@@ -4606,6 +4606,36 @@
       "blob_sha": "ce5f6135a4ad2ef2fc33d387def7e921206be4b3",
       "blob_size": 635303,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/A_current_iso.png",
+      "blob_sha": "aa70014156955f4ffa4c9983c75d0b03c46b12d4",
+      "blob_size": 58713,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/A_current_top.png",
+      "blob_sha": "f29b50606b761c79cc28b19986b4c9d0ece922ab",
+      "blob_size": 9172,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/B_wide_iso.png",
+      "blob_sha": "bbbcd49f40db3be71a210b608b18a379a77e8a78",
+      "blob_size": 56491,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/B_wide_top.png",
+      "blob_sha": "d1b39c105813ba946a2d8e387c6123b24557b449",
+      "blob_size": 8773,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/reference_canonical_success_render.png",
+      "blob_sha": "f9f1f2d25eaebf4a40fdcf75443be48aa488340f",
+      "blob_size": 71571,
+      "owner_group": "artifacts"
     }
   ]
 }
