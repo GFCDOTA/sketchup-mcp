@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.ask_gpt_gate import (
+from tools.oracle.ask_gpt_gate import (
     BRIDGE_URL,
     CANONICAL_TRIGGERS,
     GateInput,
@@ -185,7 +185,7 @@ def test_run_gate_invalid_trigger_returns_invalid_no_files(tmp_path: Path):
 def test_run_gate_online_parses_verdict(tmp_path: Path, monkeypatch):
     """§6.4 wired: when the bridge responds, run_gate parses the verdict so
     the asker can act on it programmatically — not just re-read prose."""
-    import tools.ask_gpt_gate as gate
+    import tools.oracle.ask_gpt_gate as gate
     raw = (
         "- Verdict: NO-GO\n"
         "- Confidence: high\n"
@@ -218,7 +218,7 @@ def test_run_gate_online_parses_verdict(tmp_path: Path, monkeypatch):
 def test_run_gate_sends_redteam_on_heavy_trigger(tmp_path: Path, monkeypatch):
     """6.2 wired: heavy/high-stakes triggers steelman the opposition (mode=redteam);
     routine triggers send no mode."""
-    import tools.ask_gpt_gate as gate
+    import tools.oracle.ask_gpt_gate as gate
     captured = {}
 
     def fake_call(prompt, url=gate.BRIDGE_URL, mode="", tier=""):

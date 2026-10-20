@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 from tools import rag_embed_backend as reb
-from tools import rag_freshness as rf
+from tools.knowledge import rag_freshness as rf
 
 INFRA_UP = reb.infra_up()
 requires_infra = pytest.mark.skipif(

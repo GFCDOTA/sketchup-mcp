@@ -100,7 +100,7 @@ When offline:
 
 ## Tool
 
-`tools/ask_gpt_gate.py` — CLI runner and library. See its docstring
+`tools/oracle/ask_gpt_gate.py` — CLI runner and library. See its docstring
 for CLI usage examples.
 
 ## Prompt
@@ -147,7 +147,7 @@ o existente, removendo Felipe do meio.
 
 ## Auto-trigger wiring (post-#207 iteration)
 
-`tools/run_skp_visual_review.py` now invokes the gate automatically. The
+`tools/oracle/run_skp_visual_review.py` now invokes the gate automatically. The
 agent no longer routes architectural / merge / known-warning questions
 through the user. Behaviour:
 

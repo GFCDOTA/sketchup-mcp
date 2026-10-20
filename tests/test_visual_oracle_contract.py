@@ -2,7 +2,7 @@
 
 Verifica que manifest, schema e tooling existem com o shape correto.
 Não roda o builder real (custa SU + tempo); para isso, rodar
-`python -m tools.run_skp_visual_review --fixture planta_74 --out artifacts/review/planta_74/<run>` localmente.
+`python -m tools.oracle.run_skp_visual_review --fixture planta_74 --out artifacts/review/planta_74/<run>` localmente.
 
 Companion to test_opening_routing_invariants.py: aqueles testes
 pinam invariantes de routing; estes pinam infraestrutura do Visual
@@ -204,7 +204,7 @@ def test_schema_severity_enum():
 def test_spec_references_schema_and_tool():
     text = SPEC.read_text(encoding="utf-8")
     assert "core/schemas/visual_findings.schema.json" in text
-    assert "tools/run_skp_visual_review.py" in text
+    assert "tools/oracle/run_skp_visual_review.py" in text
 
 
 def test_skill_references_spec():

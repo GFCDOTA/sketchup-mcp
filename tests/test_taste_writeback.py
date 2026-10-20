@@ -21,8 +21,8 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from core.schemas import load
-from tools import rag_freshness as rf
-from tools import taste_writeback as tw
+from tools.knowledge import rag_freshness as rf
+from tools.knowledge import taste_writeback as tw
 
 ROOT = Path(__file__).resolve().parents[1]
 WB_SCHEMA = load("rag_writeback_record.schema.json")

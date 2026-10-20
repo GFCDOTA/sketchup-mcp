@@ -12,7 +12,7 @@ Idempotente: se o render já está no `origin/<branch>` com o mesmo conteúdo, s
 verifica a URL; não recommita.
 
 Uso:
-    python -m tools.gpt_docker_visual_score --render <path.png> [--branch develop]
+    python -m tools.oracle.gpt_docker_visual_score --render <path.png> [--branch develop]
         [--bridge-url http://127.0.0.1:8899] [--timeout 200] [--json]
 
 Saída: struct {nota:int|None, factivel_10, porque, caminho_pro_10, url, raw_answer}.

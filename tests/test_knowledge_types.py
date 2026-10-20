@@ -21,11 +21,11 @@ DELIBERATELY_UNMAPPED_SOURCE_TYPES = {"consensus"}
 
 def _source_types_declared_in_rag_freshness() -> set[str]:
     """Extrai os source_type literais só de dentro do bloco
-    `SOURCES: list[tuple[str, str, str]] = [ ... ]` em tools/rag_freshness.py,
+    `SOURCES: list[tuple[str, str, str]] = [ ... ]` em tools/knowledge/rag_freshness.py,
     sem importar o módulo (evita puxar dependências pesadas nos testes)."""
     text = (REPO_ROOT / "tools" / "knowledge" / "rag_freshness.py").read_text(encoding="utf-8")
     block_match = re.search(r"SOURCES:\s*list\[tuple\[str, str, str\]\]\s*=\s*\[(.*?)\n\]", text, re.S)
-    assert block_match, "bloco SOURCES não encontrado em tools/rag_freshness.py — arquivo mudou de formato?"
+    assert block_match, "bloco SOURCES não encontrado em tools/knowledge/rag_freshness.py — arquivo mudou de formato?"
     block = block_match.group(1)
     # cada entrada é ("<glob-ou-path>", "<source_type>", "<strategy>")
     return set(re.findall(r'"([a-z_]+)",\s*"[a-z]+"\),?\s*$', block, re.M))
@@ -33,7 +33,7 @@ def _source_types_declared_in_rag_freshness() -> set[str]:
 
 def test_every_rag_freshness_source_type_has_a_mapping():
     declared = _source_types_declared_in_rag_freshness()
-    assert declared, "não achei nenhum source_type em tools/rag_freshness.py — regex desatualizada?"
+    assert declared, "não achei nenhum source_type em tools/knowledge/rag_freshness.py — regex desatualizada?"
     missing = declared - set(SOURCE_TYPE_TO_KNOWLEDGE_TYPE) - DELIBERATELY_UNMAPPED_SOURCE_TYPES
     assert not missing, f"source_type sem KnowledgeType mapeado: {missing}"
 

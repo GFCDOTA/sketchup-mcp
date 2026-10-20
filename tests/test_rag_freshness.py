@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import rag_freshness as rf
+from tools.knowledge import rag_freshness as rf
 
 T0 = "2026-07-07T10:00:00Z"
 T1 = "2026-07-07T11:00:00Z"

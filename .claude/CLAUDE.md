@@ -53,7 +53,7 @@ Quebrar uma dessas é RED. Ver `@.claude/memory/operational_rules.md`
 
 Decisões reais em bifurcação são consultadas no **GPT-Docker**
 (`ops/gpt-docker/`, `localhost:8899`, ChatGPT logado num Chrome em container,
-contrato `/health`+`/ask`): `python -m tools.ask_gpt_gate --bridge-url
+contrato `/health`+`/ask`): `python -m tools.oracle.ask_gpt_gate --bridge-url
 http://localhost:8899 …`. Degrada `SKIPPED_OFFLINE` se o container estiver
 fora/deslogado — **nunca bloqueia e nunca fabrica resposta**. Ver skill
 `gpt-docker-consult`.

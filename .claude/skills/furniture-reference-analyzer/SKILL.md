@@ -36,7 +36,7 @@ passo de análise.
    # poll do INSPECT_LOG, depois Stop-Process SketchUp
    ```
 
-2. **Interpretação (Python, sem SU)** — `tools/furniture_reference_analyzer.py
+2. **Interpretação (Python, sem SU)** — `tools/knowledge/furniture_reference_analyzer.py
    <inspect.json>` lê o JSON e escreve `<name>_analysis.{json,md}`: hipótese de
    objeto + confiança, variante (straight/chaise + lado), `is_single_block`, papéis
    das peças (seat_cushion / back_cushion / seat_base / arm / foot) por assinatura de

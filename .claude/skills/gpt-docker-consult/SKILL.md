@@ -9,7 +9,7 @@ O gate de decisão do sketchup-mcp pode consultar o **ChatGPT logado num Chrome
 dentro de um container Docker** — o bridge **GPT-no-Docker** (`ops/gpt-docker/`,
 `http://localhost:8899`). Ele expõe o **mesmo contrato** do oráculo `:8765`
 (`GET /health` + `POST /ask` → `{answer}`), então é um **backend drop-in** do
-`tools/ask_gpt_gate.py` via `--bridge-url`.
+`tools/oracle/ask_gpt_gate.py` via `--bridge-url`.
 
 > É a mesma lógica de gatilho da skill [`gpt-auto-consult-gate`](../gpt-auto-consult-gate/SKILL.md)
 > — muda só QUEM responde: aqui, o ChatGPT da assinatura do Felipe, rodando no
@@ -24,7 +24,7 @@ arquitetural / de merge / WARN-carry.
 ## Como invocar
 
 ```bash
-python -m tools.ask_gpt_gate \
+python -m tools.oracle.ask_gpt_gate \
   --trigger user_requested_consult \
   --question "Devo mergear a PR #X dado oracle PASS mas 3 WARNs conhecidos carregam?" \
   --bridge-url http://localhost:8899 \

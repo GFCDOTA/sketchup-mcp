@@ -37,7 +37,7 @@ Tornar o conhecimento de design **consultável e injetável**, fechando o laço 
 | `tools/reference_db.py` | **ESTENDER** — verbo `retrieve(room, style, budget)` + ranking + leitura de `references/tokens/`; subcomando CLI `retrieve` | nova sessão |
 | `tools/reference_db.py::ingest()` | **ESTENDER** — varrer também `references/tokens/*.json` (hoje só pega `artifacts/reference_lab/**/tokens/`) | nova sessão |
 | `tools/interior_studio/architect_program.py` | **ESTENDER** — `room_context()` chama `retrieve()`; `PROMPT` injeta o bundle estruturado no lugar do `dna` cru truncado | nova sessão |
-| `tools/reference_grammar.py` | **LER (reuso)** — `collapse_token()`/`TOKEN_SYNONYMS`/`CANON_TOKENS` pra normalizar tokens do bundle | reuso, sem edição |
+| `tools/knowledge/reference_grammar.py` | **LER (reuso)** — `collapse_token()`/`TOKEN_SYNONYMS`/`CANON_TOKENS` pra normalizar tokens do bundle | reuso, sem edição |
 | `references/tokens/*.json` | **LER** — fonte dos tokens builder-consumíveis (NÃO mutar) | reuso |
 | `references/felipe/<bucket>/*.json` + corpus FP-034 | **LER** — sinal de `curation_status`/`gate_verdicts` pro ranking | reuso (dep FP-034) |
 | `tests/test_design_retrieval_contract.py` | **NOVO** — contrato bundle + ranking determinístico | nova sessão |
@@ -141,7 +141,7 @@ def retrieve(..., backend="embed"):
 
 - `tools/reference_db.py` — índice SQLite faceted EXISTENTE (BUILT, 74 rows). `query()` exact-match em `reference_db.py:210-230`; `ingest()` varre `artifacts/reference_lab/**` em `reference_db.py:193-207` (NÃO pega `references/tokens/`).
 - `references/tokens/*.json` — 12 tokens builder-consumíveis (cozinha) com `params/applies_to_kinds/anti_pattern/gate_refs` (ex.: `hot_tower_niche.json`, `coordinated_medium_dark_wood_base.json`).
-- `tools/reference_grammar.py` — `CANON_TOKENS` (token→builder_kind→rooms), `TOKEN_SYNONYMS`, `collapse_token()` (`reference_grammar.py:39-101,152`). Vocabulário canônico ligado a builder; o bundle DEVE colapsar por aqui.
+- `tools/knowledge/reference_grammar.py` — `CANON_TOKENS` (token→builder_kind→rooms), `TOKEN_SYNONYMS`, `collapse_token()` (`reference_grammar.py:39-101,152`). Vocabulário canônico ligado a builder; o bundle DEVE colapsar por aqui.
 - `tools/interior_studio/architect_program.py` — GERADOR. `room_context()` injeta `felipe_style_dna.md` cru truncado (`architect_program.py:108-120`); `PROMPT` em `:145-156`. Ponto de injeção do bundle.
 - `tools/interior_studio/reference_packs.py` — curadoria Felipe (approve/reject/main/anti → `references/felipe/<bucket>/`), `curate()`/`_write_verdict()`/`_sync_cycle()`. Fonte do `curation_status`.
 - **FP-034** (dependência) — corpus julgado de variantes; fonte de `gate_verdicts`/`curation_status` que alimenta o ranking. Sem ele, retrieve degrada pra `confidence: LOW`.

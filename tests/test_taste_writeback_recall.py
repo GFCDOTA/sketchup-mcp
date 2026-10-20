@@ -16,8 +16,8 @@ from pathlib import Path
 import pytest
 
 from tools import rag_embed_backend as reb
-from tools import rag_freshness as rf
-from tools import taste_writeback as tw
+from tools.knowledge import rag_freshness as rf
+from tools.knowledge import taste_writeback as tw
 
 T0 = "2026-07-07T10:00:00Z"
 T1 = "2026-07-07T11:00:00Z"

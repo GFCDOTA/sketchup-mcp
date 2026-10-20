@@ -19,8 +19,8 @@ import pytest
 from jsonschema import Draft202012Validator
 from core.schemas import schema_path
 
-from tools import corpus_to_rag as ctr
-from tools import oracle_providers as op
+from tools.knowledge import corpus_to_rag as ctr
+from tools.oracle import oracle_providers as op
 from tools.orchestration import variant_axes as va
 from tools.orchestration import variant_sweep as vs
 from tools.orchestration.variant_axes import Variant

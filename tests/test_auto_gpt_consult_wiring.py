@@ -20,8 +20,8 @@ from pathlib import Path
 
 import pytest
 
-from tools.ask_gpt_gate import CANONICAL_TRIGGERS
-from tools.run_skp_visual_review import (
+from tools.oracle.ask_gpt_gate import CANONICAL_TRIGGERS
+from tools.oracle.run_skp_visual_review import (
     _build_consult_state, _maybe_run_gpt_consult,
     detect_gpt_consult_trigger, question_for_trigger,
 )
@@ -208,13 +208,13 @@ def test_mode_auto_writes_question_for_planta_74_case(tmp_path: Path, monkeypatc
     (fake_repo / ".ai_bridge" / "questions").mkdir(parents=True)
     (fake_repo / ".ai_bridge" / "responses").mkdir(parents=True)
     monkeypatch.setattr(
-        "tools.run_skp_visual_review.REPO_ROOT", fake_repo,
+        "tools.oracle.run_skp_visual_review.REPO_ROOT", fake_repo,
     )
     # Hermetic: force the gate to see the bridge as offline regardless of
     # whether a real bridge is running on localhost (it is, during the
     # autonomous work loop). Without this the test depends on network state.
     monkeypatch.setattr(
-        "tools.ask_gpt_gate.probe_bridge",
+        "tools.oracle.ask_gpt_gate.probe_bridge",
         lambda *a, **k: (False, "forced offline (test)"),
     )
 
@@ -242,11 +242,11 @@ def test_mode_required_offline_returns_block_required(tmp_path: Path, monkeypatc
     fake_repo = tmp_path / "repo"
     fake_repo.mkdir()
     monkeypatch.setattr(
-        "tools.run_skp_visual_review.REPO_ROOT", fake_repo,
+        "tools.oracle.run_skp_visual_review.REPO_ROOT", fake_repo,
     )
     # Hermetic: force offline regardless of a live localhost bridge.
     monkeypatch.setattr(
-        "tools.ask_gpt_gate.probe_bridge",
+        "tools.oracle.ask_gpt_gate.probe_bridge",
         lambda *a, **k: (False, "forced offline (test)"),
     )
     attempts = _planta_74_attempts()

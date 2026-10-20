@@ -41,7 +41,7 @@ git rev-parse origin/develop
 ### 2. Rodar visual review
 
 ```bash
-python -m tools.run_skp_visual_review \
+python -m tools.oracle.run_skp_visual_review \
   --fixture <plant> \
   --out artifacts/review/<plant>/<branch_or_pr> \
   --max-attempts 3
@@ -88,7 +88,7 @@ Após PASS ou WARN aceitável:
 ```bash
 # artifacts já promovidos automaticamente em artifacts/review/<plant>/<branch>/final/
 git add artifacts/review/<plant>/<branch>/final/
-git add tools/run_skp_visual_review.py  # se mudou
+git add tools/oracle/run_skp_visual_review.py  # se mudou
 git commit -m "evidence(<plant>): FP-030 visual review final = <verdict>"
 ```
 

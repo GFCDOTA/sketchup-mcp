@@ -254,7 +254,7 @@ def _collect_findings(png: Path, *, plant: str, provider=None,
     ok, _reason = provider.probe()
     if not ok:
         return None
-    from tools.oracle_providers import OracleRequest
+    from tools.oracle.oracle_providers import OracleRequest
     req = OracleRequest(
         prompt=(f"Judge this furnished-variant render of {plant!r}: report what "
                 "you SEE as visual_findings.v1; never invent a defect that is "
@@ -272,7 +272,7 @@ def _collect_findings(png: Path, *, plant: str, provider=None,
     if discrimination is not None:
         report = discrimination()
     else:
-        from tools.run_skp_visual_review import load_latest_discrimination
+        from tools.oracle.run_skp_visual_review import load_latest_discrimination
         report = load_latest_discrimination(plant, BACKEND)
     discriminated = bool(report and report.get("result") == "DISCRIMINATED")
     from tools.orchestration.correction.vision_queue_consumer import _degrade_unproven
@@ -529,7 +529,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     provider = None
     if a.ask_vision and not a.dry_run:
-        from tools.oracle_providers import get_provider
+        from tools.oracle.oracle_providers import get_provider
         provider = get_provider(BACKEND)
         if a.bridge_url and hasattr(provider, "url"):
             provider.url = a.bridge_url

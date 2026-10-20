@@ -39,7 +39,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/auto_camera.py",
@@ -207,7 +207,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/corpus_to_rag.py",
@@ -219,7 +219,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/correction_finding.py",
@@ -460,7 +460,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/furniture_wall_gap.py",
@@ -544,7 +544,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/gpt_review.py",
@@ -556,7 +556,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/human_verdict.py",
@@ -568,7 +568,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/interior_quality_scorecard.py",
@@ -724,7 +724,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/nightstand_builder.py",
@@ -808,7 +808,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/overlay_diff.py",
@@ -892,7 +892,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/promote_artifact.py",
@@ -952,7 +952,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/railing_exact_match_gate.py",
@@ -988,7 +988,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/regenerate_consensus.py",
@@ -1096,7 +1096,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/room_type.py",
@@ -1132,7 +1132,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/semantic_geometry_contract_gate.py",
@@ -1360,7 +1360,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/theme_palette.py",

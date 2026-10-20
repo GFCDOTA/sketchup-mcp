@@ -1,6 +1,6 @@
 # Project-Memory RAG (#2) — o "cérebro do arquiteto"
 
-`tools/project_memory_db.py` — memória de longo prazo do PROJETO indexada para
+`tools/knowledge/project_memory_db.py` — memória de longo prazo do PROJETO indexada para
 **busca semântica**. Deixa os agentes (arquiteto / PM / lead) consultarem *"o que
 já fizemos e aprendemos"* antes de decidir, em vez de depender do relay verbal.
 
@@ -24,10 +24,10 @@ já fizemos e aprendemos"* antes de decidir, em vez de depender do relay verbal.
 
 ```bash
 PY=.venv/Scripts/python.exe
-$PY tools/project_memory_db.py index            # ingere o corpus deste checkout
-$PY tools/project_memory_db.py index --rebuild  # dropa e reconstrói do zero
-$PY tools/project_memory_db.py search "como julgamos a proporção do sofá?" --k 6
-$PY tools/project_memory_db.py stats
+$PY tools/knowledge/project_memory_db.py index            # ingere o corpus deste checkout
+$PY tools/knowledge/project_memory_db.py index --rebuild  # dropa e reconstrói do zero
+$PY tools/knowledge/project_memory_db.py search "como julgamos a proporção do sofá?" --k 6
+$PY tools/knowledge/project_memory_db.py stats
 ```
 
 O `.db` é índice **DERIVADO e reconstruível** (gitignored). Idempotente: só

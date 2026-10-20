@@ -288,7 +288,7 @@ def _budget_fit(cost_level: int | None, budget: str | None) -> int:
 def _canon_token_name(name: str):
     """Colapsa sinônimo -> nome canônico via reference_grammar (reuso, sem duplicar)."""
     try:
-        from tools import reference_grammar as rg
+        from tools.knowledge import reference_grammar as rg
         return rg._canon(name)
     except Exception:  # noqa: BLE001 — grammar ausente não deve derrubar retrieve
         return name
@@ -457,7 +457,7 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
 
     try:
         from tools import rag_embed_backend as reb
-        from tools import rag_freshness as rf
+        from tools.knowledge import rag_freshness as rf
     except Exception as e:  # noqa: BLE001 — módulo ausente não derruba retrieve
         notes.append(f"backend=embed indisponível (import): {e!r} -> faceted.")
         _emit_fallback(obs, f"import falhou: {type(e).__name__}")
@@ -833,7 +833,7 @@ def _cmd_reindex(a) -> int:
     determinística (recebe now_iso injetado)."""
     import datetime as _dt
 
-    from tools import rag_freshness as rf
+    from tools.knowledge import rag_freshness as rf
 
     now_iso = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     con = rf.connect()

@@ -6,11 +6,11 @@ eixo frontal, e flag is_single_block. NAO abre o SketchUp (consome o JSON).
 
 Pipeline:
   1) SketchUp.exe <ref.skp> -RubyStartup tools/sketchup/inspect/inspect_skp.rb  -> <name>_inspect.json + renders top/front/iso
-  2) python tools/furniture_reference_analyzer.py <inspect.json>  -> <name>_analysis.{json,md}
+  2) python -m tools.knowledge.furniture_reference_analyzer <inspect.json>  -> <name>_analysis.{json,md}
 
 As heuristicas geram HIPOTESE (com confianca), nao verdade — o objetivo e virar
 spec/builder/gate, nao copiar o asset. Uso:
-  python tools/furniture_reference_analyzer.py <inspect.json> [--out-dir DIR]
+  python -m tools.knowledge.furniture_reference_analyzer <inspect.json> [--out-dir DIR]
 """
 import argparse
 import json

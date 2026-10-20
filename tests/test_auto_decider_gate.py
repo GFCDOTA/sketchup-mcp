@@ -16,7 +16,7 @@ import pytest
 from jsonschema import Draft202012Validator
 from core.schemas import schema_path
 
-from tools import ask_gpt_gate as agg
+from tools.oracle import ask_gpt_gate as agg
 from tools.interior_studio import auto_decider as ad
 from tools.interior_studio import decision_judge as dj
 

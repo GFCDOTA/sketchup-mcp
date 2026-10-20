@@ -1,11 +1,11 @@
-"""Vocabulario canonico do veredito humano (tools/human_verdict) — a FONTE
+"""Vocabulario canonico do veredito humano (tools/oracle/human_verdict) — a FONTE
 UNICA que separa o territorio do Felipe (IMPROVED/SAME/WORSE + liked + tags) do
 da maquina. Aqui pina-se o vocabulario NOVO (liked ortogonal, tags) e os
 validadores puros; o rail que probe os modulos-maquina contra os literais vive
 em test_variant_sweep.test_machine_never_writes_human_verdict."""
 from __future__ import annotations
 
-from tools import human_verdict as hv
+from tools.oracle import human_verdict as hv
 
 
 def test_human_verdicts_are_the_three_regression_words():

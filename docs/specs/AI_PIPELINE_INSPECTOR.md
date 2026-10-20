@@ -166,7 +166,7 @@ flowchart TB
 | Gates determinísticos | Sim, ~20 | `tools/*gate*.py` + `interior/validators/` | **formatos de saída heterogêneos** (ver §5) |
 | Visual judge | Sim | `run_skp_visual_review.py` (69K), `oracle_providers.py` | painel de 3 juízes; veredito final é do Felipe |
 | Preferências | Sim, ×2 | Qdrant `felipe_preferences` + `.claude/memory/felipe_style_dna.md` | um é vetorial, o outro é arquivo lido direto |
-| Avaliação de RAG | Sim | `tools/retrieval_eval.py` + `references/eval/` | recall@6=**0.7225**, MRR=**0.90**, nDCG@6=**0.8083** (backend=faceted, n=8) |
+| Avaliação de RAG | Sim | `tools/knowledge/retrieval_eval.py` + `references/eval/` | recall@6=**0.7225**, MRR=**0.90**, nDCG@6=**0.8083** (backend=faceted, n=8) |
 | CI | Sim | `.github/workflows/ci.yml` | 3 jobs: pytest (2 passes de escala), gates determinísticos, MCP smoke+stdio. **`retrieval_eval` NÃO roda no CI** |
 
 ### 1.4 Sistemas parcialmente duplicados (achado importante)
@@ -786,10 +786,10 @@ tests/test_sse_route.py
 ```
 tools/rag_embed_backend.py               # perf_counter + emit em embed()/search()
 tools/reference_db.py                    # emit em _embed_recall_chunks e _rrf_fuse; expor rejeitados
-tools/rag_freshness.py                   # emit em freshness_guard
+tools/knowledge/rag_freshness.py                   # emit em freshness_guard
 tools/interior_studio/architect_program.py  # emit em guard_bundle_freshness / render_bundle_for_prompt / chamada Ollama
 tools/ollama_bridge.py                   # ler prompt_eval_count/eval_count (hoje descartados) + emit
-tools/oracle_providers.py                # emit nas chamadas de juiz
+tools/oracle/oracle_providers.py                # emit nas chamadas de juiz
 tools/run_deterministic_gates.py         # emit por gate via adapter
 tools/correction_loop.py                 # emit cycle/retry/correction/terminal
 tools/validation/gate_verdict.py                    # normalizador

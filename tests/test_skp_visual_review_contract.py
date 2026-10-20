@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.run_skp_visual_review import (
+from tools.oracle.run_skp_visual_review import (
     AXES, ORACLE_BRIDGE_URL, SCHEMA_VERSION, check_oracle_bridge_available,
     classify_maturity, load_known_warnings, worst_verdict,
     write_blocked_summary,

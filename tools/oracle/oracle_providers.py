@@ -26,7 +26,7 @@ Design rules
    the bridge is unusable, the operator gets a self-contained
    directory they can drop into ChatGPT manually.
 
-Companion code: `tools/run_skp_visual_review.py` (orchestrator).
+Companion code: `tools/oracle/run_skp_visual_review.py` (orchestrator).
 Tests: `tests/test_oracle_providers.py`.
 """
 from __future__ import annotations

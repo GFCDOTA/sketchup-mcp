@@ -79,7 +79,7 @@ def _confirm_prompt(fixture: str, pending: list[dict]) -> str:
 def _degrade_unproven(vf: dict, discriminated: bool) -> dict:
     """FP-032 promotion parity (imported rules, not copies): an unproven backend
     cannot cast a hard FAIL — top level AND per-finding severities degrade."""
-    from tools.run_skp_visual_review import degrade_unproven_fail, promote_oracle_verdict
+    from tools.oracle.run_skp_visual_review import degrade_unproven_fail, promote_oracle_verdict
     effective, note = promote_oracle_verdict(
         vf.get("top_level_verdict", "PASS"), discriminated)
     vf["top_level_verdict"] = effective
@@ -140,14 +140,14 @@ def drain(
             pending_left=len(pending))
 
     if provider is None:
-        from tools.oracle_providers import get_provider
+        from tools.oracle.oracle_providers import get_provider
         provider = get_provider(BACKEND)
     ok, reason = provider.probe()
     if not ok:
         return _result("BLOCKED_NEEDS_FP032", detail=reason,
                        pending_left=len(pending))
 
-    from tools.oracle_providers import OracleRequest
+    from tools.oracle.oracle_providers import OracleRequest
     req = OracleRequest(
         prompt=_confirm_prompt(fixture, pending),
         image_paths=images,
@@ -166,7 +166,7 @@ def drain(
     if discrimination is not None:
         report = discrimination()
     else:
-        from tools.run_skp_visual_review import load_latest_discrimination
+        from tools.oracle.run_skp_visual_review import load_latest_discrimination
         report = load_latest_discrimination(fixture, BACKEND)
     discriminated = bool(report and report.get("result") == "DISCRIMINATED")
     vf = _degrade_unproven(vf, discriminated)
@@ -206,7 +206,7 @@ def main() -> int:
     ap.add_argument("--bridge-url", default=None)
     a = ap.parse_args()
 
-    from tools.oracle_providers import get_provider
+    from tools.oracle.oracle_providers import get_provider
     provider = get_provider(BACKEND)
     if a.bridge_url and hasattr(provider, "url"):
         provider.url = a.bridge_url

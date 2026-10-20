@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.corpus_to_rag import _last_wins, export_memory_json, export_reference_rows
+from tools.knowledge.corpus_to_rag import _last_wins, export_memory_json, export_reference_rows
 
 
 def _rec(vid: str, verdict: str = "CANDIDATE") -> dict:

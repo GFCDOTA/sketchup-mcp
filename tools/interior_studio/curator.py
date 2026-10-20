@@ -35,8 +35,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from tools import rag_embed_backend as reb
-from tools import rag_freshness as rf
-from tools import taste_writeback
+from tools.knowledge import rag_freshness as rf
+from tools.knowledge import taste_writeback
 from tools.interior_studio import auto_decider
 
 ROOT = Path(__file__).resolve().parents[2]
