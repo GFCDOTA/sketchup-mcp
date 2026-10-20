@@ -247,7 +247,7 @@ def build_shell(consensus_path: str | None = None, *, out_path: str | None = Non
         mode = resolve_mode(mode)
     except ValueError as e:
         return {"status": "ERROR", "reason": str(e)}
-    from tools import build_plan_shell_skp as bps  # shapely: só quando precisa
+    from tools.sketchup.shell import build_plan_shell_skp as bps  # shapely: só quando precisa
 
     res = bps.run(con, out, sketchup_exe=su.loc.exe, plugins_dir=su.loc.plugins_dir,
                   timeout_s=timeout_s, force_skp=force, mode=mode, plant_scale_only=True)

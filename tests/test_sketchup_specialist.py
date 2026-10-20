@@ -403,7 +403,7 @@ def test_build_shell_nao_depende_mais_do_plugin_de_autorun_global(tmp_path, monk
 
 
 def test_build_shell_nao_escreve_em_artifacts(monkeypatch, repo_temporario, tmp_path):
-    from tools import build_plan_shell_skp as bps
+    from tools.sketchup.shell import build_plan_shell_skp as bps
 
     def nunca(*a, **k):
         raise AssertionError("build real chamado com destino proibido")

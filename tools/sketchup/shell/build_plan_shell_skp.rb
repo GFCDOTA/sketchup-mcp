@@ -93,7 +93,7 @@ LINTEL_RGB       = [110, 115, 120]
 PASSAGE_MARKER_HEIGHT_IN = 1.0     # ~2.5 cm above floor
 PASSAGE_RGB              = [102, 187, 230]  # azul claro destacado
 
-# Mirror of CARVING_ORIGINS in tools/build_plan_shell_skp.py — kept
+# Mirror of CARVING_ORIGINS in tools/sketchup/shell/build_plan_shell_skp.py — kept
 # in sync manually. Used to decide which openings get a leaf/panel
 # rendered (carved) vs which only get a passage marker (already in
 # wall data).

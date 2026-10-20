@@ -173,7 +173,7 @@ def _write_readme(plant: str, artifact_dir: Path, meta: dict,
 ## Reproduce
 
 ```bash
-python -m tools.build_plan_shell_skp \\
+python -m tools.sketchup.shell.build_plan_shell_skp \\
   {consensus_path} \\
   --out runs/{plant}/{plant}.skp
 

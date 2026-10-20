@@ -168,3 +168,16 @@ comprovado. Não crie pasta vazia: o estado `previsto` do mapa existe para isso.
 | `schemas/*.schema.json` (9) | `core/schemas/` | mesmo blob (exceto a descrição de `judged_variant`, que citava o caminho antigo); quem lê usa `from core.schemas import schema_path, load` — nada de `ROOT / "schemas" / …` |
 | `capability_catalog.py`, `specialists.py` (`root / "schemas/…"`) | `schema_path(nome, root)` | o parâmetro `root` continua valendo (testes em diretório temporário) |
 | `interior/schemas/` | sem mudança | outro conjunto (intents de cena); não referencia os contratos movidos |
+
+## FP-044 / F6 — fachadas de `tools/*.py` aposentadas (por lote de dono)
+
+Os consumidores do repositório foram reescritos para o dono (imports, `python -m`, caminhos em docs vivos); o arquivo
+antigo saiu. O que **fica** em `tools/*.py` e por quê está em [`tools/PUBLIC_API.md`](../../tools/PUBLIC_API.md).
+Histórico (`artifacts/`, `docs/archive/`, `docs/handoffs/`, `docs/reports/`, `.ai_bridge/`) cita o caminho antigo de
+propósito; use esta tabela para achar o arquivo hoje.
+
+| Antes (removido) | Depois (dono) | Lote / PR |
+|---|---|---|
+| `tools.build_plan_shell_skp` (`tools/build_plan_shell_skp.py`) | `tools.sketchup.shell.build_plan_shell_skp` | `sketchup/*` |
+| `tools.su_runner_safety` | `tools.sketchup.runner_safety` | `sketchup/*` |
+| `tools.disarm_sketchup_autoruns` | `tools.sketchup.disarm_autoruns` | `sketchup/*` |

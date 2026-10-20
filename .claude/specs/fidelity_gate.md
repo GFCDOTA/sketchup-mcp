@@ -4,7 +4,7 @@ Define o que conta como "fiel" entre PDF, consensus e `.skp`.
 
 > Este spec foi alinhado em 2026-05-27 com o schema real do
 > `geometry_report.json` produzido por
-> `tools/build_plan_shell_skp.py`. Se a implementação mudar,
+> `tools/sketchup/shell/build_plan_shell_skp.py`. Se a implementação mudar,
 > seguir a implementação — abrir PR pra realinhar texto.
 
 ## Dois eixos: gate machine-readable vs julgamento humano

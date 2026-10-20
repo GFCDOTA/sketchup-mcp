@@ -55,7 +55,7 @@ python -m tools.mcp_server.stdio_check
 
 Para **gerar `.skp`** use as tools `su_*` do MCP (`su_build_shell`, `su_furnish`, `su_render`, `su_apply_edits`,
 `su_inspect`, `su_render_vray`): cada uma sobe uma instância própria do SketchUp, grava em `runs/` e só fecha o PID
-que ela mesma abriu. As CLIs equivalentes seguem funcionando (`python -m tools.build_plan_shell_skp <consensus> --out runs/…`).
+que ela mesma abriu. As CLIs equivalentes seguem funcionando (`python -m tools.sketchup.shell.build_plan_shell_skp <consensus> --out runs/…`).
 
 > **Nenhum código rastreado encerra o SketchUp por nome.** As CLIs de materialização (`furnish_apartment`, `place_layout_skp`, `material_review`,
 > `bake_theme_skp`, `kitchen_vray`, `render_banho_vray`, `render_room.ps1`, `sofa_premium_harness`, `bedroom_designer`, `interior/renderers/*`) fecham

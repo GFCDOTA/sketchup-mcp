@@ -187,7 +187,7 @@ with mode/triggered/trigger/status/question_file/response_file/decision.
 - Bridge with broader response timeout for complex questions
 - Auto-fill the `decision` field in the response file by parsing the
   GPT reply structure
-- Auto-trigger from other tools (e.g. `tools/build_plan_shell_skp.py`
+- Auto-trigger from other tools (e.g. `tools/sketchup/shell/build_plan_shell_skp.py`
   on builder regressions)
 
 ## Related

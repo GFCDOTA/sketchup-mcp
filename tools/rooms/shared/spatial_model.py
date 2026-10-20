@@ -22,7 +22,7 @@ from pathlib import Path
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 
-from tools.build_plan_shell_skp import compute_room_floors, wall_footprint
+from tools.sketchup.shell.build_plan_shell_skp import compute_room_floors, wall_footprint
 
 # escala vem da FONTE ÚNICA (core.scale); re-export p/ quem faz
 # `from tools.spatial_model import PT_TO_M`. NÃO redefinir escala aqui.

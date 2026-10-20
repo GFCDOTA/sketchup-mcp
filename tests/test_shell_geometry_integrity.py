@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.build_plan_shell_skp import (
+from tools.sketchup.shell.build_plan_shell_skp import (
     FULL_HEIGHT_CARVE_KINDS,
     _classify_endpoint_junctions,
     _remove_small_teeth,

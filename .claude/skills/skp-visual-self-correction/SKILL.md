@@ -22,7 +22,7 @@ The user is not the visual regression detector.
 Auto-trigger após qualquer mudança SKP-affecting (mesmas paths
 da Constitution #8). Especificamente:
 
-- Builder (`tools/build_plan_shell_skp.{py,rb}`) mudou
+- Builder (`tools/sketchup/shell/build_plan_shell_skp.{py,rb}`) mudou
 - Consensus de uma planta alterado
 - Routing de kind_v5 / openings / soft_barriers ajustado
 - Schema de `geometry_report.json` evoluiu

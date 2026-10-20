@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import build_plan_shell_skp as bps
+from tools.sketchup.shell import build_plan_shell_skp as bps
 from tools.sketchup.batch import LAUNCHER, launch_env
 
 ROOT = Path(__file__).resolve().parents[1]

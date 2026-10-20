@@ -38,9 +38,9 @@ PR é **SKP-affecting** (aplica gate) se mexer em qualquer um:
 
 | Path / area | Por quê |
 |---|---|
-| `tools/build_plan_shell_skp.{py,rb}` | builder direto |
+| `tools/sketchup/shell/build_plan_shell_skp.{py,rb}` | builder direto |
 | `tools/quadrado/render_view.{py,rb}` | renderer |
-| `tools/su_runner_safety.py` | runtime mode |
+| `tools/sketchup/runner_safety.py` | runtime mode |
 | `fixtures/<plant>/*.json` (consensus) | input do build |
 | Qualquer novo `tools/build_*.{py,rb}` ou `tools/render_*.*` | builder/renderer nascente |
 | `docs/specs/` contratos de consensus / `geometry_report.json` schema | contrato downstream |
@@ -180,7 +180,7 @@ Para qualquer PR coberta por este gate:
 ### 2. Rodar o build novo
 
 ```bash
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   fixtures/<plant>/<consensus>.json \
   --out runs/<plant>/<plant>.skp
 ```
@@ -337,7 +337,7 @@ Deve verificar:
 - Existe `model_top_after.png` E `model_iso_after.png`
 - Existe `regression_summary.md`
 - Summary referencia commit base + commit head
-- Se `--changed-files` toca `tools/build_plan_shell_skp.*` OU
+- Se `--changed-files` toca `tools/sketchup/shell/build_plan_shell_skp.*` OU
   `fixtures/<plant>/*.json` OU `consensus_*.json`, artifact
   review é **obrigatório**
 

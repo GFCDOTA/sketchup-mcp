@@ -58,7 +58,7 @@ via heuristic checks + structured findings JSON.
 
 Applies to any change affecting:
 
-- SKP generation (`tools/build_plan_shell_skp.{py,rb}`)
+- SKP generation (`tools/sketchup/shell/build_plan_shell_skp.{py,rb}`)
 - Walls / wall shell / canonicalisation
 - Openings (doors, windows, glazed_balcony, kind_v5 routing)
 - Rooms / floors / soft barriers

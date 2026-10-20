@@ -72,7 +72,7 @@ silently removed.
 
 ## Scope
 
-- `tools/build_plan_shell_skp.py` (2D shell + canonicalisation)
+- `tools/sketchup/shell/build_plan_shell_skp.py` (2D shell + canonicalisation)
 - `tools/sketchup/shell/build_plan_shell_skp.rb` (3D extrude + carve)
 - consensus-to-shell 2D geometry
 - wall union / canonicalisation

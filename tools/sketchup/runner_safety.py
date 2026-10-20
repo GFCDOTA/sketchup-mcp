@@ -11,7 +11,7 @@ Usage
 -----
 
 ```python
-from tools.su_runner_safety import parse_mode, should_terminate, log_mode
+from tools.sketchup.runner_safety import parse_mode, should_terminate, log_mode
 
 mode = parse_mode()   # reads --mode / --no-terminate / RUN_MODE
 log_mode(mode)        # prints [su-runner] mode=<X>; terminate_on_done=<bool>

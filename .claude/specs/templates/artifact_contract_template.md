@@ -18,7 +18,7 @@
 - **Quem escreve**: `<tool path>` ou `<manual / humano>`
 - **Quando**: <build / promotion / annotation>
 - **Função geradora**: `<file:function>` (e.g.
-  `tools/build_plan_shell_skp.py:write_metadata`)
+  `tools/sketchup/shell/build_plan_shell_skp.py:write_metadata`)
 
 ## Consumidor(es)
 

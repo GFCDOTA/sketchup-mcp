@@ -6,7 +6,7 @@
 ## Project mission
 
 Gerar um `.skp` SketchUp fiel a uma planta arquitetônica de PDF.
-Pipeline: `consensus.json → tools/build_plan_shell_skp.{py,rb} →
+Pipeline: `consensus.json → tools/sketchup/shell/build_plan_shell_skp.{py,rb} →
 .skp + renders + report`.
 
 `.skp` é o artefato humano mais importante. Tudo o mais (testes,

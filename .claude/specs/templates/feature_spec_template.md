@@ -68,7 +68,7 @@ Linhas a adicionar em
 - [ ] Spec mergeada em `docs/specs/FP-NNN_*.md`
 - [ ] Fixture micro em `fixtures/<x>/` (se aplicável)
 - [ ] Teste vermelho → verde em `tests/`
-- [ ] Implementação em `tools/build_plan_shell_skp.{py,rb}` ou
+- [ ] Implementação em `tools/sketchup/shell/build_plan_shell_skp.{py,rb}` ou
       onde aplicável
 - [ ] Aplicação na planta real (planta_74) — ou rejeição
       justificada
