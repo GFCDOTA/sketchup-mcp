@@ -1,0 +1,82 @@
+{
+ "status": "OK",
+ "mode": "interactive",
+ "pid": 34688,
+ "elapsed_s": 19.02,
+ "su_left_running": true,
+ "command": [
+  "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\furnish_20261019_211525\\_furnish_base_model.skp",
+  "-RubyStartup",
+  "E:\\Claude\\worktrees\\w-gates\\tools\\sketchup\\furnish\\place_layout_skp.rb"
+ ],
+ "boxes": 402,
+ "base_skp": "C:\\Users\\felip_local\\AppData\\Local\\Temp\\claude\\E--Claude\\1a0122f9-7260-474a-9009-96d9942517fb\\scratchpad\\p8_l2\\planta\\model.skp",
+ "rooms": [
+  {
+   "room_id": "r000",
+   "name": "SUITE 01",
+   "type": "BEDROOM",
+   "result": "OK",
+   "boxes": 65
+  },
+  {
+   "room_id": "r001",
+   "name": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "type": "SERVICE",
+   "result": "OK",
+   "boxes": 13
+  },
+  {
+   "room_id": "r002",
+   "name": "SALA DE JANTAR | SALA DE ESTAR",
+   "type": "LIVING",
+   "result": "OK",
+   "boxes": 51
+  },
+  {
+   "room_id": "r003",
+   "name": "SUITE 02",
+   "type": "BEDROOM",
+   "result": "OK",
+   "boxes": 47
+  },
+  {
+   "room_id": "r004",
+   "name": "COZINHA",
+   "type": "KITCHEN",
+   "result": "OK",
+   "boxes": 76
+  },
+  {
+   "room_id": "r005",
+   "name": "BANHO 01",
+   "type": "BATHROOM",
+   "result": "OK",
+   "boxes": 59
+  },
+  {
+   "room_id": "r006",
+   "name": "BANHO 02",
+   "type": "BATHROOM",
+   "result": "OK",
+   "boxes": 58
+  },
+  {
+   "room_id": "r007",
+   "name": "LAVABO",
+   "type": "BATHROOM",
+   "result": "OK",
+   "boxes": 33
+  }
+ ],
+ "log": "ERRACO TECNICO|Armario de servico ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Bancada gourmet ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Banqueta ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Churrasqueira ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Coifa ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Condensadora ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Jardineira ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Maquina de lavar ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Prateleira servico ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Tanque ; A.S. | TERRACO SOCIAL | TERRACO TECNICO|Varal de teto ; BANHO 01|Bancada ; BANHO 01|Box ; BANHO 01|Enxoval ; BANHO 01|Espelho ; BANHO 01|Pele ; BANHO 01|PeleTeto ; BANHO 01|Vaso ; BANHO 02|Bancada ; BANHO 02|Box ; BANHO 02|Enxoval ; BANHO 02|Espelho ; BANHO 02|Pele ; BANHO 02|PeleTeto ; BANHO 02|Vaso ; COZINHA|backsplash ; COZINHA|base_cabinet_01 ; COZINHA|cooktop_module ; COZINHA|countertop ; COZINHA|decor_board ; COZINHA|decor_vaso ; COZINHA|fridge ; COZINHA|hood ; COZINHA|sink_module ; COZINHA|upper_cabinet_01 ; COZINHA|upper_cabinet_02 ; LAVABO|Bancada ; LAVABO|Enxoval ; LAVABO|Espelho ; LAVABO|Pele ; LAVABO|PeleTeto ; LAVABO|Vaso ; SALA DE JANTAR | SALA DE ESTAR|Cadeira jantar ; SALA DE JANTAR | SALA DE ESTAR|Mesa de jantar ; SALA DE JANTAR | SALA DE ESTAR|Painel TV ; SALA DE JANTAR | SALA DE ESTAR|Pendente ; SALA DE JANTAR | SALA DE ESTAR|Rack TV ; SALA DE JANTAR | SALA DE ESTAR|Sofa ; SALA DE JANTAR | SALA DE ESTAR|TV ; SALA DE JANTAR | SALA DE ESTAR|Tapete ; SUITE 01|Cadeira escrivaninha ; SUITE 01|Cama ; SUITE 01|Criado-mudo 1 ; SUITE 01|Criado-mudo 2 ; SUITE 01|Escrivaninha ; SUITE 01|Guarda-roupa ; SUITE 01|Painel cabeceira ; SUITE 01|rug ; SUITE 02|Cama ; SUITE 02|Criado-mudo 1 ; SUITE 02|Criado-mudo 2 ; SUITE 02|Guarda-roupa ; SUITE 02|Painel cabeceira ; SUITE 02|rug\nshell travado: 25 grupos (paredes/piso/portas)\nAFTER top -> planta_74_furnished_after_top.png\nAFTER iso -> planta_74_furnished_after_iso.png\nsaved -> planta_74_furnished.skp",
+ "files": {
+  "skp": "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\furnish_20261019_211525\\planta_74_furnished.skp",
+  "before": "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\furnish_20261019_211525\\planta_74_furnished_before_top.png",
+  "top": "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\furnish_20261019_211525\\planta_74_furnished_after_top.png",
+  "iso": "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\furnish_20261019_211525\\planta_74_furnished_after_iso.png",
+  "log": "E:\\Claude\\worktrees\\w-gates\\runs\\planta_74\\mcp\\furnish_20261019_211525\\planta_74_furnished_log.txt"
+ },
+ "visual_review": "mudan\u00e7a de APAR\u00caNCIA: o veredito IMPROVED/SAME/WORSE \u00e9 do Felipe (VISUAL_REVIEW) \u2014 nunca autom\u00e1tico"
+}

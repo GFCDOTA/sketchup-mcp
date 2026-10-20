@@ -7383,6 +7383,60 @@
       "blob_sha": "3b864c359c8271fee6fe5dc39adffa6ef55f9e7d",
       "blob_size": 1979,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/A_current_iso.png",
+      "blob_sha": "aa70014156955f4ffa4c9983c75d0b03c46b12d4",
+      "blob_size": 58713,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/A_current_top.png",
+      "blob_sha": "f29b50606b761c79cc28b19986b4c9d0ece922ab",
+      "blob_size": 9172,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/B_wide_iso.png",
+      "blob_sha": "bbbcd49f40db3be71a210b608b18a379a77e8a78",
+      "blob_size": 56491,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/B_wide_top.png",
+      "blob_sha": "d1b39c105813ba946a2d8e387c6123b24557b449",
+      "blob_size": 8773,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/README.md",
+      "blob_sha": "b5a778a2271d3b4dcca26adde84612ddf7be864b",
+      "blob_size": 1736,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/consensus_option_B_wide_window.json",
+      "blob_sha": "54f54eee1cc81d18f3f358b870c114fc774f4eb3",
+      "blob_size": 1719,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/reference_canonical_success_render.png",
+      "blob_sha": "f9f1f2d25eaebf4a40fdcf75443be48aa488340f",
+      "blob_size": 71571,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p8_l2_20261019/furnish.json",
+      "blob_sha": "09e988933bfd42a5cd33be037b49616f2dd235ed",
+      "blob_size": 4392,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p8_l2_20261019/planta_check.json",
+      "blob_sha": "aed8834f5ce52ddece458826a01c32b7869dbf41",
+      "blob_size": 18978,
+      "owner_group": "artifacts"
     }
   ]
 }

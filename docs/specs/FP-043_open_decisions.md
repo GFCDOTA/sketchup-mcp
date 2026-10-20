@@ -12,6 +12,8 @@ linha vira uma nota de decisão com data e o item sai daqui.
 | D-004 | Dono da CLI `tools/trace_view.py` | Felipe | só o destino dele em P4 |
 | D-005 | `scripts/set_clipboard_image.ps1` ainda útil | Felipe | só o destino dele em P4 |
 
+**Linha final (P8, 2026-10-19):** D-001 a D-005 = BLOCKED_DECISION (Felipe; material da D-001 em `artifacts/review/fp043/p3a04_quadrado_d001/`); D-006 = RESOLVED; D-007 = OPEN_TECNICA (planta_74 já respeita o contrato por cômodo; sintéticas seguem `xfail(strict)`).
+
 **Decisão técnica já resolvida:** D-006 — o `repo_health_gate` foi corrigido e incluído no CI; evidências e contraprovas na seção histórica abaixo.
 
 ## D-001 — Peitoril (e mais) do `quadrado`: referência de 2026-05-24 × builder aprovado em 2026-06-04
