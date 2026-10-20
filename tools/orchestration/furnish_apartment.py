@@ -29,7 +29,7 @@ if not os.environ.get("PT_TO_M"):
 from tools.rooms.bedroom import designer as bedroom_designer  # noqa: E402  (quartos: brain novo GPT-approved)
 from tools.rooms.shared.geometry import _oriented_box  # noqa: E402,F401 (re-export legado)
 from tools.rooms.bathroom.layout import build_boxes as bath_boxes   # noqa: E402
-from tools.kitchen_layout import build_boxes as kitchen_boxes   # noqa: E402
+from tools.rooms.kitchen.layout import build_boxes as kitchen_boxes   # noqa: E402
 from tools.sketchup.furnish.place_layout_skp import build_boxes as living_boxes   # noqa: E402
 from tools.room_type import (BATHROOM, BEDROOM, KITCHEN, LIVING,   # noqa: E402
                              SERVICE, classify_rooms)

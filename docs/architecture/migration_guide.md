@@ -193,3 +193,9 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.bedroom_layout` | `tools.rooms.bedroom.layout` | `rooms/bedroom` |
 | `tools.make_synthetic_bedrooms` | `tools.rooms.bedroom.capabilities.make_synthetic_bedrooms` | `rooms/bedroom` |
 | `tools.place_bedroom_skp` | `tools.rooms.bedroom.capabilities.place_bedroom_skp` | `rooms/bedroom` |
+| `tools.kitchen_validation` (`main()` movido para o dono sem mudança; saída e exit code idênticos) | `tools.rooms.kitchen.anchor_rules` (CLI `python -m tools.rooms.kitchen.anchor_rules`) | `rooms/kitchen` |
+| `tools.kitchen_layout` (`main()` = `__main__` do dono, saída idêntica) | `tools.rooms.kitchen.layout` | `rooms/kitchen` |
+| `tools.kitchen_ergonomics` | `tools.rooms.kitchen.validation.ergonomics` | `rooms/kitchen` |
+| `tools.kitchen_vray` | `tools.rooms.kitchen.capabilities.vray` | `rooms/kitchen` |
+| `tools.kitchen_wall_regression_gate` | `tools.rooms.kitchen.validation.wall_regression` | `rooms/kitchen` |
+| `tools.bake_theme_skp` | `tools.rooms.kitchen.capabilities.bake_theme` | `rooms/kitchen` |

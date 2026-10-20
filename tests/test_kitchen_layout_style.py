@@ -18,7 +18,7 @@ from __future__ import annotations
 # tests/conftest.py (roda na invocacao `pytest -m planta74_scale` separada).
 from shapely.geometry import box as sbox  # noqa: E402
 
-from tools import kitchen_layout as kl  # noqa: E402
+from tools.rooms.kitchen import layout as kl  # noqa: E402
 
 WS_V = {"orient": "v", "sgn": 1}
 M2IN = kl.M2IN

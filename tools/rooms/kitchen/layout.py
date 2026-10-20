@@ -37,7 +37,7 @@ RGB_PIA = [33, 32, 34]                          # cuba composto preto satin (D5)
 RGB_COOKTOP = [22, 22, 26]                      # vitrocerâmico preto (D1)
 DOOR_KINDS = {"interior_door", "interior_passage", "glazed_balcony"}
 # pia da cozinha = ponto HIDRÁULICO fixo do PDF (parede OESTE/esquerda). NÃO mover de
-# parede sem reforma hidráulica. Validado por tools/kitchen_validation.py.
+# parede sem reforma hidráulica. Validado por tools/rooms/kitchen/anchor_rules.py.
 KITCHEN_SINK_ANCHOR = "KITCHEN_SINK_ANCHOR"
 KITCHEN_SINK_SIDE = "W"
 AREA_MIN = 0.035 / (PT_TO_M ** 2)               # area minima de uma peca (m2 -> PT2)

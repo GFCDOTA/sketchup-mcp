@@ -26,7 +26,8 @@ def test_detects_direct_cross_room_import():
 
 
 def test_detects_shared_importing_legacy_room():
-    files = {"tools/rooms/shared/parts.py": "import tools.kitchen_layout\n"}
+    # alias legado que continua existindo (as fachadas de comodo em tools/ sairam na FP-044/F6)
+    files = {"tools/rooms/shared/parts.py": "import interior.planners.living_room_planner\n"}
     assert ownership_violations(files)[0]["reason"] == "SHARED_IMPORTS_ROOM"
 
 
@@ -55,11 +56,12 @@ def test_relative_from_parent_import_room_alias_is_blocked():
     assert any(r["imported"] == "tools.rooms.bathroom" for r in violations)
 
 
-def test_from_tools_import_legacy_builder_is_blocked_in_shared():
-    code = "from tools import kitchen_layout\n"
+def test_from_package_import_room_alias_is_blocked_in_shared():
+    # `from <pacote> import <modulo>` e expandido para o modulo (o caminho que pegava `from tools import <fachada>`)
+    assert "tools.some_module" in collect_imports("from tools import some_module\n")
+    code = "from tools.rooms import kitchen\n"
     violations = ownership_violations({"tools/rooms/shared/geometry_ext.py": code})
-    assert any(r["imported"] == "tools.kitchen_layout" and
-               r["reason"] == "SHARED_IMPORTS_ROOM" for r in violations)
+    assert any(r["imported"] == "tools.rooms.kitchen" for r in violations)
 
 
 def test_relative_local_import_remains_allowed():
@@ -70,7 +72,7 @@ def test_relative_local_import_remains_allowed():
 
 
 # Os casos das fachadas de quarto (bedroom_layout, bedroom_designer, bed_class) viraram import direto do dono (as fachadas sairam na FP-044/F6);
-# o desvio por fachada legada que ainda existe segue coberto por kitchen_layout e sofa_class abaixo.
+# o desvio por alias legado que ainda existe segue coberto por interior.planners.living_room_planner.
 @pytest.mark.parametrize('source', [
     'import tools.rooms.bedroom.layout\n',
     'from tools.rooms.bedroom.bed_class import derive_spec\n',

@@ -43,7 +43,7 @@ Template: `artifacts/reference_lab/templates/reference_analysis_template.md`.
 ## 4 gates novos (além dos gates de fidelidade)
 - **theme_fit_gate** — o tema combina com a planta COMPACTA linear da planta_74?
 - **ergonomics_gate** — altura/alcance/uso/circulação/bancada fazem sentido?
-  (`tools/kitchen_ergonomics.py` = as 12 medidas; falha = WARN/FAIL.)
+  (`tools/rooms/kitchen/validation/ergonomics.py` = as 12 medidas; falha = WARN/FAIL.)
 - **maintenance_gate** — vai juntar poeira / ruim de limpar / manchar / vão inútil?
 - **buildability_gate** — dá pra marcenaria executar, ou é só imagem de Pinterest?
 

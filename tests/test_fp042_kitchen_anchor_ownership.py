@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from shapely.geometry import box
 
-from tools import kitchen_validation as legacy
+from tools.rooms.kitchen import anchor_rules as legacy
 from tools.rooms.kitchen import anchor_rules, validation
 
 
@@ -30,7 +30,8 @@ def test_sink_modules_aggregate_polygons_without_shape_change():
 
 
 def test_canonical_rules_fail_closed_when_builder_finds_no_layout(monkeypatch):
-    from tools import kitchen_layout, room_type, spatial_model
+    from tools import room_type, spatial_model
+    from tools.rooms.kitchen import layout as kitchen_layout
 
     sm = {"_geom": {"cell": box(0, 0, 100, 100),
                     "con": {"wall_thickness_pts": 8.0}, "circ": []}}

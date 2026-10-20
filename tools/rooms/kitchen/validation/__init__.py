@@ -8,7 +8,7 @@ from __future__ import annotations
 
 def validate_kitchen_anchor(con, room_id: str) -> dict:
     """Executa o gate existente, sem reimplementar regras hidráulicas."""
-    from tools.kitchen_validation import validate
+    from tools.rooms.kitchen.anchor_rules import validate
     return validate(con, room_id)
 
 

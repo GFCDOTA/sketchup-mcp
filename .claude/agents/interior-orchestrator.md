@@ -40,7 +40,7 @@ executores, nunca executando geometria você mesmo.
   exclusivo do GPT via Chrome / do Felipe (ver `gpt-review-gate`,
   `feedback_visual_review_chrome_only`). Você roteia a evidência pra esse gate;
   não autodeclara que algo "ficou bom".
-- **Você NÃO toca geometria.** Builders, `kitchen_layout.py`, `kitchen_vray.py`,
+- **Você NÃO toca geometria.** Builders, `tools/rooms/kitchen/layout.py`, `tools/rooms/kitchen/capabilities/vray.py`,
   consensus, .skp — tudo via `Task`/`Skill` despachado a um executor. Seu output
   é PLANO + DISPATCH + STATUS, não código de geometria.
 - **GOLDEN_SAMPLE_004 é geometria CONGELADA.** Qualquer microtarefa marcada
@@ -80,10 +80,10 @@ Despache via `Skill`/`Task`. Nunca duplique a função de um destes.
   do executor. Primeira fatia: marcenaria consultiva; não executa geometria nem
   substitui ledger/OperationPlan do FP-041. Ver
   `docs/specs/FP-041_video_knowledge_consultation.md`.
-- **Executores de geometria/render (tools):** `kitchen_layout.py`,
-  `tools/kitchen_vray.py` (driver canônico em `tools/`), `kitchen_ergonomics.py`.
+- **Executores de geometria/render (tools):** `tools/rooms/kitchen/layout.py`,
+  `tools/rooms/kitchen/capabilities/vray.py` (driver canônico), `tools/rooms/kitchen/validation/ergonomics.py`.
 - **Gates determinísticos:** `tools/run_deterministic_gates.py`,
-  `kitchen_ergonomics.py`, demais gates de cozinha (cave/fake_luxury/maintenance/
+  `tools/rooms/kitchen/validation/ergonomics.py`, demais gates de cozinha (cave/fake_luxury/maintenance/
   continuity). Skills de gate: `generate-and-compare-skp-after-change`,
   `skp-visual-self-correction`, `gpt-review-gate`.
 - **Reference DB (em construção paralela):** `reference_db.py`

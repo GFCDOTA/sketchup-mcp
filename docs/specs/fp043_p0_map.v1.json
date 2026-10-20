@@ -1056,8 +1056,8 @@
       "disposition": "move",
       "destination": "tools/rooms/kitchen/capabilities/bake_theme.py",
       "phase": "P4",
-      "rationale": "Capacidade de execução exclusiva da cozinha (adapter da cozinha, não builder genérico).",
-      "compat": "facade_at_old_path",
+      "rationale": "Capacidade de execução exclusiva da cozinha (adapter da cozinha, não builder genérico). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "dynamic_path_risk": true,
       "risk": "high",
       "risk_reasons": [
@@ -2333,8 +2333,8 @@
       "disposition": "move",
       "destination": "tools/rooms/kitchen/validation/ergonomics.py",
       "phase": "P4",
-      "rationale": "Regra exclusiva da cozinha (medidas/ergonomia); MCP o usa (kitchen_ergonomics_audit). Exige validation.py→validation/ sem colisão arquivo/pacote.",
-      "compat": "facade_at_old_path",
+      "rationale": "Regra exclusiva da cozinha (medidas/ergonomia); MCP o usa (kitchen_ergonomics_audit). Exige validation.py→validation/ sem colisão arquivo/pacote. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "consumido por CI/MCP/config",
@@ -2357,11 +2357,11 @@
     {
       "item": "tools/kitchen_layout.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/kitchen/layout.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": true,
@@ -2380,16 +2380,17 @@
           "tests/test_room_dependency_boundaries.py",
           "tests/test_room_module_architecture.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/kitchen_validation.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/kitchen/anchor_rules.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": true,
@@ -2406,7 +2407,8 @@
           "tests/test_fp042_kitchen_validation_boundary.py",
           "tests/test_room_integration_regression.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/kitchen_vray.py",
@@ -2414,8 +2416,8 @@
       "disposition": "move",
       "destination": "tools/rooms/kitchen/capabilities/vray.py",
       "phase": "P4",
-      "rationale": "Capacidade de execução exclusiva da cozinha (adapter da cozinha, não builder genérico).",
-      "compat": "facade_at_old_path",
+      "rationale": "Capacidade de execução exclusiva da cozinha (adapter da cozinha, não builder genérico). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "dynamic_path_risk": true,
       "risk": "high",
       "risk_reasons": [
@@ -2442,8 +2444,8 @@
       "disposition": "move",
       "destination": "tools/rooms/kitchen/validation/wall_regression.py",
       "phase": "P4",
-      "rationale": "Gate exclusivo da cozinha.",
-      "compat": "facade_at_old_path",
+      "rationale": "Gate exclusivo da cozinha. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,

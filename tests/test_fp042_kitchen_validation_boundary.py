@@ -7,7 +7,7 @@ from tools.rooms.kitchen.validation import require_kitchen_anchor, validate_kitc
 
 
 def test_pass_calls_legacy_validator_once(monkeypatch, capsys):
-    import tools.kitchen_validation as legacy
+    import tools.rooms.kitchen.anchor_rules as legacy
     report = {"result": "PASS", "lines": ["KITCHEN_VALIDATION:"],
               "checks": {"sink_wall": "LEFT"}}
     mock = Mock(return_value=report)
@@ -19,7 +19,7 @@ def test_pass_calls_legacy_validator_once(monkeypatch, capsys):
 
 
 def test_failure_blocks_render_and_preserves_reason(monkeypatch):
-    import tools.kitchen_validation as legacy
+    import tools.rooms.kitchen.anchor_rules as legacy
     monkeypatch.setattr(legacy, "validate", lambda *args: {
         "result": "FAIL", "lines": [], "checks": {"sink_wall": "RIGHT"}
     })
@@ -28,7 +28,7 @@ def test_failure_blocks_render_and_preserves_reason(monkeypatch):
 
 
 def test_boundary_is_thin_adapter(monkeypatch):
-    import tools.kitchen_validation as legacy
+    import tools.rooms.kitchen.anchor_rules as legacy
     report = {"result": "PASS", "lines": [], "checks": {}}
     monkeypatch.setattr(legacy, "validate", lambda *_: report)
     assert validate_kitchen_anchor({}, "r004") is report

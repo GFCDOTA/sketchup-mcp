@@ -7,7 +7,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 SHARED = ROOT / "tools" / "rooms" / "shared"
 ROOM_FILES = (
-    ROOT / "tools/kitchen_layout.py",
+    ROOT / "tools/rooms/kitchen/layout.py",
     ROOT / "tools/rooms/bathroom/layout.py",
     ROOT / "tools/service_layout.py",
     ROOT / "interior/planners/living_room_planner.py",
