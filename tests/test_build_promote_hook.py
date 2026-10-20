@@ -11,7 +11,7 @@ import types
 
 import pytest
 
-from tools.build_plan_shell_skp import _auto_promote, _infer_plant
+from tools.sketchup.shell.build_plan_shell_skp import _auto_promote, _infer_plant
 
 
 def _args(out, consensus, promote=True, plant=None):

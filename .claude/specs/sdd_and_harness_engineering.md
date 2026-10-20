@@ -72,7 +72,7 @@ fazem skip clean quando não há `.skp` disponível.
    ↓
 4. Teste vermelho em tests/test_<feature>.py
    ↓
-5. Implementação em tools/build_plan_shell_skp.{py,rb}
+5. Implementação em tools/sketchup/shell/build_plan_shell_skp.{py,rb}
    ↓
 6. Teste verde
    ↓

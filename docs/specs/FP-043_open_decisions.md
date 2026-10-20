@@ -11,6 +11,7 @@ linha vira uma nota de decisão com data e o item sai daqui.
 | D-003 | `tools/furnish_plan.py` / `.rb` (3D Warehouse): vigente ou histórico | Felipe | só o destino desses 2 arquivos em P4 |
 | D-004 | Dono da CLI `tools/trace_view.py` | Felipe | só o destino dele em P4 |
 | D-005 | `scripts/set_clipboard_image.ps1` ainda útil | Felipe | só o destino dele em P4 |
+| D-011 | 4 fachadas de `tools/` lidas pelo Inspector do harness (fora das 8 públicas) | técnica (PR no harness) | só a remoção dessas 4 na FP-044/F6 |
 
 **Linha final (P8, 2026-10-19):** D-001 a D-005 = BLOCKED_DECISION (Felipe; material da D-001 em `artifacts/review/fp043/p3a04_quadrado_d001/`); D-006 = RESOLVED; D-007 = OPEN_TECNICA (planta_74 já respeita o contrato por cômodo; sintéticas seguem `xfail(strict)`).
 
@@ -90,3 +91,19 @@ Mudança global não é segura.
 com regressão por cômodo, mantendo cozinha/SUITE 02/SERVICE como controles. Qualquer mudança de aparência vira
 `VISUAL_REVIEW`. Até lá o contrato "nenhum móvel dentro da parede" fica como `xfail(strict)` — vira falha ruidosa quando
 for corrigido.
+
+## D-011 — Inspector do harness lê 4 fachadas de `tools/` por caminho (FP-044/F6)
+
+**Achado (varredura da Hard Rule #1 antes do 1º lote da F6).** O `fp044_tools_facades.v1.json` só contava imports
+Python; o `apps/harness-app` (outro repositório) também tem um catálogo Java (`ImplementationCatalog`/`ComponentCatalog`)
+cujo `SourceVerifier` lê, em tempo de execução, `../sketchup-mcp/tools/reference_db.py`, `tools/rag_embed_backend.py`,
+`tools/ollama_bridge.py` e `tools/run_deterministic_gates.py` e procura `def <símbolo>` no texto. Desde o P4 esses
+arquivos são fachadas (o símbolo mora no dono), então o Inspector **já** marca esses símbolos como não encontrados;
+remover as fachadas mudaria o sintoma para "arquivo ausente".
+
+**Decisão técnica tomada na F6:** as 4 ficam (`BLOCKED_EXTERNAL_CONSUMER` no JSON de fachadas, registradas em
+`tools/PUBLIC_API.md`); nenhuma outra fachada é afetada. **Próximo passo (fora deste repositório):** PR no harness
+repontando o catálogo para os donos (`tools/knowledge/reference_db.py`, `tools/knowledge/rag_embed_backend.py`,
+`tools/oracle/ollama_bridge.py`, `tools/validation/run_deterministic_gates.py`); depois disso uma fatia futura remove
+as 4. Até lá, o critério §11 da FP-044 ("`tools/*.py` = 8 públicas + 2 bloqueadas") não fecha: estado `PARTIAL`
+(consumidor externo).

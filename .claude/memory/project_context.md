@@ -14,7 +14,7 @@ descreve walls + openings + rooms + soft barriers em PDF-points.
 consensus.json (PDF-points coords)
    │
    ▼
-[Python] tools/build_plan_shell_skp.py
+[Python] tools/sketchup/shell/build_plan_shell_skp.py
    - shapely.unary_union nas wall footprints
    - canonicaliza corners (no notches / no slivers)
    - 2D carve full-height openings (doors, passages, porta-vidro)
@@ -71,4 +71,4 @@ ressuscitado por engano — verificar com o humano antes de seguir.
 ## TODO — validação ao vivo
 
 - [ ] Confirmar `pyproject.toml` deps ainda batem com `shapely`, `pypdfium2`, `Pillow`
-- [ ] Confirmar que `tools/quadrado/` e `tools/build_plan_shell_skp.{py,rb}` continuam sendo os únicos entry points produtivos sob `tools/`
+- [ ] Confirmar que `tools/quadrado/` e `tools/sketchup/shell/build_plan_shell_skp.{py,rb}` continuam sendo os únicos entry points produtivos sob `tools/`

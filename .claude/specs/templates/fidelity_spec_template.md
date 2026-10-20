@@ -10,13 +10,13 @@
 - **Input consensus**: `fixtures/<plant>/<consensus>.json`
 - **Consensus SHA256**: `<64 hex>` (deve bater com sidecar)
 - **Built**: `<YYYY-MM-DDTHH:MM:SSZ>`
-- **Builder commit**: `<git SHA do tools/build_plan_shell_skp.{py,rb}>`
+- **Builder commit**: `<git SHA do tools/sketchup/shell/build_plan_shell_skp.{py,rb}>`
 - **SU version**: `2026`
 
 ## Reproduce
 
 ```bash
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   fixtures/<plant>/<consensus>.json \
   --out runs/<plant>/<plant>.skp
 # Promote → artifacts/<plant>/ (ver skill skp-artifact-management)

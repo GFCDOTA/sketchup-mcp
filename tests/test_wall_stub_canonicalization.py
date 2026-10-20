@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.build_plan_shell_skp import (
+from tools.sketchup.shell.build_plan_shell_skp import (
     _classify_endpoint_junctions,
     build_shell_polygon,
     wall_footprint,

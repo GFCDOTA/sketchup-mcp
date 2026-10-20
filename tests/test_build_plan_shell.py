@@ -1,4 +1,4 @@
-"""Unit tests for tools.build_plan_shell_skp pure-Python phase.
+"""Unit tests for tools.sketchup.shell.build_plan_shell_skp pure-Python phase.
 
 Tests the geometric primitives that produce the 2D shell polygon
 before SketchUp gets involved, plus the sidecar-metadata cache layer
@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 from shapely.geometry import MultiPolygon, Polygon
 
-from tools.build_plan_shell_skp import (
+from tools.sketchup.shell.build_plan_shell_skp import (
     MIN_SLIVER_AREA_PTS2,
     SNAP_EPS_PTS,
     _file_sha256,
@@ -357,7 +357,7 @@ def test_write_metadata_includes_exporter_tag(tmp_path: Path) -> None:
     write_metadata(
         skp, consensus_sha256="abc" * 8,
         sketchup_exe=Path("su.exe"),
-        command=["python", "-m", "tools.build_plan_shell_skp"],
+        command=["python", "-m", "tools.sketchup.shell.build_plan_shell_skp"],
     )
     meta = read_metadata(skp)
     assert meta is not None

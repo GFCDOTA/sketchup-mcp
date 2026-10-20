@@ -4,7 +4,7 @@ planta_74's wall-thickness scale anchor (0.19 m / 5.4 pt = 0.0352) inflated
 the flat ~1.36x. The verified anchor from SUITE 01's printed cota (5.45 x
 4.00 m) is PT_TO_M ~= 0.0259. This guards that the builder injects that scale
 for planta_74, never for quadrado/other plants, and never over an explicit
-caller override. See tools/build_plan_shell_skp.PLANT_PT_TO_M.
+caller override. See tools.sketchup.shell.build_plan_shell_skp.PLANT_PT_TO_M.
 """
 from pathlib import Path
 

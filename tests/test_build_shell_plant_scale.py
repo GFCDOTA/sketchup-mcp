@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import build_plan_shell_skp as bps
+from tools.sketchup.shell import build_plan_shell_skp as bps
 
 ROOT = Path(__file__).resolve().parents[1]
 QUADRADO = ROOT / "fixtures" / "quadrado" / "consensus_with_window.json"

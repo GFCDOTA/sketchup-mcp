@@ -36,7 +36,7 @@ artifacts/
 
 ### `<plant>.skp.metadata.json` (sidecar)
 
-Schema real produzido por `tools/build_plan_shell_skp.py`
+Schema real produzido por `tools/sketchup/shell/build_plan_shell_skp.py`
 (`write_metadata`), com extensão pra artifact promovido:
 
 ```json
@@ -84,7 +84,7 @@ Mínimo obrigatório:
 
 ## Reproduce
 ```bash
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   <consensus.json> \
   --out artifacts/<plant>/<plant>.skp
 ```
@@ -132,7 +132,7 @@ FP-026 (stub review):
 ## Schema status (2026-05-27)
 
 - ✅ `<plant>.skp.metadata.json` schema confirmado em
-  `tools/build_plan_shell_skp.py` (`write_metadata` linha ~611).
+  `tools/sketchup/shell/build_plan_shell_skp.py` (`write_metadata` linha ~611).
   Resolvido por audit P1 desta data: extensão com `source_run_path`
   pra distinguir build path vs canonical path.
 - ✅ `geometry_report.json` schema mapeado em

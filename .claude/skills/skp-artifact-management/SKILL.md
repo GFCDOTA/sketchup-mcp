@@ -36,7 +36,7 @@ Detalhe completo em `memory/artifact_policy.md` e
 
 ```bash
 # 1. Build em runs/
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   fixtures/<plant>/<consensus>.json \
   --out runs/<plant>/<plant>.skp
 

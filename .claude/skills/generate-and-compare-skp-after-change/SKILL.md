@@ -13,9 +13,9 @@ Detalhe completo do contrato em
 
 Auto-trigger após qualquer mudança que toque (ou alegue tocar):
 
-- `tools/build_plan_shell_skp.{py,rb}`
+- `tools/sketchup/shell/build_plan_shell_skp.{py,rb}`
 - `fixtures/<plant>/*.json` (consensus)
-- `tools/su_runner_safety.py` ou outros tools/ que afetem build
+- `tools/sketchup/runner_safety.py` ou outros tools/ que afetem build
 - Schema de `geometry_report.json`
 - Renderer (Ruby `write_image`, side-by-side composer)
 - `artifacts/<plant>/*` quando mudança é "promoção de baseline novo"
@@ -69,7 +69,7 @@ git rev-parse origin/develop
 Modo `interactive` (Hard Rule #4 — nunca `--mode headless` em dev):
 
 ```bash
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   fixtures/<plant>/<consensus>.json \
   --out runs/<plant>/<plant>.skp
 ```

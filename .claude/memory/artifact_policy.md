@@ -30,7 +30,7 @@ timestamp, que sempre aponta pro último build correto**. Não cace pasta
 o build pro deliverable estável quando os self-check gates passam:
 
 ```bash
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json \
   --out runs/planta_74/model.skp --promote
 # -> PROMOTED -> artifacts/planta_74/planta_74.skp (self-check gates green)

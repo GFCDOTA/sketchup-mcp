@@ -25,7 +25,7 @@ from matplotlib.patches import Polygon as MplPoly
 from shapely.geometry import LineString, Polygon, box
 from shapely.ops import unary_union
 
-from tools.build_plan_shell_skp import (
+from tools.sketchup.shell.build_plan_shell_skp import (
     SNAP_EPS_PTS,
     _classify_endpoint_junctions,
     build_shell_polygon,
@@ -81,7 +81,7 @@ def _stage_shells(consensus: dict) -> dict[str, list[Polygon]]:
     )
 
     # Carve openings (matching build_shell_polygon's CARVING_ORIGINS rule)
-    from tools.build_plan_shell_skp import (
+    from tools.sketchup.shell.build_plan_shell_skp import (
         CARVING_ORIGINS,
         is_window_aperture,
     )

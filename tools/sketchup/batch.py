@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from tools.sketchup.process import SketchUp
-from tools.su_runner_safety import MODES, parse_mode, should_terminate
+from tools.sketchup.runner_safety import MODES, parse_mode, should_terminate
 
 RUBY_DIR = Path(__file__).resolve().parent / "ruby"
 # Carrega um script Ruby neste processo (substitui o control file do autorun no Plugins global).

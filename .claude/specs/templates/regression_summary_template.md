@@ -145,7 +145,7 @@ pode mergear (com justificativa) ou se bloqueia.>
 # Comando exato pra regerar o artifact after a partir do
 # commit head desta PR
 git checkout <branch-head-SHA>
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   fixtures/<plant>/<consensus>.json \
   --out runs/<plant>/<plant>.skp
 # + promotion steps (ver skill skp-artifact-management)

@@ -41,7 +41,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.build_plan_shell_skp import build_shell_polygon
+from tools.sketchup.shell.build_plan_shell_skp import build_shell_polygon
 
 REPO_ROOT = Path(__file__).parent.parent
 CANONICAL_CONSENSUS = REPO_ROOT / "fixtures" / "quadrado" / "consensus_with_window.json"
@@ -254,7 +254,7 @@ def test_reference_shell_polygon_matches_live_build(consensus):
         python -c "
         import json
         from pathlib import Path
-        from tools.build_plan_shell_skp import build_shell_polygon, serialize_polygons
+        from tools.sketchup.shell.build_plan_shell_skp import build_shell_polygon, serialize_polygons
         c = json.loads(Path('fixtures/quadrado/consensus_with_window.json').read_text())
         polys, stats = build_shell_polygon(c)
         out = serialize_polygons(polys, c, stats)

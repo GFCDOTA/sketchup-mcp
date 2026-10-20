@@ -67,7 +67,7 @@ from shapely.ops import unary_union
 
 from core.scale import PLANT_PT_TO_M, plant_from_fixture_path, resolve_plant_pt_to_m
 from tools.sketchup.batch import LAUNCHER, launch_env
-from tools.su_runner_safety import log_mode, parse_mode, should_terminate
+from tools.sketchup.runner_safety import log_mode, parse_mode, should_terminate
 
 SKETCHUP_EXE_DEFAULT = (
     r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
@@ -976,7 +976,7 @@ def _default_runner_mode() -> str:
 
     Callers can override via the `mode` argument, `--mode` CLI flag,
     `--no-terminate` shorthand, or `RUN_MODE` env var (resolved
-    by `tools.su_runner_safety.parse_mode`).
+    by `tools.sketchup.runner_safety.parse_mode`).
     """
     ci_env = os.environ.get("CI", "").lower() == "true"
     gh_actions = os.environ.get("GITHUB_ACTIONS", "").lower() == "true"

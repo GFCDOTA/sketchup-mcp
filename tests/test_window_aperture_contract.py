@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.build_plan_shell_skp import (
+from tools.sketchup.shell.build_plan_shell_skp import (
     FULL_HEIGHT_CARVE_KINDS,
     WINDOW_APERTURE_KINDS,
     build_shell_polygon,

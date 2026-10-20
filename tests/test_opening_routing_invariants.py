@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.build_plan_shell_skp import (
+from tools.sketchup.shell.build_plan_shell_skp import (
     build_shell_polygon,
     opening_kind_v5_normalised,
 )

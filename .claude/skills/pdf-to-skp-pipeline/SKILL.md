@@ -9,7 +9,7 @@ Skill operacional pro pipeline principal do repo.
 
 ## Quando usar
 
-- Mudança em `tools/build_plan_shell_skp.py` ou `.rb`
+- Mudança em `tools/sketchup/shell/build_plan_shell_skp.py` ou `.rb`
 - Nova fixture sob `fixtures/<plant>/`
 - Debug de `_shell_polygon.json`
 - Ajuste em `kind_v5` routing (window vs door vs porta-vidro)
@@ -20,7 +20,7 @@ Skill operacional pro pipeline principal do repo.
 
 ```
 consensus.json (PDF-points)
-   ↓ tools/build_plan_shell_skp.py
+   ↓ tools/sketchup/shell/build_plan_shell_skp.py
 _shell_polygon.json (intermediate, em runs/)
    ↓ tools/sketchup/shell/build_plan_shell_skp.rb (Ruby/SU, processo próprio via -RubyStartup skmcp_launch.rb)
 <plant>.skp + iso.png + top.png + geometry_report.json (em runs/)
@@ -33,7 +33,7 @@ artifacts/<plant>/<plant>.skp + sidecars
 ### Build local (default, SU stays open)
 
 ```bash
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   fixtures/quadrado/consensus_with_window.json \
   --out runs/quadrado/quadrado.skp
 ```
@@ -49,7 +49,7 @@ python tools/quadrado/render_view.py \
 ### Plant real
 
 ```bash
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json \
   --out runs/planta_74/model.skp
 ```

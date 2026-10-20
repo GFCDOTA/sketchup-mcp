@@ -21,7 +21,7 @@
 pip install -e ".[dev]"
 
 # Build the canonical .skp (requires SketchUp 2026)
-python -m tools.build_plan_shell_skp \
+python -m tools.sketchup.shell.build_plan_shell_skp \
   fixtures/quadrado/consensus_with_window.json \
   --out runs/quadrado/quadrado.skp
 

@@ -1259,8 +1259,8 @@
       "disposition": "move",
       "destination": "tools/sketchup/shell/build_plan_shell_skp.py",
       "phase": "P4",
-      "rationale": "Pipeline do shell consensus→.skp: entrypoint público e CLI documentada em 23 docs; o Python carrega o .rb por caminho.",
-      "compat": "facade_at_old_path",
+      "rationale": "Pipeline do shell consensus→.skp: entrypoint público e CLI documentada em 23 docs; o Python carrega o .rb por caminho. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "dynamic_path_risk": true,
       "risk": "high",
       "risk_reasons": [
@@ -1728,8 +1728,8 @@
       "disposition": "move",
       "destination": "tools/sketchup/disarm_autoruns.py",
       "phase": "P4",
-      "rationale": "Remove *_control.txt do Plugins: execução SU.",
-      "compat": "facade_at_old_path",
+      "rationale": "Remove *_control.txt do Plugins: execução SU. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -4395,8 +4395,8 @@
       "disposition": "move",
       "destination": "tools/sketchup/runner_safety.py",
       "phase": "P4",
-      "rationale": "Protocolo de ciclo de vida do SketchUp (modo, terminate): é execução SU.",
-      "compat": "facade_at_old_path",
+      "rationale": "Protocolo de ciclo de vida do SketchUp (modo, terminate): é execução SU. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -4827,6 +4827,21 @@
         "counts": {}
       },
       "status": "done"
+    },
+    {
+      "item": "tools/PUBLIC_API.md",
+      "kind": "file",
+      "disposition": "retain",
+      "phase": "P8",
+      "rationale": "FP-044/F6: contrato da API publica estavel de tools/ (8 fachadas com consumidor externo, as 4 retidas pela D-011 e as 2 bloqueadas por D-003/D-004); mora junto dos caminhos que descreve.",
+      "risk": "low",
+      "risk_reasons": [],
+      "depth_sensitive": false,
+      "consumers": {
+        "counts": {
+          "tests": 1
+        }
+      }
     }
   ]
 }

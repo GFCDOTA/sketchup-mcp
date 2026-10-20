@@ -16,7 +16,7 @@ This module exposes:
   Returns the list of paths that were removed (or would be, with
   ``dry_run=True``). Safe to call when the directory is missing
   or has no control files (returns ``[]``).
-* ``python -m tools.disarm_sketchup_autoruns`` — CLI. Prints what
+* ``python -m tools.sketchup.disarm_autoruns`` — CLI. Prints what
   it does. Supports ``--dry-run`` and ``--plugins <path>``.
 
 Launchers (``skp_from_consensus.py``, ``build_room_ring_skp.py``)

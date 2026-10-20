@@ -332,7 +332,7 @@ def _check_gates_self_check(report: dict) -> list[dict]:
                     f"gate `{gate_name}` is false; per FP-030 hard gate "
                     f"any gates_self_check false blocks promotion."
                 ),
-                "source_check": "tools/build_plan_shell_skp.py write_geometry_report",
+                "source_check": "tools/sketchup/shell/build_plan_shell_skp.py write_geometry_report",
                 "suspected_owner": "builder",
                 "proposed_fix": "Inspect shell_stats_from_python and run FP-026 diagnostic; do not promote until gate is true.",
             })
@@ -353,7 +353,7 @@ def _check_window_count(report: dict, consensus: dict) -> list[dict]:
             "type": "window_count_mismatch",
             "location": "geometry_report.shell_stats_from_python.window_apertures_3d",
             "evidence": f"window_apertures_3d={actual} != count(kind_v5==window)={expected}",
-            "source_check": "tools/build_plan_shell_skp.py:build_shell_polygon — opening kind routing",
+            "source_check": "tools/sketchup/shell/build_plan_shell_skp.py:build_shell_polygon — opening kind routing",
             "suspected_owner": "opening_routing",
             "proposed_fix": "Diagnose which window leaked into 2D carve OR was skipped. Cross-check tests/test_opening_routing_invariants.py.",
         })
@@ -451,7 +451,7 @@ def _check_orphan_window_glass(report: dict, consensus: dict) -> list[dict]:
                 "type": "soft_barrier_routed_as_window",
                 "location": f"groups_diagnostic[name={name}]",
                 "evidence": f"WindowGlass group `{name}` has id `{suffix}` that matches a consensus soft_barrier id — soft_barriers must NEVER produce WindowGlass groups.",
-                "source_check": "tools/build_plan_shell_skp.{py,rb} window aperture emission",
+                "source_check": "tools/sketchup/shell/build_plan_shell_skp.{py,rb} window aperture emission",
                 "suspected_owner": "soft_barrier_routing",
                 "proposed_fix": "Verify the routing logic isolates soft_barrier paths from the window aperture path.",
             })
@@ -487,7 +487,7 @@ def _check_no_duplicate_window_application(report: dict) -> list[dict]:
             "type": "duplicate_window_application",
             "location": "geometry_report.groups_diagnostic[WindowGlass_Group_*]",
             "evidence": f"duplicate window opening ids: {duplicates}",
-            "source_check": "tools/build_plan_shell_skp.{py,rb} window aperture loop",
+            "source_check": "tools/sketchup/shell/build_plan_shell_skp.{py,rb} window aperture loop",
             "suspected_owner": "opening_routing",
             "proposed_fix": "Each opening must be applied once. Check loop conditions when shell has multiple pieces.",
         })
@@ -564,7 +564,7 @@ def _check_floor_leak_basic(report: dict) -> list[dict]:
             "type": "floor_leak",
             "location": "geometry_report.floor_groups",
             "evidence": f"floor_groups.present={fg.get('present')}, count={fg.get('count')}. No floor coverage.",
-            "source_check": "tools/build_plan_shell_skp.py polygonize → Ruby Floor_Group creation",
+            "source_check": "tools/sketchup/shell/build_plan_shell_skp.py polygonize → Ruby Floor_Group creation",
             "suspected_owner": "builder",
             "proposed_fix": "Inspect shell_stats_from_python.shell_pieces_after_union.",
         })
@@ -755,7 +755,7 @@ def run_builder(
 ) -> tuple[int, str]:
     cmd = [
         str(python_exe or sys.executable),
-        "-m", "tools.build_plan_shell_skp",
+        "-m", "tools.sketchup.shell.build_plan_shell_skp",
         str(consensus_path), "--out", str(out_skp), "--force-skp",
     ]
     try:

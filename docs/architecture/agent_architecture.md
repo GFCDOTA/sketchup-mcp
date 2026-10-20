@@ -186,7 +186,7 @@ Usuário: "corrige a fidelidade da planta_74"
 4. SKILL acionada: generate-and-compare-skp-after-change  (gatilho "corrige fidelity")
      ↳ usa pdf-to-skp-pipeline pra BUILD
   ↓
-5. build: tools/build_plan_shell_skp.py  (consensus.json → .skp em runs/)   [Hard Rule #1: não inventar]
+5. build: tools/sketchup/shell/build_plan_shell_skp.py  (consensus.json → .skp em runs/)   [Hard Rule #1: não inventar]
 6. compara before/after: geometry_report.json + renders
 7. SKILL: skp-visual-self-correction → detectores DETERMINÍSTICOS (overlay_diff / opening_host_audit)
      ↳ se mudou APARÊNCIA → sobe pro HUMANO (Visual Review) — IMPROVED/SAME/WORSE nunca é auto
