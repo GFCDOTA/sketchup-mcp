@@ -12305,15 +12305,6 @@
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
-      "path": "tools/sofa_class_matrix.py",
-      "domain": "room_living_or_shared",
-      "disposition": "retain_path_with_explicit_runtime_owner",
-      "phase": "P3",
-      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "living_visual_gate_and_cli",
-      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
-    },
-    {
       "path": "tools/spatial_model.py",
       "domain": "shared_or_cross_cutting",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -16633,6 +16624,15 @@
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "document_owner": "project_documentation",
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tools/rooms/shared/contact_sheet.py",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     }
   ]
 }

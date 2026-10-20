@@ -4093,34 +4093,6 @@
       "status": "done"
     },
     {
-      "item": "tools/sofa_class_matrix.py",
-      "kind": "file",
-      "disposition": "move",
-      "destination": "tools/rooms/living/capabilities/sofa_class_matrix.py",
-      "phase": "P4",
-      "rationale": "Ferramenta do programa do sofá/sala (harness, comparação, fixtures): pertence ao cômodo living. Antes de mover, confirmar se cada harness ainda executa; os sem consumidor são candidatos a arquivo.",
-      "compat": "facade_at_old_path",
-      "dynamic_path_risk": true,
-      "risk": "high",
-      "risk_reasons": [
-        "caminho resolvido em tempo de execução",
-        "Path(__file__)/parents dependente da profundidade"
-      ],
-      "depth_sensitive": true,
-      "consumers": {
-        "counts": {
-          "code": 10,
-          "docs": 6,
-          "history": 1,
-          "tests": 1
-        },
-        "tests_sample": [
-          "tests/test_sofa_class.py"
-        ]
-      },
-      "status": "done"
-    },
-    {
       "item": "tools/sofa_furnish_fase1_compare.py",
       "kind": "file",
       "disposition": "move",

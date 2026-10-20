@@ -27,11 +27,6 @@ O Inspector do harness (`SourceVerifier`) lê estes arquivos em `../sketchup-mcp
 Ficam até o harness ser repontado para os donos (`tools.knowledge.*`, `tools.oracle.ollama_bridge`,
 `tools.validation.run_deterministic_gates`).
 
-## Retido por dependência escondida entre cômodos (D-012)
-
-`tools/sofa_class_matrix.py`: o `bed_class` (quarto) usa `_grid_sheet` do programa do sofá (living) por esta fachada;
-tirá-la expõe a dependência ao gate de fronteira. Sai quando `_grid_sheet` for para um lugar compartilhado.
-
 ## Retidos por decisão do Felipe
 
 `tools/furnish_plan.py` (D-003) e `tools/trace_view.py` (D-004) — não são fachadas; ficam até a decisão.

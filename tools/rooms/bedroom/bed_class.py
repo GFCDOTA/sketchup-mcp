@@ -295,7 +295,7 @@ MATRIX = [
 
 def build_matrix(out_dir):
     from tools.rendering.render_parts_iso import render_parts
-    from tools.sofa_class_matrix import _grid_sheet
+    from tools.rooms.shared.contact_sheet import grid_sheet as _grid_sheet
     import json as _json
     out = Path(out_dir).resolve()
     out.mkdir(parents=True, exist_ok=True)

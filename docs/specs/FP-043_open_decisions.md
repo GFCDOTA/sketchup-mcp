@@ -12,11 +12,11 @@ linha vira uma nota de decisão com data e o item sai daqui.
 | D-004 | Dono da CLI `tools/trace_view.py` | Felipe | só o destino dele em P4 |
 | D-005 | `scripts/set_clipboard_image.ps1` ainda útil | Felipe | só o destino dele em P4 |
 | D-011 | 4 fachadas de `tools/` lidas pelo Inspector do harness (fora das 8 públicas) | técnica (PR no harness) | só a remoção dessas 4 na FP-044/F6 |
-| D-012 | `tools/sofa_class_matrix.py` esconde uma dependência quarto → living do gate de fronteira | técnica (onde mora `_grid_sheet`) | só a remoção dessa fachada na FP-044/F6 |
+| D-012 | `tools/sofa_class_matrix.py` escondia uma dependência quarto → living — **RESOLVIDA** (`_grid_sheet` → `tools/rooms/shared/contact_sheet.py`, 2026-10-20) | técnica | nada |
 
 **Linha final (P8, 2026-10-19):** D-001 a D-005 = BLOCKED_DECISION (Felipe; material da D-001 em `artifacts/review/fp043/p3a04_quadrado_d001/`); D-006 = RESOLVED; D-007 = OPEN_TECNICA (planta_74 já respeita o contrato por cômodo; sintéticas seguem `xfail(strict)`).
 
-**Linha final (FP-044/F7, 2026-10-20):** D-008 (`.impeccable/`) e D-009 (`ops/estudio-front/`) = BLOCKED_DECISION (Felipe; spec FP-044 §10); D-010 = manter as 8 públicas agora; D-011 e D-012 = OPEN_TECNICA (seções abaixo). Relatório: [FP-044_final_validation](../reports/FP-044_final_validation.md).
+**Linha final (FP-044/F7, 2026-10-20):** D-008 (`.impeccable/`) e D-009 (`ops/estudio-front/`) = BLOCKED_DECISION (Felipe; spec FP-044 §10); D-010 = manter as 8 públicas agora; D-011 = OPEN_TECNICA; D-012 = RESOLVIDA em 2026-10-20 (seções abaixo). Relatório: [FP-044_final_validation](../reports/FP-044_final_validation.md).
 
 **Decisão técnica já resolvida:** D-006 — o `repo_health_gate` foi corrigido e incluído no CI; evidências e contraprovas na seção histórica abaixo.
 
@@ -111,7 +111,7 @@ repontando o catálogo para os donos (`tools/knowledge/reference_db.py`, `tools/
 as 4. Até lá, o critério §11 da FP-044 ("`tools/*.py` = 8 públicas + 2 bloqueadas") não fecha: estado `PARTIAL`
 (consumidor externo).
 
-## D-012 — fachada `tools/sofa_class_matrix.py` esconde uma dependência quarto → living (FP-044/F6)
+## D-012 — fachada `tools/sofa_class_matrix.py` escondia uma dependência quarto → living (FP-044/F6) — **RESOLVIDA**
 
 **Achado (lote `rooms/living`).** `tools/rooms/bedroom/bed_class.py::build_matrix` importa `_grid_sheet` (helper puro de
 folha-contato em PIL) de `tools.rooms.living.capabilities.sofa_class_matrix`, **pela fachada** `tools.sofa_class_matrix`.
@@ -123,3 +123,5 @@ está lá, então a dependência quarto → living ficava invisível. Reescrever
 `bed_class` continua importando por ela, exatamente como antes). Mover `_grid_sheet` para um lugar compartilhado
 (`tools/rooms/shared/` ou `tools/rendering/`) é uma alteração de estrutura que não foi pedida — fica como proposta para
 uma fatia própria; depois disso a fachada sai e o gate passa sem exceção.
+
+**Resolução (2026-10-20).** `_grid_sheet` (helper puro de folha-contato em PIL) foi para `tools/rooms/shared/contact_sheet.py` como `grid_sheet`; `bed_class` importa de `shared` (sem dependência quarto → sala) e o módulo do sofá reexporta o nome antigo para os consumidores do living. A fachada `tools/sofa_class_matrix.py` foi removida; o gate de fronteira passa sem exceção.
