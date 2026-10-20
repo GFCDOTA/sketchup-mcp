@@ -1216,7 +1216,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "BLOCKED_HIDDEN_CROSS_ROOM_DEPENDENCY"
+   "action": "REMOVED"
   },
   {
    "path": "tools/sofa_furnish_fase1_compare.py",

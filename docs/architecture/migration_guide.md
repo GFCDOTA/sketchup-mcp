@@ -203,7 +203,7 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.layout_candidates` | `tools.rooms.living.planning.layout_candidates` | `rooms/living` |
 | `tools.sofa_gate` | `tools.rooms.living.validation.sofa_gate` | `rooms/living` |
 | `tools.{make_synthetic_rooms,sofa_furnish_fase1_compare,sofa_premium_harness,sofa_venezia_compare,sofa_venezia_room}` | `tools.rooms.living.capabilities.{…}` | `rooms/living` |
-| `tools.sofa_class_matrix` | **fica** (D-012); consumidores do living já usam `tools.rooms.living.capabilities.sofa_class_matrix` | `rooms/living` |
+| `tools.sofa_class_matrix` | `tools.rooms.living.capabilities.sofa_class_matrix` (fachada removida; D-012 resolvida: `_grid_sheet` agora é `tools.rooms.shared.contact_sheet.grid_sheet`, usado por quarto e sala) | `rooms/living` |
 | `tools.{sofa_builder,bed_builder,wardrobe_builder,nightstand_builder}` | `tools.rooms.shared.{sofa,bed,wardrobe,nightstand}` | `rooms/shared` |
 | `tools.furniture_anatomy_spec` | `tools.rooms.shared.anatomy` | `rooms/shared` |
 | `tools.style_spec` | `tools.rooms.shared.materials` | `rooms/shared` |
