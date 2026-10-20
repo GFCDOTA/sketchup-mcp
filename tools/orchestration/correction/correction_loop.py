@@ -3,13 +3,13 @@
 The state machine that turns the `autonomous-fidelity-loop` protocol (prose a
 session follows by hand) into a programmatic driver. Per cycle it detects typed
 findings, routes them (`tools/finding_router`), applies deterministic fixes
-(`tools/correction_fixes`) on a WORKING COPY, re-checks, and stops honestly:
+(`tools/orchestration/correction/correction_fixes`) on a WORKING COPY, re-checks, and stops honestly:
 
     CLEAN            no findings — backlog exhausted, does not invent cycles
     STALL            same finding signature twice / fix worsened (reverted)
     NEEDS_FELIPE     only appearance-routed findings remain (queued, never auto)
     PENDING_VISION   only vision-routed findings remain (request queued for the
-                     FP-032 eye; `tools/vision_queue_consumer` drains it via
+                     FP-032 eye; `tools/orchestration/correction/vision_queue_consumer` drains it via
                      POST /ask-vision and `pending_vision_findings` re-injects
                      the confirmed result — the loop itself NEVER fabricates a
                      visual finding)
@@ -39,10 +39,10 @@ from typing import Callable
 
 from core import observability as obs
 from core.observability.taxonomy import DecisionEvidence, HarnessKind
-from tools import correction_finding as cfind
-from tools import correction_fixes as cfix
+from tools.orchestration.correction import correction_finding as cfind
+from tools.orchestration.correction import correction_fixes as cfix
 from tools import finding_router as frouter
-from tools.jsonl_io import append_jsonl, queue_key, read_jsonl
+from tools.orchestration.correction.jsonl_io import append_jsonl, queue_key, read_jsonl
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 
@@ -69,8 +69,8 @@ def _emit_appearance_gallery(fixture: str, gallery_corpus: Path,
     idempotente (variant_id estavel por fixture): NUNCA derruba o loop nem espera
     veredito. Retorna o variant_id emitido, ou None se pulado/best-effort falhou."""
     try:
-        from tools.variant_axes import Variant
-        from tools.variant_sweep import emit_gallery_item
+        from tools.orchestration.variant_axes import Variant
+        from tools.orchestration.variant_sweep import emit_gallery_item
         corpus = Path(gallery_corpus)
         corpus.parent.mkdir(parents=True, exist_ok=True)
         v = Variant(plant=fixture, style="correction", theme="", layout_seed=0)
@@ -151,7 +151,7 @@ def run_loop(
 ) -> LoopResult:
     """Run the loop on WORKING COPIES of consensus/boxes. `detect` is injected
     (spec: hermetic tests, no network/SU) and must return unified
-    correction_findings (see tools/correction_finding)."""
+    correction_findings (see tools/orchestration/correction/correction_finding)."""
     out_dir = Path(out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     # Run outputs describe THIS run only. The out dir is persistent across NOC
@@ -393,7 +393,7 @@ def _consensus_detector(_ctx: cfix.FixContext) -> list[dict]:
 
 def pending_vision_findings(out_dir: Path) -> list[dict]:
     """Confirmed visual findings from the FP-032 eye (`vision_confirmed.jsonl`,
-    written by tools/vision_queue_consumer) — re-injected into the next DETECT.
+    written by tools/orchestration/correction/vision_queue_consumer) — re-injected into the next DETECT.
     Keyed by out_dir, not fixture (spec:106 said fixture; every loop queue is
     already relative to --out, so the code wins). Missing file -> [].
 

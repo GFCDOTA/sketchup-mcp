@@ -5,10 +5,10 @@ from __future__ import annotations
 import copy
 import json
 
-from tools import correction_finding as cfind
-from tools import correction_fixes as cfx
+from tools.orchestration.correction import correction_finding as cfind
+from tools.orchestration.correction import correction_fixes as cfx
 from tools import correction_loop as loop
-from tools.correction_fixes import FixContext, FixResult
+from tools.orchestration.correction.correction_fixes import FixContext, FixResult
 
 
 def _finding(type_="furniture_overlap", sev="FAIL", evidence="e"):

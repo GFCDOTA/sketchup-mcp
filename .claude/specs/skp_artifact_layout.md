@@ -144,11 +144,11 @@ FP-026 (stub review):
   pra `artifacts/<plant>/` **deve rewrite** o sidecar pra apontar
   `skp_path` ao path canônico e adicionar `source_run_path`. Esse
   rewrite é manual hoje — TODO produto: automatizar via
-  `tools/promote_artifact.py` (não criado ainda).
+  `tools/orchestration/promote_artifact.py` (não criado ainda).
 
 ## TODO follow-ups
 
-- [ ] Criar `tools/promote_artifact.py` que faz cp + sidecar rewrite
+- [ ] Criar `tools/orchestration/promote_artifact.py` que faz cp + sidecar rewrite
       + provenance README stub de uma vez
 - [ ] Bump `schema_version` pra `1.1.0` quando `source_run_path`
       virar campo padrão (depende do builder também passar a

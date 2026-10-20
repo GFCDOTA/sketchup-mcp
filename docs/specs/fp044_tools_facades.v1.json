@@ -231,7 +231,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/correction_fixes.py",
@@ -243,7 +243,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/correction_loop.py",
@@ -375,7 +375,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/finding_router.py",
@@ -592,7 +592,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/kitchen_ergonomics.py",
@@ -904,7 +904,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/promote_canonical.py",
@@ -916,7 +916,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/rack_class.py",
@@ -1000,7 +1000,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/render_banho_auto.py",
@@ -1409,7 +1409,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/variant_sweep.py",
@@ -1421,7 +1421,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/vision_queue_consumer.py",
@@ -1433,7 +1433,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/visual_regression_gate.py",

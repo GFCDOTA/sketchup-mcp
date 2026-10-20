@@ -121,7 +121,7 @@ errado (aperture host-filtrado + fallback painel, FP-031).
 
 A raiz dos 9/12 host-errado + da duplicata é **fragmentação**: cada parede
 arquitetônica vira vários segmentos colineares curtos com gaps nas aberturas, e o
-opening fica num gap sem host válido. `tools/regenerate_consensus.py` (gate :8765
+opening fica num gap sem host válido. `tools/orchestration/regenerate_consensus.py` (gate :8765
 = approach B): **merge colinear (mesma orientação/coord-fixa, gap ≤ bridge_gap) +
 re-host openings** → planta_74 walls **35→19**, opening_host **PASS(0/12)**,
 wall_overlap **PASS(0)**. Efeito colateral GRANDE no render: a parede contínua faz

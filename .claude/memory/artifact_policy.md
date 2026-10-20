@@ -43,7 +43,7 @@ nunca empurra build quebrado ou não-verificado pro path fixo.
 **Promover um build que já existe** (ex.: um review snapshot aprovado):
 
 ```bash
-python -m tools.promote_canonical --src artifacts/review/planta_74/<ts>/final
+python -m tools.orchestration.promote_canonical --src artifacts/review/planta_74/<ts>/final
 ```
 
 `promote_canonical` copia skp + renders + report e reescreve o metadata sidecar
@@ -110,7 +110,7 @@ sidecar canônico precisa de **rewrite**:
 - `source_run_path` ← `runs/<plant>/<plant>.skp` (provenance)
 - `consensus_sha256` ← **carregado** do sidecar do build (cache key)
 
-Isto é **feito automaticamente** por `tools/promote_canonical.py` (e portanto
+Isto é **feito automaticamente** por `tools/orchestration/promote_canonical.py` (e portanto
 pelo `build_plan_shell_skp --promote`): ele lê o sidecar do build, carrega o
 `consensus_sha256` + stats, e reescreve os campos de path pro canônico. Não
 precisa editar à mão. Schema detalhado em `specs/skp_artifact_layout.md`.

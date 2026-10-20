@@ -22,8 +22,8 @@ import pytest
 
 from core import observability as obs
 from core.observability.sink import MemorySink, set_sink
-from tools import correction_finding as cfind
-from tools import correction_fixes as cfx
+from tools.orchestration.correction import correction_finding as cfind
+from tools.orchestration.correction import correction_fixes as cfx
 from tools import correction_loop as loop
 
 REPO = Path(__file__).resolve().parents[1]

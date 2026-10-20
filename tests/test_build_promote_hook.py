@@ -59,7 +59,7 @@ def test_green_build_promotes_to_stable_path(tmp_path, monkeypatch):
     b = _build_dir(tmp_path, {"a": True, "b": True})
     c = _consensus(tmp_path)
     _patch_det(monkeypatch, "PASS")  # deterministic suite tested separately
-    import tools.promote_canonical as pc
+    import tools.orchestration.promote_canonical as pc
     orig = pc.promote
     monkeypatch.setattr(pc, "promote",
                         lambda src, plant, repo=None: orig(src, plant, repo=tmp_path))

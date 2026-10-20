@@ -1,4 +1,4 @@
-"""Tests for tools/promote_artifact.py.
+"""Tests for tools/orchestration/promote_artifact.py.
 
 Focus: the three things most likely to go wrong in production —
   1. Missing required files should block promotion (no silent partial copy).
@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.promote_artifact import _rewrite_sidecar, _validate_run, promote
+from tools.orchestration.promote_artifact import _rewrite_sidecar, _validate_run, promote
 
 
 # ---- helpers ----------------------------------------------------------
@@ -111,7 +111,7 @@ def test_sidecar_rewrite_no_run_sidecar(tmp_path):
 
 def test_promote_copies_files(tmp_path, monkeypatch):
     """Happy path: all required files present, artifacts/ empty → files copied."""
-    monkeypatch.setattr("tools.promote_artifact.REPO_ROOT", tmp_path)
+    monkeypatch.setattr("tools.orchestration.promote_artifact.REPO_ROOT", tmp_path)
     run = _make_run(tmp_path, "p74")
     # PDF absent → side-by-side will be skipped (not an error)
 
@@ -131,7 +131,7 @@ def test_promote_copies_files(tmp_path, monkeypatch):
 
 def test_promote_blocks_missing_files(tmp_path, monkeypatch):
     """Missing required file → return 1, no partial write."""
-    monkeypatch.setattr("tools.promote_artifact.REPO_ROOT", tmp_path)
+    monkeypatch.setattr("tools.orchestration.promote_artifact.REPO_ROOT", tmp_path)
     run = _make_run(tmp_path, "p74", skip_report=True)  # report missing
 
     rc = promote("p74", run_dir=run)
@@ -143,7 +143,7 @@ def test_promote_blocks_missing_files(tmp_path, monkeypatch):
 
 def test_promote_blocks_existing_without_force(tmp_path, monkeypatch):
     """Existing artifact without --force → return 2 (safe default)."""
-    monkeypatch.setattr("tools.promote_artifact.REPO_ROOT", tmp_path)
+    monkeypatch.setattr("tools.orchestration.promote_artifact.REPO_ROOT", tmp_path)
     run = _make_run(tmp_path, "p74")
     # Pre-create an existing artifact
     art = tmp_path / "artifacts" / "p74"
@@ -158,7 +158,7 @@ def test_promote_blocks_existing_without_force(tmp_path, monkeypatch):
 
 def test_promote_force_overwrites(tmp_path, monkeypatch):
     """--force overwrites existing artifact."""
-    monkeypatch.setattr("tools.promote_artifact.REPO_ROOT", tmp_path)
+    monkeypatch.setattr("tools.orchestration.promote_artifact.REPO_ROOT", tmp_path)
     run = _make_run(tmp_path, "p74")
     art = tmp_path / "artifacts" / "p74"
     art.mkdir(parents=True)
@@ -171,7 +171,7 @@ def test_promote_force_overwrites(tmp_path, monkeypatch):
 
 def test_promote_dry_run_writes_nothing(tmp_path, monkeypatch):
     """--dry-run shows plan but writes NOTHING."""
-    monkeypatch.setattr("tools.promote_artifact.REPO_ROOT", tmp_path)
+    monkeypatch.setattr("tools.orchestration.promote_artifact.REPO_ROOT", tmp_path)
     run = _make_run(tmp_path, "p74")
 
     rc = promote("p74", run_dir=run, dry_run=True)

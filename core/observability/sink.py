@@ -5,7 +5,7 @@ o `NullSink` ser o default do processo: sem `INSPECTOR=1` e sem `configure()`,
 `emit()` custa uma comparação `is None` e retorna. Nenhum arquivo aberto, nenhum
 json serializado, nenhum import de `redact` no caminho quente.
 
-`JsonlSink` reusa `tools.jsonl_io.append_jsonl` — append-only, uma linha por
+`JsonlSink` reusa `tools.orchestration.correction.jsonl_io.append_jsonl` — append-only, uma linha por
 evento, o mesmo idioma das filas do FP-033. Import é LAZY: `core` não pode
 depender de `tools` no topo do módulo (regra de direção de dependência), e o
 caminho desligado nem chega a importar.
@@ -81,7 +81,7 @@ class JsonlSink:
         return run_id in self._truncated
 
     def write(self, event: Event) -> None:
-        from tools.jsonl_io import append_jsonl  # lazy: core não importa tools no topo
+        from tools.orchestration.correction.jsonl_io import append_jsonl  # lazy: core não importa tools no topo
 
         run_id = event.run_id
         with self._lock:

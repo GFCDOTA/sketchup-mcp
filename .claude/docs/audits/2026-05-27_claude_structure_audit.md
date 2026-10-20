@@ -145,7 +145,7 @@ git diff --stat -- tools/ tests/ fixtures/ 'docs/specs/*.md'
 ## Follow-ups (não bloqueiam este patch)
 
 - [ ] **Builder produz schema 1.1.0 com `source_run_path`** — hoje
-      o promotion rewrite é manual; ideal é `tools/promote_artifact.py`
+      o promotion rewrite é manual; ideal é `tools/orchestration/promote_artifact.py`
       gerar o sidecar correto direto
 - [ ] **CI rodando build canônico** — `gates_self_check` deveria
       falhar PR no GitHub Actions

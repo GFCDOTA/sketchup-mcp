@@ -9,8 +9,8 @@ writes a metadata sidecar (sha + provenance), so:
     artifacts/<plant>/<plant>.skp        <- ALWAYS the latest blessed build
 
 Usage:
-    python -m tools.promote_canonical --src artifacts/review/planta_74/canonical_20260531/final
-    python -m tools.promote_canonical --src runs/planta_74/glassfix --plant planta_74
+    python -m tools.orchestration.promote_canonical --src artifacts/review/planta_74/canonical_20260531/final
+    python -m tools.orchestration.promote_canonical --src runs/planta_74/glassfix --plant planta_74
 
 Blessing (visual IMPROVED) stays Felipe's call — this only COPIES an
 already-approved build to the stable path; it never builds or judges.
@@ -84,7 +84,7 @@ def promote(src_final: Path, plant: str, repo: Path = REPO) -> dict:
         "skp_bytes": skp.stat().st_size,
         "files": copied,
         "note": "latest correct build at a fixed path; refresh via "
-                "tools/promote_canonical.py or build_plan_shell_skp --promote",
+                "tools/orchestration/promote_canonical.py or build_plan_shell_skp --promote",
     }
     (dst / f"{plant}.skp.metadata.json").write_text(
         json.dumps(meta, indent=2) + "\n", encoding="utf-8")

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import fidelity_loop as fl
+from tools.orchestration import fidelity_loop as fl
 
 
 def _png(path: Path, size=(40, 30), color=(120, 120, 120)):

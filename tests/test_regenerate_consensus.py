@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from tools.validation.opening_host_audit import audit_opening_hosts
-from tools.regenerate_consensus import regenerate
+from tools.orchestration.regenerate_consensus import regenerate
 from tools.validation.wall_overlap_audit import audit_wall_overlaps
 
 REPO = Path(__file__).resolve().parents[1]
