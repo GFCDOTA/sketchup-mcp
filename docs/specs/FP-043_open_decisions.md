@@ -95,6 +95,18 @@ com regressão por cômodo, mantendo cozinha/SUITE 02/SERVICE como controles. Qu
 `VISUAL_REVIEW`. Até lá o contrato "nenhum móvel dentro da parede" fica como `xfail(strict)` — vira falha ruidosa quando
 for corrigido.
 
+**Atualização de diagnóstico (FP-044, 2026-10-20) — o mecanismo real é outro e a correção muda um cômodo de controle.**
+Na sintética `bedroom_medium_14m2_inner_face` o guarda-roupa entra ~4,5 cm na parede **esquerda** (perpendicular à parede onde
+ele está encostado): o item do planner começa em x = 1,42 pt, dentro da massa da parede (face interna em 2,70 pt). Duas coisas somam:
+(1) o intervalo ao longo da parede (`_place_against`, `designer.py`) parte do **eixo** da parede perpendicular + 0,05 m, ignorando a
+meia espessura; (2) o filtro contra a massa das paredes (`b.intersection(wfoot).area > 0.06 m²`) tolera ~600 cm² de sobreposição, o que
+mascara o canto. Medido: reduzir a tolerância para 0,002 m² elimina o achado na sintética, **mas altera as caixas da SUITE 02**
+(`fp044_baseline compare` → `CAIXAS_MUDARAM: SUITE 02`), porque o guarda-roupa dela também usa essa folga no canto. Mudar a SUITE 02 é
+mudança de aparência de cômodo de controle → `VISUAL_REVIEW` do Felipe; por isso **não** foi aplicado e o `xfail(strict)` continua.
+Hipótese descartada: o piso de 0,45 m de profundidade do adaptador (`furnishing.py`) não é a causa (a profundidade já é ≥ 0,45 m).
+Proposta quando o Felipe aprovar: apertar a tolerância **e** partir o intervalo da face interna da parede perpendicular, com a
+SUITE 02 revista lado a lado antes/depois.
+
 ## D-011 — Inspector do harness lê 4 fachadas de `tools/` por caminho (FP-044/F6)
 
 **Achado (varredura da Hard Rule #1 antes do 1º lote da F6).** O `fp044_tools_facades.v1.json` só contava imports
