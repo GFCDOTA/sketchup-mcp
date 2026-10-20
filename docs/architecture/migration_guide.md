@@ -211,3 +211,4 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.service_layout` | `tools.rooms.service.layout` | `rooms/service` |
 | 24 gates/auditorias `tools.{*_gate,*_audit,gate_util,gate_verdict,gate_filefetch,diagnose_wall_stubs,furniture_wall_gap,render_bbox_audit,repo_health_gate}` | `tools.validation.{…}` (mesmo nome) | `validation` |
 | `tools.run_deterministic_gates` | **fica** (D-011: lido pelo Inspector do harness); dono `tools.validation.run_deterministic_gates` | `validation` |
+| `tools.{auto_camera,batch_theme_render,compose_side_by_side,crop_render,gen_textures,material_review,overlay_diff,pdf_overlay_verify,render_parts_iso,render_scene_views,render_scene_vray,theme_palette,tweak_vrscene}` | `tools.rendering.{…}` (mesmo nome) | `rendering` |

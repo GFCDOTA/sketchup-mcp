@@ -3,7 +3,7 @@ numpy/PIL, p/ os materiais V-Ray dos moveis. Auto-contido (sem assets externos/l
 Saida versionada em assets/textures/procedural/. Aplicadas no vray_export.rb (SU material.texture
 -> V-Ray traduz com UV).
 
-Uso: python tools/gen_textures.py
+Uso: python -m tools.rendering.gen_textures
 """
 from __future__ import annotations
 

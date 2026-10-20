@@ -137,7 +137,7 @@ def _generate_side_by_side(plant: str, artifact_dir: Path, dry_run: bool) -> str
         return f"DRY-RUN (would compose {pdf.name} + top + iso → {out.name})"
 
     cmd = [
-        sys.executable, "-m", "tools.compose_side_by_side",
+        sys.executable, "-m", "tools.rendering.compose_side_by_side",
         "--pdf", str(pdf),
         "--top", str(top),
         "--iso", str(iso),

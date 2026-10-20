@@ -229,7 +229,7 @@ MATRIX = [
 
 
 def build_matrix(out_dir):
-    from tools.render_parts_iso import render_parts
+    from tools.rendering.render_parts_iso import render_parts
     from tools.rooms.living.capabilities.sofa_class_matrix import _grid_sheet
     import json as _json
     out = Path(out_dir).resolve()

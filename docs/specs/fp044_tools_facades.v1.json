@@ -51,7 +51,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/bake_theme_skp.py",
@@ -75,7 +75,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/bathroom_layout.py",
@@ -195,7 +195,7 @@
     "config": 3
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/consult_tier.py",
@@ -267,7 +267,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/curator.py",
@@ -520,7 +520,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/geometry_sanity.py",
@@ -712,7 +712,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/negative_dogfood.py",
@@ -820,7 +820,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/parapet_not_railing_fallback_gate.py",
@@ -856,7 +856,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/place_bedroom_skp.py",
@@ -1048,7 +1048,7 @@
     "config": 3
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/render_scene_views.py",
@@ -1060,7 +1060,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/render_scene_vray.py",
@@ -1072,7 +1072,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/repo_health_gate.py",
@@ -1372,7 +1372,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/trace_view.py",
@@ -1397,7 +1397,7 @@
     "config": 2
    },
    "external_consumer": false,
-   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+   "action": "REMOVED"
   },
   {
    "path": "tools/variant_axes.py",

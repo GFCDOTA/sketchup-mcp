@@ -111,7 +111,7 @@ class VRayFinalProvider(RenderProvider):
         # 1b. corrige EXPOSICAO: o export sai com a CameraPhysical setada p/ exterior claro
         # (f/8, 1/300, ISO100) -> interior subexposto. Tweak p/ um interior bem exposto.
         try:
-            from tools.tweak_vrscene import tweak_file
+            from tools.rendering.tweak_vrscene import tweak_file
             tweak_file(vrscene, iso=req.iso, fnum=req.fnum, shutter=req.shutter, sky=req.sky,
                        materials=True)
         except Exception:  # noqa: BLE001

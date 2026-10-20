@@ -9,7 +9,7 @@ source PDF. Default mode: **`OFFLINE_DATA_ONLY`** (no GPT/Chrome dependency).
    PDF and `consensus.json` are both in pdf-points → overlaying consensus on the
    PDF raster is an *exact, deterministic* comparison (no calibration, no
    hallucination, ~1-2 s, no SketchUp, no GPU). This is the authoritative
-   correctness check. Tools: `tools/pdf_overlay_verify.py` (walls/rooms/openings
+   correctness check. Tools: `tools/rendering/pdf_overlay_verify.py` (walls/rooms/openings
    on PDF + PDF door-arc measurement), `tools/validation/opening_audit.py`, the deterministic
    heuristics in `run_skp_visual_review.py`, `geometry_report.json`.
 2. **Image/render = representation/legibility AUDIT, not a fidelity judge.**

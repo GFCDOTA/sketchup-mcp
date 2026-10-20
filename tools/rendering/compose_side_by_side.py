@@ -4,7 +4,7 @@
 Standalone composer that replaces the ad-hoc PIL inline used in PR #200.
 
 Usage:
-    python -m tools.compose_side_by_side \\
+    python -m tools.rendering.compose_side_by_side \\
         --pdf projects/planta_74/source/planta_74.pdf \\
         --top runs/planta_74/model_top.png \\
         --iso runs/planta_74/model_iso.png \\

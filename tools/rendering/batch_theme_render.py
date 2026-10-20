@@ -7,8 +7,8 @@ de cada, monta a biblioteca A/B/C/D e emite um relatório com os 4 gates + ranki
 Pinterest = intenção visual (hipótese). PDF + gates = verdade espacial. Só pele/luz/câmera.
 
 Uso:
-  PT_TO_M=0.0259 .venv/Scripts/python.exe tools/batch_theme_render.py        # usa PNGs existentes
-  BATCH_RENDER=1 PT_TO_M=0.0259 .venv/Scripts/python.exe tools/batch_theme_render.py  # re-renderiza
+  PT_TO_M=0.0259 .venv/Scripts/python.exe -m tools.rendering.batch_theme_render        # usa PNGs existentes
+  BATCH_RENDER=1 PT_TO_M=0.0259 .venv/Scripts/python.exe -m tools.rendering.batch_theme_render  # re-renderiza
 """
 import os
 import subprocess

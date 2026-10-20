@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from tools.overlay_diff import Affine, dark_mask
+from tools.rendering.overlay_diff import Affine, dark_mask
 
 
 def host_wall(consensus: dict, opening: dict) -> dict | None:

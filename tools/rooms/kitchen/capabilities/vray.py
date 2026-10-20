@@ -29,7 +29,7 @@ def main() -> None:
     if not os.environ.get("PT_TO_M"):
         os.environ["PT_TO_M"] = "0.0259"
     sys.path.insert(0, str(ROOT))
-    from tools.tweak_vrscene import tweak_file
+    from tools.rendering.tweak_vrscene import tweak_file
 
     out_name = sys.argv[1] if len(sys.argv) > 1 else "cozinha_vray.png"
     ISO = float(os.environ.get("ISO", 200))

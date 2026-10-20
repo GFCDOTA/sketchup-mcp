@@ -311,7 +311,7 @@ protection) do `memory/operational_rules.md`.
 1. Auto-fix loop (script applies source-supported fixes between
    attempts). Requires a fix taxonomy and safe-edit policies.
 2. Side-by-side composite generator
-   (`tools/compose_side_by_side.py`) — currently external.
+   (`tools/rendering/compose_side_by_side.py`) — currently external.
 3. Vision API integration for qualitative axes (optional).
 4. Wider negative class coverage:
    `misplaced_soft_barrier`, `unsupported_parapet`,

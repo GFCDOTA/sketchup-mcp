@@ -48,7 +48,7 @@ Evidência de que dá pra resolver com o que já existe:
 3. **Saída previsível** em `artifacts/planta_74/furnished/material_review/`:
    - `living_material_proof.png`, `kitchen_material_proof.png`, `bedroom_material_proof.png`
    - `living_sofa_closeup.png` (o material proof apertado).
-4. **Uma tool de revisão** (`tools/material_review.py`) que **abre o `.skp` já gerado** (default
+4. **Uma tool de revisão** (`tools/rendering/material_review.py`) que **abre o `.skp` já gerado** (default
    `artifacts/planta_74/furnished/planta_74_furnished.skp`) e produz as imagens — **desacoplada do
    furnish** (dá pra re-render sem regenerar o `.skp`). Uma única sessão SU renderiza todas as câmeras.
 5. **Config de cômodos declarativa** (nome→substring de match, alvo de close, oclusores a esconder),
@@ -69,7 +69,7 @@ Evidência de que dá pra resolver com o que já existe:
 
 | Arquivo | Papel | Mudança FP-038 |
 |---|---|---|
-| `tools/material_review.py` | **NOVO** — abre o `.skp` furnished, orquestra as câmeras por cômodo | NOVO |
+| `tools/rendering/material_review.py` | **NOVO** — abre o `.skp` furnished, orquestra as câmeras por cômodo | NOVO |
 | `tools/rendering/ruby/material_review.rb` | **NOVO** — dentro do SU: esconde não-alvo, frameia bbox do cômodo, renderiza cada câmera; NÃO salva o `.skp` | NOVO |
 | `tools/sketchup/furnish/place_layout_skp.rb` | `pl_top_camera`/`pl_iso_camera(bbox)`, group naming `"#{room} · #{module}"`, shell lock names | READ-ONLY (reusar helpers/convenções) |
 | `tools/sketchup/vray/vray_export.rb` | `VRAY_ISOLATE` (padrão de esconder grupos) | READ-ONLY (padrão a espelhar) |

@@ -12,7 +12,7 @@ visuais de uma cena composta (runs/scenes/<id>/scene_parts.json do SceneComposer
 V-Ray fica explicitamente FORA desta slice (regra: nao otimizar V-Ray antes da
 composicao passar o SpatialGate).
 
-Uso: python -m tools.render_scene_views [runs/scenes/<id>] [--su auto|off]
+Uso: python -m tools.rendering.render_scene_views [runs/scenes/<id>] [--su auto|off]
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from core.scale import M_TO_IN                      # noqa: E402
-from tools.render_parts_iso import render_parts     # noqa: E402
+from tools.rendering.render_parts_iso import render_parts     # noqa: E402
 
 
 def load_scene(scene_dir):

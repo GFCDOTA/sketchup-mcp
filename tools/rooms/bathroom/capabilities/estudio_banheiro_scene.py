@@ -230,7 +230,7 @@ def build_scene(out_dir):
 
 def run_gates(parts):
     from tools.geometry_sanity import audit
-    from tools.render_scene_views import scene_boxes
+    from tools.rendering.render_scene_views import scene_boxes
     structural = [p for p in parts if not p.get("decorative")]
     boxes = scene_boxes(structural)
     fixtures = [b for b in boxes if not (b["label"].startswith("wall_")

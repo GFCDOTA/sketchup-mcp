@@ -8,7 +8,7 @@ verdict + exit code. No SU build, no PDF, no network — pure + fast.
   - opening_host  : opening<->host-wall consistency (tools/validation/opening_host_audit)
   - wall_overlap  : duplicate/overlapping walls   (tools/validation/wall_overlap_audit)
   - wall_presence : consensus walls present in the SKP top render
-                    (tools/overlay_diff, when --render + <png>.proj.json exist).
+                    (tools/rendering/overlay_diff, when --render + <png>.proj.json exist).
                     --render given but sidecar MISSING -> overall=INCOMPLETE
                     (exit 3), never a silent green.
 
@@ -58,7 +58,7 @@ def run_all(
         gates["render_bbox"] = audit_render_bbox(render_path)
         sidecar = Path(str(render_path) + ".proj.json")
         if sidecar.exists():
-            from tools.overlay_diff import run_gate
+            from tools.rendering.overlay_diff import run_gate
             cp = consensus_path or ""
             if not cp and fixture:
                 cp = str(REPO_ROOT / "fixtures" / fixture

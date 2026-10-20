@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from tools.theme_palette import THEMES, apply_theme_palette  # noqa: E402
+from tools.rendering.theme_palette import THEMES, apply_theme_palette  # noqa: E402
 
 PLACEHOLDERS = [
     {"kind": "sofa_3", "rgb": [21, 101, 192]},     # azul debug

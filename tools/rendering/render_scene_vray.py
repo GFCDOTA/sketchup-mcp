@@ -15,7 +15,7 @@ No-disrupt so para GERAR o scene_closed.skp (o provider ainda fecha por nome de
 imagem): sem ele e com SketchUp aberto, pula. Path do run dir SEMPRE resolvido
 absoluto (licao do cycle 002: SU resolve save/write contra o CWD DELE).
 
-Uso: python -m tools.render_scene_vray [runs/scenes/<id>] [--out nome.png]
+Uso: python -m tools.rendering.render_scene_vray [runs/scenes/<id>] [--out nome.png]
      [--iso 100 --fnum 7 --shutter 160 --sky 0.3 --fov 65 --width 1500
       --height 1000 --fill x,y,z,int[,raio];...   (fill em METROS)]
 """
@@ -30,7 +30,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from core.scale import M_TO_IN                      # noqa: E402
-from tools.tweak_vrscene import tweak_file          # noqa: E402
+from tools.rendering.tweak_vrscene import tweak_file          # noqa: E402
 
 SU_EXE = Path(r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe")
 VRAY_EXE = Path(r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray\bin\vray.exe")
@@ -67,7 +67,7 @@ def _ensure_closed_skp(d, force=False):
     parts = json.loads((d / "scene_parts.json").read_text("utf-8"))
     from interior.renderers.render_provider import RenderRequest
     from interior.renderers.sketchup_basic_provider import SketchUpBasicProvider
-    from tools.render_scene_views import scene_boxes
+    from tools.rendering.render_scene_views import scene_boxes
     prov = SketchUpBasicProvider()
     if not prov.available():
         return {"status": "fail", "error": "provider SU indisponivel"}

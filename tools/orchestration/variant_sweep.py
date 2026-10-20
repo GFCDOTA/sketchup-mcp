@@ -413,10 +413,10 @@ def run_variant(v: Variant, out_dir: Path, *, con_path: Path | None = None,
     boxes, layout_source = _apply_layout_seed(con, boxes, v.layout_seed)
     # o TEMA pinta os pixels (binding nome->cor que faltava; mata os placeholders
     # primarios dos templates) — cor nao afeta gates geometricos
-    from tools.theme_palette import apply_theme_palette
+    from tools.rendering.theme_palette import apply_theme_palette
     boxes = apply_theme_palette(boxes, v.theme)
     gates, gate_detail = run_deterministic_gates(boxes, con)
-    from tools.render_parts_iso import render_parts
+    from tools.rendering.render_parts_iso import render_parts
     # ENVELOPE-FIRST (nota 2/10 unânime do painel/GPT era "furniture-only, sem
     # envelope"): paredes/portas/janelas do consensus entram ANTES da mobília,
     # em corte dollhouse. SWEEP_SHELL=0 desliga (comparação/depuração).

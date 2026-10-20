@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.material_review import (
+from tools.rendering.material_review import (
     OUT_DIR,
     ROOM_CAMERAS,
     build_cameras_env,

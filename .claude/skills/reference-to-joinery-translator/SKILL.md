@@ -61,7 +61,7 @@ Felipe cola 5–10 refs curadas (inbox/)
   → aplica na MESMA geometria da planta_74 (skin-swap) → renderiza A/B/C/D (renders/)
   → roda os 4 gates → GPT/Felipe julga → congela os melhores (GOLDEN_SAMPLES.md)
 ```
-Driver: `tools/batch_theme_render.py`. Saída: hero por tema + montagem + ranking (mais vendável /
+Driver: `tools/rendering/batch_theme_render.py`. Saída: hero por tema + montagem + ranking (mais vendável /
 autoral / seguro p/ manutenção / arriscado).
 
 ## NUNCA

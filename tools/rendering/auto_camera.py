@@ -7,7 +7,7 @@ e com a janela no campo (luz ao fundo). Conserta os 3 cômodos de uma vez — an
 root-cause do piso (apartment-wide, não band-aid por cômodo).
 
 Saída: VRAY_EYE / VRAY_TARGET / VRAY_FOV (p/ render_room.ps1) + CROP sugerido.
-Uso: python tools/auto_camera.py <room_id> [eye_z]
+Uso: python -m tools.rendering.auto_camera <room_id> [eye_z]
 """
 from __future__ import annotations
 
@@ -118,7 +118,7 @@ def auto_camera(con, room_id, eye_z=60.0):
     fov = max(52.0, min(66.0, math.degrees(2 * math.atan((hw * 0.85) / max(d, 1))) + 10))
     # AUTO-CROP rule (GPT NEXT_ACTION validado): a camera eye-level deixa foreground morto embaixo +
     # teto/shell aberto em cima. Crop p/ o cluster ocupar o quadro: ~28% baixo (piso vazio) + ~11% topo.
-    # Razoes p/ um render de altura H (px = round(ratio*H)). Aplicar com tools/crop_render.py.
+    # Razoes p/ um render de altura H (px = round(ratio*H)). Aplicar com tools/rendering/crop_render.py.
     crop = {"top_ratio": 0.11, "bottom_ratio": 0.28}
     return {"room": room_id, "type": r["room_type"], "eye": (round(ex, 1), round(ey, 1), round(eye_z, 1)),
             "target": (round(hx, 1), round(hy, 1), 36.0), "fov": round(fov, 1), "crop": crop,

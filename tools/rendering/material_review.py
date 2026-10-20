@@ -10,8 +10,8 @@ Fatia 0 (esta): bbox por comodo (Python puro) + config declarativa de cameras + 
 Fatias 1-3 (proximas): tools/rendering/ruby/material_review.rb (isola+frameia+render) + launch do SU + smoke.
 
 Uso:
-  python tools/material_review.py --dry-run      # imprime bbox por camera (sem SU)
-  python tools/material_review.py [--skp <path>] # (fatia 2+) renderiza os proofs
+  python -m tools.rendering.material_review --dry-run      # imprime bbox por camera (sem SU)
+  python -m tools.rendering.material_review [--skp <path>] # (fatia 2+) renderiza os proofs
 """
 from __future__ import annotations
 
