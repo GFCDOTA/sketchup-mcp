@@ -29,6 +29,7 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 | mexer num cômodo (exemplo completo: cozinha) | [`tools/rooms/kitchen/README.md`](tools/rooms/kitchen/README.md) |
 | saber quem usa um arquivo antes de movê-lo | `python -m tools.navigation.consumers <caminho>` |
 | ver o plano da reorganização (FP-043) e o estado dela | [relatório P8 (parcial)](docs/reports/FP-043_final_validation.md) · [spec de conclusão P3–P8](docs/specs/FP-043_remaining_execution_P3_P8.md) · [FP-043 original](docs/specs/FP-043_repository_navigation_and_room_specialists.md) · [mapa P0](docs/specs/FP-043_P0_map.md) |
+| ver o plano de enxugar a raiz e as fachadas de `tools/` (FP-044) | [spec FP-044](docs/specs/FP-044_root_and_tools_consolidation.md) |
 | saber o que o SketchUp real já provou | [`artifacts/review/l2_fp042_20261019/README.md`](artifacts/review/l2_fp042_20261019/README.md) |
 | as regras de quem edita (humano ou agente) | [`CLAUDE.md`](CLAUDE.md) → `.claude/` |
 
@@ -56,11 +57,10 @@ Para **gerar `.skp`** use as tools `su_*` do MCP (`su_build_shell`, `su_furnish`
 `su_inspect`, `su_render_vray`): cada uma sobe uma instância própria do SketchUp, grava em `runs/` e só fecha o PID
 que ela mesma abriu. As CLIs equivalentes seguem funcionando (`python -m tools.build_plan_shell_skp <consensus> --out runs/…`).
 
-> **Cuidado — CLIs legadas que fecham o SketchUp por nome.** `furnish_apartment`, `furnish_plan`, `place_layout_skp`,
-> `place_bedroom_skp`, `material_review`, `bake_theme_skp`, `kitchen_vray`, `render_banho_vray`, `render_room.ps1`,
-> `sofa_premium_harness`, `bedroom_designer` (materialização) e os providers `interior/renderers/*` ainda rodam `taskkill /IM SketchUp.exe`, que **fecha
-> sem salvar qualquer SketchUp aberto**. Feche o SketchUp antes, ou use a tool `su_*` correspondente. A remoção
-> está no escopo da FP-043 (P3).
+> **Nenhum código rastreado encerra o SketchUp por nome.** As CLIs de materialização (`furnish_apartment`, `place_layout_skp`, `material_review`,
+> `bake_theme_skp`, `kitchen_vray`, `render_banho_vray`, `render_room.ps1`, `sofa_premium_harness`, `bedroom_designer`, `interior/renderers/*`) fecham
+> **só o PID que elas abriram** (`terminate_owned` / `close_owned`); um teste varre o repositório inteiro
+> (`tests/test_fp043_no_kill_by_name_scan.py`). Mesmo assim, uma janela sua com trabalho não salvo continua sua: prefira as tools `su_*`.
 
 `runs/` é scratch (ignorado pelo git). O `.skp` canônico é `artifacts/planta_74/planta_74.skp`; evidências
 promovidas ficam em `artifacts/review/<…>/`. Nunca grave sobre `fixtures/` nem `artifacts/` por job automático.
@@ -74,7 +74,7 @@ pedido (humano ou agente)
   → tools/mcp_server/server.py        18 tools registradas (protocolo, sem lógica de domínio)
   → tools/sketchup/jobs.py            verbos su_*: valida entrada, escolhe destino em runs/
   → tools/sketchup/batch.py + process.py   sobe SketchUp próprio (-RubyStartup), lê o resultado em JSON
-  → Ruby: tools/sketchup/ruby/*.rb  (jobs MCP)  e  tools/*.rb  (build do shell, mobília, vray: legado)
+  → Ruby: tools/sketchup/ruby/*.rb  (jobs MCP)  e  tools/sketchup/{shell,furnish,inspect,vray}/*.rb  (build do shell, mobília, inspeção, vray)
   → .skp + renders em runs/<planta>/mcp/…   → promote_canonical → artifacts/<planta>/
 
 planejamento do cômodo (antes do Ruby):
