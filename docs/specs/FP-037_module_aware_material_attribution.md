@@ -26,7 +26,7 @@ O material hoje é resolvido **só por `kind`**, mas vários kinds são genéric
 - `tools/rooms/living/rack_class.py::build_rack` emite as partes com kinds **`foot`, `base`, `top`, `front`,
   `niche`** (linhas 120, 129/137/139/141/146, 147, 169, 172). O corpo do rack é kind `base`; a
   frente é `front`; o tampo é `top`.
-- `tools/sofa_builder` (via `place_sofa_boxes`) emite o sofá com kinds **`seat_cushion`,
+- `tools/rooms/shared/sofa` (via `place_sofa_boxes`) emite o sofá com kinds **`seat_cushion`,
   `back_cushion`, `arm`, `base`, `foot`** — ou seja, `base` e `foot` **colidem** com os do rack.
 - `tools/rooms/living/coffee_table_class.py` (mesa de centro `two_tier`) emite **`top`, `leg`** (confirmado no
   log do FP-036: `top bbox 20x37x2`, `leg` ×4, `top bbox 15x30x1`).
@@ -78,7 +78,7 @@ interativo é **ganho novo**, não regressão do V-Ray.
 
 | Arquivo | Papel | Mudança FP-037 |
 |---|---|---|
-| `tools/style_spec.py` | tokens de estilo; `texture_map_for`/`finish_map_for`/`tile_map_for`/`texture_env` (FP-036) | NOVO: `module_family()`, `_STYLE.module_kind_texture`/`module_kind_finish`, `resolve_material(style, family, kind)` (3-níveis) |
+| `tools/rooms/shared/materials.py` | tokens de estilo; `texture_map_for`/`finish_map_for`/`tile_map_for`/`texture_env` (FP-036) | NOVO: `module_family()`, `_STYLE.module_kind_texture`/`module_kind_finish`, `resolve_material(style, family, kind)` (3-níveis) |
 | `tools/sketchup/furnish/place_layout_skp.rb` | `pl_run` resolve `png=tex_map[kind]`, cria `ph_#{kind}` | Preferir `b["mat_name"]`/`b["tex_png"]`/`b["tile_in"]` resolvidos pelo Python; fallback = comportamento FP-036 |
 | `tools/furnish_apartment.py` | `collect_boxes` já seta `b["room"]`+`b.setdefault("module")` (l.428-429); injeta `texture_env` (FP-036) | Resolver material por box (module-aware) ANTES do dump `LAYOUT_BOXES` |
 | `tools/place_layout_skp.py` | slice r002; injeta `texture_env` | Mesma resolução por box |

@@ -17,9 +17,9 @@ from interior.composer.scene_composer import (compose_scene, load_style_pack,   
                                               place_parts, validate_furniture_intent,
                                               validate_scene_intent)
 from interior.validators.scene_spatial_gate import _sabotages, scene_spatial_gate  # noqa: E402
-from tools.decor_anatomy_spec import (DECOR_PLAUSIBLE_BBOX_M,                  # noqa: E402
+from tools.rooms.shared.decor_anatomy_spec import (DECOR_PLAUSIBLE_BBOX_M,                  # noqa: E402
                                       DECOR_REQUIRED_PARTS)
-from tools.decor_builders import BUILDERS, build_decor                          # noqa: E402
+from tools.rooms.shared.decor_builders import BUILDERS, build_decor                          # noqa: E402
 
 
 @pytest.fixture(scope="module")

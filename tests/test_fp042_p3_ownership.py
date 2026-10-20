@@ -9,7 +9,7 @@ def test_all_p3_paths_have_explicit_runtime_owners():
     assert report["result"] == "PASS", report
     # A contagem cai com cada fachada removida na FP-044 (F2: scripts/sofa_fabric_material.py; F6: lotes de comodo):
     # arquivo e linha da tabela saem juntos.
-    assert report["checked"] == len(OWNER_TABLE) == 99
+    assert report["checked"] == len(OWNER_TABLE) == 94
 
 
 def test_missing_or_unknown_p3_path_fails_closed():

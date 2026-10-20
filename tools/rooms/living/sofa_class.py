@@ -11,7 +11,7 @@
       qualquer SofaSpec (derivado ou manual) contra faixas + relacoes +
       anti-regressao. Complementa (nao substitui) sofa_gate/visual_gate.
 
-NAO toca tools/sofa_builder.py nem tools/furniture_anatomy_spec.py (geometria
+NAO toca tools/rooms/shared/sofa.py nem tools/rooms/shared/anatomy.py (geometria
 provada nos cycles 1-4 + worktree sofa-skill ativo nos mesmos arquivos).
 Uso: python -m tools.rooms.living.sofa_class   (valida arquetipos x lugares + sabotagens)
 """

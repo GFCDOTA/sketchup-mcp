@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from tools.style_spec import STYLE_TOKENS
+from tools.rooms.shared.materials import STYLE_TOKENS
 from tools.variant_axes import Variant, default_axes, layout_axis, style_axis, theme_axis
 from tools.variant_sweep import expand_axes
 

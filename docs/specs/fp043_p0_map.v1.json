@@ -946,11 +946,11 @@
     {
       "item": "tools/armchair_builder.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/shared/armchair_builder.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -964,7 +964,8 @@
           "tests/test_armchair_class.py",
           "tests/test_fp042_furniture_classes_ownership.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/armchair_class.py",
@@ -1125,11 +1126,11 @@
     {
       "item": "tools/bed_builder.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/shared/bed.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": true,
@@ -1143,7 +1144,8 @@
           "tests/test_bed_class.py",
           "tests/test_fp042_shared_parametric_builders.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/bed_class.py",
@@ -1633,8 +1635,8 @@
       "disposition": "move",
       "destination": "tools/rooms/shared/decor_anatomy_spec.py",
       "phase": "P4",
-      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
-      "compat": "facade_at_old_path",
+      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -1656,8 +1658,8 @@
       "disposition": "move",
       "destination": "tools/rooms/shared/decor_builders.py",
       "phase": "P4",
-      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
-      "compat": "facade_at_old_path",
+      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -1946,11 +1948,11 @@
     {
       "item": "tools/furniture_anatomy_spec.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/shared/anatomy.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "≥15 consumidores em código+testes"
@@ -1967,7 +1969,8 @@
           "tests/test_furnish_sofa_gate.py",
           "tests/test_sofa_class.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/furniture_overlap_gate.py",
@@ -2493,8 +2496,8 @@
       "disposition": "move",
       "destination": "tools/rooms/shared/layout_rules.py",
       "phase": "P4",
-      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
-      "compat": "facade_at_old_path",
+      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -2697,11 +2700,11 @@
     {
       "item": "tools/nightstand_builder.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/shared/nightstand.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": true,
@@ -2714,7 +2717,8 @@
         "tests_sample": [
           "tests/test_fp042_shared_parametric_builders.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/ollama_bridge.py",
@@ -3899,8 +3903,8 @@
       "disposition": "move",
       "destination": "tools/rooms/shared/semantic_zones.py",
       "phase": "P4",
-      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
-      "compat": "facade_at_old_path",
+      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -3920,11 +3924,11 @@
     {
       "item": "tools/service_layout.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/service/layout.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": true,
@@ -3939,7 +3943,8 @@
           "tests/test_room_dependency_boundaries.py",
           "tests/test_room_module_architecture.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/shell_parts.py",
@@ -3947,8 +3952,8 @@
       "disposition": "move",
       "destination": "tools/rooms/shared/shell_parts.py",
       "phase": "P4",
-      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover.",
-      "compat": "facade_at_old_path",
+      "rationale": "Contrato/modelo usado por mais de um cômodo (classificação, modelo espacial, regras, envelope arquitetônico, decor): tools/rooms/shared/. Auditar duplicação com shared/decor.py e shared/furniture.py antes de mover. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -4024,11 +4029,11 @@
     {
       "item": "tools/sofa_builder.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/shared/sofa.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "≥15 consumidores em código+testes"
@@ -4050,7 +4055,8 @@
           "tests/test_fp043_p0_map.py",
           "tests/test_furnish_sofa_gate.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/sofa_class.py",
@@ -4376,11 +4382,11 @@
     {
       "item": "tools/style_spec.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/shared/materials.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -4398,7 +4404,8 @@
           "tests/test_module_aware_material.py",
           "tests/test_variant_axes.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "tools/su_runner_safety.py",
@@ -4690,11 +4697,11 @@
     {
       "item": "tools/wardrobe_builder.py",
       "kind": "file",
-      "disposition": "facade",
+      "disposition": "move",
       "destination": "tools/rooms/shared/wardrobe.py",
       "phase": "P4",
-      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6).",
-      "compat": "facade_permanent_in_window",
+      "rationale": "Fachada pública histórica: a implementação canônica já mora em tools/rooms/…; o arquivo só delega (FP-042). Fica como exceção NOMEADA na janela de compatibilidade (spec §9.2/§9.6). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": true,
@@ -4708,7 +4715,8 @@
         "tests_sample": [
           "tests/test_fp042_shared_parametric_builders.py"
         ]
-      }
+      },
+      "status": "done"
     },
     {
       "item": "uv.lock",

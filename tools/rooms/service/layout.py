@@ -26,9 +26,9 @@ outra peca nem pra dentro da circulacao). Circulacao/vao de porta vem do
 spatial_model (mesma fonte dos outros brains).
 
 Uso:
-    from tools.service_layout import build_boxes
+    from tools.rooms.service.layout import build_boxes
     boxes, out = build_boxes(con, "r001")
-    PT_TO_M=0.0259 python -m tools.service_layout        # relatorio textual
+    PT_TO_M=0.0259 python -m tools.rooms.service.layout        # relatorio textual
 """
 from __future__ import annotations
 

@@ -24,5 +24,5 @@ def test_unclassified_tooling_does_not_fall_through():
 def test_shared_implementation_stays_out_of_public_adapter():
     assert owner_for("tools/furnish_apartment.py") == "cross_room_furnishing_orchestrator"
     assert owner_for("tools/mcp_server/server.py") == "mcp_server_api"
-    assert owner_for("tools/sofa_builder.py") == "legacy_public_compatibility_api"
+    # a fachada sofa_builder saiu na FP-044/F6 (LEGACY_FACADES encolheu junto); o dono em rooms/ nao e tooling
     assert owner_for("tools/rooms/shared/sofa.py") is None

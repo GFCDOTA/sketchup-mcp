@@ -58,7 +58,7 @@ def visual_gate(spec, parts):
 
 
 if __name__ == "__main__":
-    from tools.sofa_builder import build_sofa, sofa_spec
+    from tools.rooms.shared.sofa import build_sofa, sofa_spec
     for v in ("straight", "chaise_right", "chaise_left"):
         s = sofa_spec(v)
         parts, _ = build_sofa(s)

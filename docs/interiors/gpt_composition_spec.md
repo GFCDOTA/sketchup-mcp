@@ -134,7 +134,7 @@ ordem: (1) há parede focal boa? (2) o sofá conversa com ela? (3) circulação 
 
 ## Como mapeia no código atual
 
-- **`tools/layout_rules.py`** — vira o lar dos novos thresholds + anti-patterns
+- **`tools/rooms/shared/layout_rules.py`** — vira o lar dos novos thresholds + anti-patterns
   (glare, hierarquia focal, poltrona isolada, falta de tapete/mesa, eixo focal).
 - **`score()` em `layout_candidates.py`** — hoje é um score chato (soft 0–100);
   evolui pros 7 sub-scores + composição global, com a fórmula ponderada acima.

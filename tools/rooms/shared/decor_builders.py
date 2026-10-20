@@ -9,7 +9,7 @@ render harness desenha via render_parts_iso / place_layout_skp.rb.
 """
 from __future__ import annotations
 
-from tools.decor_anatomy_spec import (AccentSeatSpec, CoffeeTableSpec,   # noqa: F401
+from tools.rooms.shared.decor_anatomy_spec import (AccentSeatSpec, CoffeeTableSpec,   # noqa: F401
                                       CurtainSpec, FloorLampSpec, PlantSpec,
                                       RugSpec, ShelfSpec, SideTableSpec,
                                       TrackLightSpec, WallArtSpec, decor_spec)

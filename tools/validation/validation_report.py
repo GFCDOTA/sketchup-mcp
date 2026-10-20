@@ -33,7 +33,7 @@ def _placement():
 
 def _sofa_anatomy_visual():
     from interior.validators.furniture_visual_gate import visual_gate
-    from tools.sofa_builder import build_sofa, sofa_spec
+    from tools.rooms.shared.sofa import build_sofa, sofa_spec
     from tools.rooms.living.validation.sofa_gate import gate as anat
     rows, ok = [], True
     for v in ("straight", "chaise_right", "chaise_left"):
@@ -48,8 +48,8 @@ def _sofa_anatomy_visual():
 
 def _bed():
     from interior.validators.bed_gate import bed_gate
-    from tools.bed_builder import build_bed
-    from tools.furniture_anatomy_spec import bed_spec
+    from tools.rooms.shared.bed import build_bed
+    from tools.rooms.shared.anatomy import bed_spec
     rows, ok = [], True
     for sz in ("king", "queen", "casal", "solteiro"):
         s = bed_spec(sz)
@@ -62,8 +62,8 @@ def _bed():
 
 def _wardrobe():
     from interior.validators.wardrobe_gate import wardrobe_gate
-    from tools.furniture_anatomy_spec import wardrobe_spec
-    from tools.wardrobe_builder import build_wardrobe
+    from tools.rooms.shared.anatomy import wardrobe_spec
+    from tools.rooms.shared.wardrobe import build_wardrobe
     rows, ok = [], True
     for w in (1.2, 1.8, 2.4):
         s = wardrobe_spec(width=w)
@@ -76,8 +76,8 @@ def _wardrobe():
 
 def _nightstand():
     from interior.validators.nightstand_gate import nightstand_gate
-    from tools.furniture_anatomy_spec import nightstand_spec
-    from tools.nightstand_builder import build_nightstand
+    from tools.rooms.shared.anatomy import nightstand_spec
+    from tools.rooms.shared.nightstand import build_nightstand
     s = nightstand_spec()
     parts, _ = build_nightstand(s)
     r = nightstand_gate(s, parts)

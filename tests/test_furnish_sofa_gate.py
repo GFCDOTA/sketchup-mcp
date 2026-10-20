@@ -8,8 +8,8 @@ SEMPRE in-class — logo o gate pode ser promovido a hard-FAIL sem quebrar o bui
 """
 import pytest
 
-from tools.furniture_anatomy_spec import sofa_spec
-from tools.sofa_builder import build_sofa
+from tools.rooms.shared.anatomy import sofa_spec
+from tools.rooms.shared.sofa import build_sofa
 from tools.rooms.living.sofa_class import derive_living_sofa, sofa_class_gate
 
 

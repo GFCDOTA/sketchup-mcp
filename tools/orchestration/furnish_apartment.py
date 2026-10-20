@@ -33,7 +33,7 @@ from tools.rooms.kitchen.layout import build_boxes as kitchen_boxes   # noqa: E4
 from tools.sketchup.furnish.place_layout_skp import build_boxes as living_boxes   # noqa: E402
 from tools.room_type import (BATHROOM, BEDROOM, KITCHEN, LIVING,   # noqa: E402
                              SERVICE, classify_rooms)
-from tools.service_layout import build_boxes as service_boxes   # noqa: E402
+from tools.rooms.service.layout import build_boxes as service_boxes   # noqa: E402
 from tools.rooms.living.components import (  # noqa: E402,F401 (re-exports legados)
     _bwg_recolor, _dining_table_rect, _dining_table_square, _oct_in,
 )
@@ -121,7 +121,7 @@ def collect_boxes(con):
     # ANTES de qualquer serializacao LAYOUT_BOXES. Kind fora do mapa fica intacto.
     style = os.environ.get("FURNISH_STYLE")
     if style:
-        from tools.style_spec import apply_style, attach_materials
+        from tools.rooms.shared.materials import apply_style, attach_materials
         nrec = apply_style(all_boxes, style)
         print(f"[furnish-apt] estilo '{style}': {nrec} boxes recoloridos")
         # FP-037: resolve material por (familia_de_modulo, kind) e anexa por box. Destrava madeira
@@ -209,7 +209,7 @@ def main():
     # cor chapada. So sob FURNISH_STYLE; fonte unica = style_spec.texture_env (nunca a 1a peca em tudo).
     style = os.environ.get("FURNISH_STYLE")
     if style:
-        from tools.style_spec import texture_env
+        from tools.rooms.shared.materials import texture_env
         tex_env = texture_env(style, (ROOT / "assets/textures/procedural").resolve())
         env.update(tex_env)
         if tex_env:

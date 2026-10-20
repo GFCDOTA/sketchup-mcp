@@ -39,7 +39,7 @@ Falta o **placar**: rodar N variantes de planta (eixos estilo x material x layou
 | `runs/variant_sweep/<run_id>/contact_sheet.png` | **NOVO (scratch)** — grid das variantes (reusa `_grid_sheet` de `sofa_class_matrix.py`). | gerado |
 | `tools/render_parts_iso.py` | **REUSO** (`render_parts`) — renderer barato p/ proporcao; nenhuma mudanca. | existente |
 | `tools/furnish_apartment.py` | **REUSO via subprocess/env** — `FURNISH_STYLE`+`PT_TO_M=0.0259`+`KITCHEN_THEME`. Talvez extrair `collect_boxes()` como entrada importavel (refactor minimo, sem mudar comportamento). | existente |
-| `tools/style_spec.py` / `artifacts/reference_lab/themes/*.json` | **REUSO** — fontes dos eixos estilo/material. | existente |
+| `tools/rooms/shared/materials.py` / `artifacts/reference_lab/themes/*.json` | **REUSO** — fontes dos eixos estilo/material. | existente |
 | `.ai_bridge/noc/queue.jsonl` | **APPEND** — task `kind=variant-sweep` (`safe:true`, `appearance:true` -> VISUAL_REVIEW). | FP-034 |
 | `tools/corpus_to_rag.py` | **NOVO leve** — exporta `corpus.jsonl` -> linhas ingeriveis por `reference_db`/`project_memory_db` (FP-035 consome). | FP-034 |
 | `tools/png_history.py` | **NAO EXISTE hoje** (memoria descreve protocolo nunca construido). Se quisermos manifest de renders, criar AQUI e' opcional; o `corpus.jsonl` ja carrega sha+source. NAO assumir que existe. | (decisao) |
@@ -170,7 +170,7 @@ def _collect_findings(png):                              # adapter FINO p/ FP-03
 **Arquivos REAIS lidos e confirmados (ancoras):**
 - `tools/rooms/living/capabilities/sofa_class_matrix.py` — padrao matriz-de-variantes (derive->gate->render->`_grid_sheet`->`matrix_report.json`); espelhar para planta. **Reuso direto**: `_grid_sheet`.
 - `tools/furnish_apartment.py` — furnish da planta inteira; eixo ESTILO via env `FURNISH_STYLE` (linhas 280/350/393), `collect_boxes()` (l.407), `apply_style` (l.437), gotcha `PT_TO_M=0.0259` (l.27-28).
-- `tools/style_spec.py` — `STYLE_TOKENS` `{industrial, modern_warm}` (kind->rgb + textura); fonte do eixo estilo.
+- `tools/rooms/shared/materials.py` — `STYLE_TOKENS` `{industrial, modern_warm}` (kind->rgb + textura); fonte do eixo estilo.
 - `tools/batch_theme_render.py` — eixo MATERIAL/TEMA (`KITCHEN_THEME`); HOJE `THEMES`/`RANKING` (l.32-57) sao **vereditos curados a mao** — FP-034 substitui isso por verdito derivado de achados (prior art, nao reuso cego).
 - `artifacts/reference_lab/themes/*.json` — 4 presets (`black_wood_gold` etc.) com `gates`/`status`; fonte do eixo tema.
 - `tools/render_parts_iso.py` — `render_parts()` SU-free; renderer barato de proporcao p/ o sweep. **Reuso direto.**

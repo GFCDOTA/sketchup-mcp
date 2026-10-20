@@ -8,9 +8,9 @@ frente=-Y; CABECA=Y=L encosta no painel), Z=altura. Origem no canto (0,0,0). A
 colocacao na planta reusa place_sofa_boxes (rotaciona -Y -> facing + translada)."""
 from __future__ import annotations
 
-from tools.furniture_anatomy_spec import BED_REQUIRED_PARTS, BedSpec, bed_spec  # noqa: F401
-from tools.sofa_builder import PT_TO_IN, _darker, _p, parts_to_boxes  # noqa: F401
-from tools.sofa_builder import place_sofa_boxes as place_bed_boxes      # noqa: F401  (generico)
+from tools.rooms.shared.anatomy import BED_REQUIRED_PARTS, BedSpec, bed_spec  # noqa: F401
+from tools.rooms.shared.sofa import PT_TO_IN, _darker, _p, parts_to_boxes  # noqa: F401
+from tools.rooms.shared.sofa import place_sofa_boxes as place_bed_boxes      # noqa: F401  (generico)
 
 
 def build_bed(spec: BedSpec):

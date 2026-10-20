@@ -17,7 +17,6 @@ ROOM_NAMES = frozenset({
 # Public compatibility paths still reach the same room implementations.
 # Resolve them before checking boundaries so a facade cannot hide ownership.
 LEGACY_ROOM_MODULES = {
-    "tools.service_layout": "tools.rooms.service.layout",
     "interior.planners.living_room_planner": "tools.rooms.living.planner",
 }
 

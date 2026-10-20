@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import re
 
-from tools.sofa_builder import build_sofa
+from tools.rooms.shared.sofa import build_sofa
 from tools.rooms.living.sofa_class import derive_living_sofa
 
 WIDTHS_M = [1.9, 2.1, 2.8]  # nichos reais de sala; a classe fixa só a largura
@@ -50,7 +50,7 @@ def test_place_sofa_boxes_carries_profiles_for_curved_render() -> None:
     extrude_vec, já no mundo) das peças curvas — senão o place_layout_skp.rb desenha
     CAIXA e o sofá vira 'quadrado zoado' na planta (bug 2026-07-12). Padrão p/ qualquer
     peça com profile, não só sofá."""
-    from tools.sofa_builder import place_sofa_boxes
+    from tools.rooms.shared.sofa import place_sofa_boxes
 
     parts, _ = build_sofa(derive_living_sofa(2.1))
     boxes = place_sofa_boxes(parts, (100.0, 100.0), (-1, 0))

@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
-from tools.furniture_anatomy_spec import WARDROBE_REQUIRED_PARTS   # noqa: E402
+from tools.rooms.shared.anatomy import WARDROBE_REQUIRED_PARTS   # noqa: E402
 
 
 def wardrobe_gate(spec, parts):
@@ -61,8 +61,8 @@ def wardrobe_gate(spec, parts):
 
 
 if __name__ == "__main__":
-    from tools.wardrobe_builder import build_wardrobe
-    from tools.furniture_anatomy_spec import wardrobe_spec
+    from tools.rooms.shared.wardrobe import build_wardrobe
+    from tools.rooms.shared.anatomy import wardrobe_spec
     ok = True
     for w in (1.2, 1.8, 2.4):
         s = wardrobe_spec(width=w)

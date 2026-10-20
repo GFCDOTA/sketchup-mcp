@@ -1,7 +1,7 @@
 # Anti-patterns de layout de interiores
 
 > Catálogo dos erros que **já cometemos** (ou quase) e que viraram regra em
-> [`rules_layout.md`](rules_layout.md) / [`tools/layout_rules.py`](../../tools/layout_rules.py).
+> [`rules_layout.md`](rules_layout.md) / [`tools/rooms/shared/layout_rules.py`](../../tools/rooms/shared/layout_rules.py).
 > Um anti-pattern só "fecha" quando tem uma regra determinística que o pega e um
 > teste/artefato que prova. Sem isso, é só lição que vamos repetir.
 

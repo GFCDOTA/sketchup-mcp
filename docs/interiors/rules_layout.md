@@ -1,6 +1,6 @@
 # Regras de layout de interiores (feedback loop)
 
-> Fonte de verdade executável: [`tools/layout_rules.py`](../../tools/layout_rules.py).
+> Fonte de verdade executável: [`tools/rooms/shared/layout_rules.py`](../../tools/rooms/shared/layout_rules.py).
 > Este doc é a versão legível; o código é o que de fato roda no score.
 > Aplicadas por [`tools/rooms/living/planning/layout_candidates.py`](../../tools/rooms/living/planning/layout_candidates.py).
 > Escopo: **layout** (posição/função de móvel placeholder). **Sem 3D Warehouse,

@@ -9,7 +9,7 @@ SHARED = ROOT / "tools" / "rooms" / "shared"
 ROOM_FILES = (
     ROOT / "tools/rooms/kitchen/layout.py",
     ROOT / "tools/rooms/bathroom/layout.py",
-    ROOT / "tools/service_layout.py",
+    ROOT / "tools/rooms/service/layout.py",
     ROOT / "interior/planners/living_room_planner.py",
 )
 FORBIDDEN = {"tools.rooms.bedroom.layout", "tools.rooms.bedroom.designer",

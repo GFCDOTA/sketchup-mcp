@@ -12,8 +12,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from tools.furniture_anatomy_spec import SofaSpec                       # noqa: E402
-from tools.sofa_builder import build_sofa                               # noqa: E402
+from tools.rooms.shared.anatomy import SofaSpec                       # noqa: E402
+from tools.rooms.shared.sofa import build_sofa                               # noqa: E402
 from tools.rooms.living.sofa_class import (ARCHETYPES, ARM_STYLES, BASE_STYLES,      # noqa: E402
                               _sabotages, derive_spec, sofa_class_gate)
 from tools.rooms.living.validation.sofa_gate import gate as anatomy_gate                        # noqa: E402

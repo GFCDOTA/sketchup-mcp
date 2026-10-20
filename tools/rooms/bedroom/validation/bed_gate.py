@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
-from tools.furniture_anatomy_spec import BED_REQUIRED_PARTS   # noqa: E402
+from tools.rooms.shared.anatomy import BED_REQUIRED_PARTS   # noqa: E402
 
 
 def bed_gate(spec, parts):
@@ -62,8 +62,8 @@ def bed_gate(spec, parts):
 
 
 if __name__ == "__main__":
-    from tools.bed_builder import build_bed
-    from tools.furniture_anatomy_spec import bed_spec
+    from tools.rooms.shared.bed import build_bed
+    from tools.rooms.shared.anatomy import bed_spec
     ok = True
     for sz in ("king", "queen", "casal", "solteiro"):
         s = bed_spec(sz)

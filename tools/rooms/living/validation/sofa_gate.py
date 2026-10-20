@@ -16,7 +16,7 @@ from __future__ import annotations
 from shapely.geometry import box
 from shapely.ops import unary_union
 
-from tools.furniture_anatomy_spec import SOFA_REQUIRED_PARTS
+from tools.rooms.shared.anatomy import SOFA_REQUIRED_PARTS
 
 
 def _all_connected(parts):
@@ -82,7 +82,7 @@ def gate(spec, parts):
 if __name__ == "__main__":
     import json
     from pathlib import Path
-    from tools.sofa_builder import build_sofa, sofa_spec
+    from tools.rooms.shared.sofa import build_sofa, sofa_spec
     rows = []
     for v in ("straight", "chaise_right", "chaise_left"):
         s = sofa_spec(v)

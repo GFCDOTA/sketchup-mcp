@@ -12,7 +12,7 @@ from PIL import Image
 
 from tools.flat_white_gate import flat_white_check
 from tools.interior_studio.render_fingerprint import fingerprint, texture_frac
-from tools.style_spec import (
+from tools.rooms.shared.materials import (
     STYLE_TOKENS,
     finish_map_for,
     texture_env,

@@ -8,9 +8,9 @@ quarto), Z=altura. As portas ficam na FRENTE (Y pequeno), o corpo atras. Coloca 
 place_sofa_boxes (generico: rotaciona -Y -> facing + translada)."""
 from __future__ import annotations
 
-from tools.furniture_anatomy_spec import WARDROBE_REQUIRED_PARTS, WardrobeSpec, wardrobe_spec  # noqa: F401
-from tools.sofa_builder import PT_TO_IN, _p, parts_to_boxes  # noqa: F401
-from tools.sofa_builder import place_sofa_boxes as place_wardrobe_boxes  # noqa: F401  (generico)
+from tools.rooms.shared.anatomy import WARDROBE_REQUIRED_PARTS, WardrobeSpec, wardrobe_spec  # noqa: F401
+from tools.rooms.shared.sofa import PT_TO_IN, _p, parts_to_boxes  # noqa: F401
+from tools.rooms.shared.sofa import place_sofa_boxes as place_wardrobe_boxes  # noqa: F401  (generico)
 
 MARGIN = 0.03   # margem lateral do conjunto de portas
 

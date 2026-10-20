@@ -1,13 +1,14 @@
 """P2 shared material tokens and legacy compatibility without render side-effects."""
-from tools import style_spec as legacy
 from tools.rooms.shared import materials
 
 
-def test_legacy_style_symbols_reference_single_shared_owner():
-    for name in ("StyleSpec", "STYLE_TOKENS", "apply_style", "get_style",
+def test_style_symbols_live_in_the_single_shared_owner():
+    # a fachada style_spec saiu na FP-044/F6; o dono unico continua sendo tools.rooms.shared.materials
+    assert isinstance(materials.STYLE_TOKENS, dict)
+    for name in ("StyleSpec", "apply_style", "get_style",
                  "resolve_material", "attach_materials", "module_family",
                  "texture_map_for", "finish_map_for", "tile_map_for", "texture_env"):
-        assert getattr(legacy, name) is getattr(materials, name)
+        assert getattr(materials, name).__module__ == materials.__name__
 
 
 def test_styles_preserve_cross_room_material_separation():
@@ -18,12 +19,11 @@ def test_styles_preserve_cross_room_material_separation():
         rack = materials.resolve_material(style, "rack", "base")
         assert isinstance(sofa, dict)
         assert isinstance(rack, dict)
-        assert legacy.resolve_material(style, "sofa", "base") == sofa
+        assert materials.resolve_material(style, "sofa", "base") == sofa
 
 
-def test_legacy_materials_file_is_facade():
+def test_materials_owner_holds_the_style_tables():
     from pathlib import Path
-    src = Path(legacy.__file__).read_text(encoding="utf-8")
-    assert "class StyleSpec:" not in src
-    assert "_INDUSTRIAL_RGB = {" not in src
-    assert "from tools.rooms.shared import materials as _shared" in src
+    src = Path(materials.__file__).read_text(encoding="utf-8")
+    assert src.count("class StyleSpec") == 1
+    assert "_INDUSTRIAL_RGB = {" in src

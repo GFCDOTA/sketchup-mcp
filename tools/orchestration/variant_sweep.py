@@ -198,7 +198,7 @@ def _apply_layout_seed(con: dict, boxes: list[dict], seed: int) -> tuple[list[di
         b.setdefault("module", str(b.get("kind", "movel")))
     style = os.environ.get("FURNISH_STYLE")
     if style:  # paridade com collect_boxes: a camada de estilo cobre o living trocado
-        from tools.style_spec import apply_style, attach_materials
+        from tools.rooms.shared.materials import apply_style, attach_materials
         apply_style(lb, style)
         attach_materials(lb, style)
     kept = [b for b in boxes if str(b.get("room")) != room_name]
@@ -422,7 +422,7 @@ def run_variant(v: Variant, out_dir: Path, *, con_path: Path | None = None,
     # em corte dollhouse. SWEEP_SHELL=0 desliga (comparação/depuração).
     parts = _boxes_to_parts(boxes)
     if os.environ.get("SWEEP_SHELL", "1") != "0":
-        from tools.shell_parts import shell_parts
+        from tools.rooms.shared.shell_parts import shell_parts
         parts = shell_parts(con) + parts
     # elev 24→38 pós-shell (GPT: câmera baixa escondia os ambientes atrás da
     # massa cortada; mais zenital revela o interior sem virar top-down)

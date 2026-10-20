@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
-from tools.furniture_anatomy_spec import NIGHTSTAND_REQUIRED_PARTS   # noqa: E402
+from tools.rooms.shared.anatomy import NIGHTSTAND_REQUIRED_PARTS   # noqa: E402
 
 
 def nightstand_gate(spec, parts):
@@ -51,8 +51,8 @@ def nightstand_gate(spec, parts):
 
 
 if __name__ == "__main__":
-    from tools.furniture_anatomy_spec import nightstand_spec
-    from tools.nightstand_builder import build_nightstand
+    from tools.rooms.shared.anatomy import nightstand_spec
+    from tools.rooms.shared.nightstand import build_nightstand
     s = nightstand_spec()
     parts, _ = build_nightstand(s)
     r = nightstand_gate(s, parts)

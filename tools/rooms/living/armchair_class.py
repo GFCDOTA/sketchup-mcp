@@ -3,7 +3,7 @@ Cycle 001 do programa arquiteto-de-classe — 2a classe, replicando o template q
 levou o SOFA ao PASS (3 ciclos): ranges ergonomicos + relacoes + arquetipos +
 derive + gate + sabotagens + matriz.
 
-GEOMETRIA (cycle 002, "emancipar do sofa"): tools/armchair_builder.build_armchair
+GEOMETRIA (cycle 002, "emancipar do sofa"): tools/rooms/shared/armchair_builder.build_armchair
 — gramatica SHELL-WRAPAROUND propria (concha em U: costas full-width + bracos
 encostando nela + OMBROS que sobem; almofadas INTERNAS mais claras = cavidade).
 TEORIA distintiva: braco presente (arm_span 0.22-0.50), footprint quase-quadrado,

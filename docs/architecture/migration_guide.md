@@ -204,3 +204,8 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.sofa_gate` | `tools.rooms.living.validation.sofa_gate` | `rooms/living` |
 | `tools.{make_synthetic_rooms,sofa_furnish_fase1_compare,sofa_premium_harness,sofa_venezia_compare,sofa_venezia_room}` | `tools.rooms.living.capabilities.{…}` | `rooms/living` |
 | `tools.sofa_class_matrix` | **fica** (D-012); consumidores do living já usam `tools.rooms.living.capabilities.sofa_class_matrix` | `rooms/living` |
+| `tools.{sofa_builder,bed_builder,wardrobe_builder,nightstand_builder}` | `tools.rooms.shared.{sofa,bed,wardrobe,nightstand}` | `rooms/shared` |
+| `tools.furniture_anatomy_spec` | `tools.rooms.shared.anatomy` | `rooms/shared` |
+| `tools.style_spec` | `tools.rooms.shared.materials` | `rooms/shared` |
+| `tools.{armchair_builder,decor_anatomy_spec,decor_builders,layout_rules,semantic_zones,shell_parts}` | `tools.rooms.shared.{…}` | `rooms/shared` |
+| `tools.service_layout` | `tools.rooms.service.layout` | `rooms/service` |

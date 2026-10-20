@@ -169,7 +169,7 @@ def main():
     # tem entrada no mapa industrial). So sob FURNISH_STYLE; fonte unica = style_spec.texture_env.
     style = os.environ.get("FURNISH_STYLE")
     if style:
-        from tools.style_spec import texture_env
+        from tools.rooms.shared.materials import texture_env
         tex_env = texture_env(style, (ROOT / "assets/textures/procedural").resolve())
         env.update(tex_env)
         if tex_env:
