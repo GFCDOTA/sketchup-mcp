@@ -5,7 +5,7 @@ família descreve, sempre nas mesmas 4 dimensões:
 
 - **(a) O que MUDA** — o que distingue esta família das irmãs no mesmo eixo.
 - **(b) O que PERMANECE** — o que é invariante (vale pra TODA a classe, não muda).
-- **(c) PARÂMETROS do schema** — campos de `configs/sofa_schema.json` que controlam.
+- **(c) PARÂMETROS do schema** — campos de `tools/rooms/living/capabilities/ruby/sofa_program/configs/sofa_schema.json` que controlam.
 - **(d) FALHAS comuns** — erros típicos a evitar nesta família.
 
 > **Regra raiz**: as regras vivem na **classe**, não num exemplar. Nada de hardcode
@@ -15,7 +15,7 @@ família descreve, sempre nas mesmas 4 dimensões:
 
 ## Schema paramétrico (referência)
 
-Campos de `configs/sofa_schema.json`:
+Campos de `tools/rooms/living/capabilities/ruby/sofa_program/configs/sofa_schema.json`:
 
 | Campo | Valores / Tipo |
 |---|---|

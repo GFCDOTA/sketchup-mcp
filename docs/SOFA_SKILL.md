@@ -77,7 +77,7 @@ Peças obrigatórias (componente/grupo nomeado cada):
 7. **Piping/costura** — vivo fino na borda superior das almofadas (followme, guard-railed).
 8. **Suavização** — `soft`+`smooth` só nas arestas CURVAS (cantos/coroa), nunca nos 90° reais.
 9. **Materiais** — tecido (linho) nas almofadas/braços; estrutura mais escura na base; pés madeira/metal.
-10. **Render de check** — front · 3/4 · top · side → `renders/check/`.
+10. **Render de check** — front · 3/4 · top · side → `runs/sofa_program/check/` (saida de scratch; historico em `artifacts/review/sofa_program/check/`).
 
 > Regra de marcenaria: **componente reutilizável** para peças repetidas (almofada, pé).
 > `Make Unique` para variar; espelhar braço com escala −1.

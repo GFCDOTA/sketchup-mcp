@@ -51,7 +51,6 @@ OWNER_TABLE = {
   "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb": "sofa_legacy_evaluation_script",
   "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_from_config.rb": "sofa_legacy_evaluation_script",
   "tools/rooms/living/capabilities/ruby/sofa_program/sofa_components.rb": "sofa_legacy_evaluation_script",
-  "scripts/sofa_fabric_material.py": "sofa_legacy_evaluation_script",
   "tools/rooms/living/capabilities/sofa_fabric_material.py": "sofa_legacy_evaluation_script",
   "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb": "sofa_legacy_evaluation_script",
   "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb": "sofa_legacy_evaluation_script",

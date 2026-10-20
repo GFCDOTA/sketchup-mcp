@@ -4,12 +4,12 @@ e emite o PROMPT PADRAO estruturado pro GPT. Parte do harness SOFA_GPT_REVIEW_LO
 
 Uso:
     python make_gpt_review_sheet.py <case_id> [ref_key]
-        case_id : pasta em renders/sofa_eval/<case_id> (usa three_quarter/front/side/top)
+        case_id : pasta em runs/sofa_program/sofa_eval/<case_id> (env SOFA_EVAL_DIR; historico em artifacts/review/sofa_program/sofa_eval) (usa three_quarter/front/side/top)
         ref_key : modern_dark (default) | kivik
 
 Saida:
-    renders/sofa_eval/gpt_review/<case_id>_review.png   (referencia em cima, gerado embaixo)
-    renders/sofa_eval/gpt_review/<case_id>_prompt.txt    (prompt padrao p/ colar no ChatGPT)
+    runs/sofa_program/sofa_eval/gpt_review/<case_id>_review.png   (referencia em cima, gerado embaixo)
+    runs/sofa_program/sofa_eval/gpt_review/<case_id>_prompt.txt    (prompt padrao p/ colar no ChatGPT)
 O AGENTE entao: seta clipboard (set_clipboard_image.ps1) -> cola no ChatGPT (Chrome) -> cola o
 prompt -> captura a resposta no formato fixo -> aplica TOP_FIX no SISTEMA -> loga em
 references/sofas/gpt_review_log.jsonl.
@@ -20,7 +20,7 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-EV = os.path.join(WT, "renders", "sofa_eval")
+EV = os.environ.get("SOFA_EVAL_DIR") or os.path.join(WT, "runs", "sofa_program", "sofa_eval")
 OUT = os.path.join(EV, "gpt_review")
 
 REFS = {

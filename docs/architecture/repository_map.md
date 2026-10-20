@@ -50,14 +50,11 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 | `fixtures/` | existe | inputs canônicos e sintéticos; protegidos |
 | `artifacts/` | existe | entregáveis canônicos (`artifacts/<planta>/`) e evidência (`artifacts/review/`) |
 | `references/` | existe | fontes, recipes e referências de design |
-| `assets/` | existe | recursos de entrada reutilizáveis (`assets/textures`) |
-| `renders/` | existe | renders históricos do programa do sofá; destino `artifacts/review/sofa_program/` na FP-044/F2 |
+| `assets/` | existe | recursos de entrada reutilizáveis (`assets/textures`, inclusive `sofa_fabric/`) |
 | `runs/` | local (ignorado pelo git) | scratch criado em tempo de execução; não faz parte da árvore versionada |
 | `tests/` | existe | regressões em Python puro (marker `planta74_scale` separa a escala) |
-| `scripts/` | existe | 3 fachadas do sofá (somem na FP-044/F2) + `set_clipboard_image.ps1` (D-005) |
+| `scripts/` | existe | só `set_clipboard_image.ps1` (D-005); as fachadas do sofá saíram na FP-044/F2 |
 | `ops/` | existe | painel do estúdio (`ops/estudio-front/`); destino na FP-044/F4 (D-009) |
-| `configs/` | existe | JSON do programa do sofá lidos pelo Ruby; destino `tools/rooms/living/capabilities/ruby/sofa_program/configs/` (FP-044/F2) |
-| `textures/` | existe | albedo/bump de tecido do sofá; destino `assets/textures/sofa_fabric/` (FP-044/F2) |
 | `schemas/` | existe | JSON Schemas de contratos; destino `core/schemas/` (FP-044/F3) |
 | `.impeccable/` | existe | hook de design desligado; remoção pendente da D-008 (FP-044/F5) |
 | `docs/architecture/` | existe | esta pasta: mapa, guia de migração, rotas de navegação |

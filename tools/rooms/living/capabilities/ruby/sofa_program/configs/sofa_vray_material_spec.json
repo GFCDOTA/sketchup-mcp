@@ -9,8 +9,8 @@
   },
   "styles": {
     "dark_charcoal": {
-      "albedo_map": "textures/fabric_dark_charcoal_albedo.png",
-      "bump_map": "textures/fabric_dark_charcoal_bump.png",
+      "albedo_map": "assets/textures/sofa_fabric/fabric_dark_charcoal_albedo.png",
+      "bump_map": "assets/textures/sofa_fabric/fabric_dark_charcoal_bump.png",
       "base_rgb": [33, 36, 38],
       "_base_note": "V-Ray pode escurecer ao 32-38 do GPT (preview usa 40,43,45 p/ legibilidade flat)",
       "roughness": 0.85,
@@ -20,8 +20,8 @@
       "fuzz": 0.25
     },
     "mid_gray": {
-      "albedo_map": "textures/fabric_mid_gray_albedo.png",
-      "bump_map": "textures/fabric_mid_gray_bump.png",
+      "albedo_map": "assets/textures/sofa_fabric/fabric_mid_gray_albedo.png",
+      "bump_map": "assets/textures/sofa_fabric/fabric_mid_gray_bump.png",
       "base_rgb": [108, 110, 114],
       "roughness": 0.82,
       "reflection": 0.20,
@@ -30,8 +30,8 @@
       "fuzz": 0.22
     },
     "light_linen": {
-      "albedo_map": "textures/fabric_light_linen_albedo.png",
-      "bump_map": "textures/fabric_light_linen_bump.png",
+      "albedo_map": "assets/textures/sofa_fabric/fabric_light_linen_albedo.png",
+      "bump_map": "assets/textures/sofa_fabric/fabric_light_linen_bump.png",
       "base_rgb": [200, 191, 176],
       "roughness": 0.80,
       "reflection": 0.18,

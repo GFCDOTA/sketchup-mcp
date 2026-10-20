@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """generalization_gate.py — gate ANTI-OVERFIT (verificavel, sem SketchUp).
 
-Le os validation.json de renders/sofa_eval/<case>/ e assegura que a CLASSE gera
+Le os validation.json de runs/sofa_program/sofa_eval/<case>/ (ou do diretorio dado; historico em artifacts/review/sofa_program/sofa_eval/) e assegura que a CLASSE gera
 sofas COERENTES e variados (nao quebrou, nao virou exemplar). Roda DEPOIS da suite.
 
 Checa por caso: status OK; componentizado (n_parts >= 4, nao bloco unico); bbox
@@ -40,7 +40,7 @@ def check_case(vj):
 
 def main():
     base = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'renders', 'sofa_eval')
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'runs', 'sofa_program', 'sofa_eval')
     cases = []
     for name in sorted(os.listdir(base)):
         vp = os.path.join(base, name, 'validation.json')

@@ -11,7 +11,7 @@
 # Materiais do SketchUp sao AUTO-convertidos pra VRayBRDF no export (albedo -> diffuse).
 # Ajuste fino de roughness/bump/sheen = via subscriber on_model_exported (proximo passo).
 
-DIR = ENV['VRAY_DIR'] || File.join(File.expand_path('../../../../../..', __dir__), 'renders', 'sofa_vray')
+DIR = ENV['VRAY_DIR'] || File.join(File.expand_path('../../../../../..', __dir__), 'runs', 'sofa_program', 'sofa_vray')
 OUT = "#{DIR}/vray_out.png"
 LOG = ENV['VRAY_LOG'] || "#{DIR}/vray_log.txt"
 W = (ENV['VRAY_W'] || '1200').to_i
@@ -56,7 +56,7 @@ end
 # diffuse = escala 0.30m) + roughness 0.85 (fosco, mata plastico) + reflect baixo.
 # Aplica em qualquer material_style (deriva o bump png do nome /<fab|back|base>_<style>/).
 class FabricShaderSub
-  TEX_DIR = File.join(File.expand_path('../../../../../..', __dir__), 'textures')
+  TEX_DIR = File.join(File.expand_path('../../../../../..', __dir__), 'assets', 'textures', 'sofa_fabric')
   def on_model_exported(exporter)
     r = exporter.renderer
     r.grep(:BRDFVRayMtl) { |b|
