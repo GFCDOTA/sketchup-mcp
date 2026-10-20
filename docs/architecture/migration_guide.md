@@ -181,3 +181,6 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.build_plan_shell_skp` (`tools/build_plan_shell_skp.py`) | `tools.sketchup.shell.build_plan_shell_skp` | `sketchup/*` |
 | `tools.su_runner_safety` | `tools.sketchup.runner_safety` | `sketchup/*` |
 | `tools.disarm_sketchup_autoruns` | `tools.sketchup.disarm_autoruns` | `sketchup/*` |
+| `tools.curator` | `tools.interior_studio.curator` | `interior_studio` |
+| `tools.interior_quality_scorecard` | `tools.interior_studio.interior_quality_scorecard` | `interior_studio` |
+| `tools.studio_log` (`python tools/studio_log.py …`) | `python -m tools.interior_studio.studio_log …` | `interior_studio` |

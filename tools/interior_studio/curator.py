@@ -23,8 +23,8 @@ Caps proprios (env): `CURATOR_MAX_DECISIONS` capa as decisoes do carteiro nesta
 passada (repassado como cap pro auto_decider.drain).
 
 Uso:
-    python -m tools.curator --dry-run     # simula o tick, NAO muta (default)
-    python -m tools.curator --apply       # roda o tick de verdade (single-pass)
+    python -m tools.interior_studio.curator --dry-run     # simula o tick, NAO muta (default)
+    python -m tools.interior_studio.curator --apply       # roda o tick de verdade (single-pass)
 """
 from __future__ import annotations
 

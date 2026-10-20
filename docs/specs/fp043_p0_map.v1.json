@@ -1603,8 +1603,8 @@
       "disposition": "move",
       "destination": "tools/interior_studio/curator.py",
       "phase": "P4",
-      "rationale": "Loop do estúdio de interiores: já existe tools/interior_studio/ como dono.",
-      "compat": "facade_at_old_path",
+      "rationale": "Loop do estúdio de interiores: já existe tools/interior_studio/ como dono. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -2256,8 +2256,8 @@
       "disposition": "move",
       "destination": "tools/interior_studio/interior_quality_scorecard.py",
       "phase": "P4",
-      "rationale": "Loop do estúdio de interiores: já existe tools/interior_studio/ como dono.",
-      "compat": "facade_at_old_path",
+      "rationale": "Loop do estúdio de interiores: já existe tools/interior_studio/ como dono. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -4322,8 +4322,8 @@
       "disposition": "move",
       "destination": "tools/interior_studio/studio_log.py",
       "phase": "P4",
-      "rationale": "Loop do estúdio de interiores: já existe tools/interior_studio/ como dono.",
-      "compat": "facade_at_old_path",
+      "rationale": "Loop do estúdio de interiores: já existe tools/interior_studio/ como dono. FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"

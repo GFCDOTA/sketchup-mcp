@@ -15,7 +15,7 @@ Gates:
   golden_sample_style_gate     — paleta/material coerente com GOLDEN_SAMPLE_004 (placeholder p/ tema)
 
 PASS = pronto pra seguir · WARN = bom, precisa polish · FAIL = não aplicar estética ainda.
-Uso: PT_TO_M=0.0259 python -m tools.interior_quality_scorecard [room_id|all]
+Uso: PT_TO_M=0.0259 python -m tools.interior_studio.interior_quality_scorecard [room_id|all]
 """
 from __future__ import annotations
 
