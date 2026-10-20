@@ -12,8 +12,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from tools import corpus_to_rag as ctr
-from tools import project_memory_db as pmd
+from tools.knowledge import corpus_to_rag as ctr
+from tools.knowledge import project_memory_db as pmd
 from tools import reference_db as rdb
 
 

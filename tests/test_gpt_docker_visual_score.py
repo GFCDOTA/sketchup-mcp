@@ -1,7 +1,7 @@
 """Contract tests for the visual-score answer parser (pure, no network/git)."""
 from __future__ import annotations
 
-from tools.gpt_docker_visual_score import parse_visual_answer
+from tools.oracle.gpt_docker_visual_score import parse_visual_answer
 
 URL = "https://raw.githubusercontent.com/x/y/develop/r.png"
 

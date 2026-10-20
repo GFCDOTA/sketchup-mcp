@@ -151,7 +151,7 @@ em `tests/ruby/test_skmcp_core.rb`). O lado Ruby que usa a API do SketchUp só s
 prova numa máquina com SketchUp.
 
 Fora daqui: `consult_oracle` (o `:8765` foi aposentado; o oráculo é o
-GPT-Docker `:8899`, via `tools.ask_gpt_gate`).
+GPT-Docker `:8899`, via `tools.oracle.ask_gpt_gate`).
 
 ## Especialista Pinterest (esqueleto)
 
@@ -173,5 +173,5 @@ em código:
 > assinatura); o PDF/consensus manda na **POSIÇÃO** (pia, parede, porta, janela,
 > circulação = imutável). O validador faz cumprir.
 
-Núcleo: [`tools/reference_grammar.py`](../reference_grammar.py) ·
+Núcleo: [`tools/knowledge/reference_grammar.py`](../reference_grammar.py) ·
 testes: [`tests/test_reference_grammar.py`](../../tests/test_reference_grammar.py).

@@ -17,7 +17,7 @@ appenda um registro superseding). Sem clock: created_at vem do registro
 (mtime-derivado no sweep). FP-034 PRODUZ; FP-035 INDEXA/CONSULTA.
 
 Uso:
-    python -m tools.corpus_to_rag --corpus runs/variant_sweep/run1/corpus.jsonl \\
+    python -m tools.knowledge.corpus_to_rag --corpus runs/variant_sweep/run1/corpus.jsonl \\
         [--reference-db <db>] [--memory-out <scratch>/.ai_bridge/research/judged_variants.json]
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ import json
 import sys
 from pathlib import Path
 
-from tools.human_verdict import HUMAN_VERDICTS as _HUMAN_VERDICTS
+from tools.oracle.human_verdict import HUMAN_VERDICTS as _HUMAN_VERDICTS
 from tools.orchestration.correction.jsonl_io import read_jsonl
 
 

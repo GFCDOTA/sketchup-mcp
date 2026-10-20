@@ -21,7 +21,7 @@ Honestidade de escopo:
     próprio golden-set). A régua é objetiva; o gabarito é curado.
 
 CLI:
-  python -m tools.retrieval_eval [--golden PATH] [--k 6] [--backend faceted|embed]
+  python -m tools.knowledge.retrieval_eval [--golden PATH] [--k 6] [--backend faceted|embed]
                                  [--json] [--baseline PATH]
 """
 from __future__ import annotations

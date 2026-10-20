@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import retrieval_eval as re
+from tools.knowledge import retrieval_eval as re
 
 ROOT = Path(__file__).resolve().parents[1]
 GOLDEN = ROOT / "references/eval/retrieval_golden.jsonl"

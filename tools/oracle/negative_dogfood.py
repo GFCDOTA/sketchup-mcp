@@ -27,7 +27,7 @@ set), so the conclusive test mirrors PRODUCTION inputs:
 Constraints honored: no SketchUp build, no geometry invention, no auto-fix.
 
 Usage:
-    python -m tools.negative_dogfood --fixture planta_74 \\
+    python -m tools.oracle.negative_dogfood --fixture planta_74 \\
         --out artifacts/review/planta_74/negative_dogfood_<ts>
 """
 from __future__ import annotations
@@ -39,8 +39,8 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-from tools.oracle_providers import OracleRequest, get_provider
-from tools.run_skp_visual_review import _VERDICT_RANK
+from tools.oracle.oracle_providers import OracleRequest, get_provider
+from tools.oracle.run_skp_visual_review import _VERDICT_RANK
 from core.project_sources import plant_pdf_path  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent

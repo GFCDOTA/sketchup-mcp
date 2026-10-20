@@ -10,8 +10,8 @@ Covers the three slices that make the visual ACL trustworthy:
   discrimination`): only a PROVEN-discriminative backend can cast a hard FAIL,
 - a guard that no machine path emits an appearance verdict (IMPROVED/SAME/WORSE).
 
-Companion: `tools/oracle_providers.py`, `tools/run_skp_visual_review.py`,
-`tools/negative_dogfood.py`, `core/schemas/visual_findings.schema.json`.
+Companion: `tools/oracle/oracle_providers.py`, `tools/oracle/run_skp_visual_review.py`,
+`tools/oracle/negative_dogfood.py`, `core/schemas/visual_findings.schema.json`.
 """
 from __future__ import annotations
 
@@ -24,9 +24,9 @@ import pytest
 from jsonschema import Draft202012Validator
 from core.schemas import schema_path
 
-from tools import oracle_providers as op
-from tools import run_skp_visual_review as rr
-from tools.oracle_providers import OracleRequest, get_provider
+from tools.oracle import oracle_providers as op
+from tools.oracle import run_skp_visual_review as rr
+from tools.oracle.oracle_providers import OracleRequest, get_provider
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = schema_path("visual_findings.schema.json")
@@ -347,10 +347,11 @@ def test_end_to_end_gate_math_non_proven_backend():
 def test_no_machine_appearance_verdict():
     """No FP-032 tool module emits an appearance verdict (IMPROVED/SAME/WORSE)
     as a string literal. That verdict is exclusively Felipe's (chrome-only)."""
+    # FP-044/F6: as fachadas de tools/ sairam; o teste passa a ler o codigo real do dono (antes lia a fachada vazia).
     modules = [
-        REPO_ROOT / "tools" / "oracle_providers.py",
-        REPO_ROOT / "tools" / "negative_dogfood.py",
-        REPO_ROOT / "tools" / "run_skp_visual_review.py",
+        REPO_ROOT / "tools" / "oracle" / "oracle_providers.py",
+        REPO_ROOT / "tools" / "oracle" / "negative_dogfood.py",
+        REPO_ROOT / "tools" / "oracle" / "run_skp_visual_review.py",
     ]
     pattern = re.compile(r"""['"](IMPROVED|SAME|WORSE)['"]""")
     offenders = []

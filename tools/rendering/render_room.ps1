@@ -49,6 +49,6 @@ if(-not (Test-Path $img)){ "RENDER FAIL"; exit 3 }
 # STEP GPT_REVIEW gate: muda aparencia -> prepara o review (clipboard + prompt + PENDING no ledger)
 if($ReviewId -ne ""){
   Push-Location E:\Claude\sketchup-mcp-mobiliar
-  & $py tools\gpt_review.py prepare --id $ReviewId --image $img --context $ReviewCtx
+  & $py tools\oracle\gpt_review.py prepare --id $ReviewId --image $img --context $ReviewCtx
   Pop-Location
 }

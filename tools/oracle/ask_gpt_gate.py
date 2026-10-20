@@ -29,7 +29,7 @@ NOT consult when (per LL-024 spec):
 
 Usage (CLI):
 
-    python -m tools.ask_gpt_gate \\
+    python -m tools.oracle.ask_gpt_gate \\
         --trigger oracle_pass_but_known_warnings \\
         --context-file /tmp/ctx.json \\
         --question "Should PR #206 merge?" \\
@@ -50,7 +50,7 @@ Behaviour:
   evidence.
 
 This is text-only — for image-based visual review, use the FP-030
-Visual Oracle Gate (`tools/run_skp_visual_review.py --oracle ollama_vision`).
+Visual Oracle Gate (`tools/oracle/run_skp_visual_review.py --oracle ollama_vision`).
 """
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-from tools.consult_tier import choose_gate_tier
+from tools.oracle.consult_tier import choose_gate_tier
 from tools.validation.gate_verdict import parse_verdict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent

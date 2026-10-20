@@ -35,7 +35,7 @@ escreve `oracle_request_package/` — exatamente porque o servidor recusa imagem
 ## Scope
 
 1. **Provar e medir a ACL antes de confiar nela.** Tornar
-   `tools/negative_dogfood.py` um gate de *discriminação* multi-backend
+   `tools/oracle/negative_dogfood.py` um gate de *discriminação* multi-backend
    (qwen2.5vl:7b, moondream, Claude-:8765-vision), com taxa de acerto por
    tipo de defeito injetado. Sem isso, nenhum backend é promovido a fonte de
    `global_visual`/`scale_rotation`.
@@ -69,10 +69,10 @@ escreve `oracle_request_package/` — exatamente porque o servidor recusa imagem
 | Path | Mudança | Quem |
 |---|---|---|
 | `core/schemas/visual_findings.schema.json` | **EDIT (REAL)** — add `confidence`, `source`, `discriminated` opcionais nos findings + top-level; bump tolerante (v1 continua válido) | sessão |
-| `tools/oracle_providers.py` | **EDIT (REAL)** — `OllamaVisionProvider` já existe; add `ClaudeBridgeVisionProvider` (novo) que fala com a rota de imagem do :8765; registrar no `_REGISTRY` | sessão |
+| `tools/oracle/oracle_providers.py` | **EDIT (REAL)** — `OllamaVisionProvider` já existe; add `ClaudeBridgeVisionProvider` (novo) que fala com a rota de imagem do :8765; registrar no `_REGISTRY` | sessão |
 | `tools/claude_bridge/server.py` | **EDIT (REAL→NOVO)** — nova rota `/ask-vision` (ou `images` no `/ask`): aceita PNGs b64/multipart + prompt, chama `claude -p` com as imagens, devolve `visual_findings.v1` | sessão |
-| `tools/negative_dogfood.py` | **EDIT (REAL)** — multi-backend + multi-defeito; emite `discrimination_report.json` com taxa por backend×defeito; vira gate | sessão |
-| `tools/run_skp_visual_review.py` | **EDIT (REAL)** — quando um backend foi PROVADO discriminativo p/ um defeito, deixar de rebaixar `global_visual`/`scale_rotation` p/ WARN-automático e usar o veredito do oráculo (marcado `source`) | sessão |
+| `tools/oracle/negative_dogfood.py` | **EDIT (REAL)** — multi-backend + multi-defeito; emite `discrimination_report.json` com taxa por backend×defeito; vira gate | sessão |
+| `tools/oracle/run_skp_visual_review.py` | **EDIT (REAL)** — quando um backend foi PROVADO discriminativo p/ um defeito, deixar de rebaixar `global_visual`/`scale_rotation` p/ WARN-automático e usar o veredito do oráculo (marcado `source`) | sessão |
 | `tools/oracle/prompts/visual_oracle_reviewer.md` | **EDIT (REAL)** — já existe; ajustar p/ casar campos novos do schema | sessão |
 | `tools/prompts/visual_oracle_reviewer_compact.md` | **NOVO (opcional)** — extrair o prompt compacto hoje hardcoded em `OllamaVisionProvider._build_compact_prompt` p/ arquivo (ler-arquivo > hardcode) | sessão |
 | `fixtures/visual_acl/defects/*.json` | **NOVO** — catálogo de defeitos injetáveis (rect, rgb, tipo esperado) p/ o dogfood multi-defeito | sessão |
@@ -162,10 +162,10 @@ run_skp_visual_review --oracle <backend>:
 
 ## Reference
 
-- `tools/run_skp_visual_review.py` — runner FP-030; 10 checks determinísticos (`inspect_report`), provider call, agregação `worst_verdict`, `--oracle {none,chatgpt_bridge_image,ollama_vision,future_vision_api}`.
-- `tools/oracle_providers.py` — `OracleProvider`/`OracleResponse`; **`OllamaVisionProvider` (REAL, default qwen2.5vl:7b)** com prompt compacto, resize 900px, extração de JSON balanceado; `_normalize_to_visual_findings` (gate de schema); `ChatGPTBridgeImageProvider` tenta multipart e cai em `incompatible` (porque o :8765 é text-only).
+- `tools/oracle/run_skp_visual_review.py` — runner FP-030; 10 checks determinísticos (`inspect_report`), provider call, agregação `worst_verdict`, `--oracle {none,chatgpt_bridge_image,ollama_vision,future_vision_api}`.
+- `tools/oracle/oracle_providers.py` — `OracleProvider`/`OracleResponse`; **`OllamaVisionProvider` (REAL, default qwen2.5vl:7b)** com prompt compacto, resize 900px, extração de JSON balanceado; `_normalize_to_visual_findings` (gate de schema); `ChatGPTBridgeImageProvider` tenta multipart e cai em `incompatible` (porque o :8765 é text-only).
 - `tools/claude_bridge/server.py` — `_ask_route` (TEXT-ONLY: `parse_ask_payload` lê só `prompt`/`question`); `GET_ROUTES`/`POST_ROUTES` (sem rota de imagem); modo B (Opus 4.8, `VISUAL_REVIEW` é o único gate humano).
-- `tools/negative_dogfood.py` — harness de discriminação (REAL). Prova em `artifacts/_archive/review_legacy_20260609/negative_dogfood_20260529T201219Z/summary.md`: ollama_vision deu FAIL no LIMPO e no CORROMPIDO → **NOT_DISCRIMINATED**.
+- `tools/oracle/negative_dogfood.py` — harness de discriminação (REAL). Prova em `artifacts/_archive/review_legacy_20260609/negative_dogfood_20260529T201219Z/summary.md`: ollama_vision deu FAIL no LIMPO e no CORROMPIDO → **NOT_DISCRIMINATED**.
 - `core/schemas/visual_findings.schema.json` — `visual_findings.v1` (campos: `kind`/`type`, `severity`, `axis`, `location`, `evidence`, `source_check`, `suspected_owner`, `proposed_fix`).
 - `tools/oracle/prompts/visual_oracle_reviewer.md` — prompt full do reviewer (6 eixos + tabela de defeitos + JSON estrito).
 - `fixtures/planta_74/known_warnings.json` — WARNs arquiteturais carregados (oráculo PASS não os apaga).

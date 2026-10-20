@@ -18,13 +18,13 @@ render V-Ray, montagem, SKP com mudança visível, textura, câmera, iluminaçã
 
 ## Fluxo (agent-in-the-loop — o round-trip usa a sessão ChatGPT autenticada no Chrome do Felipe)
 
-1. **prepare** — `python tools/gpt_review.py prepare --id <id> --image <png> --context "<o que mudou + pergunta>"`
+1. **prepare** — `python -m tools.oracle.gpt_review prepare --id <id> --image <png> --context "<o que mudou + pergunta>"`
    Seta o clipboard com a imagem (`setclip.ps1 -STA`), imprime o PROMPT Modo B canônico, grava PENDING no ledger.
    (Render via `tools/rendering/render_room.ps1 -ReviewId <id> -ReviewCtx "..."` já chama o prepare automático.)
 2. **consult** — colar no thread ChatGPT (Chrome MCP, tab "Veredito minimalista FAIL"): `ctrl+v` a imagem +
    colar o prompt + enviar. Capturar o texto do veredito. Se o GPT começar a gerar IMAGEM, clicar "Parar de
    responder" e re-pedir texto. Limpar o composer (`ctrl+a`+Delete) antes de colar (evita texto stale).
-3. **record** — salvar o texto do veredito num .txt e `python tools/gpt_review.py record --id <id>
+3. **record** — salvar o texto do veredito num .txt e `python -m tools.oracle.gpt_review record --id <id>
    --verdict-file <txt> --image <png>`. Parseia o schema → ledger JSONL + espelho em `gpt_verdicts.md` →
    decide o GATE.
 
@@ -42,7 +42,7 @@ Prompt sempre força: SÓ TEXTO, SEM IMAGEM, SEM REDESENHAR.
 
 ## Artefatos
 
-- `tools/gpt_review.py` — prepare / record / show (parser + gate + ledger). Testado: `tests/test_gpt_review.py`.
+- `tools/oracle/gpt_review.py` — prepare / record / show (parser + gate + ledger). Testado: `tests/test_gpt_review.py`.
 - Ledger append-only: `artifacts/review/interior/gpt_review_ledger.jsonl`.
 - Espelho humano: `artifacts/review/interior/gpt_verdicts.md`.
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from tools.negative_dogfood import (
+from tools.oracle.negative_dogfood import (
     CORRUPTION_RECIPES,
     REPO_ROOT,
     corrupt_render,

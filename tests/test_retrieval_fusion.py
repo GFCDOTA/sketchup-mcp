@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 
 from tools import reference_db as rdb
-from tools import retrieval_eval as rev
+from tools.knowledge import retrieval_eval as rev
 
 GOLDEN = rev.DEFAULT_GOLDEN
 

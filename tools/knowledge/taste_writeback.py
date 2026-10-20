@@ -13,7 +13,7 @@ Honestidade (regra dura): `human_verdict` / `liked` / `felipe_comment` /
 sao derivados APENAS das tags + comentario do Felipe, com a POLARIDADE dada pelo
 sinal de gosto `liked` (thumbs) — NUNCA de `design_patterns_observed` da maquina.
 A maquina so TRANSPORTA o veredito; nunca o fabrica (o vocabulario e' VALIDADO,
-importado de tools.human_verdict, nao emitido — membership test nao fabrica).
+importado de tools.oracle.human_verdict, nao emitido — membership test nao fabrica).
 
 So verdict CURADO materializa: o `human_verdicts.jsonl` scratch inteiro (mistura
 vocabulario da maquina / linhas sem galeria / TTL) NAO entra — `drain_new_verdicts`
@@ -30,8 +30,8 @@ import json
 import re
 from pathlib import Path
 
-from tools import rag_freshness as rf
-from tools.human_verdict import is_human_verdict, is_liked, normalize_tags
+from tools.knowledge import rag_freshness as rf
+from tools.oracle.human_verdict import is_human_verdict, is_liked, normalize_tags
 from tools.orchestration.correction.jsonl_io import read_jsonl
 
 ROOT = Path(__file__).resolve().parents[2]

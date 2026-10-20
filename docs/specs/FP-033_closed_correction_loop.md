@@ -89,7 +89,7 @@ IMPROVED/SAME/WORSE).
 | `core/schemas/correction_finding.schema.json` | **NOVO** — finding tipado UNIFICADO (normaliza gate-determinístico + `visual_findings.v1` num só shape: `type, severity, source_check, suspected_owner, route, evidence`) | schema |
 | `tools/run_deterministic_gates.py` | **EXISTE** — reusar `run_all()` como detector; **adicionar** `--json-out` p/ o loop consumir o dict de gates (hoje só printa) | gate suite |
 | `tools/geometry_sanity.py`, `tools/furniture_overlap_gate.py` | **EXISTE** — reusar `audit()/overlap_gate()` como detectores de móvel; sem mudança de regra | gates móvel |
-| `tools/run_skp_visual_review.py` | **EXISTE** — reusar como REBUILD+RE-CHECK determinístico (gera .skp + `geometry_report.json` + findings); o loop chama, não reescreve | runner FP-030 |
+| `tools/oracle/run_skp_visual_review.py` | **EXISTE** — reusar como REBUILD+RE-CHECK determinístico (gera .skp + `geometry_report.json` + findings); o loop chama, não reescreve | runner FP-030 |
 | `tools/claude_bridge/noc_dispatcher.py` | **EXISTE** — reusar `dispatch()`/`_appearance_changed`; **adicionar** `kind:"correction_cycle"` na fila roteado pra um ciclo do loop (sem duplicar o caminho de worktree/commit/VISUAL_REVIEW) | NOC actuator |
 | `tools/claude_bridge/server.py` | **EXISTE** — reusar `POST /heartbeat` + `sessions_view()`; o loop bate ponto com `session_id` estável e `cycle` monotônico (sem mudança de servidor) | bridge :8765 |
 | `apps/sketchup-mcp-bff/noc_mirror.py` | **EXISTE** — já taila ledger e filtra `VISUAL_REVIEW_QUEUED`; **opcional** adicionar contagem de `correction_cycle` no `status_view()` (read-only) | cockpit BFF |
@@ -240,7 +240,7 @@ Lido e confirmado nesta sessão:
 - `tools/geometry_sanity.py` — `audit()` (hermético) + `sanity_room()` (consensus): outside_room/blocks_door/degenerate/absurd/off_axis.
 - `tools/furniture_overlap_gate.py` — `overlap_gate()`: móvel-sobre-móvel (footprint×altura), FAIL≥30% / WARN≥12%.
 - `tools/validation/visual_regression_gate.py` — scaffold IMPROVED/SAME/WORSE preenchido **só por humano** ("auto looks-like-PDF is exactly what the vision oracle was proven unable to do").
-- `tools/run_skp_visual_review.py` + `core/schemas/visual_findings.schema.json` (v1) — findings tipados com `suspected_owner`/`proposed_fix`; **auto-fix é Follow-up não implementado** (FP-030 §Loop/§Follow-ups).
+- `tools/oracle/run_skp_visual_review.py` + `core/schemas/visual_findings.schema.json` (v1) — findings tipados com `suspected_owner`/`proposed_fix`; **auto-fix é Follow-up não implementado** (FP-030 §Loop/§Follow-ups).
 - `docs/specs/FP-030_visual_oracle_gate.md` — taxonomia de findings de aparência (floating_door, orphan_glass, bad_window_aperture, etc.) e axes qualitativos (global_visual, scale_rotation → WARN needs human/agent).
 - `.claude/skills/autonomous-fidelity-loop/SKILL.md` — protocolo do ciclo (log, heartbeat, patinagem, parar em RED/NEEDS-HUMAN); hoje é prosa seguida à mão.
 - `tools/claude_bridge/noc_dispatcher.py` — `dispatch()`, worktree isolado off origin/develop, `_appearance_changed` → `VISUAL_REVIEW_QUEUED`, NUNCA main/merge; `kind:local_llm` (Ollama, token=0); fila/ledger `.ai_bridge/noc/{queue,actions}.jsonl`.

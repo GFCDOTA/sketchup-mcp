@@ -17,9 +17,9 @@ Ledger (append-only): artifacts/review/interior/gpt_review_ledger.jsonl
 Espelho humano:        artifacts/review/interior/gpt_verdicts.md
 
 Uso:
-  python tools/gpt_review.py prepare --id sala_eyefill3 --image <png> --context "..." [--dims A,B,C]
-  python tools/gpt_review.py record  --id sala_eyefill3 --verdict-file <txt>
-  python tools/gpt_review.py show     [--id <id>]            # lista o ledger
+  python -m tools.oracle.gpt_review prepare --id sala_eyefill3 --image <png> --context "..." [--dims A,B,C]
+  python -m tools.oracle.gpt_review record  --id sala_eyefill3 --verdict-file <txt>
+  python -m tools.oracle.gpt_review show     [--id <id>]            # lista o ledger
 """
 from __future__ import annotations
 

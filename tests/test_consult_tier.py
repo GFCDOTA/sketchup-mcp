@@ -6,7 +6,7 @@ Puro, sem I/O. Garante o contrato da slice:
 - ausencia/desconhecido de proposito -> deep (compat/seguranca);
 - --tier explicito vence o proposito (exceto pin sem override).
 """
-from tools.consult_tier import (
+from tools.oracle.consult_tier import (
     DEEP_PURPOSES, DEFAULT_TIER, FAST_PURPOSES, PINNED_DEEP_PURPOSES,
     choose_gate_tier,
 )

@@ -155,7 +155,7 @@ def guard_bundle_freshness(bundle: dict | None) -> dict | None:
     if not chunks:
         return bundle
     try:
-        from tools import rag_freshness as rf
+        from tools.knowledge import rag_freshness as rf
         con = rf.connect()
         try:
             candidates = [{"chunk_id": c.get("chunk_id"),

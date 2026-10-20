@@ -58,7 +58,7 @@
       (suite01: textura+eye-level+fill, usando o template provado); (c) integrar câmera/fill no VRayFinalProvider.
 ## GATE GPT_REVIEW (Felipe 2026-06-08) — validação visual formal
 
-`tools/gpt_review.py` (prepare/record/show) + skill `gpt-review-gate`. Toda mudança de aparência
+`tools/oracle/gpt_review.py` (prepare/record/show) + skill `gpt-review-gate`. Toda mudança de aparência
 atravessa o gate; NUNCA autojulgar. PASS|WARN promove (WARN=backlog), **FAIL ou qualquer dimensão
 FAIL BLOQUEIA**. Ledger append-only `artifacts/review/interior/gpt_review_ledger.jsonl` (texto cru do
 GPT) + espelho `gpt_verdicts.md`. Hook no `render_room.ps1 -ReviewId`. Test verde `tools/test_gpt_review.py`.

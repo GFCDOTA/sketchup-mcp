@@ -7,7 +7,7 @@ PDF: a referência NÃO pode mexer na posição).
 
 from __future__ import annotations
 
-from tools.reference_grammar import (
+from tools.knowledge.reference_grammar import (
     grammar_contract,
     normalize_grammar,
     validate_grammar_spec,

@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tools.gpt_review import parse_verdict, gate_decision, DEFAULT_DIMS
+from tools.oracle.gpt_review import parse_verdict, gate_decision, DEFAULT_DIMS
 
 # Caso 1: veredito REAL do eyefill3 (esperado GATE=PASS, promote=True)
 t1 = ("VERDICT: PASS // LIGHTING: PASS - resolveu: sofa virou heroi // PREMIUM_REALISM: WARN - "

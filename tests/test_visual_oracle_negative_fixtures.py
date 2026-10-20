@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.run_skp_visual_review import (
+from tools.oracle.run_skp_visual_review import (
     axes_verdict_from_findings, inspect_report, top_level_verdict,
 )
 

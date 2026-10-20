@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import rag_freshness as rf
+from tools.knowledge import rag_freshness as rf
 from tools.interior_studio import architect_program as ap
 
 T0 = "2026-07-07T10:00:00Z"

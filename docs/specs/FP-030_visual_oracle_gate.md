@@ -87,7 +87,7 @@ artifacts/review/<fixture>/<run_id>/final/
 
 ## Blocking visual findings (hard FAIL)
 
-The deterministic heuristics in `tools/run_skp_visual_review.py` hard-FAIL the build if any of these are detected:
+The deterministic heuristics in `tools/oracle/run_skp_visual_review.py` hard-FAIL the build if any of these are detected:
 
 | Type | Detection | Added |
 |---|---|---|
@@ -119,7 +119,7 @@ Tested by `tests/test_visual_oracle_negative_fixtures.py`. A planta_74 sanity te
 
 ## Oracle providers (maturity 3, pluggable)
 
-`tools/run_skp_visual_review.py --oracle <provider>` selects an oracle backend from `tools/oracle_providers.py`:
+`tools/oracle/run_skp_visual_review.py --oracle <provider>` selects an oracle backend from `tools/oracle/oracle_providers.py`:
 
 | Provider | Behaviour |
 |---|---|
@@ -221,7 +221,7 @@ attempt_2 = second fix if needed
 attempt_3 = final attempt if needed
 ```
 
-**MVP**: the script (`tools/run_skp_visual_review.py`) **does
+**MVP**: the script (`tools/oracle/run_skp_visual_review.py`) **does
 not auto-fix**. It stops on first FAIL and reports proposed
 fixes; a human or downstream agent must apply the fix and rerun.
 Auto-fix is a follow-up.
@@ -295,7 +295,7 @@ See `core/schemas/visual_findings.schema.json`. Required fields:
 
 ## Tooling
 
-- `tools/run_skp_visual_review.py` — MVP runner
+- `tools/oracle/run_skp_visual_review.py` — MVP runner
 - `tools/oracle/prompts/visual_oracle_reviewer.md` — prompt for downstream
   vision agent
 - `tests/test_visual_oracle_contract.py` — schema + manifest contract

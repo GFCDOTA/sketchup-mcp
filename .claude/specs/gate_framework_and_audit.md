@@ -7,7 +7,7 @@
 
 Em **modo B** (autonomia delegada — o oracle decide tudo menos o olho na planta), a
 autonomia só é confiável se cada decisão for **observável e auditável na origem**. Hoje
-a decisão passa por `tools/ask_gpt_gate.py` (gate monolítico) e o registro é solto
+a decisão passa por `tools/oracle/ask_gpt_gate.py` (gate monolítico) e o registro é solto
 (`.ai_bridge/questions|responses/*.md`). Este spec formaliza:
 
 1. **Gates modulares** — um módulo fino por tipo de decisão, plugável.

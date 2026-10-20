@@ -137,7 +137,7 @@ faltavam três coisas que esta arquitetura resolve:
 
 ## Referências
 - `tools/claude_bridge/server.py` (gate + orquestrador + painel)
-- `tools/ask_gpt_gate.py` (o asker / os 9 triggers)
+- `tools/oracle/ask_gpt_gate.py` (o asker / os 9 triggers)
 - `.claude/specs/gate_framework_and_audit.md` (§6)
 - `.claude/specs/generalize_any_plant.md` + `generalize_builder_constants.md`
 - `.claude/skills/autonomous-fidelity-loop` · `gpt-auto-consult-gate` · `gh-autopilot`

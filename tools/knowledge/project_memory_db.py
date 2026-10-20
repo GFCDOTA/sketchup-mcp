@@ -20,9 +20,9 @@ Invariantes:
     reembeda arquivo que mudou).
 
 Uso:
-    python tools/project_memory_db.py index  [--corpus-root <path>] [--rebuild]
-    python tools/project_memory_db.py search "como julgamos a proporção do sofá?" [--k 6]
-    python tools/project_memory_db.py stats
+    python -m tools.knowledge.project_memory_db index  [--corpus-root <path>] [--rebuild]
+    python -m tools.knowledge.project_memory_db search "como julgamos a proporção do sofá?" [--k 6]
+    python -m tools.knowledge.project_memory_db stats
 """
 from __future__ import annotations
 

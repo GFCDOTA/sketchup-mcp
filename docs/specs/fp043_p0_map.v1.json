@@ -1003,8 +1003,8 @@
       "disposition": "move",
       "destination": "tools/oracle/ask_gpt_gate.py",
       "phase": "P4",
-      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
-      "compat": "facade_at_old_path",
+      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "consumido por CI/MCP/config",
@@ -1468,8 +1468,8 @@
       "disposition": "move",
       "destination": "tools/oracle/consult_tier.py",
       "phase": "P4",
-      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
-      "compat": "facade_at_old_path",
+      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -1491,8 +1491,8 @@
       "disposition": "move",
       "destination": "tools/knowledge/corpus_to_rag.py",
       "phase": "P4",
-      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
-      "compat": "facade_at_old_path",
+      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -2011,8 +2011,8 @@
       "disposition": "move",
       "destination": "tools/knowledge/furniture_reference_analyzer.py",
       "phase": "P4",
-      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
-      "compat": "facade_at_old_path",
+      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -2170,8 +2170,8 @@
       "disposition": "move",
       "destination": "tools/oracle/gpt_docker_visual_score.py",
       "phase": "P4",
-      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
-      "compat": "facade_at_old_path",
+      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -2194,8 +2194,8 @@
       "disposition": "move",
       "destination": "tools/oracle/gpt_review.py",
       "phase": "P4",
-      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
-      "compat": "facade_at_old_path",
+      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -2219,8 +2219,8 @@
       "disposition": "move",
       "destination": "tools/oracle/human_verdict.py",
       "phase": "P4",
-      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
-      "compat": "facade_at_old_path",
+      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "low",
       "risk_reasons": [],
       "depth_sensitive": false,
@@ -2676,8 +2676,8 @@
       "disposition": "move",
       "destination": "tools/oracle/negative_dogfood.py",
       "phase": "P4",
-      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
-      "compat": "facade_at_old_path",
+      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -2837,8 +2837,8 @@
       "disposition": "move",
       "destination": "tools/oracle/oracle_providers.py",
       "phase": "P4",
-      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
-      "compat": "facade_at_old_path",
+      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -3123,8 +3123,8 @@
       "disposition": "move",
       "destination": "tools/knowledge/project_memory_db.py",
       "phase": "P4",
-      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
-      "compat": "facade_at_old_path",
+      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -3301,8 +3301,8 @@
       "disposition": "move",
       "destination": "tools/knowledge/rag_freshness.py",
       "phase": "P4",
-      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
-      "compat": "facade_at_old_path",
+      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -3411,8 +3411,8 @@
       "disposition": "move",
       "destination": "tools/knowledge/reference_grammar.py",
       "phase": "P4",
-      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
-      "compat": "facade_at_old_path",
+      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "high",
       "risk_reasons": [
         "consumido por CI/MCP/config"
@@ -3692,8 +3692,8 @@
       "disposition": "move",
       "destination": "tools/knowledge/retrieval_eval.py",
       "phase": "P4",
-      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
-      "compat": "facade_at_old_path",
+      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -3827,8 +3827,8 @@
       "disposition": "move",
       "destination": "tools/oracle/run_skp_visual_review.py",
       "phase": "P4",
-      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade).",
-      "compat": "facade_at_old_path",
+      "rationale": "Oráculo/juízes visuais e consultas (FP-030): o veredito visual IMPROVED/SAME/WORSE continua SÓ do Felipe. DECISÃO REGISTRADA: novo pacote tools/oracle/ (não listado na spec; justificado por responsabilidade). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"
@@ -4432,8 +4432,8 @@
       "disposition": "move",
       "destination": "tools/knowledge/taste_writeback.py",
       "phase": "P4",
-      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio).",
-      "compat": "facade_at_old_path",
+      "rationale": "Infra de conhecimento/RAG/memória/referências: sem dono de cômodo. DECISÃO REGISTRADA: novo pacote tools/knowledge/ (a spec §4.2 não o lista, mas a classificação por responsabilidade o exige; não é pacote vazio). FP-044/F6: fachada removida; consumidores apontam para o dono.",
+      "compat": "path_resolver_unico",
       "risk": "medium",
       "risk_reasons": [
         "Path(__file__)/parents dependente da profundidade"

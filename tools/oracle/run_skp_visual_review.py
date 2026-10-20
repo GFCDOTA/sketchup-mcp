@@ -19,20 +19,20 @@ Constitution #8 — No SKP, no progress.
 Constitution #8 — No visual proof, no progress.
 
 Usage:
-    python -m tools.run_skp_visual_review \\
+    python -m tools.oracle.run_skp_visual_review \\
         --fixture planta_74 \\
         --out artifacts/review/planta_74/visual_oracle_bridge_<ts> \\
         --max-attempts 3 \\
         --oracle none
 
     # or with bridge attempt:
-    python -m tools.run_skp_visual_review \\
+    python -m tools.oracle.run_skp_visual_review \\
         --fixture planta_74 \\
         --out artifacts/review/planta_74/visual_oracle_bridge_<ts> \\
         --oracle chatgpt_bridge
 
     # or hard-require bridge (BLOCKED if unavailable):
-    python -m tools.run_skp_visual_review \\
+    python -m tools.oracle.run_skp_visual_review \\
         --fixture planta_74 \\
         --out artifacts/review/planta_74/visual_oracle_bridge_<ts> \\
         --oracle chatgpt_bridge --require-oracle
@@ -50,13 +50,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from tools.ask_gpt_gate import (
+from tools.oracle.ask_gpt_gate import (
     GateInput as GPTGateInput,
 )
-from tools.ask_gpt_gate import (
+from tools.oracle.ask_gpt_gate import (
     run_gate as run_gpt_gate,
 )
-from tools.oracle_providers import (
+from tools.oracle.oracle_providers import (
     OracleRequest,
     available_provider_names,
     get_provider,
@@ -93,7 +93,7 @@ def worst_verdict(*verdicts: str) -> str:
 
 def load_latest_discrimination(fixture: str, backend: str) -> dict | None:
     """Return the most recent `discrimination_report.json` (from
-    `tools/negative_dogfood.py`) for (fixture, backend), or None if no dogfood
+    `tools/oracle/negative_dogfood.py`) for (fixture, backend), or None if no dogfood
     evidence exists for that backend.
 
     Legacy reports (pre-multi-backend) omit the `backend` key; those were all
@@ -1362,7 +1362,7 @@ def main() -> int:
             "LL-024 GPT Auto-Consult Gate mode. "
             "off: never invoke. "
             "auto (default): invoke when a canonical trigger fires "
-            "(see tools.run_skp_visual_review.detect_gpt_consult_trigger); "
+            "(see tools.oracle.run_skp_visual_review.detect_gpt_consult_trigger); "
             "if bridge offline, write question file and continue. "
             "required: same triggers, but BLOCK with non-zero exit when "
             "the bridge cannot deliver."

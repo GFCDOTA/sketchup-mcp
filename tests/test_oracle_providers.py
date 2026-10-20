@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.oracle_providers import (
+from tools.oracle.oracle_providers import (
     ChatGPTBridgeImageProvider, FutureVisionAPIProvider,
     NoneProvider, OllamaVisionProvider,
     OracleRequest, OracleResponse,

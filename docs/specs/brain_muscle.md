@@ -22,7 +22,7 @@ absorve o verboso; o cérebro lê o veredito. (Evidência viva: a sessão V-Ray 
 | **NOC dispatcher** (`tools/claude_bridge/noc_dispatcher.py`) | Músculo **ASSÍNCRONO**: fila → worktree isolado off develop → worker → verify determinístico → ledger. Pra tasks enfileiradas, `safe`, auto-verificáveis. Rails: 1-lock TTL, nunca main/auto-merge, aparência→VISUAL_REVIEW. |
 | **RTK** (Rust Token Killer) | Mata token nos ops **INLINE** (git/scan/status) — já transparente via hook (60-90%). |
 | **LLM local** (Ollama) | Compute **grátis** pra decisões baratas/repetitivas (o "fast" abaixo do Sonnet). |
-| **gate/tier** (`tools/consult_tier.py`) | Roteia a DECISÃO: fast (Sonnet/low) p/ rotina, deep (Opus/xhigh) p/ o juízo. |
+| **gate/tier** (`tools/oracle/consult_tier.py`) | Roteia a DECISÃO: fast (Sonnet/low) p/ rotina, deep (Opus/xhigh) p/ o juízo. |
 | **cockpit** `:8765` | Observabilidade + o único gate humano (VISUAL_REVIEW). |
 
 ## A lacuna

@@ -1,7 +1,7 @@
 """knowledge_types — vocabulário de tipo semântico de conhecimento
 (Princípio 3: nunca misturar preferência com regra técnica com decisão de
 projeto). Formaliza, sem tocar no indexador ainda, a que categoria cada
-source_type já usado por tools/rag_freshness.py::SOURCES pertence.
+source_type já usado por tools/knowledge/rag_freshness.py::SOURCES pertence.
 
 Uso pretendido (Fase B): tools/knowledge_api.py filtra/pondera resultados
 de retrieval por KnowledgeType e nunca deixa uma PREFERENCE sobrescrever um
@@ -22,7 +22,7 @@ class KnowledgeType(str, Enum):
 
 
 # source_type -> KnowledgeType, para todo source_type que já existe em
-# tools/rag_freshness.py::SOURCES (linhas 59-70, confirmado por leitura direta
+# tools/knowledge/rag_freshness.py::SOURCES (linhas 59-70, confirmado por leitura direta
 # nesta sessão). "consensus" fica fora deliberadamente — geometria de planta
 # não é conhecimento recuperável no sentido deste enum, é fato estrutural
 # imutável (ver docs/architecture/knowledge_classification.md).
