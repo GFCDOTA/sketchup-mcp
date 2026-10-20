@@ -22,7 +22,6 @@ LEGACY_ROOM_MODULES = {
     "tools.bed_class": "tools.rooms.bedroom.bed_class",
     "tools.kitchen_layout": "tools.rooms.kitchen.layout",
     "tools.kitchen_validation": "tools.rooms.kitchen.anchor_rules",
-    "tools.bathroom_layout": "tools.rooms.bathroom.layout",
     "tools.service_layout": "tools.rooms.service.layout",
     "interior.planners.living_room_planner": "tools.rooms.living.planner",
     **{f"tools.{name}_class": f"tools.rooms.living.{name}_class"

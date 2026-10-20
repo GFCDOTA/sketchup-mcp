@@ -11,7 +11,7 @@ NORTE (esq.); box vidro/perfil preto no canto NE com pedra antracite + nicho LED
 paredes cimento queimado taupe; piso pedra grafite. Camera na porta (sul), 1.60m.
 
 Convencao: metros, origem SW, X=leste (0..W), Y=norte (0..D). Deterministico.
-Uso: python -m tools.estudio_banheiro_scene [--out runs/scenes/estudio_banheiro_v1]
+Uso: python -m tools.rooms.bathroom.capabilities.estudio_banheiro_scene [--out runs/scenes/estudio_banheiro_v1]
 """
 from __future__ import annotations
 

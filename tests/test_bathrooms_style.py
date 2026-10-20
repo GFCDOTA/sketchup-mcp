@@ -17,7 +17,7 @@ import pytest
 # `pytest -m planta74_scale`) — nao setar aqui, so no conftest (fonte unica).
 pytestmark = pytest.mark.planta74_scale
 
-from tools.bathroom_layout import BASE_THEME, build_boxes, theme_of  # noqa: E402
+from tools.rooms.bathroom.layout import BASE_THEME, build_boxes, theme_of  # noqa: E402
 
 M2IN = 39.3700787402
 BRONZE = [171, 119, 63]
