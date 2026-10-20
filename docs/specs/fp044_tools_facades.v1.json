@@ -1,0 +1,1487 @@
+{
+ "schema_version": "fp044_tools_facades.v1",
+ "generated_at": "2026-10-20",
+ "source": "git ls-files @ develop 4840ef0 (consumidores contados em .py/.rb/.ps1/.cmd/.sh/.yml/.json/.md/.toml fora de artifacts/ e docs/archive/)",
+ "external_consumers_note": "apps/harness-app importa os modulos marcados KEEP_PUBLIC; mudar o caminho exige repontar o harness no mesmo PR",
+ "count": 123,
+ "entries": [
+  {
+   "path": "tools/armchair_builder.py",
+   "owner_module": "tools.rooms.shared",
+   "consumers": {
+    "code": 1,
+    "tests": 2,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/armchair_class.py",
+   "owner_module": "tools.rooms.living.armchair_class",
+   "consumers": {
+    "code": 3,
+    "tests": 2,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/ask_gpt_gate.py",
+   "owner_module": "tools.oracle.ask_gpt_gate",
+   "consumers": {
+    "code": 3,
+    "tests": 3,
+    "docs": 8,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/auto_camera.py",
+   "owner_module": "tools.rendering.auto_camera",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/bake_theme_skp.py",
+   "owner_module": "tools.rooms.kitchen.capabilities.bake_theme",
+   "consumers": {
+    "code": 0,
+    "tests": 1,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/batch_theme_render.py",
+   "owner_module": "tools.rendering.batch_theme_render",
+   "consumers": {
+    "code": 2,
+    "tests": 0,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/bathroom_layout.py",
+   "owner_module": "tools.rooms.shared.geometry",
+   "consumers": {
+    "code": 3,
+    "tests": 5,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/bed_builder.py",
+   "owner_module": "tools.rooms.shared.bed",
+   "consumers": {
+    "code": 4,
+    "tests": 1,
+    "docs": 1,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/bed_class.py",
+   "owner_module": "tools.rooms.bedroom.bed_class",
+   "consumers": {
+    "code": 4,
+    "tests": 3,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/bedroom_designer.py",
+   "owner_module": "tools.rooms.bedroom",
+   "consumers": {
+    "code": 6,
+    "tests": 4,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/bedroom_layout.py",
+   "owner_module": "tools.rooms.bedroom",
+   "consumers": {
+    "code": 5,
+    "tests": 7,
+    "docs": 4,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/build_plan_shell_skp.py",
+   "owner_module": "tools.sketchup.shell.build_plan_shell_skp",
+   "consumers": {
+    "code": 6,
+    "tests": 11,
+    "docs": 17,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/circulation_gate.py",
+   "owner_module": "tools.validation.circulation_gate",
+   "consumers": {
+    "code": 3,
+    "tests": 2,
+    "docs": 7,
+    "config": 2
+   },
+   "external_consumer": true,
+   "action": "KEEP_PUBLIC"
+  },
+  {
+   "path": "tools/coffee_table_class.py",
+   "owner_module": "tools.rooms.living.coffee_table_class",
+   "consumers": {
+    "code": 4,
+    "tests": 2,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/collision_envelope_gate.py",
+   "owner_module": "tools.validation.collision_envelope_gate",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 5,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/compose_side_by_side.py",
+   "owner_module": "tools.rendering.compose_side_by_side",
+   "consumers": {
+    "code": 4,
+    "tests": 1,
+    "docs": 2,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/consult_tier.py",
+   "owner_module": "tools.oracle.consult_tier",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/corpus_to_rag.py",
+   "owner_module": "tools.knowledge.corpus_to_rag",
+   "consumers": {
+    "code": 1,
+    "tests": 3,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/correction_finding.py",
+   "owner_module": "tools.orchestration.correction.correction_finding",
+   "consumers": {
+    "code": 2,
+    "tests": 3,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/correction_fixes.py",
+   "owner_module": "tools.orchestration.correction.correction_fixes",
+   "consumers": {
+    "code": 2,
+    "tests": 3,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/correction_loop.py",
+   "owner_module": "tools.orchestration.correction.correction_loop",
+   "consumers": {
+    "code": 1,
+    "tests": 2,
+    "docs": 5,
+    "config": 2
+   },
+   "external_consumer": true,
+   "action": "KEEP_PUBLIC"
+  },
+  {
+   "path": "tools/crop_render.py",
+   "owner_module": "tools.rendering.crop_render",
+   "consumers": {
+    "code": 2,
+    "tests": 0,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/curator.py",
+   "owner_module": "tools.interior_studio.curator",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/decor_anatomy_spec.py",
+   "owner_module": "tools.rooms.shared.decor_anatomy_spec",
+   "consumers": {
+    "code": 2,
+    "tests": 1,
+    "docs": 1,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/decor_builders.py",
+   "owner_module": "tools.rooms.shared.decor_builders",
+   "consumers": {
+    "code": 3,
+    "tests": 2,
+    "docs": 1,
+    "config": 4
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/diagnose_wall_stubs.py",
+   "owner_module": "tools.validation.diagnose_wall_stubs",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 4,
+    "config": 5
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/dining_table_class.py",
+   "owner_module": "tools.rooms.living.dining_table_class",
+   "consumers": {
+    "code": 3,
+    "tests": 2,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/disarm_sketchup_autoruns.py",
+   "owner_module": "tools.sketchup.disarm_autoruns",
+   "consumers": {
+    "code": 1,
+    "tests": 0,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/door_swing_audit.py",
+   "owner_module": "tools.validation.door_swing_audit",
+   "consumers": {
+    "code": 2,
+    "tests": 1,
+    "docs": 1,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/estudio_banheiro_scene.py",
+   "owner_module": "tools.rooms.bathroom.capabilities.estudio_banheiro_scene",
+   "consumers": {
+    "code": 1,
+    "tests": 0,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/fidelity_loop.py",
+   "owner_module": "tools.orchestration.fidelity_loop",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/finding_router.py",
+   "owner_module": "tools.orchestration.correction.finding_router",
+   "consumers": {
+    "code": 2,
+    "tests": 2,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": true,
+   "action": "KEEP_PUBLIC"
+  },
+  {
+   "path": "tools/flat_white_gate.py",
+   "owner_module": "tools.validation.flat_white_gate",
+   "consumers": {
+    "code": 2,
+    "tests": 2,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/furnish_apartment.py",
+   "owner_module": "tools.orchestration.furnish_apartment",
+   "consumers": {
+    "code": 18,
+    "tests": 23,
+    "docs": 13,
+    "config": 2
+   },
+   "external_consumer": true,
+   "action": "KEEP_PUBLIC"
+  },
+  {
+   "path": "tools/furnish_plan.py",
+   "owner_module": null,
+   "consumers": {
+    "code": 0,
+    "tests": 1,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "BLOCKED_DECISION",
+   "note": "implementacao real aqui; D-003/D-004 decidem o destino"
+  },
+  {
+   "path": "tools/furniture_anatomy_spec.py",
+   "owner_module": "tools.rooms.shared.anatomy",
+   "consumers": {
+    "code": 15,
+    "tests": 3,
+    "docs": 0,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/furniture_overlap_gate.py",
+   "owner_module": "tools.validation.furniture_overlap_gate",
+   "consumers": {
+    "code": 5,
+    "tests": 2,
+    "docs": 5,
+    "config": 5
+   },
+   "external_consumer": true,
+   "action": "KEEP_PUBLIC"
+  },
+  {
+   "path": "tools/furniture_reference_analyzer.py",
+   "owner_module": "tools.knowledge.furniture_reference_analyzer",
+   "consumers": {
+    "code": 1,
+    "tests": 0,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/furniture_wall_gap.py",
+   "owner_module": "tools.validation.furniture_wall_gap",
+   "consumers": {
+    "code": 0,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/gate_filefetch.py",
+   "owner_module": "tools.validation.gate_filefetch",
+   "consumers": {
+    "code": 0,
+    "tests": 1,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/gate_util.py",
+   "owner_module": "tools.validation.gate_util",
+   "consumers": {
+    "code": 3,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/gate_verdict.py",
+   "owner_module": "tools.validation.gate_verdict",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/gen_textures.py",
+   "owner_module": "tools.rendering.gen_textures",
+   "consumers": {
+    "code": 1,
+    "tests": 0,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/geometry_sanity.py",
+   "owner_module": "tools.validation.geometry_sanity",
+   "consumers": {
+    "code": 6,
+    "tests": 5,
+    "docs": 7,
+    "config": 2
+   },
+   "external_consumer": true,
+   "action": "KEEP_PUBLIC"
+  },
+  {
+   "path": "tools/gpt_docker_visual_score.py",
+   "owner_module": "tools.oracle.gpt_docker_visual_score",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/gpt_review.py",
+   "owner_module": "tools.oracle.gpt_review",
+   "consumers": {
+    "code": 2,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/human_verdict.py",
+   "owner_module": "tools.oracle.human_verdict",
+   "consumers": {
+    "code": 2,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/interior_quality_scorecard.py",
+   "owner_module": "tools.interior_studio.interior_quality_scorecard",
+   "consumers": {
+    "code": 1,
+    "tests": 0,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/jsonl_io.py",
+   "owner_module": "tools.orchestration.correction.jsonl_io",
+   "consumers": {
+    "code": 8,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/kitchen_ergonomics.py",
+   "owner_module": "tools.rooms.kitchen.validation.ergonomics",
+   "consumers": {
+    "code": 2,
+    "tests": 0,
+    "docs": 7,
+    "config": 12
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/kitchen_layout.py",
+   "owner_module": "tools.rooms.shared.geometry",
+   "consumers": {
+    "code": 5,
+    "tests": 6,
+    "docs": 13,
+    "config": 11
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/kitchen_validation.py",
+   "owner_module": "tools.rooms.kitchen.anchor_rules",
+   "consumers": {
+    "code": 5,
+    "tests": 5,
+    "docs": 4,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/kitchen_vray.py",
+   "owner_module": "tools.rooms.kitchen.capabilities.vray",
+   "consumers": {
+    "code": 2,
+    "tests": 2,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/kitchen_wall_regression_gate.py",
+   "owner_module": "tools.rooms.kitchen.validation.wall_regression",
+   "consumers": {
+    "code": 0,
+    "tests": 1,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/layout_candidates.py",
+   "owner_module": "tools.rooms.living.planning.layout_candidates",
+   "consumers": {
+    "code": 5,
+    "tests": 2,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/layout_rules.py",
+   "owner_module": "tools.rooms.shared.layout_rules",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/make_synthetic_bedrooms.py",
+   "owner_module": "tools.rooms.bedroom.capabilities.make_synthetic_bedrooms",
+   "consumers": {
+    "code": 3,
+    "tests": 3,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/make_synthetic_rooms.py",
+   "owner_module": "tools.rooms.living.capabilities.make_synthetic_rooms",
+   "consumers": {
+    "code": 2,
+    "tests": 0,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/material_review.py",
+   "owner_module": "tools.rendering.material_review",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/negative_dogfood.py",
+   "owner_module": "tools.oracle.negative_dogfood",
+   "consumers": {
+    "code": 2,
+    "tests": 2,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/nightstand_builder.py",
+   "owner_module": "tools.rooms.shared.nightstand",
+   "consumers": {
+    "code": 5,
+    "tests": 0,
+    "docs": 0,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/ollama_bridge.py",
+   "owner_module": "tools.oracle.ollama_bridge",
+   "consumers": {
+    "code": 0,
+    "tests": 0,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/opening_aperture_audit.py",
+   "owner_module": "tools.validation.opening_aperture_audit",
+   "consumers": {
+    "code": 0,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/opening_audit.py",
+   "owner_module": "tools.validation.opening_audit",
+   "consumers": {
+    "code": 0,
+    "tests": 0,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/opening_host_audit.py",
+   "owner_module": "tools.validation.opening_host_audit",
+   "consumers": {
+    "code": 3,
+    "tests": 2,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/optimizer_consistency_gate.py",
+   "owner_module": "tools.validation.optimizer_consistency_gate",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 6,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/oracle_providers.py",
+   "owner_module": "tools.oracle.oracle_providers",
+   "consumers": {
+    "code": 4,
+    "tests": 4,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/overlay_diff.py",
+   "owner_module": "tools.rendering.overlay_diff",
+   "consumers": {
+    "code": 3,
+    "tests": 3,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/parapet_not_railing_fallback_gate.py",
+   "owner_module": "tools.validation.parapet_not_railing_fallback_gate",
+   "consumers": {
+    "code": 1,
+    "tests": 2,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/pdf_height_labels_audit.py",
+   "owner_module": "tools.validation.pdf_height_labels_audit",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/pdf_overlay_verify.py",
+   "owner_module": "tools.rendering.pdf_overlay_verify",
+   "consumers": {
+    "code": 0,
+    "tests": 0,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/place_bedroom_skp.py",
+   "owner_module": "tools.rooms.bedroom.capabilities.place_bedroom_skp",
+   "consumers": {
+    "code": 2,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/position_fidelity_gate.py",
+   "owner_module": "tools.validation.position_fidelity_gate",
+   "consumers": {
+    "code": 1,
+    "tests": 2,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/project_memory_db.py",
+   "owner_module": "tools.knowledge.project_memory_db",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/promote_artifact.py",
+   "owner_module": "tools.orchestration.promote_artifact",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/promote_canonical.py",
+   "owner_module": "tools.orchestration.promote_canonical",
+   "consumers": {
+    "code": 3,
+    "tests": 2,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/rack_class.py",
+   "owner_module": "tools.rooms.living.rack_class",
+   "consumers": {
+    "code": 4,
+    "tests": 2,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/rag_embed_backend.py",
+   "owner_module": "tools.knowledge.rag_embed_backend",
+   "consumers": {
+    "code": 4,
+    "tests": 3,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/rag_freshness.py",
+   "owner_module": "tools.knowledge.rag_freshness",
+   "consumers": {
+    "code": 5,
+    "tests": 7,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/railing_exact_match_gate.py",
+   "owner_module": "tools.validation.railing_exact_match_gate",
+   "consumers": {
+    "code": 1,
+    "tests": 3,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/reference_db.py",
+   "owner_module": "tools.knowledge.reference_db",
+   "consumers": {
+    "code": 4,
+    "tests": 9,
+    "docs": 6,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/reference_grammar.py",
+   "owner_module": "tools.knowledge.reference_grammar",
+   "consumers": {
+    "code": 2,
+    "tests": 1,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/regenerate_consensus.py",
+   "owner_module": "tools.orchestration.regenerate_consensus",
+   "consumers": {
+    "code": 0,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/render_banho_auto.py",
+   "owner_module": "tools.rooms.bathroom.capabilities.render_banho_auto",
+   "consumers": {
+    "code": 1,
+    "tests": 0,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/render_banho_vray.py",
+   "owner_module": "tools.rooms.bathroom.capabilities.render_banho_vray",
+   "consumers": {
+    "code": 2,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/render_bbox_audit.py",
+   "owner_module": "tools.validation.render_bbox_audit",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/render_parts_iso.py",
+   "owner_module": "tools.rendering.render_parts_iso",
+   "consumers": {
+    "code": 11,
+    "tests": 0,
+    "docs": 2,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/render_scene_views.py",
+   "owner_module": "tools.rendering.render_scene_views",
+   "consumers": {
+    "code": 3,
+    "tests": 1,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/render_scene_vray.py",
+   "owner_module": "tools.rendering.render_scene_vray",
+   "consumers": {
+    "code": 2,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/repo_health_gate.py",
+   "owner_module": "tools.validation.repo_health_gate",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/retrieval_eval.py",
+   "owner_module": "tools.knowledge.retrieval_eval",
+   "consumers": {
+    "code": 1,
+    "tests": 2,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/room_type.py",
+   "owner_module": "tools.rooms.shared.room_type",
+   "consumers": {
+    "code": 11,
+    "tests": 7,
+    "docs": 5,
+    "config": 2
+   },
+   "external_consumer": true,
+   "action": "KEEP_PUBLIC"
+  },
+  {
+   "path": "tools/run_deterministic_gates.py",
+   "owner_module": "tools.validation.run_deterministic_gates",
+   "consumers": {
+    "code": 4,
+    "tests": 6,
+    "docs": 15,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/run_skp_visual_review.py",
+   "owner_module": "tools.oracle.run_skp_visual_review",
+   "consumers": {
+    "code": 6,
+    "tests": 5,
+    "docs": 10,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/semantic_geometry_contract_gate.py",
+   "owner_module": "tools.validation.semantic_geometry_contract_gate",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 5,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/semantic_zones.py",
+   "owner_module": "tools.rooms.shared.semantic_zones",
+   "consumers": {
+    "code": 0,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/service_layout.py",
+   "owner_module": "tools.rooms.service",
+   "consumers": {
+    "code": 3,
+    "tests": 3,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/shell_parts.py",
+   "owner_module": "tools.rooms.shared.shell_parts",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/sofa_builder.py",
+   "owner_module": "tools.rooms.shared.sofa",
+   "consumers": {
+    "code": 19,
+    "tests": 7,
+    "docs": 3,
+    "config": 6
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/sofa_class.py",
+   "owner_module": "tools.rooms.living.sofa_class",
+   "consumers": {
+    "code": 10,
+    "tests": 6,
+    "docs": 6,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/sofa_class_matrix.py",
+   "owner_module": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "consumers": {
+    "code": 11,
+    "tests": 1,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/sofa_furnish_fase1_compare.py",
+   "owner_module": "tools.rooms.living.capabilities.sofa_furnish_fase1_compare",
+   "consumers": {
+    "code": 2,
+    "tests": 0,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/sofa_gate.py",
+   "owner_module": "tools.rooms.living.validation.sofa_gate",
+   "consumers": {
+    "code": 5,
+    "tests": 1,
+    "docs": 1,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/sofa_premium_harness.py",
+   "owner_module": "tools.rooms.living.capabilities.sofa_premium_harness",
+   "consumers": {
+    "code": 2,
+    "tests": 0,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/sofa_venezia_compare.py",
+   "owner_module": "tools.rooms.living.capabilities.sofa_venezia_compare",
+   "consumers": {
+    "code": 3,
+    "tests": 0,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/sofa_venezia_room.py",
+   "owner_module": "tools.rooms.living.capabilities.sofa_venezia_room",
+   "consumers": {
+    "code": 2,
+    "tests": 0,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/soft_barrier_source_audit.py",
+   "owner_module": "tools.validation.soft_barrier_source_audit",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/spatial_model.py",
+   "owner_module": "tools.rooms.shared.spatial_model",
+   "consumers": {
+    "code": 20,
+    "tests": 2,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": true,
+   "action": "KEEP_PUBLIC"
+  },
+  {
+   "path": "tools/studio_log.py",
+   "owner_module": "tools.interior_studio.studio_log",
+   "consumers": {
+    "code": 1,
+    "tests": 0,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/style_coherence_gate.py",
+   "owner_module": "tools.validation.style_coherence_gate",
+   "consumers": {
+    "code": 2,
+    "tests": 0,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/style_spec.py",
+   "owner_module": "tools.rooms.shared",
+   "consumers": {
+    "code": 6,
+    "tests": 4,
+    "docs": 5,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/su_runner_safety.py",
+   "owner_module": "tools.sketchup.runner_safety",
+   "consumers": {
+    "code": 3,
+    "tests": 0,
+    "docs": 3,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/taste_writeback.py",
+   "owner_module": "tools.knowledge.taste_writeback",
+   "consumers": {
+    "code": 1,
+    "tests": 2,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/theme_palette.py",
+   "owner_module": "tools.rendering.theme_palette",
+   "consumers": {
+    "code": 1,
+    "tests": 1,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/trace_view.py",
+   "owner_module": null,
+   "consumers": {
+    "code": 0,
+    "tests": 2,
+    "docs": 4,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "BLOCKED_DECISION",
+   "note": "implementacao real aqui; D-003/D-004 decidem o destino"
+  },
+  {
+   "path": "tools/tweak_vrscene.py",
+   "owner_module": "tools.rendering.tweak_vrscene",
+   "consumers": {
+    "code": 7,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/variant_axes.py",
+   "owner_module": "tools.orchestration.variant_axes",
+   "consumers": {
+    "code": 3,
+    "tests": 2,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/variant_sweep.py",
+   "owner_module": "tools.orchestration.variant_sweep",
+   "consumers": {
+    "code": 4,
+    "tests": 3,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/vision_queue_consumer.py",
+   "owner_module": "tools.orchestration.correction.vision_queue_consumer",
+   "consumers": {
+    "code": 2,
+    "tests": 1,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/visual_regression_gate.py",
+   "owner_module": "tools.validation.visual_regression_gate",
+   "consumers": {
+    "code": 0,
+    "tests": 0,
+    "docs": 2,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/wall_exact_match_gate.py",
+   "owner_module": "tools.validation.wall_exact_match_gate",
+   "consumers": {
+    "code": 0,
+    "tests": 0,
+    "docs": 0,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/wall_overlap_audit.py",
+   "owner_module": "tools.validation.wall_overlap_audit",
+   "consumers": {
+    "code": 3,
+    "tests": 2,
+    "docs": 1,
+    "config": 2
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  },
+  {
+   "path": "tools/wardrobe_builder.py",
+   "owner_module": "tools.rooms.shared.wardrobe",
+   "consumers": {
+    "code": 5,
+    "tests": 0,
+    "docs": 2,
+    "config": 3
+   },
+   "external_consumer": false,
+   "action": "MIGRATE_CONSUMERS_THEN_REMOVE"
+  }
+ ]
+}
