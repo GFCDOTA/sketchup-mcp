@@ -218,3 +218,5 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.{reference_db,rag_embed_backend}` | **ficam** (D-011: lidos pelo Inspector do harness); donos `tools.knowledge.{…}` | `knowledge` |
 | `tools.{ask_gpt_gate,consult_tier,gpt_docker_visual_score,gpt_review,human_verdict,negative_dogfood,oracle_providers,run_skp_visual_review}` | `tools.oracle.{…}` (mesmo nome) | `oracle` |
 | `tools.ollama_bridge` | **fica** (D-011); dono `tools.oracle.ollama_bridge` | `oracle` |
+
+Estado final da F6 (2026-10-20): 108 fachadas removidas; ficam 15 arquivos em `tools/*.py` ([`tools/PUBLIC_API.md`](../../tools/PUBLIC_API.md)). Relatório: [FP-044_final_validation](../reports/FP-044_final_validation.md).

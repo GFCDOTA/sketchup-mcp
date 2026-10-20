@@ -32,6 +32,7 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 |---|---|---|
 | `core/` | existe | IDs, unidades, escala (`core.scale` congela `PT_TO_M` no 1º import) e observabilidade |
 | `interior/` | existe | semântica e composição de cena/intenção; adapters de render (não duplicam planners de `tools/rooms/`) |
+| `tools/PUBLIC_API.md` | existe | o que ainda mora em `tools/*.py` (15 arquivos) e por quê: 8 públicas do harness, D-003/D-004, D-011, D-012 |
 | `tools/rooms/` | existe | dono dos cômodos: um pacote por ambiente + `shared/`, `dispatch.py`, `registry.py`, `manifest.v1.json` |
 | `tools/rooms/shared/` | existe | geometria, materiais e builders paramétricos usados por mais de um cômodo |
 | `tools/sketchup/` | existe | processo, jobs e inspeção no SketchUp (verbos `su_*`) |
