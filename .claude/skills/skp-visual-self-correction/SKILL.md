@@ -166,7 +166,7 @@ Quando inspecionar exemplos em
 
 Exemplos com `ambiguous_or_false_positive_regions` (e.g.
 `bad_wall_stubs_*`) requerem cross-check com a FP-026 detector
-(`tools/diagnose_wall_stubs.py`) antes de qualquer FAIL.
+(`tools/validation/diagnose_wall_stubs.py`) antes de qualquer FAIL.
 
 ## Anti-padrões
 

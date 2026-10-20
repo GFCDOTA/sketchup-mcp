@@ -99,9 +99,9 @@ reescrever o pipeline.
 |---|---|---|
 | Contrato central | `core/spatial_semantics.py` | `tests/test_semantic_geometry_contract_gate.py` |
 | Threshold provenance | `core/project_policy.py` | `tests/test_circulation_gate.py::test_portal_role_is_explicit_not_inferred` |
-| Contrato ausente = FAIL/WARN | `tools/semantic_geometry_contract_gate.py` | `tests/test_semantic_geometry_contract_gate.py` |
-| bbox visual != colisão | `tools/collision_envelope_gate.py` | `tests/test_collision_envelope_gate.py` |
-| optimizer == CI | `tools/optimizer_consistency_gate.py` | `tests/test_optimizer_consistency_gate.py` |
+| Contrato ausente = FAIL/WARN | `tools/validation/semantic_geometry_contract_gate.py` | `tests/test_semantic_geometry_contract_gate.py` |
+| bbox visual != colisão | `tools/validation/collision_envelope_gate.py` | `tests/test_collision_envelope_gate.py` |
+| optimizer == CI | `tools/validation/optimizer_consistency_gate.py` | `tests/test_optimizer_consistency_gate.py` |
 | Portal role explícito | `tools/circulation_gate.py::_portal_kind` + campo `portal_role` | `tests/test_circulation_gate.py` |
 
 Ver também `docs/interview-study/` para os princípios de engenharia

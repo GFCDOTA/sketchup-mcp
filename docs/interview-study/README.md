@@ -22,7 +22,7 @@ cenário concreto — o assunto real é arquitetura de software.
 
 1. **Single Source of Truth / Validator Reuse** — um optimizer aprovou uma
    posição de móvel que o CI reprovou. Causa raiz: duas implementações da
-   MESMA regra de negócio. → `tools/optimizer_consistency_gate.py`
+   MESMA regra de negócio. → `tools/validation/optimizer_consistency_gate.py`
 
 2. **Semantic Contracts** — um vaso com cantos arredondados foi rejeitado
    como "geometria quebrada" porque nenhum gate sabia que a forma era
@@ -31,7 +31,7 @@ cenário concreto — o assunto real é arquitetura de software.
 3. **Visual Representation vs Operational Envelope** — um tapete inflou a
    área de colisão do móvel que o hospedava porque "footprint visual" e
    "footprint de colisão" eram tratados como sinônimos. →
-   `tools/collision_envelope_gate.py`
+   `tools/validation/collision_envelope_gate.py`
 
 4. **Fail Fast** — `core/scale.py` levanta `RuntimeError` explícito se a
    escala errada for usada, em vez de silenciosamente gerar geometria 36%

@@ -5,8 +5,8 @@ Runs the consensus-only detectors always, plus the render wall-presence gate
 when a top render + projection sidecar are available, and emits ONE combined
 verdict + exit code. No SU build, no PDF, no network — pure + fast.
 
-  - opening_host  : opening<->host-wall consistency (tools/opening_host_audit)
-  - wall_overlap  : duplicate/overlapping walls   (tools/wall_overlap_audit)
+  - opening_host  : opening<->host-wall consistency (tools/validation/opening_host_audit)
+  - wall_overlap  : duplicate/overlapping walls   (tools/validation/wall_overlap_audit)
   - wall_presence : consensus walls present in the SKP top render
                     (tools/overlay_diff, when --render + <png>.proj.json exist).
                     --render given but sidecar MISSING -> overall=INCOMPLETE
@@ -20,8 +20,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.opening_host_audit import audit_opening_hosts
-from tools.wall_overlap_audit import audit_wall_overlaps
+from tools.validation.opening_host_audit import audit_opening_hosts
+from tools.validation.wall_overlap_audit import audit_wall_overlaps
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
@@ -54,7 +54,7 @@ def run_all(
     if render_path:
         # render framing first (pixel-only, no sidecar): a clipped plant
         # invalidates any visual review (external-review finding #1).
-        from tools.render_bbox_audit import audit_render_bbox
+        from tools.validation.render_bbox_audit import audit_render_bbox
         gates["render_bbox"] = audit_render_bbox(render_path)
         sidecar = Path(str(render_path) + ".proj.json")
         if sidecar.exists():
@@ -81,9 +81,9 @@ def run_all(
 
     if report_path:
         rep = json.loads(Path(report_path).read_text("utf-8"))
-        from tools.parapet_not_railing_fallback_gate import (
+        from tools.validation.parapet_not_railing_fallback_gate import (
             audit_parapet_not_railing_fallback)
-        from tools.railing_exact_match_gate import audit_railing_exact_match
+        from tools.validation.railing_exact_match_gate import audit_railing_exact_match
         from tools.validation.scale_anchor_gate import audit as audit_scale_anchor
         gates["scale_anchor"] = audit_scale_anchor(
             con, rep, consensus_path=Path(consensus_path) if consensus_path else None
@@ -92,7 +92,7 @@ def run_all(
         gates["parapet_fallback"] = audit_parapet_not_railing_fallback(con, rep)
         # position-fidelity (Felipe 2026-06-02): centro/largura/host de portas+
         # janelas + alinhamento/cobertura/fechamento da grade, vs o geometry_report.
-        from tools.position_fidelity_gate import compare as _pf_compare
+        from tools.validation.position_fidelity_gate import compare as _pf_compare
         _pf = _pf_compare(con, rep)
         _pf_fails = [f for f in _pf if f.get("verdict") == "FAIL"]
         gates["position_fidelity"] = {

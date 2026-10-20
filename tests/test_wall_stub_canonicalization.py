@@ -17,7 +17,7 @@ from tools.sketchup.shell.build_plan_shell_skp import (
     build_shell_polygon,
     wall_footprint,
 )
-from tools.diagnose_wall_stubs import (
+from tools.validation.diagnose_wall_stubs import (
     STUB_MAX_LENGTH_RATIO,
     STUB_WIDTH_TOLERANCE,
     detect_candidates,

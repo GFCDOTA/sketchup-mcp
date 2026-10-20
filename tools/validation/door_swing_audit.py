@@ -15,8 +15,8 @@ consensus:
   along da dobradiça.
 
 Uso:
-    python -m tools.door_swing_audit                # audita fixture planta_74
-    python -m tools.door_swing_audit --fix planta_74 --json
+    python -m tools.validation.door_swing_audit                # audita fixture planta_74
+    python -m tools.validation.door_swing_audit --fix planta_74 --json
 
 Sem fabricação: porta sem arco casável no PDF → ``UNRESOLVED`` (nunca chuta).
 Consumido por tests/test_door_swing_contract.py como gate regressivo.

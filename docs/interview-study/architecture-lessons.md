@@ -34,7 +34,7 @@ diferente do admission controller que decide de verdade.
 
 **Implementação**: `tools/furnish_apartment.py` (busca) importa e chama
 `tools.circulation_gate.gate()` DIRETO — não uma cópia, não uma aproximação.
-`tools/optimizer_consistency_gate.py` formaliza isso como invariante testável:
+`tools/validation/optimizer_consistency_gate.py` formaliza isso como invariante testável:
 toda decisão de posicionamento carrega `canonical_gate` (qual implementação
 foi usada) e é REAVALIADA contra o estado final, não confia no resultado
 gravado no momento da escolha. `tools/furniture_overlap_gate.py::
@@ -76,7 +76,7 @@ ficou null).
 `geometry_intent` (STRUCTURAL/FURNITURE/SOFT/DECORATIVE/FIXTURE) e
 `shape_policy` (rotação permitida? forma não-retangular permitida?)
 EXPLICITAMENTE, por um registro central (`KIND_REGISTRY`), não por inferência
-de forma. `tools/semantic_geometry_contract_gate.py` torna a ausência de
+de forma. `tools/validation/semantic_geometry_contract_gate.py` torna a ausência de
 declaração um estado visível (`WARN_LEGACY_SEMANTICS`/`FAIL_MISSING_SEMANTICS`),
 não um "provavelmente está bem".
 
@@ -113,7 +113,7 @@ consumido) — a causa raiz de praticamente todo incidente de "OOM
 inesperado" em Kubernetes; bounding box de uma hitbox de jogo != zona real
 de interação (uma espada tem alcance maior que seu sprite).
 
-**Implementação**: `tools/collision_envelope_gate.py::resolve_envelope()` —
+**Implementação**: `tools/validation/collision_envelope_gate.py::resolve_envelope()` —
 `collision_footprint` só existe se `interaction_policy.furniture_overlap ==
 "EXCLUSIVE"` foi DECLARADO; nunca é derivado automaticamente do bbox visual.
 O teste `test_soft_items_never_solid` prova a regressão: um item marcado

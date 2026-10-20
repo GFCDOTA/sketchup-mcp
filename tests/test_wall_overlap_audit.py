@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.wall_overlap_audit import audit_wall_overlaps
+from tools.validation.wall_overlap_audit import audit_wall_overlaps
 
 REPO = Path(__file__).resolve().parents[1]
 

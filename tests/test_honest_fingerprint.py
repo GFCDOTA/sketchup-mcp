@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from tools.flat_white_gate import (
+from tools.validation.flat_white_gate import (
     NEUTRAL_DOM_WARN,
     WHITE_FRAC_FAIL,
     flat_white_check,

@@ -239,7 +239,7 @@ Lido e confirmado nesta sessão:
 - `tools/run_deterministic_gates.py` — `run_all()`, exit PASS=0/FAIL=1/INCOMPLETE=3, gates opening_host/wall_overlap/render_bbox/wall_presence/railing/position_fidelity.
 - `tools/geometry_sanity.py` — `audit()` (hermético) + `sanity_room()` (consensus): outside_room/blocks_door/degenerate/absurd/off_axis.
 - `tools/furniture_overlap_gate.py` — `overlap_gate()`: móvel-sobre-móvel (footprint×altura), FAIL≥30% / WARN≥12%.
-- `tools/visual_regression_gate.py` — scaffold IMPROVED/SAME/WORSE preenchido **só por humano** ("auto looks-like-PDF is exactly what the vision oracle was proven unable to do").
+- `tools/validation/visual_regression_gate.py` — scaffold IMPROVED/SAME/WORSE preenchido **só por humano** ("auto looks-like-PDF is exactly what the vision oracle was proven unable to do").
 - `tools/run_skp_visual_review.py` + `core/schemas/visual_findings.schema.json` (v1) — findings tipados com `suspected_owner`/`proposed_fix`; **auto-fix é Follow-up não implementado** (FP-030 §Loop/§Follow-ups).
 - `docs/specs/FP-030_visual_oracle_gate.md` — taxonomia de findings de aparência (floating_door, orphan_glass, bad_window_aperture, etc.) e axes qualitativos (global_visual, scale_rotation → WARN needs human/agent).
 - `.claude/skills/autonomous-fidelity-loop/SKILL.md` — protocolo do ciclo (log, heartbeat, patinagem, parar em RED/NEEDS-HUMAN); hoje é prosa seguida à mão.

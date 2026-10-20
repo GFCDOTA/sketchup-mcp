@@ -18,7 +18,7 @@ colocado DEPOIS no mesmo cômodo).
      disse. Divergência (provenance disse PASS, reavaliação diz FAIL) = FAIL
      duro — é exatamente "optimizer aprovou, CI reprovou" acontecendo de novo.
 
-Uso: python -m tools.optimizer_consistency_gate [room_id|all]
+Uso: python -m tools.validation.optimizer_consistency_gate [room_id|all]
 """
 from __future__ import annotations
 

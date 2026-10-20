@@ -4,8 +4,8 @@ openings (gate :8765 verdict = approach B).
 
 The planta_74 consensus fragments each architectural wall into short collinear
 segments with gaps at the openings, so the stored opening->wall_id points at a
-stub that does not host the opening (tools/opening_host_audit flags 9/12) and a
-human wall duplicates an extractor wall (tools/wall_overlap_audit flags 1).
+stub that does not host the opening (tools/validation/opening_host_audit flags 9/12) and a
+human wall duplicates an extractor wall (tools/validation/wall_overlap_audit flags 1).
 
 This deterministically:
   1. merges collinear walls (same orientation, same fixed coord within
@@ -23,7 +23,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from tools.opening_host_audit import _seg_dist
+from tools.validation.opening_host_audit import _seg_dist
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 

@@ -20,8 +20,8 @@ from pathlib import Path
 
 import pytest
 
-from tools.position_fidelity_gate import compare
-from tools.railing_exact_match_gate import audit_railing_exact_match
+from tools.validation.position_fidelity_gate import compare
+from tools.validation.railing_exact_match_gate import audit_railing_exact_match
 from tools.run_deterministic_gates import run_all
 
 ROOT = Path(__file__).resolve().parents[1]

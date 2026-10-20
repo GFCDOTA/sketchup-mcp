@@ -63,7 +63,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from tools.consult_tier import choose_gate_tier
-from tools.gate_verdict import parse_verdict
+from tools.validation.gate_verdict import parse_verdict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 

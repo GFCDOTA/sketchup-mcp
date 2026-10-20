@@ -6,7 +6,7 @@ polygon (post-canonicalise) per the FP-026 heuristic.
 
 Run:
 
-    python -m tools.diagnose_wall_stubs <consensus.json> --plant <name>
+    python -m tools.validation.diagnose_wall_stubs <consensus.json> --plant <name>
 
 Outputs land under ``artifacts/review/<plant>/``.
 """

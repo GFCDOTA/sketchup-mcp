@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import copy
 
-from tools.position_fidelity_gate import compare
+from tools.validation.position_fidelity_gate import compare
 
 
 def _base():

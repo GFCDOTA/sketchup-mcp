@@ -60,7 +60,7 @@ vendor/CubiCasa5k/repo/
 .ai_triage/
 
 # temp / backup files — never commit
-# Enforced by tools/repo_health_gate.py E001 (see docs/REPO_HYGIENE.md §5)
+# Enforced by tools/validation/repo_health_gate.py E001 (see docs/REPO_HYGIENE.md §5)
 .tmp_*
 *.tmp
 *.bak

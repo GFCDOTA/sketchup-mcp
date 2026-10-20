@@ -38,7 +38,7 @@ walls visíveis no render top + count de groups `Floor_Group_*` /
 - **FAIL**: stub >X.X cm visível no render
 
 Evidência: render top com overlay debug. Ferramenta:
-`tools/diagnose_wall_stubs.py`.
+`tools/validation/diagnose_wall_stubs.py`.
 
 ### A3 — Sem notches / slivers no shell polygon
 

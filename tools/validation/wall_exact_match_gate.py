@@ -22,7 +22,7 @@ import argparse
 import math
 import sys
 
-from tools.gate_util import load_json, pt_seg_dist
+from tools.validation.gate_util import load_json, pt_seg_dist
 
 MISSING_PT = 8.0      # trecho contiguo sem cobertura p/ contar como faltante (~0.2m)
 JUNCTION_GAP_PT = 6.0  # endpoint solto vs parede mais proxima (~0.15m em pdf-pt)

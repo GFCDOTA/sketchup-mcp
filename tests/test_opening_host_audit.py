@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.opening_host_audit import audit_opening_hosts
+from tools.validation.opening_host_audit import audit_opening_hosts
 
 REPO = Path(__file__).resolve().parents[1]
 

@@ -13,7 +13,7 @@ que dá pra checar ESTATICAMENTE sobre os arquivos TRACKED + o working tree:
    de módulo) ou conter o literal `0.19/5.4`. Qualquer outro `.py` deve IMPORTAR de
    `core.scale`. (Mata a doença de múltiplas fontes de verdade — Felipe 2026-06-08.)
 
-Uso:  python tools/repo_health_gate.py        (exit 1 se violar)
+Uso:  python -m tools.validation.repo_health_gate        (exit 1 se violar)
 Tb roda como pytest (test_repo_health).
 """
 from __future__ import annotations

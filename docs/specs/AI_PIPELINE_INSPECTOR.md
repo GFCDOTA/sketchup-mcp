@@ -769,7 +769,7 @@ core/observability/events.py          # envelope, enums de category/status, cat�
 core/observability/sink.py            # append jsonl + rotação + truncated honesto
 core/observability/redact.py          # allowlist + regex de segredo
 core/observability/context.py         # contextvars runId/spanId/parentSpanId/seq
-core/observability/gate_adapter.py    # (ou dentro de tools/gate_verdict.py)
+core/observability/gate_adapter.py    # (ou dentro de tools/validation/gate_verdict.py)
 ops/estudio-front/inspector.html      # a tela
 ops/estudio-front/assets/vendor/*     # React+Babel vendorizados (tirar CDN)
 ops/estudio-front/DESIGN.md           # fonte da verdade visual
@@ -792,7 +792,7 @@ tools/ollama_bridge.py                   # ler prompt_eval_count/eval_count (hoj
 tools/oracle_providers.py                # emit nas chamadas de juiz
 tools/run_deterministic_gates.py         # emit por gate via adapter
 tools/correction_loop.py                 # emit cycle/retry/correction/terminal
-tools/gate_verdict.py                    # normalizador
+tools/validation/gate_verdict.py                    # normalizador
 tools/mcp_server/server.py               # decorator de tool → tool.started/finished
 ops/estudio-front/server.py              # rotas /inspector, /api/trace*, SSE
 ops/estudio-front/rag_chat.py            # emit + preservar chunk rejeitado

@@ -2,7 +2,7 @@
 (core/spatial_semantics.py). Hermético (boxes sintéticos)."""
 from __future__ import annotations
 
-from tools.semantic_geometry_contract_gate import audit
+from tools.validation.semantic_geometry_contract_gate import audit
 
 RECT = [[10, 10], [34, 10], [34, 34], [10, 34]]
 ROTATED_RECT = [[10, 10], [30, 12], [28, 32], [8, 30]]   # retangulo real, so girado

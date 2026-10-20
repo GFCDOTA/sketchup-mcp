@@ -66,7 +66,7 @@ OVERLAP = {                                   # tools/furniture_overlap_gate
     "warns": ["Bancada × Geladeira: 180 cm² sobrepostos (4% do menor)"],
 }
 
-SEMANTIC = {                                  # tools/semantic_geometry_contract_gate
+SEMANTIC = {                                  # tools/validation/semantic_geometry_contract_gate
     "overall": "FAIL", "n_parts": 41, "n_fail": 3,
     "findings": [{"detail": "parte sem geometry_intent", "severity": "FAIL"},
                  {"detail": "interaction_policy ausente", "severity": "FAIL"},

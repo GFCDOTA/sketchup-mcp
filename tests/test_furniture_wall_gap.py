@@ -2,7 +2,7 @@
 sem dados reais nem coordenadas de consensus."""
 from __future__ import annotations
 
-from tools.furniture_wall_gap import audit, is_planned, perp_gap
+from tools.validation.furniture_wall_gap import audit, is_planned, perp_gap
 
 WALL_V = (0.0, 0.0, 0.0, 3.0)  # parede vertical em x=0, y 0..3
 

@@ -5,7 +5,7 @@ Hermético (usa evaluate_decisions com circulation_gate_fn injetado — não
 depende do consensus real)."""
 from __future__ import annotations
 
-from tools.optimizer_consistency_gate import _EXPECTED_CANONICAL_GATE_PREFIX, evaluate_decisions
+from tools.validation.optimizer_consistency_gate import _EXPECTED_CANONICAL_GATE_PREFIX, evaluate_decisions
 
 GOOD_CANONICAL = _EXPECTED_CANONICAL_GATE_PREFIX + "/test-version"
 

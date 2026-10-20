@@ -748,7 +748,7 @@ def build_door_leaf(parent_ents, opening, host_wall, _thickness_pt, material, in
   along = axis_idx == 0 ? cx.to_f : cy.to_f
   width_pt = opening['opening_width_pts'].to_f
   hinge_side = opening['hinge_side'] || opening['hinge'] || 'left'
-  # Lado do swing medido do arco do PDF (tools/door_swing_audit.py, vf_004):
+  # Lado do swing medido do arco do PDF (tools/validation/door_swing_audit.py, vf_004):
   # 'pos' = folha na face +cross do wall, 'neg' = face -cross.
   # Default 'pos' preserva o comportamento legado p/ consensus sem o campo.
   swing_side = opening['swing_side'] || 'pos'

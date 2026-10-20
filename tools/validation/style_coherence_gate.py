@@ -5,7 +5,7 @@ auto-julga APARENCIA (isso e o GPT) — checa o deterministico:
   (1) MATERIAL_COHERENCE — todo kind load-bearing foi recolorido p/ o estilo (sem vazar default);
   (2) COMPACT_SCALE — moveis cabem no comodo compacto (footprint/area util + rack raso).
 
-Uso: PT_TO_M=0.0259 python -m tools.style_coherence_gate r002 [--style industrial]
+Uso: PT_TO_M=0.0259 python -m tools.validation.style_coherence_gate r002 [--style industrial]
 """
 from __future__ import annotations
 

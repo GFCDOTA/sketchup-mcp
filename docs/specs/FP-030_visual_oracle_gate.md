@@ -266,7 +266,7 @@ they contribute WARN only.
 
 When the oracle inspects a region flagged by these examples, it
 must cross-check the FP-026 detector
-(`tools/diagnose_wall_stubs.py`) before issuing a FAIL. Each
+(`tools/validation/diagnose_wall_stubs.py`) before issuing a FAIL. Each
 ambiguous example carries an `ambiguous_or_false_positive_regions`
 list in its `.expected.json` enumerating likely false positives:
 

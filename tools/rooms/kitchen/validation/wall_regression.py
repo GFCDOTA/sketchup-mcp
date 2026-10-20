@@ -16,7 +16,7 @@ import argparse
 import math
 import sys
 
-from tools.gate_util import load_json, pt_seg_dist
+from tools.validation.gate_util import load_json, pt_seg_dist
 
 # Regiao COZINHA / SALA DE JANTAR / SALA DE ESTAR (open-plan), em pdf-points.
 # Acima da frente do terraco (y>~458, que e a faixa do gradil — preservada),

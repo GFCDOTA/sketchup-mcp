@@ -1,7 +1,7 @@
 """Gate reverso PDF→consensus pra alturas de barreira (review 2026-07-11).
 
 O PDF escreve alturas como texto ("PEITORIL H=1,10M", "MURETA H=0,70M").
-tools/pdf_height_labels_audit.py extrai e verifica contra o consensus —
+tools/validation/pdf_height_labels_audit.py extrai e verifica contra o consensus —
 a direção que era 100% cega (elemento nomeado pelo PDF e ausente do .skp
 não disparava nada).
 
@@ -16,7 +16,7 @@ Estado pinado da planta_74 (pós-curadoria 2026-07-11, chip do Felipe):
 """
 from __future__ import annotations
 
-from tools.pdf_height_labels_audit import audit
+from tools.validation.pdf_height_labels_audit import audit
 
 
 def test_planta_74_height_labels_extracted():

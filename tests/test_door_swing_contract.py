@@ -9,7 +9,7 @@ o PDF mostra abrindo pra DENTRO da sala). Causa raiz dupla:
 2. CONSUMO: build_plan_shell_skp.rb::build_door_leaf admitia no comentário
    "We don't have side info; use cross+offset" — TODA folha no lado +cross.
 
-A medida vem de tools/door_swing_audit.py (arcos bezier do PDF, sem
+A medida vem de tools/validation/door_swing_audit.py (arcos bezier do PDF, sem
 fabricação). Estes testes pinam o dado e o contrato do builder.
 
 ⚠ O .rb não executa em pytest (precisa do SketchUp) — o teste do builder é
@@ -26,7 +26,7 @@ REPO = Path(__file__).resolve().parent.parent
 FIXTURE = REPO / "fixtures" / "planta_74" / "consensus_with_human_walls_and_soft_barriers.json"
 RB = REPO / "tools" / "sketchup" / "shell" / "build_plan_shell_skp.rb"
 
-# Verdade medida do PDF (tools.door_swing_audit, 2026-07-11) — não editar sem
+# Verdade medida do PDF (tools.validation.door_swing_audit, 2026-07-11) — não editar sem
 # re-rodar o audit contra o PDF.
 PDF_TRUTH = {
     "h_o000": {"swing_side": "neg", "hinge_side": "left"},   # ENTRADA -> sala
@@ -65,7 +65,7 @@ def test_fixture_swing_and_hinge_match_pdf_measurement():
 
 def test_door_swing_audit_is_green_against_fixture():
     """O audit determinístico (PDF -> arco -> swing/hinge) fecha com a fixture."""
-    from tools.door_swing_audit import audit
+    from tools.validation.door_swing_audit import audit
     rows = audit("planta_74")
     bad = [r for r in rows if not (r.get("swing_ok") and r.get("hinge_ok"))]
     assert not bad, f"door_swing_audit divergente: {bad}"

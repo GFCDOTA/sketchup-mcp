@@ -69,7 +69,7 @@ When you find one of these, emit a finding with the matching
 You must NOT classify a `bad_real_ambiguous` pattern as `FAIL`.
 Examples include: red circles in `bad_wall_stubs_*` images
 that also cover door jambs / window mullions (correct
-geometry). Cross-check with `tools/diagnose_wall_stubs.py`
+geometry). Cross-check with `tools/validation/diagnose_wall_stubs.py`
 output if available; otherwise default to `WARN`.
 
 ## Output — STRICT JSON only

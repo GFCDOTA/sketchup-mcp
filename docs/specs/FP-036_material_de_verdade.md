@@ -15,7 +15,7 @@ Resultado: material so existe "de verdade" no render V-Ray; o artefato humano pr
 
 1. **Texturizar o path interativo** — `pl_material` (em `place_layout_skp.rb`) passa a aceitar e aplicar `m.texture` por kind, lendo um mapa `kind -> png` injetado pelo Python (`LAYOUT_TEX_MAP` no ENV, espelhando o que `texture_map_for(style)` ja produz). `kind` continua sendo a **fonte unica**: cada material `ph_<kind>` recebe a textura do SEU kind ou nenhuma — jamais pintar tudo com a 1a peca.
 2. **Token de finish/BRDF por kind** em `style_spec.py` — uma `kind_finish: dict` (`kind -> {finish, roughness, metalness, tile_in}`) destilada de `references/materials/*.md`, consumida (a) pelo path interativo pra setar `m.alpha`/cor-de-reflexo aproximada quando aplicavel e (b) como contrato unico tambem pro V-Ray (substitui os numeros hardcoded espalhados em `vray_export.rb`/`tweak_vrscene.py`). Sem inventar valor: cada entrada cita a faixa do `.md`.
-3. **`flat_white_check` gate** (`tools/flat_white_gate.py`) — gate DETERMINISTICO que le o render `after_top`/`after_iso` via `tools/interior_studio/render_fingerprint.py` e FALHA se os moveis estao chapados de branco / sem variacao (proxy de "sem textura"): fracao de pixel quase-branco + baixa variancia local nas zonas de movel.
+3. **`flat_white_check` gate** (`tools/validation/flat_white_gate.py`) — gate DETERMINISTICO que le o render `after_top`/`after_iso` via `tools/interior_studio/render_fingerprint.py` e FALHA se os moveis estao chapados de branco / sem variacao (proxy de "sem textura"): fracao de pixel quase-branco + baixa variancia local nas zonas de movel.
 4. **Fio na planta real** — `furnish_apartment.py` injeta o `LAYOUT_TEX_MAP` no ENV (a partir de `texture_map_for(FURNISH_STYLE)`), gera o `.skp` texturizado e roda o `flat_white_check` antes de promover. Entrega o `.skp` pro Felipe dar o veredito visual.
 
 ## Non-goals
@@ -34,7 +34,7 @@ Resultado: material so existe "de verdade" no render V-Ray; o artefato humano pr
 | `tools/rooms/shared/materials.py` | `StyleSpec` ganha `kind_finish: dict` (`kind -> {finish,roughness,metalness,tile_in}`); novo `finish_map_for(style)`. `texture_map_for` ja existe (REAL) — passa a ser a fonte consumida pelo interativo tambem. | NOVO campo (estende REAL) |
 | `tools/furnish_apartment.py` | `main()` injeta `env["LAYOUT_TEX_MAP"]=json(texture_map_for(style))` e `env["LAYOUT_TEX_DIR"]=assets/textures/procedural` quando `FURNISH_STYLE` setado; chama `flat_white_check` no render gerado antes de promover. | NOVO (3 linhas + call) |
 | `tools/place_layout_skp.py` | mesma injecao de `LAYOUT_TEX_MAP`/`LAYOUT_TEX_DIR` no `env` (slice de prova r002). | NOVO |
-| `tools/flat_white_gate.py` | **NOVO** — `flat_white_check(png_path, style) -> {result, fails, warns, metrics}` usando `render_fingerprint.fingerprint`. CLI `python -m tools.flat_white_gate <png>`. | NOVO (STUB->REAL) |
+| `tools/validation/flat_white_gate.py` | **NOVO** — `flat_white_check(png_path, style) -> {result, fails, warns, metrics}` usando `render_fingerprint.fingerprint`. CLI `python -m tools.validation.flat_white_gate <png>`. | NOVO (STUB->REAL) |
 | `tools/gen_textures.py` | (se faltar PNG pra algum kind do mapa) adicionar a textura procedural correspondente. So se um kind do `texture_map_for` nao tiver png. | EDIT condicional |
 | `assets/textures/procedural/*.png` | novos PNGs so se gerados por `gen_textures.py` (auto-contido). | possivel NOVO |
 | `references/materials/*.md` | leitura-fonte do `kind_finish` (RGB+roughness+metalness ja documentados). Sem mudanca de conteudo, so consumo. | REAL (read-only) |
@@ -124,7 +124,7 @@ def flat_white_check(png, style):
 - [ ] `pl_material` (place_layout_skp.rb) aplica `m.texture` por kind quando ha png; fallback chapado preservado.
 - [ ] `place_layout_skp.py` e `furnish_apartment.py` injetam `LAYOUT_TEX_MAP` (de `texture_map_for(style)`) + `LAYOUT_TEX_DIR` no ENV.
 - [ ] `style_spec.py` ganha `kind_finish` + `finish_map_for`, cada valor citando `references/materials/*.md`.
-- [ ] `tools/flat_white_gate.py` real (nao stub), usando `render_fingerprint.py`, com CLI; thresholds calibrados (baseline chapado -> FAIL/WARN; texturizado -> PASS) via micro-fixture ANTES da planta real.
+- [ ] `tools/validation/flat_white_gate.py` real (nao stub), usando `render_fingerprint.py`, com CLI; thresholds calibrados (baseline chapado -> FAIL/WARN; texturizado -> PASS) via micro-fixture ANTES da planta real.
 - [ ] Todos os testes da tabela verdes (incl. o contrato-texto do `.rb` com FLAG de confirmacao SU).
 - [ ] Render V-Ray default (sofa-sala/quarto) sem regressao (byte-equivalente OU diff documentado).
 - [ ] `.skp` texturizado da planta_74 gerado, promovido pra `artifacts/planta_74/furnished/`, e ENTREGUE pro Felipe pro veredito visual (IMPROVED/SAME/WORSE e dele).
@@ -138,7 +138,7 @@ def flat_white_check(png, style):
 - Fonte unica da cor: `apply_style` (`style_spec.py` 93-106) — `kind` -> `ph_<kind>`.
 - PNGs versionados + gerador: `assets/textures/procedural/*.png` (17 arquivos) via `tools/gen_textures.py` (procedural + override PBR CC0 de `assets/textures/pbr/`).
 - Finish/roughness/metalness (linguagem-fonte do `kind_finish`): `references/materials/{metal,wood,lacquer,stone}.md` (ex. grafite fosco roughness 0.6-0.8 metalness medio; inox escovado roughness 0.3-0.5 metalness alto; laca gloss roughness baixa).
-- Molde de gate deterministico a espelhar: `tools/style_coherence_gate.py` (PASS/WARN/FAIL + metrics; nao auto-julga aparencia).
+- Molde de gate deterministico a espelhar: `tools/validation/style_coherence_gate.py` (PASS/WARN/FAIL + metrics; nao auto-julga aparencia).
 - Extrator pro flat-white gate: `tools/interior_studio/render_fingerprint.py` (`fingerprint`, `clipped_white_px`, `palette`, `zone_colors`, `contrast_std`).
 - Caller da planta inteira: `tools/furnish_apartment.py` `main()` (456-501) -> `place_layout_skp.rb` via ENV.
 - Regras: `apps/sketchup-mcp/.claude/CLAUDE.md` (kind=verdade, develop-first, headless proibido em dev, promover runs/->artifacts/); veredito visual = humano (memoria `feedback_visual_review_chrome_only` / VISUAL_REVIEW gate).

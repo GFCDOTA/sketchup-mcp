@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tools.gate_filefetch import (
+from tools.validation.gate_filefetch import (
     build_followup,
     is_allowed,
     parse_need_files,

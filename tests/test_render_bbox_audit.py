@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from tools.render_bbox_audit import audit_render_bbox, bbox_margins
+from tools.validation.render_bbox_audit import audit_render_bbox, bbox_margins
 
 
 def _canvas(bg=200):
