@@ -7,7 +7,7 @@
 
 ## Spec (pronto, por código)
 
-`configs/sofa_vray_material_spec.json` — **SofaVRayMaterialSpec**, de CLASSE por `material_style`,
+`tools/rooms/living/capabilities/ruby/sofa_program/configs/sofa_vray_material_spec.json` — **SofaVRayMaterialSpec**, de CLASSE por `material_style`,
 com os valores de partida do GPT (dark: roughness 0.85, reflection 0.20, bump 0.045, sheen 0.35,
 fuzz 0.25, fresnel on) referenciando os maps de `sofa_fabric_material.py`. Render-engine-agnóstico:
 um applier consome isto e cria o `VRayBRDF`.

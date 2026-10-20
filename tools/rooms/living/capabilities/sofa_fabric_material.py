@@ -4,13 +4,13 @@ parametrico por material_style). Track de material (GPT, geometria fechada/PASS)
 nao copiar imagem de tecido; GERAR mapas tileaveis (albedo + bump/weave) que matam
 o "RGB chapado" sem virar ruido, e preparam o caminho do V-Ray.
 
-Saida: textures/fabric_<style>_albedo.png  +  fabric_<style>_bump.png  (1024, tileavel).
+Saida: assets/textures/sofa_fabric/fabric_<style>_albedo.png  +  fabric_<style>_bump.png  (1024, tileavel).
 Aplicado no SketchUp com UV em escala real (tile_m, default 0.30 m) em build_materials.
 
 Parametros (idioma do GPT): base_rgb, tile_m, value_variation, weave_contrast,
 large_noise, bump_strength. CLASSE: mesma estrutura p/ os 3 estilos, sem exemplar.
 
-Rodar:  <venv>/python scripts/sofa_fabric_material.py [--size 1024] [--out textures]
+Rodar:  <venv>/python -m tools.rooms.living.capabilities.sofa_fabric_material [--size 1024] [--out assets/textures/sofa_fabric]
 """
 import argparse
 import os
@@ -101,8 +101,8 @@ def generate(style, out_dir, size=1024):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--size', type=int, default=1024)
-    here = str(Path(__file__).resolve().parents[4])   # raiz do repo (textures/ fica na raiz)
-    ap.add_argument('--out', default=os.path.join(here, 'textures'))
+    here = str(Path(__file__).resolve().parents[4])   # raiz do repo (texturas do sofa em assets/textures/sofa_fabric/)
+    ap.add_argument('--out', default=os.path.join(here, 'assets', 'textures', 'sofa_fabric'))
     ap.add_argument('--style', default=None, help='um estilo so (default: todos)')
     a = ap.parse_args()
     styles = [a.style] if a.style else list(FABRIC_SPECS)

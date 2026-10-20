@@ -131,12 +131,12 @@ module SofaGenerator
 
   # Track de material (GPT, geometria fechada): tecido = textura procedural tileavel
   # (albedo) em UV de escala real, nao mais RGB chapado. Os mapas saem do
-  # sofa_fabric_material.py em textures/fabric_<style>_albedo.png. Uma unica fabric
+  # sofa_fabric_material.py em assets/textures/sofa_fabric/fabric_<style>_albedo.png. Uma unica fabric
   # nas pecas estofadas (fab/base/back) = mais realista. seam/leg seguem solidos.
   FABRIC_TILE_M = 0.30  # escala fisica do tile (GPT). CLASSE: igual p/ todo material_style.
 
   def fabric_albedo_path(ms)
-    File.join(File.expand_path('../../../../../..', __dir__), 'textures', "fabric_#{ms}_albedo.png")
+    File.join(File.expand_path('../../../../../..', __dir__), 'assets', 'textures', 'sofa_fabric', "fabric_#{ms}_albedo.png")
   end
 
   def build_materials(model, cfg)

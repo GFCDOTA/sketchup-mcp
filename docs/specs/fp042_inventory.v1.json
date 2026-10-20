@@ -6625,39 +6625,39 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
-      "path": "configs/sofa_archetypes.json",
+      "path": "tools/rooms/living/capabilities/ruby/sofa_program/configs/sofa_archetypes.json",
       "domain": "tooling_ci",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P1",
+      "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "versioned_configurations",
+      "architecture_owner": "room_module_governance",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "configs/sofa_eval_cases.json",
+      "path": "tools/rooms/living/capabilities/ruby/sofa_program/configs/sofa_eval_cases.json",
       "domain": "tooling_ci",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P1",
+      "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "versioned_configurations",
+      "architecture_owner": "room_module_governance",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "configs/sofa_schema.json",
+      "path": "tools/rooms/living/capabilities/ruby/sofa_program/configs/sofa_schema.json",
       "domain": "tooling_ci",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P1",
+      "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "versioned_configurations",
+      "architecture_owner": "room_module_governance",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "configs/sofa_vray_material_spec.json",
+      "path": "tools/rooms/living/capabilities/ruby/sofa_program/configs/sofa_vray_material_spec.json",
       "domain": "tooling_ci",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P1",
+      "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "versioned_configurations",
+      "architecture_owner": "room_module_governance",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
@@ -9740,378 +9740,392 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/check/sofa_3q.png",
+      "path": "artifacts/review/sofa_program/check/sofa_3q.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/check/sofa_3seat_v1.skp",
+      "path": "artifacts/review/sofa_program/check/sofa_3seat_v1.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/check/sofa_front.png",
+      "path": "artifacts/review/sofa_program/check/sofa_front.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/check/sofa_side.png",
+      "path": "artifacts/review/sofa_program/check/sofa_side.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/check/sofa_top.png",
+      "path": "artifacts/review/sofa_program/check/sofa_top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/bench_seat_tight_back_exposed_legs.skp",
+      "path": "artifacts/review/sofa_program/check/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/bench_seat_tight_back_exposed_legs.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/front.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/side.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/three_quarter.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/contact_sheet_archetypes.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/validation.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/contact_sheet_generalization.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_archetypes.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/contact_sheet_ref_vs_generated.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_generalization.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/eval_3seat_bench_wide_arm_recessed_base.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_ref_vs_generated.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/eval_3seat_bench_wide_arm_recessed_base.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/front.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/side.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/three_quarter.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/eval_loveseat_slim_arm_tight_back.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/validation.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/eval_loveseat_slim_arm_tight_back.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/front.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/side.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/three_quarter.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/eval_low_modern_dark_3seat.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/validation.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/eval_low_modern_dark_3seat.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/front.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/side.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/three_quarter.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/gpt_review/eval_low_modern_dark_3seat_prompt.txt",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/validation.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/gpt_review/eval_low_modern_dark_3seat_review.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/eval_low_modern_dark_3seat_prompt.txt",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/gpt_review/tufted_primitive_iso.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/eval_low_modern_dark_3seat_review.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/primitives/primitives_front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/tufted_primitive_iso.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/primitives/primitives_three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/primitives/primitives_front.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/primitives/primitives_three_quarter.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/front.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/straight_2seat_slim_arm_split_cushion_back.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/side.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/straight_2seat_slim_arm_split_cushion_back.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/three_quarter.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/validation.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/front.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/straight_3seat_track_arm_split_cushion_back.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/side.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/straight_3seat_track_arm_split_cushion_back.skp",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/three_quarter.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/top.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_eval/suite_done.txt",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/validation.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_vray/dark_lounge_vray_baseline.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/suite_done.txt",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_vray/dark_lounge_vray_ground_autoexp.png",
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_baseline.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_vray/dark_lounge_vray_material_complete.png",
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_ground_autoexp.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "renders/sofa_vray/dark_lounge_vray_microirregular.png",
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_material_complete.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_microirregular.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_vray/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -10181,24 +10195,6 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "scripts/generalization_gate.py",
-      "domain": "shared_or_cross_cutting",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "shared_gate_automation",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "scripts/make_gpt_review_sheet.py",
-      "domain": "runtime_or_orchestrator",
-      "disposition": "retain_legacy_public_or_tooling_path",
-      "phase": "P4",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "tool_owner": "repository_automation_scripts",
-      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
-    },
-    {
       "path": "scripts/set_clipboard_image.ps1",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
@@ -10206,15 +10202,6 @@
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "tool_owner": "repository_automation_scripts",
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
-    },
-    {
-      "path": "scripts/sofa_fabric_material.py",
-      "domain": "room_living_or_shared",
-      "disposition": "retain_path_with_explicit_runtime_owner",
-      "phase": "P3",
-      "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "sofa_legacy_evaluation_script",
-      "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "tests/__init__.py",
@@ -11493,42 +11480,42 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
-      "path": "textures/fabric_dark_charcoal_albedo.png",
+      "path": "assets/textures/sofa_fabric/fabric_dark_charcoal_albedo.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "textures/fabric_dark_charcoal_bump.png",
+      "path": "assets/textures/sofa_fabric/fabric_dark_charcoal_bump.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "textures/fabric_light_linen_albedo.png",
+      "path": "assets/textures/sofa_fabric/fabric_light_linen_albedo.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "textures/fabric_light_linen_bump.png",
+      "path": "assets/textures/sofa_fabric/fabric_light_linen_bump.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "textures/fabric_mid_gray_albedo.png",
+      "path": "assets/textures/sofa_fabric/fabric_mid_gray_albedo.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "textures/fabric_mid_gray_bump.png",
+      "path": "assets/textures/sofa_fabric/fabric_mid_gray_bump.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -17537,6 +17524,15 @@
     },
     {
       "path": "tests/test_fp044_readme.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_fp044_sofa_paths.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",

@@ -149,3 +149,15 @@ seguem onde estão até a decisão do Felipe — ver [decisões abertas](../spec
 Siga a convenção da [cozinha](../../tools/rooms/kitchen/README.md): `README.md` primeiro; `specialist.md`,
 `specialist.v1.json` e `knowledge/index.v1.json` quando o perfil existir (P5); `capabilities/` só quando houver adapter
 comprovado. Não crie pasta vazia: o estado `previsto` do mapa existe para isso.
+
+## FP-044 / F2 — programa do sofá sai da raiz
+
+| Antes | Depois | Observação |
+|---|---|---|
+| `configs/sofa_*.json` | `tools/rooms/living/capabilities/ruby/sofa_program/configs/` | o Ruby resolve por `__dir__`; `ENV['SOFA_*']` continua mandando |
+| `textures/fabric_*_{albedo,bump}.png` | `assets/textures/sofa_fabric/` | mesmo blob; spec V-Ray e gerador de tecido repontados |
+| `renders/check`, `renders/sofa_eval`, `renders/sofa_vray` (histórico versionado) | `artifacts/review/sofa_program/` | evidência; mesmo blob; `check/` e `sofa_vray/` ganharam `README.md` só de proveniência (padrão D-006) |
+| caminhos antigos citados em `references/sofas/*.jsonl` | sem mudança | log histórico: **não** é reescrito; vale a tabela acima para achar o arquivo hoje |
+| saída **nova** dos geradores do sofá (`renders/…`) | `runs/sofa_program/…` (scratch, ignorado pelo git) | o Ruby não grava mais em pasta versionada |
+| `scripts/{generalization_gate,make_gpt_review_sheet,sofa_fabric_material}.py` | `python -m tools.validation.generalization_gate`, `python -m tools.oracle.make_gpt_review_sheet`, `python -m tools.rooms.living.capabilities.sofa_fabric_material` | fachadas removidas (sem consumidores restantes) |
+

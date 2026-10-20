@@ -777,43 +777,6 @@
       "status": "done"
     },
     {
-      "item": "scripts/generalization_gate.py",
-      "kind": "file",
-      "disposition": "move",
-      "destination": "tools/validation/generalization_gate.py",
-      "phase": "P4",
-      "rationale": "Gate de generalização (sem consumidor em código): validação transversal.",
-      "compat": "facade_at_old_path",
-      "risk": "low",
-      "risk_reasons": [],
-      "depth_sensitive": false,
-      "consumers": {
-        "counts": {
-          "data": 1,
-          "docs": 2
-        }
-      },
-      "status": "done"
-    },
-    {
-      "item": "scripts/make_gpt_review_sheet.py",
-      "kind": "file",
-      "disposition": "move",
-      "destination": "tools/oracle/make_gpt_review_sheet.py",
-      "phase": "P4",
-      "rationale": "Monta folha de revisão para o oráculo.",
-      "compat": "facade_at_old_path",
-      "risk": "low",
-      "risk_reasons": [],
-      "depth_sensitive": false,
-      "consumers": {
-        "counts": {
-          "docs": 3
-        }
-      },
-      "status": "done"
-    },
-    {
       "item": "scripts/set_clipboard_image.ps1",
       "kind": "file",
       "disposition": "decision",
@@ -856,26 +819,6 @@
         "counts": {
           "code": 1,
           "docs": 2
-        }
-      },
-      "status": "done"
-    },
-    {
-      "item": "scripts/sofa_fabric_material.py",
-      "kind": "file",
-      "disposition": "move",
-      "destination": "tools/rooms/living/capabilities/sofa_fabric_material.py",
-      "phase": "P4",
-      "rationale": "Material de tecido do sofá (2 consumidores em código).",
-      "compat": "facade_at_old_path",
-      "risk": "low",
-      "risk_reasons": [],
-      "depth_sensitive": false,
-      "consumers": {
-        "counts": {
-          "code": 2,
-          "data": 1,
-          "docs": 3
         }
       },
       "status": "done"

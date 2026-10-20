@@ -1,7 +1,7 @@
 # SPEC DA CLASSE `sofa`
 
 > **Escopo:** esta spec descreve a **classe** sofá — o conjunto de regras, anatomia e proporções que valem para QUALQUER sofá gerado pelo builder paramétrico. Ela **NÃO** descreve um sofá específico.
-> **Schema:** os campos referenciados vivem em `configs/sofa_schema.json`. Nenhuma regra deve depender de um exemplar.
+> **Schema:** os campos referenciados vivem em `tools/rooms/living/capabilities/ruby/sofa_program/configs/sofa_schema.json`. Nenhuma regra deve depender de um exemplar.
 
 ## Princípios da classe (lei acima de tudo)
 

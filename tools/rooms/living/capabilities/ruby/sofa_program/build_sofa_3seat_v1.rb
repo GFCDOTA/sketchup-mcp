@@ -4,7 +4,7 @@
 # Rodar:  SketchUp.exe <bootstrap.skp> -RubyStartup tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_3seat_v1.rb
 # Saidas (ENV ou default relativo ao repo):
 #   SOFA_OUT_SKP  -> .skp do sofa
-#   SOFA_DIR      -> pasta dos renders (default <repo>/renders/check)
+#   SOFA_DIR      -> pasta dos renders (default <repo>/runs/sofa_program/check)
 #   SOFA_LOG      -> log/sinal de done (ERROR:... se falhar)
 #
 # Decisao 2 vs 3 almofadas de assento: v1 usa 3 ASSENTOS + 3 ENCOSTOS (vincos
@@ -15,7 +15,7 @@ require_relative 'sofa_primitives'
 SP = SofaPrimitives
 
 REPO = File.expand_path('../../../../../..', __dir__)
-RDIR = ENV['SOFA_DIR'] || File.join(REPO, 'renders', 'check')
+RDIR = ENV['SOFA_DIR'] || File.join(REPO, 'runs', 'sofa_program', 'check')
 LOGP = ENV['SOFA_LOG'] || File.join(RDIR, 'build_done.txt')
 OUTP = ENV['SOFA_OUT_SKP'] || File.join(RDIR, 'sofa_3seat_v1.skp')
 

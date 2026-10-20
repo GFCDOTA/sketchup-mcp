@@ -7,13 +7,13 @@ require 'fileutils'
 require_relative 'sofa_generator'
 
 ROOT = File.expand_path('../../../../../..', __dir__)
-LOGP = ENV['SOFA_LOG'] || File.join(ROOT, 'renders', 'sofa_eval', 'from_config_done.txt')
+LOGP = ENV['SOFA_LOG'] || File.join(ROOT, 'runs', 'sofa_program', 'sofa_eval', 'from_config_done.txt')
 
 begin
-  schema = SofaGenerator.load_schema(ENV['SOFA_SCHEMA'] || File.join(ROOT, 'configs', 'sofa_schema.json'))
+  schema = SofaGenerator.load_schema(ENV['SOFA_SCHEMA'] || File.join(__dir__, 'configs', 'sofa_schema.json'))
   cfg = JSON.parse(File.read(ENV['SOFA_CONFIG']))
   cfg = cfg[0] if cfg.is_a?(Array)
-  dir = ENV['SOFA_OUT_DIR'] || File.join(ROOT, 'renders', 'sofa_eval', cfg['id'])
+  dir = ENV['SOFA_OUT_DIR'] || File.join(ROOT, 'runs', 'sofa_program', 'sofa_eval', cfg['id'])
   vj = SofaGenerator.generate(cfg, schema, dir)
   FileUtils.mkdir_p(File.dirname(LOGP))
   File.write(LOGP, "done id=#{cfg['id']} status=#{vj[:status]} bbox=#{vj[:bbox_m]} warns=#{(vj[:warnings] || []).size}\nout=#{dir}\n")

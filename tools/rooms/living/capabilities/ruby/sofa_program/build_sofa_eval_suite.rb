@@ -10,7 +10,7 @@ require_relative 'sofa_primitives'
 
 SP = SofaPrimitives
 ROOT = File.expand_path('../../../../../..', __dir__)
-EVAL = ENV['SOFA_EVAL_DIR'] || File.join(ROOT, 'renders', 'sofa_eval')
+EVAL = ENV['SOFA_EVAL_DIR'] || File.join(ROOT, 'runs', 'sofa_program', 'sofa_eval')
 LOGP = ENV['SOFA_LOG'] || File.join(EVAL, 'suite_done.txt')
 
 # Prancha de PRIMITIVAS isoladas (Fase 11). Se assento/encosto ainda parecerem
@@ -55,9 +55,9 @@ def primitives_board(model, dir)
 end
 
 begin
-  schema = SofaGenerator.load_schema(ENV['SOFA_SCHEMA'] || File.join(ROOT, 'configs', 'sofa_schema.json'))
-  arch = JSON.parse(File.read(ENV['SOFA_ARCHETYPES'] || File.join(ROOT, 'configs', 'sofa_archetypes.json')))
-  evalc = JSON.parse(File.read(ENV['SOFA_EVAL'] || File.join(ROOT, 'configs', 'sofa_eval_cases.json')))
+  schema = SofaGenerator.load_schema(ENV['SOFA_SCHEMA'] || File.join(__dir__, 'configs', 'sofa_schema.json'))
+  arch = JSON.parse(File.read(ENV['SOFA_ARCHETYPES'] || File.join(__dir__, 'configs', 'sofa_archetypes.json')))
+  evalc = JSON.parse(File.read(ENV['SOFA_EVAL'] || File.join(__dir__, 'configs', 'sofa_eval_cases.json')))
   all = arch + evalc
   subset = (ENV['SOFA_SUBSET'] || '').split(',').map(&:strip).reject(&:empty?)
   default_min = %w[

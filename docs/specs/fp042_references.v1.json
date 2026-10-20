@@ -5993,328 +5993,340 @@
       "owner_group": "references"
     },
     {
-      "path": "renders/check/sofa_3q.png",
+      "path": "artifacts/review/sofa_program/check/sofa_3q.png",
       "blob_sha": "b0ff826a55af4593774fe418fcab099cd66d74a1",
       "blob_size": 263705,
       "owner_group": "renders"
     },
     {
-      "path": "renders/check/sofa_3seat_v1.skp",
+      "path": "artifacts/review/sofa_program/check/sofa_3seat_v1.skp",
       "blob_sha": "7056219903bf01ca7c0c579806d9412c7a789b83",
       "blob_size": 292999,
       "owner_group": "renders"
     },
     {
-      "path": "renders/check/sofa_front.png",
+      "path": "artifacts/review/sofa_program/check/sofa_front.png",
       "blob_sha": "e3592dcf9e6980f41459897cd7542f368eeb26b6",
       "blob_size": 20349,
       "owner_group": "renders"
     },
     {
-      "path": "renders/check/sofa_side.png",
+      "path": "artifacts/review/sofa_program/check/sofa_side.png",
       "blob_sha": "b7b9f61291d50c0701b46c29d7ade3ba389c3580",
       "blob_size": 54213,
       "owner_group": "renders"
     },
     {
-      "path": "renders/check/sofa_top.png",
+      "path": "artifacts/review/sofa_program/check/sofa_top.png",
       "blob_sha": "610c559a337211ea0cc66bc612b6f4ee4bf36ac8",
       "blob_size": 74662,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/bench_seat_tight_back_exposed_legs.skp",
+      "path": "artifacts/review/sofa_program/check/README.md",
+      "blob_sha": "d44b4769539cf9bcfd4f0a3e450924d798f915cf",
+      "blob_size": 584,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/bench_seat_tight_back_exposed_legs.skp",
       "blob_sha": "bfe3f25c5d5a4164ff01527f6442c5c5754a4991",
       "blob_size": 224881,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/front.png",
       "blob_sha": "b32ba83c37cc9a7f0fc591a1f46bd3787e17fd0c",
       "blob_size": 23349,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/side.png",
       "blob_sha": "e22d9d634f31a18c8328e22410b8024287bb2b18",
       "blob_size": 44163,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/three_quarter.png",
       "blob_sha": "3f4986158ba783662041052ec7682c79c713b351",
       "blob_size": 175792,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/top.png",
       "blob_sha": "ad8bdf13a93d2aff822432c0281e4d27505bee37",
       "blob_size": 62129,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/bench_seat_tight_back_exposed_legs/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/validation.json",
       "blob_sha": "512645dc3d35be58f33ad84abc25c5585e6af9c5",
       "blob_size": 1790,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/contact_sheet_archetypes.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_archetypes.png",
       "blob_sha": "9305b79592054c0e94f2190278dfdf82ff358c5f",
       "blob_size": 187290,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/contact_sheet_generalization.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_generalization.png",
       "blob_sha": "4cd2cdb18f91110cddb113d38a66673be38ecf47",
       "blob_size": 127949,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/contact_sheet_ref_vs_generated.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_ref_vs_generated.png",
       "blob_sha": "153155cf2bf9e5a37591ff6cf12e4f98bba29c2d",
       "blob_size": 268884,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/eval_3seat_bench_wide_arm_recessed_base.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/eval_3seat_bench_wide_arm_recessed_base.skp",
       "blob_sha": "057c49a1624b679edaa41a55af90038592d0878f",
       "blob_size": 292222,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/front.png",
       "blob_sha": "bb307d34ed42e0b730d69a4e937ebb49df9d4779",
       "blob_size": 17215,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/side.png",
       "blob_sha": "4a1e88dce5c945084711ef6160a1a9513c8b115a",
       "blob_size": 46566,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/three_quarter.png",
       "blob_sha": "f2d0c07b80e7f832ff36af49f508f7fdccdf17b8",
       "blob_size": 195569,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/top.png",
       "blob_sha": "098201dbe7d6b92688948dfa3f5b5e00b53375ae",
       "blob_size": 42963,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/validation.json",
       "blob_sha": "3c4924a8a98b0f3f93c80719ffc329a7dc23e741",
       "blob_size": 2083,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/eval_loveseat_slim_arm_tight_back.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/eval_loveseat_slim_arm_tight_back.skp",
       "blob_sha": "b6b2bea70d192e43f7549e867453fc70cb8cbc2c",
       "blob_size": 246662,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/front.png",
       "blob_sha": "9e267ae0bec84da6fb53b439b5d655ae081daf17",
       "blob_size": 44490,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/side.png",
       "blob_sha": "ce6f6c1b6b5929594c2efe073170c336453b8260",
       "blob_size": 45409,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/three_quarter.png",
       "blob_sha": "13d4975f62fbda50bab5301f5833a70df4f7a6fe",
       "blob_size": 220116,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/top.png",
       "blob_sha": "043271baad2e06f00da7282f0db1c18b391c67c1",
       "blob_size": 144808,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_loveseat_slim_arm_tight_back/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/validation.json",
       "blob_sha": "45660489609c381b7169895a3505cbc5dab9a19b",
       "blob_size": 1898,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/eval_low_modern_dark_3seat.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/eval_low_modern_dark_3seat.skp",
       "blob_sha": "60af3cfc43472967a6308361ec47b122d9d5d6c2",
       "blob_size": 282759,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/front.png",
       "blob_sha": "eced0bf5fb42d9c41d216089ec24177e3d9d88de",
       "blob_size": 50962,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/side.png",
       "blob_sha": "01830144d20a222d2a881eeb663ea9f65ca9aac0",
       "blob_size": 27008,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/three_quarter.png",
       "blob_sha": "52374c280f884b6ba212b54ef6fc70d2afd739a8",
       "blob_size": 179873,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/top.png",
       "blob_sha": "89c90e3e295e34afaab5e6da8ed8eedd882ecdab",
       "blob_size": 73912,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/eval_low_modern_dark_3seat/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/validation.json",
       "blob_sha": "c9874aec12dbb5d4616f80813dbec040bffbcfca",
       "blob_size": 2196,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/gpt_review/eval_low_modern_dark_3seat_prompt.txt",
+      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/eval_low_modern_dark_3seat_prompt.txt",
       "blob_sha": "b312694e49df3c5e959cb5767de1f60dd80a72f0",
       "blob_size": 781,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/gpt_review/eval_low_modern_dark_3seat_review.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/eval_low_modern_dark_3seat_review.png",
       "blob_sha": "ed58af1cb7b033f9d94464203283abe26006555a",
       "blob_size": 143090,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/gpt_review/tufted_primitive_iso.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/tufted_primitive_iso.png",
       "blob_sha": "efbe4325edd886507b95aed022226dcbecd3f5d6",
       "blob_size": 212171,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/primitives/primitives_front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/primitives/primitives_front.png",
       "blob_sha": "8d5dafdf9fda5d5911e037a52847fcd632c136a5",
       "blob_size": 36525,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/primitives/primitives_three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/primitives/primitives_three_quarter.png",
       "blob_sha": "83d94c081e1926822113307e0a3b399b8683705c",
       "blob_size": 171240,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/front.png",
       "blob_sha": "972843951a4b03ec63aae9896f6323fdc02dd87e",
       "blob_size": 18624,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/side.png",
       "blob_sha": "9a0053f4b418573939cfd1e0124824bcc3c1dd0c",
       "blob_size": 46218,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/straight_2seat_slim_arm_split_cushion_back.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/straight_2seat_slim_arm_split_cushion_back.skp",
       "blob_sha": "c10b6cc3f4a59718d0ca9d64649a7110f6c11475",
       "blob_size": 282516,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/three_quarter.png",
       "blob_sha": "6740938c7c8691754cbc6119bc6fbd1b21092e5c",
       "blob_size": 199736,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/top.png",
       "blob_sha": "7f95f1f3fa147d41246f9d198b68ebe0eab3b710",
       "blob_size": 42953,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_2seat_slim_arm_split_cushion_back/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/validation.json",
       "blob_sha": "b1b8385206b4637893e3fe626c6944f7046c3a66",
       "blob_size": 2025,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/front.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/front.png",
       "blob_sha": "e2c54143523d69cc2174dfa1935d9a48ce280d3d",
       "blob_size": 98041,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/side.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/side.png",
       "blob_sha": "aa4b7850677e10fea639ed3dfc38d2ec67801b63",
       "blob_size": 41220,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/straight_3seat_track_arm_split_cushion_back.skp",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/straight_3seat_track_arm_split_cushion_back.skp",
       "blob_sha": "81a9cefee3c5bad1b69d99fd2d08708a4d384e8b",
       "blob_size": 288616,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/three_quarter.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/three_quarter.png",
       "blob_sha": "cfac953cb486e21e233d8b90adf6d86364a895e7",
       "blob_size": 277540,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/top.png",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/top.png",
       "blob_sha": "eba220c408733a0a0792b59d400d9aa38e7afb3c",
       "blob_size": 124195,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/straight_3seat_track_arm_split_cushion_back/validation.json",
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/validation.json",
       "blob_sha": "2752b8c3a4e6338527cb50bf62defe1f18b18539",
       "blob_size": 2310,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_eval/suite_done.txt",
+      "path": "artifacts/review/sofa_program/sofa_eval/suite_done.txt",
       "blob_sha": "118985d859b7d661ad52e1e8708759de836aaa58",
       "blob_size": 150,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_vray/dark_lounge_vray_baseline.png",
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_baseline.png",
       "blob_sha": "e54b6ff92a9af09f4ed9f7f4896f2b59f7e280ca",
       "blob_size": 933553,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_vray/dark_lounge_vray_ground_autoexp.png",
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_ground_autoexp.png",
       "blob_sha": "3d7a807891342ca642ec43f095e75650cb5872cd",
       "blob_size": 568343,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_vray/dark_lounge_vray_material_complete.png",
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_material_complete.png",
       "blob_sha": "928e8e7b920896059c5398bc1dc9cce410e2ca7c",
       "blob_size": 1373496,
       "owner_group": "renders"
     },
     {
-      "path": "renders/sofa_vray/dark_lounge_vray_microirregular.png",
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_microirregular.png",
       "blob_sha": "86efffa4527f63766db46d46fc08f2554101e382",
       "blob_size": 1374507,
       "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_vray/README.md",
+      "blob_sha": "fd4e09a67164ec88d2d8f42a08340d581e7de1d8",
+      "blob_size": 1000,
+      "owner_group": "artifacts"
     },
     {
       "path": "tests/data/overlay_gate/planta74_top.png",
@@ -6323,37 +6335,37 @@
       "owner_group": "other_canonical_reference"
     },
     {
-      "path": "textures/fabric_dark_charcoal_albedo.png",
+      "path": "assets/textures/sofa_fabric/fabric_dark_charcoal_albedo.png",
       "blob_sha": "ec539080b9a84852ea04e0ad9b8f57e0527e2ce7",
       "blob_size": 303993,
       "owner_group": "other_canonical_reference"
     },
     {
-      "path": "textures/fabric_dark_charcoal_bump.png",
+      "path": "assets/textures/sofa_fabric/fabric_dark_charcoal_bump.png",
       "blob_sha": "9391d786a91ccfbb9e139b870fb7b0857ec13c84",
       "blob_size": 4860,
       "owner_group": "other_canonical_reference"
     },
     {
-      "path": "textures/fabric_light_linen_albedo.png",
+      "path": "assets/textures/sofa_fabric/fabric_light_linen_albedo.png",
       "blob_sha": "14911523d8fca72fe7ff7f278833a29d88c46244",
       "blob_size": 540523,
       "owner_group": "other_canonical_reference"
     },
     {
-      "path": "textures/fabric_light_linen_bump.png",
+      "path": "assets/textures/sofa_fabric/fabric_light_linen_bump.png",
       "blob_sha": "7288eee7566ed7d10a85473895cba868210f4858",
       "blob_size": 4857,
       "owner_group": "other_canonical_reference"
     },
     {
-      "path": "textures/fabric_mid_gray_albedo.png",
+      "path": "assets/textures/sofa_fabric/fabric_mid_gray_albedo.png",
       "blob_sha": "9915f282fb91eddbabbed343f75d06979c8e7325",
       "blob_size": 376377,
       "owner_group": "other_canonical_reference"
     },
     {
-      "path": "textures/fabric_mid_gray_bump.png",
+      "path": "assets/textures/sofa_fabric/fabric_mid_gray_bump.png",
       "blob_sha": "7213e1c27607d3a7abee238b9c705e8571190066",
       "blob_size": 4838,
       "owner_group": "other_canonical_reference"

@@ -11,8 +11,8 @@
 1. BUILD    — gerar/ajustar o sistema e rodar a suite (tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb)
 2. RENDER   — front / side / top / three_quarter do(s) caso(s) (ja sai da suite)
 3. SHEET    — montar a folha REFERENCIA x GERADO:
-              python scripts/make_gpt_review_sheet.py <case_id> [modern_dark|kivik]
-              -> renders/sofa_eval/gpt_review/<case>_review.png  +  <case>_prompt.txt
+              python -m tools.oracle.make_gpt_review_sheet <case_id> [modern_dark|kivik]
+              -> runs/sofa_program/sofa_eval/gpt_review/<case>_review.png  +  <case>_prompt.txt
 4. CONSULT  — o AGENTE manda pro GPT (ChatGPT via extensao Claude no Chrome):
               a) powershell -STA -File scripts/set_clipboard_image.ps1 -Path <review.png>
               b) Chrome MCP: nova aba -> chatgpt.com -> Ctrl+V (cola a imagem) -> cola o PROMPT -> Enter
