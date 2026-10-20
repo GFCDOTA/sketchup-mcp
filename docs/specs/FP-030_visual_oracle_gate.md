@@ -83,7 +83,7 @@ artifacts/review/<fixture>/<run_id>/final/
 └── regression_summary.md           ← veredito + evidência
 ```
 
-`visual_findings.json` schema at `schemas/visual_findings.schema.json`.
+`visual_findings.json` schema at `core/schemas/visual_findings.schema.json`.
 
 ## Blocking visual findings (hard FAIL)
 
@@ -285,7 +285,7 @@ Total: 19 examples.
 
 ## Schema (`visual_findings.v1`)
 
-See `schemas/visual_findings.schema.json`. Required fields:
+See `core/schemas/visual_findings.schema.json`. Required fields:
 
 - `schema_version` (const `"visual_findings.v1"`)
 - `fixture`, `attempt`, `top_level_verdict`
@@ -324,4 +324,4 @@ protection) do `memory/operational_rules.md`.
 - [`.claude/specs/skp_proof_of_progress_gate.md`](../../.claude/specs/skp_proof_of_progress_gate.md)
 - [`.claude/skills/skp-visual-self-correction/SKILL.md`](../../.claude/skills/skp-visual-self-correction/SKILL.md)
 - [`fixtures/visual_oracle_examples/manifest.json`](../../fixtures/visual_oracle_examples/manifest.json)
-- [`schemas/visual_findings.schema.json`](../../schemas/visual_findings.schema.json)
+- [`core/schemas/visual_findings.schema.json`](../../core/schemas/visual_findings.schema.json)

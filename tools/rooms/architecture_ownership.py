@@ -27,8 +27,8 @@ def owner_for(path: str, phase: str) -> str | None:
     if phase == "P2":
         for prefix, owner in (
             ("tests/", "regression_test_suite"),
+            ("core/schemas/", "shared_validation_schemas"),   # FP-044/F3: schemas/ da raiz -> core/schemas/, mesmo dono
             ("core/", "core_cross_room_domain"),
-            ("schemas/", "shared_validation_schemas"),
             ("scripts/", "shared_gate_automation"),
             ("tools/rooms/shared/", "shared_room_primitives"),
             ("tools/rooms/kitchen/", "kitchen_validation_boundary"),

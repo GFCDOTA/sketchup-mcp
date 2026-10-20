@@ -10132,7 +10132,7 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
-      "path": "schemas/correction_finding.schema.json",
+      "path": "core/schemas/correction_finding.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -10141,7 +10141,7 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "schemas/curadoria_verdict.schema.json",
+      "path": "core/schemas/curadoria_verdict.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -10150,7 +10150,7 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "schemas/decision_audit_record.schema.json",
+      "path": "core/schemas/decision_audit_record.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -10159,7 +10159,7 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "schemas/design_spec_bundle.schema.json",
+      "path": "core/schemas/design_spec_bundle.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -10168,7 +10168,7 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "schemas/judged_variant.schema.json",
+      "path": "core/schemas/judged_variant.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -10177,7 +10177,7 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "schemas/rag_writeback_record.schema.json",
+      "path": "core/schemas/rag_writeback_record.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -10186,7 +10186,7 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "schemas/visual_findings.schema.json",
+      "path": "core/schemas/visual_findings.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -16446,7 +16446,7 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
-      "path": "schemas/capability_catalog.v1.schema.json",
+      "path": "core/schemas/capability_catalog.v1.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -16455,7 +16455,16 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "schemas/specialist_profile.v1.schema.json",
+      "path": "core/schemas/specialist_profile.v1.schema.json",
+      "domain": "shared_domain",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_validation_schemas",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "core/schemas/__init__.py",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -17533,6 +17542,15 @@
     },
     {
       "path": "tests/test_fp044_sofa_paths.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_fp044_schemas.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",

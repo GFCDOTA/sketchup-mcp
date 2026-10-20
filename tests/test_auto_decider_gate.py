@@ -14,13 +14,14 @@ from types import SimpleNamespace
 
 import pytest
 from jsonschema import Draft202012Validator
+from core.schemas import schema_path
 
 from tools import ask_gpt_gate as agg
 from tools.interior_studio import auto_decider as ad
 from tools.interior_studio import decision_judge as dj
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCHEMA_PATH = REPO_ROOT / "schemas" / "decision_audit_record.schema.json"
+SCHEMA_PATH = schema_path("decision_audit_record.schema.json")
 FIXED_NOW = lambda pid: "2026-01-01T00:00:00Z"  # noqa: E731
 
 

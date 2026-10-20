@@ -8,7 +8,7 @@ Each detector speaks its own dialect:
 - ``furniture_overlap_gate.overlap_gate()``: ``{result, room, fails[str], warns[str]}``
 - ``run_deterministic_gates.run_all()``: ``{gate_name: {verdict|overall|result, ...}}``
 
-This module maps them ALL onto one shape (see ``schemas/correction_finding.schema.json``)
+This module maps them ALL onto one shape (see ``core/schemas/correction_finding.schema.json``)
 so ``finding_router.classify`` and the loop consume a single dialect. Pure, no I/O.
 Normalization NEVER invents a verdict/type — it only reshapes what the detector said;
 message-only detectors (``geometry_sanity.sanity_room``) are deferred (slice 2).

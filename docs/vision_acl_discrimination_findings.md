@@ -36,7 +36,7 @@ registrado (`claude_bridge_vision`) em `tools/oracle_providers.py`; `negative_do
 multi-backend (`--backend`/`--bridge-url`). O placar acima rodou pelo harness → DISCRIMINATED.
 
 **Fatia 3 (schema + promoção + tests) — FEITA.**
-- `schemas/visual_findings.schema.json` endurecido: `source`/`confidence`/`discriminated`
+- `core/schemas/visual_findings.schema.json` endurecido: `source`/`confidence`/`discriminated`
   opcionais (top-level + por finding), retrocompat provada (`tests/test_vision_acl.py`).
 - `tools/run_skp_visual_review.py`: **regra de promoção** — um FAIL de oráculo só endurece o
   gate se o backend foi provado DISCRIMINATED (`load_latest_discrimination` +

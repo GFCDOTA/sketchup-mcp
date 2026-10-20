@@ -16,7 +16,7 @@ Uso:
 FP-035: retrieve(room, style, budget) devolve um DesignSpecBundle.v1 ranqueado
 (tokens curados de references/tokens/ + sinal de curadoria/gates do índice),
 degradando honesto pra confidence LOW quando o corpus julgado do FP-034 está
-ausente. Ver schemas/design_spec_bundle.schema.json.
+ausente. Ver core/schemas/design_spec_bundle.schema.json.
 """
 from __future__ import annotations
 

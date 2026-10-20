@@ -17,6 +17,7 @@ from types import SimpleNamespace
 
 import pytest
 from jsonschema import Draft202012Validator
+from core.schemas import schema_path
 
 from tools import corpus_to_rag as ctr
 from tools import oracle_providers as op
@@ -25,7 +26,7 @@ from tools import variant_sweep as vs
 from tools.variant_axes import Variant
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCHEMA_PATH = REPO_ROOT / "schemas" / "judged_variant.schema.json"
+SCHEMA_PATH = schema_path("judged_variant.schema.json")
 
 
 @pytest.fixture(scope="module")

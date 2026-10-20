@@ -12,10 +12,11 @@ from pathlib import Path
 import jsonschema
 import pytest
 
+from core.schemas import load
 from tools import reference_db as rdb
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA = json.loads((ROOT / "schemas/design_spec_bundle.schema.json").read_text("utf-8"))
+SCHEMA = load("design_spec_bundle.schema.json")
 
 
 def _validate(bundle: dict) -> None:

@@ -618,7 +618,7 @@ The user is not the visual regression detector.
 | 1 | `docs/specs/FP-030_visual_oracle_gate.md` |
 | 2 | `.claude/skills/skp-visual-self-correction/SKILL.md` |
 | 3 | `fixtures/visual_oracle_examples/manifest.json` (19 examples, 5 confidence tiers) |
-| 4 | `schemas/visual_findings.schema.json` (v1) |
+| 4 | `core/schemas/visual_findings.schema.json` (v1) |
 | 5 | `tools/run_skp_visual_review.py` (MVP runner, 6 heurísticas determinísticas) |
 | 6 | Execução real na `planta_74` ✅ |
 | 7 | `artifacts/review/planta_74/visual_loop_current/final/model.skp` |

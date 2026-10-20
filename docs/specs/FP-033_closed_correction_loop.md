@@ -86,7 +86,7 @@ IMPROVED/SAME/WORSE).
 | `tools/correction_loop.py` | **NOVO** — máquina de estados + CLI (`--fixture --max-cycles --once --dry-run --room`) | loop driver |
 | `tools/correction_fixes.py` | **NOVO** — registry `finding_type → handler`, `FixResult` dataclass, handlers determinísticos idempotentes | fix registry |
 | `tools/finding_router.py` | **NOVO** — `classify(finding) -> Route{DETERMINISTIC_AUTOFIX\|NEEDS_VISION\|NEEDS_FELIPE}`; tabela source-of-truth dos tipos | classificador |
-| `schemas/correction_finding.schema.json` | **NOVO** — finding tipado UNIFICADO (normaliza gate-determinístico + `visual_findings.v1` num só shape: `type, severity, source_check, suspected_owner, route, evidence`) | schema |
+| `core/schemas/correction_finding.schema.json` | **NOVO** — finding tipado UNIFICADO (normaliza gate-determinístico + `visual_findings.v1` num só shape: `type, severity, source_check, suspected_owner, route, evidence`) | schema |
 | `tools/run_deterministic_gates.py` | **EXISTE** — reusar `run_all()` como detector; **adicionar** `--json-out` p/ o loop consumir o dict de gates (hoje só printa) | gate suite |
 | `tools/geometry_sanity.py`, `tools/furniture_overlap_gate.py` | **EXISTE** — reusar `audit()/overlap_gate()` como detectores de móvel; sem mudança de regra | gates móvel |
 | `tools/run_skp_visual_review.py` | **EXISTE** — reusar como REBUILD+RE-CHECK determinístico (gera .skp + `geometry_report.json` + findings); o loop chama, não reescreve | runner FP-030 |
@@ -224,7 +224,7 @@ run_loop(fixture, max_cycles, room=None, dry_run=False):
 - [ ] `tools/correction_loop.py` roda 1 fixture e fecha o laço determinístico sozinho (sem humano no laço interno), com log por ciclo no formato da `autonomous-fidelity-loop`.
 - [ ] `tools/finding_router.py` classifica todo finding em `DETERMINISTIC_AUTOFIX | NEEDS_VISION | NEEDS_FELIPE` pela tabela da §Algorithm; aparência final → SEMPRE `NEEDS_FELIPE`.
 - [ ] `tools/correction_fixes.py` tem ≥1 handler determinístico REAL, idempotente e source-supported (MVP: `furniture_overlap`), com os demais tipos honestamente roteados (não stubados como "consertados").
-- [ ] `schemas/correction_finding.schema.json` unifica gate-determinístico + `visual_findings.v1`; normalização testada por contract test.
+- [ ] `core/schemas/correction_finding.schema.json` unifica gate-determinístico + `visual_findings.v1`; normalização testada por contract test.
 - [ ] Patinagem PARA (2 ciclos sem progresso) e fix-que-piora REVERTE (paridade com SAME/WORSE→revert).
 - [ ] Wiring NOC: ciclo que muda artefato passa pelo worktree isolado off develop, commit em branch (NUNCA main/merge); APARÊNCIA → `VISUAL_REVIEW_QUEUED`.
 - [ ] Heartbeat por ciclo no `:8765` (`cycle` monotônico); offline = best-effort, não trava.
@@ -240,7 +240,7 @@ Lido e confirmado nesta sessão:
 - `tools/geometry_sanity.py` — `audit()` (hermético) + `sanity_room()` (consensus): outside_room/blocks_door/degenerate/absurd/off_axis.
 - `tools/furniture_overlap_gate.py` — `overlap_gate()`: móvel-sobre-móvel (footprint×altura), FAIL≥30% / WARN≥12%.
 - `tools/visual_regression_gate.py` — scaffold IMPROVED/SAME/WORSE preenchido **só por humano** ("auto looks-like-PDF is exactly what the vision oracle was proven unable to do").
-- `tools/run_skp_visual_review.py` + `schemas/visual_findings.schema.json` (v1) — findings tipados com `suspected_owner`/`proposed_fix`; **auto-fix é Follow-up não implementado** (FP-030 §Loop/§Follow-ups).
+- `tools/run_skp_visual_review.py` + `core/schemas/visual_findings.schema.json` (v1) — findings tipados com `suspected_owner`/`proposed_fix`; **auto-fix é Follow-up não implementado** (FP-030 §Loop/§Follow-ups).
 - `docs/specs/FP-030_visual_oracle_gate.md` — taxonomia de findings de aparência (floating_door, orphan_glass, bad_window_aperture, etc.) e axes qualitativos (global_visual, scale_rotation → WARN needs human/agent).
 - `.claude/skills/autonomous-fidelity-loop/SKILL.md` — protocolo do ciclo (log, heartbeat, patinagem, parar em RED/NEEDS-HUMAN); hoje é prosa seguida à mão.
 - `tools/claude_bridge/noc_dispatcher.py` — `dispatch()`, worktree isolado off origin/develop, `_appearance_changed` → `VISUAL_REVIEW_QUEUED`, NUNCA main/merge; `kind:local_llm` (Ollama, token=0); fila/ledger `.ai_bridge/noc/{queue,actions}.jsonl`.

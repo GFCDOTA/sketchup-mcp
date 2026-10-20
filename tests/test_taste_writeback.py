@@ -20,12 +20,12 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
+from core.schemas import load
 from tools import rag_freshness as rf
 from tools import taste_writeback as tw
 
 ROOT = Path(__file__).resolve().parents[1]
-WB_SCHEMA = json.loads(
-    (ROOT / "schemas/rag_writeback_record.schema.json").read_text("utf-8"))
+WB_SCHEMA = load("rag_writeback_record.schema.json")
 
 T0 = "2026-07-07T10:00:00Z"
 T1 = "2026-07-07T11:00:00Z"

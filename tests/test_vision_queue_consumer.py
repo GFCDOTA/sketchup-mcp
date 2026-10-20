@@ -9,13 +9,14 @@ from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
+from core.schemas import schema_path
 
 from tools import oracle_providers as op
 from tools import vision_queue_consumer as vqc
 from tools.oracle_providers import get_provider
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCHEMA_PATH = REPO_ROOT / "schemas" / "correction_finding.schema.json"
+SCHEMA_PATH = schema_path("correction_finding.schema.json")
 NOW = "2026-07-01T12:00:00"
 
 
