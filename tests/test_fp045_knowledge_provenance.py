@@ -74,3 +74,37 @@ def test_unimplemented_binding_declares_its_gap():
     missing = [b for b in catalog["bindings"] if not b["capability_id"]]
     assert missing
     assert [b["id"] for b in missing if not (b.get("gap") or "").strip()] == []
+
+
+def _recipe_sources() -> dict[str, set[str]]:
+    video, env = _load("video_recipes.v1.json"), _load("environment_recipes.v1.json")
+    out = {r["id"]: {x["id"] for x in r["sources"]} for r in video["recipes"]}
+    out.update({r["id"]: {x["id"] for x in r["source_refs"]} for r in env["recipes"]})
+    return out
+
+
+def test_binding_sources_are_exactly_the_sources_of_its_recipes():
+    """FP-046/P0: o binding nao cita fonte que a recipe nao referencia, nem omite uma que ela referencia."""
+    recipes = _recipe_sources()
+    catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+    bad = {}
+    for b in catalog["bindings"]:
+        expected = set().union(*(recipes[rid] for rid in b["recipe_ids"]))
+        if set(b["source_ids"]) != expected:
+            bad[b["id"]] = {"declared": sorted(b["source_ids"]), "from_recipes": sorted(expected)}
+    assert bad == {}
+
+
+def test_catalog_verify_rejects_binding_source_that_recipe_does_not_cite():
+    import copy
+
+    from tools.rooms import capability_catalog as cc
+
+    catalog = cc.load_catalog(CATALOG)
+    assert cc.verify(catalog=catalog)["result"] == "PASS"
+    forged = copy.deepcopy(catalog)
+    shaker = next(b for b in forged["bindings"] if b["id"] == "bind.kitchen.shaker")
+    shaker["source_ids"] = ["yt-cabinet-tips-2021"]   # fonte que a recipe Shaker NAO cita
+    report = cc.verify(catalog=forged)
+    assert report["result"] == "FAIL"
+    assert "BINDING_SOURCE_MISMATCH" in report["errors"]

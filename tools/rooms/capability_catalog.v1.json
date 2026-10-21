@@ -980,6 +980,7 @@
         "cabinet.front-gaps-and-profiles"
       ],
       "source_ids": [
+        "yt-cabinet-styles-2024",
         "yt-cabinet-tips-2021"
       ],
       "capability_id": "kitchen.cabinet.plain-fronts",
@@ -999,7 +1000,7 @@
         "cabinet.recessed-shaker-and-louvers"
       ],
       "source_ids": [
-        "yt-cabinet-tips-2021"
+        "yt-cabinet-styles-2024"
       ],
       "capability_id": null,
       "terms": [
@@ -1018,7 +1019,7 @@
         "cabinet.drawer-box-and-hardware"
       ],
       "source_ids": [
-        "yt-cabinet-tips-2021"
+        "yt-kitchen-joinery-2024"
       ],
       "capability_id": null,
       "terms": [
@@ -1054,7 +1055,7 @@
         "cabinet.sink-and-wet-channel-cutouts"
       ],
       "source_ids": [
-        "yt-cabinet-tips-2021"
+        "yt-kitchen-joinery-2024"
       ],
       "capability_id": null,
       "terms": [
