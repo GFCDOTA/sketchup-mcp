@@ -16,7 +16,8 @@ spec:
   autor: "GPT-6 (proposta SDD); aprovação estética e decisões de referência: Felipe"
   data_criacao: "2026-10-21"
   ultima_atualizacao: "2026-10-21"
-  baseline_develop: "214d73e3c38c8bae9a3dc16f0fc579b64a017ac7"
+  baseline_develop: "029f9685a17bb720d6af426a25d8afe66f0472dc"
+  reconciliacao: "FP-045/F2 #343: 4 fachadas D-011 removidas de tools (14->10); não alterar esta decisão."
   spec_mae: "docs/specs/FP-045_specialists_knowledge_and_room_modularization.md"
   spec_relacionada: "FP-046 — Porta Shaker Paramétrica"
   entrega_por: "PRs pequenos na develop"
@@ -48,7 +49,7 @@ spec:
 | Oracle/visão | `tools.oracle.run_skp_visual_review` | consultivo; IA não aprova estética do Felipe |
 | Prova FP-043 P8 / FP-044 F7 | `docs/reports/FP-043_final_validation.md` / `FP-044_final_validation.md` | SketchUp 26.0.429; 402/402 peças, erro máx. 0,05 mm naquele build, 0 mobília/fixture/decor em parede/giro (segundo relatório) |
 | D-007 | `docs/specs/FP-043_open_decisions.md` e PR #338 | guarda-roupa sintético invade parede ~4,5 cm; solução tentada modifica SUITE 02 |
-| CI vigente | head `214d73e` — `ci` concluído `success` | quatro checks; não é L2 nem L3 |
+| CI vigente | head `029f9685` — `ci` concluído `success` | quatro checks; não é L2 nem L3 |
 
 **Regra central:** `strict_identity` para refatoração/movimento de arquivos; `scoped_change` para evolução funcional. Em `scoped_change`, apenas as peças autorizadas mudam e **todos** os invariantes globais e de cômodos-controle continuam válidos. Não converter um hash diferente em “PASS porque alterou apenas a suíte”: verificar o delta semântico, o gate real e o visual.
 
