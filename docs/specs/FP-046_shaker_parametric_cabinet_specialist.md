@@ -17,6 +17,7 @@ spec:
   data_criacao: "2026-10-21"
   ultima_atualizacao: "2026-10-21"
   baseline_develop: "214d73e3c38c8bae9a3dc16f0fc579b64a017ac7"
+  status_reconciliacao: "Em 2026-10-21, develop avancou para 029f9685 (PR #343); 4 fachadas D-011 removidas, nao pertencem ao escopo desta SPEC."
   spec_mae: "docs/specs/FP-045_specialists_knowledge_and_room_modularization.md"
   specs_dependentes: ["FP-047 (regressão geométrica e visual, contrato complementar)"]
   pr_alvo: "develop"
@@ -150,7 +151,7 @@ references/sketchup/knowledge/video_recipes.v1.json
 | `tools/rooms/kitchen/knowledge/index.v1.json` / `specialist.v1.json` | ATUALIZAR APÓS IMPLEMENTAÇÃO | recipe, capability e tool allowlist |
 | `tools/rooms/shared/cabinet/model.py` | PRESERVAR | input legada sem defaults |
 | `tools/rooms/shared/cabinet/assembly.py` | REUTILIZAR | quadro local, definições equivalentes |
-| `tools/rooms/shared/cabinet/plan.py` | COMPATIBILIDADE | ``cabinet_assembly_plan.v1` legado não deve aceitar plano de Shaker sem contrato |
+| `tools/rooms/shared/cabinet/plan.py` | COMPATIBILIDADE | `cabinet_assembly_plan.v1` legado não deve aceitar plano de Shaker sem contrato |
 | `tools/rooms/shared/cabinet/validation.py` | REUTILIZAR/COMPOR | colisões, envelopes, provas de recuo |
 | `tools/rooms/shared/cabinet/sketchup.py` | ADAPTER VERSIONADO | job tipado + inspeção de vértices |
 | `tools/rooms/shared/cabinet/ruby/cabinet_build.rb` | PROTEGER | aceita apenas `shared.cabinet.parametric` |
