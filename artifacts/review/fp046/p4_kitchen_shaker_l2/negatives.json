@@ -1,0 +1,18 @@
+{
+ "default_no_ack": {
+  "state": "BLOCKED_CAPABILITY_MISSING",
+  "pids": []
+ },
+ "pose_outside_kitchen": {
+  "state": "BLOCKED_PLAN_REFUSED",
+  "pids": []
+ },
+ "architecture_change": {
+  "state": "BLOCKED_ARCHITECTURE_CHANGE",
+  "pids": []
+ },
+ "frame_thickness_mismatch": {
+  "state": "BLOCKED_PLAN_REFUSED",
+  "pids": []
+ }
+}
