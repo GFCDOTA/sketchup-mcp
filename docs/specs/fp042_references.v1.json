@@ -7013,6 +7013,12 @@
       "owner_group": "fixtures"
     },
     {
+      "path": "fixtures/synthetic_cabinets/fp046_shaker_valid_a.json",
+      "blob_sha": "848d91bd6a1f1964bf217bb31c7f65444f0d30d4",
+      "blob_size": 871,
+      "owner_group": "fixtures"
+    },
+    {
       "path": "fixtures/synthetic_cabinets/valid_b_tall_900.json",
       "blob_sha": "8a2124c6a17cc3de274e4c60d656022f35fcfa45",
       "blob_size": 1463,

@@ -1,0 +1,23 @@
+{
+  "schema_version": "shaker_door_request.v1",
+  "request_id": "shaker-fixture-001",
+  "parent_cabinet_request_id": "synthetic-a",
+  "target_front": "front",
+  "style": "recessed_shaker",
+  "frame": {
+    "stile_width": {"value": 60, "unit": "mm", "origin": "user_request"},
+    "rail_height": {"value": 60, "unit": "mm", "origin": "user_request"},
+    "frame_thickness": {"value": 18, "unit": "mm", "origin": "user_request"}
+  },
+  "panel": {
+    "thickness": {"value": 6, "unit": "mm", "origin": "user_request"},
+    "recess_from_frame_front": {"value": 4, "unit": "mm", "origin": "user_request"}
+  },
+  "materials": {"frame": "mdf_branco", "panel": "mdf_branco"},
+  "grain": {"frame": "none", "panel": "none"},
+  "origin_context": {
+    "recipe_id": "cabinet.recessed-shaker-and-louvers",
+    "source_id": "yt-cabinet-styles-2024",
+    "source_verified": false
+  }
+}
