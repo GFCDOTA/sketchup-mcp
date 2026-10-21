@@ -7,8 +7,8 @@
 spec:
   feature: "FP-047 — Regressão geométrica e visual com isolamento de cômodos"
   escopo_versao: "Distinguir refatoração de alteração funcional autorizada e bloquear regressões arquitetônicas, geométricas e visuais fora do escopo de cada PR."
-  versao: "1.0.0"
-  status: "RASCUNHO"
+  versao: "1.1.0"
+  status: "RASCUNHO_VALIDADO_CONTRA_DEVELOP"
   classificacao:
     contexto_delimitado: "Fidelidade e Validação de Modelagem"
     dominio: "SketchUp MCP / validação cross-room / evidências L1-L2-L3"
@@ -16,7 +16,9 @@ spec:
   autor: "GPT-6 (proposta SDD); aprovação estética e decisões de referência: Felipe"
   data_criacao: "2026-10-21"
   ultima_atualizacao: "2026-10-21"
-  baseline_develop: "029f9685a17bb720d6af426a25d8afe66f0472dc"
+  baseline_develop: "23939d9"
+  baseline_develop_original: "029f9685a17bb720d6af426a25d8afe66f0472dc"
+  validacao: "2026-10-21: APIs citadas conferidas no codigo; boxes e registry medidos; correcoes em 3.2 (v1.1.0)"
   reconciliacao: "FP-045/F2 #343: 4 fachadas D-011 removidas de tools (14->10); não alterar esta decisão."
   spec_mae: "docs/specs/FP-045_specialists_knowledge_and_room_modularization.md"
   spec_relacionada: "FP-046 — Porta Shaker Paramétrica"
@@ -39,7 +41,7 @@ spec:
 
 | Elemento | Fonte real / prova | Limite |
 |---|---|---|
-| Hash por cômodo + SHA dos canônicos | `tools.validation.fp044_baseline.capture/compare` | compara **saída idêntica**: útil para refatoração, não aceita mudança funcional intencional |
+| Hash por cômodo + SHA dos canônicos | `tools.validation.fp044_baseline.capture()` (sem argumentos: lê a árvore atual) / `compare(baseline) -> list[str]` (`CAIXAS_MUDARAM: <room>`, `CANONICO_MUDOU: <path>`) | compara **saída idêntica**: útil para refatoração, não aceita mudança funcional intencional |
 | Colisões de planejador | `tools.validation.room_collisions.audit/findings` | `FURNITURE/FIXTURE` x paredes, `DECORATIVE` no giro; categorias específicas |
 | Footprint e portas | `tools.rooms.shared.clearance.{box_footprint_pt,wall_mass_pt,door_swings_pt}` | geometria/conversões já utilizadas no L1 |
 | Circulação | `tools.validation.circulation_gate.gate` | check por room ID com entradas do consensus |
@@ -77,7 +79,7 @@ origin/develop / candidate commit + PDF/consensus/fixtures
       -> tools.validation.room_collisions.audit (parede + arco)
       -> tools.validation.circulation_gate.gate (por room)
       -> tools.validation.*_gate existentes para shell/fidelidade
-      -> report L1: PASS / FAIL / BLOCKED / PENDING_L2
+      -> report L1: PASS / FAIL / BLOCKED / PENDING_SKETCHUP
   -> job SketchUp seguro (PID próprio, SKP novo, não canônico)
       -> su_inspect + medidas SKP realmente reaberto
       -> report L2 por cômodo (pass/fail/skip explícito)
@@ -216,7 +218,7 @@ origin/develop / candidate commit + PDF/consensus/fixtures
 **API nova proposta é Python/CLI local, NÃO HTTP:**
 
 ```python
-# PROPOSTO — não existe em develop@214d73e
+# PROPOSTO — não existe em develop (rascunho original citava 214d73e)
 from tools.validation.room_regression import capture, compare
 before = capture(commit="BASE_SHA", fixture="planta_74", pt_to_m=0.0259)
 after = capture(commit="CANDIDATE_SHA", fixture="planta_74", pt_to_m=0.0259)
@@ -242,20 +244,24 @@ Não prometer `commit` remoto executável diretamente sem checkout isolado: `cap
   "change_mode": "scoped_change",
   "allowed_changes": [
     {
-      "room_key": "SUITE 02",
-      "part_keys": ["wardrobe"],
+      "room_key": "r003",
+      "part_keys": ["Guarda-roupa"],
       "allowed_effects": ["position"],
       "reason": "EXEMPLO de alteração sujeita a revisão visual",
       "spec_rule": "FP-047/R-17",
       "visual_review_required": true
     }
   ],
-  "control_rooms": ["kitchen", "service"],
+  "control_rooms": ["r004", "r001"],
   "protect_canonicals": true,
   "require_l2": true,
   "require_l3_if_visual_changed": true
 }
 ```
+
+**Validado contra o código (2026-10-21) — o `room_key` do rascunho original NÃO resolvia:** `core.domain.room_registry.resolve_room_id` aceita o `room_id` (`r003`) e os aliases (`suite_02`, `kitchen`, `area_servico`…), mas **não** o nome de exibição (`"SUITE 02"`, `"COZINHA"`) nem o alias `"service"` (`KeyError`). Já os boxes de `collect_boxes` carregam o **nome de exibição** em `box["room"]` (`"SUITE 02"`, `"COZINHA"`, `"A.S. | TERRACO SOCIAL | TERRACO TECNICO"`). O comparador deve, portanto, aceitar `room_id`/alias, converter com `RoomInfo.display_name` e só então casar com `box["room"]`; para fixtures fora do registry (sintéticas) aceita-se apenas nome exato presente no snapshot. Desconhecido ou ambíguo = `INVALID_CONTRACT`, nunca "sem efeito". O exemplo acima foi corrigido para `r003`/`r004`/`r001`; `part_keys` usa o `module` real (`"Guarda-roupa"`).
+
+**Identidade de peça (D47-06, medido):** em `planta_74` há 402 boxes mas só 254 chaves distintas `(room, module, label|kind)` (ex.: `SUITE 01 / Guarda-roupa / ks_gola`, `Escrivaninha / leg`). A identidade precisa de um índice de ocorrência determinístico dentro do grupo (ordem de `collect_boxes`), e o snapshot deve registrar quantos grupos são ambíguos; chave sem esse desempate seria falso positivo/negativo garantido.
 
 **Cuidado:** `room_key`, `part_keys` e `control_rooms` do exemplo são rótulos ilustrativos, não IDs canônicos resolvidos. Na implementação o comparador deve resolver contra o registry/consensus e rejeitar alias ambíguo ou inexistente; nunca permitir que um alias desconhecido faça o check pular um cômodo. Para D-007 o contrato de teste real precisa cobrir também a fixture sintética em **processo de outra escala**, não usar exemplo `pt_to_m=0.0259` para ela.
 
@@ -278,14 +284,14 @@ Python 3.11/3.12 CI; `PT_TO_M=0.0259` apenas processo da planta_74, sintéticos 
   "schema_version": "room_regression_report.v1",
   "change_id": "fp047-d007-repro-001",
   "mode": "scoped_change",
-  "state": "PENDING_L2",
+  "state": "PENDING_SKETCHUP",
   "base_commit": "214d73e3c38c8bae9a3dc16f0fc579b64a017ac7",
   "candidate_commit": "SHA_DO_COMMIT_A_SER_TESTADO",
   "input_sha256": null,
   "canonical_hashes_unchanged": null,
   "room_results": [
     {
-      "room_key": "SUITE 02",
+      "room_key": "r003",
       "state": "NOT_RUN",
       "allowed_delta_count": 0,
       "unexpected_delta_count": 0,
@@ -474,10 +480,11 @@ PT_TO_M=0.0259 python -m pytest tests/ -q -m planta74_scale
 | Versão | Data | Autor | Descrição |
 |---|---|---|---|
 | 1.0.0 | 2026-10-21 | GPT-6 | SDD F0–F8, 32 regras, 28 critérios, modo dual, D-007 e integração FP-046 |
+| 1.1.0 | 2026-10-21 | Claude (validação contra o código) | APIs citadas existem (`fp044_baseline`, `room_collisions.audit/findings`, `clearance`, `circulation_gate.gate`, `visual_regression_gate.build_montage`, `collect_boxes`). Correções: (1) `room_key`/`control_rooms` do exemplo não resolviam no registry (`"SUITE 02"`, `"service"`) — corrigidos para `r003`/`r004`/`r001` e regra de resolução explícita; (2) identidade de peça medida: 402 boxes × 254 chaves → índice de ocorrência obrigatório (D47-06); (3) `PENDING_L2` → `PENDING_SKETCHUP` (estado único); (4) assinatura real de `fp044_baseline`; (5) baseline `23939d9` (o texto mesclava `029f968` e `214d73e`) |
 
 ### 3.3 Handoff para agente implementador
 
-1. Confirme `origin/develop`/CI/PRs atualizados; anote SHA real se evoluiu além de `214d73e`.
+1. Confirme `origin/develop`/CI/PRs atualizados; anote o SHA real (baseline desta versão: `23939d9`).
 2. Leia `tools/validation/{fp044_baseline,room_collisions,circulation_gate}.py` e `tools/rooms/shared/clearance.py`; não invente thresholds.
 3. Crie as fixtures negativas primeiro: SUITE 02 muda sem permissão, parede/arco/semantic tag e mudança em canônico.
 4. Implemente F1/F2 puro e mantenha API `fp044_baseline`; regist­re novos arquivos em `fp042_inventory.v1.json` na mesma PR.
