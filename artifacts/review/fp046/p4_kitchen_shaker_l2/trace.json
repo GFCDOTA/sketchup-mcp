@@ -1,0 +1,311 @@
+{
+ "schema_version": "kitchen_shaker_trace.v1",
+ "request_id": "p4-kitchen-shaker-parent",
+ "steps": [
+  {
+   "step": "request",
+   "status": "OK",
+   "request_sha256": "b67686db2389a5c54d56e15aa2d5bf2f79cfe0417b197f8b0b5e452d00faa20c",
+   "text": "Quero um gabinete baixo na cozinha com porta shaker de painel rebaixado",
+   "prepromotion_ack": true
+  },
+  {
+   "step": "project_room",
+   "status": "OK",
+   "project": "planta_74",
+   "room_id": "r004",
+   "display_name": "COZINHA",
+   "room_type": "kitchen"
+  },
+  {
+   "step": "consensus_requirements",
+   "status": "OK",
+   "consensus_sha256": "adeace53cdb3dba1b7ca8d5bb78a5d6d70d1adb17a903ee6b8082f188d750aa2",
+   "base_skp": "E:\\Claude\\worktrees\\w-prov\\artifacts\\planta_74\\furnished\\planta_74_furnished.skp",
+   "base_sha256": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397"
+  },
+  {
+   "step": "knowledge",
+   "status": "OK",
+   "binding": "bind.kitchen.shaker",
+   "capability_id": null,
+   "source_ids": [
+    "yt-cabinet-styles-2024"
+   ],
+   "source_evidence": {
+    "yt-cabinet-styles-2024": "TRANSCRIPT_AND_DESCRIPTION_ONLY"
+   },
+   "recipe_ids": [
+    "cabinet.recessed-shaker-and-louvers"
+   ]
+  },
+  {
+   "step": "specialist_plan",
+   "status": "BLOCKED",
+   "state": "BLOCKED_CAPABILITY_MISSING",
+   "reason": "porta Shaker/frente rebaixada: nao ha builder de perfil/rebaixo nem fixture L2; so existe a recipe",
+   "next_step": "registrar builder + fixture + teste da tecnica antes de pedir execucao",
+   "gap": "porta Shaker/frente rebaixada: nao ha builder de perfil/rebaixo nem fixture L2; so existe a recipe"
+  },
+  {
+   "step": "prepromotion",
+   "status": "ACK",
+   "note": "contorna APENAS BLOCKED_CAPABILITY_MISSING; nao promove, nao muda catalogo/perfil/allowlist",
+   "tools": [
+    "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker",
+    "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door",
+    "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker",
+    "python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker",
+    "python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker",
+    "ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+    "ruby:tools/rooms/shared/cabinet/ruby/shaker_inspect.rb"
+   ]
+  },
+  {
+   "step": "plan_validation",
+   "status": "OK",
+   "result_status": "OK",
+   "stage": "plan",
+   "parent_gates": [
+    {
+     "gate": "hydraulic_anchor",
+     "result": "PASS",
+     "detail": "pia na parede oeste do PDF, dentro da cozinha"
+    },
+    {
+     "gate": "architecture",
+     "result": "PASS",
+     "detail": "pegada dentro da celula da cozinha, sem tocar parede"
+    },
+    {
+     "gate": "furniture_overlap",
+     "result": "PASS",
+     "detail": "sem sobreposicao com a mobilia planejada da cozinha"
+    },
+    {
+     "gate": "circulation",
+     "result": "PASS",
+     "detail": "zonas de porta livres e circulation_gate PASS com a peca"
+    }
+   ],
+   "shaker_gates": [
+    {
+     "gate": "hydraulic_anchor",
+     "result": "PASS",
+     "detail": "pia na parede oeste do PDF, dentro da cozinha"
+    },
+    {
+     "gate": "architecture",
+     "result": "PASS",
+     "detail": "pecas Shaker dentro da celula da cozinha, sem tocar parede"
+    },
+    {
+     "gate": "furniture_overlap",
+     "result": "PASS",
+     "detail": "sem sobreposicao com a mobilia planejada da cozinha"
+    },
+    {
+     "gate": "circulation",
+     "result": "PASS",
+     "detail": "zonas de porta livres e circulation_gate PASS com a composicao final"
+    }
+   ],
+   "parent_signature": "a8f3908980a8b9689e6d96f098cca9cd64a249b5c5c109478862c60ce287dae4",
+   "shaker_signature": "4bbdcfcff3fd6ffef2a88abe3a877ff21b3a416b2fe02eef3d4bc3c172f0a5e6",
+   "findings": []
+  },
+  {
+   "step": "allowlist",
+   "status": "PREPROMOTION",
+   "tools": [
+    "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker",
+    "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door",
+    "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker",
+    "python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker",
+    "python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker",
+    "ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+    "ruby:tools/rooms/shared/cabinet/ruby/shaker_inspect.rb"
+   ],
+   "note": "fora da allowlist do perfil kitchen enquanto o binding nao for promovido"
+  },
+  {
+   "step": "baseline_inspect",
+   "status": "OK",
+   "pid": 31480,
+   "non_cabinet": {
+    "count": 76,
+    "fingerprint": "751a56d44f4c6cec14e9fe65d7fb67bbead65f8969daafd8ebcb12b6cb1c0e33",
+    "items": 76
+   }
+  },
+  {
+   "step": "job_parent",
+   "status": "OK",
+   "pid": 37536,
+   "sketchup_version": "26.0.429"
+  },
+  {
+   "step": "job_shaker",
+   "status": "OK",
+   "pid": 35008,
+   "sketchup_version": "26.0.429",
+   "out_skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp046\\p4\\run2\\flow\\f9b445a36e57\\kitchen_shaker.skp",
+   "removed_front": "p4-kitchen-shaker-parent/front",
+   "grain_support": "NOT_SUPPORTED"
+  },
+  {
+   "step": "reopen_inspection",
+   "status": "OK",
+   "pid": 23792,
+   "checks": 50,
+   "failed": [],
+   "max_corner_error_m": 3.554447978966673e-15
+  },
+  {
+   "step": "kitchen_anchor_after",
+   "status": "OK",
+   "result": "PASS"
+  },
+  {
+   "step": "evidence",
+   "status": "OK",
+   "commit": "34d5cf6a06adb985e551ceb25994264ce6da2c67",
+   "capability": {
+    "id": "shared.cabinet.front.shaker",
+    "version": "1.0.0"
+   },
+   "parent_capability": {
+    "id": "shared.cabinet.parametric",
+    "version": "1.0.0"
+   },
+   "promotion": "NOT_PROMOTED",
+   "parent_signature": "a8f3908980a8b9689e6d96f098cca9cd64a249b5c5c109478862c60ce287dae4",
+   "shaker_signature": "4bbdcfcff3fd6ffef2a88abe3a877ff21b3a416b2fe02eef3d4bc3c172f0a5e6",
+   "idempotency_key": "f9b445a36e578b5df332c735d3d8b409d26ab98cc1c28838e7f624e8ad2f8ae6",
+   "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp046\\p4\\run2\\flow\\f9b445a36e57\\kitchen_shaker.skp",
+   "skp_sha256": "833f3a70acaa1bc7a299bbf1a62b706bb5659d82e695afb4361fad2c5a5c5a0a",
+   "skp_bytes": 3439215,
+   "consensus_sha256": "adeace53cdb3dba1b7ca8d5bb78a5d6d70d1adb17a903ee6b8082f188d750aa2",
+   "base_sha256": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+   "sketchup_version": "26.0.429",
+   "non_cabinet_fingerprint_before": "751a56d44f4c6cec14e9fe65d7fb67bbead65f8969daafd8ebcb12b6cb1c0e33",
+   "non_cabinet_fingerprint_after": "751a56d44f4c6cec14e9fe65d7fb67bbead65f8969daafd8ebcb12b6cb1c0e33",
+   "gates": {
+    "parent": [
+     {
+      "gate": "hydraulic_anchor",
+      "result": "PASS"
+     },
+     {
+      "gate": "architecture",
+      "result": "PASS"
+     },
+     {
+      "gate": "furniture_overlap",
+      "result": "PASS"
+     },
+     {
+      "gate": "circulation",
+      "result": "PASS"
+     }
+    ],
+    "composition": [
+     {
+      "gate": "hydraulic_anchor",
+      "result": "PASS"
+     },
+     {
+      "gate": "architecture",
+      "result": "PASS"
+     },
+     {
+      "gate": "furniture_overlap",
+      "result": "PASS"
+     },
+     {
+      "gate": "circulation",
+      "result": "PASS"
+     }
+    ]
+   },
+   "source_verified": false,
+   "visual_review": "PENDING_HUMAN (nenhum veredito visual automatico)"
+  }
+ ],
+ "state": "PREPROMOTION_L2_VERIFIED",
+ "execution_authorized": false,
+ "pids": [
+  31480,
+  37536,
+  35008,
+  23792
+ ],
+ "promotion": "NOT_PROMOTED",
+ "visual_review": "PENDING_HUMAN",
+ "base_sha256": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+ "idempotency_key": "f9b445a36e578b5df332c735d3d8b409d26ab98cc1c28838e7f624e8ad2f8ae6",
+ "evidence": {
+  "commit": "34d5cf6a06adb985e551ceb25994264ce6da2c67",
+  "capability": {
+   "id": "shared.cabinet.front.shaker",
+   "version": "1.0.0"
+  },
+  "parent_capability": {
+   "id": "shared.cabinet.parametric",
+   "version": "1.0.0"
+  },
+  "promotion": "NOT_PROMOTED",
+  "parent_signature": "a8f3908980a8b9689e6d96f098cca9cd64a249b5c5c109478862c60ce287dae4",
+  "shaker_signature": "4bbdcfcff3fd6ffef2a88abe3a877ff21b3a416b2fe02eef3d4bc3c172f0a5e6",
+  "idempotency_key": "f9b445a36e578b5df332c735d3d8b409d26ab98cc1c28838e7f624e8ad2f8ae6",
+  "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp046\\p4\\run2\\flow\\f9b445a36e57\\kitchen_shaker.skp",
+  "skp_sha256": "833f3a70acaa1bc7a299bbf1a62b706bb5659d82e695afb4361fad2c5a5c5a0a",
+  "skp_bytes": 3439215,
+  "consensus_sha256": "adeace53cdb3dba1b7ca8d5bb78a5d6d70d1adb17a903ee6b8082f188d750aa2",
+  "base_sha256": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+  "sketchup_version": "26.0.429",
+  "non_cabinet_fingerprint_before": "751a56d44f4c6cec14e9fe65d7fb67bbead65f8969daafd8ebcb12b6cb1c0e33",
+  "non_cabinet_fingerprint_after": "751a56d44f4c6cec14e9fe65d7fb67bbead65f8969daafd8ebcb12b6cb1c0e33",
+  "gates": {
+   "parent": [
+    {
+     "gate": "hydraulic_anchor",
+     "result": "PASS"
+    },
+    {
+     "gate": "architecture",
+     "result": "PASS"
+    },
+    {
+     "gate": "furniture_overlap",
+     "result": "PASS"
+    },
+    {
+     "gate": "circulation",
+     "result": "PASS"
+    }
+   ],
+   "composition": [
+    {
+     "gate": "hydraulic_anchor",
+     "result": "PASS"
+    },
+    {
+     "gate": "architecture",
+     "result": "PASS"
+    },
+    {
+     "gate": "furniture_overlap",
+     "result": "PASS"
+    },
+    {
+     "gate": "circulation",
+     "result": "PASS"
+    }
+   ]
+  },
+  "source_verified": false,
+  "visual_review": "PENDING_HUMAN (nenhum veredito visual automatico)"
+ },
+ "input_unchanged": true
+}

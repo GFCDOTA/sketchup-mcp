@@ -52,13 +52,22 @@ def materialize_shaker(plan: dict, parent_plan: dict, out_skp: str | Path, *, ba
     return res
 
 
+def _scratch_dir(src: Path) -> Path:
+    """Onde o job de inspecao grava params/resultado/copia. Nunca dentro de artifacts/ ou fixtures/ (achado do L2 da P4: inspecionar
+    um .skp canonico direto deixava lixo ao lado dele); nesse caso vai para o scratch `runs/`."""
+    try:
+        return paths.check_output(src.parent / f"_{src.stem}_shaker_inspect" / "_probe").parent
+    except paths.OutputPathRefused:
+        return paths.default_out_dir("shaker_inspect") / src.stem
+
+
 def inspect_shaker(skp: str | Path, *, mode: str | None = None, timeout_s: int = 180,
                    su: SketchUp | None = None) -> dict[str, Any]:
     """Reabre o .skp (uma COPIA, em outro processo) e devolve a inspecao dos gabinetes e das portas Shaker."""
     src = paths.resolve(skp)
     if src.suffix.lower() != ".skp" or not src.exists():
         return {"status": "ERROR", "reason": f"nao e um .skp existente: {src}"}
-    job_dir = src.parent / f"_{src.stem}_shaker_inspect"
+    job_dir = _scratch_dir(src)
     job_dir.mkdir(parents=True, exist_ok=True)
     copy = job_dir / f"_copy_{src.name}"
     shutil.copy2(src, copy)

@@ -26,13 +26,13 @@
     },
     {
       "id": "shaker-door-recipe",
-      "question": "Existe porta Shaker?",
+      "question": "Existe porta Shaker e ela está promovida?",
       "hops": ["README.md", "docs/architecture/repository_map.md", "tools/rooms/kitchen/README.md"],
       "answers": [
-        {"path": "references/sketchup/knowledge/video_recipes.v1.json", "symbol": "cabinet.recessed-shaker-and-louvers", "role": "recipe (consultiva)"}
-      ],
-      "absent": [
-        {"path": "tools/rooms/kitchen/capabilities/shaker.py", "why": "a capacidade de portas rebaixadas/Shaker não existe: BLOCKED_CAPABILITY_MISSING"}
+        {"path": "references/sketchup/knowledge/video_recipes.v1.json", "symbol": "cabinet.recessed-shaker-and-louvers", "role": "recipe (consultiva)"},
+        {"path": "tools/rooms/shared/cabinet/shaker/plan.py", "symbol": "plan_shaker_door", "role": "plano puro da porta (L1) + materialização com L2 sintético; NÃO promovida ao catálogo"},
+        {"path": "tools/rooms/kitchen/capabilities/shaker.py", "symbol": "plan_kitchen_shaker", "role": "adapter da cozinha: gates de âncora/arquitetura/mobília/circulação antes do job"},
+        {"path": "tools/rooms/kitchen/capabilities/shaker_flow.py", "symbol": "run_prepromotion_request", "role": "fluxo opt-in de pré-promoção (exige prepromotion_ack; binding segue bloqueado, D46-09)"}
       ]
     },
     {

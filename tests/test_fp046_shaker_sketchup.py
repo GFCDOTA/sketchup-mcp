@@ -301,3 +301,31 @@ def test_shaker_ruby_remove_definicoes_orfas_da_execucao_anterior_antes_de_recri
     src = _code((RUBY / "shaker_build.rb").read_text("utf-8"))
     assert 'start_with?("ShakerDef_#{request_id}_")' in src and "shk_drop_definition_if_unused" in src
     assert src.index("old.each(&:erase!)") < src.index('start_with?("ShakerDef_#{request_id}_")') < src.index("model.definitions.add(")
+
+
+def test_inspecionar_skp_canonico_nao_deixa_lixo_dentro_de_artifacts(repo_falso):
+    """Achado do L2 da P4: o scratch do job de inspecao nascia AO LADO do .skp inspecionado, ou seja, dentro de artifacts/."""
+    base = repo_falso / "artifacts" / "planta" / "mobiliado.skp"
+    base.parent.mkdir(parents=True)
+    base.write_bytes(b"SKP-CANONICO")
+
+    def job(cmd, env, handle):
+        Path(env["SKMCP_RESULT"]).write_text(json.dumps({"ok": True, "cabinets": [], "non_cabinet": {"count": 1, "fingerprint": "f"}}), "utf-8")
+
+    su, _ = fake_su(job)
+    res = ss.inspect_shaker(base, mode="interactive", su=su)
+    assert res["status"] == "OK"
+    assert sorted(p.name for p in (repo_falso / "artifacts").rglob("*") if p.is_file()) == ["mobiliado.skp"]
+    assert base.read_bytes() == b"SKP-CANONICO" and Path(res["out_dir"]).resolve().is_relative_to((repo_falso / "runs").resolve())
+
+
+def test_inspecionar_skp_fora_de_artifacts_continua_usando_a_pasta_ao_lado(tmp_path):
+    skp = tmp_path / "x.skp"
+    skp.write_bytes(b"SKP")
+
+    def job(cmd, env, handle):
+        Path(env["SKMCP_RESULT"]).write_text(json.dumps({"ok": True, "cabinets": [], "non_cabinet": {"count": 0, "fingerprint": "f"}}), "utf-8")
+
+    su, _ = fake_su(job)
+    res = ss.inspect_shaker(skp, mode="interactive", su=su)
+    assert res["status"] == "OK" and Path(res["out_dir"]).parent == tmp_path
