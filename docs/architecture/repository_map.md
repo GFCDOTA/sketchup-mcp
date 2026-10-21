@@ -100,7 +100,7 @@ A cozinha foi o primeiro módulo a seguir a convenção; os nove perfis (`specia
 | `tools/rooms/specialists.py` | existe | perfis, roteamento e plano fail-closed (`BLOCKED_CAPABILITY_MISSING`); nunca executa (P5) |
 | `tools/rooms/kitchen/capabilities/` | existe | capacidades exclusivas da cozinha: V-Ray, bake de tema e Ruby de recolor/ângulos (P4a) |
 | `tools/rooms/kitchen/capabilities/cabinet.py` | existe | adapter do gabinete paramétrico: planeja só após âncora hidráulica, arquitetura, mobília e circulação (P6a, L1) |
-| `tools/rooms/shared/cabinet/` | existe | gabinete paramétrico compartilhado: caixaria retangular + frentes lisas separadas; plano L1 (P6a) e materializador SketchUp com L2 em micro-fixtures (P6b); sem ferragem/gaveta/recorte; a porta Shaker vive em `shaker/` (plano + materialização com L2 sintético, ainda não promovida ao catálogo) |
+| `tools/rooms/shared/cabinet/` | existe | gabinete paramétrico compartilhado: caixaria retangular + frentes lisas separadas; plano L1 (P6a) e materializador SketchUp com L2 em micro-fixtures (P6b); sem ferragem/gaveta/recorte; a porta Shaker vive em `shaker/` (plano + materialização; capability `shared.cabinet.front.shaker` com L2) |
 | `tools/rooms/kitchen/capabilities/cabinet_flow.py` | existe | fluxo vertical da cozinha (P7): pedido → 4 gates → allowlist → job SketchUp → reabertura → trace; evidência L2 em `artifacts/review/fp043/p7_kitchen_cabinet/` |
 | `tools/rooms/shared/cabinet/sketchup.py` | existe | driver da materialização: `materialize` (exige `require_valid`), `inspect` (reabre o salvo) e `verify` (plano × vértices reais) |
 | `tools/rooms/shared/cabinet/ruby/` | existe | jobs Ruby do gabinete: `cabinet_build.rb` (cria só o grupo `Cabinet_<id>`) e `cabinet_inspect.rb` (somente leitura) |
@@ -126,7 +126,7 @@ resposta estão em [`navigation_routes.v1.json`](navigation_routes.v1.json) e s�
 |---|---|
 | Onde está o planner da cozinha e a regra que protege a pia? | README → este mapa → [README da cozinha](../../tools/rooms/kitchen/README.md) |
 | Onde está o builder compartilhado de gabinete e quem o usa? | README → este mapa → [README da cozinha](../../tools/rooms/kitchen/README.md) (hoje: **não existe**) |
-| Existe porta Shaker? | README → este mapa → [README da cozinha](../../tools/rooms/kitchen/README.md) (recipe sim; código e L2 sim; **promoção ao catálogo não** — D46-09) |
+| Existe porta Shaker? | README → este mapa → [README da cozinha](../../tools/rooms/kitchen/README.md) (sim: recipe, código, L2 e capability registrada no catálogo; **aparência não aprovada** — só o Felipe) |
 | Qual teste e qual evidência L2 provam uma capacidade? | README → este mapa → [README da cozinha](../../tools/rooms/kitchen/README.md) (cozinha), ou [relatório L2](../../artifacts/review/l2_fp042_20261019/README.md) |
 | Onde entra o MCP, quem executa no SketchUp e onde sai o `.skp`? | README → este mapa (seção 1) |
 

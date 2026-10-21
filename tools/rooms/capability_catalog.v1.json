@@ -401,8 +401,16 @@
             "symbol_digests": {
               "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet": "97fa552cf5e14f6a30ab19a1a3474252d02e652e25b23cbf9c9fb12357d0bf59",
               "python:tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet": "128a2cad06b8bc61dbacfa200bcbfae1ca4596c13ab51df38623ce39061709ac",
-              "python:tools.rooms.kitchen.capabilities.cabinet_flow.run_request": "05cf0f640ab90d773ebb7b87cb8b2ecabf363242648ccaa3a422a22b297781c8",
               "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "80b8bd953b0516ad10443be865d73e21b4d15c87b138cddbcdb82c75431063cf"
+            }
+          },
+          {
+            "ref": "artifacts/review/fp046/promotion_l2/README.md",
+            "sketchup_version": "26.0.429",
+            "commit": "7820f74",
+            "scope": "rerun do L2 da P7 (script inalterado) depois que cabinet_flow.run_request passou a recusar pedido de Shaker: positivo DONE_L2_VERIFIED, 6 negativos, job interrompido de verdade, canonico identico; SketchUp 26.0.429",
+            "symbol_digests": {
+              "python:tools.rooms.kitchen.capabilities.cabinet_flow.run_request": "9c7b16cbc15b256f23844af7f8d2216a65083b6f991d9a952458bc6403b4c166"
             }
           }
         ]
@@ -528,6 +536,353 @@
         "a pose vem do pedido: passar nos gates nao significa bom layout",
         "veio NOT_SUPPORTED; sem ferragem/gaveta/Shaker/recorte",
         "visual NOT_REVIEWED"
+      ]
+    },
+    {
+      "id": "kitchen.cabinet.shaker-door",
+      "room": "kitchen",
+      "version": "1.0.0",
+      "owner": "tools.rooms.kitchen",
+      "title": "Porta Shaker na cozinha: gabinete pai e composicao final passam por ancora, arquitetura, mobilia e circulacao antes de materializar; fluxo pedido -> SKP com trace",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.kitchen.capabilities.shaker_flow.run_request"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L2_PASS",
+        "fixtures": [
+          "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+          "artifacts/review/fp046/promotion_l2/request.json"
+        ],
+        "tests": [
+          "tests/test_fp046_kitchen_shaker.py"
+        ],
+        "evidence": [
+          {
+            "ref": "artifacts/review/fp046/promotion_l2/README.md",
+            "sketchup_version": "26.0.429",
+            "commit": "7820f74",
+            "scope": "cozinha da planta_74 (copia do .skp mobiliado) pelo fluxo sem contorno: pedido -> 8 gates -> gabinete + Shaker salvos/reabertos/inspecionados, 7 negativos sem SketchUp, strict_identity FP-047, canonicos intactos; SketchUp 26.0.429; NAO e veredito visual nem projeto de cozinha",
+            "symbol_digests": {
+              "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker": "2b656cce571da5a63c02bc68a3c74d39d38ebaa935dbd434e1e90c1a4d457c3a",
+              "python:tools.rooms.kitchen.capabilities.shaker_flow.run_request": "5367a232ca5fed1f47292bac61c3ff100cc843beff3c64172991467e549ebfd8",
+              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "e9e99a4199eac697b951030d8e325c72e81dd55800d64808ea39e95d4b5f15d4"
+            }
+          }
+        ]
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet",
+        "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker",
+        "python:tools.rooms.shared.cabinet.plan.plan_cabinet",
+        "python:tools.rooms.shared.cabinet.plan.require_valid",
+        "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door",
+        "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker",
+        "python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker",
+        "python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker",
+        "python:tools.rooms.shared.cabinet.sketchup.materialize",
+        "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+        "ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+        "ruby:tools/rooms/shared/cabinet/ruby/shaker_inspect.rb"
+      ],
+      "parameters": [
+        {
+          "name": "dimensions.width",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "dimensions.depth",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "dimensions.height",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.side",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.top_bottom",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.back",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "panels.front",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "gaps.front_clearance",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "gaps.front_reveal",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "fronts.count",
+          "unit": "count",
+          "origin": "user_request"
+        },
+        {
+          "name": "shelf.count",
+          "unit": "count",
+          "origin": "user_request"
+        },
+        {
+          "name": "materials.carcass",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "materials.back",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "materials.front",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.x",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.y",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.z",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "pose.rotation_deg",
+          "unit": "deg",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.frame.stile_width",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.frame.rail_height",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.frame.frame_thickness",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.panel.thickness",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.panel.recess_from_frame_front",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.materials.frame",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.materials.panel",
+          "unit": "text",
+          "origin": "user_request"
+        }
+      ],
+      "preconditions": [
+        "consensus da planta com a cozinha identificada",
+        "escala PT_TO_M da planta (0,0259 para a planta_74)",
+        "base = copia de um .skp; o original nunca e aberto"
+      ],
+      "invariants": [
+        "a pia continua na parede oeste",
+        "nenhuma parede/porta/janela e alterada",
+        "sem sobreposicao com a mobilia planejada",
+        "zonas de porta livres",
+        "so ferramentas da allowlist do perfil; um gate reprovado recusa antes de subir o SketchUp",
+        "o pedido precisa PEDIR Shaker no texto; um bloco shaker num pedido de frente lisa e recusado",
+        "source_verified=true so com revisao humana registrada na fonte"
+      ],
+      "side_effects": "WRITES_WORKING_COPY",
+      "limitations": [
+        "a pose vem do pedido: passar nos gates nao significa bom layout",
+        "veio NOT_SUPPORTED; sem ferragem/gaveta/recorte",
+        "uma porta por pedido; duas portas = dois pedidos em sequencia",
+        "visual NOT_REVIEWED (aparencia so com o Felipe)"
+      ]
+    },
+    {
+      "id": "shared.cabinet.front.shaker",
+      "room": "shared",
+      "version": "1.0.0",
+      "owner": "tools.rooms.shared",
+      "title": "Porta Shaker parametrica: moldura (2 montantes + 2 travessas) e painel central recuado como submontagem editavel de um gabinete pai assinado",
+      "implementation": {
+        "state": "IMPLEMENTED",
+        "symbols": [
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.rooms.shared.cabinet.shaker.sketchup.verify_shaker"
+          },
+          {
+            "lang": "ruby",
+            "ref": "tools/rooms/shared/cabinet/ruby/shaker_build.rb"
+          },
+          {
+            "lang": "ruby",
+            "ref": "tools/rooms/shared/cabinet/ruby/shaker_inspect.rb"
+          }
+        ]
+      },
+      "validation": {
+        "state": "L2_PASS",
+        "fixtures": [
+          "fixtures/synthetic_cabinets/valid_a_base_600.json",
+          "fixtures/synthetic_cabinets/fp046_shaker_valid_a.json"
+        ],
+        "tests": [
+          "tests/test_fp046_shaker_plan.py",
+          "tests/test_fp046_shaker_sketchup.py"
+        ],
+        "evidence": [
+          {
+            "ref": "artifacts/review/fp046/promotion_l2/README.md",
+            "sketchup_version": "26.0.429",
+            "commit": "7820f74",
+            "scope": "matriz sintetica (pai valid_a_base_600): 1 porta a 0/90/30 graus, 2 portas no mesmo gabinete, reexecucao idempotente, make_unique local, propagate explicito, material local, 2 negativos no Ruby real; SketchUp 26.0.429; NAO e cozinha real nem veredito visual",
+            "symbol_digests": {
+              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "e9e99a4199eac697b951030d8e325c72e81dd55800d64808ea39e95d4b5f15d4",
+              "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker": "ed31e190eec9ef1c19838078e88c78da88a44a2fad89036cae80a0fcdcbc5733",
+              "python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker": "21c5b199c1197780bcdc030d7b416f1821a5f5f3c9f1bfa3744d940790be3ec0",
+              "python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker": "9d69a5e56945906d5585129d2a060465ec8e43562740cf4db54cbb9f19b9beaf",
+              "python:tools.rooms.shared.cabinet.shaker.sketchup.verify_shaker": "1335419e985e77d63a41e2e1dc76b1f2dc42fc96e2caa3053597df68514b4f86",
+              "ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb": "e9bf32574646ba26bc7b9c1793038601e55112dee6a6aaffbec31f10a9a80117",
+              "ruby:tools/rooms/shared/cabinet/ruby/shaker_inspect.rb": "1bbb3fc32cd7eb110fb8a1e8f4179fb4562b4e925134f0958608043cbd77ba68"
+            }
+          }
+        ]
+      },
+      "visual": {
+        "state": "NOT_REVIEWED"
+      },
+      "tools": [
+        "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door",
+        "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker",
+        "python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker",
+        "python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker",
+        "ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+        "ruby:tools/rooms/shared/cabinet/ruby/shaker_inspect.rb"
+      ],
+      "parameters": [
+        {
+          "name": "shaker.frame.stile_width",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.frame.rail_height",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.frame.frame_thickness",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.panel.thickness",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.panel.recess_from_frame_front",
+          "unit": "length",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.materials.frame",
+          "unit": "text",
+          "origin": "user_request"
+        },
+        {
+          "name": "shaker.materials.panel",
+          "unit": "text",
+          "origin": "user_request"
+        }
+      ],
+      "preconditions": [
+        "gabinete pai = cabinet_assembly_plan.v1 valido (require_valid) ja materializado na copia de trabalho",
+        "base = copia de um .skp; o original nunca e aberto",
+        "frame_thickness igual a panels.front do pai; recuo + painel <= moldura"
+      ],
+      "invariants": [
+        "a Shaker substitui UMA frente lisa do pai: o envelope da frente permanece",
+        "contato de face entre pecas; volume em comum e falha",
+        "recuo do painel medido por coordenada no modelo reaberto, nao por material",
+        "plano adulterado, reassinado-mas-invalido ou de pai alterado e recusado antes de subir o SketchUp",
+        "reexecucao do mesmo request_id substitui; nunca duplica nem deixa definicao orfa"
+      ],
+      "side_effects": "WRITES_WORKING_COPY",
+      "limitations": [
+        "veio NOT_SUPPORTED (atributo, sem UV)",
+        "sem ferragem, gaveta, veneziana, recorte, lista de corte",
+        "valores de moldura/painel vem do pedido: passar nos gates nao significa boa proporcao",
+        "visual NOT_REVIEWED (aparencia so com o Felipe)"
       ]
     },
     {
@@ -997,12 +1352,14 @@
       "id": "bind.kitchen.shaker",
       "room": "kitchen",
       "recipe_ids": [
+        "cabinet.front-gaps-and-profiles",
         "cabinet.recessed-shaker-and-louvers"
       ],
       "source_ids": [
-        "yt-cabinet-styles-2024"
+        "yt-cabinet-styles-2024",
+        "yt-cabinet-tips-2021"
       ],
-      "capability_id": null,
+      "capability_id": "kitchen.cabinet.shaker-door",
       "terms": [
         "shaker",
         "rebaixad",
@@ -1010,7 +1367,7 @@
         "louver",
         "moldura"
       ],
-      "gap": "porta Shaker/frente rebaixada: nao ha builder de perfil/rebaixo nem fixture L2; so existe a recipe"
+      "gap": null
     },
     {
       "id": "bind.kitchen.drawer",

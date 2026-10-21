@@ -41,8 +41,8 @@ def test_rotas_de_navegacao_passam():
     assert all(len(r["hops"]) - 1 <= 3 for r in doc["routes"])
 
 
-def test_shaker_existe_no_codigo_mas_continua_nao_promovida():
-    """FP-046/P4: o codigo da Shaker existe (P1-P4), mas a promocao ao catalogo segue bloqueada (D46-09). A rota diz as duas coisas."""
+def test_shaker_existe_registrada_mas_a_aparencia_nao_foi_aprovada():
+    """FP-046/P5: a Shaker esta registrada no catalogo (fonte inspecionada com revisao humana); a APARENCIA segue NOT_REVIEWED."""
     doc = json.loads((ROOT / ROUTES_PATH).read_text(encoding="utf-8"))
     route = next(r for r in doc["routes"] if r["id"] == "shaker-door-recipe")
     assert not route.get("absent")
@@ -50,9 +50,11 @@ def test_shaker_existe_no_codigo_mas_continua_nao_promovida():
     assert {"tools/rooms/kitchen/capabilities/shaker.py", "tools/rooms/shared/cabinet/shaker/plan.py"} <= paths
     assert all((ROOT / p).exists() for p in paths)
     readme = (ROOT / "tools/rooms/kitchen/README.md").read_text(encoding="utf-8")
-    assert "BLOCKED_CAPABILITY_MISSING" in readme and "NÃO está promovida" in readme and "D46-09" in readme
+    assert "existe e está registrada" in readme and "NOT_REVIEWED" in readme and "Felipe" in readme
     catalog = json.loads((ROOT / "tools/rooms/capability_catalog.v1.json").read_text(encoding="utf-8"))
-    assert next(b for b in catalog["bindings"] if b["id"] == "bind.kitchen.shaker")["capability_id"] is None
+    assert next(b for b in catalog["bindings"] if b["id"] == "bind.kitchen.shaker")["capability_id"] == "kitchen.cabinet.shaker-door"
+    shaker = [c for c in catalog["capabilities"] if "shaker" in c["id"]]
+    assert shaker and all(c["visual"]["state"] == "NOT_REVIEWED" for c in shaker)           # promover != aprovar a aparencia
 
 
 def test_readme_raiz_nao_repete_afirmacoes_desatualizadas():

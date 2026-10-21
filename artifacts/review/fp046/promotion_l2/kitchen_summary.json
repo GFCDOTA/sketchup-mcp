@@ -1,0 +1,212 @@
+{
+ "commit": "7820f745db8291c6f6adbedcfe641d79b4b09ab2",
+ "dirty": false,
+ "canonical_before": {
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "69dbbf0394b5197321e511d5518cf6bb0ae6772879a6edfb285d4be36f3fe2be"
+ },
+ "cases": [
+  {
+   "case": "positive_kitchen_shaker_promoted",
+   "ok": true,
+   "state": "DONE_L2_VERIFIED",
+   "steps": [
+    [
+     "request",
+     "OK"
+    ],
+    [
+     "project_room",
+     "OK"
+    ],
+    [
+     "consensus_requirements",
+     "OK"
+    ],
+    [
+     "knowledge",
+     "OK"
+    ],
+    [
+     "specialist_plan",
+     "OK"
+    ],
+    [
+     "capability",
+     "OK"
+    ],
+    [
+     "plan_validation",
+     "OK"
+    ],
+    [
+     "allowlist",
+     "OK"
+    ],
+    [
+     "baseline_inspect",
+     "OK"
+    ],
+    [
+     "job_parent",
+     "OK"
+    ],
+    [
+     "job_shaker",
+     "OK"
+    ],
+    [
+     "reopen_inspection",
+     "OK"
+    ],
+    [
+     "kitchen_anchor_after",
+     "OK"
+    ],
+    [
+     "evidence",
+     "OK"
+    ]
+   ],
+   "checks": 50,
+   "max_corner_error_m": 3.554447978966673e-15,
+   "gates": {
+    "parent": [
+     {
+      "gate": "hydraulic_anchor",
+      "result": "PASS"
+     },
+     {
+      "gate": "architecture",
+      "result": "PASS"
+     },
+     {
+      "gate": "furniture_overlap",
+      "result": "PASS"
+     },
+     {
+      "gate": "circulation",
+      "result": "PASS"
+     }
+    ],
+    "composition": [
+     {
+      "gate": "hydraulic_anchor",
+      "result": "PASS"
+     },
+     {
+      "gate": "architecture",
+      "result": "PASS"
+     },
+     {
+      "gate": "furniture_overlap",
+      "result": "PASS"
+     },
+     {
+      "gate": "circulation",
+      "result": "PASS"
+     }
+    ]
+   },
+   "skp_sha256": "94dbdb3a2401b0a9295ecccdba7adb716e9065ae15cb952e3e07474fef72c79f",
+   "sketchup_version": "26.0.429",
+   "source_evidence": {
+    "yt-cabinet-styles-2024": "TRANSCRIPT_AND_DESCRIPTION_ONLY",
+    "yt-cabinet-tips-2021": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH"
+   },
+   "human_review": {
+    "yt-cabinet-tips-2021": {
+     "reviewer": "Felipe",
+     "date": "2026-10-21",
+     "channel": "chat da sessao FP-046/D46-09 (resposta escrita)",
+     "segment": "03:13-04:29",
+     "recipe_id": "cabinet.front-gaps-and-profiles",
+     "confirmed": [
+      "frente modelada como peca separada da caixa",
+      "frente com painel central em rebaixo dentro de moldura (estilo Shaker)",
+      "perfil interno por Offset e extrusao negativa controlada do painel",
+      "gap geometrico real (nao so linha de divisao)"
+     ],
+     "not_confirmed": "nada alem do segmento; nenhuma medida do video e adotada (insumos do projeto seguem origin=user_request)"
+    }
+   }
+  },
+  {
+   "case": "same_key_already_done",
+   "ok": true,
+   "state": "ALREADY_DONE"
+  },
+  {
+   "case": "negative_without_shaker_block",
+   "ok": true,
+   "state": "BLOCKED_INPUT_INCOMPLETE",
+   "expected": "BLOCKED_INPUT_INCOMPLETE"
+  },
+  {
+   "case": "negative_pose_outside_kitchen",
+   "ok": true,
+   "state": "BLOCKED_PLAN_REFUSED",
+   "expected": "BLOCKED_PLAN_REFUSED"
+  },
+  {
+   "case": "negative_architecture_change",
+   "ok": true,
+   "state": "BLOCKED_ARCHITECTURE_CHANGE",
+   "expected": "BLOCKED_ARCHITECTURE_CHANGE"
+  },
+  {
+   "case": "negative_frame_thickness_mismatch",
+   "ok": true,
+   "state": "BLOCKED_PLAN_REFUSED",
+   "expected": "BLOCKED_PLAN_REFUSED"
+  },
+  {
+   "case": "negative_text_does_not_ask_shaker",
+   "ok": true,
+   "state": "BLOCKED_TECHNIQUE_UNRESOLVED",
+   "expected": "BLOCKED_TECHNIQUE_UNRESOLVED"
+  },
+  {
+   "case": "negative_source_verified_without_human_review",
+   "ok": true,
+   "state": "BLOCKED_KNOWLEDGE_EVIDENCE",
+   "expected": "BLOCKED_KNOWLEDGE_EVIDENCE"
+  },
+  {
+   "case": "negative_plain_front_flow_refuses_shaker",
+   "ok": true,
+   "state": "BLOCKED_CAPABILITY_MISMATCH"
+  },
+  {
+   "case": "fp047_strict_identity_planned_boxes_and_canonicals",
+   "ok": true,
+   "state": "PASS",
+   "preexisting": [
+    "CIRC|r000|corredor_principal"
+   ],
+   "delta_count": 0
+  },
+  {
+   "case": "canonicals_byte_identical",
+   "ok": true
+  },
+  {
+   "case": "no_scratch_left_inside_artifacts",
+   "ok": true,
+   "leftovers": []
+  }
+ ],
+ "pids": [
+  22024,
+  24992,
+  37556,
+  37572
+ ],
+ "canonical_after": {
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "69dbbf0394b5197321e511d5518cf6bb0ae6772879a6edfb285d4be36f3fe2be"
+ },
+ "note": "Promocao do binding bind.kitchen.shaker (opcao C da D46-09): fonte yt-cabinet-tips-2021 03:13-04:29 revisada pelo Felipe; aparencia PENDING_HUMAN; veio NOT_SUPPORTED; valores da porta sao do pedido de teste"
+}

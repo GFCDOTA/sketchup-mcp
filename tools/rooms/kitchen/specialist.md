@@ -4,7 +4,7 @@
 
 ## Papel
 
-**planner**. Cozinha: layout linear em caixas/pecas com a pia presa a parede oeste do PDF. Gabinete parametrico, Shaker, gavetas e ferragens ainda NAO existem como capacidade.
+**planner**. Cozinha: layout linear em caixas/pecas com a pia presa a parede oeste do PDF. Gabinete parametrico de frentes lisas e porta Shaker existem como capacidade; gavetas e ferragens ainda NAO.
 
 ## Como decide
 
@@ -22,6 +22,8 @@
 | `kitchen.sink-anchor-guard` | IMPLEMENTED | L1_PASS |
 | `kitchen.ergonomics.audit` | IMPLEMENTED | UNTESTED |
 | `kitchen.cabinet.plain-fronts` | IMPLEMENTED | L2_PASS |
+| `kitchen.cabinet.shaker-door` | IMPLEMENTED | L2_PASS |
+| `shared.cabinet.front.shaker` | IMPLEMENTED | L2_PASS |
 | `shared.cabinet.parametric` | IMPLEMENTED | L2_PASS |
 
 Recipes (so conhecimento, `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP`): `cross.room.material-and-instance-rules`, `room.kitchen.cabinet-assemblies`, `cabinet.countertop-separate-and-bevel`, `cabinet.drawer-box-and-hardware`, `cabinet.front-gaps-and-profiles`, `cabinet.recessed-shaker-and-louvers`, `cabinet.reusable-components`, `cabinet.sink-and-wet-channel-cutouts`.
@@ -31,14 +33,21 @@ Recipes (so conhecimento, `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP`): `cross.room.ma
 - `mcp:su_inspect`
 - `python:tools.rooms.kitchen.anchor_rules.validate`
 - `python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet`
+- `python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker`
 - `python:tools.rooms.kitchen.layout.build_boxes`
 - `python:tools.rooms.kitchen.validation.ergonomics.audit`
 - `python:tools.rooms.shared.cabinet.plan.plan_cabinet`
 - `python:tools.rooms.shared.cabinet.plan.require_valid`
+- `python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door`
+- `python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker`
+- `python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker`
+- `python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker`
 - `python:tools.rooms.shared.cabinet.sketchup.inspect`
 - `python:tools.rooms.shared.cabinet.sketchup.materialize`
 - `ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb`
 - `ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb`
+- `ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb`
+- `ruby:tools/rooms/shared/cabinet/ruby/shaker_inspect.rb`
 - `ruby:tools/sketchup/furnish/place_layout_skp.rb`
 
 Qualquer outra ferramenta e recusada (`TOOL_NOT_ALLOWLISTED`).
@@ -47,7 +56,7 @@ Qualquer outra ferramenta e recusada (`TOOL_NOT_ALLOWLISTED`).
 
 - A pia e ponto hidraulico fixo do PDF (parede oeste): nao migrar de parede.
 - Nao criar, mover ou apagar parede, porta ou janela.
-- Tecnica sem capacidade registrada (ex.: porta Shaker) responde BLOCKED_CAPABILITY_MISSING; nao improvisar caixa.
+- Tecnica sem capacidade registrada (ex.: gaveta) responde BLOCKED_CAPABILITY_MISSING; nao improvisar caixa.
 
 ## Condicoes de parada
 
@@ -60,13 +69,12 @@ Qualquer outra ferramenta e recusada (`TOOL_NOT_ALLOWLISTED`).
 ## Limites conhecidos
 
 - so a cozinha da planta_74 foi provada em L2
-- porta Shaker, gavetas e ferragens NAO existem
+- gavetas e ferragens NAO existem; a porta Shaker existe, mas a aparencia nao foi aprovada
 - valida posicao relativa a parede; nao substitui projeto hidraulico
 - sem teste proprio hoje (UNTESTED); ergonomia nao e aprovacao estetica
 - a pose vem do pedido: passar nos gates nao significa bom layout
-- veio NOT_SUPPORTED; sem ferragem/gaveta/Shaker/recorte
+- veio NOT_SUPPORTED; sem ferragem/gaveta/recorte
 - visual NOT_REVIEWED
-- porta Shaker/frente rebaixada: nao ha builder de perfil/rebaixo nem fixture L2; so existe a recipe
 - gaveta e ferragens: nao ha builder de caixa de gaveta nem fixture L2; so existe a recipe
 - tampo separado com chanfro: sem builder nem fixture
 - recorte de cuba e canal umido: sem builder nem fixture

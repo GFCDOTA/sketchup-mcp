@@ -5844,8 +5844,8 @@
     },
     {
       "path": "references/sketchup/knowledge/video_recipes.v1.json",
-      "blob_sha": "464e7777e16fec75ac9d501d6701f741e94ef931",
-      "blob_size": 18458,
+      "blob_sha": "991effc561e28085aa16f62417c5dd75a9bd8d7c",
+      "blob_size": 19156,
       "owner_group": "references"
     },
     {
@@ -7034,6 +7034,138 @@
       "path": "artifacts/review/fp043/p6b_cabinet_l2/l2_matrix.py",
       "blob_sha": "fac0fa0c1a5b60f1c53371d7f9aa68c895627742",
       "blob_size": 9348,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/README.md",
+      "blob_sha": "41850276c24b99a173bf3cd420d69ae4ae4e3a56",
+      "blob_size": 5076,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/kitchen_fp047_report.json",
+      "blob_sha": "b3f6ace0da9ecbbe187a061cd6032fffea0674d7",
+      "blob_size": 1227,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/kitchen_negatives.json",
+      "blob_sha": "b1960e10fd6cf5856d7c9f0933520e1b1a505d91",
+      "blob_size": 1772,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/kitchen_summary.json",
+      "blob_sha": "a430f8c046743b07dbd2407de8e73e20c2415d95",
+      "blob_size": 5046,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/kitchen_trace.json",
+      "blob_sha": "f8456e9b7bfe8cd77cfbc60edb194d22ac76f183",
+      "blob_size": 11250,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s1_one_door_r0_verify.json",
+      "blob_sha": "4b8f21ccc82b49a38881514f975f1f6e05b1d3af",
+      "blob_size": 5396,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s1_one_door_r30_verify.json",
+      "blob_sha": "c12a8cf951213d949dcc18a8b25d493272d1dd5b",
+      "blob_size": 5450,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s1_one_door_r90_verify.json",
+      "blob_sha": "77f7e49a1e8c7a8cc6347c9158b23a7b2924f5c4",
+      "blob_size": 5432,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s2_two_doors_r30_verify.json",
+      "blob_sha": "769275a1982157efee7a7c8094d24812b40ff177",
+      "blob_size": 5668,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s3_idempotent_rebuild_verify.json",
+      "blob_sha": "69af2f09d163d790f9708afec18a523f4faa5aad",
+      "blob_size": 5229,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s4_make_unique_local_verify.json",
+      "blob_sha": "e44684df21073d1eecf39caec5be95fe71579bf1",
+      "blob_size": 5508,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s5_edit_propagate_verify.json",
+      "blob_sha": "0fddb1b45e5d5ae9e0811b6d6890166431e20754",
+      "blob_size": 5316,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s6_set_material_panel_verify.json",
+      "blob_sha": "4b3d0f63fafa0b4b461bce5381c6b4523a9b5ea0",
+      "blob_size": 147,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s7_ruby_refuses_stale_parent_verify.json",
+      "blob_sha": "7f6906ec5e2a05724b7e14e109eb814719f4373f",
+      "blob_size": 216,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s8_ruby_refuses_changed_parent_signature_verify.json",
+      "blob_sha": "63ec3d4daadb07b2bb6b22e4500e62047f8ea6b8",
+      "blob_size": 275,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_summary.json",
+      "blob_sha": "dfb267eb257e3f7c311f676700d41d8cb7a5c80c",
+      "blob_size": 6022,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_interrupted_job.json",
+      "blob_sha": "ff79ece4b5992f66baebf0e87e8a891748a15514",
+      "blob_size": 251,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_negatives.json",
+      "blob_sha": "d7299b773408ead27d5b2758bd94db7fe6e1fb6a",
+      "blob_size": 2579,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_summary.json",
+      "blob_sha": "3bfb2c975dcafa46e822b8a4e975037c7b2d500a",
+      "blob_size": 706,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_trace.json",
+      "blob_sha": "ccaed83debd921a60fbd816da4fa24a1a4013e21",
+      "blob_size": 10024,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/l2_promoted.py",
+      "blob_sha": "8b85937d1f079f743449209717413838b55f3a2b",
+      "blob_size": 7550,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/request.json",
+      "blob_sha": "c80aaa9369d9603785d14b20873b14602062e5a8",
+      "blob_size": 3535,
       "owner_group": "artifacts"
     },
     {

@@ -74,7 +74,6 @@ def test_cozinha_com_capacidade_implementada_gera_plano_estruturado_sem_autoriza
 
 
 @pytest.mark.parametrize("text,binding", [
-    ("quero porta Shaker nos armarios", "bind.kitchen.shaker"),
     ("preciso de gavetas com corredica", "bind.kitchen.drawer"),
     ("tampo com chanfro", "bind.kitchen.countertop"),
     ("recorte da cuba na bancada da cozinha", "bind.kitchen.sink-cutout"),
@@ -86,10 +85,32 @@ def test_tecnica_conhecida_so_como_recipe_responde_capability_missing(text, bind
     assert res["execution_authorized"] is False and "steps" not in res            # nao improvisa caixa nem Ruby
 
 
-def test_shaker_continua_bloqueado_mesmo_com_o_gabinete_liso_planejado():
+def test_shaker_pede_os_insumos_da_porta_alem_dos_do_gabinete_liso():
+    """FP-046/P5: a Shaker foi promovida, mas gabinete liso planejado NAO basta: faltam as medidas da moldura/painel."""
     res = sp.plan({"text": "armario de cozinha com porta Shaker", "room": "kitchen", "inputs": CAB_INPUTS})
-    assert res["state"] == "BLOCKED_CAPABILITY_MISSING" and res["binding"] == "bind.kitchen.shaker"
-    assert "bind.kitchen.cabinet" in res["also_matched"]
+    assert res["state"] == "BLOCKED_INPUT_INCOMPLETE"
+    assert {"bind.kitchen.cabinet", "bind.kitchen.shaker"} == {res["binding"], *res["also_matched"]}
+    assert all(name.startswith("shaker.") for name in res["missing"]) and len(res["missing"]) == 7
+    assert res["execution_authorized"] is False and "steps" not in res
+
+
+SHAKER_INPUTS = {
+    **{f"shaker.{k}": {"value": v, "unit": "mm", "origin": "user_request"}
+       for k, v in (("frame.stile_width", 50), ("frame.rail_height", 50), ("frame.frame_thickness", 18), ("panel.thickness", 6),
+                    ("panel.recess_from_frame_front", 4))},
+    "shaker.materials.frame": {"value": "mdf_branco", "unit": "text", "origin": "user_request"},
+    "shaker.materials.panel": {"value": "mdf_branco", "unit": "text", "origin": "user_request"},
+}
+
+
+def test_shaker_com_todos_os_insumos_gera_plano_estruturado_sem_autorizar_execucao():
+    res = sp.plan({"text": "armario de cozinha com porta Shaker", "room": "kitchen", "inputs": {**CAB_INPUTS, **SHAKER_INPUTS}})
+    assert res["state"] == "PLAN_READY_NOT_EXECUTED" and res["execution_authorized"] is False
+    tools = {s["tool"] for s in res["steps"]}
+    assert "ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb" in tools and "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker" in tools
+    assert res["capability"]["visual"] == "NOT_REVIEWED"
+    assert "Felipe" in res["visual_review"]                                     # a aparencia continua sendo decisao humana
+    assert "bind.kitchen.shaker" in [res["binding"], *res.get("also_matched", [])]
 
 
 CAB_INPUTS = {

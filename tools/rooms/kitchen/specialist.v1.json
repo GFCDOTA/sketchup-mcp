@@ -7,7 +7,7 @@
   ],
   "role": "planner",
   "reuse_of": null,
-  "scope": "Cozinha: layout linear em caixas/pecas com a pia presa a parede oeste do PDF. Gabinete parametrico, Shaker, gavetas e ferragens ainda NAO existem como capacidade.",
+  "scope": "Cozinha: layout linear em caixas/pecas com a pia presa a parede oeste do PDF; gabinete parametrico de frentes lisas e porta Shaker (moldura + painel rebaixado) sobre ele. Gavetas e ferragens ainda NAO existem como capacidade.",
   "owner": "tools.rooms.kitchen",
   "state": "LEGACY_PROVIDER_PRESENT",
   "knowledge_room_ids": [
@@ -30,26 +30,35 @@
     "kitchen.sink-anchor-guard",
     "kitchen.ergonomics.audit",
     "kitchen.cabinet.plain-fronts",
-    "shared.cabinet.parametric"
+    "shared.cabinet.parametric",
+    "kitchen.cabinet.shaker-door",
+    "shared.cabinet.front.shaker"
   ],
   "tool_allowlist": [
     "mcp:su_inspect",
     "python:tools.rooms.kitchen.anchor_rules.validate",
     "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet",
+    "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker",
     "python:tools.rooms.kitchen.layout.build_boxes",
     "python:tools.rooms.kitchen.validation.ergonomics.audit",
     "python:tools.rooms.shared.cabinet.plan.plan_cabinet",
     "python:tools.rooms.shared.cabinet.plan.require_valid",
+    "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door",
+    "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker",
+    "python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker",
+    "python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker",
     "python:tools.rooms.shared.cabinet.sketchup.inspect",
     "python:tools.rooms.shared.cabinet.sketchup.materialize",
     "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
     "ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb",
+    "ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+    "ruby:tools/rooms/shared/cabinet/ruby/shaker_inspect.rb",
     "ruby:tools/sketchup/furnish/place_layout_skp.rb"
   ],
   "constraints": [
     "A pia e ponto hidraulico fixo do PDF (parede oeste): nao migrar de parede.",
     "Nao criar, mover ou apagar parede, porta ou janela.",
-    "Tecnica sem capacidade registrada (ex.: porta Shaker) responde BLOCKED_CAPABILITY_MISSING; nao improvisar caixa."
+    "Tecnica sem capacidade registrada (ex.: gaveta) responde BLOCKED_CAPABILITY_MISSING; nao improvisar caixa."
   ],
   "result_types": [
     "boxes_plan",

@@ -130,7 +130,7 @@ def test_ferramenta_fora_da_allowlist_do_perfil_reprova():
 
 def test_tecnica_ausente_sem_lacuna_declarada_reprova():
     def mutate(cat):
-        next(b for b in cat["bindings"] if b["id"] == "bind.kitchen.shaker")["gap"] = ""
+        next(b for b in cat["bindings"] if b["id"] == "bind.kitchen.drawer")["gap"] = ""
     assert "ABSENT_CAPABILITY_WITHOUT_GAP" in _verify(mutate)["errors"]
 
 

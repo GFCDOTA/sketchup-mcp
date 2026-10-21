@@ -1,7 +1,7 @@
-"""FP-046/P4 — adapter e fluxo opt-in da porta Shaker na cozinha, com SketchUp DUBLE.
+"""FP-046/P4+P5 — adapter e fluxo da porta Shaker na cozinha, com SketchUp DUBLE.
 
-Prova ORDEM, bloqueios e a ausencia de promocao implicita (D46-09). A prova real (SKP salvo/reaberto na cozinha da planta_74) e o
-L2 em artifacts/review/fp046/p4_kitchen_shaker_l2/. Escala da planta_74 -> marcador `planta74_scale`.
+Prova ORDEM, bloqueios e que nao ha contorno (o fluxo so roda se o catalogo/perfil liberarem a Shaker). A prova real (SKP
+salvo/reaberto na cozinha da planta_74) e o L2 em artifacts/review/fp046/promotion_l2/. Escala da planta_74 -> `planta74_scale`.
 """
 from __future__ import annotations
 
@@ -38,8 +38,8 @@ def shaker_block(parent_id="shaker-kitchen-parent", **over):
         "panel": {"thickness": {"value": 6, "unit": "mm", "origin": "user_request"},
                   "recess_from_frame_front": {"value": 4, "unit": "mm", "origin": "user_request"}},
         "materials": {"frame": "mdf_nogueira", "panel": "mdf_nogueira"}, "grain": {"frame": "none", "panel": "none"},
-        "origin_context": {"recipe_id": "cabinet.recessed-shaker-and-louvers", "source_id": "yt-cabinet-styles-2024",
-                           "source_verified": False},
+        "origin_context": {"recipe_id": "cabinet.front-gaps-and-profiles", "source_id": "yt-cabinet-tips-2021",
+                           "source_verified": True},
     }
     block.update(over)
     return block
@@ -169,20 +169,28 @@ def test_composition_overlap_failure_refuses_even_though_the_parent_passed(conse
     assert [g["gate"] for g in out["gates"]][-1] == "furniture_overlap" and out["gates"][-1]["result"] == "FAIL"
 
 
-# --- catalogo/perfil: nada foi promovido (D46-09) ----------------------------------------------------------------------
+# --- catalogo/perfil: promovida, mas a aparencia segue com o Felipe ---------------------------------------------------------
 
-def test_binding_stays_blocked_and_nothing_was_promoted():
+def test_binding_is_registered_with_an_inspected_reviewed_source_and_the_tools_are_allowlisted():
     catalog = cc.load_catalog()
     binding = next(b for b in catalog["bindings"] if b["id"] == "bind.kitchen.shaker")
-    assert binding["capability_id"] is None and binding["gap"]
-    assert "shared.cabinet.front.shaker" not in {c["id"] for c in catalog["capabilities"]}
+    assert binding["capability_id"] == "kitchen.cabinet.shaker-door" and not binding.get("gap")
+    caps = {c["id"]: c for c in catalog["capabilities"]}
+    assert {"kitchen.cabinet.shaker-door", "shared.cabinet.front.shaker"} <= set(caps)
+    assert all(caps[i]["visual"]["state"] == "NOT_REVIEWED" for i in ("kitchen.cabinet.shaker-door", "shared.cabinet.front.shaker"))
     profile = sp.load_profile("kitchen")
-    assert not set(flow.PREPROMOTION_TOOLS) & set(profile["tool_allowlist"])
-    plan = sp.plan({"text": SHAKER_TEXT, "room": "kitchen"})
-    assert plan["state"] == "BLOCKED_CAPABILITY_MISSING"
+    assert set(flow.FLOW_TOOLS) <= set(profile["tool_allowlist"])
+    assert {"kitchen.cabinet.shaker-door", "shared.cabinet.front.shaker"} <= set(profile["capability_ids"])
+    assert profile["execution_authorized"] is False
 
 
-# --- fluxo opt-in com SketchUp duble -----------------------------------------------------------------------------------------
+def test_the_flow_has_no_bypass_argument():
+    import inspect
+    assert not [p for p in inspect.signature(flow.run_request).parameters if "ack" in p or "promotion" in p or "bypass" in p]
+    assert not hasattr(flow, "run_prepromotion_request") and not hasattr(flow, "BYPASSABLE")
+
+
+# --- fluxo com SketchUp duble ------------------------------------------------------------------------------------------------
 
 class World:
     def __init__(self, tmp_path, *, tamper=False, die_on=None):
@@ -223,42 +231,32 @@ class World:
         self.out = tmp_path / "out"
 
 
-def _run(world, req=None, *, ack=True, su=None, **kw):
-    return flow.run_prepromotion_request(req or request(), out_dir=world.out, base_skp=world.base, su=su or world.su,
-                                         mode="interactive", close_pids=False, prepromotion_ack=ack, **kw)
+def _run(world, req=None, *, su=None, **kw):
+    return flow.run_request(req or request(), out_dir=world.out, base_skp=world.base, su=su or world.su, mode="interactive",
+                            close_pids=False, **kw)
 
 
-def test_default_stops_at_the_specialist_verdict_without_touching_sketchup(tmp_path, consensus):
-    w = World(tmp_path)
-    req = request()
-    snap = copy.deepcopy(req)
-    t = _run(w, req, ack=False, su=Boom())
-    assert t["state"] == "BLOCKED_CAPABILITY_MISSING" and t["promotion"] == "NOT_PROMOTED"
-    assert w.state["launches"] == [] and not w.out.exists() and req == snap and t["input_unchanged"] is True
-    k = next(s for s in t["steps"] if s["step"] == "knowledge")
-    assert k["binding"] == "bind.kitchen.shaker" and k["capability_id"] is None
-    assert k["source_evidence"] == {"yt-cabinet-styles-2024": "TRANSCRIPT_AND_DESCRIPTION_ONLY"}
-    assert "evidence" not in t and t["execution_authorized"] is False
-
-
-def test_ack_runs_the_whole_chain_in_order_and_never_promotes(tmp_path, consensus):
+def test_whole_chain_runs_in_order_with_the_specialist_verdict_and_never_authorizes_or_approves(tmp_path, consensus):
     w = World(tmp_path)
     req = request()
     snap = copy.deepcopy(req)
     t = _run(w, req)
-    assert t["state"] == "PREPROMOTION_L2_VERIFIED", t["steps"][-3:]
+    assert t["state"] == "DONE_L2_VERIFIED", t["steps"][-3:]
     assert [s["step"] for s in t["steps"]] == ["request", "project_room", "consensus_requirements", "knowledge", "specialist_plan",
-                                                "prepromotion", "plan_validation", "allowlist", "baseline_inspect", "job_parent",
+                                                "capability", "plan_validation", "allowlist", "baseline_inspect", "job_parent",
                                                 "job_shaker", "reopen_inspection", "kitchen_anchor_after", "evidence"]
     assert w.state["launches"] == ["shaker_inspect.rb", "cabinet_build.rb", "shaker_build.rb", "shaker_inspect.rb"]
+    k = next(s for s in t["steps"] if s["step"] == "knowledge")
+    assert k["capability_id"] == "kitchen.cabinet.shaker-door"
+    assert k["source_evidence"]["yt-cabinet-tips-2021"] == "TRANSCRIPT_AND_VISUAL_WALKTHROUGH"
+    assert k["human_review"]["yt-cabinet-tips-2021"]["reviewer"] == "Felipe"
+    assert next(s for s in t["steps"] if s["step"] == "specialist_plan")["state"] == "PLAN_READY_NOT_EXECUTED"
     ev = t["evidence"]
-    assert t["promotion"] == ev["promotion"] == "NOT_PROMOTED" and ev["source_verified"] is False
-    assert ev["non_cabinet_fingerprint_before"] == ev["non_cabinet_fingerprint_after"] == "fp0"
+    assert ev["non_cabinet_fingerprint_before"] == ev["non_cabinet_fingerprint_after"] == "fp0" and ev["source_verified"] is True
     assert "PENDING_HUMAN" in ev["visual_review"] and t["visual_review"] == "PENDING_HUMAN"
     assert [g["result"] for g in ev["gates"]["parent"] + ev["gates"]["composition"]] == ["PASS"] * 8
     assert t["execution_authorized"] is False and t["input_unchanged"] is True and req == snap
     assert w.base.read_bytes() == b"SKP-FURNISHED"
-    assert next(s for s in t["steps"] if s["step"] == "allowlist")["status"] == "PREPROMOTION"
 
 
 def test_same_key_is_not_redone_and_other_request_gets_another_key(tmp_path, consensus):
@@ -276,25 +274,53 @@ def test_same_key_is_not_redone_and_other_request_gets_another_key(tmp_path, con
     (lambda r: r.update(touches=["walls"]), "BLOCKED_ARCHITECTURE_CHANGE"),
     (lambda r: r.update(text=SHAKER_TEXT + " e remover a parede oeste"), "BLOCKED_ARCHITECTURE_CHANGE"),
     (lambda r: r.update(tool="mcp:su_apply_edits"), "BLOCKED_TOOL_NOT_ALLOWED"),
+    (lambda r: r["shaker"]["frame"].pop("stile_width"), "BLOCKED_INPUT_INCOMPLETE"),
+    (lambda r: r["shaker"]["panel"]["thickness"].pop("origin"), "BLOCKED_INPUT_INCOMPLETE"),
+    (lambda r: r.pop("shaker"), "BLOCKED_INPUT_INCOMPLETE"),
 ])
-def test_ack_bypasses_only_the_missing_capability_not_other_blocks(tmp_path, consensus, mutate, state):
+def test_blocks_before_any_sketchup(tmp_path, consensus, mutate, state):
     w = World(tmp_path)
     req = request()
     mutate(req)
     t = _run(w, req, su=Boom())
-    assert t["state"] == state and w.state["launches"] == [] and not w.out.exists()
+    assert t["state"] == state and w.state["launches"] == [] and not w.out.exists() and "evidence" not in t
 
 
-def test_ack_with_a_refused_plan_does_not_boot_sketchup(tmp_path, consensus):
+def test_refused_plans_do_not_boot_sketchup(tmp_path, consensus):
+    w = World(tmp_path)
+    outside = request()
+    outside["inputs"]["pose.x"] = {"value": 0.5, "unit": "m", "origin": "user_request"}
+    thick = request()
+    thick["shaker"]["frame"]["frame_thickness"] = {"value": 20, "unit": "mm", "origin": "user_request"}
+    for req in (outside, thick):
+        t = _run(w, req, su=Boom())
+        assert t["state"] == "BLOCKED_PLAN_REFUSED" and w.state["launches"] == [] and "evidence" not in t
+
+
+def test_a_shaker_block_in_a_request_that_does_not_ask_for_shaker_is_refused(tmp_path, consensus):
+    w = World(tmp_path)
+    req = request(text="Quero um gabinete baixo de frentes lisas na cozinha")
+    t = _run(w, req, su=Boom())
+    assert t["state"] == "BLOCKED_TECHNIQUE_UNRESOLVED" and "nao pede porta Shaker" in t["reason"] and w.state["launches"] == []
+
+
+def test_source_verified_true_needs_a_recorded_human_review(tmp_path, consensus):
     w = World(tmp_path)
     req = request()
-    req["inputs"]["pose.x"] = {"value": 0.5, "unit": "m", "origin": "user_request"}
+    req["shaker"]["origin_context"]["source_id"] = "yt-cabinet-styles-2024"             # fonte so descritiva: sem revisao humana
     t = _run(w, req, su=Boom())
-    assert t["state"] == "BLOCKED_PLAN_REFUSED" and w.state["launches"] == [] and "evidence" not in t
-    no_block = request()
-    del no_block["shaker"]
-    t2 = _run(w, no_block, su=Boom())
-    assert t2["state"] == "BLOCKED_INPUT_INCOMPLETE" and w.state["launches"] == []
+    assert t["state"] == "BLOCKED_KNOWLEDGE_EVIDENCE" and w.state["launches"] == []
+    req["shaker"]["origin_context"]["source_verified"] = False                          # declarar honestamente nao e bloqueado
+    assert _run(w, req)["state"] == "DONE_L2_VERIFIED"
+
+
+def test_if_the_specialist_stops_releasing_the_capability_the_flow_stops_with_no_way_around(tmp_path, consensus, monkeypatch):
+    real = sp.plan
+    monkeypatch.setattr(sp, "plan", lambda r, root=sp.ROOT: {"state": "BLOCKED_CAPABILITY_MISSING", "reason": "retirada", "next_step": "x",
+                                                              "binding": "bind.kitchen.shaker"} if r.get("room") else real(r))
+    w = World(tmp_path)
+    t = _run(w, su=Boom())
+    assert t["state"] == "BLOCKED_CAPABILITY_MISSING" and w.state["launches"] == [] and not w.out.exists()
 
 
 def test_job_failure_and_geometry_mismatch_leave_no_positive_proof(tmp_path, consensus):
@@ -307,17 +333,31 @@ def test_job_failure_and_geometry_mismatch_leave_no_positive_proof(tmp_path, con
     assert next(s for s in t2["steps"] if s["step"] == "reopen_inspection")["failed"]
 
 
-def test_if_the_binding_is_ever_promoted_the_same_flow_needs_no_ack(tmp_path, consensus, monkeypatch):
-    real = sp.plan
-    monkeypatch.setattr(sp, "plan", lambda r, root=sp.ROOT: {"state": sp.PLAN_READY, "binding": "bind.kitchen.shaker",
-                                                              "capability": {"id": "x"}, "steps": []} if r.get("room") else real(r))
+def test_the_plain_front_flow_refuses_shaker_instead_of_building_a_plain_cabinet(tmp_path, consensus):
+    """R-19: um pedido de Shaker no fluxo de frentes lisas nao pode virar gabinete liso em silencio."""
+    from tools.rooms.kitchen.capabilities.cabinet_flow import run_request as plain_run
     w = World(tmp_path)
-    t = _run(w, ack=False)
-    assert t["state"] == "DONE_L2_VERIFIED" and t["promotion"] == "PROMOTED"
+    req = request()
+    req["inputs"].update(flow.shaker_inputs(req["shaker"]))
+    t = plain_run({k: v for k, v in req.items() if k != "shaker"}, out_dir=w.out, base_skp=w.base, su=Boom(), mode="interactive", close_pids=False)
+    assert t["state"] == "BLOCKED_CAPABILITY_MISMATCH" and w.state["launches"] == []
 
 
-def test_the_plain_front_flow_is_untouched_by_this_phase():
-    from tools.rooms.kitchen.capabilities import cabinet, cabinet_flow
-    for module in (cabinet, cabinet_flow):
-        text = Path(module.__file__).read_text("utf-8")
-        assert "shaker" not in text.lower(), module.__name__
+def test_stale_evidence_blocks_the_flow_before_sketchup(tmp_path, consensus, monkeypatch):
+    """R-18: o codigo mudou depois da prova L2 => o especialista bloqueia e o fluxo nem sobe o SketchUp."""
+    real = cc.symbol_digest
+    monkeypatch.setattr(cc, "symbol_digest", lambda s, root=ROOT: "f" * 64 if s["ref"].endswith("plan_shaker_door") else real(s, root))
+    w = World(tmp_path)
+    t = _run(w, su=Boom())
+    assert t["state"] == "BLOCKED_EVIDENCE_STALE" and w.state["launches"] == [] and not w.out.exists()
+
+
+def test_l2_proof_in_the_catalog_points_to_evidence_made_on_the_current_symbols():
+    catalog = cc.load_catalog()
+    for cid in ("kitchen.cabinet.shaker-door", "shared.cabinet.front.shaker"):
+        cap = next(c for c in catalog["capabilities"] if c["id"] == cid)
+        assert cap["validation"]["state"] == "L2_PASS" and cap["visual"]["state"] == "NOT_REVIEWED"
+        ev = cap["validation"]["evidence"][0]
+        assert ev["sketchup_version"] == "26.0.429" and (ROOT / ev["ref"]).is_file()
+        assert {k.split(":", 1)[1] for k in ev["symbol_digests"]} == {s["ref"] for s in cap["implementation"]["symbols"]}
+    assert cc.verify()["result"] == "PASS"
