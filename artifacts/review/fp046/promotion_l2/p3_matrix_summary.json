@@ -1,0 +1,190 @@
+{
+ "commit": "7820f745db8291c6f6adbedcfe641d79b4b09ab2",
+ "dirty": false,
+ "base_template": "E:\\Claude\\worktrees\\w-prov\\runs\\fp046\\p3\\template_simple_m.skp",
+ "base_template_sha256": "2ae1418dddca85afb7c271896a005d14d814df562a231633631ea3ec57121063",
+ "cases": [
+  {
+   "case": "s1_one_door_r0",
+   "kind": "build_parent+shaker+reopen",
+   "request_id": "shaker-r0",
+   "signature": "f34a41dd6460c91d7d0fb1fb2d27984e35c1d8ef4b9b1439736cba3d3506dfa5",
+   "ok": true,
+   "max_corner_error_m": 0.0,
+   "checks": 53,
+   "failed": [],
+   "rotation_deg": 0,
+   "pid_build": 22688
+  },
+  {
+   "case": "s1_one_door_r90",
+   "kind": "build_parent+shaker+reopen",
+   "request_id": "shaker-r90",
+   "signature": "71c1821489a012fd2d2fa74a9abada01c6ec692cbd358d08010656df12538759",
+   "ok": true,
+   "max_corner_error_m": 0.0,
+   "checks": 53,
+   "failed": [],
+   "rotation_deg": 90,
+   "pid_build": 1208
+  },
+  {
+   "case": "s1_one_door_r30",
+   "kind": "build_parent+shaker+reopen",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 4.616050692080683e-07,
+   "checks": 53,
+   "failed": [],
+   "rotation_deg": 30,
+   "pid_build": 8032
+  },
+  {
+   "case": "s2_two_doors_r30",
+   "kind": "two_doors_same_cabinet",
+   "request_id": "shaker-left",
+   "signature": "e01091c003964e462e4b5f1d94f36d273e95466a926823bd0a88e8ad8d6f95b1",
+   "ok": true,
+   "max_corner_error_m": 4.767536599994284e-07,
+   "checks": 54,
+   "failed": [],
+   "right_ok": true,
+   "right_checks": 50
+  },
+  {
+   "case": "s3_idempotent_rebuild",
+   "kind": "rebuild",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 4.616050692080683e-07,
+   "checks": 51,
+   "failed": []
+  },
+  {
+   "case": "s4_make_unique_local",
+   "kind": "make_unique+local_update",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 4.616050692080683e-07,
+   "checks": 52,
+   "failed": [],
+   "edit_report": [
+    {
+     "op": "edit_definition",
+     "part": "shaker-r30/stile_left",
+     "propagate": false,
+     "definition_instances_before": 2,
+     "definition": "ShakerDef_shaker-r30_def:stile_left:60.000x18.000x714.000#1",
+     "definition_instances_after": 1
+    }
+   ]
+  },
+  {
+   "case": "s5_edit_propagate",
+   "kind": "definition_edit_propagates_when_explicit",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 4.616050692080683e-07,
+   "checks": 50,
+   "failed": [],
+   "edit_report": [
+    {
+     "op": "edit_definition",
+     "part": "shaker-r30/rail_top",
+     "propagate": true,
+     "definition_instances_before": 2,
+     "definition": "ShakerDef_shaker-r30_def:rail_top:474.000x18.000x60.000",
+     "definition_instances_after": 2
+    }
+   ]
+  },
+  {
+   "case": "s6_set_material_panel",
+   "kind": "local_material_update",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 0.0,
+   "checks": 1,
+   "failed": []
+  },
+  {
+   "case": "s7_ruby_refuses_stale_parent",
+   "kind": "negative_parent_missing_in_model",
+   "request_id": "shaker-neg",
+   "signature": "c3ced65dd329a0b3788fe152fe38c6d3681746784ad988f4886e4934798dbae5",
+   "ok": true,
+   "max_corner_error_m": null,
+   "checks": 1,
+   "failed": []
+  },
+  {
+   "case": "s8_ruby_refuses_changed_parent_signature",
+   "kind": "negative_parent_signature_changed",
+   "request_id": "shaker-neg-c",
+   "signature": "4a34cca2281b8d1c96d26dd320d167195702a80701aba7143f4c18ef9cfc0644",
+   "ok": true,
+   "max_corner_error_m": null,
+   "checks": 1,
+   "failed": []
+  }
+ ],
+ "pids": [
+  37568,
+  36272,
+  22688,
+  16588,
+  23716,
+  19952,
+  1208,
+  36792,
+  19764,
+  38740,
+  8032,
+  36812,
+  31844,
+  36984,
+  36828,
+  35172,
+  9320,
+  35996,
+  37096,
+  19676,
+  28364,
+  13300,
+  38840,
+  23420,
+  19348,
+  37396,
+  36120,
+  26340,
+  38336
+ ],
+ "outputs_sha256": {
+  "s1_one_door_r0/parent.skp": "60ce7a6e223958be64f3c01410be036299ffad7d78c23b3499484c0a1d14c093",
+  "s1_one_door_r0/shaker.skp": "bd24d69b3d88eb88f4231c804d8a356b5e395207cb2963cf8446c1223d8ccc5b",
+  "s1_one_door_r90/parent.skp": "6d625b79882375bdbd828575a5704fa924ba46bd7b2c4844f492ec93739bc424",
+  "s1_one_door_r90/shaker.skp": "7b8fd2bfe361fb170ba920d299751b6e7e5caf71d27625aa5a96cf8280b232c1",
+  "s1_one_door_r30/parent.skp": "7160a57afa2540b66e2917ffb41e6075aab499d4b7ff22c7653ed79dc37cac66",
+  "s1_one_door_r30/shaker.skp": "67965165a283ffd996436f9cec2a94fb5852ccb7caeddd7fff45b065a24dba03",
+  "s2_two_doors_r30/parent.skp": "0ffbefb6c67686671024923f8d1430b7f31999543e2d926cafc1060e0044e199",
+  "s2_two_doors_r30/left.skp": "6457af2dfd4b02e6e769217f86b5bf399037e996d0c9277351950fd3efd74f47",
+  "s2_two_doors_r30/right.skp": "1ddfb4e8002133628139a0db8d7c40479f6644945efd3fd8cd6db8f0f0ec8374",
+  "s3_idempotent_rebuild/shaker_again.skp": "781a9046d0686127ebacb2a720a7b44dc6eb66497f5cfaf065c8cc086a3a5c85",
+  "s4_make_unique_local/edit.skp": "30ca36a1ed5907facac43d0d4178a20a0a9d44542ce60dcb150e75ddd509c881",
+  "s5_edit_propagate/edit.skp": "dbd8624a7db3cde73134f6689532e0ce9b83012ac929ce38167b2c5ec17400aa",
+  "s6_set_material_panel/edit.skp": "887280d609eec8bbeb0ad35d5d9952d89da94ef669d70f44e7d36ff5e12f24b0",
+  "s7_ruby_refuses_stale_parent/parent.skp": "93051e75ff1b444efed26eb93954c252aac77c89dabc8e842cf51c81d124bf29",
+  "s8_ruby_refuses_changed_parent_signature/parent.skp": "102413eb0b790c2c009f7c4b316df9f69f65037ea9cbb46818a069a198831f82"
+ },
+ "sketchup_version": "26.0.429",
+ "grain": {
+  "state": "NOT_SUPPORTED",
+  "note": "sem textura/UV: o veio fica como atributo, nao aplicado"
+ },
+ "scope_note": "SINTETICO: pai valid_a_base_600; nenhuma cozinha real, ferragem, gaveta ou veredito visual (L3 PENDING_HUMAN)"
+}

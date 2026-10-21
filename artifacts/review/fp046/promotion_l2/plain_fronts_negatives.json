@@ -1,0 +1,56 @@
+{
+ "shaker_sem_builder": {
+  "state": "BLOCKED_INPUT_INCOMPLETE",
+  "reason": "insumos sem valor/unidade/origem: ['shaker.frame.stile_width', 'shaker.frame.rail_height', 'shaker.frame.frame_thickness', 'shaker.panel.thickness', 'shaker.panel.recess_from_frame_front', 'shaker.materials.frame', 'shaker.materials.panel']",
+  "next_step": "informar cada medida com unidade e origem (pdf, consensus, user_request)",
+  "no_positive_evidence": true,
+  "input_and_base_unchanged": true,
+  "sketchup_launched": false,
+  "execution_authorized": false
+ },
+ "ferramenta_fora_da_allowlist": {
+  "state": "BLOCKED_TOOL_NOT_ALLOWED",
+  "reason": "ferramenta fora da allowlist do perfil kitchen: mcp:su_apply_edits",
+  "next_step": "usar uma ferramenta da allowlist ou registrar a capacidade (e sua autorizacao) no catalogo",
+  "no_positive_evidence": true,
+  "input_and_base_unchanged": true,
+  "sketchup_launched": false,
+  "execution_authorized": false
+ },
+ "geometria_impossivel": {
+  "state": "BLOCKED_PLAN_REFUSED",
+  "reason": "NON_POSITIVE_PART: neg-geom/bottom size=[0.0, 0.5275000000000001, 0.015]; NON_POSITIVE_PART: neg-geom/top size=[0.0, 0.5275000000000001, 0.015000000000000013]; NON_POSITIVE_PART: neg-geom/back size=[0.0, 0.004, 0.75]; INFEASIBLE_INNER_WIDTH: width=0.03 nao comporta 2 laterais de 0.015",
+  "next_step": null,
+  "no_positive_evidence": true,
+  "input_and_base_unchanged": true,
+  "sketchup_launched": false,
+  "execution_authorized": false
+ },
+ "entrada_sem_unidade_ou_origem": {
+  "state": "BLOCKED_INPUT_INCOMPLETE",
+  "reason": "insumos sem valor/unidade/origem: ['dimensions.depth', 'dimensions.height']",
+  "next_step": "informar cada medida com unidade e origem (pdf, consensus, user_request)",
+  "no_positive_evidence": true,
+  "input_and_base_unchanged": true,
+  "sketchup_launched": false,
+  "execution_authorized": false
+ },
+ "alterar_arquitetura": {
+  "state": "BLOCKED_ARCHITECTURE_CHANGE",
+  "reason": "o pedido altera arquitetura derivada do PDF (Hard Rule #1)",
+  "next_step": "tratar como proposta ao Felipe; o especialista nao altera paredes, portas ou janelas",
+  "no_positive_evidence": true,
+  "input_and_base_unchanged": true,
+  "sketchup_launched": false,
+  "execution_authorized": false
+ },
+ "pose_fora_da_cozinha_gate_de_arquitetura": {
+  "state": "BLOCKED_PLAN_REFUSED",
+  "reason": "KITCHEN_GATE_FAILED: architecture: fora da cozinha 0.261600 m2; dentro de parede 0.000000 m2",
+  "next_step": null,
+  "no_positive_evidence": true,
+  "input_and_base_unchanged": true,
+  "sketchup_launched": false,
+  "execution_authorized": false
+ }
+}

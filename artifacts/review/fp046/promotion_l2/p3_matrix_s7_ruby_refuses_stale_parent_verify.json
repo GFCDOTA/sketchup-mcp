@@ -1,0 +1,11 @@
+{
+ "ok": true,
+ "checks": [
+  {
+   "check": "ruby_refused_and_no_result_left",
+   "ok": true,
+   "detail": "RuntimeError: gabinete pai 'synthetic-neg-a' não existe neste modelo"
+  }
+ ],
+ "max_corner_error_m": null
+}

@@ -341,3 +341,23 @@ def test_the_plain_front_flow_refuses_shaker_instead_of_building_a_plain_cabinet
     req["inputs"].update(flow.shaker_inputs(req["shaker"]))
     t = plain_run({k: v for k, v in req.items() if k != "shaker"}, out_dir=w.out, base_skp=w.base, su=Boom(), mode="interactive", close_pids=False)
     assert t["state"] == "BLOCKED_CAPABILITY_MISMATCH" and w.state["launches"] == []
+
+
+def test_stale_evidence_blocks_the_flow_before_sketchup(tmp_path, consensus, monkeypatch):
+    """R-18: o codigo mudou depois da prova L2 => o especialista bloqueia e o fluxo nem sobe o SketchUp."""
+    real = cc.symbol_digest
+    monkeypatch.setattr(cc, "symbol_digest", lambda s, root=ROOT: "f" * 64 if s["ref"].endswith("plan_shaker_door") else real(s, root))
+    w = World(tmp_path)
+    t = _run(w, su=Boom())
+    assert t["state"] == "BLOCKED_EVIDENCE_STALE" and w.state["launches"] == [] and not w.out.exists()
+
+
+def test_l2_proof_in_the_catalog_points_to_evidence_made_on_the_current_symbols():
+    catalog = cc.load_catalog()
+    for cid in ("kitchen.cabinet.shaker-door", "shared.cabinet.front.shaker"):
+        cap = next(c for c in catalog["capabilities"] if c["id"] == cid)
+        assert cap["validation"]["state"] == "L2_PASS" and cap["visual"]["state"] == "NOT_REVIEWED"
+        ev = cap["validation"]["evidence"][0]
+        assert ev["sketchup_version"] == "26.0.429" and (ROOT / ev["ref"]).is_file()
+        assert {k.split(":", 1)[1] for k in ev["symbol_digests"]} == {s["ref"] for s in cap["implementation"]["symbols"]}
+    assert cc.verify()["result"] == "PASS"

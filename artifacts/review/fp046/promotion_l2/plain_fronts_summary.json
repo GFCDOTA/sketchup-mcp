@@ -1,0 +1,16 @@
+{
+ "commit": "7820f745db8291c6f6adbedcfe641d79b4b09ab2",
+ "canonical_furnished_sha256": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+ "base_copy_sha256": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+ "canonical_unchanged": true,
+ "state": "DONE_L2_VERIFIED",
+ "negatives": {
+  "shaker_sem_builder": "BLOCKED_INPUT_INCOMPLETE",
+  "ferramenta_fora_da_allowlist": "BLOCKED_TOOL_NOT_ALLOWED",
+  "geometria_impossivel": "BLOCKED_PLAN_REFUSED",
+  "entrada_sem_unidade_ou_origem": "BLOCKED_INPUT_INCOMPLETE",
+  "alterar_arquitetura": "BLOCKED_ARCHITECTURE_CHANGE",
+  "pose_fora_da_cozinha_gate_de_arquitetura": "BLOCKED_PLAN_REFUSED"
+ },
+ "interrupted": "SU_EXITED"
+}

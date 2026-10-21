@@ -394,7 +394,7 @@ Cada P0–P6 é PR pequeno para `develop`, 4 checks aplicáveis verdes. P0 (font
 | D46-03 | RESOLVIDA | `cabinet_request.v1` e frentes lisas mantêm contrato atual |
 | D46-04 | RESOLVIDA | observação de recuo depende de vértices/peças no SketchUp, não render bonito |
 | D46-05 | RESOLVIDA (#345) | origem da recipe Shaker verificada: binding agora cita só o que a recipe cita |
-| D46-09 | PENDENTE TÉCNICA + FELIPE | fonte *inspecionada* para o binding Shaker (ver 2.1); bloqueia só o P4 |
+| D46-09 | RESOLVIDA (2026-10-21, opção C) | o trecho 03:13–04:29 do `yt-cabinet-tips-2021` (recipe `cabinet.front-gaps-and-profiles`, objetivo "frentes de estilo Shaker/rebaixadas") foi revisado pelo Felipe e confirmou frente separada, painel central em rebaixo dentro de moldura, Offset + extrusão negativa e gap real; registrado em `human_review` na fonte. O binding passou a citar também essa recipe (sem fonte/locator novos). Promoção ≠ aprovação visual |
 | D46-06 | PENDENTE TÉCNICA | ADR do versionamento do plano e Ruby job |
 | D46-07 | PENDENTE FELIPE | aparência final e aceitação das proporções (valores sintéticos ≠ padrão) |
 | D46-08 | PENDENTE TÉCNICA | integrar Shaker como opção sem modificar `cabinet_flow` legacy; provar compatibilidade |
@@ -405,6 +405,7 @@ Cada P0–P6 é PR pequeno para `develop`, 4 checks aplicáveis verdes. P0 (font
 |---|---|---|---|
 | 1.0.0 | 2026-10-21 | GPT-6 | SPEC executável P0–P6, Shaker compartilhado, 24 regras, 24 critérios e CA-19 |
 | 1.1.0 | 2026-10-21 | Claude (validação contra o código) | Conferido: `quantity`, `Params`, `build_parts` (`front`/`front_N`, quadro local), `definitions`, `plan_cabinet/require_valid`, `cabinet_build.rb` aceita só `shared.cabinet.parametric`. Correções: (1) P0 entregue em #345 — eram 4 bindings, não 3; (2) nova pendência D46-09: binding Shaker só cita fonte descritiva e não pode ganhar capability sem fonte inspecionada; (3) restrições de profundidade ausentes (`frame_thickness == panels.front`, `recess + panel ≤ frame`); (4) `parent_plan_signature`; (5) papéis `frame`/`panel` novos; (6) baseline `23939d9` |
+| 1.2.0 | 2026-10-21 | Claude (execução P3–P5) | P3 (Ruby + driver + L2 sintético, #352), P4 (adapter da cozinha, #353) e **P5 (promoção, opção C da D46-09)** entregues: capacidades `shared.cabinet.front.shaker` e `kitchen.cabinet.shaker-door` registradas com L2 refeito no commit da promoção; `cabinet_flow` recusa Shaker (R-19); `shaker_flow.run_request` sem argumento de contorno. **L3 segue `PENDING_HUMAN`.** |
 
 ### 3.3 Handoff de implementação
 
@@ -433,11 +434,11 @@ Cada P0–P6 é PR pequeno para `develop`, 4 checks aplicáveis verdes. P0 (font
 
 **Implementação — tudo pendente:**
 - [x] P0 fonte Shaker/binding verificados e teste vermelho→verde (#345)
-- [ ] P1 Schema + inputs completos, negativos e plano assinado
-- [ ] P2 5 peças por frente, recuo real, sem overlap positivo
-- [ ] P3 job SketchUp real e reabertura/editabilidade comprovada
-- [ ] P4 roteamento/allowlist/kitchen gates preservados
-- [ ] P5 regressão legada e geometria do apartamento não alteradas
+- [x] P1 Schema + inputs completos, negativos e plano assinado (#350)
+- [x] P2 5 peças por frente, recuo real, sem overlap positivo (#350)
+- [x] P3 job SketchUp real e reabertura/editabilidade comprovada (#352; refeito na promoção)
+- [x] P4 roteamento/allowlist/kitchen gates preservados (#353; promoção: `artifacts/review/fp046/promotion_l2/`)
+- [x] P5 regressão legada e geometria do apartamento não alteradas (rerun do L2 liso + `strict_identity` FP-047; canônicos idênticos)
 - [ ] P6 comparação visual e aprovação humana quando cabível
 - [ ] CA-19 e matriz final com CI+L2 e hashes
 - [ ] Só marcar COMPLETE após os gates e decisões bloqueantes

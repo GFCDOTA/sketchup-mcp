@@ -1,0 +1,261 @@
+{
+ "ok": true,
+ "checks": [
+  {
+   "check": "exactly_one_parent_root",
+   "ok": true,
+   "detail": "1 gabinete(s) para synthetic-a-r30"
+  },
+  {
+   "check": "parent_signature_unchanged",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "replaced_front_is_gone",
+   "ok": true,
+   "detail": "nenhuma frente lisa sob a Shaker"
+  },
+  {
+   "check": "other_parent_parts_untouched",
+   "ok": true,
+   "detail": "5 peca(s) diretas"
+  },
+  {
+   "check": "sibling_fronts_also_gone",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "check": "parent_part_corners:synthetic-a-r30/side_left",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "parent_part_corners:synthetic-a-r30/side_right",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "parent_part_corners:synthetic-a-r30/bottom",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "parent_part_corners:synthetic-a-r30/top",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "parent_part_corners:synthetic-a-r30/back",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "exactly_one_shaker_group",
+   "ok": true,
+   "detail": "1 subgrupo(s) para shaker-r30"
+  },
+  {
+   "check": "capability_attributes",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "signature_attribute",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "parent_link_attributes",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "source_verified_carried_not_flipped",
+   "ok": true,
+   "detail": "False"
+  },
+  {
+   "check": "group_tag",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "no_loose_geometry",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "part_ids_match_plan",
+   "ok": true,
+   "detail": "plano=5 modelo=5"
+  },
+  {
+   "check": "corners:shaker-r30/stile_left",
+   "ok": true,
+   "detail": "max 4.62e-07 m"
+  },
+  {
+   "check": "solid:shaker-r30/stile_left",
+   "ok": true,
+   "detail": "manifold=True faces=6 edges=12"
+  },
+  {
+   "check": "material:shaker-r30/stile_left",
+   "ok": true,
+   "detail": "'mdf_branco'"
+  },
+  {
+   "check": "tag:shaker-r30/stile_left",
+   "ok": true,
+   "detail": "Cabinet_frame"
+  },
+  {
+   "check": "name:shaker-r30/stile_left",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "corners:shaker-r30/stile_right",
+   "ok": true,
+   "detail": "max 4.26e-07 m"
+  },
+  {
+   "check": "solid:shaker-r30/stile_right",
+   "ok": true,
+   "detail": "manifold=True faces=6 edges=12"
+  },
+  {
+   "check": "material:shaker-r30/stile_right",
+   "ok": true,
+   "detail": "'mdf_branco'"
+  },
+  {
+   "check": "tag:shaker-r30/stile_right",
+   "ok": true,
+   "detail": "Cabinet_frame"
+  },
+  {
+   "check": "name:shaker-r30/stile_right",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "corners:shaker-r30/rail_top",
+   "ok": true,
+   "detail": "max 4.62e-07 m"
+  },
+  {
+   "check": "solid:shaker-r30/rail_top",
+   "ok": true,
+   "detail": "manifold=True faces=6 edges=12"
+  },
+  {
+   "check": "material:shaker-r30/rail_top",
+   "ok": true,
+   "detail": "'mdf_branco'"
+  },
+  {
+   "check": "tag:shaker-r30/rail_top",
+   "ok": true,
+   "detail": "Cabinet_frame"
+  },
+  {
+   "check": "name:shaker-r30/rail_top",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "corners:shaker-r30/rail_bottom",
+   "ok": true,
+   "detail": "max 4.62e-07 m"
+  },
+  {
+   "check": "solid:shaker-r30/rail_bottom",
+   "ok": true,
+   "detail": "manifold=True faces=6 edges=12"
+  },
+  {
+   "check": "material:shaker-r30/rail_bottom",
+   "ok": true,
+   "detail": "'mdf_branco'"
+  },
+  {
+   "check": "tag:shaker-r30/rail_bottom",
+   "ok": true,
+   "detail": "Cabinet_frame"
+  },
+  {
+   "check": "name:shaker-r30/rail_bottom",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "corners:shaker-r30/recessed_panel",
+   "ok": true,
+   "detail": "max 4.19e-07 m"
+  },
+  {
+   "check": "solid:shaker-r30/recessed_panel",
+   "ok": true,
+   "detail": "manifold=True faces=6 edges=12"
+  },
+  {
+   "check": "material:shaker-r30/recessed_panel",
+   "ok": true,
+   "detail": "'mdf_branco'"
+  },
+  {
+   "check": "tag:shaker-r30/recessed_panel",
+   "ok": true,
+   "detail": "Cabinet_panel"
+  },
+  {
+   "check": "name:shaker-r30/recessed_panel",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "panel_recess_measured_in_model",
+   "ok": true,
+   "detail": "medido 0.0040002 m, pedido 0.0040000 m"
+  },
+  {
+   "check": "panel_face_behind_frame_face",
+   "ok": true,
+   "detail": "0.0040002 m"
+  },
+  {
+   "check": "definition_sharing:def:stile_left:60.000x18.000x714.000",
+   "ok": true,
+   "detail": "['ShakerDef_shaker-r30_def:stile_left:60.000x18.000x714.000']"
+  },
+  {
+   "check": "definition_sharing:def:rail_top:474.000x18.000x60.000",
+   "ok": true,
+   "detail": "['ShakerDef_shaker-r30_def:rail_top:474.000x18.000x60.000']"
+  },
+  {
+   "check": "definition_sharing:def:recessed_panel:474.000x6.000x594.000",
+   "ok": true,
+   "detail": "['ShakerDef_shaker-r30_def:recessed_panel:474.000x6.000x594.000']"
+  },
+  {
+   "check": "grain_not_claimed",
+   "ok": true,
+   "detail": "veio registrado, nao aplicado"
+  },
+  {
+   "check": "non_cabinet_unchanged",
+   "ok": true,
+   "detail": "arquitetura/outros objetos intactos"
+  },
+  {
+   "check": "replaced_not_duplicated",
+   "ok": true,
+   "detail": "replaced=1 groups=1 defs=3"
+  }
+ ],
+ "max_corner_error_m": 4.616050692080683e-07
+}
