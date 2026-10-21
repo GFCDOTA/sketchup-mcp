@@ -16025,6 +16025,90 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
+      "path": "artifacts/review/fp046/p3_shaker_l2/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/summary.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r0_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r30_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r90_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s2_two_doors_r30_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s3_idempotent_rebuild_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s4_make_unique_local_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s5_edit_propagate_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s6_set_material_panel_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s7_ruby_refuses_stale_parent_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s8_ruby_refuses_changed_parent_signature_verify.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
       "path": "artifacts/review/fp046/p3_shaker_l2/l2_matrix.py",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",

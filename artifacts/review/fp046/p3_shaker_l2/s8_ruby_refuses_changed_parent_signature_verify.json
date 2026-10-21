@@ -1,0 +1,11 @@
+{
+ "ok": true,
+ "checks": [
+  {
+   "check": "ruby_refused_wrong_signature_and_no_result_left",
+   "ok": true,
+   "detail": "RuntimeError: o gabinete pai neste modelo tem outra assinatura que o plano Shaker (pai alterado depois do plano)"
+  }
+ ],
+ "max_corner_error_m": null
+}

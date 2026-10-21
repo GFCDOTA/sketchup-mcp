@@ -1,0 +1,11 @@
+{
+ "ok": true,
+ "checks": [
+  {
+   "check": "only_panel_changed",
+   "ok": true,
+   "detail": "mdf_azul_teste"
+  }
+ ],
+ "max_corner_error_m": 0.0
+}
