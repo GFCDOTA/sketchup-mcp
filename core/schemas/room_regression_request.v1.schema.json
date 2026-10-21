@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "room_regression_request.v1",
+  "description": "FP-047/F1: contrato de uma mudanca submetida ao gate de regressao por comodo. Declarativo: NAO autoriza editar PDF, consensus, fixtures ou canonicos (protect_canonicals e sempre true). change_mode nunca tem default: ausente = BLOCKED_CHANGE_MODE no validador.",
+  "type": "object",
+  "required": ["schema_version", "change_id", "fixture", "change_mode", "protect_canonicals", "require_l2", "require_l3_if_visual_changed", "control_rooms"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "room_regression_request.v1"},
+    "change_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,80}$"},
+    "base_commit": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "candidate_commit": {"type": "string", "pattern": "^[0-9a-f]{7,40}$"},
+    "fixture": {"type": "string", "minLength": 1},
+    "consensus_path": {"type": "string", "minLength": 1},
+    "pt_to_m": {"type": "number", "exclusiveMinimum": 0},
+    "change_mode": {"enum": ["strict_identity", "scoped_change"]},
+    "allowed_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["room_key", "part_keys", "allowed_effects", "reason", "spec_rule", "visual_review_required"],
+        "additionalProperties": false,
+        "properties": {
+          "room_key": {"type": "string", "minLength": 1},
+          "part_keys": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "allowed_effects": {"type": "array", "minItems": 1, "uniqueItems": true,
+                              "items": {"enum": ["position", "size", "material", "tag", "intent", "added", "removed"]}},
+          "reason": {"type": "string", "minLength": 10},
+          "spec_rule": {"type": "string", "pattern": "^FP-[0-9]{3}/[A-Z]+-[0-9]+$"},
+          "visual_review_required": {"type": "boolean"}
+        }
+      }
+    },
+    "control_rooms": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "protect_canonicals": {"const": true},
+    "require_l2": {"type": "boolean"},
+    "require_l3_if_visual_changed": {"type": "boolean"}
+  }
+}
