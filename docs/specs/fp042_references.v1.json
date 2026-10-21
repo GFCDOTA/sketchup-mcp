@@ -7037,6 +7037,84 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp046/p3_shaker_l2/README.md",
+      "blob_sha": "59e1368aa08120db6f91a79b26226b5ba1836026",
+      "blob_size": 4635,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/summary.json",
+      "blob_sha": "0b53783d64e1f236a3eb33aef2eccacb2138f30f",
+      "blob_size": 6023,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r0_verify.json",
+      "blob_sha": "4b8f21ccc82b49a38881514f975f1f6e05b1d3af",
+      "blob_size": 5396,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r30_verify.json",
+      "blob_sha": "c12a8cf951213d949dcc18a8b25d493272d1dd5b",
+      "blob_size": 5450,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r90_verify.json",
+      "blob_sha": "77f7e49a1e8c7a8cc6347c9158b23a7b2924f5c4",
+      "blob_size": 5432,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s2_two_doors_r30_verify.json",
+      "blob_sha": "769275a1982157efee7a7c8094d24812b40ff177",
+      "blob_size": 5668,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s3_idempotent_rebuild_verify.json",
+      "blob_sha": "69af2f09d163d790f9708afec18a523f4faa5aad",
+      "blob_size": 5229,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s4_make_unique_local_verify.json",
+      "blob_sha": "e44684df21073d1eecf39caec5be95fe71579bf1",
+      "blob_size": 5508,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s5_edit_propagate_verify.json",
+      "blob_sha": "0fddb1b45e5d5ae9e0811b6d6890166431e20754",
+      "blob_size": 5316,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s6_set_material_panel_verify.json",
+      "blob_sha": "4b3d0f63fafa0b4b461bce5381c6b4523a9b5ea0",
+      "blob_size": 147,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s7_ruby_refuses_stale_parent_verify.json",
+      "blob_sha": "7f6906ec5e2a05724b7e14e109eb814719f4373f",
+      "blob_size": 216,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s8_ruby_refuses_changed_parent_signature_verify.json",
+      "blob_sha": "63ec3d4daadb07b2bb6b22e4500e62047f8ea6b8",
+      "blob_size": 275,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/l2_matrix.py",
+      "blob_sha": "229a117b7fa84d5086e327a1f2a6b4ddec9f7177",
+      "blob_size": 14609,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r0.json",
       "blob_sha": "0a0f2644068828f241f53a2f6918075a36f6b28c",
       "blob_size": 14877,
