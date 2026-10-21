@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "room_regression_report.v1",
+  "description": "FP-047/F1: relatorio do gate de regressao por comodo. Campos null/NOT_RUN sao intencionais e nunca viram PASS por default; o estado final vem de tools.validation.room_regression.aggregate_state.",
+  "type": "object",
+  "required": ["schema_version", "change_id", "mode", "state", "tests", "room_results", "canonical_hashes_unchanged", "evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "room_regression_report.v1"},
+    "change_id": {"type": "string", "minLength": 3},
+    "mode": {"enum": ["strict_identity", "scoped_change"]},
+    "state": {"enum": ["PASS", "FAIL", "BLOCKED", "PENDING_SKETCHUP", "PENDING_HUMAN", "REJECTED", "NOT_APPLICABLE"]},
+    "reasons": {"type": "array", "items": {"type": "string"}},
+    "blocked": {"type": "array", "items": {"type": "string"}},
+    "require_l2": {"type": "boolean"},
+    "require_l3_if_visual_changed": {"type": "boolean"},
+    "visual_changed": {"type": "boolean"},
+    "base_commit": {"type": ["string", "null"]},
+    "candidate_commit": {"type": ["string", "null"]},
+    "input_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "canonical_hashes_unchanged": {"type": ["boolean", "null"]},
+    "tests": {
+      "type": "object",
+      "required": ["l1", "l2", "l3"],
+      "additionalProperties": false,
+      "properties": {
+        "l1": {"enum": ["PASS", "FAIL", "NOT_RUN"]},
+        "l2": {"enum": ["PASS", "FAIL", "NOT_RUN", "PENDING_SKETCHUP", "NOT_APPLICABLE"]},
+        "l3": {"enum": ["APPROVED", "REJECTED", "PENDING_HUMAN", "NOT_REVIEWED", "NOT_APPLICABLE"]}
+      }
+    },
+    "room_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["room_key", "state", "allowed_delta_count", "unexpected_delta_count"],
+        "additionalProperties": true,
+        "properties": {
+          "room_key": {"type": "string"},
+          "state": {"enum": ["PASS", "FAIL", "NOT_RUN"]},
+          "allowed_delta_count": {"type": "integer", "minimum": 0},
+          "unexpected_delta_count": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "evidence": {"type": "object"}
+  }
+}
