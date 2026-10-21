@@ -65,7 +65,7 @@ def _first(sink, name):
     ("living", "industrial", "embed"),
 ])
 def test_retrieve_bundle_is_identical_on_and_off(room, style, backend):
-    from tools.reference_db import retrieve
+    from tools.knowledge.reference_db import retrieve
 
     obs.reset_for_tests()
     previous = set_sink(None)
@@ -81,7 +81,7 @@ def test_retrieve_bundle_is_identical_on_and_off(room, style, backend):
 
 
 def test_gate_run_all_result_is_identical_on_and_off():
-    from tools.run_deterministic_gates import run_all
+    from tools.validation.run_deterministic_gates import run_all
 
     obs.reset_for_tests()
     previous = set_sink(None)
@@ -142,7 +142,7 @@ def test_correction_loop_result_is_identical_on_and_off(tmp_path):
 
 def test_retrieve_records_intent_and_actual_separately(sink):
     """Qdrant fora: pediu embed, executou faceted — e a trace diz os dois."""
-    from tools.reference_db import retrieve
+    from tools.knowledge.reference_db import retrieve
 
     with obs.run(run_id="run_intent"):
         retrieve("kitchen", "black_wood_gold", backend="embed")
@@ -167,7 +167,7 @@ def test_empty_retrieval_is_still_rag_not_an_orphan(sink):
     geração alguma (project_memory_db) — propriedade da FIAÇÃO, não do resultado
     de uma execução. Quem conta a história do vazio é `nSelected=0`.
     """
-    from tools.reference_db import retrieve
+    from tools.knowledge.reference_db import retrieve
 
     with obs.run(run_id="run_vazio"):
         bundle = retrieve("bathroom", None, backend="faceted")
@@ -185,7 +185,7 @@ def test_retrieve_nests_embedding_and_search_under_the_query_span(sink):
     O trace tree tem que mostrar isso ANINHADO, não como irmãos soltos na raiz.
     """
     from core.observability.replay import build_span_tree, parse_rows
-    from tools.reference_db import retrieve
+    from tools.knowledge.reference_db import retrieve
 
     with obs.run(run_id="run_tree"):
         retrieve("kitchen", "black_wood_gold", backend="embed")
@@ -200,7 +200,7 @@ def test_retrieve_nests_embedding_and_search_under_the_query_span(sink):
 
 
 def test_faceted_run_is_not_labelled_a_fallback(sink):
-    from tools.reference_db import retrieve
+    from tools.knowledge.reference_db import retrieve
 
     with obs.run(run_id="run_faceted"):
         retrieve("kitchen", "black_wood_gold", backend="faceted")
@@ -214,7 +214,7 @@ def test_faceted_run_is_not_labelled_a_fallback(sink):
 
 def test_gates_emit_only_the_normalized_contract(sink):
     """A UI futura nunca deve conhecer os cinco formatos legados."""
-    from tools.run_deterministic_gates import run_all
+    from tools.validation.run_deterministic_gates import run_all
 
     with obs.run(run_id="run_gates"):
         run_all(fixture="quadrado")

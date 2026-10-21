@@ -281,7 +281,7 @@ def test_real_run_all_on_the_quadrado_fixture_normalizes():
     É o teste que impede a normalização de divergir da saída real: se
     `run_deterministic_gates` mudar de formato, isto quebra antes da UI.
     """
-    from tools.run_deterministic_gates import run_all
+    from tools.validation.run_deterministic_gates import run_all
 
     raw = run_all(fixture="quadrado")
     gates = normalize("run_deterministic_gates", raw)

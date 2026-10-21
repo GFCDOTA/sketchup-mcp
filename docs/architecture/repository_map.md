@@ -109,7 +109,7 @@ A cozinha foi o primeiro módulo a seguir a convenção; os nove perfis (`specia
 
 | Nível | O que prova | Onde está |
 |---|---|---|
-| L1 | cálculo e plano em Python (brains, gates, testes) | `tests/`, `tools/run_deterministic_gates.py` |
+| L1 | cálculo e plano em Python (brains, gates, testes) | `tests/`, `tools/validation/run_deterministic_gates.py` |
 | L2 | o que o SketchUp real materializou, salvou, reabriu e foi inspecionado | `artifacts/review/l2_fp042_20261019/` |
 | Visual | aparência vs PDF | só o Felipe; nunca automático |
 

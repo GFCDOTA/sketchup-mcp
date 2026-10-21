@@ -125,7 +125,7 @@ def test_architect_prompt_injects_bundle(monkeypatch):
 
 def test_retrieve_bundle_degrada_para_none_em_erro(monkeypatch):
     # RETROCOMPAT: se retrieve estoura, _retrieve_bundle devolve None (cai no dna cru)
-    import tools.reference_db as rdb
+    import tools.knowledge.reference_db as rdb
 
     def _boom(*a, **k):
         raise RuntimeError("db off")

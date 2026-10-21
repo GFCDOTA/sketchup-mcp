@@ -14,7 +14,7 @@ import pytest
 
 from tools.knowledge import corpus_to_rag as ctr
 from tools.knowledge import project_memory_db as pmd
-from tools import reference_db as rdb
+from tools.knowledge import reference_db as rdb
 
 
 def _record(vid: str, verdict: str, gates: dict) -> dict:

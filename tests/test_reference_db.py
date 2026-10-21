@@ -3,7 +3,7 @@ import sqlite3
 
 import pytest
 
-from tools import reference_db as rdb
+from tools.knowledge import reference_db as rdb
 
 
 @pytest.fixture()

@@ -58,7 +58,6 @@ OWNER_TABLE = {
   "tests/test_room_module_architecture.py": "regression_test_suite",
   "tools/rooms/bedroom/capabilities/make_synthetic_bedrooms.py": "synthetic_bedroom_fixture_tool",
   "tools/rooms/bedroom/capabilities/place_bedroom_skp.py": "bedroom_sketchup_cli",
-  "tools/rag_embed_backend.py": "cross_room_rag_infrastructure",
   "tools/knowledge/rag_embed_backend.py": "cross_room_rag_infrastructure",
   "tools/rooms/balcony/__init__.py": "tools.rooms.balcony",
   "tools/rooms/bedroom/__init__.py": "tools.rooms.bedroom",

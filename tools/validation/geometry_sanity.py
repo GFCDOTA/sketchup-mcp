@@ -1,5 +1,5 @@
 """geometry_sanity.py — GATE determinístico BARATO de sanidade geométrica de MÓVEL (consensus-only,
-sem SU/render/rede). Complementa tools/run_deterministic_gates.py (que cobre a SHELL: walls/openings).
+sem SU/render/rede). Complementa tools/validation/run_deterministic_gates.py (que cobre a SHELL: walls/openings).
 Aqui: o MÓVEL vs o cômodo. NÃO julga beleza/premium — só impede CAOS geométrico.
 
 Bloqueia (FAIL) / alerta (WARN):

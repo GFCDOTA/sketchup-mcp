@@ -1,7 +1,7 @@
 """rag_chat.py — chat leve com o "designer" (Ollama) + memória em Qdrant.
 
 Coleção PRÓPRIA (`felipe_preferences`), separada do `rag_chunks` usado pelo
-RAG de fidelidade do sketchup-mcp (tools/rag_embed_backend.py) — não mexe
+RAG de fidelidade do sketchup-mcp (tools/knowledge/rag_embed_backend.py) — não mexe
 naquele corpus/reindex. Mesmo padrão de infra (Qdrant :6333 + Ollama :11434,
 HTTP puro via urllib, stdlib only, degrada limpo se offline).
 
