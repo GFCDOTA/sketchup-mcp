@@ -16034,6 +16034,13 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
+      "path": "artifacts/review/fp046/l3_package/render_l3.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
       "path": "artifacts/review/fp046/promotion_l2/README.md",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
