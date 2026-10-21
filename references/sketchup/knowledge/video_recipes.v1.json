@@ -13,7 +13,21 @@
       "duration": "11:02",
       "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
       "reviewed": "2026-10-18",
-      "license": "VIDEO_REFERENCE_ONLY_NO_REPUBLICATION"
+      "license": "VIDEO_REFERENCE_ONLY_NO_REPUBLICATION",
+      "human_review": {
+        "reviewer": "Felipe",
+        "date": "2026-10-21",
+        "channel": "chat da sessao FP-046/D46-09 (resposta escrita)",
+        "segment": "03:13-04:29",
+        "recipe_id": "cabinet.front-gaps-and-profiles",
+        "confirmed": [
+          "frente modelada como peca separada da caixa",
+          "frente com painel central em rebaixo dentro de moldura (estilo Shaker)",
+          "perfil interno por Offset e extrusao negativa controlada do painel",
+          "gap geometrico real (nao so linha de divisao)"
+        ],
+        "not_confirmed": "nada alem do segmento; nenhuma medida do video e adotada (insumos do projeto seguem origin=user_request)"
+      }
     },
     {
       "id": "yt-kitchen-joinery-2024",

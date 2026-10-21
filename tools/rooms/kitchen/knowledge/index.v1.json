@@ -22,7 +22,9 @@
     "kitchen.sink-anchor-guard",
     "kitchen.ergonomics.audit",
     "kitchen.cabinet.plain-fronts",
-    "shared.cabinet.parametric"
+    "shared.cabinet.parametric",
+    "kitchen.cabinet.shaker-door",
+    "shared.cabinet.front.shaker"
   ],
   "bindings": [
     "bind.kitchen.layout",

@@ -137,9 +137,17 @@ def _blocked(world, req, state):
     return t
 
 
-def test_shaker_sem_builder_e_bloqueado(tmp_path):
-    t = _blocked(World(tmp_path), _request(text="armario de cozinha com porta Shaker"), "BLOCKED_CAPABILITY_MISSING")
-    assert "Shaker" in t["reason"] and t["next_step"]
+def test_shaker_no_fluxo_de_frentes_lisas_nao_vira_gabinete_liso_em_silencio(tmp_path):
+    """FP-046/P5: a Shaker foi promovida, mas ESTE fluxo so materializa frente lisa."""
+    # so com os insumos do gabinete liso: o especialista pede as medidas da porta (nada sobe)
+    _blocked(World(tmp_path / "a"), _request(text="armario de cozinha com porta Shaker"), "BLOCKED_INPUT_INCOMPLETE")
+    # com os insumos da Shaker tambem: o fluxo liso RECUSA em vez de construir a peca errada
+    full = _inputs(**{f"shaker.{k}": {"value": v, "unit": "mm", "origin": "user_request"}
+                      for k, v in (("frame.stile_width", 50), ("frame.rail_height", 50), ("frame.frame_thickness", 18),
+                                   ("panel.thickness", 6), ("panel.recess_from_frame_front", 4))},
+                    **{f"shaker.materials.{r}": {"value": "mdf_branco", "unit": "text", "origin": "user_request"} for r in ("frame", "panel")})
+    t = _blocked(World(tmp_path / "b"), _request(text="armario de cozinha com porta Shaker", inputs=full), "BLOCKED_CAPABILITY_MISMATCH")
+    assert "frentes lisas" in t["reason"] and "shaker_flow" in t["next_step"]
 
 
 def test_ferramenta_fora_da_allowlist_e_bloqueada(tmp_path):

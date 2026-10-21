@@ -131,6 +131,11 @@ def run_request(request: dict, *, out_dir: str | Path, base_skp: str | Path, con
         step("specialist_plan", "BLOCKED", state=splan["state"], reason=splan.get("reason"), next_step=splan.get("next_step"),
              gap=splan.get("gap"), missing=splan.get("missing"))
         return finish(splan["state"], reason=splan.get("reason"), next_step=splan.get("next_step"))
+    if "bind.kitchen.shaker" in [splan.get("binding"), *splan.get("also_matched", [])]:
+        # FP-046/P5: este fluxo so materializa frente LISA. Pedido de Shaker aqui nao pode virar um gabinete liso em silencio (R-19).
+        step("specialist_plan", "BLOCKED", state="BLOCKED_CAPABILITY_MISMATCH", binding=splan.get("binding"))
+        return finish("BLOCKED_CAPABILITY_MISMATCH", reason="o pedido pede porta Shaker e este fluxo so materializa frentes lisas",
+                      next_step="usar tools.rooms.kitchen.capabilities.shaker_flow.run_request")
     step("specialist_plan", "OK", state=splan["state"], capability=splan["capability"], steps=[s["tool"] for s in splan["steps"]])
     step("capability", "OK", **splan["capability"])
     step("parameters", "OK", parameters={k: request["inputs"][k] for k in sorted(request["inputs"])})

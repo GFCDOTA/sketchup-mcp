@@ -69,6 +69,26 @@ def test_implemented_binding_is_not_backed_only_by_description_only_sources():
         assert evidence & EVIDENCE_INSPECTED, f"{binding['id']}: so fontes descritivas ({sorted(evidence)})"
 
 
+def test_shaker_binding_is_backed_by_an_inspected_source_with_a_recorded_human_review():
+    """FP-046/D46-09 (opcao C): a fonte inspecionada que sustenta o binding tem revisao humana registrada (quem, quando, trecho)."""
+    catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
+    binding = next(b for b in catalog["bindings"] if b["id"] == "bind.kitchen.shaker")
+    assert binding["capability_id"] == "kitchen.cabinet.shaker-door" and not binding.get("gap")
+    sources = _sources()
+    reviewed = [sid for sid in binding["source_ids"] if sources[sid].get("human_review")]
+    assert reviewed == ["yt-cabinet-tips-2021"]
+    review = sources["yt-cabinet-tips-2021"]["human_review"]
+    assert review["reviewer"] == "Felipe" and review["date"] == "2026-10-21" and review["segment"] == "03:13-04:29"
+    assert review["recipe_id"] in binding["recipe_ids"] and len(review["confirmed"]) == 4
+    assert sources["yt-cabinet-tips-2021"]["evidence"] in EVIDENCE_INSPECTED
+    assert sources["yt-cabinet-styles-2024"]["evidence"] in EVIDENCE_DESCRIPTION_ONLY       # a fonte descritiva continua descritiva
+
+
+def test_human_review_exists_only_where_a_person_recorded_it():
+    reviewed = {sid for sid, s in _sources().items() if s.get("human_review")}
+    assert reviewed == {"yt-cabinet-tips-2021"}
+
+
 def test_unimplemented_binding_declares_its_gap():
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     missing = [b for b in catalog["bindings"] if not b["capability_id"]]

@@ -5844,8 +5844,8 @@
     },
     {
       "path": "references/sketchup/knowledge/video_recipes.v1.json",
-      "blob_sha": "464e7777e16fec75ac9d501d6701f741e94ef931",
-      "blob_size": 18458,
+      "blob_sha": "991effc561e28085aa16f62417c5dd75a9bd8d7c",
+      "blob_size": 19156,
       "owner_group": "references"
     },
     {
@@ -7034,6 +7034,18 @@
       "path": "artifacts/review/fp043/p6b_cabinet_l2/l2_matrix.py",
       "blob_sha": "fac0fa0c1a5b60f1c53371d7f9aa68c895627742",
       "blob_size": 9348,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/l2_promoted.py",
+      "blob_sha": "8b85937d1f079f743449209717413838b55f3a2b",
+      "blob_size": 7550,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/request.json",
+      "blob_sha": "c80aaa9369d9603785d14b20873b14602062e5a8",
+      "blob_size": 3535,
       "owner_group": "artifacts"
     },
     {
