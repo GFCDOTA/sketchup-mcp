@@ -113,6 +113,8 @@ def verify(catalog: dict | None = None, profiles: dict[str, dict] | None = None,
     video = _read_json(root / catalog["knowledge_catalogs"]["video"])
     env = _read_json(root / catalog["knowledge_catalogs"]["environment"])
     recipe_ids = {r["id"] for r in video["recipes"]} | {r["id"] for r in env["recipes"]}
+    recipe_sources = {r["id"]: {x["id"] for x in r["sources"]} for r in video["recipes"]}
+    recipe_sources.update({r["id"]: {x["id"] for x in r["source_refs"]} for r in env["recipes"]})
     source_ids = {s["id"] for s in video["sources"]} | {s["id"] for s in env["sources"]}
 
     caps = catalog["capabilities"]
@@ -139,6 +141,10 @@ def verify(catalog: dict | None = None, profiles: dict[str, dict] | None = None,
         for sid in b["source_ids"]:
             if sid not in source_ids:
                 flag("SOURCE_NOT_FOUND", f"{b['id']}: {sid}")
+        cited = set().union(*(recipe_sources.get(rid, set()) for rid in b["recipe_ids"]))
+        if set(b["source_ids"]) != cited:
+            flag("BINDING_SOURCE_MISMATCH",
+                 f"{b['id']}: declara {sorted(b['source_ids'])}, as recipes citam {sorted(cited)}")
         if b["capability_id"] is None:
             if not (b.get("gap") or "").strip():
                 flag("ABSENT_CAPABILITY_WITHOUT_GAP", b["id"])
