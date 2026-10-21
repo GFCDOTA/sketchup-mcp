@@ -56,7 +56,7 @@ Determinístico, idempotente, exit-code = status. Base `.skp`/fixtures: hash con
 
 ## Primeiro slice mínimo e verificável
 
-**`tools/muscle.py gates <plant>`** — envelopa `tools/run_deterministic_gates.py` (determinístico, sem SU/rede, segundos):
+**`tools/muscle.py gates <plant>`** — envelopa `tools/validation/run_deterministic_gates.py` (determinístico, sem SU/rede, segundos):
 - captura o verboso num log file;
 - devolve JSON compacto `{plant, gates:{<gate>:pass|fail,...}, verdict, log_path}`;
 - exit 0 = todos PASS, 1 = algum FAIL.

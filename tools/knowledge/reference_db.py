@@ -5,13 +5,13 @@ sub-elemento e lê só o que importa. Fonte da verdade continua nos arquivos; o 
 DERIVADO e reconstruível (`rebuild`). Idempotente por sha256 do arquivo.
 
 Uso:
-    python tools/reference_db.py init
-    python tools/reference_db.py ingest            # cards/tokens/themes (M1) + kitchen_angles (M3)
-    python tools/reference_db.py rebuild           # drop + init + ingest
-    python tools/reference_db.py query --room kitchen --theme black_wood_gold [--kind render]
-    python tools/reference_db.py query --sub-element hero_render --json
-    python tools/reference_db.py retrieve --room kitchen --style black_wood_gold [--budget medio] [--json]
-    python tools/reference_db.py stats
+    python tools/knowledge/reference_db.py init
+    python tools/knowledge/reference_db.py ingest            # cards/tokens/themes (M1) + kitchen_angles (M3)
+    python tools/knowledge/reference_db.py rebuild           # drop + init + ingest
+    python tools/knowledge/reference_db.py query --room kitchen --theme black_wood_gold [--kind render]
+    python tools/knowledge/reference_db.py query --sub-element hero_render --json
+    python tools/knowledge/reference_db.py retrieve --room kitchen --style black_wood_gold [--budget medio] [--json]
+    python tools/knowledge/reference_db.py stats
 
 FP-035: retrieve(room, style, budget) devolve um DesignSpecBundle.v1 ranqueado
 (tokens curados de references/tokens/ + sinal de curadoria/gates do índice),
@@ -456,7 +456,7 @@ def _embed_recall_chunks(room: str, style_norm: str | None) -> tuple[list[dict],
     from core.observability.retrieval import ChunkRef
 
     try:
-        from tools import rag_embed_backend as reb
+        from tools.knowledge import rag_embed_backend as reb
         from tools.knowledge import rag_freshness as rf
     except Exception as e:  # noqa: BLE001 — módulo ausente não derruba retrieve
         notes.append(f"backend=embed indisponível (import): {e!r} -> faceted.")
@@ -842,7 +842,7 @@ def _cmd_reindex(a) -> int:
     qdrant_report = None
     if not a.no_embed:
         try:
-            from tools import rag_embed_backend as reb
+            from tools.knowledge import rag_embed_backend as reb
             if reb.infra_up():
                 qdrant_report = reb.reindex_qdrant(
                     con, corpus_version=report["corpus_version"], now_iso=now_iso)

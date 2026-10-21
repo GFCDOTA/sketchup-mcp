@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.run_deterministic_gates import run_all
+from tools.validation.run_deterministic_gates import run_all
 
 REPO = Path(__file__).resolve().parents[1]
 _PLANTA = (REPO / "fixtures" / "planta_74"
@@ -116,7 +116,7 @@ def test_cli_exit_code_3_on_incomplete(tmp_path):
     render = tmp_path / "top.png"
     _good_render(render)
     r = subprocess.run(
-        [sys.executable, "-m", "tools.run_deterministic_gates",
+        [sys.executable, "-m", "tools.validation.run_deterministic_gates",
          "--consensus", str(cpath), "--render", str(render)],
         cwd=REPO, capture_output=True, text=True)
     assert r.returncode == 3, (r.returncode, r.stdout, r.stderr)

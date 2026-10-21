@@ -24,7 +24,7 @@
 
 Hoje a fidelidade da planta avança com o humano no laço interno: alguém roda um gate, lê o
 FAIL, decide o conserto, reconstrói, olha de novo. As peças determinísticas já existem e são
-boas — `tools/run_deterministic_gates.py` (opening_host + wall_overlap + render_bbox +
+boas — `tools/validation/run_deterministic_gates.py` (opening_host + wall_overlap + render_bbox +
 wall_presence + position_fidelity), `tools/geometry_sanity.py` (móvel-vs-cômodo) e
 `tools/furniture_overlap_gate.py` (móvel-sobre-móvel) — mas **ninguém as encadeia**. O FP-030
 gera `visual_findings.json` tipado com `suspected_owner` e `proposed_fix`, porém o runner
@@ -87,7 +87,7 @@ IMPROVED/SAME/WORSE).
 | `tools/orchestration/correction/correction_fixes.py` | **NOVO** — registry `finding_type → handler`, `FixResult` dataclass, handlers determinísticos idempotentes | fix registry |
 | `tools/finding_router.py` | **NOVO** — `classify(finding) -> Route{DETERMINISTIC_AUTOFIX\|NEEDS_VISION\|NEEDS_FELIPE}`; tabela source-of-truth dos tipos | classificador |
 | `core/schemas/correction_finding.schema.json` | **NOVO** — finding tipado UNIFICADO (normaliza gate-determinístico + `visual_findings.v1` num só shape: `type, severity, source_check, suspected_owner, route, evidence`) | schema |
-| `tools/run_deterministic_gates.py` | **EXISTE** — reusar `run_all()` como detector; **adicionar** `--json-out` p/ o loop consumir o dict de gates (hoje só printa) | gate suite |
+| `tools/validation/run_deterministic_gates.py` | **EXISTE** — reusar `run_all()` como detector; **adicionar** `--json-out` p/ o loop consumir o dict de gates (hoje só printa) | gate suite |
 | `tools/geometry_sanity.py`, `tools/furniture_overlap_gate.py` | **EXISTE** — reusar `audit()/overlap_gate()` como detectores de móvel; sem mudança de regra | gates móvel |
 | `tools/oracle/run_skp_visual_review.py` | **EXISTE** — reusar como REBUILD+RE-CHECK determinístico (gera .skp + `geometry_report.json` + findings); o loop chama, não reescreve | runner FP-030 |
 | `tools/claude_bridge/noc_dispatcher.py` | **EXISTE** — reusar `dispatch()`/`_appearance_changed`; **adicionar** `kind:"correction_cycle"` na fila roteado pra um ciclo do loop (sem duplicar o caminho de worktree/commit/VISUAL_REVIEW) | NOC actuator |
@@ -236,7 +236,7 @@ run_loop(fixture, max_cycles, room=None, dry_run=False):
 ## Reference
 
 Lido e confirmado nesta sessão:
-- `tools/run_deterministic_gates.py` — `run_all()`, exit PASS=0/FAIL=1/INCOMPLETE=3, gates opening_host/wall_overlap/render_bbox/wall_presence/railing/position_fidelity.
+- `tools/validation/run_deterministic_gates.py` — `run_all()`, exit PASS=0/FAIL=1/INCOMPLETE=3, gates opening_host/wall_overlap/render_bbox/wall_presence/railing/position_fidelity.
 - `tools/geometry_sanity.py` — `audit()` (hermético) + `sanity_room()` (consensus): outside_room/blocks_door/degenerate/absurd/off_axis.
 - `tools/furniture_overlap_gate.py` — `overlap_gate()`: móvel-sobre-móvel (footprint×altura), FAIL≥30% / WARN≥12%.
 - `tools/validation/visual_regression_gate.py` — scaffold IMPROVED/SAME/WORSE preenchido **só por humano** ("auto looks-like-PDF is exactly what the vision oracle was proven unable to do").

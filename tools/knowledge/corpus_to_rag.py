@@ -126,7 +126,7 @@ def export_reference_rows(corpus_path: Path) -> list[tuple[dict, list[str]]]:
 def ingest_reference(corpus_path: Path, db_path: Path | None = None) -> int:
     """Upsert das linhas exportadas no reference_db (RAG #1). Idempotente por
     slug (ON CONFLICT UPDATE); _upsert nao comita -> commit explicito aqui."""
-    from tools import reference_db as rdb
+    from tools.knowledge import reference_db as rdb
     if db_path is not None:
         rdb.DB_PATH = Path(db_path)
         rdb.DB_PATH.parent.mkdir(parents=True, exist_ok=True)

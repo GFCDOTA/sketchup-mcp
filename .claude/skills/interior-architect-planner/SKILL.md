@@ -75,7 +75,7 @@ Escolher o melhor e **registrar por que os outros foram descartados**.
 `tools/geometry_sanity.py` (consensus + móveis + polígono do cômodo + aberturas). Bloqueia:
 underground · degenerada · off-axis · bbox absurda · móvel fora do cômodo · móvel atravessando parede ·
 móvel bloqueando porta · móvel sobre janela · abertura fantasma · parede do baseline sumida ·
-diferença absurda consensus×.skp×render. (Shell: complementa `tools/run_deterministic_gates.py`.)
+diferença absurda consensus×.skp×render. (Shell: complementa `tools/validation/run_deterministic_gates.py`.)
 Resultado: **PASS** (sem regressão objetiva) · **WARN** (segue com motivo explícito) · **FAIL** (bloqueia promoção).
 **Não aprova beleza/premium/fidelidade subjetiva** — só impede caos geométrico.
 

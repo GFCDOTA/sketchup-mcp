@@ -174,7 +174,7 @@ def _collect_findings(png):                              # adapter FINO p/ FP-03
 - `tools/rendering/batch_theme_render.py` — eixo MATERIAL/TEMA (`KITCHEN_THEME`); HOJE `THEMES`/`RANKING` (l.32-57) sao **vereditos curados a mao** — FP-034 substitui isso por verdito derivado de achados (prior art, nao reuso cego).
 - `artifacts/reference_lab/themes/*.json` — 4 presets (`black_wood_gold` etc.) com `gates`/`status`; fonte do eixo tema.
 - `tools/rendering/render_parts_iso.py` — `render_parts()` SU-free; renderer barato de proporcao p/ o sweep. **Reuso direto.**
-- `tools/reference_db.py` (RAG #1, SQLite/visual) e `tools/knowledge/project_memory_db.py` (RAG #2, SQLite + Ollama `nomic-embed-text`) — consumidores em FP-035; ja existem.
+- `tools/knowledge/reference_db.py` (RAG #1, SQLite/visual) e `tools/knowledge/project_memory_db.py` (RAG #2, SQLite + Ollama `nomic-embed-text`) — consumidores em FP-035; ja existem.
 - `tools/claude_bridge/noc_dispatcher.py` + `.ai_bridge/noc/queue.jsonl` + `actions.jsonl` — runner de fundo (lock 1-atuador, NUNCA main, APARENCIA->VISUAL_REVIEW); base do `kind=variant-sweep`.
 - `tools/rooms/living/planning/layout_candidates.py` — expõe `candidates`/`ranking` de parede-TV (ambíguo) — base do eixo `layout_seed`.
 

@@ -13,7 +13,7 @@ import jsonschema
 import pytest
 
 from core.schemas import load
-from tools import reference_db as rdb
+from tools.knowledge import reference_db as rdb
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = load("design_spec_bundle.schema.json")

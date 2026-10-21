@@ -20,12 +20,11 @@ vive só no dono. Teste: `tests/test_fp044_tools_facades.py`.
 Política (D-010): ficam enquanto o harness importar estes caminhos. Aposentar exige primeiro um PR **no harness**
 repontando para o dono; só então uma spec futura remove a fachada.
 
-## Retidos por consumidor externo descoberto na F6 (D-011)
+## D-011 — encerrada (FP-045/F2, 2026-10-21)
 
-O Inspector do harness (`SourceVerifier`) lê estes arquivos em `../sketchup-mcp/` em tempo de execução:
-`tools/reference_db.py`, `tools/rag_embed_backend.py`, `tools/ollama_bridge.py`, `tools/run_deterministic_gates.py`.
-Ficam até o harness ser repontado para os donos (`tools.knowledge.*`, `tools.oracle.ollama_bridge`,
-`tools.validation.run_deterministic_gates`).
+O Inspector do harness lia `tools/{reference_db,rag_embed_backend,ollama_bridge,run_deterministic_gates}.py` em tempo de
+execução. `GFCDOTA/harness-app#17` repontou o catálogo para os donos (`tools/knowledge/*`, `tools/oracle/ollama_bridge.py`,
+`tools/validation/run_deterministic_gates.py`) e as 4 fachadas foram removidas. Quem importava `tools.<nome>` deve usar o dono.
 
 ## Retidos por decisão do Felipe
 

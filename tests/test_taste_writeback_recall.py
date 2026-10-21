@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import rag_embed_backend as reb
+from tools.knowledge import rag_embed_backend as reb
 from tools.knowledge import rag_freshness as rf
 from tools.knowledge import taste_writeback as tw
 
@@ -73,7 +73,7 @@ def test_retrieve_recovers_learned_verdict(tmp_path, monkeypatch):
     finally:
         con2.close()
 
-    from tools import reference_db as rdb
+    from tools.knowledge import reference_db as rdb
     bundle = rdb.retrieve("kitchen", "black_wood_gold", backend="embed")
     try:
         assert bundle["rag_corpus_version"] == cv

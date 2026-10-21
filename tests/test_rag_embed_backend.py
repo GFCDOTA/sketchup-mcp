@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from tools import rag_embed_backend as reb
+from tools.knowledge import rag_embed_backend as reb
 from tools.knowledge import rag_freshness as rf
 
 INFRA_UP = reb.infra_up()
@@ -42,7 +42,7 @@ def test_fallback_to_faceted_when_qdrant_port_dead(monkeypatch):
     # aponta o adapter pra uma porta morta -> retrieve(backend='embed') degrada
     monkeypatch.setattr(reb, "QDRANT_URL", "http://127.0.0.1:6553")   # porta morta
     monkeypatch.setattr(reb, "OLLAMA_URL", "http://127.0.0.1:6554")   # porta morta
-    from tools import reference_db as rdb
+    from tools.knowledge import reference_db as rdb
     bundle = rdb.retrieve("kitchen", "black_wood_gold", backend="embed")
     # degradou honesto: tokens continuam vindo do faceted, confidence NÃO inflada
     assert bundle["tokens"]                       # faceted ainda entrega
@@ -53,7 +53,7 @@ def test_fallback_to_faceted_when_qdrant_port_dead(monkeypatch):
 
 def test_retrieve_carries_additive_fp037_fields():
     # retrocompat aditivo: mesmo no faceted default, os campos novos existem
-    from tools import reference_db as rdb
+    from tools.knowledge import reference_db as rdb
     bundle = rdb.retrieve("kitchen", "black_wood_gold")
     assert "rag_corpus_version" in bundle
     assert "retrieved_chunks" in bundle
@@ -192,7 +192,7 @@ def test_retrieve_embed_backend_populates_retrieved_chunks(integ_corpus, monkeyp
         reb.reindex_qdrant(con2, corpus_version=cv, now_iso=T0)
     finally:
         con2.close()
-    from tools import reference_db as rdb
+    from tools.knowledge import reference_db as rdb
     bundle = rdb.retrieve("kitchen", "black_wood_gold", backend="embed")
     try:
         assert bundle["rag_corpus_version"] == cv

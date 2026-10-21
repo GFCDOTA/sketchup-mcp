@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 
-from tools import reference_db as rdb
+from tools.knowledge import reference_db as rdb
 from tools.knowledge import retrieval_eval as rev
 
 GOLDEN = rev.DEFAULT_GOLDEN
@@ -31,7 +31,7 @@ def test_writeback_chunks_stay_auditable_but_dont_fuse(monkeypatch):
     # verdict do Felipe no recall: fica AUDITÁVEL nos retrieved_chunks, mas a
     # fusão só usa source_type='token' (join por source_path contra o faceted) —
     # regressão do filtro nativo que escondia o write-back (taste recall).
-    import tools.reference_db as _rdb
+    import tools.knowledge.reference_db as _rdb
 
     def _stub(room, style_norm):
         ch = _chunks(["coordinated_oak_base"])

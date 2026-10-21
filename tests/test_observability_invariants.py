@@ -204,8 +204,8 @@ def traces(tmp_path):
 
 
 def test_a_real_recorded_run_satisfies_every_invariant(traces):
-    from tools.reference_db import retrieve
-    from tools.run_deterministic_gates import run_all
+    from tools.knowledge.reference_db import retrieve
+    from tools.validation.run_deterministic_gates import run_all
 
     with obs.run(run_id="run_real", component="test"):
         retrieve("kitchen", "black_wood_gold", backend="faceted")
@@ -298,7 +298,7 @@ def sink():
 
 def test_faceted_retrieval_has_its_own_executed_span(sink):
     """`backendActual=faceted` tem que ser CONSEQUÊNCIA de um span observável."""
-    from tools.reference_db import retrieve
+    from tools.knowledge.reference_db import retrieve
 
     with obs.run(run_id="run_fb"):
         retrieve("kitchen", "black_wood_gold", backend="faceted")
@@ -317,7 +317,7 @@ def test_faceted_retrieval_has_its_own_executed_span(sink):
 
 def test_faceted_span_is_nested_under_the_query_span(sink):
     from core.observability.replay import build_span_tree, parse_rows
-    from tools.reference_db import retrieve
+    from tools.knowledge.reference_db import retrieve
 
     with obs.run(run_id="run_nest_fb"):
         retrieve("kitchen", "black_wood_gold", backend="faceted")
@@ -333,7 +333,7 @@ def test_degraded_run_shows_the_faceted_execution_that_produced_the_result(sink)
     Antes, `backendActual=faceted` era a única evidência de que o faceted tinha
     executado — uma conclusão, não uma observação.
     """
-    from tools.reference_db import retrieve
+    from tools.knowledge.reference_db import retrieve
 
     with obs.run(run_id="run_degraded"):
         retrieve("kitchen", "black_wood_gold", backend="embed")

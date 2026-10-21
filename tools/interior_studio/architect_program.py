@@ -129,7 +129,7 @@ def _retrieve_bundle(room_key: str | None) -> dict | None:
     if not room_type:
         return None
     try:
-        from tools import reference_db as rdb
+        from tools.knowledge import reference_db as rdb
         bundle = rdb.retrieve(room_type, FELIPE_STYLE, backend=_RAG_BACKEND)
         return bundle if bundle.get("tokens") else None
     except Exception:  # noqa: BLE001 — retrieve nunca deve quebrar o gerador

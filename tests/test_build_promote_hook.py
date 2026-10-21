@@ -45,7 +45,7 @@ def test_infer_plant():
 
 
 def _patch_det(monkeypatch, overall="PASS", gates=None):
-    import tools.run_deterministic_gates as rdg
+    import tools.validation.run_deterministic_gates as rdg
     monkeypatch.setattr(rdg, "run_all",
                         lambda **k: {"overall": overall, "gates": gates or {}})
     # Estas provas isolam o hook de promoção; o gate absoluto é testado

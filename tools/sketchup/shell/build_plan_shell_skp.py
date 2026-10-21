@@ -1251,7 +1251,7 @@ def _auto_promote(args, result):
     # never land at the fixed path with a deterministic FAIL/INCOMPLETE.
     out_dir = args.out.resolve().parent
     try:
-        from tools.run_deterministic_gates import run_all
+        from tools.validation.run_deterministic_gates import run_all
         det = run_all(consensus_path=str(args.consensus),
                       render_path=str(out_dir / "model_top.png"))
     except Exception as e:  # pragma: no cover - defensive
