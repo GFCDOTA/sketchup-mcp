@@ -192,12 +192,18 @@ def authorize(deltas: list[dict], contract: dict, rooms: dict[str, str]) -> list
     return out
 
 
+def _in_room(rows: list[dict], room: str) -> list[dict]:
+    return [r for r in rows if r["room"] == room]
+
+
 def compare(before: dict, after: dict, contract: dict, *, canonical_before: dict | None = None,
-            canonical_after: dict | None = None, l1_gates: str | None = None, l2: str | None = None,
-            l3: str | None = None) -> dict:
+            canonical_after: dict | None = None, l1_gates: str | None = None, gates_before: dict | None = None,
+            gates_after: dict | None = None, l2: str | None = None, l3: str | None = None) -> dict:
     """`room_regression_report.v1`. Contrato invalido/bloqueado => relatorio BLOCKED sem comparar nada (fail-closed).
 
-    `l1_gates` ("PASS"/"FAIL") vem da F3 (parede/giro/circulacao); sem ele L1 fica NOT_RUN e o estado nao passa de BLOCKED.
+    L1 de parede/giro/circulacao (F3): `gates_before`/`gates_after` = `room_regression_gates.run(...)` dos dois commits;
+    o que a mudanca INTRODUZ reprova, o que ja existia na base e listado como preexistente. So um dos dois lados = BLOCKED
+    (nunca comparar contra o nada). `l1_gates` ("PASS"/"FAIL") e o atalho antigo da F2. Sem nenhum, L1 fica NOT_RUN.
     """
     known = set(before["rooms"]) | set(after["rooms"])
     check = rr.validate_contract(contract, known, "planta_74" if contract.get("fixture") == "planta_74" else None)
@@ -227,6 +233,18 @@ def compare(before: dict, after: dict, contract: dict, *, canonical_before: dict
                              "role": "control" if room in controls else ("allowed" if room in allowed_rooms else "unlisted"),
                              "allowed_delta_count": len(mine) - len(bad), "unexpected_delta_count": len(bad),
                              "deltas": mine})
+    gate_delta = None
+    incomplete = []
+    if (gates_before is None) != (gates_after is None):
+        incomplete.append("GATES_INCOMPLETE")
+    elif gates_before is not None:
+        from tools.validation import room_regression_gates as gates
+        gate_delta = gates.delta(gates_before, gates_after)
+        for entry in room_results:
+            entry["gate_findings"] = {"introduced": _in_room(gate_delta["introduced"], entry["room_key"]),
+                                      "preexisting": _in_room(gate_delta["preexisting"], entry["room_key"])}
+            if entry["gate_findings"]["introduced"]:
+                entry["state"] = "FAIL"
     canonical = None
     if canonical_before is not None and canonical_after is not None:
         canonical = canonical_before == canonical_after                      # R-31: vale em qualquer modo
@@ -234,8 +252,17 @@ def compare(before: dict, after: dict, contract: dict, *, canonical_before: dict
     base["evidence"]["delta_count"] = len(deltas)
     base["evidence"]["unauthorized_delta_count"] = sum(1 for d in deltas if d["authorization"])
     base["evidence"]["ambiguous_groups"] = {"before": before.get("ambiguous_groups"), "after": after.get("ambiguous_groups")}
+    if gate_delta is not None:
+        base["evidence"]["l1_gates"] = {k: (v if k == "rooms_checked" else len(v) if isinstance(v, list) else v)
+                                        for k, v in gate_delta.items() if k != "state"}
+        base["evidence"]["preexisting_gate_findings"] = [f["key"] for f in gate_delta["preexisting"]]
+        base["evidence"]["introduced_gate_findings"] = [f["key"] for f in gate_delta["introduced"]]
+        base["evidence"]["resolved_gate_findings"] = [f["key"] for f in gate_delta["resolved"]]
+    l1 = gate_delta["state"] if gate_delta is not None else (l1_gates or "NOT_RUN")
+    if incomplete:
+        base["blocked"] = incomplete
     report = {**base, "canonical_hashes_unchanged": canonical, "room_results": room_results, "visual_changed": visual,
-              "tests": {"l1": l1_gates or "NOT_RUN", "l2": l2 or ("NOT_RUN" if base["require_l2"] else "NOT_APPLICABLE"),
+              "tests": {"l1": l1, "l2": l2 or ("NOT_RUN" if base["require_l2"] else "NOT_APPLICABLE"),
                         "l3": l3 or ("NOT_REVIEWED" if visual else "NOT_APPLICABLE")}}
     report["state"], report["reasons"] = rr.aggregate_state(report)
     return report
