@@ -7,8 +7,8 @@
 spec:
   feature: "FP-046 — Porta Shaker paramétrica e execução comprovada"
   escopo_versao: "Acrescentar uma capability de porta Shaker com moldura e painel realmente rebaixado ao gabinete compartilhado, comprovada do plano à inspeção no SketchUp."
-  versao: "1.0.0"
-  status: "RASCUNHO"
+  versao: "1.1.0"
+  status: "RASCUNHO_VALIDADO_CONTRA_DEVELOP"
   classificacao:
     contexto_delimitado: "Marcenaria Paramétrica"
     dominio: "SketchUp MCP / Especialistas por Cômodo"
@@ -16,7 +16,9 @@ spec:
   autor: "GPT-6 (proposta SDD); decisão estética e de produto: Felipe"
   data_criacao: "2026-10-21"
   ultima_atualizacao: "2026-10-21"
-  baseline_develop: "214d73e3c38c8bae9a3dc16f0fc579b64a017ac7"
+  baseline_develop: "23939d9"
+  baseline_develop_original: "214d73e3c38c8bae9a3dc16f0fc579b64a017ac7"
+  validacao: "2026-10-21: assinaturas de assembly/model/plan conferidas; P0 entregue em #345; correcoes em 3.2 (v1.1.0)"
   status_reconciliacao: "Em 2026-10-21, develop avancou para 029f9685 (PR #343); 4 fachadas D-011 removidas, nao pertencem ao escopo desta SPEC."
   spec_mae: "docs/specs/FP-045_specialists_knowledge_and_room_modularization.md"
   specs_dependentes: ["FP-047 (regressão geométrica e visual, contrato complementar)"]
@@ -37,7 +39,11 @@ O código atual **já** planeja gabinetes `cabinet_request.v1` → `cabinet_asse
 
 **Motivo:** transformar uma receita consultiva em uma técnica de modelagem reproduzível, sem promover conhecimento/execução por mera transcrição de vídeo. A entrega terá peças reais: montantes laterais, travessas superior/inferior e painel central recuado, semanticamente identificáveis e editáveis.
 
-**Gap observado em 2026-10-21 (pré-condição):** `bind.kitchen.shaker` indica `yt-cabinet-tips-2021`, enquanto a recipe `cabinet.recessed-shaker-and-louvers` referencia `yt-cabinet-styles-2024`. O catálogo atual testa se IDs existem, mas não se o binding cita uma fonte efetivamente referenciada pela recipe. **Não resolver alterando uma fonte no chute.** Abrir primeiro micro-PR da FP-045/F4 com teste `binding.source_ids ↔ recipe.sources/source_refs` e correção após inspeção da origem. Os mesmos negativos se aplicam a `bind.kitchen.drawer` e `bind.kitchen.sink-cutout` (ambos apontam `yt-cabinet-tips-2021`, ao passo que suas recipes apontam `yt-kitchen-joinery-2024`). Não elevar `TRANSCRIPT_AND_DESCRIPTION_ONLY` para inspeção visual sem prova.
+**P0 resolvido em #345 (2026-10-21).** `capability_catalog.verify` ganhou `BINDING_SOURCE_MISMATCH` (fontes do binding == união das fontes das suas recipes) e os 4 bindings foram corrigidos *derivando das recipes*, sem criar fonte, locator ou evidência. Medido: `shaker` → `yt-cabinet-styles-2024`; `drawer`/`sink-cutout` → `yt-kitchen-joinery-2024`; `cabinet` passou a citar também `yt-cabinet-styles-2024` (a recipe `front-gaps-and-profiles` o cita).
+
+**Consequência que a v1.0.0 não previu (D46-09, PENDENTE):** `yt-cabinet-styles-2024` é `TRANSCRIPT_AND_DESCRIPTION_ONLY`. O teste `test_implemented_binding_is_not_backed_only_by_description_only_sources` (#340) exige ≥1 fonte *inspecionada* em todo binding com capability — logo `bind.kitchen.shaker` **não pode receber `capability_id` enquanto só citar essa fonte**, e acrescentar uma fonte ao binding sem a recipe citá-la reprova `BINDING_SOURCE_MISMATCH`. Caminhos legítimos (decisão técnica + Felipe, sem inventar evidência): (a) a recipe Shaker passar a citar uma documentação oficial já lida (`official-components`/`official-groups`, `OFFICIAL_DOCUMENTATION_READ`) com `locator` real e relação declarada; ou (b) alguém inspecionar o vídeo e elevar a evidência da fonte. Até lá o P4 (ligar o binding) fica `BLOCKED_DECISION`; P1–P3 (plano puro, builder, L2 em micro-fixture) não dependem disso.
+
+**Gap observado em 2026-10-21 (pré-condição, histórico — fechado pelo P0 acima):** `bind.kitchen.shaker` indica `yt-cabinet-tips-2021`, enquanto a recipe `cabinet.recessed-shaker-and-louvers` referencia `yt-cabinet-styles-2024`. O catálogo atual testa se IDs existem, mas não se o binding cita uma fonte efetivamente referenciada pela recipe. **Não resolver alterando uma fonte no chute.** Abrir primeiro micro-PR da FP-045/F4 com teste `binding.source_ids ↔ recipe.sources/source_refs` e correção após inspeção da origem. Os mesmos negativos se aplicam a `bind.kitchen.drawer` e `bind.kitchen.sink-cutout` (ambos apontam `yt-cabinet-tips-2021`, ao passo que suas recipes apontam `yt-kitchen-joinery-2024`). Não elevar `TRANSCRIPT_AND_DESCRIPTION_ONLY` para inspeção visual sem prova.
 
 **Estado inicial real:** `tools.rooms.shared.cabinet.assembly.build_parts` retorna frentes retangulares `front`/`front_1`/`front_2` e `tools.rooms.shared.cabinet.sketchup.GRAIN_SUPPORT = NOT_SUPPORTED`; `cabinet_build.rb` cria componentes e `Cabinet_<request_id>` e só aceita `shared.cabinet.parametric`. Qualquer nova capability deve respeitar essa fronteira ou criar contrato versionado explícito.
 
@@ -45,7 +51,7 @@ O código atual **já** planeja gabinetes `cabinet_request.v1` → `cabinet_asse
 
 | Fase | Entrega | Saída exigida |
 |---|---|---|
-| P0 | Prova de origem e negativa dos três bindings inconsistentes (FP-045) | fonte correta, receita rastreável; CI do PR independente |
+| P0 | **ENTREGUE (#345, 2026-10-21):** prova de origem e negativa dos bindings inconsistentes (eram 4, não 3: `shaker`, `drawer`, `sink-cutout` **e** `cabinet`) | fonte correta, receita rastreável; CI do PR independente |
 | P1 | Contrato `shaker_door_request.v1` + plano puro e fixtures | validação rígida, geometria sem overlap, assinatura |
 | P2 | Builders shared de moldura, travessas e painel recuado | teste de propriedades, identidade e editabilidade; sem SU |
 | P3 | Driver Ruby/SketchUp da capacidade e inspector | L2 Windows em 0°/90°/30° e 1/2 portas; salvar/reabrir |
@@ -284,8 +290,10 @@ Mesma request/mesmos hashes → mesmo plano e resultado idempotente verificado; 
 **Invariantes da submontagem (não transformar em desenho aproximado):**
 - Envelope W×H da **frente existente** permanece; parte externa de montantes/travessas ocupa o envelope, com folga da porta preservada.
 - Montantes laterais possuem largura `stile_width`; travessas entre montantes possuem altura `rail_height`; painel central cobre vão restante com espessura e recuo declarados.
+- **Restrições de profundidade que a v1.0.0 omitia (conferidas em `assembly.build_parts`):** a frente lisa atual ocupa `y ∈ [D − front, D]` (`front` = `panels.front`) e `z ∈ [reveal, H − reveal]`; logo `frame_thickness` deve ser **igual** à espessura de frente do gabinete pai (`panels.front`) — maior invade a `front_clearance`/carcaça, menor deixa vão — e `recess_from_frame_front + panel.thickness ≤ frame_thickness`. No exemplo (18 mm / 4 mm / 6 mm) vale 4+6=10 ≤ 18. O plano da Shaker deve citar a **assinatura do plano pai** (`parent_plan_signature`) para não substituir uma frente de um plano já alterado (R-12).
 - `frame_thickness > recess_from_frame_front >= 0` e painel atrás da face externa, dentro do envelope autorizado; condições exatas de profundidade derivadas de `panel.thickness`, sem intersectar ilicitamente outros sólidos.
 - Contato de face é permitido; interseção volumétrica positiva entre partes não previstas é FAIL.
+- Os papéis e chaves de material atuais são `ROLE_OF_PART`/`materials[role]` do gabinete pai (frente = `front`); `frame` e `panel` são papéis **novos** — o contrato deve declará-los (e `definitions()` já agrupa por `(role, size, material, grain)`), sem alterar `ROLE_OF_PART` das frentes lisas (R-19).
 - `role`/`id`/`material`/`grain`/`geometry_signature` determinam compartilhamento; `make_unique` protege edição local.
 - Assinatura liga schema, versão, frente alvo, materiais, espessuras, transforms e todos os bounds. Não incluir PID/timestamp no hash lógico.
 
@@ -385,7 +393,8 @@ Cada P0–P6 é PR pequeno para `develop`, 4 checks aplicáveis verdes. P0 (font
 | D46-02 | RESOLVIDA | começar por moldura+painel rebaixado; sem gaveta, ferragem, UV ou fabricação |
 | D46-03 | RESOLVIDA | `cabinet_request.v1` e frentes lisas mantêm contrato atual |
 | D46-04 | RESOLVIDA | observação de recuo depende de vértices/peças no SketchUp, não render bonito |
-| D46-05 | PENDENTE TÉCNICA | verificar origem da recipe Shaker (FP-045/F4) antes de promover |
+| D46-05 | RESOLVIDA (#345) | origem da recipe Shaker verificada: binding agora cita só o que a recipe cita |
+| D46-09 | PENDENTE TÉCNICA + FELIPE | fonte *inspecionada* para o binding Shaker (ver 2.1); bloqueia só o P4 |
 | D46-06 | PENDENTE TÉCNICA | ADR do versionamento do plano e Ruby job |
 | D46-07 | PENDENTE FELIPE | aparência final e aceitação das proporções (valores sintéticos ≠ padrão) |
 | D46-08 | PENDENTE TÉCNICA | integrar Shaker como opção sem modificar `cabinet_flow` legacy; provar compatibilidade |
@@ -395,6 +404,7 @@ Cada P0–P6 é PR pequeno para `develop`, 4 checks aplicáveis verdes. P0 (font
 | Versão | Data | Autor | Descrição |
 |---|---|---|---|
 | 1.0.0 | 2026-10-21 | GPT-6 | SPEC executável P0–P6, Shaker compartilhado, 24 regras, 24 critérios e CA-19 |
+| 1.1.0 | 2026-10-21 | Claude (validação contra o código) | Conferido: `quantity`, `Params`, `build_parts` (`front`/`front_N`, quadro local), `definitions`, `plan_cabinet/require_valid`, `cabinet_build.rb` aceita só `shared.cabinet.parametric`. Correções: (1) P0 entregue em #345 — eram 4 bindings, não 3; (2) nova pendência D46-09: binding Shaker só cita fonte descritiva e não pode ganhar capability sem fonte inspecionada; (3) restrições de profundidade ausentes (`frame_thickness == panels.front`, `recess + panel ≤ frame`); (4) `parent_plan_signature`; (5) papéis `frame`/`panel` novos; (6) baseline `23939d9` |
 
 ### 3.3 Handoff de implementação
 
@@ -422,7 +432,7 @@ Cada P0–P6 é PR pequeno para `develop`, 4 checks aplicáveis verdes. P0 (font
 - [ ] ADR de versionamento do plano aprovada
 
 **Implementação — tudo pendente:**
-- [ ] P0 fonte Shaker/binding verificados e teste vermelho→verde
+- [x] P0 fonte Shaker/binding verificados e teste vermelho→verde (#345)
 - [ ] P1 Schema + inputs completos, negativos e plano assinado
 - [ ] P2 5 peças por frente, recuo real, sem overlap positivo
 - [ ] P3 job SketchUp real e reabertura/editabilidade comprovada
