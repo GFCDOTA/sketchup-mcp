@@ -11,7 +11,7 @@ linha vira uma nota de decisão com data e o item sai daqui.
 | D-003 | `tools/furnish_plan.py` / `.rb` (3D Warehouse): vigente ou histórico | Felipe | só o destino desses 2 arquivos em P4 |
 | D-004 | Dono da CLI `tools/trace_view.py` | Felipe | só o destino dele em P4 |
 | D-005 | `scripts/set_clipboard_image.ps1` ainda útil | Felipe | só o destino dele em P4 |
-| D-011 | 4 fachadas de `tools/` lidas pelo Inspector do harness (fora das 8 públicas) | técnica (PR no harness) | só a remoção dessas 4 na FP-044/F6 |
+| D-011 | 4 fachadas de `tools/` lidas pelo Inspector do harness (fora das 8 públicas) — **RESOLVIDA** (harness-app#17 + FP-045/F2, 2026-10-21) | técnica | nada |
 | D-012 | `tools/sofa_class_matrix.py` escondia uma dependência quarto → living — **RESOLVIDA** (`_grid_sheet` → `tools/rooms/shared/contact_sheet.py`, 2026-10-20) | técnica | nada |
 
 **Linha final (P8, 2026-10-19):** D-001 a D-005 = BLOCKED_DECISION (Felipe; material da D-001 em `artifacts/review/fp043/p3a04_quadrado_d001/`); D-006 = RESOLVED; D-007 = OPEN_TECNICA (planta_74 já respeita o contrato por cômodo; sintéticas seguem `xfail(strict)`).
@@ -107,7 +107,9 @@ Hipótese descartada: o piso de 0,45 m de profundidade do adaptador (`furnishing
 Proposta quando o Felipe aprovar: apertar a tolerância **e** partir o intervalo da face interna da parede perpendicular, com a
 SUITE 02 revista lado a lado antes/depois.
 
-## D-011 — Inspector do harness lê 4 fachadas de `tools/` por caminho (FP-044/F6)
+## D-011 — Inspector do harness lê 4 fachadas de `tools/` por caminho (FP-044/F6) — **RESOLVIDA (FP-045/F2, 2026-10-21)**
+
+**Resolução:** `GFCDOTA/harness-app#17` repontou o catálogo Java para os donos (e `correction_loop` para `tools/orchestration/correction/`, cuja fachada não define `run_loop`); as 4 fachadas foram removidas (`tools/*.py`: 14 → 10). O texto abaixo é o registro histórico.
 
 **Achado (varredura da Hard Rule #1 antes do 1º lote da F6).** O `fp044_tools_facades.v1.json` só contava imports
 Python; o `apps/harness-app` (outro repositório) também tem um catálogo Java (`ImplementationCatalog`/`ComponentCatalog`)

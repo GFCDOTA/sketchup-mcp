@@ -74,9 +74,9 @@ jobs:
       - name: FP-042 P3 — exact owner coverage
         run: python -m tools.rooms.p3_ownership
       - name: Gate — planta_74
-        run: python -m tools.run_deterministic_gates --fixture planta_74
+        run: python -m tools.validation.run_deterministic_gates --fixture planta_74
       - name: Gate — quadrado (micro-fixture canônico)
-        run: python -m tools.run_deterministic_gates --fixture quadrado
+        run: python -m tools.validation.run_deterministic_gates --fixture quadrado
       # Scale is checked against an independent source (PDF cota / fixture),
       # NEVER report metadata or environment PT_TO_M. Fails on 0.74x shells.
       - name: FP-043 P3 — absolute scale (planta_74)

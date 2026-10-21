@@ -525,8 +525,8 @@ python -m tools.navigation.p0_map --check
 python -m tools.navigation.docs_check
 python -m tools.rooms.asset_provenance
 python -m tools.rooms.reference_provenance
-python -m tools.run_deterministic_gates --fixture quadrado
-python -m tools.run_deterministic_gates --fixture planta_74
+python -m tools.validation.run_deterministic_gates --fixture quadrado
+python -m tools.validation.run_deterministic_gates --fixture planta_74
 python -m tools.mcp_server.smoke
 python -m tools.mcp_server.stdio_check
 python -m pytest tests/ -q -m "not planta74_scale"

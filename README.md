@@ -46,8 +46,8 @@ python -m pytest tests/ -q -m "not planta74_scale"
 PT_TO_M=0.0259 python -m pytest tests/ -q -m planta74_scale      # PowerShell: $env:PT_TO_M="0.0259"; …
 
 # gates determinísticos (CI / pre-commit)
-python -m tools.run_deterministic_gates --fixture planta_74
-python -m tools.run_deterministic_gates --fixture quadrado
+python -m tools.validation.run_deterministic_gates --fixture planta_74
+python -m tools.validation.run_deterministic_gates --fixture quadrado
 
 # servidor MCP (stdio) e o handshake de prova
 python -m tools.mcp_server.smoke
@@ -89,7 +89,7 @@ Mapa completo, com o estado de cada pasta, em [`docs/architecture/repository_map
 
 ## Gates de fidelidade
 
-**Determinísticos** (rápidos; `tools/run_deterministic_gates.py`): paredes e posição vs consensus
+**Determinísticos** (rápidos; `tools/validation/run_deterministic_gates.py`): paredes e posição vs consensus
 (`wall_exact_match_gate`, `position_fidelity_gate`), guarda-corpo vs mureta (`railing_exact_match_gate`,
 `parapet_not_railing_fallback_gate`), aberturas (`opening_audit`, `opening_aperture_audit`, `opening_host_audit`,
 `door_swing_audit`), sobreposição de paredes e enquadramento (`wall_overlap_audit`, `render_bbox_audit`), e os gates

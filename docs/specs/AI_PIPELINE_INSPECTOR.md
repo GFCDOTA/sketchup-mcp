@@ -784,13 +784,13 @@ tests/test_sse_route.py
 
 ### Alterados (todos aditivos)
 ```
-tools/rag_embed_backend.py               # perf_counter + emit em embed()/search()
-tools/reference_db.py                    # emit em _embed_recall_chunks e _rrf_fuse; expor rejeitados
+tools/knowledge/rag_embed_backend.py               # perf_counter + emit em embed()/search()
+tools/knowledge/reference_db.py                    # emit em _embed_recall_chunks e _rrf_fuse; expor rejeitados
 tools/knowledge/rag_freshness.py                   # emit em freshness_guard
 tools/interior_studio/architect_program.py  # emit em guard_bundle_freshness / render_bundle_for_prompt / chamada Ollama
-tools/ollama_bridge.py                   # ler prompt_eval_count/eval_count (hoje descartados) + emit
+tools/oracle/ollama_bridge.py                   # ler prompt_eval_count/eval_count (hoje descartados) + emit
 tools/oracle/oracle_providers.py                # emit nas chamadas de juiz
-tools/run_deterministic_gates.py         # emit por gate via adapter
+tools/validation/run_deterministic_gates.py         # emit por gate via adapter
 tools/correction_loop.py                 # emit cycle/retry/correction/terminal
 tools/validation/gate_verdict.py                    # normalizador
 tools/mcp_server/server.py               # decorator de tool → tool.started/finished

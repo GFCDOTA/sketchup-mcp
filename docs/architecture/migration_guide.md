@@ -210,13 +210,15 @@ propósito; use esta tabela para achar o arquivo hoje.
 | `tools.{armchair_builder,decor_anatomy_spec,decor_builders,layout_rules,semantic_zones,shell_parts}` | `tools.rooms.shared.{…}` | `rooms/shared` |
 | `tools.service_layout` | `tools.rooms.service.layout` | `rooms/service` |
 | 24 gates/auditorias `tools.{*_gate,*_audit,gate_util,gate_verdict,gate_filefetch,diagnose_wall_stubs,furniture_wall_gap,render_bbox_audit,repo_health_gate}` | `tools.validation.{…}` (mesmo nome) | `validation` |
-| `tools.run_deterministic_gates` | **fica** (D-011: lido pelo Inspector do harness); dono `tools.validation.run_deterministic_gates` | `validation` |
+| `tools.run_deterministic_gates` | removida na FP-045/F2 (D-011 resolvida); dono `tools.validation.run_deterministic_gates` | `validation` |
 | `tools.{auto_camera,batch_theme_render,compose_side_by_side,crop_render,gen_textures,material_review,overlay_diff,pdf_overlay_verify,render_parts_iso,render_scene_views,render_scene_vray,theme_palette,tweak_vrscene}` | `tools.rendering.{…}` (mesmo nome) | `rendering` |
 | `tools.{correction_finding,correction_fixes,jsonl_io,vision_queue_consumer}` | `tools.orchestration.correction.{…}` | `orchestration` |
 | `tools.{fidelity_loop,promote_artifact,promote_canonical,regenerate_consensus,variant_axes,variant_sweep}` | `tools.orchestration.{…}` | `orchestration` |
 | `tools.{corpus_to_rag,furniture_reference_analyzer,project_memory_db,rag_freshness,reference_grammar,retrieval_eval,taste_writeback}` | `tools.knowledge.{…}` (mesmo nome) | `knowledge` |
-| `tools.{reference_db,rag_embed_backend}` | **ficam** (D-011: lidos pelo Inspector do harness); donos `tools.knowledge.{…}` | `knowledge` |
+| `tools.{reference_db,rag_embed_backend}` | removidas na FP-045/F2 (D-011 resolvida); donos `tools.knowledge.{…}` | `knowledge` |
 | `tools.{ask_gpt_gate,consult_tier,gpt_docker_visual_score,gpt_review,human_verdict,negative_dogfood,oracle_providers,run_skp_visual_review}` | `tools.oracle.{…}` (mesmo nome) | `oracle` |
-| `tools.ollama_bridge` | **fica** (D-011); dono `tools.oracle.ollama_bridge` | `oracle` |
+| `tools.ollama_bridge` | removida na FP-045/F2 (D-011 resolvida); dono `tools.oracle.ollama_bridge` | `oracle` |
 
-Estado final da F6 (2026-10-20): 108 fachadas removidas; ficam 15 arquivos em `tools/*.py` ([`tools/PUBLIC_API.md`](../../tools/PUBLIC_API.md)). Relatório: [FP-044_final_validation](../reports/FP-044_final_validation.md).
+Atualização FP-045/F2 (2026-10-21): as 4 de D-011 também saíram (harness-app#17 repontou o catálogo) — 112 removidas, **10** arquivos em `tools/*.py`.
+
+Estado final da F6 (2026-10-20, histórico): 108 fachadas removidas; ficavam 15 arquivos em `tools/*.py` ([`tools/PUBLIC_API.md`](../../tools/PUBLIC_API.md)). Relatório: [FP-044_final_validation](../reports/FP-044_final_validation.md).

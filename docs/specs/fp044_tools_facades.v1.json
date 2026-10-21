@@ -2,7 +2,7 @@
  "schema_version": "fp044_tools_facades.v1",
  "generated_at": "2026-10-20",
  "source": "git ls-files @ develop 4840ef0 (consumidores contados em .py/.rb/.ps1/.cmd/.sh/.yml/.json/.md/.toml fora de artifacts/ e docs/archive/)",
- "external_consumers_note": "apps/harness-app importa os modulos marcados KEEP_PUBLIC; mudar o caminho exige repontar o harness no mesmo PR; FP-044/F6 (D-011): o Inspector do harness (SourceVerifier) le tools/{reference_db,rag_embed_backend,ollama_bridge,run_deterministic_gates}.py em runtime -> BLOCKED_EXTERNAL_CONSUMER ate repontar o harness",
+ "external_consumers_note": "apps/harness-app importa os modulos marcados KEEP_PUBLIC; mudar o caminho exige repontar o harness no mesmo PR; FP-044/F6 (D-011): o Inspector do harness (SourceVerifier) le tools/{reference_db,rag_embed_backend,ollama_bridge,run_deterministic_gates}.py em runtime -> BLOCKED_EXTERNAL_CONSUMER ate repontar o harness; RESOLVIDO: harness-app#17 repontou o catalogo para os donos e FP-045/F2 removeu as 4",
  "count": 123,
  "entries": [
   {
@@ -747,8 +747,8 @@
     "docs": 3,
     "config": 2
    },
-   "external_consumer": true,
-   "action": "BLOCKED_EXTERNAL_CONSUMER"
+   "external_consumer": false,
+   "action": "REMOVED"
   },
   {
    "path": "tools/opening_aperture_audit.py",
@@ -939,8 +939,8 @@
     "docs": 2,
     "config": 2
    },
-   "external_consumer": true,
-   "action": "BLOCKED_EXTERNAL_CONSUMER"
+   "external_consumer": false,
+   "action": "REMOVED"
   },
   {
    "path": "tools/rag_freshness.py",
@@ -975,8 +975,8 @@
     "docs": 6,
     "config": 2
    },
-   "external_consumer": true,
-   "action": "BLOCKED_EXTERNAL_CONSUMER"
+   "external_consumer": false,
+   "action": "REMOVED"
   },
   {
    "path": "tools/reference_grammar.py",
@@ -1119,8 +1119,8 @@
     "docs": 15,
     "config": 3
    },
-   "external_consumer": true,
-   "action": "BLOCKED_EXTERNAL_CONSUMER"
+   "external_consumer": false,
+   "action": "REMOVED"
   },
   {
    "path": "tools/run_skp_visual_review.py",

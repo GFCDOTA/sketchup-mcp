@@ -22,7 +22,7 @@ import pytest
 
 from tools.validation.position_fidelity_gate import compare
 from tools.validation.railing_exact_match_gate import audit_railing_exact_match
-from tools.run_deterministic_gates import run_all
+from tools.validation.run_deterministic_gates import run_all
 
 ROOT = Path(__file__).resolve().parents[1]
 CON_PATH = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"

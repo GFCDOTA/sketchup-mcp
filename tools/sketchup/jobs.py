@@ -254,7 +254,7 @@ def build_shell(consensus_path: str | None = None, *, out_path: str | None = Non
     out_d: dict[str, Any] = {"status": "OK" if res.get("ok") else "FAILED", "mode": mode,
                              "consensus": str(con), "build": res}
     if res.get("ok") and not res.get("skipped"):
-        from tools.run_deterministic_gates import run_all
+        from tools.validation.run_deterministic_gates import run_all
 
         out_d["gates"] = run_all(consensus_path=str(con), render_path=str(out.with_name("model_top.png")))
         out_d["next"] = ("gates PASS + VISUAL_REVIEW do Felipe → promote_canonical(src_final="

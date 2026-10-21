@@ -31,7 +31,7 @@ import json
 import math
 from pathlib import Path
 
-from tools import reference_db as rdb
+from tools.knowledge import reference_db as rdb
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_GOLDEN = ROOT / "references/eval/retrieval_golden.jsonl"
