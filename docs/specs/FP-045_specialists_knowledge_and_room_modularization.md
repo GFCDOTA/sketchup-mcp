@@ -7,8 +7,8 @@
 spec:
   feature: "FP-045 — Especialistas executáveis, conhecimento verificável e fechamento da modularização"
   escopo_versao: "Concluir pendências verificáveis das FP-041 a FP-044, promover técnicas consultivas a capacidades reproduzíveis e tornar auditável a modularização por cômodo, sem alterar canônicos sem aprovação."
-  versao: "1.0.0"
-  status: "RASCUNHO"
+  versao: "1.1.0"
+  status: "RASCUNHO_VALIDADO_CONTRA_DEVELOP"
   classificacao:
     contexto_delimitado: "modelagem paramétrica e conhecimento especializado por cômodo"
     dominio: "SketchUp MCP / interior design / geometry orchestration"
@@ -16,6 +16,7 @@ spec:
   autor: "Auditoria assistida GPT-6; responsável pelas decisões de produto: Felipe"
   data_criacao: "2026-10-21"
   ultima_atualizacao: "2026-10-21"
+  validacao: "2026-10-21 contra develop@2af60b0: 7 gates L1 e specialists.plan reais executados; correcoes em 3.2 (v1.1.0)"
   integracao_alvo: "develop, via PR e CI"
   baseline_develop_sha: "2af60b0274356292f2b7f6dc7d869b9858f35e2b"
   janela_auditada: "2026-09-21 a 2026-10-21"
@@ -52,8 +53,8 @@ spec:
 | FP-043/P7 | Fluxo vertical `tools.rooms.kitchen.capabilities.cabinet_flow.run_request` | 42 checks no teste documentado; piloto cozinha, não generalização automática |
 | FP-043/P8 | `su_build_shell` → `su_furnish` → `su_inspect` reais; 402/402 caixas, erro máx. 0,05 mm; 0 móvel em parede/giro | SketchUp 26.0.429; L3 humano para reparos pendente |
 | FP-044/F0–F7 | Guard da raiz, baseline, documentação, mover ativos de sofá/schema e retirar fachadas | 123 `tools/*.py` da F0 → **14 agora**: 109 removidas, 8 públicas, 4 bloqueadas por harness e 2 por decisão; F4/F5 pendentes |
-| Estado CI | Workflow em `develop` para SHA `2af60b0` concluído `success` | https://github.com/GFCDOTA/sketchup-mcp/actions/runs/39415240475 ; CI Linux não representa L2/L3 |
-| Estado GitHub | Nenhum PR ou issue aberto na consulta de 2026-10-21 | Leitura remota pontual; reconsultar antes de implementar |
+| Estado CI | Workflow `ci` #234 em `develop` para SHA `2af60b0` concluído `success` (4 jobs: pytest 3.11, pytest 3.12, deterministic fidelity gates, mcp server smoke+stdio) | https://github.com/GFCDOTA/sketchup-mcp/actions/runs/39415240475 ; CI Linux não representa L2/L3 |
+| Estado GitHub | Nenhuma issue aberta; único PR aberto é o #339 (esta própria SPEC, draft). Seus 3 checks de teste falharam na v1.0.0 por R-11: o arquivo não estava em `docs/specs/fp042_inventory.v1.json` (`UNREGISTERED_FILES`). Corrigido na v1.1.0 | Leitura remota pontual; reconsultar antes de implementar |
 
 **Reconciliação importante:** o `FP-044_final_validation.md` foi produzido quando existiam 15 fachadas e D-012 ainda aberta. O PR #337 moveu `_grid_sheet` para `tools/rooms/shared/contact_sheet.py` e removeu `tools/sofa_class_matrix.py`. A D-012 agora está **resolvida**; o relatório histórico NÃO deve ser falsificado. Criar complemento datado/novo snapshot para os 14 atuais.
 
@@ -122,7 +123,7 @@ PDF + consensus + fixtures protegidas
 |---|---|---|
 | R-01 | Pedido toca parede, porta, janela, abertura | Retornar `BLOCKED_ARCHITECTURE_CHANGE` antes de qualquer job |
 | R-02 | `room` desconhecido, ambíguo ou contraditório | `BLOCKED_ROOM_UNRESOLVED` / `BLOCKED_ROOM_MISMATCH`, sem mutação |
-| R-03 | Receita com proveniência `PUBLIC_DESCRIPTION_ONLY` | Só consultiva; não alegar visualização, transcrição ou “aprendido integralmente” |
+| R-03 | Fonte com `evidence` ∈ {`PUBLIC_DESCRIPTION_ONLY`, `TRANSCRIPT_AND_DESCRIPTION_ONLY`} (vocabulário real, ver 2.6.1) | Só consultiva; não alegar visualização, transcrição completa ou “aprendido integralmente” |
 | R-04 | Fonte declarada indisponível/sem locator/hash quando exigível | Bloquear promoção; registrar lacuna, sem inventar timestamp |
 | R-05 | `binding` sem `capability_id` implementado | `BLOCKED_CAPABILITY_MISSING`, próximo passo e fonte |
 | R-06 | Capability `IMPLEMENTED` mas prova L2 ausente | Não declarar `L2_PASS` nem capability demonstrada no SketchUp |
@@ -227,7 +228,9 @@ PDF + consensus + fixtures protegidas
 
 **Endpoint GET/POST:** `N/A`. Não criar `/api/specialists` sem ADR e consumidor. Para futura exposição MCP de `specialists.plan`: contrato versionado e apenas consulta, isolado de um comando explícito de execução; sem habilitar mutações por route textual.
 
-**Taxonomia proposta complementar (não afirmar que já existe):** `BLOCKED_KNOWLEDGE_EVIDENCE`, `FAILED_L2`, `PENDING_VISION` e `BLOCKED_EXTERNAL_CONSUMER`. Mapear para o vocabulário existente antes de introduzir estados no schema.
+**Taxonomia — estados que JÁ existem no código** (`tools/rooms/specialists.py`, `capability_catalog.py`, `tools/sketchup/knowledge.py`, verificado em `2af60b0`): `PLAN_READY_NOT_EXECUTED`, `BLOCKED_ARCHITECTURE_CHANGE`, `BLOCKED_ROOM_UNRESOLVED`, `BLOCKED_ROOM_MISMATCH`, `BLOCKED_TECHNIQUE_UNRESOLVED`, `BLOCKED_CAPABILITY_MISSING`, `BLOCKED_CAPABILITY_NOT_IN_PROFILE`, `BLOCKED_TOOL_NOT_ALLOWED`, `BLOCKED_INPUT_INCOMPLETE`, `BLOCKED_EVIDENCE_STALE`, `CROSS_ROOM_DEPENDENCY` (ownership), `EVIDENCE_STALE` (catálogo), `PENDING_SKETCHUP` (L2) e `PENDING_HUMAN` (L3) em `knowledge.py`, `NOT_SUPPORTED` (veio).
+
+**Taxonomia PROPOSTA (não existe; mapear antes de introduzir no schema):** `BLOCKED_KNOWLEDGE_EVIDENCE`, `FAILED_L2`, `BLOCKED_EXTERNAL_CONSUMER`. **`PENDING_VISION` (R-18, tabela de promoção, CA-18) é sinônimo proposto do `PENDING_HUMAN` já existente: usar `PENDING_HUMAN` e não criar estado novo.**
 
 #### 2.4.1 Pré-requisitos de infra
 
@@ -251,29 +254,28 @@ PDF + consensus + fixtures protegidas
 
 #### 2.5.1 Evento de entrada
 
-**Contrato proposto `specialist_request.v1`**, transportado por chamada Python/CLI (não tópico Kafka):
+**Contrato proposto `specialist_request.v1`**, transportado por chamada Python/CLI (não tópico Kafka). Os campos `text`, `room`, `technique`, `tool`, `inputs`, `touches` são os que `specialists.plan` lê hoje; `request_id`, `inputs`, `materials` e `grain?` são os de `cabinet_flow.run_request`. **`project_id` e `execution_requested` NÃO são campos do pedido atual** (`base_skp`, `consensus_path`, `out_dir` e `project` são kwargs de `run_request`). Campos desconhecidos são ignorados e não ampliam direitos.
 
 ```json
 {
   "schema_version": "specialist_request.v1",
   "request_id": "fp045-kitchen-cabinet-001",
   "project_id": "planta_74",
-  "text": "Criar um gabinete de cozinha com frentes lisas, sem mover a pia",
+  "text": "gabinete de cozinha com frentes lisas",
   "room": "kitchen",
-  "technique": "cabinet-assemblies",
+  "technique": "bind.kitchen.cabinet",
   "inputs": {
-    "width": {"value": 1200, "unit": "mm", "origin": "user_request"},
-    "height": {"value": 720, "unit": "mm", "origin": "user_request"},
-    "depth": {"value": 560, "unit": "mm", "origin": "user_request"}
+    "dimensions.width":  {"value": 480, "unit": "mm", "origin": "user_request"},
+    "dimensions.depth":  {"value": 545, "unit": "mm", "origin": "user_request"},
+    "dimensions.height": {"value": 780, "unit": "mm", "origin": "user_request"},
+    "OMITIDO": "demais 15 chaves exigidas pela capability: panels.{side,top_bottom,back,front}, gaps.{front_clearance,front_reveal}, fronts.count, shelf.count, materials.{carcass,back,front}, pose.{x,y,z,rotation_deg}"
   },
   "touches": [],
-  "base_skp": "artifacts/planta_74/planta_74.skp",
-  "consensus_path": "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
   "execution_requested": false
 }
 ```
 
-**Atenção:** exemplo **proposto**, valores sintéticos de estudo, não ordem de fabricação nem payload que o `run_request` já aceita integralmente. O adapter deve normalizar para o schema real de parâmetros da capability. Nenhuma medida provém de tutorial por inferência.
+**Validado contra o código (2026-10-21):** a v1.0.0 desta SPEC usava `technique: "cabinet-assemblies"` e `inputs.width/height/depth`; `specialists.plan` devolve `BLOCKED_TECHNIQUE_UNRESOLVED` para isso (`technique` só casa com `binding.id` ou um `recipe_id` do binding — `_select_binding`). Com `technique: "bind.kitchen.cabinet"` e o conjunto completo de `inputs` do pedido real `artifacts/review/fp043/p7_kitchen_cabinet/request.json` o estado é `PLAN_READY_NOT_EXECUTED`; com o texto e sem inputs, `BLOCKED_INPUT_INCOMPLETE`. Valores são sintéticos de estudo, não ordem de fabricação. `project_id`/`execution_requested` são adições PROPOSTAS: o adapter normaliza para o schema real da capability `kitchen.cabinet.plain-fronts` (parâmetros `dimensions.*`).
 
 #### 2.5.2 Evento de saída
 
@@ -337,6 +339,17 @@ Valores `to_be_computed_at_runtime` não são digests reais. Resultado é **exem
 | `JobEvidenceV1` | job_id, idempotency_key, input/source/base SHA, output SKP SHA, own_pids, gates, state | jamais creditar janela não pertencente |
 | `RoomRegressionV1` | room_id, before/after boxes hash, wall/door/circulation findings, visual_required | zero alterações de controle sem rastreio |
 
+#### 2.6.1 Vocabulário real de proveniência e lacunas medidas (develop@2af60b0)
+
+| Catálogo | Campo de evidência (fonte) | Valores existentes | Observação |
+|---|---|---|---|
+| `video_recipes.v1.json` (3 fontes, 8 recipes) | `sources[].evidence` | `TRANSCRIPT_AND_VISUAL_WALKTHROUGH` (2), `TRANSCRIPT_AND_DESCRIPTION_ONLY` (1) | estado da recipe em `proof_state` |
+| `environment_recipes.v1.json` (10 fontes, 11 recipes) | `sources[].evidence` | `OFFICIAL_DOCUMENTATION_READ` (7), `PUBLIC_DESCRIPTION_ONLY` (3: `yt-laundry-basic`, `yt-pergola`, `yt-sliding-wardrobe`) | estado da recipe em `knowledge_state`; as 11 estão `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP` |
+
+Lacunas para a F4: (a) o campo de estado da recipe tem nomes diferentes nos dois catálogos (`proof_state` × `knowledge_state`); (b) nenhuma fonte tem `sha256`/`retrieved_at`, então R-04 hoje só consegue exigir `locator`; (c) `PUBLIC_DESCRIPTION_ONLY` existe como dado e em `tests/test_sketchup_room_knowledge.py`, mas não como estado de bloqueio no `plan`. Nada disso é falha atual: são os alvos reais da F4.
+
+**Bindings sem capability (alvos reais de F6/F7):** 7 de 15 — `bind.kitchen.{shaker,drawer,countertop,sink-cutout}`, `bind.balcony.pergola`, `bind.closet.sliding`, `bind.home_office.desk`. `plan` já devolve `BLOCKED_CAPABILITY_MISSING` com o `gap` textual (verificado para gaveta e Shaker).
+
 **Compatibilidade:** novos schemas devem usar `core/schemas/` e manter readers atuais; migration tests antes de mudar `.v1` existente. Campos ausentes não podem dar `PASS` por default.
 
 ### 2.7 Requisitos Não Funcionais
@@ -388,7 +401,7 @@ Valores `to_be_computed_at_runtime` não são digests reais. Resultado é **exem
 
 | CA | Given | When | Then |
 |---|---|---|---|
-| CA-01 | `develop` no SHA de baseline | gerar snapshot F0 | 2.128 blobs auditados no snapshot histórico e contagem atual recalculada; nenhum path sem owner |
+| CA-01 | `develop` no SHA de baseline | gerar snapshot F0 | 2.128 blobs rastreados em `2af60b0` = 2.124 registrados em `fp042_inventory.v1.json` + 4 `CONTROL_PATHS` do gate; contagem recalculada no HEAD corrente; `inventory_gate --strict` PASS; nenhum path sem owner |
 | CA-02 | 9 perfis e 19 recipes | rodar gate de referências | IDs, fontes e ligações consistentes; nenhuma origem inventada |
 | CA-03 | 16 capacidades atuais | computar matriz | 3 L2, 12 L1, 1 UNTESTED, 16 NOT_REVIEWED neste baseline; sem promoção automática |
 | CA-04 | pedido a cômodo errado | route | retorna erro tipado sem SKP |
@@ -432,7 +445,7 @@ Valores `to_be_computed_at_runtime` não são digests reais. Resultado é **exem
 
 ### 2.10 ADRs Vinculados
 
-- `docs/adr/0001-*` — contrato semântico de geometria e políticas de modelagem; ler nome exato na árvore antes do PR.
+- `docs/adr/0001-semantic-geometry-contract.md` — contrato semântico de geometria e políticas de modelagem.
 - `docs/specs/FP-041_video_knowledge_consultation.md` — separação consulta/execução.
 - `docs/specs/FP-041_room_knowledge_expansion.md` — nove categorias e proveniência.
 - `docs/specs/FP-042_exhaustive_modularization.md` + `FP-042_final_validation.md` — ownership/provas.
@@ -485,6 +498,7 @@ Valores `to_be_computed_at_runtime` não são digests reais. Resultado é **exem
 | Versão | Data | Autor | Descrição |
 |---|---|---|---|
 | 1.0.0 | 2026-10-21 | GPT-6 (auditoria) | Handoff consolidado FP-041–044; baseline real `develop@2af60b0`; faseamento F0–F10; R-01..R-28 e CA-01..CA-24 |
+| 1.1.0 | 2026-10-21 | Claude (validação contra o código) | Executados `inventory_gate --strict`, `ownership_audit`, `capability_catalog`, `p0_map --check`, `docs_check`, `asset_provenance`, `reference_provenance` e `specialists.plan` reais. Correções: (1) a própria SPEC violava R-11 (fora do inventário FP-042 → 3 checks do #339 vermelhos) — registrada; (2) payload de exemplo 2.5.1 retornava `BLOCKED_TECHNIQUE_UNRESOLVED` — corrigido; (3) estados existentes separados dos propostos, `PENDING_VISION` → `PENDING_HUMAN`; (4) vocabulário real de evidência e 7 bindings sem capability (2.6.1); (5) CA-01 com a conta 2.124 + 4; (6) estado GitHub (#339) e CI (#234); (7) nome exato do ADR 0001. Prova: os 13 comandos de reprodução de 3.3 saem com exit 0 em `develop@2af60b0` (pytest 2.288 passed + 111 `planta74_scale`; L2/L3 não executados) |
 
 ### 3.3 Handoff para agentes implementadores
 
