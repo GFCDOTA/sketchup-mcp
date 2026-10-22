@@ -54,10 +54,10 @@ reutilizáveis; **sketchup** executa e inspeciona, sem decidir decoração; **mc
 | `assets/` | existe | recursos de entrada reutilizáveis (`assets/textures`, inclusive `sofa_fabric/`) |
 | `runs/` | local (ignorado pelo git) | scratch criado em tempo de execução; não faz parte da árvore versionada |
 | `tests/` | existe | regressões em Python puro (marker `planta74_scale` separa a escala) |
-| `scripts/` | existe | só `set_clipboard_image.ps1` (D-005); as fachadas do sofá saíram na FP-044/F2 |
+| `scripts/` | removido | saiu em 2026-10-22 (D-005): `set_clipboard_image.ps1` foi para `tools/oracle/`; as fachadas do sofá já tinham saído na FP-044/F2 |
 | `ops/` | existe | painel do estúdio (`ops/estudio-front/`); destino na FP-044/F4 (D-009) |
 | `core/schemas/` | existe | JSON Schemas de contratos (ex-`schemas/` da raiz, FP-044/F3); o caminho vive só em `core.schemas` (`SCHEMA_DIR`, `schema_path`, `load`) |
-| `.impeccable/` | existe | hook de design desligado; remoção pendente da D-008 (FP-044/F5) |
+| `.impeccable/` | existe | config que MANTÉM DESLIGADO o hook de design do plugin impeccable neste projeto; tirar religaria o hook (D-008) |
 | `docs/architecture/` | existe | esta pasta: mapa, guia de migração, rotas de navegação |
 | `docs/specs/` | existe | especificações e manifestos (FP-042, FP-043) |
 | `docs/handoffs/` | existe | passagens de bastão datadas (inclui o ex-`HANDOFF.md` e o ex-`KICKOFF.md` da raiz) |

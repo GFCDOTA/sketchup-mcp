@@ -128,12 +128,64 @@ def splice(readme: str, block: str) -> str:
     return readme.replace(anchor, "## Módulos de cômodo\n\n" + block + "\n\n---\n\n" + anchor, 1)
 
 
+LAYOUT_BEGIN, LAYOUT_END = "<!-- root-layout:begin -->", "<!-- root-layout:end -->"
+# papel de cada entrada versionada da raiz; entrada nova sem linha aqui faz o teste falhar (complementa o guard da FP-044)
+ROOT_ROLES = {
+    "tools": "código: um módulo por cômodo em `tools/rooms/`, executor SketchUp, gates, navegação, MCP",
+    "core": "domínio sem framework: escala, semântica espacial, schemas (`core/schemas/`), observabilidade",
+    "interior": "pacote do estúdio de interiores (planners, renderers, validators, class specs) — importado por várias ferramentas",
+    "tests": "suíte de regressão (marker `planta74_scale` separa a escala)",
+    "docs": "specs SDD (`docs/specs/`), mapa e guias (`docs/architecture/`), relatórios e handoffs datados, arquivo morto",
+    "artifacts": "entregáveis canônicos (`artifacts/<planta>/`) e evidência (`artifacts/review/`) — protegidos por hash",
+    "fixtures": "entradas canônicas e sintéticas dos testes — protegidas",
+    "references": "fontes e recipes de conhecimento (aulas SketchUp, referências de design)",
+    "assets": "texturas e recursos reutilizáveis",
+    "projects": "fonte de cada projeto (`projects/planta_74/source/planta_74.pdf`)",
+    "ops": "painel do estúdio (`ops/estudio-front/`, :8788) — o Harness App aponta para ele; mover exige repontar (D-009)",
+    ".claude": "instruções do agente: CLAUDE.md, rules por caminho, skills, agentes, memória",
+    ".ai_bridge": "fio entre sessões (`HANDOFF.md`) e logs históricos de revisão/fidelidade",
+    ".github": "CI (4 checks obrigatórios)",
+    ".impeccable": "config que mantém DESLIGADO o hook de design do plugin impeccable neste projeto (D-008)",
+    "README.md": "este arquivo", "CLAUDE.md": "ponteiro para `.claude/CLAUDE.md`",
+    "pyproject.toml": "pacote, dependências (`[dev]` inclui ruff/pytest) e config de lint/teste", "uv.lock": "lock das dependências",
+    "docker-compose.rag.yml": "Qdrant opcional do RAG (degrada para busca facetada se estiver desligado)",
+    ".gitignore": "o que não versiona (`runs/`, scratch, caches)", ".gitattributes": "normalização de fim de linha",
+    ".dockerignore": "contexto do build do compose do RAG",
+}
+
+
+def render_layout(root: Path = ROOT) -> str:
+    files = subprocess.check_output(["git", "-C", str(root), "ls-files"], text=True).splitlines()
+    counts = defaultdict(int)
+    for f in files:
+        counts[f.split("/")[0]] += 1
+    lines = [LAYOUT_BEGIN, "", "> Gerado por `python -m tools.navigation.rooms_index --write`; toda entrada versionada da raiz precisa de papel aqui.",
+             "", "| Entrada | Arquivos | Papel |", "|---|---|---|"]
+    for entry in sorted(counts, key=lambda e: (not (root / e).is_dir(), e.lower())):
+        role = ROOT_ROLES.get(entry, "**SEM PAPEL DEFINIDO** — decidir antes de manter na raiz")
+        label = f"`{entry}/`" if (root / entry).is_dir() else f"`{entry}`"
+        lines.append(f"| {label} | {counts[entry]} | {role} |")
+    lines += ["", "`runs/` existe só localmente (scratch ignorado pelo git).", "", LAYOUT_END]
+    return "\n".join(lines)
+
+
+def splice_layout(readme: str, block: str) -> str:
+    if LAYOUT_BEGIN in readme and LAYOUT_END in readme:
+        head, _, rest = readme.partition(LAYOUT_BEGIN)
+        _, _, tail = rest.partition(LAYOUT_END)
+        return head + block + tail
+    anchor = "## Módulos de cômodo"
+    if anchor not in readme:
+        raise ValueError("README sem a secao '## Módulos de cômodo' para ancorar o mapa da raiz")
+    return readme.replace(anchor, "## O que mora na raiz\n\n" + block + "\n\n---\n\n" + anchor, 1)
+
+
 def targets(root: Path = ROOT) -> dict[Path, str]:
     data = collect(root)
     readme = root / "README.md"
     raw = readme.read_bytes().decode("utf-8")
     nl = "\r\n" if "\r\n" in raw else "\n"
-    new_readme = splice(raw.replace("\r\n", "\n"), render_root(data)).replace("\n", nl)
+    new_readme = splice_layout(splice(raw.replace("\r\n", "\n"), render_root(data)), render_layout(root)).replace("\n", nl)
     detail = root / "tools/rooms/README.md"
     return {readme: new_readme, detail: render_detail(data)}
 

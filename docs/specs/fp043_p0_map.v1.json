@@ -26,7 +26,6 @@
     "CLAUDE.md",
     "README.md",
     "docker-compose.rag.yml",
-    "docker-compose.yml",
     "pyproject.toml",
     "uv.lock"
   ],
@@ -124,25 +123,24 @@
     }
   ],
   "summary": {
-    "items": 189,
+    "items": 190,
     "by_disposition": {
-      "retain": 26,
-      "facade": 19,
-      "move": 140,
-      "decision": 4
+      "retain": 30,
+      "move": 158,
+      "decision": 2
     },
     "by_risk": {
-      "high": 64,
-      "medium": 68,
-      "low": 57
+      "low": 55,
+      "medium": 72,
+      "high": 63
     },
     "by_phase": {
       "P1": 2,
       "P2": 14,
+      "P3": 1,
       "P4": 170,
       "P5": 1,
-      "P8": 1,
-      "P3": 1
+      "P8": 2
     }
   },
   "items": [
@@ -389,10 +387,10 @@
     {
       "item": "docker-compose.yml",
       "kind": "file",
-      "disposition": "retain",
-      "destination": null,
+      "disposition": "move",
+      "destination": "docs/archive/2026-10-22/root/docker-compose.dashboard.yml",
       "phase": "P2",
-      "rationale": "Spec §4.1: manter na raiz inicialmente. Achado P0: docker-compose.yml sobe o dashboard do estúdio (tools/studio_dashboard.py) que NÃO existe mais; a stack RAG segue válida.",
+      "rationale": "Spec §4.1: manter na raiz inicialmente. Achado P0: docker-compose.yml sobe o dashboard do estúdio (tools/studio_dashboard.py) que NÃO existe mais; a stack RAG segue válida. EXECUTADO em 2026-10-22 com a autorizacao do Felipe (\"todas as permissoes\"): arquivado (D-002); subia tools/studio_dashboard.py, que nao existe.",
       "stale_note": "docker-compose.yml referencia tools/Dockerfile.dashboard → tools/studio_dashboard.py inexistente",
       "risk": "low",
       "risk_reasons": [],
@@ -407,7 +405,9 @@
           "tests/test_fp042_knowledge_ownership.py",
           "tests/test_fp043_p0_map.py"
         ]
-      }
+      },
+      "status": "done",
+      "compat": "none_needed"
     },
     {
       "item": "interior/__init__.py",
@@ -779,12 +779,11 @@
     {
       "item": "scripts/set_clipboard_image.ps1",
       "kind": "file",
-      "disposition": "decision",
+      "disposition": "move",
       "destination": "tools/oracle/set_clipboard_image.ps1",
       "phase": "P4",
-      "rationale": "Colava imagem no ChatGPT; a memória do projeto registra que Ctrl+V/upload não funcionam (GPT vê via URL raw). DECISÃO: obsoleto? Arquivar em vez de mover.",
-      "open_question": "set_clipboard_image.ps1 ainda útil?",
-      "compat": "path_resolver_unico",
+      "rationale": "Colava imagem no ChatGPT; a memória do projeto registra que Ctrl+V/upload não funcionam (GPT vê via URL raw). DECISÃO: obsoleto? Arquivar em vez de mover. EXECUTADO em 2026-10-22 com a autorizacao do Felipe (\"todas as permissoes\"): movido para junto do fluxo legado de revisao GPT (D-005); nenhum codigo o chama por caminho, so docs.",
+      "compat": "none_needed",
       "dynamic_path_risk": true,
       "precondition": "resolvedor único do caminho do script antes de mover; revisar depth/require_relative",
       "risk": "high",
@@ -797,7 +796,9 @@
           "code": 1,
           "docs": 3
         }
-      }
+      },
+      "status": "done",
+      "resolved_question": "set_clipboard_image.ps1 ainda útil?"
     },
     {
       "item": "scripts/sofa_components.rb",
@@ -902,11 +903,10 @@
     {
       "item": "tools/Dockerfile.dashboard",
       "kind": "file",
-      "disposition": "decision",
-      "destination": null,
+      "disposition": "move",
+      "destination": "docs/archive/2026-10-22/root/Dockerfile.dashboard",
       "phase": "P8",
-      "rationale": "Imagem do dashboard do estúdio que roda tools/studio_dashboard.py — arquivo que já não existe (dashboard removido). DECISÃO do Felipe: arquivar junto com o docker-compose.yml do dashboard (Hard Rule #4: classificar antes de mover).",
-      "open_question": "arquivar o dashboard do estúdio (Dockerfile + compose)?",
+      "rationale": "Imagem do dashboard do estúdio que roda tools/studio_dashboard.py — arquivo que já não existe (dashboard removido). DECISÃO do Felipe: arquivar junto com o docker-compose.yml do dashboard (Hard Rule #4: classificar antes de mover). EXECUTADO em 2026-10-22 com a autorizacao do Felipe (\"todas as permissoes\"): arquivado junto com o compose (D-002).",
       "stale_note": "aponta para tools/studio_dashboard.py inexistente",
       "risk": "high",
       "risk_reasons": [
@@ -923,7 +923,10 @@
         "config": [
           "docker-compose.yml"
         ]
-      }
+      },
+      "status": "done",
+      "compat": "none_needed",
+      "resolved_question": "arquivar o dashboard do estúdio (Dockerfile + compose)?"
     },
     {
       "item": "tools/README_project_memory.md",

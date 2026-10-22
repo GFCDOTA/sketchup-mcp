@@ -128,7 +128,7 @@ L2: `material_review.rb` no caminho novo gera os 4 proofs **byte-idênticos** (S
 | `tools/prompts/` | `tools/oracle/prompts/` | caminho único (referências reescritas); `tools/prompts/README.md` é ponteiro |
 | `tools/quadrado/` | `tools/rendering/quadrado/` | `render_view.py` com fachada; `render_view.rb` com stub no caminho antigo |
 
-**Congelados por decisão (D-002…D-005):** `tools/furnish_plan.py` (+`.rb` já movido), `tools/trace_view.py` e `scripts/set_clipboard_image.ps1`
+**Congelados por decisão (D-003, D-004; D-002 e D-005 resolvidas em 2026-10-22):** `tools/furnish_plan.py` (+`.rb` já movido), `tools/trace_view.py` e `scripts/set_clipboard_image.ps1`
 seguem onde estão até a decisão do Felipe — ver [decisões abertas](../specs/FP-043_open_decisions.md).
 
 ## Para quem vai mover um arquivo (checklist do PR)
