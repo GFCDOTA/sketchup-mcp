@@ -1,6 +1,11 @@
 # Handoff — sketchup-mcp
 
-> Fio da meada entre sessões. Última atualização: **2026-06-12** — **🏆×5: SOFÁ·POLTRONA·CAMA·MESA·RACK — TODAS PASS ("a classe se explica visualmente"; TV-proxy = "padrão forte do programa, melhoria institucional"). Fila: mesa de jantar → cadeira → guarda-roupa → criado-mudo. Sentinelas: chaise-plinth/lounge-highback/queen-box-legs/organic@formal-2l/floating@tv75.**
+> **2026-10-22 — LEIA PRIMEIRO:** o estado geral atual está em
+> [`docs/handoffs/2026-10-22_general_app_handoff.md`](../docs/handoffs/2026-10-22_general_app_handoff.md) e a fila de
+> trabalho do core de construção em [`docs/specs/construction_core_microphases.md`](../docs/specs/construction_core_microphases.md).
+> Tudo abaixo desta linha é histórico (jun–ago/2026): os oráculos `:8765` e GPT-via-Chrome citados ali foram removidos/dispensados.
+
+> Fio da meada entre sessões. Última atualização (histórica): **2026-06-12** — **🏆×5: SOFÁ·POLTRONA·CAMA·MESA·RACK — TODAS PASS ("a classe se explica visualmente"; TV-proxy = "padrão forte do programa, melhoria institucional"). Fila: mesa de jantar → cadeira → guarda-roupa → criado-mudo. Sentinelas: chaise-plinth/lounge-highback/queen-box-legs/organic@formal-2l/floating@tv75.**
 > Leia primeiro ao iniciar sessão.
 
 ## 2026-06-12 — Programa ARQUITETO DE CLASSE — sofá cycles 001-002 LANDADOS (WARN→WARN "melhora real")

@@ -85,6 +85,7 @@ Registrar no mesmo PR em `docs/specs/fp042_inventory.v1.json`; evidência em `ar
 | Quando | Arquivo |
 |---|---|
 | retomar trabalho / saber o que está aberto | `.ai_bridge/HANDOFF.md`, `.claude/plans/next_actions.md` |
+| melhorar o detalhe de um componente (fila T0/K/B/L/W/S) | `docs/specs/construction_core_microphases.md` |
 | autonomia GREEN/YELLOW/RED, quando parar | `.claude/memory/operational_rules.md` |
 | promover `.skp`, `runs/` × `artifacts/` | `.claude/memory/artifact_policy.md`, `.claude/specs/skp_artifact_layout.md` |
 | PR que muda geração do `.skp` | `.claude/specs/skp_proof_of_progress_gate.md`, `.claude/specs/fidelity_gate.md` |

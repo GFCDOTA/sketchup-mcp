@@ -1,54 +1,18 @@
 # Next actions — sketchup-mcp
 
-Fila curta. Máximo 5 itens. Adicionar novo só se houver espaço E
-valor claro pro produto.
+Fila curta (máx. 5). A fila completa e o estado de cada microfase moram em
+`docs/specs/construction_core_microphases.md` §4 — esta lista é só o topo dela.
 
-> **Snapshot:** 2026-10-18. Decai rápido.
+> **Snapshot:** 2026-10-22.
 
-## Fila atual
-
-### 1. Provar as tools `su_*` num SketchUp real (#249)
-
-- **Objetivo:** rodar o checklist do corpo do PR #249 no Windows com SketchUp
-  2026 (status, inspect × Outliner, render, apply_edits + VISUAL_REVIEW,
-  recusas de arquitetura, move em eixo de mundo dentro do sofá girado).
-- **Por quê:** hoje toda a prova é lógica pura + dublês
-  (`proof_state = UNVERIFIED_ON_SKETCHUP`); nenhum cliente deve tratar as
-  `su_*` como capacidade comprovada antes disso.
-- **Critério de parada:** evidência em `artifacts/review/` e `PROOF_STATE`
-  atualizado no código.
-
-### 2. Gate B do FP-041 (aguarda autorização)
-
-- **Objetivo:** Fase 1 do SketchUp Tooling Specialist (plano rev. 3:
-  competência operacional + ledger/validador de 3 camadas).
-- **NÃO INICIAR** sem ok explícito do Felipe.
-
-### 3. AI Pipeline Inspector — SSE + `Last-Event-ID`
-
-- **Objetivo:** próxima fatia do `GFCDOTA/harness-app` (hoje só replay JSONL;
-  `SseTraceSource` falha alto de propósito). Requer emissor SSE no lado Python.
-- **Por quê:** tempo real é a próxima fase declarada da ADR-001.
-
-### 4. (follow-up) `tools/check_skp_proof_of_progress.py` CI gate
-
-- **Objetivo:** implementar o gate executável de
-  `specs/skp_proof_of_progress_gate.md`.
-- **NÃO INICIAR** sem ok explícito do Felipe.
-
-### 5. (produto, HIGH) DIFF-001 — extrator PDF → consensus
-
-- **Objetivo:** hoje o `consensus.json` é autoria humana; sem extrator o
-  pipeline não generaliza para planta nova. Roadmap M4.
-
-## Backlog observado
-
-- Branches remotas `backup/stash-0..4` sem PR — arquivar/deletar com ok do Felipe.
-- SU 2026 pode deixar processos pendurados após runs interactive — kill antes de reuso.
+1. **T0.1 — R-18 transitivo.** `closure_digests` na evidência L2 (fecho `tools.rooms`/`core` calculado no commit da prova);
+   gate do catálogo acusa fecho velho. Sem isso, detalhe novo num helper (`build_parts`) mantém `L2_PASS` falso.
+2. **T0.2 — scratch do `cabinet.sketchup.inspect` em `runs/`** (teste vermelho com caminho protegido + L2 de regressão).
+3. **T0.3 — FP-051 P1** `plan_furniture_goal()` puro, com `BLOCKED_TARGET_UNDEFINED` (FP-052) como dependência de produto.
+4. **T0.5 — placement FP-050 como gate obrigatório** nos dois fluxos da cozinha, refazendo o L2 de ambos.
+5. **Com o Felipe:** veredito L3 da Shaker (#356) e revisão do trecho do tampo (07:09–08:53) → abre K1.
 
 ## Regra de fila
 
-Concluir a fila → escolher próximo item **só se houver valor claro pro
-produto** (gerar/revisar `.skp` fiel). Não inventar trabalho cosmético.
-Ver `specs/product_goal.md` § "Critérios de avanço real" e
-`memory/operational_rules.md` § "Continuar automaticamente vs parar".
+Concluir um item → o próximo só se tiver valor claro de produto (componente mais fiel/mais detalhado, prova honesta,
+gate falhando, PR aberta). Não inventar trabalho cosmético. Ver `memory/operational_rules.md`.
