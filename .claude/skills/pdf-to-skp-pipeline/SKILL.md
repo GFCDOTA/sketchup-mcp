@@ -1,6 +1,10 @@
 ---
 name: pdf-to-skp-pipeline
-description: Use when a task touches the PDF → consensus.json → .skp pipeline of sketchup-mcp. Triggers on `consensus.json`, `build_plan_shell_skp.{py,rb}`, wall/opening/room extraction, fixtures/quadrado or fixtures/planta_74, `_shell_polygon.json`, kind_v5 routing, peitoril/verga handling, or any phrase like "gerar SKP", "rodar pipeline", "build do plant", "consensus do <plant>".
+description: >-
+  Guia o pipeline PDF → consensus.json → .skp do sketchup-mcp (tools/sketchup/shell/build_plan_shell_skp.{py,rb}):
+  paredes, aberturas, cômodos, roteamento kind_v5, peitoril/verga e fixtures quadrado/planta_74. Use quando a tarefa
+  tocar consensus.json, build_plan_shell_skp, extração de parede/abertura/cômodo, _shell_polygon.json ou pedidos como
+  "gerar SKP", "rodar pipeline", "build do plant", "consensus do {plant}".
 ---
 
 # pdf-to-skp-pipeline

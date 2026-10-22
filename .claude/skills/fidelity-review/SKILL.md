@@ -1,6 +1,10 @@
 ---
 name: fidelity-review
-description: Use when reviewing whether a generated .skp is faithful to its source PDF. Triggers on phrases like "review SKP", "side-by-side PDF vs SKP", "fidelity check", "room_fidelity", "wall_fidelity", "validar contra planta", "compare with floorplan", "geometry_report", "is the SKP correct". Also fires on visual audits of artifacts/<plant>/.
+description: >-
+  Revisa se um .skp gerado é fiel ao PDF de origem — contagens de paredes, aberturas e cômodos, geometry_report,
+  fidelity_report, side-by-side PDF × SKP e auditoria de artifacts/{plant}/ — e prepara a evidência para o veredito
+  do Felipe. Use em "review SKP", "side-by-side PDF vs SKP", "fidelity check", "room_fidelity", "wall_fidelity",
+  "validar contra planta", "compare with floorplan", "geometry_report" ou "o SKP está certo?".
 ---
 
 # fidelity-review
@@ -70,7 +74,7 @@ Pedir PDF / contexto adicional ao humano quando:
 - Window que parece deveria ser porta-vidro (e vice-versa)
 - Discrepância dimensional > 5% entre PDF measure e consensus
 
-## Quando consultar ChatGPT bridge / LLM local
+## Quando consultar LLM local
 
 Em julgamento visual subjetivo (ex.: "parede está no lugar
 certo?" comparando renders), seguir `memory/operational_rules.md`
@@ -78,7 +82,7 @@ certo?" comparando renders), seguir `memory/operational_rules.md`
 
 1. LLM local (`deepseek-r1:14b` decisão, `qwen2.5-coder:14b`
    código) primeiro
-2. ChatGPT bridge `localhost:8765 POST /ask` como fallback
+2. GPT-Docker `:8899` só se o Felipe pedir (dormente; o `:8765` foi removido)
 3. Dar contexto: PDF excerpt + render + coords + decisão
    específica
 

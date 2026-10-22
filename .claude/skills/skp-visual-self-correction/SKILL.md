@@ -1,6 +1,12 @@
 ---
 name: skp-visual-self-correction
-description: Use when a task generates an .skp and a visual review must happen before declaring progress. Triggers on `model.skp`, `model_top.png`, `model_iso.png`, "visual review", "visual findings", "FP-030", "Visual Oracle", `geometry_report.json`, `artifacts/review/.../final/`, or any PR that touches SKP generation and needs evidence that the build does not have floating doors, orphan glass, misplaced soft barriers, wall stubs, missing walls, or floor leaks. Implements Constitution #8 + FP-030. Skill rule: the user is NOT the visual regression detector.
+description: >-
+  Roda o Visual Oracle Gate (FP-030) num .skp recém-gerado antes de declarar progresso: detecta porta flutuante,
+  vidro órfão, contagem de janela divergente, abertura ruim, barreira macia fora do lugar, toco ou falta de parede e
+  vazamento de piso, com até 3 tentativas de correção determinística (Constitution #8). Use quando a tarefa gerar um
+  .skp e precisar de evidência visual — model.skp, model_top.png, model_iso.png, "visual review", "visual findings",
+  "FP-030", "Visual Oracle", geometry_report.json, artifacts/review/.../final/. O Felipe não é o detector de
+  regressão; o veredito estético continua dele.
 ---
 
 # skp-visual-self-correction
@@ -97,8 +103,7 @@ git commit -m "evidence(<plant>): FP-030 visual review final = <verdict>"
 **Não peça ao usuário pra inspecionar screenshots antes do agente
 ter gerado e inspecionado seus próprios artefatos.**
 
-A regra existe porque ChatGPT bridge / vision API podem estar
-offline / sem key. Em fallback, o agente CLAUDE INLINE (este aqui)
+A regra existe porque não há oráculo visual externo ativo (o bridge `:8765` foi removido em 2026-07-24). Em fallback, o agente CLAUDE INLINE (este aqui)
 inspeciona via `Read` PNG. Inspeção do user é último recurso.
 
 ## Escalate apenas em RED
@@ -129,12 +134,15 @@ Next command: <comando exato pro humano>
 - [`skp-artifact-management`](../skp-artifact-management/SKILL.md) — promotion + sidecar
 - [`fidelity-review`](../fidelity-review/SKILL.md) — checklist humano original
 
-## Oracle bridge mode (maturity 2+)
+## Oracle bridge mode (maturity 2+) — sem bridge ativo hoje
+
+> O código ainda sonda `localhost:8765`; como o bridge foi removido, o caminho normal é `oracle_status="unavailable"`
+> e eixos qualitativos em WARN. Não usar `--require-oracle` (bloquearia sempre).
 
 `--oracle chatgpt_bridge` activates the visual oracle bridge path.
 The script:
 
-1. Probes `localhost:8765/health` with 5s timeout
+1. Probes `localhost:8765/health` with 5s timeout (bridge removido em 2026-07-24 → hoje sempre cai no passo 4)
 2. If reachable: POSTs 3 PNGs (b64) + minimal report context to `/ask`
 3. Saves raw response to `final/visual_oracle_raw_response.json`
 4. If unreachable: marks `oracle_status="unavailable"` and continues with deterministic-only (qualitative axes stay WARN)

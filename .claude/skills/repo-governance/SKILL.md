@@ -1,6 +1,9 @@
 ---
 name: repo-governance
-description: Use for any task touching PR creation, branch management, repo hygiene, merge strategy, or commit discipline. Triggers on `gh pr`, "abrir PR", "merge develop", "cleanup branch", "branch cleanup", "PR contra develop", ".gitignore", "develop-first", or any decision about how changes land in the repo.
+description: >-
+  Define como mudanças landam no repo: branch develop-first, disciplina de commit, PR contra develop, merge com os 4
+  checks verdes no head exato, higiene de branch e .gitignore. Use em gh pr, "abrir PR", "merge develop", "cleanup
+  branch", "PR contra develop", ".gitignore", "develop-first" ou qualquer decisão de como uma mudança entra no repo.
 ---
 
 # repo-governance

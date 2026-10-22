@@ -1,6 +1,10 @@
 ---
 name: gh-autopilot
-description: Use pra automatizar commit->PR->merge->cleanup de branch via gh CLI, e pra configurar/consertar a auth do gh. Dispara em "abrir PR", "mergear PR", "auto-merge", "gh auth", "token github", "limpar/organizar branches", "nunca deixar PR aberto", ou quando o loop/worker precisa landar trabalho sozinho. Captura os gotchas reais (token 366-day da org GFCDOTA, permissao Pull requests, GH_TOKEN). NAO usar pra git local puro sem gh.
+description: >-
+  Automatiza commit → PR → checks → merge → limpeza de branch com o gh CLI desta máquina e conserta a auth do gh
+  (caminho absoluto, GH_TOKEN, keyring, permissão Pull requests). Use em "abrir PR", "mergear PR", "auto-merge", "gh
+  auth", "token github", "limpar/organizar branches", "nunca deixar PR aberto" ou quando um fluxo precisa landar
+  trabalho sozinho. Não usar para git local sem gh.
 ---
 
 # gh-autopilot — commit->PR->merge->cleanup sem humano

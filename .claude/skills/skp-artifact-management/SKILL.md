@@ -1,6 +1,10 @@
 ---
 name: skp-artifact-management
-description: Use whenever a task creates, promotes, validates, or versions a .skp file. Triggers on `artifacts/<plant>/`, `runs/<plant>/`, "promote SKP", "commit SKP", `<plant>.skp.metadata.json`, "build provenance", or any decision about where a generated SKP lands. The .skp is the human-facing deliverable — protect that.
+description: >-
+  Decide onde um .skp gerado mora e como é promovido — runs/ (scratch) × artifacts/{plant}/ (canônico) ×
+  artifacts/review/ (evidência) — com metadata, proveniência de build e registro no inventário FP-042. Use sempre que
+  uma tarefa criar, promover, validar ou versionar um .skp: artifacts/{plant}/, runs/{plant}/, "promote SKP", "commit
+  SKP", {plant}.skp.metadata.json, "build provenance".
 ---
 
 # skp-artifact-management

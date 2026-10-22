@@ -1,6 +1,12 @@
 ---
 name: generate-and-compare-skp-after-change
-description: Use AFTER any change that affects (or claims to affect) .skp generation, walls, openings, rooms, fidelity reports, geometry reports, renderer, artifact policy, consensus schema, or visual validation. Triggers on phrases like "melhora fidelity", "corrige wall", "corrige janela", "corrige room", "corrige artifact", "melhora SKP", "fix routing", or any PR body claiming improvement to the architectural model. Generates new .skp + renders, compares against baseline, promotes evidence to artifacts/review/. Enforces "No SKP, no progress" rule. Do NOT trigger for pure docs/CI/.claude/ changes.
+description: >-
+  Gera o novo .skp + renders depois de uma mudança na geração, compara com a baseline e promove a evidência para
+  artifacts/review/, aplicando "No SKP, no progress" (Constitution #8). Use depois de qualquer mudança que afete (ou
+  diga afetar) geração de .skp, paredes, aberturas, cômodos, fidelity/geometry report, renderer, política de
+  artefato, schema do consensus ou validação visual — "melhora fidelity", "corrige wall/janela/room", "melhora SKP",
+  "fix routing" — ou PR que alegue melhoria do modelo arquitetônico. Não usar para mudança só de docs, CI ou
+  .claude/.
 ---
 
 # generate-and-compare-skp-after-change

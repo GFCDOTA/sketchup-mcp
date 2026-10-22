@@ -1,15 +1,11 @@
 ---
 name: furniture-reference-analyzer
 description: >-
-  Use ANTES de construir um builder paramétrico de móvel, quando há um .skp de
-  REFERÊNCIA (asset baixado, ex. IKEA) pra estudar. Inspeciona o .skp e gera um
-  relatório estruturado (unidade, bounding box, materiais, componentes/grupos,
-  renders top/front/iso, hipótese semântica: sofá reto / sofá com chaise / cama /
-  armário...). Dispara em "analisar referência", "inspecionar .skp", "estudar o
-  asset", "Group_60.skp", "que móvel é esse", ou ao receber um .skp de móvel pra
-  virar spec/builder. NÃO copia o asset — extrai o aprendizado (dims, anatomia,
-  material) pra virar spec + builder + gate. NÃO usar pra gerar móvel (isso é o
-  builder) nem pra planta de parede.
+  Inspeciona um .skp de REFERÊNCIA de móvel (asset baixado, ex. IKEA) e gera relatório estruturado — unidade,
+  bounding box, materiais, componentes/grupos, renders top/front/iso e hipótese semântica (sofá reto, com chaise,
+  cama, armário) — para virar spec + builder + gate, sem copiar o asset. Use antes de construir um builder
+  paramétrico de móvel, ao receber um .skp de móvel, ou em "analisar referência", "inspecionar .skp", "estudar o
+  asset", "que móvel é esse". Não usar para gerar o móvel (é o builder) nem para parede de planta.
 ---
 
 # Furniture Reference Analyzer

@@ -1,6 +1,10 @@
 ---
 name: multi-agent-handoff
-description: Use when work is shared across multiple agents (Claude / Codex / ChatGPT bridge / human) or sessions on the sketchup-mcp repo. Triggers on `git worktree`, ".ai_bridge", "HANDOFF", "handoff", "outro agente", "out-of-band commit", "branch que apareceu", or anything involving coordinating parallel work without overwriting another's.
+description: >-
+  Coordena trabalho compartilhado entre agentes (Claude, Codex, ChatGPT, humano) e sessões no repo sketchup-mcp —
+  worktrees, commits out-of-band, branches que aparecem, .ai_bridge e HANDOFF — sem sobrescrever o trabalho do outro.
+  Use em git worktree, ".ai_bridge", "HANDOFF", "handoff", "outro agente", "out-of-band commit", "branch que
+  apareceu" ou qualquer paralelismo no mesmo repo.
 ---
 
 # multi-agent-handoff

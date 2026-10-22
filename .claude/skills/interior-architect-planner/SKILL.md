@@ -1,13 +1,12 @@
 ---
 name: interior-architect-planner
 description: >-
-  Planejar mobiliário/interiores como ARQUITETO + MARCENEIRO (não "colocar objetos no espaço"):
-  função do ambiente, móvel-herói, paredes boas/ruins, circulação, proporção, marcenaria útil,
-  hierarquia visual, e só então câmera/render. Use SEMPRE que for mobiliar/renderizar um cômodo
-  da planta (quarto/sala/cozinha/banho/área), gerar .skp de móvel, decidir layout, ou revisar
-  render/câmera. Antes de qualquer .skp: produzir DesignIntentSpec → geometry_sanity (determinístico)
-  → auto-camera → veredito visual GPT. Frase-guia: "planejar como arquiteto/marceneiro, validar como
-  engenheiro, só depois renderizar como artista."
+  Planeja o mobiliário de um cômodo como arquiteto + marceneiro antes de qualquer .skp — função do ambiente,
+  móvel-herói, paredes boas/ruins, circulação, proporção, marcenaria útil e hierarquia visual — produzindo
+  DesignIntentSpec → geometry_sanity determinístico → câmera → veredito visual do Felipe. Use sempre que for mobiliar
+  ou renderizar um cômodo da planta (quarto, sala, cozinha, banho, área), gerar .skp de móvel, decidir layout ou
+  revisar render/câmera. Frase-guia: planejar como arquiteto/marceneiro, validar como engenheiro, só depois
+  renderizar como artista.
 ---
 
 # Interior Architect + Carpentry Planner + Auto Camera Review
@@ -19,7 +18,7 @@ description: >-
 
 1. **Função** do ambiente. 2. **Móvel-herói**. 3. **Paredes boas × ruins**. 4. **Circulação**.
 5. **Proporção** dos móveis. 6. **Armazenamento / marcenaria**. 7. **Hierarquia visual**.
-8. **Câmera / render**. 9. **Gates determinísticos**. 10. **Visual review final (GPT)**.
+8. **Câmera / render**. 9. **Gates determinísticos**. 10. **Visual review final (Felipe, no chat)**.
 
 ## 2. Regras gerais de interiores
 
@@ -96,16 +95,17 @@ Validação honesta (estado 2026-06-08): **SALA full-auto = VERDICT PASS + CAMER
 WARN-promotable** (caso-limite: cômodo pequeno → herói foreshortened OU dresser no quadro). **Auto-camera NÃO
 garante PASS universal**; sala PASS não prova universalidade — revalidar cada cômodo no pipeline full-auto.
 
-## 8. Quando chamar GPT / deep visual review (`gpt-review-gate`)
+## 8. Quando pedir o veredito visual do Felipe
 
-GPT/deep é necessário p/: veredito visual FINAL · premium realism · composição subjetiva · comparação com
+(O `gpt-review-gate` é legado desde 2026-07-27; só com pedido dele.)
+O olho do Felipe é necessário p/: veredito visual FINAL · premium realism · composição subjetiva · comparação com
 expectativa humana · artifact approval · conflito entre gates. **NUNCA** usar local-worker/geometry_sanity p/
 aprovar "bonito" (negative_dogfood: veredito visual auto é não-confiável).
 
 ## 9. Fluxo de execução por cômodo (o slice)
 
 1. DesignIntentSpec (§4) ANTES do .skp. 2. `geometry_sanity` (§6) antes de promover. 3. auto-camera/full-auto (§7).
-4. Render → `gpt-review-gate` (§8) se a aparência muda. 5. Registrar o STATUS honesto do cômodo:
+4. Render → veredito do Felipe (§8) se a aparência muda. 5. Registrar o STATUS honesto do cômodo:
 - **`READY_FOR_SKP`** — spec + geometry_sanity OK, layout funcional.
 - **`NEEDS_LAYOUT_FIX`** — geometry_sanity ou regra de interiores violada (corrigir o layout, não o crop).
 - **`LIMITED_BY_ROOM_GEOMETRY`** — cômodo não comporta bom shot/programa; documentar, não mascarar.

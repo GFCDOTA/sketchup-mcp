@@ -1,19 +1,26 @@
 ---
 name: gpt-docker-consult
-description: Use para consultar o ChatGPT logado num container Docker (bridge "GPT-no-Docker", localhost:8899) como ASSISTÊNCIA / segunda-opinião do gate de decisão do sketchup-mcp — em vez de travar no humano. Mesmo contrato /health+/ask do oráculo :8765, então é um backend drop-in via `--bridge-url`. Dispara nos mesmos 9 triggers canônicos de decisão real (merge de PR, oracle diverge do final, A/B/C com trade-off, WARN-carry, risco de inventar geometria, abrir novo ciclo, --require-oracle bloqueou, friction tax, consulta pedida pelo user) quando se quer a opinião do GPT via container. Degrada SKIPPED se offline/deslogado — NUNCA bloqueia. NÃO usar para typo/doc/teste trivial, nem para veredito VISUAL (é text-only).
+description: >-
+  DORMENTE. Consulta o ChatGPT logado no container GPT-Docker (localhost:8899, contrato /health + /ask) como segunda
+  opinião TEXTUAL de uma decisão técnica, via tools.oracle.ask_gpt_gate --bridge-url; degrada para SKIPPED_OFFLINE sem
+  bloquear nem fabricar resposta. Use só quando o Felipe pedir a opinião do GPT. Não serve para veredito visual (é do
+  Felipe) nem para typo, doc ou teste trivial.
+disable-model-invocation: true
 ---
 
 # gpt-docker-consult
 
+> **Status: DORMENTE (2026-07-27).** Docker Desktop costuma estar parado; não subir o container nem
+> consultar sem o Felipe pedir. Decisão técnica = evidência determinística (+ Ollama `:11434` se precisar);
+> veredito visual é do Felipe, no chat (decisão de 2026-07-27).
+
 O gate de decisão do sketchup-mcp pode consultar o **ChatGPT logado num Chrome
 dentro de um container Docker** — o bridge **GPT-no-Docker** (`ops/gpt-docker/`,
-`http://localhost:8899`). Ele expõe o **mesmo contrato** do oráculo `:8765`
+`http://localhost:8899`). Ele expõe o **mesmo contrato** do antigo oráculo `:8765` (removido)
 (`GET /health` + `POST /ask` → `{answer}`), então é um **backend drop-in** do
 `tools/oracle/ask_gpt_gate.py` via `--bridge-url`.
 
-> É a mesma lógica de gatilho da skill [`gpt-auto-consult-gate`](../gpt-auto-consult-gate/SKILL.md)
-> — muda só QUEM responde: aqui, o ChatGPT da assinatura do Felipe, rodando no
-> container, em vez do bridge Claude/ChatGPT no `:8765`.
+> Quem responde é o ChatGPT da assinatura do Felipe, rodando no container.
 
 ## Quando invocar
 
@@ -48,7 +55,7 @@ python -m tools.oracle.ask_gpt_gate \
 ## Limites e honestidade (importante)
 
 - É **assistência / segunda-opinião**, NÃO um juiz que fecha gate sozinho. O
-  veredito de aparência continua sendo do Felipe/GPT-visual; decisão técnica
+  veredito de aparência é do Felipe; decisão técnica
   continua ancorada em evidência determinística.
 - É **browser-automation da assinatura ChatGPT** — frágil (login/DOM/Cloudflare)
   e **fora dos Termos da OpenAI em escala**. Um bug, rate-limit ou desafio
@@ -62,6 +69,5 @@ python -m tools.oracle.ask_gpt_gate \
 
 ## Skills relacionadas
 
-- [`gpt-auto-consult-gate`](../gpt-auto-consult-gate/SKILL.md) — os 9 triggers + a mecânica do gate (:8765 default).
 - [`skp-visual-self-correction`](../skp-visual-self-correction/SKILL.md) — veredito VISUAL (image-based, separado).
-- README do bridge: `ops/gpt-docker/README.md` (subir container, login noVNC, riscos).
+- README do bridge, no workspace (fora deste repo): `E:/Claude/ops/gpt-docker/README.md`.

@@ -1,6 +1,11 @@
 ---
 name: interior-design
-description: Use when furnishing a SketchUp floor plan with real 3D Warehouse furniture — generating styled, mobiliated apartment variants (planta_74_vN.skp) for the human to compare. Triggers on "mobiliar", "decorar", "design de interiores", "móveis no apê", "sofá/cama/mesa", "3D Warehouse furniture", "estilo industrial/dark/clean", `furnish_plan`, `interior-designer` Ollama model, or creating styled plant variants vN.
+description: >-
+  Mobilia uma planta SketchUp com componentes reais do 3D Warehouse para gerar variantes estilizadas
+  (planta_74_vN.skp) que o Felipe compara. Use em "mobiliar", "decorar", "design de interiores", "móveis no apê",
+  "sofá/cama/mesa", "3D Warehouse furniture", "estilo industrial/dark/clean", furnish_plan, modelo Ollama
+  interior-designer ou criação de variantes vN. Para móvel paramétrico próprio (gabinete, Shaker) use
+  planned-furniture-designer e capability-l2-proof.
 ---
 
 # interior-design
@@ -82,7 +87,7 @@ Build do cérebro: `ollama create interior-designer -f .claude/skills/interior-d
 - **Escala**: SEMPRE auto-escalar — componentes 3DW vêm em unidades/escalas variadas.
 - **Posição**: `polylabel` (pole of inaccessibility) dá o ponto mais central do
   cômodo; `representative_point` joga o móvel na borda (sobre parede).
-- **Visual review**: veredito é do humano; só via Chrome/olho, nunca auto.
+- **Visual review**: veredito é do Felipe, no chat; nunca auto.
 
 ## Arquivos
 
