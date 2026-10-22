@@ -14,7 +14,7 @@
               python -m tools.oracle.make_gpt_review_sheet <case_id> [modern_dark|kivik]
               -> runs/sofa_program/sofa_eval/gpt_review/<case>_review.png  +  <case>_prompt.txt
 4. CONSULT  — o AGENTE manda pro GPT (ChatGPT via extensao Claude no Chrome):
-              a) powershell -STA -File scripts/set_clipboard_image.ps1 -Path <review.png>
+              a) powershell -STA -File tools/oracle/set_clipboard_image.ps1 -Path <review.png>
               b) Chrome MCP: nova aba -> chatgpt.com -> Ctrl+V (cola a imagem) -> cola o PROMPT -> Enter
               c) ler a resposta (get_page_text / screenshot)
 5. PARSE    — extrair o formato fixo (abaixo). E a fonte de verdade do veredito visual.

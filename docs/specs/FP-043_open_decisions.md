@@ -7,10 +7,10 @@ linha vira uma nota de decisão com data e o item sai daqui.
 | ID | Assunto | Decide | Bloqueia |
 |---|---|---|---|
 | D-001 | Referência canônica do `quadrado` × builder aprovado em 2026-06-04 | Felipe | só a re-baseline da referência; nenhum fluxo |
-| D-002 | `tools/Dockerfile.dashboard` + `docker-compose.yml` do dashboard morto | Felipe | nada |
+| D-002 | `tools/Dockerfile.dashboard` + `docker-compose.yml` do dashboard morto — **RESOLVIDA** (2026-10-22: arquivados em `docs/archive/2026-10-22/root/`, autorização do Felipe) | Felipe | nada |
 | D-003 | `tools/furnish_plan.py` / `.rb` (3D Warehouse): vigente ou histórico | Felipe | só o destino desses 2 arquivos em P4 |
 | D-004 | Dono da CLI `tools/trace_view.py` | Felipe | só o destino dele em P4 |
-| D-005 | `scripts/set_clipboard_image.ps1` ainda útil | Felipe | só o destino dele em P4 |
+| D-005 | `scripts/set_clipboard_image.ps1` ainda útil — **RESOLVIDA** (2026-10-22: movido para `tools/oracle/`, junto do fluxo legado de revisão GPT; `scripts/` saiu da raiz) | Felipe | nada |
 | D-011 | 4 fachadas de `tools/` lidas pelo Inspector do harness (fora das 8 públicas) — **RESOLVIDA** (harness-app#17 + FP-045/F2, 2026-10-21) | técnica | nada |
 | D-012 | `tools/sofa_class_matrix.py` escondia uma dependência quarto → living — **RESOLVIDA** (`_grid_sheet` → `tools/rooms/shared/contact_sheet.py`, 2026-10-20) | técnica | nada |
 

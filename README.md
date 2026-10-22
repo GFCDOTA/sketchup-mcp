@@ -38,6 +38,44 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 
 ---
 
+## O que mora na raiz
+
+<!-- root-layout:begin -->
+
+> Gerado por `python -m tools.navigation.rooms_index --write`; toda entrada versionada da raiz precisa de papel aqui.
+
+| Entrada | Arquivos | Papel |
+|---|---|---|
+| `.ai_bridge/` | 38 | fio entre sessões (`HANDOFF.md`) e logs históricos de revisão/fidelidade |
+| `.claude/` | 77 | instruções do agente: CLAUDE.md, rules por caminho, skills, agentes, memória |
+| `.github/` | 1 | CI (4 checks obrigatórios) |
+| `.impeccable/` | 1 | config que mantém DESLIGADO o hook de design do plugin impeccable neste projeto (D-008) |
+| `artifacts/` | 1050 | entregáveis canônicos (`artifacts/<planta>/`) e evidência (`artifacts/review/`) — protegidos por hash |
+| `assets/` | 51 | texturas e recursos reutilizáveis |
+| `core/` | 35 | domínio sem framework: escala, semântica espacial, schemas (`core/schemas/`), observabilidade |
+| `docs/` | 249 | specs SDD (`docs/specs/`), mapa e guias (`docs/architecture/`), relatórios e handoffs datados, arquivo morto |
+| `fixtures/` | 70 | entradas canônicas e sintéticas dos testes — protegidas |
+| `interior/` | 38 | pacote do estúdio de interiores (planners, renderers, validators, class specs) — importado por várias ferramentas |
+| `ops/` | 20 | painel do estúdio (`ops/estudio-front/`, :8788) — o Harness App aponta para ele; mover exige repontar (D-009) |
+| `projects/` | 2 | fonte de cada projeto (`projects/planta_74/source/planta_74.pdf`) |
+| `references/` | 58 | fontes e recipes de conhecimento (aulas SketchUp, referências de design) |
+| `tests/` | 216 | suíte de regressão (marker `planta74_scale` separa a escala) |
+| `tools/` | 390 | código: um módulo por cômodo em `tools/rooms/`, executor SketchUp, gates, navegação, MCP |
+| `.dockerignore` | 1 | contexto do build do compose do RAG |
+| `.gitattributes` | 1 | normalização de fim de linha |
+| `.gitignore` | 1 | o que não versiona (`runs/`, scratch, caches) |
+| `CLAUDE.md` | 1 | ponteiro para `.claude/CLAUDE.md` |
+| `docker-compose.rag.yml` | 1 | Qdrant opcional do RAG (degrada para busca facetada se estiver desligado) |
+| `pyproject.toml` | 1 | pacote, dependências (`[dev]` inclui ruff/pytest) e config de lint/teste |
+| `README.md` | 1 | este arquivo |
+| `uv.lock` | 1 | lock das dependências |
+
+`runs/` existe só localmente (scratch ignorado pelo git).
+
+<!-- root-layout:end -->
+
+---
+
 ## Módulos de cômodo
 
 <!-- rooms-index:begin -->

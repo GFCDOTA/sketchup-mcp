@@ -15,14 +15,14 @@ ROOT = Path(__file__).resolve().parents[1]
 ROOT_ALLOWED = {
     # arquivos do projeto
     ".dockerignore", ".gitattributes", ".gitignore", "CLAUDE.md", "README.md", "docker-compose.rag.yml",
-    "docker-compose.yml", "pyproject.toml", "uv.lock",
+    "pyproject.toml", "uv.lock",   # docker-compose.yml (dashboard morto) arquivado em 2026-10-22 (D-002)
     # pastas com papel claro
     ".ai_bridge", ".claude", ".github", "artifacts", "assets", "core", "docs", "fixtures", "interior", "projects",
     "references", "tests", "tools",
     # pastas a aposentar nas fatias indicadas (remover a linha no PR da fatia)
     ".impeccable",   # F5 (D-008)
     "ops",           # F4 (D-009)
-    "scripts",       # so o set_clipboard_image.ps1 ate a D-005
+    # "scripts" saiu em 2026-10-22 (D-005): set_clipboard_image.ps1 foi para tools/oracle/
 }
 FACADES = ROOT / "docs/specs/fp044_tools_facades.v1.json"
 

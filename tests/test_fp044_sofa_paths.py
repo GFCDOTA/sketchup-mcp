@@ -55,4 +55,4 @@ def test_nenhum_codigo_rastreado_usa_os_caminhos_antigos_da_raiz():
 def test_raiz_sem_as_pastas_do_sofa_e_sem_as_fachadas_de_scripts():
     tracked = _tracked()
     assert not [f for f in tracked if f.split("/")[0] in ("configs", "renders", "textures")]
-    assert sorted(f for f in tracked if f.startswith("scripts/")) == ["scripts/set_clipboard_image.ps1"]
+    assert not [f for f in tracked if f.startswith("scripts/")]   # 2026-10-22 (D-005): o ultimo arquivo foi para tools/oracle/
