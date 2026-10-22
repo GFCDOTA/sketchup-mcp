@@ -1,0 +1,954 @@
+{
+ "bindings": [
+  {
+   "capability_id": "kitchen.layout.galley",
+   "gap": null,
+   "id": "bind.kitchen.layout",
+   "recipe_ids": [
+    "room.kitchen.cabinet-assemblies"
+   ],
+   "room": "kitchen",
+   "sources": [
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-components"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-groups"
+    }
+   ]
+  },
+  {
+   "capability_id": "kitchen.cabinet.plain-fronts",
+   "gap": null,
+   "id": "bind.kitchen.cabinet",
+   "recipe_ids": [
+    "cabinet.reusable-components",
+    "cabinet.front-gaps-and-profiles"
+   ],
+   "room": "kitchen",
+   "sources": [
+    {
+     "evidence": "TRANSCRIPT_AND_DESCRIPTION_ONLY",
+     "human_review": false,
+     "source_id": "yt-cabinet-styles-2024"
+    },
+    {
+     "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+     "human_review": true,
+     "source_id": "yt-cabinet-tips-2021"
+    }
+   ]
+  },
+  {
+   "capability_id": "kitchen.cabinet.shaker-door",
+   "gap": null,
+   "id": "bind.kitchen.shaker",
+   "recipe_ids": [
+    "cabinet.front-gaps-and-profiles",
+    "cabinet.recessed-shaker-and-louvers"
+   ],
+   "room": "kitchen",
+   "sources": [
+    {
+     "evidence": "TRANSCRIPT_AND_DESCRIPTION_ONLY",
+     "human_review": false,
+     "source_id": "yt-cabinet-styles-2024"
+    },
+    {
+     "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+     "human_review": true,
+     "source_id": "yt-cabinet-tips-2021"
+    }
+   ]
+  },
+  {
+   "capability_id": null,
+   "gap": "gaveta e ferragens: nao ha builder de caixa de gaveta nem fixture L2; so existe a recipe",
+   "id": "bind.kitchen.drawer",
+   "recipe_ids": [
+    "cabinet.drawer-box-and-hardware"
+   ],
+   "room": "kitchen",
+   "sources": [
+    {
+     "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+     "human_review": false,
+     "source_id": "yt-kitchen-joinery-2024"
+    }
+   ]
+  },
+  {
+   "capability_id": null,
+   "gap": "tampo separado com chanfro: sem builder nem fixture",
+   "id": "bind.kitchen.countertop",
+   "recipe_ids": [
+    "cabinet.countertop-separate-and-bevel"
+   ],
+   "room": "kitchen",
+   "sources": [
+    {
+     "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+     "human_review": false,
+     "human_review_other_scope": {
+      "recipe_id": "cabinet.front-gaps-and-profiles",
+      "segment": "03:13-04:29"
+     },
+     "source_id": "yt-cabinet-tips-2021"
+    }
+   ]
+  },
+  {
+   "capability_id": null,
+   "gap": "recorte de cuba e canal umido: sem builder nem fixture",
+   "id": "bind.kitchen.sink-cutout",
+   "recipe_ids": [
+    "cabinet.sink-and-wet-channel-cutouts"
+   ],
+   "room": "kitchen",
+   "sources": [
+    {
+     "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+     "human_review": false,
+     "source_id": "yt-kitchen-joinery-2024"
+    }
+   ]
+  },
+  {
+   "capability_id": "living.layout.boxes",
+   "gap": null,
+   "id": "bind.living.layout",
+   "recipe_ids": [
+    "room.living.media-wall"
+   ],
+   "room": "living",
+   "sources": [
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-components"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-model-organization"
+    }
+   ]
+  },
+  {
+   "capability_id": "living.sofa.class",
+   "gap": null,
+   "id": "bind.living.sofa",
+   "recipe_ids": [
+    "room.living.organic-sofa"
+   ],
+   "room": "living",
+   "sources": [
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-followme"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "ruby-method-list"
+    }
+   ]
+  },
+  {
+   "capability_id": "bedroom.layout.boxes",
+   "gap": null,
+   "id": "bind.bedroom.layout",
+   "recipe_ids": [
+    "room.bedroom.bed-and-headboard"
+   ],
+   "room": "bedroom",
+   "sources": [
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-groups"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-components"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-texture-position"
+    }
+   ]
+  },
+  {
+   "capability_id": "bathroom.layout.boxes",
+   "gap": null,
+   "id": "bind.bathroom.layout",
+   "recipe_ids": [
+    "room.bathroom.vanity-and-shower"
+   ],
+   "room": "bathroom",
+   "sources": [
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-groups"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-components"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-materials"
+    }
+   ]
+  },
+  {
+   "capability_id": "service.layout.boxes",
+   "gap": null,
+   "id": "bind.service.layout",
+   "recipe_ids": [
+    "room.laundry.casework-and-appliances"
+   ],
+   "room": "service",
+   "sources": [
+    {
+     "evidence": "PUBLIC_DESCRIPTION_ONLY",
+     "human_review": false,
+     "source_id": "yt-laundry-basic"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-components"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-groups"
+    }
+   ]
+  },
+  {
+   "capability_id": null,
+   "gap": "varanda e advisory: nao ha brain independente (esta dentro do conjunto de servico)",
+   "id": "bind.balcony.pergola",
+   "recipe_ids": [
+    "room.balcony.pergola-and-planter"
+   ],
+   "room": "balcony",
+   "sources": [
+    {
+     "evidence": "PUBLIC_DESCRIPTION_ONLY",
+     "human_review": false,
+     "source_id": "yt-pergola"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-components"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-followme"
+    }
+   ]
+  },
+  {
+   "capability_id": null,
+   "gap": "closet reaproveita a marcenaria do quarto; portas de correr nao tem builder",
+   "id": "bind.closet.sliding",
+   "recipe_ids": [
+    "room.closet.wardrobe-sliding-doors"
+   ],
+   "room": "closet",
+   "sources": [
+    {
+     "evidence": "PUBLIC_DESCRIPTION_ONLY",
+     "human_review": false,
+     "source_id": "yt-sliding-wardrobe"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-components"
+    }
+   ]
+  },
+  {
+   "capability_id": null,
+   "gap": "home office reaproveita o designer de quarto; sem builder proprio",
+   "id": "bind.home_office.desk",
+   "recipe_ids": [
+    "room.office.desk-and-storage"
+   ],
+   "room": "home_office",
+   "sources": [
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-components"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-model-organization"
+    }
+   ]
+  },
+  {
+   "capability_id": "circulation.gate",
+   "gap": null,
+   "id": "bind.circulation.gate",
+   "recipe_ids": [
+    "room.circulation.hall-and-doors"
+   ],
+   "room": "circulation",
+   "sources": [
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-groups"
+    },
+    {
+     "evidence": "OFFICIAL_DOCUMENTATION_READ",
+     "human_review": false,
+     "source_id": "official-model-organization"
+    }
+   ]
+  }
+ ],
+ "capabilities": [
+  {
+   "evidence_commits": [
+    "9d7a496"
+   ],
+   "evidence_current": true,
+   "id": "kitchen.layout.galley",
+   "implementation": "IMPLEMENTED",
+   "room": "kitchen",
+   "stale_symbols": [],
+   "validation": "L2_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "kitchen.sink-anchor-guard",
+   "implementation": "IMPLEMENTED",
+   "room": "kitchen",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "kitchen.ergonomics.audit",
+   "implementation": "IMPLEMENTED",
+   "room": "kitchen",
+   "stale_symbols": [],
+   "validation": "UNTESTED",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [
+    "8317dce"
+   ],
+   "evidence_current": true,
+   "id": "shared.cabinet.parametric",
+   "implementation": "IMPLEMENTED",
+   "room": "shared",
+   "stale_symbols": [],
+   "validation": "L2_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [
+    "8317dce",
+    "7820f74"
+   ],
+   "evidence_current": true,
+   "id": "kitchen.cabinet.plain-fronts",
+   "implementation": "IMPLEMENTED",
+   "room": "kitchen",
+   "stale_symbols": [],
+   "validation": "L2_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [
+    "7820f74"
+   ],
+   "evidence_current": true,
+   "id": "kitchen.cabinet.shaker-door",
+   "implementation": "IMPLEMENTED",
+   "room": "kitchen",
+   "stale_symbols": [],
+   "validation": "L2_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [
+    "7820f74"
+   ],
+   "evidence_current": true,
+   "id": "shared.cabinet.front.shaker",
+   "implementation": "IMPLEMENTED",
+   "room": "shared",
+   "stale_symbols": [],
+   "validation": "L2_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "living.layout.boxes",
+   "implementation": "IMPLEMENTED",
+   "room": "living",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "living.sofa.class",
+   "implementation": "IMPLEMENTED",
+   "room": "living",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "living.sofa.gate",
+   "implementation": "IMPLEMENTED",
+   "room": "living",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "bedroom.layout.boxes",
+   "implementation": "IMPLEMENTED",
+   "room": "bedroom",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "bedroom.bed.build",
+   "implementation": "IMPLEMENTED",
+   "room": "bedroom",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "bedroom.wardrobe.build",
+   "implementation": "IMPLEMENTED",
+   "room": "bedroom",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "bedroom.wardrobe.gate",
+   "implementation": "IMPLEMENTED",
+   "room": "bedroom",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "bathroom.layout.boxes",
+   "implementation": "IMPLEMENTED",
+   "room": "bathroom",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "bathroom.wet-room.guard",
+   "implementation": "IMPLEMENTED",
+   "room": "bathroom",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "service.layout.boxes",
+   "implementation": "IMPLEMENTED",
+   "room": "service",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  },
+  {
+   "evidence_commits": [],
+   "evidence_current": false,
+   "id": "circulation.gate",
+   "implementation": "IMPLEMENTED",
+   "room": "circulation",
+   "stale_symbols": [],
+   "validation": "L1_PASS",
+   "visual": "NOT_REVIEWED"
+  }
+ ],
+ "external": {
+  "develop_head": "13b1372c083bbe53b5efb07c46b3fbd34fd03179",
+  "prs": {
+   "342": {
+    "checks": [
+     "SUCCESS"
+    ],
+    "head": "docs/fp046-shaker-parametric-cabinet-spec",
+    "isDraft": false,
+    "mergeable": "UNKNOWN",
+    "state": "MERGED",
+    "title": "docs(fp046): SPEC SDD — marcenaria Shaker parametrica e prova L2"
+   },
+   "344": {
+    "checks": [
+     "SUCCESS"
+    ],
+    "head": "docs/fp047-room-geometry-visual-regression-spec",
+    "isDraft": false,
+    "mergeable": "UNKNOWN",
+    "state": "MERGED",
+    "title": "docs(fp047): SPEC SDD — contrato de regressao geometrica e visual por comodo"
+   },
+   "346": {
+    "checks": [
+     "SUCCESS"
+    ],
+    "head": "docs/fp048-shared-geometry-capability-contract",
+    "isDraft": true,
+    "mergeable": "MERGEABLE",
+    "state": "OPEN",
+    "title": "docs(fp048): SPEC SDD — geometria compartilhada entre cômodos"
+   },
+   "347": {
+    "checks": [
+     "SUCCESS"
+    ],
+    "head": "docs/fp049-composable-wardrobe-assembly-spec",
+    "isDraft": true,
+    "mergeable": "MERGEABLE",
+    "state": "OPEN",
+    "title": "docs(fp049): SPEC SDD — guarda-roupa componível com capabilities compartilhadas"
+   },
+   "355": {
+    "checks": [
+     "SUCCESS"
+    ],
+    "head": "feat/fp050-kitchen-placement-l1-pilot",
+    "isDraft": true,
+    "mergeable": "MERGEABLE",
+    "state": "OPEN",
+    "title": "feat(fp050): piloto L1 para escolher posição de gabinete sem bloquear circulação"
+   },
+   "356": {
+    "checks": [
+     "SUCCESS"
+    ],
+    "head": "docs/fp046-l3-visual-package",
+    "isDraft": false,
+    "mergeable": "UNKNOWN",
+    "state": "MERGED",
+    "title": "docs(fp046): pacote visual L3 da porta Shaker na cozinha (antes x depois) — PENDING_HUMAN"
+   }
+  },
+  "snapshot_date": "2026-10-21",
+  "source": "gh pr view (consulta pontual; o gerador nunca acessa a rede)"
+ },
+ "furniture_matrix": {
+  "bedroom_wardrobe": {
+   "cycle_status": "PENDING_SKETCHUP",
+   "execution_authorized": false,
+   "kind": "wardrobe",
+   "missing_capabilities": [],
+   "optional_not_available": [],
+   "placement": "NOT_CHOSEN: depende de P4 (FP-050 #355 em draft); nenhuma posicao, parede ou dimensao e escolhida no P0",
+   "required": {
+    "placement_gate": {
+     "capability": {
+      "evidence_commits": [],
+      "evidence_current": false,
+      "id": "bedroom.wardrobe.gate",
+      "implementation": "IMPLEMENTED",
+      "room": "bedroom",
+      "stale_symbols": [],
+      "validation": "L1_PASS",
+      "visual": "NOT_REVIEWED"
+     },
+     "reason": "so L1",
+     "resolver": {
+      "capability": "bedroom.wardrobe.gate"
+     },
+     "status": "RESOLVED_L1_ONLY"
+    },
+    "wardrobe": {
+     "capability": {
+      "evidence_commits": [],
+      "evidence_current": false,
+      "id": "bedroom.wardrobe.build",
+      "implementation": "IMPLEMENTED",
+      "room": "bedroom",
+      "stale_symbols": [],
+      "validation": "L1_PASS",
+      "visual": "NOT_REVIEWED"
+     },
+     "reason": "so L1",
+     "resolver": {
+      "capability": "bedroom.wardrobe.build"
+     },
+     "status": "RESOLVED_L1_ONLY"
+    }
+   },
+   "room": "bedroom",
+   "room_id": "r000/r003",
+   "why": "candidato a SEGUNDO consumidor (reuso cross-room): hoje so L1 e com frente em -Y (cabinet e +Y); depende de FP-048/049 (drafts)"
+  },
+  "kitchen_base_drawer": {
+   "cycle_status": "BLOCKED_CAPABILITY_MISSING",
+   "execution_authorized": false,
+   "kind": "base_cabinet_with_drawer",
+   "missing_capabilities": [
+    "drawer_box"
+   ],
+   "optional_not_available": [
+    "slides_hardware"
+   ],
+   "placement": "NOT_CHOSEN: depende de P4 (FP-050 #355 em draft); nenhuma posicao, parede ou dimensao e escolhida no P0",
+   "required": {
+    "carcass": {
+     "capability": {
+      "evidence_commits": [
+       "8317dce"
+      ],
+      "evidence_current": true,
+      "id": "shared.cabinet.parametric",
+      "implementation": "IMPLEMENTED",
+      "room": "shared",
+      "stale_symbols": [],
+      "validation": "L2_PASS",
+      "visual": "NOT_REVIEWED"
+     },
+     "resolver": {
+      "capability": "shared.cabinet.parametric"
+     },
+     "status": "RESOLVED_L2"
+    },
+    "drawer_box": {
+     "reason": "gaveta e ferragens: nao ha builder de caixa de gaveta nem fixture L2; so existe a recipe",
+     "recipe_ids": [
+      "cabinet.drawer-box-and-hardware"
+     ],
+     "resolver": {
+      "binding": "bind.kitchen.drawer"
+     },
+     "sources": [
+      {
+       "evidence": "TRANSCRIPT_AND_VISUAL_WALKTHROUGH",
+       "human_review": false,
+       "source_id": "yt-kitchen-joinery-2024"
+      }
+     ],
+     "status": "MISSING"
+    },
+    "front": {
+     "capability": {
+      "evidence_commits": [
+       "7820f74"
+      ],
+      "evidence_current": true,
+      "id": "kitchen.cabinet.shaker-door",
+      "implementation": "IMPLEMENTED",
+      "room": "kitchen",
+      "stale_symbols": [],
+      "validation": "L2_PASS",
+      "visual": "NOT_REVIEWED"
+     },
+     "resolver": {
+      "alternatives": [
+       {
+        "capability": "kitchen.cabinet.plain-fronts"
+       }
+      ],
+      "capability": "kitchen.cabinet.shaker-door"
+     },
+     "status": "RESOLVED_L2"
+    }
+   },
+   "room": "kitchen",
+   "room_id": "r004",
+   "why": "exige a caixa de gaveta: o gap que justificaria um P2 (so a CAIXA; corredica/ferragem fora do escopo)"
+  },
+  "kitchen_base_shaker_shelf": {
+   "cycle_status": "READY_FOR_NEXT_STEP",
+   "execution_authorized": false,
+   "kind": "base_cabinet",
+   "missing_capabilities": [],
+   "optional_not_available": [
+    "handle"
+   ],
+   "placement": "NOT_CHOSEN: depende de P4 (FP-050 #355 em draft); nenhuma posicao, parede ou dimensao e escolhida no P0",
+   "required": {
+    "carcass": {
+     "capability": {
+      "evidence_commits": [
+       "8317dce"
+      ],
+      "evidence_current": true,
+      "id": "shared.cabinet.parametric",
+      "implementation": "IMPLEMENTED",
+      "room": "shared",
+      "stale_symbols": [],
+      "validation": "L2_PASS",
+      "visual": "NOT_REVIEWED"
+     },
+     "resolver": {
+      "capability": "shared.cabinet.parametric"
+     },
+     "status": "RESOLVED_L2"
+    },
+    "front": {
+     "capability": {
+      "evidence_commits": [
+       "7820f74"
+      ],
+      "evidence_current": true,
+      "id": "kitchen.cabinet.shaker-door",
+      "implementation": "IMPLEMENTED",
+      "room": "kitchen",
+      "stale_symbols": [],
+      "validation": "L2_PASS",
+      "visual": "NOT_REVIEWED"
+     },
+     "resolver": {
+      "alternatives": [
+       {
+        "capability": "kitchen.cabinet.plain-fronts"
+       }
+      ],
+      "capability": "kitchen.cabinet.shaker-door"
+     },
+     "status": "RESOLVED_L2"
+    },
+    "shelf": {
+     "capability": {
+      "evidence_commits": [
+       "8317dce"
+      ],
+      "evidence_current": true,
+      "id": "shared.cabinet.parametric",
+      "implementation": "IMPLEMENTED",
+      "room": "shared",
+      "stale_symbols": [],
+      "validation": "L2_PASS",
+      "visual": "NOT_REVIEWED"
+     },
+     "resolver": {
+      "capability": "shared.cabinet.parametric",
+      "note": "shelf.count = 1 do cabinet_request.v1"
+     },
+     "status": "RESOLVED_L2"
+    }
+   },
+   "room": "kitchen",
+   "room_id": "r004",
+   "why": "todos os componentes obrigatorios ja tem capability: primeiro caminho vertical possivel (P3-P5) sem aprender nada novo"
+  }
+ },
+ "git_head": "13b1372c083bbe53b5efb07c46b3fbd34fd03179",
+ "metrics": {
+  "blocked_gaps": {
+   "count": 6,
+   "definition": "bindings sem capability_id",
+   "ids": [
+    "bind.balcony.pergola",
+    "bind.closet.sliding",
+    "bind.home_office.desk",
+    "bind.kitchen.countertop",
+    "bind.kitchen.drawer",
+    "bind.kitchen.sink-cutout"
+   ]
+  },
+  "capabilities_L2_com_prova_vigente": {
+   "count": 5,
+   "definition": "validation=L2_PASS, ha evidencia e o digest de TODOS os simbolos provados ainda casa com o codigo",
+   "ids": [
+    "kitchen.cabinet.plain-fronts",
+    "kitchen.cabinet.shaker-door",
+    "kitchen.layout.galley",
+    "shared.cabinet.front.shaker",
+    "shared.cabinet.parametric"
+   ]
+  },
+  "furniture_assemblies_L2": {
+   "count": 2,
+   "definition": "fluxos que entregam um gabinete COMPLETO salvo/reaberto na cozinha; 2 variantes (frente lisa, Shaker) do MESMO tipo de movel",
+   "furniture_kinds": [
+    "base_cabinet"
+   ],
+   "ids": [
+    "kitchen.cabinet.plain-fronts",
+    "kitchen.cabinet.shaker-door"
+   ]
+  },
+  "furniture_placed_in_correct_room_L2": {
+   "count": 0,
+   "definition": "movel cuja posicao foi ESCOLHIDA por um gate de placement e provada em L2",
+   "why_zero": "a pose de hoje vem do pedido (user_request); nao existe gate de placement em develop (FP-050 #355 em draft)"
+  },
+  "reused_capabilities_cross_room": {
+   "count": 0,
+   "definition": "capabilities com L2 vigente listadas em perfis de 2+ comodos E executadas por 2 consumidores (so conta o que o L2 provou)",
+   "ids": [],
+   "note": "a lista por perfil e necessaria, nao suficiente; sem segundo consumidor executado o reuso nao e afirmado"
+  },
+  "rooms_approved_L3": {
+   "count": 0,
+   "definition": "comodos com capability visual=APPROVED (veredito do Felipe)",
+   "rooms": []
+  }
+ },
+ "schema_version": "fp051_baseline.v1",
+ "scope": "P0 — leitura apenas: nenhuma geometria, nenhum .skp, nenhuma posicao ou dimensao escolhida",
+ "spec_claims": [
+  {
+   "claim": "shared.cabinet.parametric registrada com L2_PASS e visual NOT_REVIEWED",
+   "detail": "L2_PASS/NOT_REVIEWED",
+   "id": "cap:shared.cabinet.parametric",
+   "ok": true
+  },
+  {
+   "claim": "kitchen.cabinet.shaker-door registrada com L2_PASS e visual NOT_REVIEWED",
+   "detail": "L2_PASS/NOT_REVIEWED",
+   "id": "cap:kitchen.cabinet.shaker-door",
+   "ok": true
+  },
+  {
+   "claim": "shared.cabinet.front.shaker registrada com L2_PASS e visual NOT_REVIEWED",
+   "detail": "L2_PASS/NOT_REVIEWED",
+   "id": "cap:shared.cabinet.front.shaker",
+   "ok": true
+  },
+  {
+   "claim": "bind.kitchen.drawer ainda sem capability_id",
+   "detail": "",
+   "id": "gap:bind.kitchen.drawer",
+   "ok": true
+  },
+  {
+   "claim": "bind.kitchen.countertop ainda sem capability_id",
+   "detail": "",
+   "id": "gap:bind.kitchen.countertop",
+   "ok": true
+  },
+  {
+   "claim": "bind.kitchen.sink-cutout ainda sem capability_id",
+   "detail": "",
+   "id": "gap:bind.kitchen.sink-cutout",
+   "ok": true
+  },
+  {
+   "claim": "tools/rooms/learning nao existe em develop (proposto por FP-051/FP-049/FP-050)",
+   "detail": "",
+   "id": "absent:tools/rooms/learning",
+   "ok": true
+  },
+  {
+   "claim": "tools/rooms/shared/assembly nao existe em develop (proposto por FP-051/FP-049/FP-050)",
+   "detail": "",
+   "id": "absent:tools/rooms/shared/assembly",
+   "ok": true
+  },
+  {
+   "claim": "tools/rooms/kitchen/planning nao existe em develop (proposto por FP-051/FP-049/FP-050)",
+   "detail": "",
+   "id": "absent:tools/rooms/kitchen/planning",
+   "ok": true
+  },
+  {
+   "claim": "so o yt-cabinet-tips-2021 tem human_review",
+   "detail": "['yt-cabinet-tips-2021']",
+   "id": "review:tips-2021",
+   "ok": true
+  },
+  {
+   "claim": "a fonte da recipe de gaveta e rotulada inspecionada, mas SEM human_review (achado: o criterio da D46-09 pede a checagem humana)",
+   "detail": "[{'source_id': 'yt-kitchen-joinery-2024', 'evidence': 'TRANSCRIPT_AND_VISUAL_WALKTHROUGH', 'human_review': False}]",
+   "id": "drawer:source-inspected-without-human-review",
+   "ok": true
+  },
+  {
+   "claim": "a revisao humana existente cobre UMA recipe e UM trecho (nao a fonte inteira)",
+   "detail": "cabinet.front-gaps-and-profiles 03:13-04:29",
+   "id": "review:scope",
+   "ok": true
+  },
+  {
+   "claim": "shaker_flow confere que a revisao humana cobre a recipe do pedido (nao so que a fonte tem alguma revisao)",
+   "detail": "ACHADO: hoje so verifica que a fonte tem human_review; um source_verified=true para OUTRA recipe do mesmo video passaria",
+   "id": "flow:source_verified-checks-review-scope",
+   "ok": false
+  },
+  {
+   "claim": "PENDING_SKETCHUP ja existe no codigo (a spec propoe PENDING_L2)",
+   "detail": "",
+   "id": "vocab:PENDING_SKETCHUP",
+   "ok": true
+  },
+  {
+   "claim": "BLOCKED_KNOWLEDGE_EVIDENCE ja existe no codigo (a spec propoe BLOCKED_SOURCE_UNVERIFIED)",
+   "detail": "",
+   "id": "vocab:BLOCKED_KNOWLEDGE_EVIDENCE",
+   "ok": true
+  },
+  {
+   "claim": "hypothesis (citada no P2) esta declarada como dependencia de dev em develop",
+   "detail": "so o PR #355 declara; sem isso o P2 precisa declarar a dependencia",
+   "id": "dep:hypothesis",
+   "ok": false
+  },
+  {
+   "claim": "a frente do gabinete esta em +Y local",
+   "detail": "front.max_y=0.56 depth=0.56",
+   "id": "frame:cabinet-front-plus-y",
+   "ok": true
+  },
+  {
+   "claim": "o guarda-roupa tem frente em -Y",
+   "detail": "-Y",
+   "id": "frame:wardrobe-front-minus-y",
+   "ok": true
+  }
+ ]
+}
