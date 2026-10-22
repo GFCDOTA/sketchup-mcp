@@ -59,8 +59,8 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 | `ops/` | 20 | painel do estúdio (`ops/estudio-front/`, :8788) — o Harness App aponta para ele; mover exige repontar (D-009) |
 | `projects/` | 2 | fonte de cada projeto (`projects/planta_74/source/planta_74.pdf`) |
 | `references/` | 58 | fontes e recipes de conhecimento (aulas SketchUp, referências de design) |
-| `tests/` | 215 | suíte de regressão (marker `planta74_scale` separa a escala) |
-| `tools/` | 389 | código: um módulo por cômodo em `tools/rooms/`, executor SketchUp, gates, navegação, MCP |
+| `tests/` | 216 | suíte de regressão (marker `planta74_scale` separa a escala) |
+| `tools/` | 390 | código: um módulo por cômodo em `tools/rooms/`, executor SketchUp, gates, navegação, MCP |
 | `.dockerignore` | 1 | contexto do build do compose do RAG |
 | `.gitattributes` | 1 | normalização de fim de linha |
 | `.gitignore` | 1 | o que não versiona (`runs/`, scratch, caches) |
