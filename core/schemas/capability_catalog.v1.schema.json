@@ -44,6 +44,11 @@
           "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
           "description": "sha256 do codigo de cada simbolo/arquivo NO MOMENTO da prova; se o codigo muda, a prova fica velha"
         },
+        "closure_digests": {
+          "type": "object",
+          "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "description": "sha256 do FECHO estatico (tools.rooms/core) de cada simbolo Python no commit da prova (R-18 transitivo, T0.1; tools.rooms.evidence_closure)"
+        },
         "scope": {"type": "string"}
       }
     },

@@ -88,6 +88,22 @@ def symbol_digest(symbol: dict, root: Path = ROOT) -> str | None:
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
 
+def _check_closures(cid: str, evidence: list[dict], root: Path, flag) -> None:
+    """R-18 transitivo (T0.1): toda prova L2 de simbolo Python guarda o digest do FECHO, que precisa casar com o disco.
+    Sem isso, mudar um helper chamado pelo simbolo (ex.: `build_parts`) mantinha a prova antiga."""
+    from tools.rooms import evidence_closure
+
+    for ev in evidence:
+        recorded = ev.get("closure_digests") or {}
+        for key in ev["symbol_digests"]:
+            if not key.startswith("python:"):
+                continue
+            if key not in recorded:
+                flag("L2_CLOSURE_WITHOUT_PROOF", f"{cid}: {key} sem closure_digests (rodar evidence_closure --backfill)")
+            elif evidence_closure.current_closure_digest(key, root) != recorded[key]:
+                flag("EVIDENCE_CLOSURE_STALE", f"{cid}: {key}: o fecho (helpers/constantes) mudou depois da prova")
+
+
 def _tool_symbol(tool: str) -> dict | None:
     kind, _, ref = tool.partition(":")
     return {"lang": kind, "ref": ref} if kind in ("python", "ruby") else None
@@ -190,6 +206,7 @@ def verify(catalog: dict | None = None, profiles: dict[str, dict] | None = None,
             for s in impl["symbols"]:
                 if f"{s['lang']}:{s['ref']}" not in proved:
                     flag("L2_SYMBOL_WITHOUT_PROOF", f"{cid}: {s['lang']}:{s['ref']}")
+            _check_closures(cid, val["evidence"], root, flag)
         # --- ferramenta x allowlist do perfil ---
         room_list = [c["room"]] if c["room"] != "shared" else list(allowlists)
         if c["room"] in allowlists or c["room"] == "shared":
@@ -209,9 +226,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--digest", nargs="*", metavar="LANG:REF", help="imprime o sha256 de simbolos (para registrar prova)")
     ns = ap.parse_args(argv)
     if ns.digest:
+        from tools.rooms import evidence_closure
+
         for item in ns.digest:
             lang, _, ref = item.partition(":")
-            print(item, symbol_digest({"lang": lang, "ref": ref}))
+            closure = evidence_closure.current_closure_digest(item) if lang == "python" else None
+            print(item, symbol_digest({"lang": lang, "ref": ref}), *([f"closure={closure}"] if closure else []))
         return 0
     res = verify()
     print(json.dumps(res, indent=1, ensure_ascii=False))
