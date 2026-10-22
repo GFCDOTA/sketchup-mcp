@@ -1,6 +1,6 @@
 # Handoff por arquivo — interior/
 
-> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `66fd65b`.
+> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `e0de518`.
 > Retrato datado: regenere, não edite. Estados e regras no docstring de `tools/navigation/file_audit.py`.
 
 Contagem: ACTIVE_ENTRYPOINT 2, ACTIVE_IMPORTED 16, CONFIG 7, DOC 4, PACKAGE_MARKER 9
@@ -20,7 +20,7 @@ Contagem: ACTIVE_ENTRYPOINT 2, ACTIVE_IMPORTED 16, CONFIG 7, DOC 4, PACKAGE_MARK
 | `interior/renderers/__init__.py` | ACTIVE_ENTRYPOINT | citado por 1 arquivo(s) de codigo/CI/config/skill | 0 | 3 | 2026-06-07 | manter |
 | `interior/renderers/enscape_preview_provider.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 3 | 2026-06-07 | manter |
 | `interior/renderers/render_provider.py` | ACTIVE_IMPORTED | importado por 7 arquivo(s) | 7 | 3 | 2026-06-08 | manter |
-| `interior/renderers/sketchup_basic_provider.py` | ACTIVE_IMPORTED | importado por 4 arquivo(s) | 4 | 5 | 2026-10-20 | manter |
+| `interior/renderers/sketchup_basic_provider.py` | ACTIVE_IMPORTED | importado por 4 arquivo(s) | 4 | 5 | 2026-10-22 | manter |
 | `interior/renderers/vray_final_provider.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 4 | 2026-10-20 | manter |
 | `interior/schemas/__init__.py` | PACKAGE_MARKER | pacote sem logica | 0 | 3 | 2026-06-24 | manter |
 | `interior/schemas/design_intent.schema.json` | CONFIG | configuracao/outro |  | 4 | 2026-06-05 | manter |

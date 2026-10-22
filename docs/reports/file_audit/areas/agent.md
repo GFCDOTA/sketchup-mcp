@@ -1,6 +1,6 @@
 # Handoff por arquivo — .claude/ (instruções do agente)
 
-> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `66fd65b`.
+> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `e0de518`.
 > Retrato datado: regenere, não edite. Estados e regras no docstring de `tools/navigation/file_audit.py`.
 
 Contagem: AGENT_INSTRUCTION 77
@@ -41,7 +41,7 @@ Contagem: AGENT_INSTRUCTION 77
 | `.claude/plans/roadmap.md` | AGENT_INSTRUCTION | instrucao do agente |  | 2 | 2026-05-27 | manter (tests/test_claude_assets.py) |
 | `.claude/plans/stopped_work.md` | AGENT_INSTRUCTION | instrucao do agente |  | 2 | 2026-05-27 | manter (tests/test_claude_assets.py) |
 | `.claude/rules/evidence-and-protected-files.md` | AGENT_INSTRUCTION | instrucao do agente |  | 2 | 2026-10-22 | manter (tests/test_claude_assets.py) |
-| `.claude/rules/rooms-and-capabilities.md` | AGENT_INSTRUCTION | instrucao do agente |  | 2 | 2026-10-22 | manter (tests/test_claude_assets.py) |
+| `.claude/rules/rooms-and-capabilities.md` | AGENT_INSTRUCTION | instrucao do agente |  | 4 | 2026-10-22 | manter (tests/test_claude_assets.py) |
 | `.claude/rules/sketchup-ruby-jobs.md` | AGENT_INSTRUCTION | instrucao do agente |  | 2 | 2026-10-22 | manter (tests/test_claude_assets.py) |
 | `.claude/skills/autonomous-fidelity-loop/SKILL.md` | AGENT_INSTRUCTION | instrucao do agente |  | 4 | 2026-10-22 | manter (tests/test_claude_assets.py) |
 | `.claude/skills/capability-l2-proof/SKILL.md` | AGENT_INSTRUCTION | instrucao do agente |  | 2 | 2026-10-22 | manter (tests/test_claude_assets.py) |
@@ -70,7 +70,7 @@ Contagem: AGENT_INSTRUCTION 77
 | `.claude/specs/autonomous_planta_prep.md` | AGENT_INSTRUCTION | instrucao do agente |  | 3 | 2026-07-01 | manter (tests/test_claude_assets.py) |
 | `.claude/specs/fidelity_gate.md` | AGENT_INSTRUCTION | instrucao do agente |  | 4 | 2026-10-19 | manter (tests/test_claude_assets.py) |
 | `.claude/specs/gate_framework_and_audit.md` | AGENT_INSTRUCTION | instrucao do agente |  | 3 | 2026-10-20 | manter (tests/test_claude_assets.py) |
-| `.claude/specs/generalize_any_plant.md` | AGENT_INSTRUCTION | instrucao do agente |  | 4 | 2026-10-20 | manter (tests/test_claude_assets.py) |
+| `.claude/specs/generalize_any_plant.md` | AGENT_INSTRUCTION | instrucao do agente |  | 4 | 2026-10-22 | manter (tests/test_claude_assets.py) |
 | `.claude/specs/generalize_builder_constants.md` | AGENT_INSTRUCTION | instrucao do agente |  | 2 | 2026-05-31 | manter (tests/test_claude_assets.py) |
 | `.claude/specs/interior_common_sense.md` | AGENT_INSTRUCTION | instrucao do agente |  | 2 | 2026-06-05 | manter (tests/test_claude_assets.py) |
 | `.claude/specs/perfect_reference_strategy.md` | AGENT_INSTRUCTION | instrucao do agente |  | 2 | 2026-05-27 | manter (tests/test_claude_assets.py) |

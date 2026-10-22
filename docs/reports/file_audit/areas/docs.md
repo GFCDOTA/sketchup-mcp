@@ -1,6 +1,6 @@
 # Handoff por arquivo — docs/
 
-> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `66fd65b`.
+> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `e0de518`.
 > Retrato datado: regenere, não edite. Estados e regras no docstring de `tools/navigation/file_audit.py`.
 
 Contagem: CONFIG 4, DOC 32, HISTORICAL 156, SPEC 54
@@ -13,7 +13,7 @@ Contagem: CONFIG 4, DOC 32, HISTORICAL 156, SPEC 54
 | `docs/SOFA_GPT_REVIEW_LOOP.md` | DOC | documentacao |  | 2 | 2026-10-19 | manter |
 | `docs/SOFA_LEARNING_LOG.md` | DOC | documentacao |  | 2 | 2026-06-10 | manter |
 | `docs/SOFA_SKILL.md` | DOC | documentacao |  | 3 | 2026-10-19 | manter |
-| `docs/SOFA_VRAY_TRACK.md` | DOC | documentacao |  | 3 | 2026-10-19 | manter |
+| `docs/SOFA_VRAY_TRACK.md` | DOC | documentacao |  | 3 | 2026-10-22 | manter |
 | `docs/adr/.gitkeep` | CONFIG | configuracao/outro |  | 3 | 2026-06-08 | manter |
 | `docs/adr/0001-semantic-geometry-contract.md` | DOC | documentacao |  | 4 | 2026-10-20 | manter |
 | `docs/adr/0002-shaker-door-plan-separate-schema.md` | DOC | documentacao |  | 2 | 2026-10-21 | manter |
@@ -65,17 +65,17 @@ Contagem: CONFIG 4, DOC 32, HISTORICAL 156, SPEC 54
 | `docs/specs/FP-042_final_validation.md` | SPEC | spec SDD |  | 4 | 2026-10-19 | manter; mudar so com PR da frente dona |
 | `docs/specs/FP-043_P0_map.md` | SPEC | spec SDD |  | 3 | 2026-10-19 | manter; mudar so com PR da frente dona |
 | `docs/specs/FP-043_open_decisions.md` | SPEC | spec SDD |  | 5 | 2026-10-21 | manter; mudar so com PR da frente dona |
-| `docs/specs/FP-043_remaining_execution_P3_P8.md` | SPEC | spec SDD |  | 3 | 2026-10-19 | manter; mudar so com PR da frente dona |
+| `docs/specs/FP-043_remaining_execution_P3_P8.md` | SPEC | spec SDD |  | 4 | 2026-10-19 | manter; mudar so com PR da frente dona |
 | `docs/specs/FP-043_repository_navigation_and_room_specialists.md` | SPEC | spec SDD |  | 7 | 2026-10-19 | manter; mudar so com PR da frente dona |
 | `docs/specs/FP-044_root_and_tools_consolidation.md` | SPEC | spec SDD |  | 6 | 2026-10-19 | manter; mudar so com PR da frente dona |
 | `docs/specs/FP-045_specialists_knowledge_and_room_modularization.md` | SPEC | spec SDD |  | 4 | 2026-10-22 | manter; mudar so com PR da frente dona |
-| `docs/specs/FP-046_shaker_parametric_cabinet_specialist.md` | SPEC | spec SDD |  | 3 | 2026-10-22 | manter; mudar so com PR da frente dona |
-| `docs/specs/FP-047_room_geometry_visual_regression_contract.md` | SPEC | spec SDD |  | 2 | 2026-10-22 | manter; mudar so com PR da frente dona |
-| `docs/specs/FP-048_shared_geometry_capabilities_and_coordinate_contract.md` | SPEC | spec SDD |  | 2 | 2026-10-22 | manter; mudar so com PR da frente dona |
-| `docs/specs/FP-049_composable_wardrobe_end_to_end_assembly.md` | SPEC | spec SDD |  | 2 | 2026-10-22 | manter; mudar so com PR da frente dona |
-| `docs/specs/FP-050_kitchen_wall_placement_pilot.md` | SPEC | spec SDD |  | 2 | 2026-10-22 | manter; mudar so com PR da frente dona |
-| `docs/specs/FP-051_incremental_learning_furniture_composition.md` | SPEC | spec SDD |  | 2 | 2026-10-22 | manter; mudar so com PR da frente dona |
-| `docs/specs/FP-052_reference_truth_and_component_learning.md` | SPEC | spec SDD |  | 2 | 2026-10-22 | manter; mudar so com PR da frente dona |
+| `docs/specs/FP-046_shaker_parametric_cabinet_specialist.md` | SPEC | spec SDD |  | 4 | 2026-10-22 | manter; mudar so com PR da frente dona |
+| `docs/specs/FP-047_room_geometry_visual_regression_contract.md` | SPEC | spec SDD |  | 3 | 2026-10-22 | manter; mudar so com PR da frente dona |
+| `docs/specs/FP-048_shared_geometry_capabilities_and_coordinate_contract.md` | SPEC | spec SDD |  | 3 | 2026-10-22 | manter; mudar so com PR da frente dona |
+| `docs/specs/FP-049_composable_wardrobe_end_to_end_assembly.md` | SPEC | spec SDD |  | 4 | 2026-10-22 | manter; mudar so com PR da frente dona |
+| `docs/specs/FP-050_kitchen_wall_placement_pilot.md` | SPEC | spec SDD |  | 3 | 2026-10-22 | manter; mudar so com PR da frente dona |
+| `docs/specs/FP-051_incremental_learning_furniture_composition.md` | SPEC | spec SDD |  | 4 | 2026-10-22 | manter; mudar so com PR da frente dona |
+| `docs/specs/FP-052_reference_truth_and_component_learning.md` | SPEC | spec SDD |  | 4 | 2026-10-22 | manter; mudar so com PR da frente dona |
 | `docs/specs/FP-SOFA-PREMIUM/ALTERATION_REVIEW_CONTRACT.json` | SPEC | spec SDD |  | 2 | 2026-07-11 | manter; mudar so com PR da frente dona |
 | `docs/specs/FP-SOFA-PREMIUM/CLAUDE_EXECUTION_PROMPT.md` | SPEC | spec SDD |  | 2 | 2026-07-11 | manter; mudar so com PR da frente dona |
 | `docs/specs/FP-SOFA-PREMIUM/FP-SOFA-PREMIUM-SPEC.md` | SPEC | spec SDD |  | 2 | 2026-07-11 | manter; mudar so com PR da frente dona |
@@ -86,7 +86,7 @@ Contagem: CONFIG 4, DOC 32, HISTORICAL 156, SPEC 54
 | `docs/specs/_assets/quadrado_canonical_shell_polygon.json` | SPEC | spec SDD |  | 4 | 2026-05-24 | manter; mudar so com PR da frente dona |
 | `docs/specs/_assets/quadrado_canonical_success_render.png` | SPEC | spec SDD |  | 4 | 2026-05-24 | manter; mudar so com PR da frente dona |
 | `docs/specs/brain_muscle.md` | SPEC | spec SDD |  | 2 | 2026-10-21 | manter; mudar so com PR da frente dona |
-| `docs/specs/construction_core_microphases.md` | SPEC | spec SDD |  | 7 | 2026-10-22 | manter; mudar so com PR da frente dona |
+| `docs/specs/construction_core_microphases.md` | SPEC | spec SDD |  | 26 | 2026-10-22 | manter; mudar so com PR da frente dona |
 | `docs/specs/fp042_asset_blobs.v1.json` | SPEC | spec SDD |  | 5 | 2026-10-21 | manter; mudar so com PR da frente dona |
 | `docs/specs/fp042_inventory.v1.json` | SPEC | spec SDD |  | 20 | 2026-10-22 | manter; mudar so com PR da frente dona |
 | `docs/specs/fp042_references.v1.json` | SPEC | spec SDD |  | 5 | 2026-10-21 | manter; mudar so com PR da frente dona |
@@ -96,7 +96,7 @@ Contagem: CONFIG 4, DOC 32, HISTORICAL 156, SPEC 54
 | `docs/specs/geometry_sanity_gate.md` | SPEC | spec SDD |  | 2 | 2026-06-08 | manter; mudar so com PR da frente dona |
 | `docs/specs/quadrado_demo_spec.md` | SPEC | spec SDD |  | 5 | 2026-10-19 | manter; mudar so com PR da frente dona |
 | `docs/spikes/render_and_asset_providers.md` | DOC | documentacao |  | 4 | 2026-06-07 | manter |
-| `docs/vision_acl_discrimination_findings.md` | DOC | documentacao |  | 3 | 2026-10-20 | manter |
+| `docs/vision_acl_discrimination_findings.md` | DOC | documentacao |  | 3 | 2026-10-22 | manter |
 
 ## Evidência e histórico (por diretório)
 
@@ -117,5 +117,5 @@ Contagem: CONFIG 4, DOC 32, HISTORICAL 156, SPEC 54
 | `docs/reports/FP-045_F0_baseline.md/` | HISTORICAL | 1 | 2026-10-21 | nao editar; nova evidencia vai num arquivo novo |
 | `docs/reports/FP-051_P0_baseline.md/` | HISTORICAL | 1 | 2026-10-21 | nao editar; nova evidencia vai num arquivo novo |
 | `docs/reports/construction_core/` | HISTORICAL | 1 | 2026-10-22 | nao editar; nova evidencia vai num arquivo novo |
-| `docs/reports/file_audit/` | HISTORICAL | 22 |  | nao editar; nova evidencia vai num arquivo novo |
+| `docs/reports/file_audit/` | HISTORICAL | 22 | 2026-10-22 | nao editar; nova evidencia vai num arquivo novo |
 | `docs/reports/fp051/` | HISTORICAL | 2 | 2026-10-21 | nao editar; nova evidencia vai num arquivo novo |
