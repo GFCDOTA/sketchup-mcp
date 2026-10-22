@@ -1,0 +1,28 @@
+{
+ "schema_version": "fp046_visual_review.v1",
+ "state": "PENDING_HUMAN",
+ "decision": null,
+ "reviewer": null,
+ "date": null,
+ "applies_to": {
+  "after_skp_sha256": "893829ba69d36171d492427c74e41c523ae5203f669660e4752e8eaf88c1ca40",
+  "before_skp_sha256": "94685b5e5a5e218e21cb7f6d5a42e22a7805a79cf9dc4555937ff3ee27e83f8c",
+  "images_sha256": {
+   "top_before.png": "8ccdd0db42c26977d44a1a495f669700a08f3a9b8efa9b40e4a8dfbafdc2961b",
+   "top_after.png": "12c853e396a770c54c0b10ab25bbb655f0cb3f74f16ffcb9588e9ca4040a9d1a",
+   "sheet_top.png": "bc34f45723998105894f81822f69035732548c33e2f274882d87917d96aeeea9",
+   "iso_before.png": "43543e3b13a9aaca12786d6afcdba73972298e5c0699ed22658fc18edc71e983",
+   "iso_after.png": "f8c2bbb536abb391528321207df91a5771ab17b4df7513daaeecf27f9d667eb4",
+   "sheet_iso.png": "10d7e79592b05b3add25bd53a0f8c45280fe3e445f03089760a1436e361ee92f",
+   "front_before.png": "fa32d157ad08c0fede7d994978a255c01730183e2b26fb79130b25c87f93151c",
+   "front_after.png": "7eb6465087465243a3006c06b36f9f94b49f8a1b1d249d15165ce52d76a2a3e0",
+   "sheet_front.png": "31e27ddf1414dc5886dbfff31ec93ecab046abe2489446c46eaf1cd1b6d68c5d",
+   "detail_oblique_before.png": "4ffb12dd6302fa99473232690e343e15491833653666dcefbba19c535d49ecd4",
+   "detail_oblique_after.png": "4d0d39f7da7857bcede0154fe32bf5396242a5de75a6599e3b623ece8d049257",
+   "sheet_detail_oblique.png": "316d45126bcaf9d94ce1856edec337ff51eda3bb8df4d7743dbf676477bdc1c9",
+   "overview_1_top_iso.png": "ccf0cb5c91308af64158bdd957c857fce3c796090a0525f90f3438a6ff13e60a",
+   "overview_2_front_detail.png": "39daa3b24e4ae0631b2722c6a8abc10a85b589199380a1197571f7949e4b87f7"
+  }
+ },
+ "note": "Nenhum veredito visual foi emitido por IA. A decisao e do Felipe (APPROVED | CHANGES_REQUESTED) e vale so para estes hashes."
+}
