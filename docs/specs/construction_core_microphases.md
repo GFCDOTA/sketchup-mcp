@@ -25,8 +25,10 @@ O número de literais é termômetro, não veredito (inclui proporções de clas
 alcançadas por nome) das 5 capacidades L2 tem **7–50 funções**, das quais 3–5 estão listadas. Ex.: `plan_cabinet` chama
 `assembly.build_parts` — a geometria do gabinete — que **não** é símbolo provado: mudar `build_parts` mantém o `L2_PASS`
 antigo. Medição desta data: nenhum helper de `tools.rooms`/`core` mudou desde as evidências vigentes (o único delta é a
-camada de processo `tools.sketchup.process`, do #311, que falha alto e tem bateria L2 própria). **O buraco existe, ainda
-não foi explorado.** Fechar isso (T0.1) vem antes de qualquer detalhe novo, porque detalhe novo mexe justamente em helpers.
+camada de processo `tools.sketchup.process`, do #311, que falha alto e tem bateria L2 própria). **O buraco existia e não
+havia sido explorado.** **Fechado na T0.1:** cada evidência L2 guarda `closure_digests` (fecho calculado no commit da prova,
+`tools.rooms.evidence_closure`) e o gate do catálogo acusa `EVIDENCE_CLOSURE_STALE`; o backfill confirmou que as 6 evidências
+vigentes casam com o HEAD.
 
 ### 1.3 Capacidades e cômodos
 
@@ -64,7 +66,7 @@ Estado: `PRONTA` (sem bloqueio), `BLOQ-HUMANO` (só o Felipe destrava), `BLOQ-DE
 
 | ID | Cômodo / componente | Entrega (uma coisa) | Prova | Custo L2 | Depende de | Spec dona | Estado |
 |---|---|---|---|---|---|---|---|
-| **T0.1** | todos / prova | `closure_digests` na evidência L2: fecho estático `tools.rooms`/`core` de cada símbolo, calculado **no commit da evidência**; gate do catálogo acusa fecho velho | testes do fecho (alias, import relativo, aninhada); migração prova igualdade commit×HEAD; teste com helper alterado → stale | nenhum se o fecho casa (medido: casa) | — | R-18 (FP-046/051) | PRONTA |
+| **T0.1** | todos / prova | `closure_digests` na evidência L2: fecho estático `tools.rooms`/`core` de cada símbolo, calculado **no commit da evidência**; gate do catálogo acusa fecho velho | testes do fecho (alias, import relativo, aninhada); migração prova igualdade commit×HEAD; teste com helper alterado → stale | nenhum se o fecho casa (medido: casa) | — | R-18 (FP-046/051) | FEITA |
 | **T0.2** | cozinha / gabinete | `cabinet.sketchup.inspect` grava scratch em `runs/`, nunca ao lado de `.skp` de `artifacts/`/`fixtures/` (o Shaker já faz) | teste vermelho com caminho protegido; L2 de regressão | frente lisa, se o fecho mudar | T0.1 | FP-043 P6b | PRONTA |
 | **T0.3** | todos / orquestração | `plan_furniture_goal()` puro: DAG de componentes → próximo gap; reporta `BLOCKED_TARGET_UNDEFINED` | unitários: reuso, gap, ciclo, prova velha, fonte sem revisão, schema, nunca executa | nenhum | T0.1 | FP-051 P1 | PRONTA |
 | **T0.4** | todos / geometria | contrato de quadro `shared_transform.v1` (+Y cozinha × −Y quarto), conversão determinística 0/30/90/180°, ida e volta | propriedades + negativos | nenhum | — | FP-048 F1–F2 | PRONTA |

@@ -44,6 +44,9 @@
             "symbol_digests": {
               "python:tools.rooms.kitchen.layout.build_boxes": "e74765ee18cf82738300b68a6dd60887618a1efe455dac634fcd014fe65eac74",
               "ruby:tools/sketchup/furnish/place_layout_skp.rb": "20ac2eda55bb296f04286d4d83e348bfa7eb395d953fbcdbda1a9afdba254b5a"
+            },
+            "closure_digests": {
+              "python:tools.rooms.kitchen.layout.build_boxes": "ead6e82cd5457df0e82eb711dddce054e63a2b8d9ad1dd639c1b424d8f7abb5e"
             }
           }
         ]
@@ -231,6 +234,13 @@
               "python:tools.rooms.shared.cabinet.sketchup.verify": "d7d3dc62dbb699890468614a89e09088fc3a1a23c70d32d2445ccdded23903dd",
               "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb": "faad1fe33e175ac0026a16eaa765f91b657116d72d6d7603da50af07273f24b9",
               "ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb": "51bb6da37730081ac8274f533fc2c8923c1018526fbf21163291724c08052bce"
+            },
+            "closure_digests": {
+              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "f14513b1221c6a7a8b0168afb6112fc8d18c066b4f37edd141954ddfffb7e507",
+              "python:tools.rooms.shared.cabinet.plan.require_valid": "755e6190191efec157d22da029db1bd741624313c6046dc06a84057736ad3b34",
+              "python:tools.rooms.shared.cabinet.sketchup.materialize": "e5c9316c8f485922695d26b38023316f543e1701c009ebaf31c6f3c5ed15595c",
+              "python:tools.rooms.shared.cabinet.sketchup.inspect": "6ac9dce2ceeb5e48e4d3fafcfd2ac97539bd4b0839702bcd1daa50f16a7b7f99",
+              "python:tools.rooms.shared.cabinet.sketchup.verify": "43bfd51e0b74d827d29e47ea44ce818bd439b1932bec7f7fb5f88f0ceed00279"
             }
           }
         ]
@@ -402,6 +412,11 @@
               "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet": "97fa552cf5e14f6a30ab19a1a3474252d02e652e25b23cbf9c9fb12357d0bf59",
               "python:tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet": "128a2cad06b8bc61dbacfa200bcbfae1ca4596c13ab51df38623ce39061709ac",
               "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "80b8bd953b0516ad10443be865d73e21b4d15c87b138cddbcdb82c75431063cf"
+            },
+            "closure_digests": {
+              "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet": "7e5bceb48d9e18ef77e2d262a1019fe8187cb481c0ee46a7ae01550d035461fe",
+              "python:tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet": "5c0bcbb6f6ab2f3c613dc758596223a450840b6d9ab3a7f25767a79a6906b48f",
+              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "f14513b1221c6a7a8b0168afb6112fc8d18c066b4f37edd141954ddfffb7e507"
             }
           },
           {
@@ -411,6 +426,9 @@
             "scope": "rerun do L2 da P7 (script inalterado) depois que cabinet_flow.run_request passou a recusar pedido de Shaker: positivo DONE_L2_VERIFIED, 6 negativos, job interrompido de verdade, canonico identico; SketchUp 26.0.429",
             "symbol_digests": {
               "python:tools.rooms.kitchen.capabilities.cabinet_flow.run_request": "9c7b16cbc15b256f23844af7f8d2216a65083b6f991d9a952458bc6403b4c166"
+            },
+            "closure_digests": {
+              "python:tools.rooms.kitchen.capabilities.cabinet_flow.run_request": "875962afcfc9f17ddb967eeb46f221a1c3f54e4b35f93898b8ea3f9c275f0fe3"
             }
           }
         ]
@@ -580,6 +598,11 @@
               "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker": "2b656cce571da5a63c02bc68a3c74d39d38ebaa935dbd434e1e90c1a4d457c3a",
               "python:tools.rooms.kitchen.capabilities.shaker_flow.run_request": "e6d13a4fdb57e6b2712aec88721bc67dd5cf34ac996d0acd8510d96080f4d44e",
               "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "e9e99a4199eac697b951030d8e325c72e81dd55800d64808ea39e95d4b5f15d4"
+            },
+            "closure_digests": {
+              "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker": "103bd61b5d7ff4784806f11cc1ce609973a4df352aa649f1d0ea6fcfdb881b65",
+              "python:tools.rooms.kitchen.capabilities.shaker_flow.run_request": "0b5ba03772d9f70d47efe17889df87b1736c3ecff4b87f730e3692b62e5f3d9d",
+              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "c005937b797a31880f4a991ca9d7748cae9c57dce4017b9f71726fe24777eb38"
             }
           }
         ]
@@ -813,6 +836,13 @@
               "python:tools.rooms.shared.cabinet.shaker.sketchup.verify_shaker": "1335419e985e77d63a41e2e1dc76b1f2dc42fc96e2caa3053597df68514b4f86",
               "ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb": "e9bf32574646ba26bc7b9c1793038601e55112dee6a6aaffbec31f10a9a80117",
               "ruby:tools/rooms/shared/cabinet/ruby/shaker_inspect.rb": "1bbb3fc32cd7eb110fb8a1e8f4179fb4562b4e925134f0958608043cbd77ba68"
+            },
+            "closure_digests": {
+              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "c005937b797a31880f4a991ca9d7748cae9c57dce4017b9f71726fe24777eb38",
+              "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker": "9adac39ed1e69c2cf5233713d254d3eea879c7be4a7ebf2130b0cbd9f1ca89c5",
+              "python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker": "8bc1a6214d73b810a193a03a4ce5be956f5df4d698b4346d761b4519b95ef3a3",
+              "python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker": "18c1d10608c205d551a3203a8ac9c4d728fd91d8d55dc45bf98f4985a78b46c7",
+              "python:tools.rooms.shared.cabinet.shaker.sketchup.verify_shaker": "00b1bb73681cf20b8eb8269946ce6e54b5a4a64d76a9ad8149344f758b59d507"
             }
           }
         ]

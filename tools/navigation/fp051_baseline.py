@@ -67,14 +67,24 @@ def default_digest(symbol: dict) -> str | None:
     return cc.symbol_digest(symbol)
 
 
-def capability_state(cap: dict, digest_fn) -> dict:
-    """Estado real; `evidence_current` so e True quando TODA prova ainda casa com o codigo (digest dos simbolos)."""
+def default_closure(key: str) -> str | None:
+    from tools.rooms import evidence_closure
+    return evidence_closure.current_closure_digest(key)
+
+
+def capability_state(cap: dict, digest_fn, closure_fn=None) -> dict:
+    """Estado real; `evidence_current` so e True quando TODA prova ainda casa com o codigo: digest dos simbolos e, no codigo
+    real, tambem o FECHO (helpers/constantes, T0.1). Testes sinteticos injetam `digest_fn` e nao checam fecho."""
+    if closure_fn is None and digest_fn is default_digest:
+        closure_fn = default_closure
     stale = []
     for ev in cap["validation"]["evidence"]:
         for key, digest in ev["symbol_digests"].items():
             lang, _, ref = key.partition(":")
             if digest_fn({"lang": lang, "ref": ref}) != digest:
                 stale.append(key)
+            elif closure_fn is not None and lang == "python" and closure_fn(key) != (ev.get("closure_digests") or {}).get(key):
+                stale.append(key + " (fecho)")
     state = cap["validation"]["state"]
     current = state == "L2_PASS" and bool(cap["validation"]["evidence"]) and not stale
     return {"id": cap["id"], "room": cap["room"], "implementation": cap["implementation"]["state"], "validation": state,

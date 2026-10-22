@@ -53,8 +53,10 @@ Rodar sempre de dentro do repo (rodar da raiz do workspace cria caches lá).
 
 - **L1** — contrato/cálculo puro testado (sem SketchUp). **L2** — SketchUp real (26.0.429) em cópia: salvar, fechar o próprio PID,
   reabrir em outro processo, inspecionar e verificar. **L3** — veredito visual humano.
-- **R-18:** mudou um símbolo provado → o digest não casa → `BLOCKED_EVIDENCE_STALE`. Prova velha nunca é reaproveitada:
-  revogar no catálogo, rodar o L2 de novo num **commit limpo** (`dirty: false`) e restaurar com os digests novos. Skill `capability-l2-proof`.
+- **R-18:** mudou um símbolo provado **ou um helper/constante do seu fecho** (`tools.rooms`/`core`) → o digest não casa →
+  `EVIDENCE_STALE`/`EVIDENCE_CLOSURE_STALE`. Prova velha nunca é reaproveitada: revogar no catálogo, rodar o L2 de novo num
+  **commit limpo** (`dirty: false`) e restaurar com os digests novos; `python -m tools.rooms.evidence_closure --backfill --write`
+  grava o fecho calculado no commit da prova. Skill `capability-l2-proof`.
 - `human_review` de uma fonte vale para **uma recipe e um trecho**; outra recipe do mesmo vídeo não herda.
 - Capacidade que não existe **recusa com o motivo** (`BLOCKED_*`); não contornar por outra tool.
 

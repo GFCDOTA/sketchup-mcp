@@ -12,8 +12,9 @@ description: >-
 # capability-l2-proof
 
 Uma capacidade só é `L2_PASS` se a evidência foi gerada **no código que está no catálogo**. O digest de cada símbolo
-(`symbol_digests`) amarra as duas coisas; mudou o símbolo, a prova caiu (R-18). Este é o procedimento que mantém isso
-verdadeiro sem contorno.
+(`symbol_digests`) e o do seu fecho estático (`closure_digests`: helpers e constantes de `tools.rooms`/`core` alcançados por
+nome) amarram as duas coisas; mudou qualquer um, a prova caiu (R-18). Este é o procedimento que mantém isso verdadeiro sem
+contorno. Ver o que entra no fecho: `$PY -m tools.rooms.evidence_closure --explain python:<mod.simbolo>`.
 
 ## Checklist (copiar e marcar)
 
@@ -56,7 +57,12 @@ $PY -m tools.rooms.capability_catalog --digest python:<mod.simbolo> ...
 ```
 Nova entrada de evidência: `ref` (README da pasta), `commit` (sha curto do A), `sketchup_version`, `scope` (o que a prova
 cobre e o que NÃO é — nunca veredito visual) e `symbol_digests` de **todos** os símbolos da capacidade. Prova antiga de
-outra fase fica no histórico do git, não no catálogo. Conferir `python -m tools.rooms.capability_catalog` (`errors: {}`).
+outra fase fica no histórico do git, não no catálogo. Depois, o fecho (helpers e constantes que os símbolos alcançam):
+```bash
+$PY -m tools.rooms.evidence_closure --backfill            # seco: compara o fecho no commit da prova × HEAD
+$PY -m tools.rooms.evidence_closure --backfill --write    # grava closure_digests (recusa se alguma prova estiver velha)
+```
+Conferir `python -m tools.rooms.capability_catalog` (`errors: {}`).
 Editou o README depois do `git add`? Rodar `register_evidence` de novo (refaz o blob sha).
 
 ## README da evidência (mínimo)
