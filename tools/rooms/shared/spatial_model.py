@@ -14,8 +14,10 @@ Uso: python -m tools.spatial_model --room r002   (default planta_74 / r002)
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+from collections import OrderedDict
 from pathlib import Path
 
 from shapely.geometry import LineString, Point, Polygon, box
@@ -79,15 +81,35 @@ def _tv_depth_m(w, usable):
     return best
 
 
+_GEOMETRY_CACHE: OrderedDict = OrderedDict()   # chave = sha1 do CONTEUDO do consensus; poucas plantas por processo
+_GEOMETRY_CACHE_MAX = 8
+
+
+def _consensus_geometry(con: dict):
+    """Pegadas das paredes, envelope e pisos de TODOS os comodos — dependem so do consensus, nao do comodo pedido.
+    Antes eram recalculados a cada `build_spatial_model` (126 chamadas para 11 comodos ao mobiliar a planta_74).
+    Chave pelo CONTEUDO (sha1 do JSON, ~0,6 ms): consensus editado no mesmo processo gera outra chave, nunca reaproveita
+    geometria velha. Geometria shapely e imutavel; os pisos ficam aqui dentro (so leitura) e nao sao devolvidos a quem chama."""
+    key = hashlib.sha1(json.dumps(con, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+    hit = _GEOMETRY_CACHE.get(key)
+    if hit is None:
+        wt = float(con.get("wall_thickness_pts") or 5.4)
+        wp = [wall_footprint(w, extend_endpoints=True) for w in con["walls"]]
+        hit = (wt, {w["id"]: wp[i] for i, w in enumerate(con["walls"])}, _envelope(con, wp, wt), compute_room_floors(con))
+        _GEOMETRY_CACHE[key] = hit
+        while len(_GEOMETRY_CACHE) > _GEOMETRY_CACHE_MAX:
+            _GEOMETRY_CACHE.popitem(last=False)
+    else:
+        _GEOMETRY_CACHE.move_to_end(key)
+    return hit
+
+
 def build_spatial_model(con: dict, room_id: str) -> dict:
     assert_pt_to_m_for_source(con.get("source"))
-    wt = float(con.get("wall_thickness_pts") or 5.4)
     walls = {w["id"]: w for w in con["walls"]}
-    wp = [wall_footprint(w, extend_endpoints=True) for w in con["walls"]]
-    foot = {w["id"]: wp[i] for i, w in enumerate(con["walls"])}
-    envelope = _envelope(con, wp, wt)
+    wt, foot, envelope, floors = _consensus_geometry(con)
 
-    e = compute_room_floors(con)[room_id]
+    e = floors[room_id]
     cell = Polygon(e["outer"], holes=e.get("holes") or [])
 
     room_walls = [wid for wid, f in foot.items() if f.distance(cell) < 0.8]

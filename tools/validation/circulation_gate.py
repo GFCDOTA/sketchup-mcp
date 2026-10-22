@@ -41,6 +41,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from functools import lru_cache                       # noqa: E402
+from shapely import wkb                               # noqa: E402
 from shapely.geometry import Point, Polygon           # noqa: E402
 from shapely.ops import unary_union                   # noqa: E402
 
@@ -144,13 +146,24 @@ def _portal_kind(p, sm):
     return best
 
 
+@lru_cache(maxsize=2048)
+def _eroded_regions(polygon_wkb: bytes, width_m: float) -> tuple:
+    """Regioes livres de `polygon` erodido por width_m. Funcao pura de (poligono, largura): a busca binaria de cada portal,
+    os varios portais de um comodo e as ~95 chamadas do gate por apartamento repetem as mesmas larguras (0.50, 1.00, 0.75...)
+    sobre o MESMO poligono (o comodo vazio, sobretudo). Cache limitado (2048 entradas) troca ~54 mil `buffer` por algumas
+    centenas — medido em docs/reports/construction_core/geometry_hot_paths.md."""
+    eroded = wkb.loads(polygon_wkb).buffer(-(width_m / 2) * M2IN)
+    if eroded.is_empty:
+        return ()
+    return tuple(eroded.geoms) if eroded.geom_type == "MultiPolygon" else (eroded,)
+
+
 def _connected_at_width(polygon, width_m, pt_a, pt_b):
     """True se pt_a e pt_b caem na MESMA regiao conectada apos erodir
     'polygon' por width_m (corredor livre continuo dessa largura)."""
-    eroded = polygon.buffer(-(width_m / 2) * M2IN)
-    if eroded.is_empty:
+    regions = _eroded_regions(polygon.wkb, width_m)
+    if not regions:
         return False
-    regions = list(eroded.geoms) if eroded.geom_type == "MultiPolygon" else [eroded]
 
     def _region_of(p):
         best, bd = None, 1e18
