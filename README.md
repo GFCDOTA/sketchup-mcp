@@ -26,6 +26,8 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 |---|---|
 | entender onde cada coisa mora, e o que existe vs. o que ainda é previsto | [`docs/architecture/repository_map.md`](docs/architecture/repository_map.md) |
 | achar um arquivo antigo que sumiu/mudou | [`docs/architecture/migration_guide.md`](docs/architecture/migration_guide.md) |
+| ver o que **cada cômodo** tem (capacidades, prova, lacunas, arquivos) | [Módulos de cômodo](#módulos-de-cômodo) · [`tools/rooms/README.md`](tools/rooms/README.md) |
+| o estado de **cada arquivo** (ativo, legado, só documentado, histórico) | [`docs/reports/file_audit/`](docs/reports/file_audit/README.md) |
 | mexer num cômodo (exemplo completo: cozinha) | [`tools/rooms/kitchen/README.md`](tools/rooms/kitchen/README.md) |
 | saber quem usa um arquivo antes de movê-lo | `python -m tools.navigation.consumers <caminho>` |
 | ver o plano da reorganização (FP-043) e o estado dela | [relatório P8 (parcial)](docs/reports/FP-043_final_validation.md) · [spec de conclusão P3–P8](docs/specs/FP-043_remaining_execution_P3_P8.md) · [FP-043 original](docs/specs/FP-043_repository_navigation_and_room_specialists.md) · [mapa P0](docs/specs/FP-043_P0_map.md) |
@@ -33,6 +35,30 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 | saber o que ainda mora em `tools/*.py` e por quê | [`tools/PUBLIC_API.md`](tools/PUBLIC_API.md) |
 | saber o que o SketchUp real já provou | [`artifacts/review/l2_fp042_20261019/README.md`](artifacts/review/l2_fp042_20261019/README.md) |
 | as regras de quem edita (humano ou agente) | [`CLAUDE.md`](CLAUDE.md) → `.claude/` |
+
+---
+
+## Módulos de cômodo
+
+<!-- rooms-index:begin -->
+
+> Gerado por `python -m tools.navigation.rooms_index --write` (não editar à mão; o teste acusa divergência).
+> Detalhe por cômodo: [`tools/rooms/README.md`](tools/rooms/README.md) · handoff por arquivo: [`docs/reports/file_audit/`](docs/reports/file_audit/README.md).
+
+| Cômodo | Pasta | Papel | Capacidades (prova) | Lacunas | Fragmentos | Arquivos (py/rb) |
+|---|---|---|---|---|---|---|
+| Cozinha | [`tools/rooms/kitchen/`](tools/rooms/kitchen/) | planeja e constrói | 5 L2, 1 L1, 1 sem prova | 3 | — | 22 (16/2) |
+| Sala | [`tools/rooms/living/`](tools/rooms/living/) | planeja e constrói | 3 L1 | — | — | 39 (22/10) |
+| Quarto | [`tools/rooms/bedroom/`](tools/rooms/bedroom/) | planeja e constrói | 4 L1 | — | — | 16 (13/0) |
+| Banheiro | [`tools/rooms/bathroom/`](tools/rooms/bathroom/) | planeja e constrói | 2 L1 | — | — | 10 (7/0) |
+| Serviço | [`tools/rooms/service/`](tools/rooms/service/) | planeja e constrói | 1 L1 | — | — | 5 (2/0) |
+| Closet | [`tools/rooms/closet/`](tools/rooms/closet/) | reusa outro cômodo (bedroom) | — | 1 | — | 4 (1/0) |
+| Home office | [`tools/rooms/home_office/`](tools/rooms/home_office/) | reusa outro cômodo (bedroom) | — | 1 | — | 4 (1/0) |
+| Varanda | [`tools/rooms/balcony/`](tools/rooms/balcony/) | só consultivo | — | 1 | — | 4 (1/0) |
+| Circulação | [`tools/rooms/circulation/`](tools/rooms/circulation/) | só valida | 1 L1 | — | — | 4 (1/0) |
+| Compartilhado | [`tools/rooms/shared/`](tools/rooms/shared/) | peças usadas por ≥ 2 cômodos | 2 capacidades | — | — | 36 |
+
+<!-- rooms-index:end -->
 
 ---
 
