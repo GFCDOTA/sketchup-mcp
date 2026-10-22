@@ -59,8 +59,8 @@ def world(x, y, z):
 views = [
     {"name": "top", "preset": "top"},
     {"name": "iso", "eye_m": world(cw / 2 + 0.95, cd + 0.95, ch + 0.75), "target_m": world(cw / 2, cd * 0.9, ch * 0.5), "fov": 32},
-    {"name": "front", "eye_m": world(cw / 2, cd + 1.35, ch * 0.55), "target_m": world(cw / 2, cd, ch * 0.5), "fov": 30},
-    {"name": "detail_oblique", "eye_m": world(cw / 2 - 0.42, cd + 0.50, ch * 0.62), "target_m": world(cw / 2, cd, ch * 0.5), "fov": 32},
+    {"name": "front", "eye_m": world(cw / 2, cd + 1.40, ch * 0.55), "target_m": world(cw / 2, cd, ch * 0.5), "fov": 42},
+    {"name": "detail_oblique", "eye_m": world(cw / 2 - 0.35, cd + 0.80, ch + 0.80), "target_m": world(cw / 2, cd, ch * 0.5), "fov": 34},
 ]
 shots = {}
 for label, skp in (("before", before_skp), ("after", after_skp)):
