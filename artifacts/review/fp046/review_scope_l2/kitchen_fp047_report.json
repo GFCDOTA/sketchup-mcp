@@ -1,0 +1,60 @@
+{
+ "schema_version": "room_regression_report.v1",
+ "change_id": "fp046-review-scope-kitchen-shaker-l2",
+ "mode": "strict_identity",
+ "base_commit": null,
+ "candidate_commit": null,
+ "input_sha256": "03140fb857c0000454159d3bd046fa91083d68dea3c19737679d56121d6caa13",
+ "evidence": {
+  "before_snapshot_sha256": "03140fb857c0000454159d3bd046fa91083d68dea3c19737679d56121d6caa13",
+  "delta_count": 0,
+  "unauthorized_delta_count": 0,
+  "ambiguous_groups": {
+   "before": 63,
+   "after": 63
+  },
+  "l1_gates": {
+   "introduced": 0,
+   "preexisting": 1,
+   "resolved": 0,
+   "rooms_checked": {
+    "before": [
+     "r000",
+     "r001",
+     "r002",
+     "r003",
+     "r004",
+     "r005",
+     "r006",
+     "r007"
+    ],
+    "after": [
+     "r000",
+     "r001",
+     "r002",
+     "r003",
+     "r004",
+     "r005",
+     "r006",
+     "r007"
+    ]
+   }
+  },
+  "preexisting_gate_findings": [
+   "CIRC|r000|corredor_principal"
+  ],
+  "introduced_gate_findings": [],
+  "resolved_gate_findings": []
+ },
+ "require_l2": false,
+ "require_l3_if_visual_changed": true,
+ "canonical_hashes_unchanged": true,
+ "visual_changed": false,
+ "tests": {
+  "l1": "PASS",
+  "l2": "NOT_APPLICABLE",
+  "l3": "NOT_APPLICABLE"
+ },
+ "state": "PASS",
+ "reasons": []
+}

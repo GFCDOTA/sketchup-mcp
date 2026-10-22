@@ -1,0 +1,48 @@
+{
+ "without_shaker_block": {
+  "state": "BLOCKED_INPUT_INCOMPLETE",
+  "pids": [],
+  "reason": "insumos sem valor/unidade/origem: ['shaker.frame.stile_width', 'shaker.frame.rail_height', 'shaker.frame.frame_thickness', 'shaker.panel.thickness', 'shaker.panel.recess_from_frame_front', 'shaker.materials.frame', 'shaker.materials.panel']",
+  "next_step": "informar cada medida com unidade e origem (pdf, consensus, user_request)"
+ },
+ "pose_outside_kitchen": {
+  "state": "BLOCKED_PLAN_REFUSED",
+  "pids": [],
+  "reason": "KITCHEN_GATE_FAILED: architecture: fora da cozinha 0.261600 m2; dentro de parede 0.000000 m2",
+  "next_step": null
+ },
+ "architecture_change": {
+  "state": "BLOCKED_ARCHITECTURE_CHANGE",
+  "pids": [],
+  "reason": "o pedido altera arquitetura derivada do PDF (Hard Rule #1)",
+  "next_step": "tratar como proposta ao Felipe; o especialista nao altera paredes, portas ou janelas"
+ },
+ "frame_thickness_mismatch": {
+  "state": "BLOCKED_PLAN_REFUSED",
+  "pids": [],
+  "reason": "FRAME_THICKNESS_MISMATCH: moldura 0.02 m != espessura da frente do pai 0.016000000000000014 m",
+  "next_step": null
+ },
+ "text_does_not_ask_shaker": {
+  "state": "BLOCKED_TECHNIQUE_UNRESOLVED",
+  "pids": [],
+  "reason": "o texto do pedido nao pede porta Shaker; um bloco 'shaker' nao basta",
+  "next_step": "descrever a porta Shaker no pedido ou usar o fluxo de frentes lisas"
+ },
+ "source_verified_without_human_review": {
+  "state": "BLOCKED_KNOWLEDGE_EVIDENCE",
+  "pids": [],
+  "reason": "o pedido declara source_verified=true para a recipe 'cabinet.recessed-shaker-and-louvers' da fonte 'yt-cabinet-styles-2024', mas nao ha revisao humana registrada para essa fonte (a fonte nunca e presumida)",
+  "next_step": null
+ },
+ "source_verified_for_another_recipe_of_the_same_video": {
+  "state": "BLOCKED_KNOWLEDGE_EVIDENCE",
+  "pids": [],
+  "reason": "o pedido declara source_verified=true para a recipe 'cabinet.countertop-separate-and-bevel' da fonte 'yt-cabinet-tips-2021', mas a revisao registrada cobre 'cabinet.front-gaps-and-profiles' (03:13-04:29) (a fonte nunca e presumida)",
+  "next_step": null
+ },
+ "plain_front_flow_refuses_shaker": {
+  "state": "BLOCKED_CAPABILITY_MISMATCH",
+  "pids": []
+ }
+}

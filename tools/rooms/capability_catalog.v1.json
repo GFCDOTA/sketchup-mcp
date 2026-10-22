@@ -572,13 +572,13 @@
         ],
         "evidence": [
           {
-            "ref": "artifacts/review/fp046/promotion_l2/README.md",
+            "ref": "artifacts/review/fp046/review_scope_l2/README.md",
             "sketchup_version": "26.0.429",
-            "commit": "7820f74",
-            "scope": "cozinha da planta_74 (copia do .skp mobiliado) pelo fluxo sem contorno: pedido -> 8 gates -> gabinete + Shaker salvos/reabertos/inspecionados, 7 negativos sem SketchUp, strict_identity FP-047, canonicos intactos; SketchUp 26.0.429; NAO e veredito visual nem projeto de cozinha",
+            "commit": "4023b78",
+            "scope": "cozinha da planta_74 (copia do .skp mobiliado) pelo fluxo sem contorno, com a human_review conferida CONTRA A RECIPE do pedido: gabinete + Shaker salvos/reabertos/inspecionados, 8 negativos sem SketchUp (inclui source_verified=true para outra recipe do mesmo video), strict_identity FP-047, canonicos intactos; SketchUp 26.0.429; NAO e veredito visual nem projeto de cozinha",
             "symbol_digests": {
               "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker": "2b656cce571da5a63c02bc68a3c74d39d38ebaa935dbd434e1e90c1a4d457c3a",
-              "python:tools.rooms.kitchen.capabilities.shaker_flow.run_request": "5367a232ca5fed1f47292bac61c3ff100cc843beff3c64172991467e549ebfd8",
+              "python:tools.rooms.kitchen.capabilities.shaker_flow.run_request": "e6d13a4fdb57e6b2712aec88721bc67dd5cf34ac996d0acd8510d96080f4d44e",
               "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "e9e99a4199eac697b951030d8e325c72e81dd55800d64808ea39e95d4b5f15d4"
             }
           }

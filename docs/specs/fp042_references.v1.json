@@ -7037,6 +7037,36 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp046/review_scope_l2/README.md",
+      "blob_sha": "99419b8f321e3714c950a35fa0c6cb1f9f4ef27b",
+      "blob_size": 2995,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/kitchen_fp047_report.json",
+      "blob_sha": "06dc7b4570662ba29116bd13340fd0132ce2628f",
+      "blob_size": 1230,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/kitchen_negatives.json",
+      "blob_sha": "0717fd08ac4e6f38227ebb0969b6b2bea5cba3d7",
+      "blob_size": 2201,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/kitchen_summary.json",
+      "blob_sha": "4fd56c52d8667438f12acf20a0df1f4a5b6c818c",
+      "blob_size": 5230,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/kitchen_trace.json",
+      "blob_sha": "58fb709b9c360fcc50ded3f5fdcf64560906ee1a",
+      "blob_size": 11240,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp046/l3_package/README.md",
       "blob_sha": "65b9f499f3ab9fe64e658d96cf2498293523332a",
       "blob_size": 3555,
@@ -7274,6 +7304,12 @@
       "path": "artifacts/review/fp046/promotion_l2/l2_promoted.py",
       "blob_sha": "8b85937d1f079f743449209717413838b55f3a2b",
       "blob_size": 7550,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/l2_review_scope.py",
+      "blob_sha": "a61ca60331b38be48cb82dcd30d4d0802efeb959",
+      "blob_size": 8215,
       "owner_group": "artifacts"
     },
     {
