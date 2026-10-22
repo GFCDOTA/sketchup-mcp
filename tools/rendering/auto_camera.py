@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import sys
 
 sys.path.insert(0, ".")

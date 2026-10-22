@@ -1,5 +1,7 @@
 # FP-032 — Placar de discriminação da ACL de visão (1ª fatia)
 
+> **Nota (2026-10-22):** o NOC/oráculo `:8765` foi removido em 2026-07-24 e o veredito visual por GPT/Chrome foi substituído pelo do Felipe no chat em 2026-07-27. Trechos abaixo que citam esses sistemas são históricos.
+
 > Defeito injetado (determinístico, reproduzível): `erase_top_exterior_wall_segment`
 > (`missing_wall_continuation`) no `planta_74_top.png`, rect=(500,200,900,224) preenchido
 > com o cinza de fundo. Só o render é corrompido; consensus/geometry ficam idênticos.

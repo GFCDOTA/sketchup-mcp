@@ -6,7 +6,6 @@ Uso: KITCHEN_THEME=black_wood_gold .venv/Scripts/python.exe .claude/scratch/bake
 import hashlib
 import os
 import shutil
-import subprocess
 import time
 from pathlib import Path
 from tools.sketchup.legacy_process import launch_owned, close_owned

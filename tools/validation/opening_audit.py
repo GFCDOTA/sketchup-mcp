@@ -92,7 +92,7 @@ def _derive_pdf_to_world(con: dict, rep: dict):
 
 def audit(fixture: str = "planta_74") -> dict:
     import pypdfium2 as pdfium
-    from PIL import Image, ImageDraw
+    from PIL import ImageDraw
 
     con = json.loads((REPO_ROOT / "fixtures" / fixture
                       / "consensus_with_human_walls_and_soft_barriers.json").read_text("utf-8"))

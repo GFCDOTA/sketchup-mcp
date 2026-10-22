@@ -17,8 +17,7 @@ def bedroom_designer_boxes(con, room_id):
     GOLDEN composta (bed_builder: plinto+estrado+colchao+travesseiros+manta, material
     por papel + bevel) no MESMO footprint/facing. Substitui o place_bedroom_skp antigo."""
     from tools.rooms.shared.bed import build_bed, place_bed_boxes
-    from tools.rooms.shared.anatomy import bed_spec, nightstand_spec, wardrobe_spec
-    from tools.rooms.shared.nightstand import build_nightstand, place_nightstand_boxes
+    from tools.rooms.shared.anatomy import bed_spec, wardrobe_spec
     from tools.rooms.shared.wardrobe import build_wardrobe, place_wardrobe_boxes
     sm, out = bedroom_designer.run(con, room_id, minimalist=True)
     if out.get("result") != "OK":

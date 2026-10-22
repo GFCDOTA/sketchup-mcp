@@ -17,7 +17,6 @@ Uso: python -m tools.rooms.living.sofa_class   (valida arquetipos x lugares + sa
 """
 from __future__ import annotations
 
-import math
 import sys
 from pathlib import Path
 

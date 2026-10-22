@@ -15,7 +15,6 @@ Saída: STATUS PASS|WARN|FAIL + itens. Exit 0 (PASS/WARN) / 1 (FAIL).
 from __future__ import annotations
 
 import json
-import os
 import sys
 
 sys.path.insert(0, ".")

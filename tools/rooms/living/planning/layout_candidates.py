@@ -24,7 +24,6 @@ from shapely.ops import unary_union
 
 from tools.rooms.shared.layout_rules import (FILL_IDEAL, RESPIRO_IDEAL, RULES, flag_anti_patterns)
 from tools.rooms.shared.layout_rules import IDEAL_SOFA_TV as SOFA_TV_IDEAL
-from tools.rooms.shared.layout_rules import MAX_SOFA_TV as SOFA_TV_MAX
 from tools.rooms.shared.layout_rules import MIN_SOFA_TV as SOFA_TV_MIN
 from tools.rooms.shared.layout_rules import PASSAGE_MIN_M as PASSAGE_M
 from tools.spatial_model import (PT_TO_M, _tv_depth_m, _wall_mid,

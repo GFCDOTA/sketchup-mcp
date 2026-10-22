@@ -11,7 +11,7 @@ import json
 import math
 from pathlib import Path
 
-from core.scale import DEFAULT_PT_TO_M, PLANT_PT_TO_M, expected_pt_to_m
+from core.scale import PLANT_PT_TO_M, expected_pt_to_m
 
 
 def audit(consensus: dict, report: dict, *, consensus_path: Path | None = None,

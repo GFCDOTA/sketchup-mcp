@@ -1,5 +1,7 @@
 # consult_gpt_bridge
 
+> **Nota (2026-10-22):** o NOC/oráculo `:8765` foi removido em 2026-07-24 e o veredito visual por GPT/Chrome foi substituído pelo do Felipe no chat em 2026-07-27. Trechos abaixo que citam esses sistemas são históricos.
+
 Ponte de pergunta/resposta ESTRUTURADA entre o **Arquiteto de Interiores** (Interior Studio, `:8782`)
 e um consultor externo chamado **Consult GPT**. O objetivo é um loop real de aprendizado visual:
 
