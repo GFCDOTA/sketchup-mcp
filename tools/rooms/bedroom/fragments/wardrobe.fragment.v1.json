@@ -1,0 +1,44 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "bedroom",
+  "id": "wardrobe",
+  "title": "Guarda-roupa",
+  "focus": "Guarda-roupa: hoje corpo em UM bloco + portas + puxador (Gen1). Alvo: painéis reusando a carcaça compartilhada no quadro −Y (FP-048/049, microfases B1–B2).",
+  "capability_ids": [
+    "bedroom.wardrobe.build",
+    "bedroom.wardrobe.gate"
+  ],
+  "binding_ids": [],
+  "recipe_ids": [
+    "cabinet.reusable-components",
+    "cabinet.materials-and-texture-direction"
+  ],
+  "specs": [
+    "docs/specs/FP-048_shared_geometry_capabilities_and_coordinate_contract.md",
+    "docs/specs/FP-049_composable_wardrobe_end_to_end_assembly.md",
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/bedroom/validation/wardrobe_gate.py",
+    "tools/rooms/shared/wardrobe.py"
+  ],
+  "tests": [
+    "tests/test_bed_placement_gate.py",
+    "tests/test_fp042_shared_parametric_builders.py"
+  ],
+  "skills": [
+    "planned-furniture-designer",
+    "capability-l2-proof"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "D48-04 (matemática +Y/−Y) e D49-06 (giro e puxadores)"
+  ],
+  "stop_conditions": [
+    "medida que o pedido não trouxe: recusar, nunca default",
+    "aparência nova: PENDING_HUMAN até o Felipe decidir (nunca autodeclarar)",
+    "frente −Y no quarto × +Y na cozinha: converter pelo contrato FP-048, nunca à mão"
+  ]
+}

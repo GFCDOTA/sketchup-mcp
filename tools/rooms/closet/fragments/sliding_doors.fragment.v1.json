@@ -1,0 +1,29 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "closet",
+  "id": "sliding_doors",
+  "title": "Portas de correr do closet",
+  "focus": "Closet reusa a marcenaria do quarto; portas de correr ainda sem builder (microfase C1, depois de B1–B2).",
+  "capability_ids": [],
+  "binding_ids": [
+    "bind.closet.sliding"
+  ],
+  "recipe_ids": [
+    "cabinet.reusable-components"
+  ],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [],
+  "tests": [],
+  "skills": [],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "fonte de portas de correr sem revisão humana"
+  ],
+  "stop_conditions": [
+    "técnica sem human_review do trecho exato da recipe: BLOCKED_KNOWLEDGE_EVIDENCE"
+  ]
+}

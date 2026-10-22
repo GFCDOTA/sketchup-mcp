@@ -1,0 +1,27 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "balcony",
+  "id": "pergola_and_planters",
+  "title": "Pérgola e floreiras da varanda",
+  "focus": "Varanda só consultiva: pérgola e floreiras descritas por fonte, sem capacidade nem brain independente.",
+  "capability_ids": [],
+  "binding_ids": [
+    "bind.balcony.pergola"
+  ],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [],
+  "tests": [],
+  "skills": [],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "fonte só descrição + doc oficial"
+  ],
+  "stop_conditions": [
+    "técnica sem human_review do trecho exato da recipe: BLOCKED_KNOWLEDGE_EVIDENCE"
+  ]
+}

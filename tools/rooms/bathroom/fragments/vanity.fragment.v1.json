@@ -1,0 +1,31 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "bathroom",
+  "id": "vanity",
+  "title": "Gabinete da pia (vanity)",
+  "focus": "Gabinete de banheiro = carcaça compartilhada + tampo + recorte de cuba (microfase W1); depende de K1/K4.",
+  "capability_ids": [],
+  "binding_ids": [],
+  "recipe_ids": [
+    "cabinet.sink-and-wet-channel-cutouts",
+    "cabinet.materials-and-texture-direction"
+  ],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [],
+  "tests": [],
+  "skills": [
+    "planned-furniture-designer"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "depende de K1 (tampo) e K4 (cuba) da cozinha"
+  ],
+  "stop_conditions": [
+    "técnica sem human_review do trecho exato da recipe: BLOCKED_KNOWLEDGE_EVIDENCE",
+    "medida que o pedido não trouxe: recusar, nunca default"
+  ]
+}

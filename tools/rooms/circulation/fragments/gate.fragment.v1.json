@@ -1,0 +1,33 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "circulation",
+  "id": "gate",
+  "title": "Circulação",
+  "focus": "Gate de circulação entre móveis e portas (corredor livre, giro de porta); usado antes e depois (FP-047).",
+  "capability_ids": [
+    "circulation.gate"
+  ],
+  "binding_ids": [
+    "bind.circulation.gate"
+  ],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/FP-047_room_geometry_visual_regression_contract.md"
+  ],
+  "code": [
+    "tools/validation/circulation_gate.py"
+  ],
+  "tests": [
+    "tests/test_circulation_gate.py"
+  ],
+  "skills": [],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "SUITE 01 reprova antes e depois (preexistente, #351)"
+  ],
+  "stop_conditions": [
+    "achado introduzido pela mudança: FAIL; preexistente é declarado, não escondido"
+  ]
+}

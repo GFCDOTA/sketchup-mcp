@@ -1,0 +1,43 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "living",
+  "id": "sofa",
+  "title": "Sofá (classe paramétrica e gate)",
+  "focus": "Classe paramétrica do sofá (reto, chaise) e seu gate; builder Gen1 com medidas embutidas — migrar para o contrato por pedido sem mudar a aparência aprovada.",
+  "capability_ids": [
+    "living.sofa.class",
+    "living.sofa.gate"
+  ],
+  "binding_ids": [
+    "bind.living.sofa"
+  ],
+  "recipe_ids": [
+    "cabinet.materials-and-texture-direction"
+  ],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/living/sofa_class.py",
+    "tools/rooms/living/validation/sofa_gate.py",
+    "tools/rooms/shared/sofa.py"
+  ],
+  "tests": [
+    "tests/test_furnish_sofa_gate.py",
+    "tests/test_sofa_class.py"
+  ],
+  "skills": [
+    "furniture-reference-analyzer",
+    "planned-furniture-designer"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "Gen1: 44 literais em shared/sofa.py + 20 em living/sofa_class.py (builder_detail_audit)"
+  ],
+  "stop_conditions": [
+    "aparência nova: PENDING_HUMAN até o Felipe decidir (nunca autodeclarar)",
+    "baseline de medida embutida só pode cair (test_builder_detail_audit)"
+  ]
+}

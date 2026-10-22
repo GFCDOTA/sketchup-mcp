@@ -1,0 +1,80 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "kitchen",
+  "id": "cabinetry",
+  "title": "Marcenaria de gabinete (carcaça, frentes lisas, Shaker, gaveta)",
+  "focus": "Gabinete paramétrico peça a peça (laterais, base, topo, fundo, prateleira) e suas frentes: lisa e Shaker (moldura + painel rebaixado), com prova L2 e fecho R-18. Responde também pela lacuna da caixa de gaveta (K2).",
+  "capability_ids": [
+    "shared.cabinet.parametric",
+    "kitchen.cabinet.plain-fronts",
+    "shared.cabinet.front.shaker",
+    "kitchen.cabinet.shaker-door"
+  ],
+  "binding_ids": [
+    "bind.kitchen.cabinet",
+    "bind.kitchen.shaker",
+    "bind.kitchen.drawer"
+  ],
+  "recipe_ids": [
+    "cabinet.front-gaps-and-profiles",
+    "cabinet.recessed-shaker-and-louvers",
+    "cabinet.reusable-components",
+    "cabinet.drawer-box-and-hardware"
+  ],
+  "specs": [
+    "docs/specs/FP-043_remaining_execution_P3_P8.md",
+    "docs/specs/FP-046_shaker_parametric_cabinet_specialist.md",
+    "docs/specs/FP-049_composable_wardrobe_end_to_end_assembly.md",
+    "docs/specs/FP-051_incremental_learning_furniture_composition.md",
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/kitchen/capabilities/cabinet.py",
+    "tools/rooms/kitchen/capabilities/cabinet_flow.py",
+    "tools/rooms/kitchen/capabilities/shaker.py",
+    "tools/rooms/kitchen/capabilities/shaker_flow.py",
+    "tools/rooms/shared/cabinet/",
+    "tools/rooms/shared/cabinet/plan.py",
+    "tools/rooms/shared/cabinet/ruby/",
+    "tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+    "tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb",
+    "tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+    "tools/rooms/shared/cabinet/ruby/shaker_inspect.rb",
+    "tools/rooms/shared/cabinet/shaker/plan.py",
+    "tools/rooms/shared/cabinet/shaker/sketchup.py",
+    "tools/rooms/shared/cabinet/sketchup.py"
+  ],
+  "tests": [
+    "tests/test_cabinet_plan.py",
+    "tests/test_cabinet_sketchup_driver.py",
+    "tests/test_fp046_kitchen_shaker.py",
+    "tests/test_fp046_shaker_plan.py",
+    "tests/test_fp046_shaker_sketchup.py",
+    "tests/test_kitchen_cabinet_adapter.py",
+    "tests/test_kitchen_cabinet_flow.py"
+  ],
+  "skills": [
+    "capability-l2-proof",
+    "planned-furniture-designer",
+    "sketchup-video-knowledge"
+  ],
+  "reference_targets": [
+    "artifacts/reference_lab/targets/planta_74/r004/kitchen_base_001.target.v1.json"
+  ],
+  "golden_sources": [
+    "artifacts/reference_lab/GOLDEN_SAMPLES.md",
+    "artifacts/reference_lab/DECISIONS.md"
+  ],
+  "demos": [],
+  "open_decisions": [
+    "veredito L3 da porta Shaker (pacote do #356)",
+    "K2: menor trecho da caixa de gaveta em yt-kitchen-joinery-2024 (21:20–39:23) para revisão humana",
+    "FP-052 T2: curar o alvo kitchen_base_001 (hoje DRAFT_BLOCKED)"
+  ],
+  "stop_conditions": [
+    "técnica sem human_review do trecho exato da recipe: BLOCKED_KNOWLEDGE_EVIDENCE",
+    "medida que o pedido não trouxe: recusar, nunca default",
+    "aparência nova: PENDING_HUMAN até o Felipe decidir (nunca autodeclarar)",
+    "símbolo ou helper do fecho mudou: revogar e refazer o L2 (R-18)"
+  ]
+}

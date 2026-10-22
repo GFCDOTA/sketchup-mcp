@@ -1,0 +1,38 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "living",
+  "id": "layout",
+  "title": "Layout da sala",
+  "focus": "Distribuição da sala em caixas por papel (sofá, rack, mesas) respeitando circulação e TV.",
+  "capability_ids": [
+    "living.layout.boxes"
+  ],
+  "binding_ids": [
+    "bind.living.layout"
+  ],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/living/furnishing.py",
+    "tools/rooms/living/planning/"
+  ],
+  "tests": [
+    "tests/test_fp042_living_furnishing_adapter.py",
+    "tests/test_living_room_style.py"
+  ],
+  "skills": [
+    "interior-architect-planner"
+  ],
+  "reference_targets": [],
+  "golden_sources": [
+    "artifacts/reference_lab/GOLDEN_SAMPLES.md"
+  ],
+  "demos": [],
+  "open_decisions": [],
+  "stop_conditions": [
+    "aparência nova: PENDING_HUMAN até o Felipe decidir (nunca autodeclarar)",
+    "circulação reprovada: não materializar"
+  ]
+}

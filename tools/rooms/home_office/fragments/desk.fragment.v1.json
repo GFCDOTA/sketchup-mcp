@@ -1,0 +1,28 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "home_office",
+  "id": "desk",
+  "title": "Mesa do home office",
+  "focus": "Home office reusa o designer do quarto; mesa sem builder próprio.",
+  "capability_ids": [],
+  "binding_ids": [
+    "bind.home_office.desk"
+  ],
+  "recipe_ids": [
+    "cabinet.reusable-components"
+  ],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [],
+  "tests": [],
+  "skills": [],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [],
+  "stop_conditions": [
+    "técnica sem human_review do trecho exato da recipe: BLOCKED_KNOWLEDGE_EVIDENCE",
+    "medida que o pedido não trouxe: recusar, nunca default"
+  ]
+}
