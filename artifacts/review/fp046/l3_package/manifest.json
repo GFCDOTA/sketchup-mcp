@@ -1,0 +1,162 @@
+{
+ "schema_version": "fp046_l3_visual_package.v1",
+ "commit": "05d810fed4b62c83b0e601eea5f8160ab51750e0",
+ "dirty": false,
+ "sketchup_version": "26.0.429",
+ "pids": [
+  2420,
+  39128,
+  36232,
+  23728,
+  34224,
+  36744
+ ],
+ "before_skp": {
+  "path": "E:\\Claude\\worktrees\\w-prov\\runs\\fp046\\l3\\run2\\flow\\2f7f19146b24\\kitchen_parent.skp",
+  "sha256": "94685b5e5a5e218e21cb7f6d5a42e22a7805a79cf9dc4555937ff3ee27e83f8c",
+  "meaning": "cozinha real + gabinete de FRENTE LISA (pai da Shaker)"
+ },
+ "after_skp": {
+  "path": "E:\\Claude\\worktrees\\w-prov\\runs\\fp046\\l3\\run2\\flow\\2f7f19146b24\\kitchen_shaker.skp",
+  "sha256": "893829ba69d36171d492427c74e41c523ae5203f669660e4752e8eaf88c1ca40",
+  "meaning": "mesmo gabinete com a frente substituida pela porta Shaker"
+ },
+ "base_furnished_copy_sha256": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+ "flow_state": "DONE_L2_VERIFIED",
+ "cabinet_request": {
+  "pose_m": [
+   2.25,
+   15.9,
+   0.0
+  ],
+  "rotation_deg": 0,
+  "size_m": [
+   0.48,
+   0.545,
+   0.78
+  ]
+ },
+ "shaker_request": {
+  "schema_version": "shaker_door_request.v1",
+  "request_id": "promo-kitchen-shaker-door",
+  "parent_cabinet_request_id": "promo-kitchen-shaker-parent",
+  "target_front": "front",
+  "style": "recessed_shaker",
+  "frame": {
+   "stile_width": {
+    "value": 50,
+    "unit": "mm",
+    "origin": "user_request"
+   },
+   "rail_height": {
+    "value": 50,
+    "unit": "mm",
+    "origin": "user_request"
+   },
+   "frame_thickness": {
+    "value": 16,
+    "unit": "mm",
+    "origin": "user_request"
+   }
+  },
+  "panel": {
+   "thickness": {
+    "value": 6,
+    "unit": "mm",
+    "origin": "user_request"
+   },
+   "recess_from_frame_front": {
+    "value": 4,
+    "unit": "mm",
+    "origin": "user_request"
+   }
+  },
+  "materials": {
+   "frame": "mdf_nogueira",
+   "panel": "mdf_nogueira"
+  },
+  "grain": {
+   "frame": "none",
+   "panel": "none"
+  },
+  "origin_context": {
+   "recipe_id": "cabinet.front-gaps-and-profiles",
+   "source_id": "yt-cabinet-tips-2021",
+   "source_verified": true
+  }
+ },
+ "cameras": [
+  {
+   "name": "top",
+   "preset": "top"
+  },
+  {
+   "name": "iso",
+   "eye_m": [
+    3.44,
+    17.395,
+    1.53
+   ],
+   "target_m": [
+    2.49,
+    16.3905,
+    0.39
+   ],
+   "fov": 32
+  },
+  {
+   "name": "front",
+   "eye_m": [
+    2.49,
+    17.845,
+    0.429
+   ],
+   "target_m": [
+    2.49,
+    16.445,
+    0.39
+   ],
+   "fov": 42
+  },
+  {
+   "name": "detail_oblique",
+   "eye_m": [
+    2.14,
+    17.245,
+    1.58
+   ],
+   "target_m": [
+    2.49,
+    16.445,
+    0.39
+   ],
+   "fov": 34
+  }
+ ],
+ "image_size_px": [
+  1600,
+  1200
+ ],
+ "images_sha256": {
+  "top_before.png": "8ccdd0db42c26977d44a1a495f669700a08f3a9b8efa9b40e4a8dfbafdc2961b",
+  "top_after.png": "12c853e396a770c54c0b10ab25bbb655f0cb3f74f16ffcb9588e9ca4040a9d1a",
+  "sheet_top.png": "bc34f45723998105894f81822f69035732548c33e2f274882d87917d96aeeea9",
+  "iso_before.png": "43543e3b13a9aaca12786d6afcdba73972298e5c0699ed22658fc18edc71e983",
+  "iso_after.png": "f8c2bbb536abb391528321207df91a5771ab17b4df7513daaeecf27f9d667eb4",
+  "sheet_iso.png": "10d7e79592b05b3add25bd53a0f8c45280fe3e445f03089760a1436e361ee92f",
+  "front_before.png": "fa32d157ad08c0fede7d994978a255c01730183e2b26fb79130b25c87f93151c",
+  "front_after.png": "7eb6465087465243a3006c06b36f9f94b49f8a1b1d249d15165ce52d76a2a3e0",
+  "sheet_front.png": "31e27ddf1414dc5886dbfff31ec93ecab046abe2489446c46eaf1cd1b6d68c5d",
+  "detail_oblique_before.png": "4ffb12dd6302fa99473232690e343e15491833653666dcefbba19c535d49ecd4",
+  "detail_oblique_after.png": "4d0d39f7da7857bcede0154fe32bf5396242a5de75a6599e3b623ece8d049257",
+  "sheet_detail_oblique.png": "316d45126bcaf9d94ce1856edec337ff51eda3bb8df4d7743dbf676477bdc1c9",
+  "overview_1_top_iso.png": "ccf0cb5c91308af64158bdd957c857fce3c796090a0525f90f3438a6ff13e60a",
+  "overview_2_front_detail.png": "39daa3b24e4ae0631b2722c6a8abc10a85b589199380a1197571f7949e4b87f7"
+ },
+ "colors": "derivadas do NOME do material (hash), sem textura/acabamento: NAO sao a cor real da madeira",
+ "limits": [
+  "frame e painel tem o mesmo material: o rebaixo aparece pelas arestas e pelo angulo, nao por cor",
+  "sem sombras/V-Ray: nao e render fotorrealista",
+  "valores da porta sao do pedido de teste"
+ ]
+}
