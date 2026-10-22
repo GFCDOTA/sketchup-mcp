@@ -3299,6 +3299,864 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/A_current_iso.png",
+      "blob_sha": "aa70014156955f4ffa4c9983c75d0b03c46b12d4",
+      "blob_size": 58713,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/A_current_top.png",
+      "blob_sha": "f29b50606b761c79cc28b19986b4c9d0ece922ab",
+      "blob_size": 9172,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/B_wide_iso.png",
+      "blob_sha": "bbbcd49f40db3be71a210b608b18a379a77e8a78",
+      "blob_size": 56491,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/B_wide_top.png",
+      "blob_sha": "d1b39c105813ba946a2d8e387c6123b24557b449",
+      "blob_size": 8773,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/consensus_option_B_wide_window.json",
+      "blob_sha": "54f54eee1cc81d18f3f358b870c114fc774f4eb3",
+      "blob_size": 1719,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/README.md",
+      "blob_sha": "b5a778a2271d3b4dcca26adde84612ddf7be864b",
+      "blob_size": 1736,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3a04_quadrado_d001/reference_canonical_success_render.png",
+      "blob_sha": "f9f1f2d25eaebf4a40fdcf75443be48aa488340f",
+      "blob_size": 71571,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/aperture_conditional_tests.txt",
+      "blob_sha": "c73f8d9c7ac621959359426e16010c993e04742e",
+      "blob_size": 3773,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/clients_before_fix.json",
+      "blob_sha": "0db0c3bb7c07ba4ac91c1503494833c2bc398ee0",
+      "blob_size": 3183,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/clients.json",
+      "blob_sha": "3752c2e5137f9ae451d43db5de556ec8a840c7c7",
+      "blob_size": 3215,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/README.md",
+      "blob_sha": "59dffe22fe51dee8569b08ec79f7a838d4ae38e6",
+      "blob_size": 7851,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_apply_edits.json",
+      "blob_sha": "87206b19a4f19e48706ad6121e7928ec693798ad",
+      "blob_size": 1437,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_compare_furnish.json",
+      "blob_sha": "8ccdf5b945844b6ee9f0820c3908c945519cb81e",
+      "blob_size": 259138,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_furnish.json",
+      "blob_sha": "2d7b6204fae417e72436861f431153606d791d08",
+      "blob_size": 4305,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_planta_build.json",
+      "blob_sha": "886ffae4e72173ed6f2ffcb2149b9a27f8bb3355",
+      "blob_size": 7754,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_quadrado_build.json",
+      "blob_sha": "051871dd0837cbdec70b48df8e9f3f72605924f4",
+      "blob_size": 3776,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_quadrado_inspect.json",
+      "blob_sha": "489eb33b313aa0e718371d2586d52166d69fc826",
+      "blob_size": 23101,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_su_status.json",
+      "blob_sha": "8fde258aad4f0f184f57e795bf875520314640eb",
+      "blob_size": 705,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_summary.json",
+      "blob_sha": "3417b741d2c2f625c3fbe52b21d7cda5c9092207",
+      "blob_size": 4902,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/reg_vray.json",
+      "blob_sha": "45630afd733ca5fc832b300544c77bea6ff1299f",
+      "blob_size": 1985,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/render_planta_iso.png",
+      "blob_sha": "b92a2a17e8e4980ed1712dceb069fec7252bb1f2",
+      "blob_size": 59609,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/render_planta_top.png",
+      "blob_sha": "44286545db466685f0ee86bed4c25ef8dfa1ba70",
+      "blob_size": 19536,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/rooms_isolated_report.json",
+      "blob_sha": "b00af052702999e8892f889a0430bbf55e92a610",
+      "blob_size": 1925,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/node_client.mjs",
+      "blob_sha": "3b864c359c8271fee6fe5dc39adffa6ef55f9e7d",
+      "blob_size": 1979,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/p3b_clients.py",
+      "blob_sha": "e6fbbae72edafeb0f48412845516b8a48f1ef7c8",
+      "blob_size": 3984,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/p3b_regression.py",
+      "blob_sha": "02575915bde0cd5d717eafb58178436d76e95483",
+      "blob_size": 14878,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/p3b_two_windows.py",
+      "blob_sha": "f7b4cedcd6d66863682db7970ec50245afcb8941",
+      "blob_size": 8371,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/tools/planta_rooms_isolated.py",
+      "blob_sha": "90f3bd382a0c23ccc4b60f8130212dd9e7fd3208",
+      "blob_size": 3516,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/two_windows.json",
+      "blob_sha": "2c59c5db5f0489bc7e869a961a93ef8d853b02b9",
+      "blob_size": 3315,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p3b_windows_l2/vray_living.png",
+      "blob_sha": "ce5f6135a4ad2ef2fc33d387def7e921206be4b3",
+      "blob_size": 635303,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/l2_matrix.py",
+      "blob_sha": "fac0fa0c1a5b60f1c53371d7f9aa68c895627742",
+      "blob_size": 9348,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r0.json",
+      "blob_sha": "0a0f2644068828f241f53a2f6918075a36f6b28c",
+      "blob_size": 14877,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r0.skp",
+      "blob_sha": "150ba5f0a11f032a5975bce8a811018966683501",
+      "blob_size": 182650,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r30.json",
+      "blob_sha": "509e68f7d9d3bf7b4d0f304b694aff57ff8fef9e",
+      "blob_size": 15126,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r30.skp",
+      "blob_sha": "16e5fc102b6607fbb6b3c967393165e8413a59da",
+      "blob_size": 181353,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r0.json",
+      "blob_sha": "9021705575c3f26a379fb93641b64866fa412235",
+      "blob_size": 14588,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r0.skp",
+      "blob_sha": "46e64f4ec1b96a3ad7bdc5222a732cbd335faada",
+      "blob_size": 183482,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r30.json",
+      "blob_sha": "27e1feb91e11402d832f2967ca0be3fc10de8304",
+      "blob_size": 14944,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r30.skp",
+      "blob_sha": "ff40c016ebdf779110119e492515b39a332d6992",
+      "blob_size": 182067,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r90.json",
+      "blob_sha": "2d1d931e268a676f8c477d9bfb7e67c2cc25ed2b",
+      "blob_size": 14654,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r90.skp",
+      "blob_sha": "4319f231fbdfc64c3aca906ab4927ed1bf22de71",
+      "blob_size": 182409,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r30.json",
+      "blob_sha": "930cd9403b50ec89c4b602e06d874d5afe03bdd2",
+      "blob_size": 18967,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r30.skp",
+      "blob_sha": "d835377e1217f462d82bf6d9a85ebdad07f4a7bf",
+      "blob_size": 182037,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r90.json",
+      "blob_sha": "44b38849ab6c4503c5f2e551c5c941d91cf5a763",
+      "blob_size": 18606,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r90.skp",
+      "blob_sha": "113688ed75e4130b18bbe12a521db395a31b344b",
+      "blob_size": 183242,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m2_idempotent_rebuild.json",
+      "blob_sha": "c52fa6bb65858ee3485e605cddb448efb1690501",
+      "blob_size": 14699,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m2_idempotent_rebuild.skp",
+      "blob_sha": "2270f89a5bf1d7b552061326b9c5fd2d3fee91c2",
+      "blob_size": 183506,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_local.json",
+      "blob_sha": "a1b07a54d1d6739a9e4d8f5c808612ed2ea91d7e",
+      "blob_size": 30149,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_local.skp",
+      "blob_sha": "f30a972202e36ac22808af7a5209104d1fc6b32c",
+      "blob_size": 187244,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_propagate.json",
+      "blob_sha": "4cbf12e5018b5ffb62e5fa4d3a8ece534777fb3b",
+      "blob_size": 30225,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_propagate.skp",
+      "blob_sha": "a8bdca34935cbd0a6297f903a128e509a51c37e0",
+      "blob_size": 187293,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_x.json",
+      "blob_sha": "53af5f462222af556a1623bdfedc2bfe6e759b4b",
+      "blob_size": 28985,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_x.skp",
+      "blob_sha": "2c7baa55a38917f49edc815b16f465c59e7ae0ff",
+      "blob_size": 183794,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_y.json",
+      "blob_sha": "0770b5ea8341ccc7fd5ff51f37d779dc54c21dfc",
+      "blob_size": 29234,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_y.skp",
+      "blob_sha": "16e7738e9ff4a7a7f4b4de5fac567f8fd859bc30",
+      "blob_size": 186060,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_set_material.json",
+      "blob_sha": "04c046d739fdae838b3dca24b14f430ebedcfe9e",
+      "blob_size": 24118,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_set_material.skp",
+      "blob_sha": "c035569b63897a0ee5775e32e549c52ac3254fc1",
+      "blob_size": 188003,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/README.md",
+      "blob_sha": "e488201c1b28728872c4a0e04bcf58d7a241bed9",
+      "blob_size": 3913,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p6b_cabinet_l2/summary.json",
+      "blob_sha": "d363ca478fe9b23b705c266c4196b189ce9032df",
+      "blob_size": 4020,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/cabinet.skp",
+      "blob_sha": "b65dcd66f4fbfa3805e5d5064867049aa0cc2ff8",
+      "blob_size": 3435398,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/interrupted_job.json",
+      "blob_sha": "4300e19f00ca4ba20f0a85762e2a725e1ee4ed76",
+      "blob_size": 260,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/iso.png",
+      "blob_sha": "663f8c40ee93d13f9e8db6642a13f67d0630f29e",
+      "blob_size": 189803,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/l2_p7.py",
+      "blob_sha": "f6dd1cacfab60486ee626ebb99119e429fe96065",
+      "blob_size": 5980,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/negatives.json",
+      "blob_sha": "2b4d2ce4e6b35a41184177cff80550deec26f96c",
+      "blob_size": 2492,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/p6b_matrix_rerun.json",
+      "blob_sha": "5fddb8efe05958ea326af33b5ec57880fda68dd6",
+      "blob_size": 2894,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/README.md",
+      "blob_sha": "ffcfda3f9a86e58303d23261f2af8df5dc7ccd62",
+      "blob_size": 5416,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/request.json",
+      "blob_sha": "62d715bba518129eeb12f4f251038f8520f30cbf",
+      "blob_size": 2475,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/summary.json",
+      "blob_sha": "8991e01af34be6864402c74c6928c64a30799fd4",
+      "blob_size": 723,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/top.png",
+      "blob_sha": "85aed5b74207d3ff6802d2dfad732d266451d2c4",
+      "blob_size": 17652,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p7_kitchen_cabinet/trace.json",
+      "blob_sha": "7731fe5a6b323841b25b6b3d8274ab11602c5757",
+      "blob_size": 10029,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p8_l2_20261019/furnish.json",
+      "blob_sha": "09e988933bfd42a5cd33be037b49616f2dd235ed",
+      "blob_size": 4392,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp043/p8_l2_20261019/planta_check.json",
+      "blob_sha": "aed8834f5ce52ddece458826a01c32b7869dbf41",
+      "blob_size": 18978,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp044/baseline/baseline.json",
+      "blob_sha": "0244735f5cd7b46dad63990b983eb5a3ffa90401",
+      "blob_size": 5996,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp044/f7_l2_20261020/l2_summary.json",
+      "blob_sha": "54b63adf01ba98d6d43d818d9162aa99321498bf",
+      "blob_size": 3868,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp044/f7_l2_20261020/planta_check.json",
+      "blob_sha": "aed8834f5ce52ddece458826a01c32b7869dbf41",
+      "blob_size": 18020,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp044/f7_l2_20261020/README.md",
+      "blob_sha": "dcfd73fc079397f921b674783469831f5dad3ae8",
+      "blob_size": 1853,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/flow_trace.json",
+      "blob_sha": "cc9c2d7a4884d9027653a5dfb36ba8ddd38ae9c3",
+      "blob_size": 11232,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/manifest.json",
+      "blob_sha": "81481edea49c254a31cbe9e97dc81723eacf801b",
+      "blob_size": 4236,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/detail_oblique_after.png",
+      "blob_sha": "c30de31452a2a54ca97d7fbaafcf10e3d924d9c9",
+      "blob_size": 109075,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/detail_oblique_before.png",
+      "blob_sha": "738e69b45e9a2502f15c2514dfd519a77beb21f4",
+      "blob_size": 87457,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/front_after.png",
+      "blob_sha": "f8d8c95c1a4a02b335d0cf2f541caf0fdce225be",
+      "blob_size": 39762,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/front_before.png",
+      "blob_sha": "88f7fd4b40f6719941d7c1653006d699e2a33301",
+      "blob_size": 38813,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/iso_after.png",
+      "blob_sha": "98cd6ba67cb731ea361cba9509f9a67575c530bd",
+      "blob_size": 120993,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/iso_before.png",
+      "blob_sha": "5826fc9e772a8146fe1991b75d2b4d2ea9fb5bda",
+      "blob_size": 107462,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/overview_1_top_iso.png",
+      "blob_sha": "24aee49773ec3e193c8197d16686484c4afedd63",
+      "blob_size": 156125,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/overview_2_front_detail.png",
+      "blob_sha": "9266319a9812733547d17d83a28f5bc9d45d6e58",
+      "blob_size": 174351,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/sheet_detail_oblique.png",
+      "blob_sha": "b88fc696a946bba4a8b18cf80cb5197ecd76cbde",
+      "blob_size": 169490,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/sheet_front.png",
+      "blob_sha": "916deb33edc7683367b869b18fa53c0578f91483",
+      "blob_size": 70154,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/sheet_iso.png",
+      "blob_sha": "71dbe051125a74985082ec8d0c102c12a843a98c",
+      "blob_size": 175927,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/sheet_top.png",
+      "blob_sha": "292f0d8f7cf79aaf0acb4d0c8a75e1c8e23cc466",
+      "blob_size": 47140,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/top_after.png",
+      "blob_sha": "b27e663e2cf2375ea45c75c309d5e3062ac3698c",
+      "blob_size": 17732,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/package/top_before.png",
+      "blob_sha": "85aed5b74207d3ff6802d2dfad732d266451d2c4",
+      "blob_size": 17652,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/README.md",
+      "blob_sha": "65b9f499f3ab9fe64e658d96cf2498293523332a",
+      "blob_size": 3555,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/render_l3.py",
+      "blob_sha": "afdbe18b2087903f5adc7b56513b14199a2af5d9",
+      "blob_size": 7829,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/l3_package/visual_review.json",
+      "blob_sha": "2ff0d56e7cb787c705698dcfe67d145ed48f8d91",
+      "blob_size": 1788,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/l2_matrix.py",
+      "blob_sha": "229a117b7fa84d5086e327a1f2a6b4ddec9f7177",
+      "blob_size": 14609,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/README.md",
+      "blob_sha": "59e1368aa08120db6f91a79b26226b5ba1836026",
+      "blob_size": 4635,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r0_verify.json",
+      "blob_sha": "4b8f21ccc82b49a38881514f975f1f6e05b1d3af",
+      "blob_size": 5396,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r30_verify.json",
+      "blob_sha": "c12a8cf951213d949dcc18a8b25d493272d1dd5b",
+      "blob_size": 5450,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r90_verify.json",
+      "blob_sha": "77f7e49a1e8c7a8cc6347c9158b23a7b2924f5c4",
+      "blob_size": 5432,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s2_two_doors_r30_verify.json",
+      "blob_sha": "769275a1982157efee7a7c8094d24812b40ff177",
+      "blob_size": 5668,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s3_idempotent_rebuild_verify.json",
+      "blob_sha": "69af2f09d163d790f9708afec18a523f4faa5aad",
+      "blob_size": 5229,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s4_make_unique_local_verify.json",
+      "blob_sha": "e44684df21073d1eecf39caec5be95fe71579bf1",
+      "blob_size": 5508,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s5_edit_propagate_verify.json",
+      "blob_sha": "0fddb1b45e5d5ae9e0811b6d6890166431e20754",
+      "blob_size": 5316,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s6_set_material_panel_verify.json",
+      "blob_sha": "4b3d0f63fafa0b4b461bce5381c6b4523a9b5ea0",
+      "blob_size": 147,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s7_ruby_refuses_stale_parent_verify.json",
+      "blob_sha": "7f6906ec5e2a05724b7e14e109eb814719f4373f",
+      "blob_size": 216,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/s8_ruby_refuses_changed_parent_signature_verify.json",
+      "blob_sha": "63ec3d4daadb07b2bb6b22e4500e62047f8ea6b8",
+      "blob_size": 275,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p3_shaker_l2/summary.json",
+      "blob_sha": "0b53783d64e1f236a3eb33aef2eccacb2138f30f",
+      "blob_size": 6023,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/fp047_report.json",
+      "blob_sha": "1c2057bb479b0bae0ed625f7f0bb157d289824c7",
+      "blob_size": 1220,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/l2_p4.py",
+      "blob_sha": "bb1b5299b0fac22a8610d259cb4a85bf35df5d32",
+      "blob_size": 7205,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/negatives.json",
+      "blob_sha": "465be8276af6eca3b1a349e092b74aa46fef4bb6",
+      "blob_size": 328,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/README.md",
+      "blob_sha": "9f3a9716a92b95ae454ff08733150de94a63e42d",
+      "blob_size": 5439,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/request.json",
+      "blob_sha": "566cf7fcafbfc795f9c540d3f572417be52387b8",
+      "blob_size": 3535,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/summary.json",
+      "blob_sha": "598e17c6202ba6e76405ffc38010a344d5373193",
+      "blob_size": 3482,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/trace.json",
+      "blob_sha": "7c09d71fc6fa03068d414a5bcad482fe91e6e040",
+      "blob_size": 9484,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/kitchen_fp047_report.json",
+      "blob_sha": "b3f6ace0da9ecbbe187a061cd6032fffea0674d7",
+      "blob_size": 1227,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/kitchen_negatives.json",
+      "blob_sha": "b1960e10fd6cf5856d7c9f0933520e1b1a505d91",
+      "blob_size": 1772,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/kitchen_summary.json",
+      "blob_sha": "a430f8c046743b07dbd2407de8e73e20c2415d95",
+      "blob_size": 5046,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/kitchen_trace.json",
+      "blob_sha": "f8456e9b7bfe8cd77cfbc60edb194d22ac76f183",
+      "blob_size": 11250,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/l2_promoted.py",
+      "blob_sha": "8b85937d1f079f743449209717413838b55f3a2b",
+      "blob_size": 7550,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s1_one_door_r0_verify.json",
+      "blob_sha": "4b8f21ccc82b49a38881514f975f1f6e05b1d3af",
+      "blob_size": 5396,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s1_one_door_r30_verify.json",
+      "blob_sha": "c12a8cf951213d949dcc18a8b25d493272d1dd5b",
+      "blob_size": 5450,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s1_one_door_r90_verify.json",
+      "blob_sha": "77f7e49a1e8c7a8cc6347c9158b23a7b2924f5c4",
+      "blob_size": 5432,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s2_two_doors_r30_verify.json",
+      "blob_sha": "769275a1982157efee7a7c8094d24812b40ff177",
+      "blob_size": 5668,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s3_idempotent_rebuild_verify.json",
+      "blob_sha": "69af2f09d163d790f9708afec18a523f4faa5aad",
+      "blob_size": 5229,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s4_make_unique_local_verify.json",
+      "blob_sha": "e44684df21073d1eecf39caec5be95fe71579bf1",
+      "blob_size": 5508,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s5_edit_propagate_verify.json",
+      "blob_sha": "0fddb1b45e5d5ae9e0811b6d6890166431e20754",
+      "blob_size": 5316,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s6_set_material_panel_verify.json",
+      "blob_sha": "4b3d0f63fafa0b4b461bce5381c6b4523a9b5ea0",
+      "blob_size": 147,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s7_ruby_refuses_stale_parent_verify.json",
+      "blob_sha": "7f6906ec5e2a05724b7e14e109eb814719f4373f",
+      "blob_size": 216,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s8_ruby_refuses_changed_parent_signature_verify.json",
+      "blob_sha": "63ec3d4daadb07b2bb6b22e4500e62047f8ea6b8",
+      "blob_size": 275,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_summary.json",
+      "blob_sha": "dfb267eb257e3f7c311f676700d41d8cb7a5c80c",
+      "blob_size": 6022,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_interrupted_job.json",
+      "blob_sha": "ff79ece4b5992f66baebf0e87e8a891748a15514",
+      "blob_size": 251,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_negatives.json",
+      "blob_sha": "d7299b773408ead27d5b2758bd94db7fe6e1fb6a",
+      "blob_size": 2579,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_summary.json",
+      "blob_sha": "3bfb2c975dcafa46e822b8a4e975037c7b2d500a",
+      "blob_size": 706,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_trace.json",
+      "blob_sha": "ccaed83debd921a60fbd816da4fa24a1a4013e21",
+      "blob_size": 10024,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/README.md",
+      "blob_sha": "41850276c24b99a173bf3cd420d69ae4ae4e3a56",
+      "blob_size": 5076,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/promotion_l2/request.json",
+      "blob_sha": "c80aaa9369d9603785d14b20873b14602062e5a8",
+      "blob_size": 3535,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/kitchen_fp047_report.json",
+      "blob_sha": "06dc7b4570662ba29116bd13340fd0132ce2628f",
+      "blob_size": 1230,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/kitchen_negatives.json",
+      "blob_sha": "0717fd08ac4e6f38227ebb0969b6b2bea5cba3d7",
+      "blob_size": 2201,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/kitchen_summary.json",
+      "blob_sha": "4fd56c52d8667438f12acf20a0df1f4a5b6c818c",
+      "blob_size": 5230,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/kitchen_trace.json",
+      "blob_sha": "58fb709b9c360fcc50ded3f5fdcf64560906ee1a",
+      "blob_size": 11240,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/l2_review_scope.py",
+      "blob_sha": "a61ca60331b38be48cb82dcd30d4d0802efeb959",
+      "blob_size": 8215,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp046/review_scope_l2/README.md",
+      "blob_sha": "99419b8f321e3714c950a35fa0c6cb1f9f4ef27b",
+      "blob_size": 2995,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
       "blob_size": 335219,
@@ -3416,6 +4274,12 @@
       "path": "artifacts/review/furniture/kitchen/r004_plan_top.png",
       "blob_sha": "c2cb5eea2f7c95cd882cf6165a7fd7cc92853068",
       "blob_size": 25031,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/furniture/kitchen/README.md",
+      "blob_sha": "b8bad0afed88fa599834a49ad19dd3eeea893ed5",
+      "blob_size": 408,
       "owner_group": "artifacts"
     },
     {
@@ -3731,6 +4595,576 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/l2_fp042_20261019/integrity/hashes_after.sha256",
+      "blob_sha": "9cff8accbf26461ae9b978a5241dc40028d859a1",
+      "blob_size": 119950,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/integrity/hashes_before.sha256",
+      "blob_sha": "2b30e1f7c1d5110db559cbcbe05d9d04d841aa5b",
+      "blob_size": 119950,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/integrity/S08_scene_hash_before.txt",
+      "blob_sha": "289a95dc543e2f255c669545a4d13a4c8030f086",
+      "blob_size": 160,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/geometry_report.json",
+      "blob_sha": "4b1c39d8bc1ab8a5e74ef1bb7d285f19918336df",
+      "blob_size": 26891,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/inspect.json",
+      "blob_sha": "56adc090c514a19118e17e5ebe3a32eb24728f86",
+      "blob_size": 90361,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_iso.png",
+      "blob_sha": "2ac14d41bf94502f6f322067cb2d861c94e74974",
+      "blob_size": 140885,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_top.png",
+      "blob_sha": "2979ba98a994ddea487ced6c393e620768ca7ba7",
+      "blob_size": 29037,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model.skp",
+      "blob_sha": "1254f5827c074503c1bf116db8db77631e483538",
+      "blob_size": 111957,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/probe_result.json",
+      "blob_sha": "c15401fe5cd6c8941e6d4b3fb1f8a69ef88e8180",
+      "blob_size": 23810,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/inspect.json",
+      "blob_sha": "e2f1995e35623e4f5fdbf4f8a6638cf1d7250864",
+      "blob_size": 616231,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/P02_furnish_mcp.json",
+      "blob_sha": "906b1816d189a264295a7fca7d3e2deadab4bba6",
+      "blob_size": 4461,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_iso.png",
+      "blob_sha": "d14c0a600448fcfc2e2693c04a5875362b113a0f",
+      "blob_size": 242861,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_top.png",
+      "blob_sha": "16319186fbe9eafca46995512491d1255a048c20",
+      "blob_size": 88185,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_before_top.png",
+      "blob_sha": "7fd2d32663deb12a8c98c71c757dbfb61c78c0fc",
+      "blob_size": 29027,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_log.txt",
+      "blob_sha": "f1b838a6bfcf5917e4710f1ddc4f6f91a05085b2",
+      "blob_size": 13966,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished.skp",
+      "blob_sha": "25086ffffb86c298c431c762a889bd70d8229ef2",
+      "blob_size": 3359078,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_check.json",
+      "blob_sha": "0fc45131e11fcdb7984d1d737cb57b1e1f9dccc5",
+      "blob_size": 19662,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_iso.png",
+      "blob_sha": "2278ce5e385d8113a1ef33e33dc154373d51bef1",
+      "blob_size": 119618,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_top.png",
+      "blob_sha": "9afff407deb00a3cbec7f4f2917d085157a846a0",
+      "blob_size": 19772,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_iso.png",
+      "blob_sha": "71c1b807a9bbef7b6eeda36cf43317989971cd55",
+      "blob_size": 93453,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_top.png",
+      "blob_sha": "f6633d2fe9640da8ee92394b2e1330536ac87f93",
+      "blob_size": 31300,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_iso.png",
+      "blob_sha": "b78f6d5ec13f0ed4efbb9dd7136a9abcb248761e",
+      "blob_size": 166101,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_top.png",
+      "blob_sha": "6dbf450e292bbf17a5a6d0b0d6bf5d3851452f44",
+      "blob_size": 120371,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_iso.png",
+      "blob_sha": "f9999fd23b7898eae93dec762c2072f535cf3632",
+      "blob_size": 85583,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_top.png",
+      "blob_sha": "5ab1b2da5a6d2afac050a627966fba39d00ec00b",
+      "blob_size": 18100,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/isolated_report.json",
+      "blob_sha": "b00af052702999e8892f889a0430bbf55e92a610",
+      "blob_size": 1836,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_iso.png",
+      "blob_sha": "d705cb7ab03a59445201ecaec3d3cefc7c4578ed",
+      "blob_size": 129813,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_top.png",
+      "blob_sha": "b82ed6824a0e87a7401a97aaf089bfb0eb499774",
+      "blob_size": 38039,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_iso.png",
+      "blob_sha": "0e098ad2a649df7bc39cc9bc306510565665050e",
+      "blob_size": 144756,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_top.png",
+      "blob_sha": "4e8e523bafd77ad378aea76c4add8f7a35461bab",
+      "blob_size": 36989,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_iso.png",
+      "blob_sha": "7ae3b27be8a0dec7c0fb20711d645cc92ee3a06f",
+      "blob_size": 126647,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_top.png",
+      "blob_sha": "28377b42696726caac65bf5de18647cdd7d60f6a",
+      "blob_size": 30263,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_iso.png",
+      "blob_sha": "5746800475398d69b43b6b7671f621d185d97b5f",
+      "blob_size": 152049,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_top.png",
+      "blob_sha": "911b143f94a4c958468d2803509b33b4525b789e",
+      "blob_size": 26791,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P04_room_edit/edit.json",
+      "blob_sha": "5c172820ea4b8ac2ac153d8e06640fc580ecf3a7",
+      "blob_size": 1449,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P04_room_edit/inspect.json",
+      "blob_sha": "c49f49126ee548ebf846689915bb611459b63c1b",
+      "blob_size": 616503,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P05_sofa_premium/inspect_approved.json",
+      "blob_sha": "da07d0de19367697b51e9c324b111a6430f9af70",
+      "blob_size": 380898,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P07_scale_fix/geometry_report.json",
+      "blob_sha": "e5d8ffa7a06181e9612415abd68ef8f3e3f48010",
+      "blob_size": 26905,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/P07_scale_fix/P06_mcp_build_quadrado.json",
+      "blob_sha": "f42ebbcc559794708805ffeba1d81bd4174d3144",
+      "blob_size": 3496,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/README.md",
+      "blob_sha": "334cfc8d8d0c75bf0762a54db290098fde816801",
+      "blob_size": 14932,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/build_result.json",
+      "blob_sha": "51f4c95f212dfc78cbf0758eef4716afb0172767",
+      "blob_size": 3176,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/geometry_report.json",
+      "blob_sha": "1603643beedfd07f0ea9577744d5abf8f4741c34",
+      "blob_size": 5523,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/inspect.json",
+      "blob_sha": "651b6d31ba8caef5dc09fcadac4af6c22cc007c0",
+      "blob_size": 21670,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_iso.png",
+      "blob_sha": "2aee5f6bd0f10984975ed77a688ff449681e6a88",
+      "blob_size": 58715,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_top.png",
+      "blob_sha": "c57af704c2b4499f064a5e1e9130e4f3bd64582d",
+      "blob_size": 9172,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model.skp",
+      "blob_sha": "626faa3c9da529fd6b1d8da19d2b7c38a975923b",
+      "blob_size": 72560,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/probe_result.json",
+      "blob_sha": "011b62508d808d05052c3b45146a3132a4d152f0",
+      "blob_size": 2669,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/compare.json",
+      "blob_sha": "48abeddbe2fe7fc00a711f65b4639720c865d463",
+      "blob_size": 37921,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_iso.png",
+      "blob_sha": "feffde1be0f1bb9ffcdda349906645cc01deeb59",
+      "blob_size": 72353,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_top.png",
+      "blob_sha": "4ed935338fa83d643a529248be279fb2872a897a",
+      "blob_size": 13727,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_log.txt",
+      "blob_sha": "7c351c919b80b8b77891d70904e2ffb6c51064ff",
+      "blob_size": 2135,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished.skp",
+      "blob_sha": "920ee02e9502a74f25eb943150b4369d7e619e51",
+      "blob_size": 152966,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/compare.json",
+      "blob_sha": "c8b7cd075343afccefe7e572ce87974134bc50de",
+      "blob_size": 29045,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_iso.png",
+      "blob_sha": "eec15141d306f85e2fbe6216dadd9da0faa1bd16",
+      "blob_size": 83966,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_top.png",
+      "blob_sha": "fb262ae0472301d2dd9e846b50e205c976b2cd25",
+      "blob_size": 18415,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_log.txt",
+      "blob_sha": "7100952c07c159f41f2d42a16ef3d48fcdcc9191",
+      "blob_size": 1869,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished.skp",
+      "blob_sha": "c67704b6a7a1bd6e05083243fa1ac3b6c04a8d23",
+      "blob_size": 150071,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/compare.json",
+      "blob_sha": "07e8de90126ae801dc58a49b25d94329697ae527",
+      "blob_size": 50585,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished_after_iso.png",
+      "blob_sha": "4be25503cd7701e1d5fabbfe858f181f9e87c4be",
+      "blob_size": 121796,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished_log.txt",
+      "blob_sha": "080c4756ce0455c4d9c9a948c859bfcba0bb2ac9",
+      "blob_size": 3265,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished.skp",
+      "blob_sha": "e2cb0670c667f94e5d4c61621c66497ebe131773",
+      "blob_size": 606764,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_iso.png",
+      "blob_sha": "4717517d2009a47237e1fc12eb63b83c39370c75",
+      "blob_size": 208771,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_top.png",
+      "blob_sha": "148f3ce4ac309661e2c4cd1755c946028dbe3650",
+      "blob_size": 40167,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders.skp",
+      "blob_sha": "032ee4a9bd9dd504d64b53d334184c79658a37df",
+      "blob_size": 234476,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/compare.json",
+      "blob_sha": "04fb78cd83db38e428f47597b16339f949021115",
+      "blob_size": 130767,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/probe_result.json",
+      "blob_sha": "cb648c9ea4d11a5190483ac652c5a78b90582a06",
+      "blob_size": 41978,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_after_fix/suite.json",
+      "blob_sha": "5ebc6dd9270f33dc69d4fbecba768096a18b81cc",
+      "blob_size": 46275,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_before_fix/I01_retry.json",
+      "blob_sha": "fb2abcea7d6dd008eb6b4583677006ecb269a91c",
+      "blob_size": 891,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_before_fix/suite_stdout.txt",
+      "blob_sha": "35d881401d2b29fe3e12080a909cc7de2035b611",
+      "blob_size": 1468,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/job_repro.py",
+      "blob_sha": "de691de994d0b19f00cfdc138320407c49a92c3e",
+      "blob_size": 1794,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/P02_fh.txt",
+      "blob_sha": "957534fdf82581f628a568476b60e1a45dd4c42b",
+      "blob_size": 28791,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/pending_read_repro.py",
+      "blob_sha": "4909b3d647eda282c5a17f23d3c017842d64e0db",
+      "blob_size": 1488,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S07_repros/stdin_repro.py",
+      "blob_sha": "efcab7fbd1e74c9f8995a9558176aff18a9b1538",
+      "blob_size": 1025,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/S08_vray_proof_result.json",
+      "blob_sha": "9138dfa185e3ed4d42da57398950d11ebb0a26a6",
+      "blob_size": 1917,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/vray_export_log.txt",
+      "blob_sha": "2e6a02a852dcad44d2f2b6d7f250c8751dda4f7a",
+      "blob_size": 172,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/vray.png",
+      "blob_sha": "6544137c2248d0681f47fb89c44988fa73708e6d",
+      "blob_size": 318551,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_iso.png",
+      "blob_sha": "9e2b5cbad1e4615e4e323a2820a7017af3fc3304",
+      "blob_size": 199342,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_top.png",
+      "blob_sha": "d416cb2590f186ca82ad136fe7980ecf9d2ca389",
+      "blob_size": 64682,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders.skp",
+      "blob_sha": "ae171ef85079931a7a306670f8b55eeaf6de60f1",
+      "blob_size": 235683,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/compare.json",
+      "blob_sha": "c0e2dfe7d225cd87261ad0018f60f4df3643ac79",
+      "blob_size": 130767,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/probe_result.json",
+      "blob_sha": "39537ee462c663fd42adefb273a3c3209c3c9e4f",
+      "blob_size": 34996,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/S10_cabinet/cabinet_plan.json",
+      "blob_sha": "8f340c1adf698d304d62cd8d7f16c8d304d2d302",
+      "blob_size": 12885,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/SHA256SUMS",
+      "blob_sha": "6535eaf7627de38665ec4af954a51e5c7224f142",
+      "blob_size": 9643,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/builders_fixture.py",
+      "blob_sha": "bcf6898a2372836bd962fd449e764764cd5b2254",
+      "blob_size": 4461,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/closepid.py",
+      "blob_sha": "718208529e1e35495759c79ba4e9113c17005e58",
+      "blob_size": 268,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/coll_summary.py",
+      "blob_sha": "6ebee5f464fe3e2f521d956cd1c117d80ed29f8c",
+      "blob_size": 793,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/compare_furnish.py",
+      "blob_sha": "250be85c89771c73cc71e696e6f2ccf4645278af",
+      "blob_size": 7083,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/geometry_probe.rb",
+      "blob_sha": "9f5177b7565df272bea4bb598bee7a21fa7e3ebf",
+      "blob_size": 2936,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/mcp_call.py",
+      "blob_sha": "74bea2735582327f9f516ea094cfa97de45a018e",
+      "blob_size": 2001,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/mcp_suite.py",
+      "blob_sha": "2ca5475d6a4a9c0b932f53417c86e452cd45d53f",
+      "blob_size": 16574,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/planta_check.py",
+      "blob_sha": "a4e0d9837f89c9485f2f8b0ea1b60bb84dba1ae9",
+      "blob_size": 8043,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/planta_rooms_isolated.py",
+      "blob_sha": "5a38280ea59a49cf0c997565bfe63a8935168a4c",
+      "blob_size": 3491,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/probe.py",
+      "blob_sha": "e0adc115c7826b0fb76ae6eb75778ec4bfc803c2",
+      "blob_size": 1219,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/run.py",
+      "blob_sha": "6ef6221841c766097b9102adab75355a196e1e11",
+      "blob_size": 551,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/l2_fp042_20261019/tools/synth_furnish.py",
+      "blob_sha": "857f89e3cb984fa70c741b2d5f3b37d279ce4fc9",
+      "blob_size": 2584,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/planta_74/_preview/layout_r002_estar_ancorado_after_iso.png",
       "blob_sha": "731b149ff412f752787308d5fc5310e8f0b1f163",
       "blob_size": 151068,
@@ -3848,6 +5282,12 @@
       "path": "artifacts/review/planta_74/curation/planta_74__industrial__warm_compact__L0.png",
       "blob_sha": "da4a56cdfce2479ea0ff345503491427ee259059",
       "blob_size": 64033,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/curation/README.md",
+      "blob_sha": "f1a86b2aa01edce098e0dc48085755a465526589",
+      "blob_size": 809,
       "owner_group": "artifacts"
     },
     {
@@ -4022,6 +5462,12 @@
       "path": "artifacts/review/planta_74/scale_anchor_candidate_report.md",
       "blob_sha": "6bb98f7b72ef4c33056bb76815203f6c793779d7",
       "blob_size": 1754,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/shell_proof/README.md",
+      "blob_sha": "131e2522a55540adb2c7db31c5fb945b1acd9d02",
+      "blob_size": 407,
       "owner_group": "artifacts"
     },
     {
@@ -4451,6 +5897,354 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/sofa_program/check/README.md",
+      "blob_sha": "d44b4769539cf9bcfd4f0a3e450924d798f915cf",
+      "blob_size": 584,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/sofa_program/check/sofa_3q.png",
+      "blob_sha": "b0ff826a55af4593774fe418fcab099cd66d74a1",
+      "blob_size": 263705,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/check/sofa_3seat_v1.skp",
+      "blob_sha": "7056219903bf01ca7c0c579806d9412c7a789b83",
+      "blob_size": 292999,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/check/sofa_front.png",
+      "blob_sha": "e3592dcf9e6980f41459897cd7542f368eeb26b6",
+      "blob_size": 20349,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/check/sofa_side.png",
+      "blob_sha": "b7b9f61291d50c0701b46c29d7ade3ba389c3580",
+      "blob_size": 54213,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/check/sofa_top.png",
+      "blob_sha": "610c559a337211ea0cc66bc612b6f4ee4bf36ac8",
+      "blob_size": 74662,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/bench_seat_tight_back_exposed_legs.skp",
+      "blob_sha": "bfe3f25c5d5a4164ff01527f6442c5c5754a4991",
+      "blob_size": 224881,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/front.png",
+      "blob_sha": "b32ba83c37cc9a7f0fc591a1f46bd3787e17fd0c",
+      "blob_size": 23349,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/side.png",
+      "blob_sha": "e22d9d634f31a18c8328e22410b8024287bb2b18",
+      "blob_size": 44163,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/three_quarter.png",
+      "blob_sha": "3f4986158ba783662041052ec7682c79c713b351",
+      "blob_size": 175792,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/top.png",
+      "blob_sha": "ad8bdf13a93d2aff822432c0281e4d27505bee37",
+      "blob_size": 62129,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/validation.json",
+      "blob_sha": "512645dc3d35be58f33ad84abc25c5585e6af9c5",
+      "blob_size": 1790,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_archetypes.png",
+      "blob_sha": "9305b79592054c0e94f2190278dfdf82ff358c5f",
+      "blob_size": 187290,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_generalization.png",
+      "blob_sha": "4cd2cdb18f91110cddb113d38a66673be38ecf47",
+      "blob_size": 127949,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_ref_vs_generated.png",
+      "blob_sha": "153155cf2bf9e5a37591ff6cf12e4f98bba29c2d",
+      "blob_size": 268884,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/eval_3seat_bench_wide_arm_recessed_base.skp",
+      "blob_sha": "057c49a1624b679edaa41a55af90038592d0878f",
+      "blob_size": 292222,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/front.png",
+      "blob_sha": "bb307d34ed42e0b730d69a4e937ebb49df9d4779",
+      "blob_size": 17215,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/side.png",
+      "blob_sha": "4a1e88dce5c945084711ef6160a1a9513c8b115a",
+      "blob_size": 46566,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/three_quarter.png",
+      "blob_sha": "f2d0c07b80e7f832ff36af49f508f7fdccdf17b8",
+      "blob_size": 195569,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/top.png",
+      "blob_sha": "098201dbe7d6b92688948dfa3f5b5e00b53375ae",
+      "blob_size": 42963,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/validation.json",
+      "blob_sha": "3c4924a8a98b0f3f93c80719ffc329a7dc23e741",
+      "blob_size": 2083,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/eval_loveseat_slim_arm_tight_back.skp",
+      "blob_sha": "b6b2bea70d192e43f7549e867453fc70cb8cbc2c",
+      "blob_size": 246662,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/front.png",
+      "blob_sha": "9e267ae0bec84da6fb53b439b5d655ae081daf17",
+      "blob_size": 44490,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/side.png",
+      "blob_sha": "ce6f6c1b6b5929594c2efe073170c336453b8260",
+      "blob_size": 45409,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/three_quarter.png",
+      "blob_sha": "13d4975f62fbda50bab5301f5833a70df4f7a6fe",
+      "blob_size": 220116,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/top.png",
+      "blob_sha": "043271baad2e06f00da7282f0db1c18b391c67c1",
+      "blob_size": 144808,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/validation.json",
+      "blob_sha": "45660489609c381b7169895a3505cbc5dab9a19b",
+      "blob_size": 1898,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/eval_low_modern_dark_3seat.skp",
+      "blob_sha": "60af3cfc43472967a6308361ec47b122d9d5d6c2",
+      "blob_size": 282759,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/front.png",
+      "blob_sha": "eced0bf5fb42d9c41d216089ec24177e3d9d88de",
+      "blob_size": 50962,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/side.png",
+      "blob_sha": "01830144d20a222d2a881eeb663ea9f65ca9aac0",
+      "blob_size": 27008,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/three_quarter.png",
+      "blob_sha": "52374c280f884b6ba212b54ef6fc70d2afd739a8",
+      "blob_size": 179873,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/top.png",
+      "blob_sha": "89c90e3e295e34afaab5e6da8ed8eedd882ecdab",
+      "blob_size": 73912,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/validation.json",
+      "blob_sha": "c9874aec12dbb5d4616f80813dbec040bffbcfca",
+      "blob_size": 2196,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/eval_low_modern_dark_3seat_prompt.txt",
+      "blob_sha": "b312694e49df3c5e959cb5767de1f60dd80a72f0",
+      "blob_size": 781,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/eval_low_modern_dark_3seat_review.png",
+      "blob_sha": "ed58af1cb7b033f9d94464203283abe26006555a",
+      "blob_size": 143090,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/tufted_primitive_iso.png",
+      "blob_sha": "efbe4325edd886507b95aed022226dcbecd3f5d6",
+      "blob_size": 212171,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/primitives/primitives_front.png",
+      "blob_sha": "8d5dafdf9fda5d5911e037a52847fcd632c136a5",
+      "blob_size": 36525,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/primitives/primitives_three_quarter.png",
+      "blob_sha": "83d94c081e1926822113307e0a3b399b8683705c",
+      "blob_size": 171240,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/front.png",
+      "blob_sha": "972843951a4b03ec63aae9896f6323fdc02dd87e",
+      "blob_size": 18624,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/side.png",
+      "blob_sha": "9a0053f4b418573939cfd1e0124824bcc3c1dd0c",
+      "blob_size": 46218,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/straight_2seat_slim_arm_split_cushion_back.skp",
+      "blob_sha": "c10b6cc3f4a59718d0ca9d64649a7110f6c11475",
+      "blob_size": 282516,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/three_quarter.png",
+      "blob_sha": "6740938c7c8691754cbc6119bc6fbd1b21092e5c",
+      "blob_size": 199736,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/top.png",
+      "blob_sha": "7f95f1f3fa147d41246f9d198b68ebe0eab3b710",
+      "blob_size": 42953,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/validation.json",
+      "blob_sha": "b1b8385206b4637893e3fe626c6944f7046c3a66",
+      "blob_size": 2025,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/front.png",
+      "blob_sha": "e2c54143523d69cc2174dfa1935d9a48ce280d3d",
+      "blob_size": 98041,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/side.png",
+      "blob_sha": "aa4b7850677e10fea639ed3dfc38d2ec67801b63",
+      "blob_size": 41220,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/straight_3seat_track_arm_split_cushion_back.skp",
+      "blob_sha": "81a9cefee3c5bad1b69d99fd2d08708a4d384e8b",
+      "blob_size": 288616,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/three_quarter.png",
+      "blob_sha": "cfac953cb486e21e233d8b90adf6d86364a895e7",
+      "blob_size": 277540,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/top.png",
+      "blob_sha": "eba220c408733a0a0792b59d400d9aa38e7afb3c",
+      "blob_size": 124195,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/validation.json",
+      "blob_sha": "2752b8c3a4e6338527cb50bf62defe1f18b18539",
+      "blob_size": 2310,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_eval/suite_done.txt",
+      "blob_sha": "118985d859b7d661ad52e1e8708759de836aaa58",
+      "blob_size": 150,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_baseline.png",
+      "blob_sha": "e54b6ff92a9af09f4ed9f7f4896f2b59f7e280ca",
+      "blob_size": 933553,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_ground_autoexp.png",
+      "blob_sha": "3d7a807891342ca642ec43f095e75650cb5872cd",
+      "blob_size": 568343,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_material_complete.png",
+      "blob_sha": "928e8e7b920896059c5398bc1dc9cce410e2ca7c",
+      "blob_size": 1373496,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_microirregular.png",
+      "blob_sha": "86efffa4527f63766db46d46fc08f2554101e382",
+      "blob_size": 1374507,
+      "owner_group": "renders"
+    },
+    {
+      "path": "artifacts/review/sofa_program/sofa_vray/README.md",
+      "blob_sha": "fd4e09a67164ec88d2d8f42a08340d581e7de1d8",
+      "blob_size": 1000,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/vray_pipeline_proof_2026-06/README.md",
+      "blob_sha": "84877b4f5732e616d5f5311d09e2d1a159e05f01",
+      "blob_size": 771,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/vray_pipeline_proof_2026-06/vray_pipeline_proof.png",
+      "blob_sha": "42f50d658683639ac9decb78d373c8463b9dc043",
+      "blob_size": 1239741,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/variant_sweep/planta_74/contact_sheet.png",
       "blob_sha": "c94419969de5f28d753e87572218c7a817100e24",
       "blob_size": 205290,
@@ -4779,6 +6573,42 @@
       "blob_sha": "f49e683cc989c8be8c97b7705d0033a6eb80a0d4",
       "blob_size": 377372,
       "owner_group": "assets"
+    },
+    {
+      "path": "assets/textures/sofa_fabric/fabric_dark_charcoal_albedo.png",
+      "blob_sha": "ec539080b9a84852ea04e0ad9b8f57e0527e2ce7",
+      "blob_size": 303993,
+      "owner_group": "other_canonical_reference"
+    },
+    {
+      "path": "assets/textures/sofa_fabric/fabric_dark_charcoal_bump.png",
+      "blob_sha": "9391d786a91ccfbb9e139b870fb7b0857ec13c84",
+      "blob_size": 4860,
+      "owner_group": "other_canonical_reference"
+    },
+    {
+      "path": "assets/textures/sofa_fabric/fabric_light_linen_albedo.png",
+      "blob_sha": "14911523d8fca72fe7ff7f278833a29d88c46244",
+      "blob_size": 540523,
+      "owner_group": "other_canonical_reference"
+    },
+    {
+      "path": "assets/textures/sofa_fabric/fabric_light_linen_bump.png",
+      "blob_sha": "7288eee7566ed7d10a85473895cba868210f4858",
+      "blob_size": 4857,
+      "owner_group": "other_canonical_reference"
+    },
+    {
+      "path": "assets/textures/sofa_fabric/fabric_mid_gray_albedo.png",
+      "blob_sha": "9915f282fb91eddbabbed343f75d06979c8e7325",
+      "blob_size": 376377,
+      "owner_group": "other_canonical_reference"
+    },
+    {
+      "path": "assets/textures/sofa_fabric/fabric_mid_gray_bump.png",
+      "blob_sha": "7213e1c27607d3a7abee238b9c705e8571190066",
+      "blob_size": 4838,
+      "owner_group": "other_canonical_reference"
     },
     {
       "path": "docs/archive/2026-07-11/artifacts/review/planta_74/apt_full_0259/apt_full_0259.skp",
@@ -5195,6 +7025,12 @@
       "owner_group": "other_canonical_reference"
     },
     {
+      "path": "fixtures/components/circulation_table_chair/case_001_golden.json",
+      "blob_sha": "3ad47109a7e2fc0a435b858d522ec978fa53aa60",
+      "blob_size": 864,
+      "owner_group": "fixtures"
+    },
+    {
       "path": "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
       "blob_sha": "d910dcbc54e1276ded44adbbf75a8c4c1621fc28",
       "blob_size": 105654,
@@ -5249,9 +7085,51 @@
       "owner_group": "fixtures"
     },
     {
+      "path": "fixtures/synthetic_cabinets/fp046_shaker_valid_a.json",
+      "blob_sha": "848d91bd6a1f1964bf217bb31c7f65444f0d30d4",
+      "blob_size": 871,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/holdout_c.json",
+      "blob_sha": "ae1dfb59030a64b5e884b0001b5bcf8546cd9042",
+      "blob_size": 1454,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/invalid_impossible.json",
+      "blob_sha": "266cde3b654f005e867a0c102c0609c6cca215a6",
+      "blob_size": 1636,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/invalid_incomplete.json",
+      "blob_sha": "d0c66eb2817c4054fe2bf031eb21adb30924c4a7",
+      "blob_size": 1585,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/valid_a_base_600.json",
+      "blob_sha": "02443b5b2977594a85ba068d2cd4ddd3f3848af0",
+      "blob_size": 1269,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/valid_b_tall_900.json",
+      "blob_sha": "8a2124c6a17cc3de274e4c60d656022f35fcfa45",
+      "blob_size": 1463,
+      "owner_group": "fixtures"
+    },
+    {
       "path": "fixtures/synthetic_rooms/bedroom_large_18m2.json",
       "blob_sha": "36e989ebbbf13c62b04dd5df63f59aa188d46685",
       "blob_size": 1712,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_rooms/bedroom_medium_14m2_inner_face.json",
+      "blob_sha": "46fa0e0bc6e9ec32dd0eba0366bc3ca42eca5e4d",
+      "blob_size": 1666,
       "owner_group": "fixtures"
     },
     {
@@ -5651,6 +7529,12 @@
       "owner_group": "other_canonical_reference"
     },
     {
+      "path": "projects/planta_74/source/planta_74.pdf",
+      "blob_sha": "91d81dacba3ff50ac9213b33e25e67b9a259e43a",
+      "blob_size": 175850,
+      "owner_group": "projects"
+    },
+    {
       "path": "references/design_rules/design_rule.schema.json",
       "blob_sha": "6bdcbb79dbae32bdd1c0c3d572885df920705631",
       "blob_size": 1870,
@@ -5909,6 +7793,12 @@
       "owner_group": "references"
     },
     {
+      "path": "references/sofas/history/HISTORICO_SOFA.json",
+      "blob_sha": "ceac4316e24214ae6ef920aa65191217ed2a5670",
+      "blob_size": 31110,
+      "owner_group": "references"
+    },
+    {
       "path": "references/sofas/raw/group60.skp",
       "blob_sha": "f9a3a41bbb9cfcccd248db6403f53f7a519d9f3b",
       "blob_size": 1075095,
@@ -5993,1894 +7883,10 @@
       "owner_group": "references"
     },
     {
-      "path": "artifacts/review/sofa_program/check/sofa_3q.png",
-      "blob_sha": "b0ff826a55af4593774fe418fcab099cd66d74a1",
-      "blob_size": 263705,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/check/sofa_3seat_v1.skp",
-      "blob_sha": "7056219903bf01ca7c0c579806d9412c7a789b83",
-      "blob_size": 292999,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/check/sofa_front.png",
-      "blob_sha": "e3592dcf9e6980f41459897cd7542f368eeb26b6",
-      "blob_size": 20349,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/check/sofa_side.png",
-      "blob_sha": "b7b9f61291d50c0701b46c29d7ade3ba389c3580",
-      "blob_size": 54213,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/check/sofa_top.png",
-      "blob_sha": "610c559a337211ea0cc66bc612b6f4ee4bf36ac8",
-      "blob_size": 74662,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/check/README.md",
-      "blob_sha": "d44b4769539cf9bcfd4f0a3e450924d798f915cf",
-      "blob_size": 584,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/bench_seat_tight_back_exposed_legs.skp",
-      "blob_sha": "bfe3f25c5d5a4164ff01527f6442c5c5754a4991",
-      "blob_size": 224881,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/front.png",
-      "blob_sha": "b32ba83c37cc9a7f0fc591a1f46bd3787e17fd0c",
-      "blob_size": 23349,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/side.png",
-      "blob_sha": "e22d9d634f31a18c8328e22410b8024287bb2b18",
-      "blob_size": 44163,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/three_quarter.png",
-      "blob_sha": "3f4986158ba783662041052ec7682c79c713b351",
-      "blob_size": 175792,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/top.png",
-      "blob_sha": "ad8bdf13a93d2aff822432c0281e4d27505bee37",
-      "blob_size": 62129,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/bench_seat_tight_back_exposed_legs/validation.json",
-      "blob_sha": "512645dc3d35be58f33ad84abc25c5585e6af9c5",
-      "blob_size": 1790,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_archetypes.png",
-      "blob_sha": "9305b79592054c0e94f2190278dfdf82ff358c5f",
-      "blob_size": 187290,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_generalization.png",
-      "blob_sha": "4cd2cdb18f91110cddb113d38a66673be38ecf47",
-      "blob_size": 127949,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/contact_sheet_ref_vs_generated.png",
-      "blob_sha": "153155cf2bf9e5a37591ff6cf12e4f98bba29c2d",
-      "blob_size": 268884,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/eval_3seat_bench_wide_arm_recessed_base.skp",
-      "blob_sha": "057c49a1624b679edaa41a55af90038592d0878f",
-      "blob_size": 292222,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/front.png",
-      "blob_sha": "bb307d34ed42e0b730d69a4e937ebb49df9d4779",
-      "blob_size": 17215,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/side.png",
-      "blob_sha": "4a1e88dce5c945084711ef6160a1a9513c8b115a",
-      "blob_size": 46566,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/three_quarter.png",
-      "blob_sha": "f2d0c07b80e7f832ff36af49f508f7fdccdf17b8",
-      "blob_size": 195569,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/top.png",
-      "blob_sha": "098201dbe7d6b92688948dfa3f5b5e00b53375ae",
-      "blob_size": 42963,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_3seat_bench_wide_arm_recessed_base/validation.json",
-      "blob_sha": "3c4924a8a98b0f3f93c80719ffc329a7dc23e741",
-      "blob_size": 2083,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/eval_loveseat_slim_arm_tight_back.skp",
-      "blob_sha": "b6b2bea70d192e43f7549e867453fc70cb8cbc2c",
-      "blob_size": 246662,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/front.png",
-      "blob_sha": "9e267ae0bec84da6fb53b439b5d655ae081daf17",
-      "blob_size": 44490,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/side.png",
-      "blob_sha": "ce6f6c1b6b5929594c2efe073170c336453b8260",
-      "blob_size": 45409,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/three_quarter.png",
-      "blob_sha": "13d4975f62fbda50bab5301f5833a70df4f7a6fe",
-      "blob_size": 220116,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/top.png",
-      "blob_sha": "043271baad2e06f00da7282f0db1c18b391c67c1",
-      "blob_size": 144808,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_loveseat_slim_arm_tight_back/validation.json",
-      "blob_sha": "45660489609c381b7169895a3505cbc5dab9a19b",
-      "blob_size": 1898,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/eval_low_modern_dark_3seat.skp",
-      "blob_sha": "60af3cfc43472967a6308361ec47b122d9d5d6c2",
-      "blob_size": 282759,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/front.png",
-      "blob_sha": "eced0bf5fb42d9c41d216089ec24177e3d9d88de",
-      "blob_size": 50962,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/side.png",
-      "blob_sha": "01830144d20a222d2a881eeb663ea9f65ca9aac0",
-      "blob_size": 27008,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/three_quarter.png",
-      "blob_sha": "52374c280f884b6ba212b54ef6fc70d2afd739a8",
-      "blob_size": 179873,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/top.png",
-      "blob_sha": "89c90e3e295e34afaab5e6da8ed8eedd882ecdab",
-      "blob_size": 73912,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/eval_low_modern_dark_3seat/validation.json",
-      "blob_sha": "c9874aec12dbb5d4616f80813dbec040bffbcfca",
-      "blob_size": 2196,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/eval_low_modern_dark_3seat_prompt.txt",
-      "blob_sha": "b312694e49df3c5e959cb5767de1f60dd80a72f0",
-      "blob_size": 781,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/eval_low_modern_dark_3seat_review.png",
-      "blob_sha": "ed58af1cb7b033f9d94464203283abe26006555a",
-      "blob_size": 143090,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/gpt_review/tufted_primitive_iso.png",
-      "blob_sha": "efbe4325edd886507b95aed022226dcbecd3f5d6",
-      "blob_size": 212171,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/primitives/primitives_front.png",
-      "blob_sha": "8d5dafdf9fda5d5911e037a52847fcd632c136a5",
-      "blob_size": 36525,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/primitives/primitives_three_quarter.png",
-      "blob_sha": "83d94c081e1926822113307e0a3b399b8683705c",
-      "blob_size": 171240,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/front.png",
-      "blob_sha": "972843951a4b03ec63aae9896f6323fdc02dd87e",
-      "blob_size": 18624,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/side.png",
-      "blob_sha": "9a0053f4b418573939cfd1e0124824bcc3c1dd0c",
-      "blob_size": 46218,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/straight_2seat_slim_arm_split_cushion_back.skp",
-      "blob_sha": "c10b6cc3f4a59718d0ca9d64649a7110f6c11475",
-      "blob_size": 282516,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/three_quarter.png",
-      "blob_sha": "6740938c7c8691754cbc6119bc6fbd1b21092e5c",
-      "blob_size": 199736,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/top.png",
-      "blob_sha": "7f95f1f3fa147d41246f9d198b68ebe0eab3b710",
-      "blob_size": 42953,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_2seat_slim_arm_split_cushion_back/validation.json",
-      "blob_sha": "b1b8385206b4637893e3fe626c6944f7046c3a66",
-      "blob_size": 2025,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/front.png",
-      "blob_sha": "e2c54143523d69cc2174dfa1935d9a48ce280d3d",
-      "blob_size": 98041,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/side.png",
-      "blob_sha": "aa4b7850677e10fea639ed3dfc38d2ec67801b63",
-      "blob_size": 41220,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/straight_3seat_track_arm_split_cushion_back.skp",
-      "blob_sha": "81a9cefee3c5bad1b69d99fd2d08708a4d384e8b",
-      "blob_size": 288616,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/three_quarter.png",
-      "blob_sha": "cfac953cb486e21e233d8b90adf6d86364a895e7",
-      "blob_size": 277540,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/top.png",
-      "blob_sha": "eba220c408733a0a0792b59d400d9aa38e7afb3c",
-      "blob_size": 124195,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/straight_3seat_track_arm_split_cushion_back/validation.json",
-      "blob_sha": "2752b8c3a4e6338527cb50bf62defe1f18b18539",
-      "blob_size": 2310,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_eval/suite_done.txt",
-      "blob_sha": "118985d859b7d661ad52e1e8708759de836aaa58",
-      "blob_size": 150,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_baseline.png",
-      "blob_sha": "e54b6ff92a9af09f4ed9f7f4896f2b59f7e280ca",
-      "blob_size": 933553,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_ground_autoexp.png",
-      "blob_sha": "3d7a807891342ca642ec43f095e75650cb5872cd",
-      "blob_size": 568343,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_material_complete.png",
-      "blob_sha": "928e8e7b920896059c5398bc1dc9cce410e2ca7c",
-      "blob_size": 1373496,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_vray/dark_lounge_vray_microirregular.png",
-      "blob_sha": "86efffa4527f63766db46d46fc08f2554101e382",
-      "blob_size": 1374507,
-      "owner_group": "renders"
-    },
-    {
-      "path": "artifacts/review/sofa_program/sofa_vray/README.md",
-      "blob_sha": "fd4e09a67164ec88d2d8f42a08340d581e7de1d8",
-      "blob_size": 1000,
-      "owner_group": "artifacts"
-    },
-    {
       "path": "tests/data/overlay_gate/planta74_top.png",
       "blob_sha": "98a5bd0e302db1337d9d716a179dda4e9cf61377",
       "blob_size": 30054,
       "owner_group": "other_canonical_reference"
-    },
-    {
-      "path": "assets/textures/sofa_fabric/fabric_dark_charcoal_albedo.png",
-      "blob_sha": "ec539080b9a84852ea04e0ad9b8f57e0527e2ce7",
-      "blob_size": 303993,
-      "owner_group": "other_canonical_reference"
-    },
-    {
-      "path": "assets/textures/sofa_fabric/fabric_dark_charcoal_bump.png",
-      "blob_sha": "9391d786a91ccfbb9e139b870fb7b0857ec13c84",
-      "blob_size": 4860,
-      "owner_group": "other_canonical_reference"
-    },
-    {
-      "path": "assets/textures/sofa_fabric/fabric_light_linen_albedo.png",
-      "blob_sha": "14911523d8fca72fe7ff7f278833a29d88c46244",
-      "blob_size": 540523,
-      "owner_group": "other_canonical_reference"
-    },
-    {
-      "path": "assets/textures/sofa_fabric/fabric_light_linen_bump.png",
-      "blob_sha": "7288eee7566ed7d10a85473895cba868210f4858",
-      "blob_size": 4857,
-      "owner_group": "other_canonical_reference"
-    },
-    {
-      "path": "assets/textures/sofa_fabric/fabric_mid_gray_albedo.png",
-      "blob_sha": "9915f282fb91eddbabbed343f75d06979c8e7325",
-      "blob_size": 376377,
-      "owner_group": "other_canonical_reference"
-    },
-    {
-      "path": "assets/textures/sofa_fabric/fabric_mid_gray_bump.png",
-      "blob_sha": "7213e1c27607d3a7abee238b9c705e8571190066",
-      "blob_size": 4838,
-      "owner_group": "other_canonical_reference"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/geometry_report.json",
-      "blob_sha": "4b1c39d8bc1ab8a5e74ef1bb7d285f19918336df",
-      "blob_size": 26891,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/inspect.json",
-      "blob_sha": "56adc090c514a19118e17e5ebe3a32eb24728f86",
-      "blob_size": 90361,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model.skp",
-      "blob_sha": "1254f5827c074503c1bf116db8db77631e483538",
-      "blob_size": 111957,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_iso.png",
-      "blob_sha": "2ac14d41bf94502f6f322067cb2d861c94e74974",
-      "blob_size": 140885,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/model_top.png",
-      "blob_sha": "2979ba98a994ddea487ced6c393e620768ca7ba7",
-      "blob_size": 29037,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P01_planta74_shell/probe_result.json",
-      "blob_sha": "c15401fe5cd6c8941e6d4b3fb1f8a69ef88e8180",
-      "blob_size": 23810,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/P02_furnish_mcp.json",
-      "blob_sha": "906b1816d189a264295a7fca7d3e2deadab4bba6",
-      "blob_size": 4461,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/inspect.json",
-      "blob_sha": "e2f1995e35623e4f5fdbf4f8a6638cf1d7250864",
-      "blob_size": 616231,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished.skp",
-      "blob_sha": "25086ffffb86c298c431c762a889bd70d8229ef2",
-      "blob_size": 3359078,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_iso.png",
-      "blob_sha": "d14c0a600448fcfc2e2693c04a5875362b113a0f",
-      "blob_size": 242861,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_after_top.png",
-      "blob_sha": "16319186fbe9eafca46995512491d1255a048c20",
-      "blob_size": 88185,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_before_top.png",
-      "blob_sha": "7fd2d32663deb12a8c98c71c757dbfb61c78c0fc",
-      "blob_size": 29027,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_74_furnished_log.txt",
-      "blob_sha": "f1b838a6bfcf5917e4710f1ddc4f6f91a05085b2",
-      "blob_size": 13966,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P02_furnish_integrated/planta_check.json",
-      "blob_sha": "0fc45131e11fcdb7984d1d737cb57b1e1f9dccc5",
-      "blob_size": 19662,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_iso.png",
-      "blob_sha": "2278ce5e385d8113a1ef33e33dc154373d51bef1",
-      "blob_size": 119618,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/A_S____TERRACO_SOCIAL___TERRACO_TECNICO_room_top.png",
-      "blob_sha": "9afff407deb00a3cbec7f4f2917d085157a846a0",
-      "blob_size": 19772,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_iso.png",
-      "blob_sha": "71c1b807a9bbef7b6eeda36cf43317989971cd55",
-      "blob_size": 93453,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_01_room_top.png",
-      "blob_sha": "f6633d2fe9640da8ee92394b2e1330536ac87f93",
-      "blob_size": 31300,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_iso.png",
-      "blob_sha": "b78f6d5ec13f0ed4efbb9dd7136a9abcb248761e",
-      "blob_size": 166101,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/BANHO_02_room_top.png",
-      "blob_sha": "6dbf450e292bbf17a5a6d0b0d6bf5d3851452f44",
-      "blob_size": 120371,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_iso.png",
-      "blob_sha": "f9999fd23b7898eae93dec762c2072f535cf3632",
-      "blob_size": 85583,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/COZINHA_room_top.png",
-      "blob_sha": "5ab1b2da5a6d2afac050a627966fba39d00ec00b",
-      "blob_size": 18100,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_iso.png",
-      "blob_sha": "d705cb7ab03a59445201ecaec3d3cefc7c4578ed",
-      "blob_size": 129813,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/LAVABO_room_top.png",
-      "blob_sha": "b82ed6824a0e87a7401a97aaf089bfb0eb499774",
-      "blob_size": 38039,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_iso.png",
-      "blob_sha": "0e098ad2a649df7bc39cc9bc306510565665050e",
-      "blob_size": 144756,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SALA_DE_JANTAR___SALA_DE_ESTAR_room_top.png",
-      "blob_sha": "4e8e523bafd77ad378aea76c4add8f7a35461bab",
-      "blob_size": 36989,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_iso.png",
-      "blob_sha": "7ae3b27be8a0dec7c0fb20711d645cc92ee3a06f",
-      "blob_size": 126647,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_01_room_top.png",
-      "blob_sha": "28377b42696726caac65bf5de18647cdd7d60f6a",
-      "blob_size": 30263,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_iso.png",
-      "blob_sha": "5746800475398d69b43b6b7671f621d185d97b5f",
-      "blob_size": 152049,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/SUITE_02_room_top.png",
-      "blob_sha": "911b143f94a4c958468d2803509b33b4525b789e",
-      "blob_size": 26791,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P03_rooms_isolated/isolated_report.json",
-      "blob_sha": "b00af052702999e8892f889a0430bbf55e92a610",
-      "blob_size": 1836,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P04_room_edit/edit.json",
-      "blob_sha": "5c172820ea4b8ac2ac153d8e06640fc580ecf3a7",
-      "blob_size": 1449,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P04_room_edit/inspect.json",
-      "blob_sha": "c49f49126ee548ebf846689915bb611459b63c1b",
-      "blob_size": 616503,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P05_sofa_premium/inspect_approved.json",
-      "blob_sha": "da07d0de19367697b51e9c324b111a6430f9af70",
-      "blob_size": 380898,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P07_scale_fix/P06_mcp_build_quadrado.json",
-      "blob_sha": "f42ebbcc559794708805ffeba1d81bd4174d3144",
-      "blob_size": 3496,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/P07_scale_fix/geometry_report.json",
-      "blob_sha": "e5d8ffa7a06181e9612415abd68ef8f3e3f48010",
-      "blob_size": 26905,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/README.md",
-      "blob_sha": "334cfc8d8d0c75bf0762a54db290098fde816801",
-      "blob_size": 14932,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/build_result.json",
-      "blob_sha": "51f4c95f212dfc78cbf0758eef4716afb0172767",
-      "blob_size": 3176,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/geometry_report.json",
-      "blob_sha": "1603643beedfd07f0ea9577744d5abf8f4741c34",
-      "blob_size": 5523,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/inspect.json",
-      "blob_sha": "651b6d31ba8caef5dc09fcadac4af6c22cc007c0",
-      "blob_size": 21670,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model.skp",
-      "blob_sha": "626faa3c9da529fd6b1d8da19d2b7c38a975923b",
-      "blob_size": 72560,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_iso.png",
-      "blob_sha": "2aee5f6bd0f10984975ed77a688ff449681e6a88",
-      "blob_size": 58715,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/model_top.png",
-      "blob_sha": "c57af704c2b4499f064a5e1e9130e4f3bd64582d",
-      "blob_size": 9172,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S01_quadrado_shell/probe_result.json",
-      "blob_sha": "011b62508d808d05052c3b45146a3132a4d152f0",
-      "blob_size": 2669,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/compare.json",
-      "blob_sha": "48abeddbe2fe7fc00a711f65b4639720c865d463",
-      "blob_size": 37921,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished.skp",
-      "blob_sha": "920ee02e9502a74f25eb943150b4369d7e619e51",
-      "blob_size": 152966,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_iso.png",
-      "blob_sha": "feffde1be0f1bb9ffcdda349906645cc01deeb59",
-      "blob_size": 72353,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_after_top.png",
-      "blob_sha": "4ed935338fa83d643a529248be279fb2872a897a",
-      "blob_size": 13727,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_bedroom/furnished_log.txt",
-      "blob_sha": "7c351c919b80b8b77891d70904e2ffb6c51064ff",
-      "blob_size": 2135,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/compare.json",
-      "blob_sha": "c8b7cd075343afccefe7e572ce87974134bc50de",
-      "blob_size": 29045,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished.skp",
-      "blob_sha": "c67704b6a7a1bd6e05083243fa1ac3b6c04a8d23",
-      "blob_size": 150071,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_iso.png",
-      "blob_sha": "eec15141d306f85e2fbe6216dadd9da0faa1bd16",
-      "blob_size": 83966,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_after_top.png",
-      "blob_sha": "fb262ae0472301d2dd9e846b50e205c976b2cd25",
-      "blob_size": 18415,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S03_synth_living/furnished_log.txt",
-      "blob_sha": "7100952c07c159f41f2d42a16ef3d48fcdcc9191",
-      "blob_size": 1869,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/compare.json",
-      "blob_sha": "07e8de90126ae801dc58a49b25d94329697ae527",
-      "blob_size": 50585,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished.skp",
-      "blob_sha": "e2cb0670c667f94e5d4c61621c66497ebe131773",
-      "blob_size": 606764,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished_after_iso.png",
-      "blob_sha": "4be25503cd7701e1d5fabbfe858f181f9e87c4be",
-      "blob_size": 121796,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S04_styled_living_large/furnished_log.txt",
-      "blob_sha": "080c4756ce0455c4d9c9a948c859bfcba0bb2ac9",
-      "blob_size": 3265,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders.skp",
-      "blob_sha": "032ee4a9bd9dd504d64b53d334184c79658a37df",
-      "blob_size": 234476,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_iso.png",
-      "blob_sha": "4717517d2009a47237e1fc12eb63b83c39370c75",
-      "blob_size": 208771,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/builders_top.png",
-      "blob_sha": "148f3ce4ac309661e2c4cd1755c946028dbe3650",
-      "blob_size": 40167,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/compare.json",
-      "blob_sha": "04fb78cd83db38e428f47597b16339f949021115",
-      "blob_size": 130767,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S05_builders_before_fix/probe_result.json",
-      "blob_sha": "cb648c9ea4d11a5190483ac652c5a78b90582a06",
-      "blob_size": 41978,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_after_fix/suite.json",
-      "blob_sha": "5ebc6dd9270f33dc69d4fbecba768096a18b81cc",
-      "blob_size": 46275,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_before_fix/I01_retry.json",
-      "blob_sha": "fb2abcea7d6dd008eb6b4583677006ecb269a91c",
-      "blob_size": 891,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S06_mcp_before_fix/suite_stdout.txt",
-      "blob_sha": "35d881401d2b29fe3e12080a909cc7de2035b611",
-      "blob_size": 1468,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S07_repros/P02_fh.txt",
-      "blob_sha": "957534fdf82581f628a568476b60e1a45dd4c42b",
-      "blob_size": 28791,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S07_repros/job_repro.py",
-      "blob_sha": "de691de994d0b19f00cfdc138320407c49a92c3e",
-      "blob_size": 1794,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S07_repros/pending_read_repro.py",
-      "blob_sha": "4909b3d647eda282c5a17f23d3c017842d64e0db",
-      "blob_size": 1488,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S07_repros/stdin_repro.py",
-      "blob_sha": "efcab7fbd1e74c9f8995a9558176aff18a9b1538",
-      "blob_size": 1025,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/S08_vray_proof_result.json",
-      "blob_sha": "9138dfa185e3ed4d42da57398950d11ebb0a26a6",
-      "blob_size": 1917,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/vray.png",
-      "blob_sha": "6544137c2248d0681f47fb89c44988fa73708e6d",
-      "blob_size": 318551,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S08_vray_proof/vray_export_log.txt",
-      "blob_sha": "2e6a02a852dcad44d2f2b6d7f250c8751dda4f7a",
-      "blob_size": 172,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders.skp",
-      "blob_sha": "ae171ef85079931a7a306670f8b55eeaf6de60f1",
-      "blob_size": 235683,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_iso.png",
-      "blob_sha": "9e2b5cbad1e4615e4e323a2820a7017af3fc3304",
-      "blob_size": 199342,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/builders_top.png",
-      "blob_sha": "d416cb2590f186ca82ad136fe7980ecf9d2ca389",
-      "blob_size": 64682,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/compare.json",
-      "blob_sha": "c0e2dfe7d225cd87261ad0018f60f4df3643ac79",
-      "blob_size": 130767,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S09_builders_after_fix/probe_result.json",
-      "blob_sha": "39537ee462c663fd42adefb273a3c3209c3c9e4f",
-      "blob_size": 34996,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/S10_cabinet/cabinet_plan.json",
-      "blob_sha": "8f340c1adf698d304d62cd8d7f16c8d304d2d302",
-      "blob_size": 12885,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/SHA256SUMS",
-      "blob_sha": "6535eaf7627de38665ec4af954a51e5c7224f142",
-      "blob_size": 9643,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/integrity/S08_scene_hash_before.txt",
-      "blob_sha": "289a95dc543e2f255c669545a4d13a4c8030f086",
-      "blob_size": 160,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/integrity/hashes_after.sha256",
-      "blob_sha": "9cff8accbf26461ae9b978a5241dc40028d859a1",
-      "blob_size": 119950,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/integrity/hashes_before.sha256",
-      "blob_sha": "2b30e1f7c1d5110db559cbcbe05d9d04d841aa5b",
-      "blob_size": 119950,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/builders_fixture.py",
-      "blob_sha": "bcf6898a2372836bd962fd449e764764cd5b2254",
-      "blob_size": 4461,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/closepid.py",
-      "blob_sha": "718208529e1e35495759c79ba4e9113c17005e58",
-      "blob_size": 268,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/coll_summary.py",
-      "blob_sha": "6ebee5f464fe3e2f521d956cd1c117d80ed29f8c",
-      "blob_size": 793,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/compare_furnish.py",
-      "blob_sha": "250be85c89771c73cc71e696e6f2ccf4645278af",
-      "blob_size": 7083,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/geometry_probe.rb",
-      "blob_sha": "9f5177b7565df272bea4bb598bee7a21fa7e3ebf",
-      "blob_size": 2936,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/mcp_call.py",
-      "blob_sha": "74bea2735582327f9f516ea094cfa97de45a018e",
-      "blob_size": 2001,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/mcp_suite.py",
-      "blob_sha": "2ca5475d6a4a9c0b932f53417c86e452cd45d53f",
-      "blob_size": 16574,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/planta_check.py",
-      "blob_sha": "a4e0d9837f89c9485f2f8b0ea1b60bb84dba1ae9",
-      "blob_size": 8043,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/planta_rooms_isolated.py",
-      "blob_sha": "5a38280ea59a49cf0c997565bfe63a8935168a4c",
-      "blob_size": 3491,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/probe.py",
-      "blob_sha": "e0adc115c7826b0fb76ae6eb75778ec4bfc803c2",
-      "blob_size": 1219,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/run.py",
-      "blob_sha": "6ef6221841c766097b9102adab75355a196e1e11",
-      "blob_size": 551,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/l2_fp042_20261019/tools/synth_furnish.py",
-      "blob_sha": "857f89e3cb984fa70c741b2d5f3b37d279ce4fc9",
-      "blob_size": 2584,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "references/sofas/history/HISTORICO_SOFA.json",
-      "blob_sha": "ceac4316e24214ae6ef920aa65191217ed2a5670",
-      "blob_size": 31110,
-      "owner_group": "references"
-    },
-    {
-      "path": "artifacts/review/vray_pipeline_proof_2026-06/vray_pipeline_proof.png",
-      "blob_sha": "42f50d658683639ac9decb78d373c8463b9dc043",
-      "blob_size": 1239741,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/vray_pipeline_proof_2026-06/README.md",
-      "blob_sha": "84877b4f5732e616d5f5311d09e2d1a159e05f01",
-      "blob_size": 771,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "projects/planta_74/source/planta_74.pdf",
-      "blob_sha": "91d81dacba3ff50ac9213b33e25e67b9a259e43a",
-      "blob_size": 175850,
-      "owner_group": "projects"
-    },
-    {
-      "path": "fixtures/synthetic_rooms/bedroom_medium_14m2_inner_face.json",
-      "blob_sha": "46fa0e0bc6e9ec32dd0eba0366bc3ca42eca5e4d",
-      "blob_size": 1666,
-      "owner_group": "fixtures"
-    },
-    {
-      "path": "artifacts/review/furniture/kitchen/README.md",
-      "blob_sha": "b8bad0afed88fa599834a49ad19dd3eeea893ed5",
-      "blob_size": 408,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/planta_74/curation/README.md",
-      "blob_sha": "f1a86b2aa01edce098e0dc48085755a465526589",
-      "blob_size": 809,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/planta_74/shell_proof/README.md",
-      "blob_sha": "131e2522a55540adb2c7db31c5fb945b1acd9d02",
-      "blob_size": 407,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "fixtures/synthetic_cabinets/holdout_c.json",
-      "blob_sha": "ae1dfb59030a64b5e884b0001b5bcf8546cd9042",
-      "blob_size": 1454,
-      "owner_group": "fixtures"
-    },
-    {
-      "path": "fixtures/synthetic_cabinets/invalid_impossible.json",
-      "blob_sha": "266cde3b654f005e867a0c102c0609c6cca215a6",
-      "blob_size": 1636,
-      "owner_group": "fixtures"
-    },
-    {
-      "path": "fixtures/synthetic_cabinets/invalid_incomplete.json",
-      "blob_sha": "d0c66eb2817c4054fe2bf031eb21adb30924c4a7",
-      "blob_size": 1585,
-      "owner_group": "fixtures"
-    },
-    {
-      "path": "fixtures/synthetic_cabinets/valid_a_base_600.json",
-      "blob_sha": "02443b5b2977594a85ba068d2cd4ddd3f3848af0",
-      "blob_size": 1269,
-      "owner_group": "fixtures"
-    },
-    {
-      "path": "fixtures/synthetic_cabinets/fp046_shaker_valid_a.json",
-      "blob_sha": "848d91bd6a1f1964bf217bb31c7f65444f0d30d4",
-      "blob_size": 871,
-      "owner_group": "fixtures"
-    },
-    {
-      "path": "fixtures/synthetic_cabinets/valid_b_tall_900.json",
-      "blob_sha": "8a2124c6a17cc3de274e4c60d656022f35fcfa45",
-      "blob_size": 1463,
-      "owner_group": "fixtures"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/README.md",
-      "blob_sha": "e488201c1b28728872c4a0e04bcf58d7a241bed9",
-      "blob_size": 3913,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/l2_matrix.py",
-      "blob_sha": "fac0fa0c1a5b60f1c53371d7f9aa68c895627742",
-      "blob_size": 9348,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/review_scope_l2/README.md",
-      "blob_sha": "99419b8f321e3714c950a35fa0c6cb1f9f4ef27b",
-      "blob_size": 2995,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/review_scope_l2/kitchen_fp047_report.json",
-      "blob_sha": "06dc7b4570662ba29116bd13340fd0132ce2628f",
-      "blob_size": 1230,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/review_scope_l2/kitchen_negatives.json",
-      "blob_sha": "0717fd08ac4e6f38227ebb0969b6b2bea5cba3d7",
-      "blob_size": 2201,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/review_scope_l2/kitchen_summary.json",
-      "blob_sha": "4fd56c52d8667438f12acf20a0df1f4a5b6c818c",
-      "blob_size": 5230,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/review_scope_l2/kitchen_trace.json",
-      "blob_sha": "58fb709b9c360fcc50ded3f5fdcf64560906ee1a",
-      "blob_size": 11240,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/README.md",
-      "blob_sha": "65b9f499f3ab9fe64e658d96cf2498293523332a",
-      "blob_size": 3555,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/manifest.json",
-      "blob_sha": "81481edea49c254a31cbe9e97dc81723eacf801b",
-      "blob_size": 4236,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/visual_review.json",
-      "blob_sha": "2ff0d56e7cb787c705698dcfe67d145ed48f8d91",
-      "blob_size": 1788,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/flow_trace.json",
-      "blob_sha": "cc9c2d7a4884d9027653a5dfb36ba8ddd38ae9c3",
-      "blob_size": 11232,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/detail_oblique_after.png",
-      "blob_sha": "c30de31452a2a54ca97d7fbaafcf10e3d924d9c9",
-      "blob_size": 109075,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/detail_oblique_before.png",
-      "blob_sha": "738e69b45e9a2502f15c2514dfd519a77beb21f4",
-      "blob_size": 87457,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/front_after.png",
-      "blob_sha": "f8d8c95c1a4a02b335d0cf2f541caf0fdce225be",
-      "blob_size": 39762,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/front_before.png",
-      "blob_sha": "88f7fd4b40f6719941d7c1653006d699e2a33301",
-      "blob_size": 38813,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/iso_after.png",
-      "blob_sha": "98cd6ba67cb731ea361cba9509f9a67575c530bd",
-      "blob_size": 120993,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/iso_before.png",
-      "blob_sha": "5826fc9e772a8146fe1991b75d2b4d2ea9fb5bda",
-      "blob_size": 107462,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/overview_1_top_iso.png",
-      "blob_sha": "24aee49773ec3e193c8197d16686484c4afedd63",
-      "blob_size": 156125,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/overview_2_front_detail.png",
-      "blob_sha": "9266319a9812733547d17d83a28f5bc9d45d6e58",
-      "blob_size": 174351,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/sheet_detail_oblique.png",
-      "blob_sha": "b88fc696a946bba4a8b18cf80cb5197ecd76cbde",
-      "blob_size": 169490,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/sheet_front.png",
-      "blob_sha": "916deb33edc7683367b869b18fa53c0578f91483",
-      "blob_size": 70154,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/sheet_iso.png",
-      "blob_sha": "71dbe051125a74985082ec8d0c102c12a843a98c",
-      "blob_size": 175927,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/sheet_top.png",
-      "blob_sha": "292f0d8f7cf79aaf0acb4d0c8a75e1c8e23cc466",
-      "blob_size": 47140,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/top_after.png",
-      "blob_sha": "b27e663e2cf2375ea45c75c309d5e3062ac3698c",
-      "blob_size": 17732,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/package/top_before.png",
-      "blob_sha": "85aed5b74207d3ff6802d2dfad732d266451d2c4",
-      "blob_size": 17652,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/l3_package/render_l3.py",
-      "blob_sha": "afdbe18b2087903f5adc7b56513b14199a2af5d9",
-      "blob_size": 7829,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/README.md",
-      "blob_sha": "41850276c24b99a173bf3cd420d69ae4ae4e3a56",
-      "blob_size": 5076,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/kitchen_fp047_report.json",
-      "blob_sha": "b3f6ace0da9ecbbe187a061cd6032fffea0674d7",
-      "blob_size": 1227,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/kitchen_negatives.json",
-      "blob_sha": "b1960e10fd6cf5856d7c9f0933520e1b1a505d91",
-      "blob_size": 1772,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/kitchen_summary.json",
-      "blob_sha": "a430f8c046743b07dbd2407de8e73e20c2415d95",
-      "blob_size": 5046,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/kitchen_trace.json",
-      "blob_sha": "f8456e9b7bfe8cd77cfbc60edb194d22ac76f183",
-      "blob_size": 11250,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s1_one_door_r0_verify.json",
-      "blob_sha": "4b8f21ccc82b49a38881514f975f1f6e05b1d3af",
-      "blob_size": 5396,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s1_one_door_r30_verify.json",
-      "blob_sha": "c12a8cf951213d949dcc18a8b25d493272d1dd5b",
-      "blob_size": 5450,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s1_one_door_r90_verify.json",
-      "blob_sha": "77f7e49a1e8c7a8cc6347c9158b23a7b2924f5c4",
-      "blob_size": 5432,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s2_two_doors_r30_verify.json",
-      "blob_sha": "769275a1982157efee7a7c8094d24812b40ff177",
-      "blob_size": 5668,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s3_idempotent_rebuild_verify.json",
-      "blob_sha": "69af2f09d163d790f9708afec18a523f4faa5aad",
-      "blob_size": 5229,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s4_make_unique_local_verify.json",
-      "blob_sha": "e44684df21073d1eecf39caec5be95fe71579bf1",
-      "blob_size": 5508,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s5_edit_propagate_verify.json",
-      "blob_sha": "0fddb1b45e5d5ae9e0811b6d6890166431e20754",
-      "blob_size": 5316,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s6_set_material_panel_verify.json",
-      "blob_sha": "4b3d0f63fafa0b4b461bce5381c6b4523a9b5ea0",
-      "blob_size": 147,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s7_ruby_refuses_stale_parent_verify.json",
-      "blob_sha": "7f6906ec5e2a05724b7e14e109eb814719f4373f",
-      "blob_size": 216,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_s8_ruby_refuses_changed_parent_signature_verify.json",
-      "blob_sha": "63ec3d4daadb07b2bb6b22e4500e62047f8ea6b8",
-      "blob_size": 275,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/p3_matrix_summary.json",
-      "blob_sha": "dfb267eb257e3f7c311f676700d41d8cb7a5c80c",
-      "blob_size": 6022,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_interrupted_job.json",
-      "blob_sha": "ff79ece4b5992f66baebf0e87e8a891748a15514",
-      "blob_size": 251,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_negatives.json",
-      "blob_sha": "d7299b773408ead27d5b2758bd94db7fe6e1fb6a",
-      "blob_size": 2579,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_summary.json",
-      "blob_sha": "3bfb2c975dcafa46e822b8a4e975037c7b2d500a",
-      "blob_size": 706,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/plain_fronts_trace.json",
-      "blob_sha": "ccaed83debd921a60fbd816da4fa24a1a4013e21",
-      "blob_size": 10024,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/l2_promoted.py",
-      "blob_sha": "8b85937d1f079f743449209717413838b55f3a2b",
-      "blob_size": 7550,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/review_scope_l2/l2_review_scope.py",
-      "blob_sha": "a61ca60331b38be48cb82dcd30d4d0802efeb959",
-      "blob_size": 8215,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/promotion_l2/request.json",
-      "blob_sha": "c80aaa9369d9603785d14b20873b14602062e5a8",
-      "blob_size": 3535,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/README.md",
-      "blob_sha": "9f3a9716a92b95ae454ff08733150de94a63e42d",
-      "blob_size": 5439,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/trace.json",
-      "blob_sha": "7c09d71fc6fa03068d414a5bcad482fe91e6e040",
-      "blob_size": 9484,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/negatives.json",
-      "blob_sha": "465be8276af6eca3b1a349e092b74aa46fef4bb6",
-      "blob_size": 328,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/summary.json",
-      "blob_sha": "598e17c6202ba6e76405ffc38010a344d5373193",
-      "blob_size": 3482,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/fp047_report.json",
-      "blob_sha": "1c2057bb479b0bae0ed625f7f0bb157d289824c7",
-      "blob_size": 1220,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/l2_p4.py",
-      "blob_sha": "bb1b5299b0fac22a8610d259cb4a85bf35df5d32",
-      "blob_size": 7205,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/request.json",
-      "blob_sha": "566cf7fcafbfc795f9c540d3f572417be52387b8",
-      "blob_size": 3535,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/README.md",
-      "blob_sha": "59e1368aa08120db6f91a79b26226b5ba1836026",
-      "blob_size": 4635,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/summary.json",
-      "blob_sha": "0b53783d64e1f236a3eb33aef2eccacb2138f30f",
-      "blob_size": 6023,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r0_verify.json",
-      "blob_sha": "4b8f21ccc82b49a38881514f975f1f6e05b1d3af",
-      "blob_size": 5396,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r30_verify.json",
-      "blob_sha": "c12a8cf951213d949dcc18a8b25d493272d1dd5b",
-      "blob_size": 5450,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s1_one_door_r90_verify.json",
-      "blob_sha": "77f7e49a1e8c7a8cc6347c9158b23a7b2924f5c4",
-      "blob_size": 5432,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s2_two_doors_r30_verify.json",
-      "blob_sha": "769275a1982157efee7a7c8094d24812b40ff177",
-      "blob_size": 5668,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s3_idempotent_rebuild_verify.json",
-      "blob_sha": "69af2f09d163d790f9708afec18a523f4faa5aad",
-      "blob_size": 5229,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s4_make_unique_local_verify.json",
-      "blob_sha": "e44684df21073d1eecf39caec5be95fe71579bf1",
-      "blob_size": 5508,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s5_edit_propagate_verify.json",
-      "blob_sha": "0fddb1b45e5d5ae9e0811b6d6890166431e20754",
-      "blob_size": 5316,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s6_set_material_panel_verify.json",
-      "blob_sha": "4b3d0f63fafa0b4b461bce5381c6b4523a9b5ea0",
-      "blob_size": 147,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s7_ruby_refuses_stale_parent_verify.json",
-      "blob_sha": "7f6906ec5e2a05724b7e14e109eb814719f4373f",
-      "blob_size": 216,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/s8_ruby_refuses_changed_parent_signature_verify.json",
-      "blob_sha": "63ec3d4daadb07b2bb6b22e4500e62047f8ea6b8",
-      "blob_size": 275,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp046/p3_shaker_l2/l2_matrix.py",
-      "blob_sha": "229a117b7fa84d5086e327a1f2a6b4ddec9f7177",
-      "blob_size": 14609,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r0.json",
-      "blob_sha": "0a0f2644068828f241f53a2f6918075a36f6b28c",
-      "blob_size": 14877,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r0.skp",
-      "blob_sha": "150ba5f0a11f032a5975bce8a811018966683501",
-      "blob_size": 182650,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r30.json",
-      "blob_sha": "509e68f7d9d3bf7b4d0f304b694aff57ff8fef9e",
-      "blob_size": 15126,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_holdout_c_r30.skp",
-      "blob_sha": "16e5fc102b6607fbb6b3c967393165e8413a59da",
-      "blob_size": 181353,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r0.json",
-      "blob_sha": "9021705575c3f26a379fb93641b64866fa412235",
-      "blob_size": 14588,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r0.skp",
-      "blob_sha": "46e64f4ec1b96a3ad7bdc5222a732cbd335faada",
-      "blob_size": 183482,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r30.json",
-      "blob_sha": "27e1feb91e11402d832f2967ca0be3fc10de8304",
-      "blob_size": 14944,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r30.skp",
-      "blob_sha": "ff40c016ebdf779110119e492515b39a332d6992",
-      "blob_size": 182067,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r90.json",
-      "blob_sha": "2d1d931e268a676f8c477d9bfb7e67c2cc25ed2b",
-      "blob_size": 14654,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_a_base_600_r90.skp",
-      "blob_sha": "4319f231fbdfc64c3aca906ab4927ed1bf22de71",
-      "blob_size": 182409,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r30.json",
-      "blob_sha": "930cd9403b50ec89c4b602e06d874d5afe03bdd2",
-      "blob_size": 18967,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r30.skp",
-      "blob_sha": "d835377e1217f462d82bf6d9a85ebdad07f4a7bf",
-      "blob_size": 182037,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r90.json",
-      "blob_sha": "44b38849ab6c4503c5f2e551c5c941d91cf5a763",
-      "blob_size": 18606,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m1_valid_b_tall_900_r90.skp",
-      "blob_sha": "113688ed75e4130b18bbe12a521db395a31b344b",
-      "blob_size": 183242,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m2_idempotent_rebuild.json",
-      "blob_sha": "c52fa6bb65858ee3485e605cddb448efb1690501",
-      "blob_size": 14699,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m2_idempotent_rebuild.skp",
-      "blob_sha": "2270f89a5bf1d7b552061326b9c5fd2d3fee91c2",
-      "blob_size": 183506,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_local.json",
-      "blob_sha": "a1b07a54d1d6739a9e4d8f5c808612ed2ea91d7e",
-      "blob_size": 30149,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_local.skp",
-      "blob_sha": "f30a972202e36ac22808af7a5209104d1fc6b32c",
-      "blob_size": 187244,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_propagate.json",
-      "blob_sha": "4cbf12e5018b5ffb62e5fa4d3a8ece534777fb3b",
-      "blob_size": 30225,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_edit_propagate.skp",
-      "blob_sha": "a8bdca34935cbd0a6297f903a128e509a51c37e0",
-      "blob_size": 187293,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_x.json",
-      "blob_sha": "53af5f462222af556a1623bdfedc2bfe6e759b4b",
-      "blob_size": 28985,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_x.skp",
-      "blob_sha": "2c7baa55a38917f49edc815b16f465c59e7ae0ff",
-      "blob_size": 183794,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_y.json",
-      "blob_sha": "0770b5ea8341ccc7fd5ff51f37d779dc54c21dfc",
-      "blob_size": 29234,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_repeat_y.skp",
-      "blob_sha": "16e7738e9ff4a7a7f4b4de5fac567f8fd859bc30",
-      "blob_size": 186060,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_set_material.json",
-      "blob_sha": "04c046d739fdae838b3dca24b14f430ebedcfe9e",
-      "blob_size": 24118,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/m3_set_material.skp",
-      "blob_sha": "c035569b63897a0ee5775e32e549c52ac3254fc1",
-      "blob_size": 188003,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p6b_cabinet_l2/summary.json",
-      "blob_sha": "d363ca478fe9b23b705c266c4196b189ce9032df",
-      "blob_size": 4020,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/README.md",
-      "blob_sha": "ffcfda3f9a86e58303d23261f2af8df5dc7ccd62",
-      "blob_size": 5416,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/cabinet.skp",
-      "blob_sha": "b65dcd66f4fbfa3805e5d5064867049aa0cc2ff8",
-      "blob_size": 3435398,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/interrupted_job.json",
-      "blob_sha": "4300e19f00ca4ba20f0a85762e2a725e1ee4ed76",
-      "blob_size": 260,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/l2_p7.py",
-      "blob_sha": "f6dd1cacfab60486ee626ebb99119e429fe96065",
-      "blob_size": 5980,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/negatives.json",
-      "blob_sha": "2b4d2ce4e6b35a41184177cff80550deec26f96c",
-      "blob_size": 2492,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/p6b_matrix_rerun.json",
-      "blob_sha": "5fddb8efe05958ea326af33b5ec57880fda68dd6",
-      "blob_size": 2894,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/request.json",
-      "blob_sha": "62d715bba518129eeb12f4f251038f8520f30cbf",
-      "blob_size": 2475,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/summary.json",
-      "blob_sha": "8991e01af34be6864402c74c6928c64a30799fd4",
-      "blob_size": 723,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/trace.json",
-      "blob_sha": "7731fe5a6b323841b25b6b3d8274ab11602c5757",
-      "blob_size": 10029,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/iso.png",
-      "blob_sha": "663f8c40ee93d13f9e8db6642a13f67d0630f29e",
-      "blob_size": 189803,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p7_kitchen_cabinet/top.png",
-      "blob_sha": "85aed5b74207d3ff6802d2dfad732d266451d2c4",
-      "blob_size": 17652,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/README.md",
-      "blob_sha": "59dffe22fe51dee8569b08ec79f7a838d4ae38e6",
-      "blob_size": 7851,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/clients.json",
-      "blob_sha": "3752c2e5137f9ae451d43db5de556ec8a840c7c7",
-      "blob_size": 3215,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/clients_before_fix.json",
-      "blob_sha": "0db0c3bb7c07ba4ac91c1503494833c2bc398ee0",
-      "blob_size": 3183,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/reg_apply_edits.json",
-      "blob_sha": "87206b19a4f19e48706ad6121e7928ec693798ad",
-      "blob_size": 1437,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/reg_compare_furnish.json",
-      "blob_sha": "8ccdf5b945844b6ee9f0820c3908c945519cb81e",
-      "blob_size": 259138,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/reg_furnish.json",
-      "blob_sha": "2d7b6204fae417e72436861f431153606d791d08",
-      "blob_size": 4305,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/reg_planta_build.json",
-      "blob_sha": "886ffae4e72173ed6f2ffcb2149b9a27f8bb3355",
-      "blob_size": 7754,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/reg_quadrado_build.json",
-      "blob_sha": "051871dd0837cbdec70b48df8e9f3f72605924f4",
-      "blob_size": 3776,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/reg_quadrado_inspect.json",
-      "blob_sha": "489eb33b313aa0e718371d2586d52166d69fc826",
-      "blob_size": 23101,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/reg_su_status.json",
-      "blob_sha": "8fde258aad4f0f184f57e795bf875520314640eb",
-      "blob_size": 705,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/reg_summary.json",
-      "blob_sha": "3417b741d2c2f625c3fbe52b21d7cda5c9092207",
-      "blob_size": 4902,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/reg_vray.json",
-      "blob_sha": "45630afd733ca5fc832b300544c77bea6ff1299f",
-      "blob_size": 1985,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/render_planta_iso.png",
-      "blob_sha": "b92a2a17e8e4980ed1712dceb069fec7252bb1f2",
-      "blob_size": 59609,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/render_planta_top.png",
-      "blob_sha": "44286545db466685f0ee86bed4c25ef8dfa1ba70",
-      "blob_size": 19536,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/rooms_isolated_report.json",
-      "blob_sha": "b00af052702999e8892f889a0430bbf55e92a610",
-      "blob_size": 1925,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/tools/p3b_clients.py",
-      "blob_sha": "e6fbbae72edafeb0f48412845516b8a48f1ef7c8",
-      "blob_size": 3984,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/tools/p3b_regression.py",
-      "blob_sha": "02575915bde0cd5d717eafb58178436d76e95483",
-      "blob_size": 14878,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/tools/p3b_two_windows.py",
-      "blob_sha": "f7b4cedcd6d66863682db7970ec50245afcb8941",
-      "blob_size": 8371,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/tools/planta_rooms_isolated.py",
-      "blob_sha": "90f3bd382a0c23ccc4b60f8130212dd9e7fd3208",
-      "blob_size": 3516,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/two_windows.json",
-      "blob_sha": "2c59c5db5f0489bc7e869a961a93ef8d853b02b9",
-      "blob_size": 3315,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/vray_living.png",
-      "blob_sha": "ce5f6135a4ad2ef2fc33d387def7e921206be4b3",
-      "blob_size": 635303,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/aperture_conditional_tests.txt",
-      "blob_sha": "c73f8d9c7ac621959359426e16010c993e04742e",
-      "blob_size": 3773,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3b_windows_l2/tools/node_client.mjs",
-      "blob_sha": "3b864c359c8271fee6fe5dc39adffa6ef55f9e7d",
-      "blob_size": 1979,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3a04_quadrado_d001/A_current_iso.png",
-      "blob_sha": "aa70014156955f4ffa4c9983c75d0b03c46b12d4",
-      "blob_size": 58713,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3a04_quadrado_d001/A_current_top.png",
-      "blob_sha": "f29b50606b761c79cc28b19986b4c9d0ece922ab",
-      "blob_size": 9172,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3a04_quadrado_d001/B_wide_iso.png",
-      "blob_sha": "bbbcd49f40db3be71a210b608b18a379a77e8a78",
-      "blob_size": 56491,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3a04_quadrado_d001/B_wide_top.png",
-      "blob_sha": "d1b39c105813ba946a2d8e387c6123b24557b449",
-      "blob_size": 8773,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3a04_quadrado_d001/README.md",
-      "blob_sha": "b5a778a2271d3b4dcca26adde84612ddf7be864b",
-      "blob_size": 1736,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3a04_quadrado_d001/consensus_option_B_wide_window.json",
-      "blob_sha": "54f54eee1cc81d18f3f358b870c114fc774f4eb3",
-      "blob_size": 1719,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p3a04_quadrado_d001/reference_canonical_success_render.png",
-      "blob_sha": "f9f1f2d25eaebf4a40fdcf75443be48aa488340f",
-      "blob_size": 71571,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p8_l2_20261019/furnish.json",
-      "blob_sha": "09e988933bfd42a5cd33be037b49616f2dd235ed",
-      "blob_size": 4392,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp043/p8_l2_20261019/planta_check.json",
-      "blob_sha": "aed8834f5ce52ddece458826a01c32b7869dbf41",
-      "blob_size": 18978,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp044/baseline/baseline.json",
-      "blob_sha": "0244735f5cd7b46dad63990b983eb5a3ffa90401",
-      "blob_size": 5996,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp044/f7_l2_20261020/README.md",
-      "blob_sha": "dcfd73fc079397f921b674783469831f5dad3ae8",
-      "blob_size": 1853,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp044/f7_l2_20261020/l2_summary.json",
-      "blob_sha": "54b63adf01ba98d6d43d818d9162aa99321498bf",
-      "blob_size": 3868,
-      "owner_group": "artifacts"
-    },
-    {
-      "path": "artifacts/review/fp044/f7_l2_20261020/planta_check.json",
-      "blob_sha": "aed8834f5ce52ddece458826a01c32b7869dbf41",
-      "blob_size": 18020,
-      "owner_group": "artifacts"
     }
   ]
 }
