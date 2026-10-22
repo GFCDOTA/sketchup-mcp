@@ -1,5 +1,7 @@
 # SOFA — track de realismo V-Ray (último track)
 
+> **Nota (2026-10-22):** o NOC/oráculo `:8765` foi removido em 2026-07-24 e o veredito visual por GPT/Chrome foi substituído pelo do Felipe no chat em 2026-07-27. Trechos abaixo que citam esses sistemas são históricos.
+
 > Geometria ✅ (PASS, 14 ciclos GPT) e albedo-preview ✅ (PASS, 2 ciclos). O GPT (diretor)
 > liberou o track final: **V-Ray** — usar os MESMOS maps (albedo/bump tileáveis) e ajustar
 > **roughness / bump / sheen / fuzz / fresnel**. Em tecido escuro é AQUI que o realismo aparece

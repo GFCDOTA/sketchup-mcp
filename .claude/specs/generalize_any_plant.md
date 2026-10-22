@@ -1,5 +1,7 @@
 # Spec — Generalizar PDF → SKP para QUALQUER planta
 
+> **Nota (2026-10-22):** o NOC/oráculo `:8765` foi removido em 2026-07-24 e o veredito visual por GPT/Chrome foi substituído pelo do Felipe no chat em 2026-07-27. Trechos abaixo que citam esses sistemas são históricos.
+
 > **STATUS: DRAFT** (2026-05-31, não commitado — para revisão do Felipe).
 > Regra-raiz deste spec: **não quero mais infra pela infra.**
 > Prioridade, nesta ordem: **(1) produto · (2) `.skp` fiel · (3) artefato

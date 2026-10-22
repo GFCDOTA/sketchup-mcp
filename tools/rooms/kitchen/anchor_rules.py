@@ -28,7 +28,7 @@ def validate(con, room_id="r004"):
     from shapely.ops import unary_union
 
     from core.scale import PT_TO_IN
-    from tools.rooms.kitchen.layout import KITCHEN_SINK_SIDE, build_boxes
+    from tools.rooms.kitchen.layout import build_boxes
     from tools.room_type import classify_rooms
     from tools.spatial_model import build_spatial_model
 

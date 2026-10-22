@@ -257,7 +257,6 @@ def run_gate(
 
 if __name__ == "__main__":
     import argparse
-    import json
 
     ap = argparse.ArgumentParser(description="deterministic wall-presence gate")
     ap.add_argument("--render", required=True, help="SKP top render PNG")

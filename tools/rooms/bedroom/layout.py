@@ -22,10 +22,10 @@ import argparse
 import json
 from pathlib import Path
 
-from shapely.geometry import Point, box
+from shapely.geometry import box
 from shapely.ops import unary_union
 
-from tools.spatial_model import (PT_TO_M, _wall_mid, build_spatial_model,
+from tools.spatial_model import (PT_TO_M, build_spatial_model,
                                  wall_footprint)
 
 
