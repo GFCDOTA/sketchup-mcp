@@ -18,6 +18,9 @@ paths:
   num helper do fecho** → revogar (`L1_PASS`, `evidence: []`) no mesmo commit da mudança, rodar o L2 nesse commit limpo e restaurar no
   commit seguinte. Conferir com `python -m tools.rooms.capability_catalog` (`errors` vazio); ver o fecho com
   `python -m tools.rooms.evidence_closure --explain python:<mod.simbolo>`.
+- **Fragmentos** (`tools/rooms/<cômodo>/fragments/*.fragment.v1.json`): cada capacidade e cada binding (inclusive lacuna) do
+  cômodo tem exatamente um fragmento dono; o fragmento só aponta (specs, código, testes, alvos FP-052, golden, demos FP-053) e
+  nunca autoriza execução. Capacidade/binding novo entra no fragmento certo no mesmo PR (`python -m tools.rooms.specialist_fragments`).
 - **Recipe não é permissão:** conhecimento consultivo nunca eleva `implementation`/`validation`; trecho sem revisão humana não promove.
 - **Entrada paramétrica:** `{value, unit, origin}` com `origin ∈ {user_request, consensus, pdf, derived}`; recusar com código estável
   (`CabinetInputError`-style) em vez de assumir valor.

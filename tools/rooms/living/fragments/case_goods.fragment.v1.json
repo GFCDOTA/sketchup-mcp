@@ -1,0 +1,38 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "living",
+  "id": "case_goods",
+  "title": "Rack e mesas (marcenaria da sala)",
+  "focus": "Rack, mesa de centro e mesa de jantar: classes Gen1 sem capacidade no catálogo; o rack é o próximo consumidor real do gabinete compartilhado (microfase L1).",
+  "capability_ids": [],
+  "binding_ids": [],
+  "recipe_ids": [
+    "cabinet.reusable-components"
+  ],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/living/coffee_table_class.py",
+    "tools/rooms/living/dining_table_class.py",
+    "tools/rooms/living/rack_class.py"
+  ],
+  "tests": [
+    "tests/test_coffee_table_class.py",
+    "tests/test_dining_table_class.py",
+    "tests/test_rack_class.py"
+  ],
+  "skills": [
+    "planned-furniture-designer"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "registrar rack/mesas como capacidade só depois de migrar para o contrato por pedido"
+  ],
+  "stop_conditions": [
+    "medida que o pedido não trouxe: recusar, nunca default",
+    "aparência nova: PENDING_HUMAN até o Felipe decidir (nunca autodeclarar)"
+  ]
+}

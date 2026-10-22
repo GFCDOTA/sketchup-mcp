@@ -1,6 +1,6 @@
 # Handoff por arquivo — raiz, artifacts, fixtures, references, assets, ops, projects
 
-> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `66fd65b`.
+> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `e0de518`.
 > Retrato datado: regenere, não edite. Estados e regras no docstring de `tools/navigation/file_audit.py`.
 
 Contagem: ACTIVE_ENTRYPOINT 2, AGENT_INSTRUCTION 6, CLI_DOC_ONLY 1, CONFIG 27, DOC 2, EVIDENCE_OR_DATA 1129, HISTORICAL 134
@@ -19,7 +19,7 @@ Contagem: ACTIVE_ENTRYPOINT 2, AGENT_INSTRUCTION 6, CLI_DOC_ONLY 1, CONFIG 27, D
 | `.gitignore` | CONFIG | configuracao/outro |  | 20 | 2026-10-22 | manter |
 | `.impeccable/config.json` | CONFIG | configuracao/outro |  | 3 | 2026-08-26 | manter |
 | `CLAUDE.md` | DOC | documentacao |  | 31 | 2026-05-27 | manter |
-| `README.md` | DOC | documentacao |  | 35 | 2026-10-21 | manter |
+| `README.md` | DOC | documentacao |  | 37 | 2026-10-22 | manter |
 | `docker-compose.rag.yml` | CONFIG | configuracao/outro |  | 8 | 2026-07-07 | manter |
 | `docker-compose.yml` | CONFIG | configuracao/outro |  | 10 | 2026-06-20 | manter |
 | `ops/estudio-front/assets/banho01.png` | CONFIG | configuracao/outro |  | 2 | 2026-08-09 | manter |

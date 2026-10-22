@@ -1,0 +1,41 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "kitchen",
+  "id": "countertop_and_sink",
+  "title": "Tampo e recorte de cuba",
+  "focus": "Tampo como peça própria sobre os módulos (balanço e espessura do pedido, perfil de borda real) e recorte passante de cuba/calha com espessura remanescente válida. Hoje só lacunas: K1 e K4 do mapa de microfases.",
+  "capability_ids": [],
+  "binding_ids": [
+    "bind.kitchen.countertop",
+    "bind.kitchen.sink-cutout"
+  ],
+  "recipe_ids": [
+    "cabinet.countertop-separate-and-bevel",
+    "cabinet.sink-and-wet-channel-cutouts"
+  ],
+  "specs": [
+    "docs/specs/construction_core_microphases.md",
+    "docs/specs/FP-052_reference_truth_and_component_learning.md"
+  ],
+  "code": [],
+  "tests": [],
+  "skills": [
+    "sketchup-video-knowledge",
+    "joinery-ergonomics-reference"
+  ],
+  "reference_targets": [],
+  "golden_sources": [
+    "artifacts/reference_lab/GOLDEN_SAMPLES.md",
+    "artifacts/reference_lab/DECISIONS.md"
+  ],
+  "demos": [],
+  "open_decisions": [
+    "K1: revisão humana do trecho 07:09–08:53 de yt-cabinet-tips-2021 (checklist no mapa §5)",
+    "K4: ficha técnica da cuba e ok hidráulico"
+  ],
+  "stop_conditions": [
+    "técnica sem human_review do trecho exato da recipe: BLOCKED_KNOWLEDGE_EVIDENCE",
+    "medida que o pedido não trouxe: recusar, nunca default",
+    "pia/cuba presa à parede do PDF: âncora não se move"
+  ]
+}

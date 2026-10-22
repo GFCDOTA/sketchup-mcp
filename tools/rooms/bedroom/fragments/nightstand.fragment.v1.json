@@ -1,0 +1,30 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "bedroom",
+  "id": "nightstand",
+  "title": "Criado-mudo",
+  "focus": "Criado-mudo e seu gate; candidato a segundo consumidor real do gabinete compartilhado (microfase B3).",
+  "capability_ids": [],
+  "binding_ids": [],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/bedroom/validation/nightstand_gate.py",
+    "tools/rooms/shared/nightstand.py"
+  ],
+  "tests": [],
+  "skills": [
+    "planned-furniture-designer"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "sem capacidade no catálogo ainda"
+  ],
+  "stop_conditions": [
+    "medida que o pedido não trouxe: recusar, nunca default"
+  ]
+}

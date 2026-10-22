@@ -1,0 +1,36 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "bedroom",
+  "id": "bed",
+  "title": "Cama",
+  "focus": "Cama paramétrica (plinto, estrado, colchão, travesseiros, manta) — estofado; fica Gen1 até existir alvo FP-052.",
+  "capability_ids": [
+    "bedroom.bed.build"
+  ],
+  "binding_ids": [],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/bedroom/validation/bed_gate.py",
+    "tools/rooms/bedroom/validation/bed_placement_gate.py",
+    "tools/rooms/shared/bed.py"
+  ],
+  "tests": [
+    "tests/test_bed_class.py",
+    "tests/test_fp042_shared_parametric_builders.py"
+  ],
+  "skills": [
+    "furniture-reference-analyzer"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "Gen1: 54 literais em shared/bed.py"
+  ],
+  "stop_conditions": [
+    "aparência nova: PENDING_HUMAN até o Felipe decidir (nunca autodeclarar)"
+  ]
+}

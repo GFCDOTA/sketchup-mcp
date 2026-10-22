@@ -1,0 +1,49 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "kitchen",
+  "id": "layout_and_placement",
+  "title": "Layout galley e posicionamento na parede",
+  "focus": "Distribuição linear da cozinha com a pia presa à parede oeste do PDF e o piloto FP-050 que escolhe a posição do gabinete sem invadir móvel, giro de porta ou corredor; ainda não integrado aos fluxos (T0.5).",
+  "capability_ids": [
+    "kitchen.layout.galley",
+    "kitchen.sink-anchor-guard"
+  ],
+  "binding_ids": [
+    "bind.kitchen.layout"
+  ],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/FP-050_kitchen_wall_placement_pilot.md",
+    "docs/specs/FP-051_incremental_learning_furniture_composition.md",
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/kitchen/anchor_rules.py",
+    "tools/rooms/kitchen/layout.py",
+    "tools/rooms/kitchen/planning/",
+    "tools/sketchup/furnish/place_layout_skp.rb"
+  ],
+  "tests": [
+    "tests/test_fp042_kitchen_anchor_ownership.py",
+    "tests/test_fp042_kitchen_validation_boundary.py",
+    "tests/test_kitchen_cabinet_placement.py",
+    "tests/test_kitchen_cabinet_placement_properties.py",
+    "tests/test_kitchen_layout_style.py"
+  ],
+  "skills": [
+    "interior-architect-planner",
+    "planned-furniture-designer"
+  ],
+  "reference_targets": [
+    "artifacts/reference_lab/targets/planta_74/r004/kitchen_base_001.target.v1.json"
+  ],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "divergência LINEAR × Galley em L entre spec e DesignIntent (FP-052 T2)"
+  ],
+  "stop_conditions": [
+    "parede, âncora ou abertura fora do consensus: BLOCKED (nunca inventar arquitetura)",
+    "placement retorna execution_authorized=false: não executar sem o gate nos fluxos"
+  ]
+}

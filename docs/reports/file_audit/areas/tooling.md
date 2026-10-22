@@ -1,9 +1,9 @@
 # Handoff por arquivo — tools/ (demais ferramentas)
 
-> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `66fd65b`.
+> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `e0de518`.
 > Retrato datado: regenere, não edite. Estados e regras no docstring de `tools/navigation/file_audit.py`.
 
-Contagem: ACTIVE_ENTRYPOINT 16, ACTIVE_IMPORTED 80, CONFIG 5, DOC 14, LEGACY_FACADE 6, PACKAGE_MARKER 13, RUBY_JOB 3
+Contagem: ACTIVE_ENTRYPOINT 16, ACTIVE_IMPORTED 81, CONFIG 5, DOC 14, LEGACY_FACADE 6, PACKAGE_MARKER 13, RUBY_JOB 3
 
 | Arquivo | Estado | Por quê | Importado por | Citado por | Último toque | Próximo passo |
 |---|---|---|---|---|---|---|
@@ -25,7 +25,7 @@ Contagem: ACTIVE_ENTRYPOINT 16, ACTIVE_IMPORTED 80, CONFIG 5, DOC 14, LEGACY_FAC
 | `tools/interior_studio/architect_program.py` | ACTIVE_IMPORTED | importado por 3 arquivo(s) | 3 | 6 | 2026-10-21 | manter |
 | `tools/interior_studio/auditor.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 2 | 2026-06-23 | manter |
 | `tools/interior_studio/auto_decider.py` | ACTIVE_IMPORTED | importado por 3 arquivo(s) | 3 | 2 | 2026-10-20 | manter |
-| `tools/interior_studio/consult_gpt_bridge/README.md` | DOC | documentacao |  | 3 | 2026-06-20 | manter |
+| `tools/interior_studio/consult_gpt_bridge/README.md` | DOC | documentacao |  | 3 | 2026-10-22 | manter |
 | `tools/interior_studio/consult_gpt_bridge/__init__.py` | ACTIVE_ENTRYPOINT | citado por 6 arquivo(s) de codigo/CI/config/skill | 0 | 8 | 2026-06-20 | manter |
 | `tools/interior_studio/consult_gpt_bridge/answer_parser.py` | ACTIVE_IMPORTED | importado por 3 arquivo(s) | 3 | 2 | 2026-06-22 | manter |
 | `tools/interior_studio/consult_gpt_bridge/contracts.py` | ACTIVE_IMPORTED | importado por 5 arquivo(s) | 5 | 3 | 2026-06-22 | manter |
@@ -76,15 +76,16 @@ Contagem: ACTIVE_ENTRYPOINT 16, ACTIVE_IMPORTED 80, CONFIG 5, DOC 14, LEGACY_FAC
 | `tools/mcp_server/smoke.py` | ACTIVE_ENTRYPOINT | citado por 1 arquivo(s) de codigo/CI/config/skill | 0 | 15 | 2026-10-18 | manter |
 | `tools/mcp_server/stdio_check.py` | ACTIVE_ENTRYPOINT | citado por 1 arquivo(s) de codigo/CI/config/skill | 0 | 13 | 2026-10-18 | manter |
 | `tools/mcp_server/stdio_isolation.py` | ACTIVE_IMPORTED | importado por 2 arquivo(s) | 2 | 2 | 2026-10-19 | manter |
-| `tools/navigation/__init__.py` | PACKAGE_MARKER | pacote sem logica | 0 | 6 | 2026-10-19 | manter |
+| `tools/navigation/__init__.py` | PACKAGE_MARKER | pacote sem logica | 0 | 7 | 2026-10-19 | manter |
 | `tools/navigation/builder_detail_audit.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 4 | 2026-10-22 | manter |
 | `tools/navigation/consumers.py` | ACTIVE_IMPORTED | importado por 5 arquivo(s) | 5 | 8 | 2026-10-19 | manter |
 | `tools/navigation/docs_check.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 10 | 2026-10-19 | manter |
-| `tools/navigation/file_audit.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 22 |  | manter |
+| `tools/navigation/file_audit.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 22 | 2026-10-22 | manter |
 | `tools/navigation/fp051_baseline.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 6 | 2026-10-22 | manter |
 | `tools/navigation/p0_map.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 9 | 2026-10-19 | manter |
 | `tools/navigation/register_evidence.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 5 | 2026-10-22 | manter |
 | `tools/navigation/renames.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 2 | 2026-10-19 | manter |
+| `tools/navigation/rooms_index.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 2 | 2026-10-22 | manter |
 | `tools/oracle/__init__.py` | PACKAGE_MARKER | pacote sem logica | 0 | 9 | 2026-10-19 | manter |
 | `tools/oracle/ask_gpt_gate.py` | ACTIVE_IMPORTED | importado por 5 arquivo(s) | 5 | 10 | 2026-10-20 | manter |
 | `tools/oracle/consult_tier.py` | ACTIVE_IMPORTED | importado por 2 arquivo(s) | 2 | 5 | 2026-10-19 | manter |
@@ -107,7 +108,7 @@ Contagem: ACTIVE_ENTRYPOINT 16, ACTIVE_IMPORTED 80, CONFIG 5, DOC 14, LEGACY_FAC
 | `tools/orchestration/correction/jsonl_io.py` | ACTIVE_IMPORTED | importado por 9 arquivo(s) | 9 | 4 | 2026-10-20 | manter |
 | `tools/orchestration/correction/vision_queue_consumer.py` | ACTIVE_IMPORTED | importado por 2 arquivo(s) | 2 | 6 | 2026-10-20 | manter |
 | `tools/orchestration/fidelity_loop.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 6 | 2026-10-20 | manter |
-| `tools/orchestration/furnish_apartment.py` | ACTIVE_IMPORTED | importado por 2 arquivo(s) | 2 | 9 | 2026-10-20 | manter |
+| `tools/orchestration/furnish_apartment.py` | ACTIVE_IMPORTED | importado por 2 arquivo(s) | 2 | 9 | 2026-10-22 | manter |
 | `tools/orchestration/promote_artifact.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 7 | 2026-10-20 | manter |
 | `tools/orchestration/promote_canonical.py` | ACTIVE_IMPORTED | importado por 4 arquivo(s) | 4 | 5 | 2026-10-20 | manter |
 | `tools/orchestration/regenerate_consensus.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 5 | 2026-10-20 | manter |
@@ -123,13 +124,13 @@ Contagem: ACTIVE_ENTRYPOINT 16, ACTIVE_IMPORTED 80, CONFIG 5, DOC 14, LEGACY_FAC
 | `tools/quadrado/render_view.py` | ACTIVE_ENTRYPOINT | citado por 1 arquivo(s) de codigo/CI/config/skill | 0 | 4 | 2026-10-19 | manter |
 | `tools/quadrado/render_view.rb` | RUBY_JOB | citado por 3 arquivo(s) |  | 3 | 2026-10-19 | manter |
 | `tools/rendering/__init__.py` | PACKAGE_MARKER | pacote sem logica | 0 | 3 | 2026-10-19 | manter |
-| `tools/rendering/auto_camera.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 6 | 2026-10-20 | manter |
+| `tools/rendering/auto_camera.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 6 | 2026-10-22 | manter |
 | `tools/rendering/batch_theme_render.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 6 | 2026-10-20 | manter |
 | `tools/rendering/compose_side_by_side.py` | ACTIVE_IMPORTED | importado por 3 arquivo(s) | 3 | 6 | 2026-10-20 | manter |
-| `tools/rendering/crop_render.py` | ACTIVE_ENTRYPOINT | citado por 1 arquivo(s) de codigo/CI/config/skill | 0 | 5 | 2026-10-20 | manter |
+| `tools/rendering/crop_render.py` | ACTIVE_ENTRYPOINT | citado por 1 arquivo(s) de codigo/CI/config/skill | 0 | 5 | 2026-10-22 | manter |
 | `tools/rendering/gen_textures.py` | ACTIVE_ENTRYPOINT | citado por 1 arquivo(s) de codigo/CI/config/skill | 0 | 6 | 2026-10-20 | manter |
 | `tools/rendering/material_review.py` | ACTIVE_IMPORTED | importado por 1 arquivo(s) | 1 | 5 | 2026-10-20 | manter |
-| `tools/rendering/overlay_diff.py` | ACTIVE_IMPORTED | importado por 4 arquivo(s) | 4 | 6 | 2026-10-19 | manter |
+| `tools/rendering/overlay_diff.py` | ACTIVE_IMPORTED | importado por 4 arquivo(s) | 4 | 6 | 2026-10-22 | manter |
 | `tools/rendering/pdf_overlay_verify.py` | ACTIVE_ENTRYPOINT | citado por 1 arquivo(s) de codigo/CI/config/skill | 0 | 6 | 2026-10-19 | manter |
 | `tools/rendering/quadrado/__init__.py` | PACKAGE_MARKER | pacote sem logica | 0 | 2 | 2026-10-19 | manter |
 | `tools/rendering/quadrado/render_view.py` | ACTIVE_ENTRYPOINT | citado por 2 arquivo(s) de codigo/CI/config/skill | 0 | 4 | 2026-10-19 | manter |

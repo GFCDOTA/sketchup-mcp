@@ -1,0 +1,35 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "service",
+  "id": "layout",
+  "title": "Área de serviço",
+  "focus": "Máquina, tanque e armazenamento vertical em caixas; armário de lavanderia reusando a carcaça (microfase S1).",
+  "capability_ids": [
+    "service.layout.boxes"
+  ],
+  "binding_ids": [
+    "bind.service.layout"
+  ],
+  "recipe_ids": [
+    "cabinet.reusable-components"
+  ],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/service/layout.py"
+  ],
+  "tests": [
+    "tests/test_fp042_service_layout_ownership.py"
+  ],
+  "skills": [
+    "interior-architect-planner"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [],
+  "stop_conditions": [
+    "aparência nova: PENDING_HUMAN até o Felipe decidir (nunca autodeclarar)"
+  ]
+}

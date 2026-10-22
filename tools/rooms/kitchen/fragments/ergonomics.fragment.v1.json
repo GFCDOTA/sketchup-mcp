@@ -1,0 +1,32 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "kitchen",
+  "id": "ergonomics",
+  "title": "Ergonomia e medidas de planejado",
+  "focus": "Alturas e clearances de bancada, aéreo, sóculo, coifa e geladeira auditados por medida; a referência muda medida e linguagem, nunca a posição.",
+  "capability_ids": [
+    "kitchen.ergonomics.audit"
+  ],
+  "binding_ids": [],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/kitchen/validation/ergonomics.py"
+  ],
+  "tests": [],
+  "skills": [
+    "joinery-ergonomics-reference"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "kitchen.ergonomics.audit está UNTESTED: falta teste para chegar a L1"
+  ],
+  "stop_conditions": [
+    "layout linear não vira U/L por causa de uma foto",
+    "medida que o pedido não trouxe: recusar, nunca default"
+  ]
+}

@@ -1,13 +1,13 @@
 # Handoff por arquivo — tests/
 
-> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `66fd65b`.
+> Gerado por `python -m tools.navigation.file_audit --out docs/reports/file_audit` em `e0de518`.
 > Retrato datado: regenere, não edite. Estados e regras no docstring de `tools/navigation/file_audit.py`.
 
-Contagem: TEST 213
+Contagem: TEST 215
 
 | Arquivo | Estado | Por quê | Importado por | Citado por | Último toque | Próximo passo |
 |---|---|---|---|---|---|---|
-| `tests/__init__.py` | TEST | suite de regressao | 0 | 87 | 2026-04-28 | manter verde |
+| `tests/__init__.py` | TEST | suite de regressao | 0 | 109 | 2026-04-28 | manter verde |
 | `tests/conftest.py` | TEST | suite de regressao | 0 | 10 | 2026-10-19 | manter verde |
 | `tests/data/overlay_gate/planta74_top.png` | TEST | suite de regressao |  | 2 | 2026-05-31 | manter verde |
 | `tests/data/overlay_gate/planta74_top.png.proj.json` | TEST | suite de regressao |  | 2 | 2026-05-31 | manter verde |
@@ -23,20 +23,20 @@ Contagem: TEST 213
 | `tests/test_auto_decider.py` | TEST | suite de regressao | 0 | 3 | 2026-10-19 | manter verde |
 | `tests/test_auto_decider_gate.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
 | `tests/test_auto_gpt_consult_wiring.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
-| `tests/test_bathroom_enxoval_clearance.py` | TEST | suite de regressao | 0 | 3 | 2026-10-19 | manter verde |
-| `tests/test_bathrooms_style.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
-| `tests/test_bed_class.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
-| `tests/test_bed_placement_gate.py` | TEST | suite de regressao | 0 | 5 | 2026-08-12 | manter verde |
-| `tests/test_bedroom_layout.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
+| `tests/test_bathroom_enxoval_clearance.py` | TEST | suite de regressao | 0 | 4 | 2026-10-19 | manter verde |
+| `tests/test_bathrooms_style.py` | TEST | suite de regressao | 0 | 6 | 2026-10-19 | manter verde |
+| `tests/test_bed_class.py` | TEST | suite de regressao | 0 | 5 | 2026-10-20 | manter verde |
+| `tests/test_bed_placement_gate.py` | TEST | suite de regressao | 0 | 6 | 2026-08-12 | manter verde |
+| `tests/test_bedroom_layout.py` | TEST | suite de regressao | 0 | 6 | 2026-10-19 | manter verde |
 | `tests/test_build_plan_shell.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
 | `tests/test_build_promote_hook.py` | TEST | suite de regressao | 0 | 3 | 2026-10-21 | manter verde |
 | `tests/test_build_shell_plant_scale.py` | TEST | suite de regressao | 0 | 3 | 2026-10-19 | manter verde |
 | `tests/test_builder_detail_audit.py` | TEST | suite de regressao | 0 | 4 | 2026-10-22 | manter verde |
-| `tests/test_cabinet_plan.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
-| `tests/test_cabinet_sketchup_driver.py` | TEST | suite de regressao | 1 | 4 | 2026-10-19 | manter verde |
-| `tests/test_circulation_gate.py` | TEST | suite de regressao | 0 | 5 | 2026-10-18 | manter verde |
+| `tests/test_cabinet_plan.py` | TEST | suite de regressao | 0 | 6 | 2026-10-19 | manter verde |
+| `tests/test_cabinet_sketchup_driver.py` | TEST | suite de regressao | 1 | 5 | 2026-10-19 | manter verde |
+| `tests/test_circulation_gate.py` | TEST | suite de regressao | 0 | 6 | 2026-10-18 | manter verde |
 | `tests/test_claude_assets.py` | TEST | suite de regressao | 0 | 7 | 2026-10-22 | manter verde |
-| `tests/test_coffee_table_class.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
+| `tests/test_coffee_table_class.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
 | `tests/test_collision_envelope_gate.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
 | `tests/test_consult_bridge.py` | TEST | suite de regressao | 0 | 3 | 2026-10-19 | manter verde |
 | `tests/test_consult_tier.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
@@ -48,35 +48,35 @@ Contagem: TEST 213
 | `tests/test_curator.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
 | `tests/test_decision_audit_record.py` | TEST | suite de regressao | 0 | 2 | 2026-10-19 | manter verde |
 | `tests/test_decision_judge.py` | TEST | suite de regressao | 0 | 3 | 2026-07-07 | manter verde |
-| `tests/test_dining_table_class.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
+| `tests/test_dining_table_class.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
 | `tests/test_domain_ids.py` | TEST | suite de regressao | 0 | 2 | 2026-08-11 | manter verde |
 | `tests/test_door_swing_contract.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
-| `tests/test_evidence_closure.py` | TEST | suite de regressao | 0 |  | 2026-10-22 | manter verde |
+| `tests/test_evidence_closure.py` | TEST | suite de regressao | 0 | 2 | 2026-10-22 | manter verde |
 | `tests/test_fidelity_loop.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
-| `tests/test_file_audit.py` | TEST | suite de regressao | 0 | 3 |  | manter verde |
+| `tests/test_file_audit.py` | TEST | suite de regressao | 0 | 3 | 2026-10-22 | manter verde |
 | `tests/test_finding_router.py` | TEST | suite de regressao | 0 | 4 | 2026-07-02 | manter verde |
 | `tests/test_fp042_architecture_ownership.py` | TEST | suite de regressao | 0 | 3 | 2026-10-19 | manter verde |
 | `tests/test_fp042_asset_provenance.py` | TEST | suite de regressao | 0 | 3 | 2026-10-19 | manter verde |
 | `tests/test_fp042_automated_closure.py` | TEST | suite de regressao | 0 | 3 | 2026-10-19 | manter verde |
-| `tests/test_fp042_bathroom_validation.py` | TEST | suite de regressao | 0 | 4 | 2026-10-19 | manter verde |
-| `tests/test_fp042_bedroom_furnishing_adapter.py` | TEST | suite de regressao | 0 | 5 | 2026-10-20 | manter verde |
+| `tests/test_fp042_bathroom_validation.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
+| `tests/test_fp042_bedroom_furnishing_adapter.py` | TEST | suite de regressao | 0 | 6 | 2026-10-20 | manter verde |
 | `tests/test_fp042_bedroom_planner_ownership.py` | TEST | suite de regressao | 0 | 4 | 2026-10-19 | manter verde |
 | `tests/test_fp042_furniture_classes_ownership.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
 | `tests/test_fp042_inventory_gate.py` | TEST | suite de regressao | 0 | 3 | 2026-10-19 | manter verde |
-| `tests/test_fp042_kitchen_anchor_ownership.py` | TEST | suite de regressao | 0 | 6 | 2026-10-19 | manter verde |
-| `tests/test_fp042_kitchen_bathroom_builder_ownership.py` | TEST | suite de regressao | 0 | 7 | 2026-10-19 | manter verde |
-| `tests/test_fp042_kitchen_validation_boundary.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
+| `tests/test_fp042_kitchen_anchor_ownership.py` | TEST | suite de regressao | 0 | 7 | 2026-10-19 | manter verde |
+| `tests/test_fp042_kitchen_bathroom_builder_ownership.py` | TEST | suite de regressao | 0 | 8 | 2026-10-19 | manter verde |
+| `tests/test_fp042_kitchen_validation_boundary.py` | TEST | suite de regressao | 0 | 6 | 2026-10-19 | manter verde |
 | `tests/test_fp042_knowledge_integrity.py` | TEST | suite de regressao | 0 | 2 | 2026-10-19 | manter verde |
 | `tests/test_fp042_knowledge_ownership.py` | TEST | suite de regressao | 0 | 4 | 2026-10-22 | manter verde |
 | `tests/test_fp042_living_component_ownership.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
-| `tests/test_fp042_living_furnishing_adapter.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
+| `tests/test_fp042_living_furnishing_adapter.py` | TEST | suite de regressao | 0 | 6 | 2026-10-19 | manter verde |
 | `tests/test_fp042_living_planner_ownership.py` | TEST | suite de regressao | 0 | 4 | 2026-10-19 | manter verde |
 | `tests/test_fp042_ownership_audit.py` | TEST | suite de regressao | 0 | 5 | 2026-10-20 | manter verde |
 | `tests/test_fp042_p3_ownership.py` | TEST | suite de regressao | 0 | 4 | 2026-10-21 | manter verde |
 | `tests/test_fp042_reference_provenance.py` | TEST | suite de regressao | 0 | 2 | 2026-10-19 | manter verde |
-| `tests/test_fp042_service_layout_ownership.py` | TEST | suite de regressao | 0 | 5 | 2026-10-20 | manter verde |
+| `tests/test_fp042_service_layout_ownership.py` | TEST | suite de regressao | 0 | 6 | 2026-10-20 | manter verde |
 | `tests/test_fp042_shared_material_ownership.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
-| `tests/test_fp042_shared_parametric_builders.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
+| `tests/test_fp042_shared_parametric_builders.py` | TEST | suite de regressao | 0 | 6 | 2026-10-20 | manter verde |
 | `tests/test_fp042_tooling_ownership.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
 | `tests/test_fp043_capability_catalog.py` | TEST | suite de regressao | 0 | 3 | 2026-10-21 | manter verde |
 | `tests/test_fp043_legacy_process.py` | TEST | suite de regressao | 0 | 2 | 2026-10-19 | manter verde |
@@ -97,15 +97,15 @@ Contagem: TEST 213
 | `tests/test_fp044_sofa_paths.py` | TEST | suite de regressao | 0 | 2 | 2026-10-19 | manter verde |
 | `tests/test_fp044_tools_facades.py` | TEST | suite de regressao | 0 | 4 | 2026-10-19 | manter verde |
 | `tests/test_fp045_knowledge_provenance.py` | TEST | suite de regressao | 0 | 5 | 2026-10-21 | manter verde |
-| `tests/test_fp046_kitchen_shaker.py` | TEST | suite de regressao | 0 | 3 | 2026-10-21 | manter verde |
-| `tests/test_fp046_shaker_plan.py` | TEST | suite de regressao | 0 | 4 | 2026-10-21 | manter verde |
-| `tests/test_fp046_shaker_sketchup.py` | TEST | suite de regressao | 1 | 4 | 2026-10-21 | manter verde |
+| `tests/test_fp046_kitchen_shaker.py` | TEST | suite de regressao | 0 | 4 | 2026-10-21 | manter verde |
+| `tests/test_fp046_shaker_plan.py` | TEST | suite de regressao | 0 | 5 | 2026-10-21 | manter verde |
+| `tests/test_fp046_shaker_sketchup.py` | TEST | suite de regressao | 1 | 5 | 2026-10-21 | manter verde |
 | `tests/test_fp047_contract.py` | TEST | suite de regressao | 0 | 2 | 2026-10-21 | manter verde |
 | `tests/test_fp047_diff.py` | TEST | suite de regressao | 0 | 2 | 2026-10-21 | manter verde |
 | `tests/test_fp047_gates.py` | TEST | suite de regressao | 0 | 2 | 2026-10-21 | manter verde |
 | `tests/test_fp051_baseline.py` | TEST | suite de regressao | 0 | 3 | 2026-10-21 | manter verde |
-| `tests/test_fp052_reference_target_contract.py` | TEST | suite de regressao | 0 | 2 | 2026-10-22 | manter verde |
-| `tests/test_furnish_sofa_gate.py` | TEST | suite de regressao | 0 | 5 | 2026-10-20 | manter verde |
+| `tests/test_fp052_reference_target_contract.py` | TEST | suite de regressao | 0 | 3 | 2026-10-22 | manter verde |
+| `tests/test_furnish_sofa_gate.py` | TEST | suite de regressao | 0 | 6 | 2026-10-20 | manter verde |
 | `tests/test_furniture_wall_gap.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
 | `tests/test_gate_filefetch.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
 | `tests/test_gate_normalizer.py` | TEST | suite de regressao | 0 | 3 | 2026-10-21 | manter verde |
@@ -122,16 +122,16 @@ Contagem: TEST 213
 | `tests/test_intent_to_scene.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
 | `tests/test_interior_cycles.py` | TEST | suite de regressao | 0 | 2 | 2026-06-21 | manter verde |
 | `tests/test_iteration_result.py` | TEST | suite de regressao | 0 | 2 | 2026-08-11 | manter verde |
-| `tests/test_kitchen_cabinet_adapter.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
-| `tests/test_kitchen_cabinet_flow.py` | TEST | suite de regressao | 0 | 5 | 2026-10-21 | manter verde |
-| `tests/test_kitchen_cabinet_placement.py` | TEST | suite de regressao | 0 | 3 | 2026-10-22 | manter verde |
-| `tests/test_kitchen_cabinet_placement_properties.py` | TEST | suite de regressao | 0 | 3 | 2026-10-22 | manter verde |
-| `tests/test_kitchen_layout_style.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
+| `tests/test_kitchen_cabinet_adapter.py` | TEST | suite de regressao | 0 | 6 | 2026-10-19 | manter verde |
+| `tests/test_kitchen_cabinet_flow.py` | TEST | suite de regressao | 0 | 6 | 2026-10-21 | manter verde |
+| `tests/test_kitchen_cabinet_placement.py` | TEST | suite de regressao | 0 | 4 | 2026-10-22 | manter verde |
+| `tests/test_kitchen_cabinet_placement_properties.py` | TEST | suite de regressao | 0 | 4 | 2026-10-22 | manter verde |
+| `tests/test_kitchen_layout_style.py` | TEST | suite de regressao | 0 | 6 | 2026-10-19 | manter verde |
 | `tests/test_kitchen_wall_regression_gate.py` | TEST | suite de regressao | 0 | 4 | 2026-10-19 | manter verde |
 | `tests/test_knowledge_types.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
 | `tests/test_layout_rules.py` | TEST | suite de regressao | 0 | 5 | 2026-10-20 | manter verde |
 | `tests/test_learning_patch.py` | TEST | suite de regressao | 0 | 2 | 2026-06-22 | manter verde |
-| `tests/test_living_room_style.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
+| `tests/test_living_room_style.py` | TEST | suite de regressao | 0 | 6 | 2026-10-19 | manter verde |
 | `tests/test_living_sofa_is_approved_premium.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
 | `tests/test_material_de_verdade.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
 | `tests/test_material_review.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
@@ -158,7 +158,7 @@ Contagem: TEST 213
 | `tests/test_promote_artifact.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
 | `tests/test_promote_canonical.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
 | `tests/test_quadrado_canonical_smoke.py` | TEST | suite de regressao | 0 | 5 | 2026-10-19 | manter verde |
-| `tests/test_rack_class.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
+| `tests/test_rack_class.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
 | `tests/test_rag_embed_backend.py` | TEST | suite de regressao | 0 | 3 | 2026-10-21 | manter verde |
 | `tests/test_rag_freshness.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
 | `tests/test_rag_freshness_architect.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
@@ -182,6 +182,7 @@ Contagem: TEST 213
 | `tests/test_room_module_architecture.py` | TEST | suite de regressao | 0 | 5 | 2026-10-20 | manter verde |
 | `tests/test_room_registry.py` | TEST | suite de regressao | 0 | 2 | 2026-08-11 | manter verde |
 | `tests/test_room_type.py` | TEST | suite de regressao | 0 | 3 | 2026-06-05 | manter verde |
+| `tests/test_rooms_index.py` | TEST | suite de regressao | 0 |  | 2026-10-22 | manter verde |
 | `tests/test_run_deterministic_gates.py` | TEST | suite de regressao | 0 | 3 | 2026-10-21 | manter verde |
 | `tests/test_semantic_geometry_contract_gate.py` | TEST | suite de regressao | 0 | 4 | 2026-10-20 | manter verde |
 | `tests/test_semantic_zones.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
@@ -197,8 +198,9 @@ Contagem: TEST 213
 | `tests/test_sketchup_specialist.py` | TEST | suite de regressao | 6 | 4 | 2026-10-20 | manter verde |
 | `tests/test_sketchup_video_knowledge.py` | TEST | suite de regressao | 0 | 4 | 2026-10-18 | manter verde |
 | `tests/test_skp_visual_review_contract.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
-| `tests/test_sofa_class.py` | TEST | suite de regressao | 0 | 5 | 2026-10-20 | manter verde |
+| `tests/test_sofa_class.py` | TEST | suite de regressao | 0 | 6 | 2026-10-20 | manter verde |
 | `tests/test_soft_barrier_source_audit.py` | TEST | suite de regressao | 0 | 3 | 2026-10-20 | manter verde |
+| `tests/test_specialist_fragments.py` | TEST | suite de regressao | 0 |  | 2026-10-22 | manter verde |
 | `tests/test_su_job_info.py` | TEST | suite de regressao | 0 | 2 | 2026-10-19 | manter verde |
 | `tests/test_su_spawn_detached.py` | TEST | suite de regressao | 0 | 4 | 2026-10-19 | manter verde |
 | `tests/test_suite01_scale_gate.py` | TEST | suite de regressao | 0 | 3 | 2026-08-03 | manter verde |

@@ -1,0 +1,29 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "bathroom",
+  "id": "wet_room",
+  "title": "Área molhada",
+  "focus": "Guarda de tipos inesperados em cômodo molhado (ralo, box, pia) antes de mobiliar.",
+  "capability_ids": [
+    "bathroom.wet-room.guard"
+  ],
+  "binding_ids": [],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/bathroom/validation.py"
+  ],
+  "tests": [
+    "tests/test_fp042_bathroom_validation.py"
+  ],
+  "skills": [],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [],
+  "stop_conditions": [
+    "tipo não previsto em área molhada: bloquear"
+  ]
+}

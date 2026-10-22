@@ -1,0 +1,39 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "bedroom",
+  "id": "layout",
+  "title": "Layout do quarto",
+  "focus": "Designer do quarto: cama, criado-mudo e guarda-roupa posicionados por paredes boas/ruins e circulação.",
+  "capability_ids": [
+    "bedroom.layout.boxes"
+  ],
+  "binding_ids": [
+    "bind.bedroom.layout"
+  ],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/bedroom/designer.py",
+    "tools/rooms/bedroom/furnishing.py",
+    "tools/rooms/bedroom/layout.py"
+  ],
+  "tests": [
+    "tests/test_bedroom_layout.py",
+    "tests/test_fp042_bedroom_furnishing_adapter.py"
+  ],
+  "skills": [
+    "interior-architect-planner"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [
+    "D-007 (vão de mobiliar = laje) afeta a SUITE 02"
+  ],
+  "stop_conditions": [
+    "aparência nova: PENDING_HUMAN até o Felipe decidir (nunca autodeclarar)",
+    "móvel dentro da parede ou do giro da porta: FAIL"
+  ]
+}

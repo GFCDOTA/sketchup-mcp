@@ -1,0 +1,40 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "kitchen",
+  "id": "reference_truth",
+  "title": "Fonte da verdade, golden e demos da cozinha",
+  "focus": "Onde mora a verdade de cada peça da cozinha: alvo por instância (FP-052), golden do ambiente (que NÃO aprova peça individual) e, quando existirem, as micro-demos de comportamento (FP-053, demo-first).",
+  "capability_ids": [],
+  "binding_ids": [],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/FP-052_reference_truth_and_component_learning.md",
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/reference_targets.py"
+  ],
+  "tests": [
+    "tests/test_fp052_reference_target_contract.py"
+  ],
+  "skills": [
+    "reference-to-joinery-translator",
+    "planned-joinery-translator"
+  ],
+  "reference_targets": [
+    "artifacts/reference_lab/targets/planta_74/r004/kitchen_base_001.target.v1.json"
+  ],
+  "golden_sources": [
+    "artifacts/reference_lab/GOLDEN_SAMPLES.md",
+    "artifacts/reference_lab/DECISIONS.md",
+    "artifacts/reference_lab/kitchen/spec/KITCHEN_DECISIONS_FELIPE_V1.md"
+  ],
+  "demos": [],
+  "open_decisions": [
+    "FP-053 (demo-first + golden components) ainda em draft (#362)"
+  ],
+  "stop_conditions": [
+    "sem reference_target aprovado da peça: BLOCKED_TARGET_UNDEFINED; só exploração PROPOSED",
+    "golden do ambiente não aprova frente, gaveta ou armário individual"
+  ]
+}

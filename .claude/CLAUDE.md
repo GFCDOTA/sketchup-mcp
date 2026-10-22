@@ -27,7 +27,7 @@ Estado vivo (PRs, fases, pendências): `.ai_bridge/HANDOFF.md` — ler ao retoma
 | Onde | O que é |
 |---|---|
 | `core/` | domínio sem framework: escala (`scale.py`), semântica espacial, schemas (`core/schemas/`), observabilidade |
-| `tools/rooms/<cômodo>/` | um módulo por cômodo: `specialist.v1.json` (perfil + allowlist), `knowledge/`, `capabilities/`, `validation/`, layout |
+| `tools/rooms/<cômodo>/` | um módulo por cômodo: `specialist.v1.json` (perfil + allowlist), `fragments/` (sub-especialistas por tópico: dono de cada capacidade/lacuna, specs, alvos, golden, demos), `knowledge/`, `capabilities/`, `validation/`, layout |
 | `tools/rooms/shared/` | peças reutilizáveis entre cômodos (gabinete paramétrico, Shaker, sofá, cama, materiais, geometria) |
 | `tools/rooms/capability_catalog.v1.json` | catálogo de capacidades: símbolos, estados `implementation/validation/visual`, evidência L2 com digests |
 | `tools/rooms/specialists.py` | `plan()` fail-closed: pedido → binding → capability → `PLAN_READY_NOT_EXECUTED` ou `BLOCKED_*` |

@@ -1,28 +1,28 @@
 {
  "schema_version": "file_audit.v1",
- "commit": "66fd65b",
- "files": 2275,
+ "commit": "e0de518",
+ "files": 2301,
  "by_status": {
   "ACTIVE_ENTRYPOINT": 41,
-  "ACTIVE_IMPORTED": 228,
+  "ACTIVE_IMPORTED": 230,
   "AGENT_INSTRUCTION": 83,
   "CLI_DOC_ONLY": 6,
-  "CONFIG": 79,
-  "DOC": 62,
+  "CONFIG": 100,
+  "DOC": 63,
   "EVIDENCE_OR_DATA": 1129,
   "HISTORICAL": 290,
   "LEGACY_FACADE": 7,
   "PACKAGE_MARKER": 49,
   "RUBY_JOB": 34,
   "SPEC": 54,
-  "TEST": 213
+  "TEST": 215
  },
  "by_room": {
   "agent": {
    "AGENT_INSTRUCTION": 77
   },
   "balcony": {
-   "CONFIG": 2,
+   "CONFIG": 3,
    "DOC": 1,
    "PACKAGE_MARKER": 1
   },
@@ -30,30 +30,30 @@
    "ACTIVE_ENTRYPOINT": 1,
    "ACTIVE_IMPORTED": 2,
    "CLI_DOC_ONLY": 2,
-   "CONFIG": 2,
+   "CONFIG": 5,
    "DOC": 1,
    "PACKAGE_MARKER": 2
   },
   "bedroom": {
    "ACTIVE_ENTRYPOINT": 5,
    "ACTIVE_IMPORTED": 5,
-   "CONFIG": 2,
+   "CONFIG": 6,
    "DOC": 1,
    "PACKAGE_MARKER": 3
   },
   "circulation": {
-   "CONFIG": 2,
+   "CONFIG": 3,
    "DOC": 1,
    "PACKAGE_MARKER": 1
   },
   "closet": {
-   "CONFIG": 2,
+   "CONFIG": 3,
    "DOC": 1,
    "PACKAGE_MARKER": 1
   },
   "core": {
    "ACTIVE_IMPORTED": 20,
-   "CONFIG": 12,
+   "CONFIG": 13,
    "PACKAGE_MARKER": 2
   },
   "docs": {
@@ -63,7 +63,7 @@
    "SPEC": 54
   },
   "home_office": {
-   "CONFIG": 2,
+   "CONFIG": 3,
    "DOC": 1,
    "PACKAGE_MARKER": 1
   },
@@ -77,7 +77,7 @@
   "kitchen": {
    "ACTIVE_ENTRYPOINT": 2,
    "ACTIVE_IMPORTED": 11,
-   "CONFIG": 2,
+   "CONFIG": 7,
    "DOC": 2,
    "PACKAGE_MARKER": 3,
    "RUBY_JOB": 2
@@ -85,7 +85,7 @@
   "living": {
    "ACTIVE_ENTRYPOINT": 6,
    "ACTIVE_IMPORTED": 12,
-   "CONFIG": 6,
+   "CONFIG": 9,
    "DOC": 1,
    "PACKAGE_MARKER": 4,
    "RUBY_JOB": 10
@@ -100,13 +100,14 @@
    "HISTORICAL": 134
   },
   "rooms_core": {
-   "ACTIVE_IMPORTED": 14,
+   "ACTIVE_IMPORTED": 15,
    "CONFIG": 2,
+   "DOC": 1,
    "PACKAGE_MARKER": 1
   },
   "service": {
    "ACTIVE_IMPORTED": 1,
-   "CONFIG": 2,
+   "CONFIG": 3,
    "DOC": 1,
    "PACKAGE_MARKER": 1
   },
@@ -123,11 +124,11 @@
    "RUBY_JOB": 15
   },
   "tests": {
-   "TEST": 213
+   "TEST": 215
   },
   "tooling": {
    "ACTIVE_ENTRYPOINT": 16,
-   "ACTIVE_IMPORTED": 80,
+   "ACTIVE_IMPORTED": 81,
    "CONFIG": 5,
    "DOC": 14,
    "LEGACY_FACADE": 6,
@@ -554,7 +555,7 @@
    "room": "agent",
    "last_touch": "2026-10-22",
    "owner": "agent_skills_memory",
-   "cited_by": 2,
+   "cited_by": 4,
    "status": "AGENT_INSTRUCTION",
    "reason": "instrucao do agente",
    "next_action": "manter (tests/test_claude_assets.py)"
@@ -842,7 +843,7 @@
   {
    "path": ".claude/specs/generalize_any_plant.md",
    "room": "agent",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "agent_skills_memory",
    "cited_by": 4,
    "status": "AGENT_INSTRUCTION",
@@ -1042,9 +1043,9 @@
   {
    "path": "README.md",
    "room": "repo",
-   "last_touch": "2026-10-21",
+   "last_touch": "2026-10-22",
    "owner": "project_readme",
-   "cited_by": 35,
+   "cited_by": 37,
    "status": "DOC",
    "reason": "documentacao",
    "next_action": "manter"
@@ -1294,11 +1295,11 @@
    "room": "core",
    "last_touch": "2026-10-19",
    "owner": "shared_domain",
-   "imported_by": 14,
+   "imported_by": 15,
    "tests_importing": 11,
    "cited_by": 6,
    "status": "ACTIVE_IMPORTED",
-   "reason": "importado por 14 arquivo(s)",
+   "reason": "importado por 15 arquivo(s)",
    "next_action": "manter"
   },
   {
@@ -1397,6 +1398,15 @@
    "last_touch": "2026-10-21",
    "owner": "shared_domain",
    "cited_by": 3,
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "core/schemas/specialist_fragment.v1.schema.json",
+   "room": "core",
+   "last_touch": "2026-10-22",
+   "owner": "shared_domain",
    "status": "CONFIG",
    "reason": "configuracao/outro",
    "next_action": "manter"
@@ -1516,7 +1526,7 @@
   {
    "path": "docs/SOFA_VRAY_TRACK.md",
    "room": "docs",
-   "last_touch": "2026-10-19",
+   "last_touch": "2026-10-22",
    "owner": "project_documentation",
    "cited_by": 3,
    "status": "DOC",
@@ -2037,7 +2047,7 @@
    "room": "docs",
    "last_touch": "2026-10-19",
    "owner": "project_documentation",
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "SPEC",
    "reason": "spec SDD",
    "next_action": "manter; mudar so com PR da frente dona"
@@ -2077,7 +2087,7 @@
    "room": "docs",
    "last_touch": "2026-10-22",
    "owner": "project_documentation",
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "SPEC",
    "reason": "spec SDD",
    "next_action": "manter; mudar so com PR da frente dona"
@@ -2087,7 +2097,7 @@
    "room": "docs",
    "last_touch": "2026-10-22",
    "owner": "project_documentation",
-   "cited_by": 2,
+   "cited_by": 3,
    "status": "SPEC",
    "reason": "spec SDD",
    "next_action": "manter; mudar so com PR da frente dona"
@@ -2097,7 +2107,7 @@
    "room": "docs",
    "last_touch": "2026-10-22",
    "owner": "project_documentation",
-   "cited_by": 2,
+   "cited_by": 3,
    "status": "SPEC",
    "reason": "spec SDD",
    "next_action": "manter; mudar so com PR da frente dona"
@@ -2107,7 +2117,7 @@
    "room": "docs",
    "last_touch": "2026-10-22",
    "owner": "project_documentation",
-   "cited_by": 2,
+   "cited_by": 4,
    "status": "SPEC",
    "reason": "spec SDD",
    "next_action": "manter; mudar so com PR da frente dona"
@@ -2117,7 +2127,7 @@
    "room": "docs",
    "last_touch": "2026-10-22",
    "owner": "project_documentation",
-   "cited_by": 2,
+   "cited_by": 3,
    "status": "SPEC",
    "reason": "spec SDD",
    "next_action": "manter; mudar so com PR da frente dona"
@@ -2127,7 +2137,7 @@
    "room": "docs",
    "last_touch": "2026-10-22",
    "owner": "project_documentation",
-   "cited_by": 2,
+   "cited_by": 4,
    "status": "SPEC",
    "reason": "spec SDD",
    "next_action": "manter; mudar so com PR da frente dona"
@@ -2137,7 +2147,7 @@
    "room": "docs",
    "last_touch": "2026-10-22",
    "owner": "project_documentation",
-   "cited_by": 2,
+   "cited_by": 4,
    "status": "SPEC",
    "reason": "spec SDD",
    "next_action": "manter; mudar so com PR da frente dona"
@@ -2247,7 +2257,7 @@
    "room": "docs",
    "last_touch": "2026-10-22",
    "owner": "project_documentation",
-   "cited_by": 7,
+   "cited_by": 26,
    "status": "SPEC",
    "reason": "spec SDD",
    "next_action": "manter; mudar so com PR da frente dona"
@@ -2344,7 +2354,7 @@
   {
    "path": "docs/vision_acl_discrimination_findings.md",
    "room": "docs",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "project_documentation",
    "cited_by": 3,
    "status": "DOC",
@@ -2504,7 +2514,7 @@
   {
    "path": "interior/renderers/sketchup_basic_provider.py",
    "room": "interior",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "interior_engine",
    "imported_by": 4,
    "tests_importing": 0,
@@ -3018,7 +3028,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 87,
+   "cited_by": 109,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3198,7 +3208,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3210,7 +3220,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3222,7 +3232,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3234,7 +3244,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3246,7 +3256,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3306,7 +3316,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3318,7 +3328,7 @@
    "owner": "regression_test_suite",
    "imported_by": 1,
    "tests_importing": 1,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3330,7 +3340,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3354,7 +3364,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3498,7 +3508,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3534,6 +3544,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
+   "cited_by": 2,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3553,7 +3564,7 @@
   {
    "path": "tests/test_file_audit.py",
    "room": "tests",
-   "last_touch": null,
+   "last_touch": "2026-10-22",
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
@@ -3617,7 +3628,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3629,7 +3640,7 @@
    "owner": "test",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3676,7 +3687,7 @@
    "owner": "test",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 6,
+   "cited_by": 7,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3688,7 +3699,7 @@
    "owner": "test",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 7,
+   "cited_by": 8,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3700,7 +3711,7 @@
    "owner": "test",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3748,7 +3759,7 @@
    "owner": "test",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3808,7 +3819,7 @@
    "owner": "test",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -3832,7 +3843,7 @@
    "owner": "test",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 4,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4084,7 +4095,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4096,7 +4107,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4108,7 +4119,7 @@
    "owner": "regression_test_suite",
    "imported_by": 1,
    "tests_importing": 1,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4168,7 +4179,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 2,
+   "cited_by": 3,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4180,7 +4191,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4384,7 +4395,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4396,7 +4407,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4408,7 +4419,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4420,7 +4431,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4432,7 +4443,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4492,7 +4503,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -4816,7 +4827,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -5098,6 +5109,17 @@
    "next_action": "manter verde"
   },
   {
+   "path": "tests/test_rooms_index.py",
+   "room": "tests",
+   "last_touch": "2026-10-22",
+   "owner": "regression_test_suite",
+   "imported_by": 0,
+   "tests_importing": 0,
+   "status": "TEST",
+   "reason": "suite de regressao",
+   "next_action": "manter verde"
+  },
+  {
    "path": "tests/test_run_deterministic_gates.py",
    "room": "tests",
    "last_touch": "2026-10-21",
@@ -5284,7 +5306,7 @@
    "owner": "regression_test_suite",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -5297,6 +5319,17 @@
    "imported_by": 0,
    "tests_importing": 0,
    "cited_by": 3,
+   "status": "TEST",
+   "reason": "suite de regressao",
+   "next_action": "manter verde"
+  },
+  {
+   "path": "tests/test_specialist_fragments.py",
+   "room": "tests",
+   "last_touch": "2026-10-22",
+   "owner": "regression_test_suite",
+   "imported_by": 0,
+   "tests_importing": 0,
    "status": "TEST",
    "reason": "suite de regressao",
    "next_action": "manter verde"
@@ -5764,7 +5797,7 @@
   {
    "path": "tools/interior_studio/consult_gpt_bridge/README.md",
    "room": "tooling",
-   "last_touch": "2026-06-20",
+   "last_touch": "2026-10-22",
    "owner": "tooling_documentation",
    "cited_by": 3,
    "status": "DOC",
@@ -6360,7 +6393,7 @@
    "owner": "cross_room_pipeline_tooling",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 6,
+   "cited_by": 7,
    "status": "PACKAGE_MARKER",
    "reason": "pacote sem logica",
    "next_action": "manter"
@@ -6404,7 +6437,7 @@
   {
    "path": "tools/navigation/file_audit.py",
    "room": "tooling",
-   "last_touch": null,
+   "last_touch": "2026-10-22",
    "owner": "cross_room_pipeline_tooling",
    "imported_by": 1,
    "tests_importing": 1,
@@ -6453,6 +6486,18 @@
    "path": "tools/navigation/renames.py",
    "room": "tooling",
    "last_touch": "2026-10-19",
+   "owner": "cross_room_pipeline_tooling",
+   "imported_by": 1,
+   "tests_importing": 1,
+   "cited_by": 2,
+   "status": "ACTIVE_IMPORTED",
+   "reason": "importado por 1 arquivo(s)",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/navigation/rooms_index.py",
+   "room": "tooling",
+   "last_touch": "2026-10-22",
    "owner": "cross_room_pipeline_tooling",
    "imported_by": 1,
    "tests_importing": 1,
@@ -6724,7 +6769,7 @@
   {
    "path": "tools/orchestration/furnish_apartment.py",
    "room": "tooling",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "cross_room_pipeline_tooling",
    "imported_by": 2,
    "tests_importing": 1,
@@ -6910,7 +6955,7 @@
   {
    "path": "tools/rendering/auto_camera.py",
    "room": "tooling",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "cross_room_pipeline_tooling",
    "imported_by": 1,
    "tests_importing": 1,
@@ -6946,7 +6991,7 @@
   {
    "path": "tools/rendering/crop_render.py",
    "room": "tooling",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "cross_room_pipeline_tooling",
    "imported_by": 0,
    "tests_importing": 0,
@@ -6982,7 +7027,7 @@
   {
    "path": "tools/rendering/overlay_diff.py",
    "room": "tooling",
-   "last_touch": "2026-10-19",
+   "last_touch": "2026-10-22",
    "owner": "cross_room_pipeline_tooling",
    "imported_by": 4,
    "tests_importing": 2,
@@ -7130,13 +7175,23 @@
    "next_action": "manter"
   },
   {
+   "path": "tools/rooms/README.md",
+   "room": "rooms_core",
+   "last_touch": "2026-10-22",
+   "owner": "tooling_documentation",
+   "cited_by": 3,
+   "status": "DOC",
+   "reason": "documentacao",
+   "next_action": "manter"
+  },
+  {
    "path": "tools/rooms/__init__.py",
    "room": "rooms_core",
    "last_touch": "2026-10-18",
    "owner": "room_module_existing",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 24,
+   "cited_by": 25,
    "status": "PACKAGE_MARKER",
    "reason": "pacote sem logica",
    "next_action": "manter"
@@ -7175,6 +7230,15 @@
    "cited_by": 5,
    "status": "PACKAGE_MARKER",
    "reason": "pacote sem logica",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/balcony/fragments/pergola_and_planters.fragment.v1.json",
+   "room": "balcony",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
    "next_action": "manter"
   },
   {
@@ -7268,6 +7332,33 @@
    "next_action": "manter"
   },
   {
+   "path": "tools/rooms/bathroom/fragments/layout.fragment.v1.json",
+   "room": "bathroom",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/bathroom/fragments/vanity.fragment.v1.json",
+   "room": "bathroom",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/bathroom/fragments/wet_room.fragment.v1.json",
+   "room": "bathroom",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
    "path": "tools/rooms/bathroom/knowledge/index.v1.json",
    "room": "bathroom",
    "last_touch": "2026-10-19",
@@ -7284,7 +7375,7 @@
    "owner": "room_bathroom",
    "imported_by": 6,
    "tests_importing": 4,
-   "cited_by": 8,
+   "cited_by": 9,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 6 arquivo(s)",
    "next_action": "manter"
@@ -7316,7 +7407,7 @@
    "owner": "room_bathroom",
    "imported_by": 2,
    "tests_importing": 1,
-   "cited_by": 2,
+   "cited_by": 3,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 2 arquivo(s)",
    "next_action": "manter"
@@ -7388,19 +7479,55 @@
    "owner": "room_bedroom",
    "imported_by": 5,
    "tests_importing": 3,
-   "cited_by": 10,
+   "cited_by": 11,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 5 arquivo(s)",
    "next_action": "manter"
   },
   {
+   "path": "tools/rooms/bedroom/fragments/bed.fragment.v1.json",
+   "room": "bedroom",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/bedroom/fragments/layout.fragment.v1.json",
+   "room": "bedroom",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/bedroom/fragments/nightstand.fragment.v1.json",
+   "room": "bedroom",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/bedroom/fragments/wardrobe.fragment.v1.json",
+   "room": "bedroom",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
    "path": "tools/rooms/bedroom/furnishing.py",
    "room": "bedroom",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "room_bedroom",
    "imported_by": 2,
    "tests_importing": 1,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 2 arquivo(s)",
    "next_action": "manter"
@@ -7418,11 +7545,11 @@
   {
    "path": "tools/rooms/bedroom/layout.py",
    "room": "bedroom",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "room_bedroom",
    "imported_by": 7,
    "tests_importing": 4,
-   "cited_by": 11,
+   "cited_by": 12,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 7 arquivo(s)",
    "next_action": "manter"
@@ -7466,9 +7593,9 @@
    "owner": "interior_engine",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "ACTIVE_ENTRYPOINT",
-   "reason": "citado por 2 arquivo(s) de codigo/CI/config/skill",
+   "reason": "citado por 3 arquivo(s) de codigo/CI/config/skill",
    "next_action": "manter"
   },
   {
@@ -7478,9 +7605,9 @@
    "owner": "interior_engine",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "ACTIVE_ENTRYPOINT",
-   "reason": "citado por 2 arquivo(s) de codigo/CI/config/skill",
+   "reason": "citado por 3 arquivo(s) de codigo/CI/config/skill",
    "next_action": "manter"
   },
   {
@@ -7490,9 +7617,9 @@
    "owner": "interior_engine",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "ACTIVE_ENTRYPOINT",
-   "reason": "citado por 2 arquivo(s) de codigo/CI/config/skill",
+   "reason": "citado por 3 arquivo(s) de codigo/CI/config/skill",
    "next_action": "manter"
   },
   {
@@ -7502,9 +7629,9 @@
    "owner": "interior_engine",
    "imported_by": 0,
    "tests_importing": 0,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "ACTIVE_ENTRYPOINT",
-   "reason": "citado por 2 arquivo(s) de codigo/CI/config/skill",
+   "reason": "citado por 3 arquivo(s) de codigo/CI/config/skill",
    "next_action": "manter"
   },
   {
@@ -7524,7 +7651,7 @@
    "room": "rooms_core",
    "last_touch": "2026-10-22",
    "owner": "room_module_existing",
-   "cited_by": 28,
+   "cited_by": 30,
    "status": "CONFIG",
    "reason": "configuracao/outro",
    "next_action": "manter"
@@ -7539,6 +7666,15 @@
    "cited_by": 5,
    "status": "PACKAGE_MARKER",
    "reason": "pacote sem logica",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/circulation/fragments/gate.fragment.v1.json",
+   "room": "circulation",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
    "next_action": "manter"
   },
   {
@@ -7581,6 +7717,15 @@
    "cited_by": 4,
    "status": "PACKAGE_MARKER",
    "reason": "pacote sem logica",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/closet/fragments/sliding_doors.fragment.v1.json",
+   "room": "closet",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
    "next_action": "manter"
   },
   {
@@ -7632,7 +7777,7 @@
    "owner": "room_module_existing",
    "imported_by": 3,
    "tests_importing": 1,
-   "cited_by": 5,
+   "cited_by": 7,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 3 arquivo(s)",
    "next_action": "manter"
@@ -7647,6 +7792,15 @@
    "cited_by": 4,
    "status": "PACKAGE_MARKER",
    "reason": "pacote sem logica",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/home_office/fragments/desk.fragment.v1.json",
+   "room": "home_office",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
    "next_action": "manter"
   },
   {
@@ -7715,11 +7869,11 @@
   {
    "path": "tools/rooms/kitchen/anchor_rules.py",
    "room": "kitchen",
-   "last_touch": "2026-10-19",
+   "last_touch": "2026-10-22",
    "owner": "room_kitchen",
    "imported_by": 11,
    "tests_importing": 5,
-   "cited_by": 12,
+   "cited_by": 13,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 11 arquivo(s)",
    "next_action": "manter"
@@ -7739,7 +7893,7 @@
   {
    "path": "tools/rooms/kitchen/capabilities/bake_theme.py",
    "room": "kitchen",
-   "last_touch": "2026-10-19",
+   "last_touch": "2026-10-22",
    "owner": "runtime_or_orchestrator",
    "imported_by": 0,
    "tests_importing": 0,
@@ -7755,7 +7909,7 @@
    "owner": "room_module_existing",
    "imported_by": 5,
    "tests_importing": 2,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 5 arquivo(s)",
    "next_action": "manter"
@@ -7767,7 +7921,7 @@
    "owner": "room_module_existing",
    "imported_by": 6,
    "tests_importing": 2,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 6 arquivo(s)",
    "next_action": "manter"
@@ -7799,7 +7953,7 @@
    "owner": "room_module_existing",
    "imported_by": 2,
    "tests_importing": 1,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 2 arquivo(s)",
    "next_action": "manter"
@@ -7811,7 +7965,7 @@
    "owner": "room_module_existing",
    "imported_by": 5,
    "tests_importing": 1,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 5 arquivo(s)",
    "next_action": "manter"
@@ -7829,6 +7983,51 @@
    "next_action": "manter"
   },
   {
+   "path": "tools/rooms/kitchen/fragments/cabinetry.fragment.v1.json",
+   "room": "kitchen",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/kitchen/fragments/countertop_and_sink.fragment.v1.json",
+   "room": "kitchen",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/kitchen/fragments/ergonomics.fragment.v1.json",
+   "room": "kitchen",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/kitchen/fragments/layout_and_placement.fragment.v1.json",
+   "room": "kitchen",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/kitchen/fragments/reference_truth.fragment.v1.json",
+   "room": "kitchen",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
    "path": "tools/rooms/kitchen/knowledge/index.v1.json",
    "room": "kitchen",
    "last_touch": "2026-10-21",
@@ -7841,11 +8040,11 @@
   {
    "path": "tools/rooms/kitchen/layout.py",
    "room": "kitchen",
-   "last_touch": "2026-10-19",
+   "last_touch": "2026-10-22",
    "owner": "room_kitchen",
    "imported_by": 10,
    "tests_importing": 5,
-   "cited_by": 15,
+   "cited_by": 16,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 10 arquivo(s)",
    "next_action": "manter"
@@ -7925,7 +8124,7 @@
    "owner": "room_kitchen",
    "imported_by": 1,
    "tests_importing": 0,
-   "cited_by": 10,
+   "cited_by": 11,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 1 arquivo(s)",
    "next_action": "manter"
@@ -8221,7 +8420,7 @@
    "owner": "room_living",
    "imported_by": 3,
    "tests_importing": 1,
-   "cited_by": 9,
+   "cited_by": 10,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 3 arquivo(s)",
    "next_action": "manter"
@@ -8245,9 +8444,36 @@
    "owner": "room_living",
    "imported_by": 2,
    "tests_importing": 1,
-   "cited_by": 8,
+   "cited_by": 9,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 2 arquivo(s)",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/living/fragments/case_goods.fragment.v1.json",
+   "room": "living",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/living/fragments/layout.fragment.v1.json",
+   "room": "living",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/living/fragments/sofa.fragment.v1.json",
+   "room": "living",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
    "next_action": "manter"
   },
   {
@@ -8257,7 +8483,7 @@
    "owner": "room_living",
    "imported_by": 2,
    "tests_importing": 1,
-   "cited_by": 4,
+   "cited_by": 5,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 2 arquivo(s)",
    "next_action": "manter"
@@ -8299,7 +8525,7 @@
   {
    "path": "tools/rooms/living/planning/layout_candidates.py",
    "room": "living",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "runtime_or_orchestrator",
    "imported_by": 4,
    "tests_importing": 2,
@@ -8315,7 +8541,7 @@
    "owner": "room_living",
    "imported_by": 3,
    "tests_importing": 1,
-   "cited_by": 9,
+   "cited_by": 10,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 3 arquivo(s)",
    "next_action": "manter"
@@ -8323,11 +8549,11 @@
   {
    "path": "tools/rooms/living/sofa_class.py",
    "room": "living",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "room_living",
    "imported_by": 11,
    "tests_importing": 3,
-   "cited_by": 11,
+   "cited_by": 12,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 11 arquivo(s)",
    "next_action": "manter"
@@ -8371,7 +8597,7 @@
    "owner": "room_living_or_shared",
    "imported_by": 4,
    "tests_importing": 1,
-   "cited_by": 6,
+   "cited_by": 7,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 4 arquivo(s)",
    "next_action": "manter"
@@ -8441,7 +8667,7 @@
    "owner": "room_module_existing",
    "imported_by": 1,
    "tests_importing": 1,
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 1 arquivo(s)",
    "next_action": "manter"
@@ -8471,6 +8697,15 @@
    "next_action": "manter"
   },
   {
+   "path": "tools/rooms/service/fragments/layout.fragment.v1.json",
+   "room": "service",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "status": "CONFIG",
+   "reason": "configuracao/outro",
+   "next_action": "manter"
+  },
+  {
    "path": "tools/rooms/service/knowledge/index.v1.json",
    "room": "service",
    "last_touch": "2026-10-19",
@@ -8487,7 +8722,7 @@
    "owner": "room_service",
    "imported_by": 3,
    "tests_importing": 2,
-   "cited_by": 7,
+   "cited_by": 8,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 3 arquivo(s)",
    "next_action": "manter"
@@ -8555,7 +8790,7 @@
    "owner": "shared",
    "imported_by": 7,
    "tests_importing": 2,
-   "cited_by": 8,
+   "cited_by": 9,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 7 arquivo(s)",
    "next_action": "manter"
@@ -8603,7 +8838,7 @@
    "owner": "room_module_existing",
    "imported_by": 6,
    "tests_importing": 0,
-   "cited_by": 8,
+   "cited_by": 9,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 6 arquivo(s)",
    "next_action": "manter"
@@ -8613,9 +8848,9 @@
    "room": "shared",
    "last_touch": "2026-10-19",
    "owner": "room_kitchen",
-   "cited_by": 17,
+   "cited_by": 18,
    "status": "RUBY_JOB",
-   "reason": "citado por 17 arquivo(s)",
+   "reason": "citado por 18 arquivo(s)",
    "next_action": "manter"
   },
   {
@@ -8623,9 +8858,9 @@
    "room": "shared",
    "last_touch": "2026-10-19",
    "owner": "room_kitchen",
-   "cited_by": 10,
+   "cited_by": 11,
    "status": "RUBY_JOB",
-   "reason": "citado por 10 arquivo(s)",
+   "reason": "citado por 11 arquivo(s)",
    "next_action": "manter"
   },
   {
@@ -8633,9 +8868,9 @@
    "room": "shared",
    "last_touch": "2026-10-21",
    "owner": "room_kitchen",
-   "cited_by": 11,
+   "cited_by": 12,
    "status": "RUBY_JOB",
-   "reason": "citado por 11 arquivo(s)",
+   "reason": "citado por 12 arquivo(s)",
    "next_action": "manter"
   },
   {
@@ -8643,9 +8878,9 @@
    "room": "shared",
    "last_touch": "2026-10-21",
    "owner": "room_kitchen",
-   "cited_by": 9,
+   "cited_by": 10,
    "status": "RUBY_JOB",
-   "reason": "citado por 9 arquivo(s)",
+   "reason": "citado por 10 arquivo(s)",
    "next_action": "manter"
   },
   {
@@ -8679,7 +8914,7 @@
    "owner": "room_module_existing",
    "imported_by": 3,
    "tests_importing": 1,
-   "cited_by": 6,
+   "cited_by": 7,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 3 arquivo(s)",
    "next_action": "manter"
@@ -8691,7 +8926,7 @@
    "owner": "room_module_existing",
    "imported_by": 3,
    "tests_importing": 1,
-   "cited_by": 3,
+   "cited_by": 4,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 3 arquivo(s)",
    "next_action": "manter"
@@ -8715,7 +8950,7 @@
    "owner": "room_module_existing",
    "imported_by": 10,
    "tests_importing": 3,
-   "cited_by": 5,
+   "cited_by": 6,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 10 arquivo(s)",
    "next_action": "manter"
@@ -8847,7 +9082,7 @@
    "owner": "shared",
    "imported_by": 5,
    "tests_importing": 1,
-   "cited_by": 7,
+   "cited_by": 8,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 5 arquivo(s)",
    "next_action": "manter"
@@ -8907,7 +9142,7 @@
    "owner": "shared",
    "imported_by": 28,
    "tests_importing": 6,
-   "cited_by": 12,
+   "cited_by": 13,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 28 arquivo(s)",
    "next_action": "manter"
@@ -8915,7 +9150,7 @@
   {
    "path": "tools/rooms/shared/spatial_model.py",
    "room": "shared",
-   "last_touch": "2026-10-19",
+   "last_touch": "2026-10-22",
    "owner": "shared_or_cross_cutting",
    "imported_by": 5,
    "tests_importing": 3,
@@ -8931,9 +9166,21 @@
    "owner": "shared",
    "imported_by": 6,
    "tests_importing": 1,
-   "cited_by": 11,
+   "cited_by": 12,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 6 arquivo(s)",
+   "next_action": "manter"
+  },
+  {
+   "path": "tools/rooms/specialist_fragments.py",
+   "room": "rooms_core",
+   "last_touch": "2026-10-22",
+   "owner": "room_module_existing",
+   "imported_by": 1,
+   "tests_importing": 1,
+   "cited_by": 2,
+   "status": "ACTIVE_IMPORTED",
+   "reason": "importado por 1 arquivo(s)",
    "next_action": "manter"
   },
   {
@@ -9055,9 +9302,9 @@
    "room": "sketchup_executor",
    "last_touch": "2026-10-19",
    "owner": "cross_room_pipeline_tooling",
-   "cited_by": 43,
+   "cited_by": 44,
    "status": "RUBY_JOB",
-   "reason": "citado por 43 arquivo(s)",
+   "reason": "citado por 44 arquivo(s)",
    "next_action": "manter"
   },
   {
@@ -9321,7 +9568,7 @@
    "owner": "shared_or_cross_cutting",
    "imported_by": 6,
    "tests_importing": 3,
-   "cited_by": 7,
+   "cited_by": 8,
    "status": "ACTIVE_IMPORTED",
    "reason": "importado por 6 arquivo(s)",
    "next_action": "manter"
@@ -9341,7 +9588,7 @@
   {
    "path": "tools/validation/diagnose_wall_stubs.py",
    "room": "validation",
-   "last_touch": "2026-10-20",
+   "last_touch": "2026-10-22",
    "owner": "cross_room_pipeline_tooling",
    "imported_by": 1,
    "tests_importing": 1,
@@ -9473,7 +9720,7 @@
   {
    "path": "tools/validation/geometry_sanity.py",
    "room": "validation",
-   "last_touch": "2026-10-21",
+   "last_touch": "2026-10-22",
    "owner": "shared_or_cross_cutting",
    "imported_by": 0,
    "tests_importing": 0,
@@ -9497,7 +9744,7 @@
   {
    "path": "tools/validation/opening_audit.py",
    "room": "validation",
-   "last_touch": "2026-10-19",
+   "last_touch": "2026-10-22",
    "owner": "cross_room_pipeline_tooling",
    "imported_by": 0,
    "tests_importing": 0,
@@ -9665,7 +9912,7 @@
   {
    "path": "tools/validation/scale_anchor_gate.py",
    "room": "validation",
-   "last_touch": "2026-10-19",
+   "last_touch": "2026-10-22",
    "owner": "shared_or_cross_cutting",
    "imported_by": 4,
    "tests_importing": 2,

@@ -1,0 +1,35 @@
+{
+  "schema_version": "specialist_fragment.v1",
+  "room": "bathroom",
+  "id": "layout",
+  "title": "Layout dos banheiros",
+  "focus": "Vaso, box, pia e enxoval em caixas por papel, com clearances e zonas molhadas.",
+  "capability_ids": [
+    "bathroom.layout.boxes"
+  ],
+  "binding_ids": [
+    "bind.bathroom.layout"
+  ],
+  "recipe_ids": [],
+  "specs": [
+    "docs/specs/construction_core_microphases.md"
+  ],
+  "code": [
+    "tools/rooms/bathroom/layout.py"
+  ],
+  "tests": [
+    "tests/test_bathroom_enxoval_clearance.py",
+    "tests/test_bathrooms_style.py",
+    "tests/test_fp042_kitchen_bathroom_builder_ownership.py"
+  ],
+  "skills": [
+    "interior-architect-planner"
+  ],
+  "reference_targets": [],
+  "golden_sources": [],
+  "demos": [],
+  "open_decisions": [],
+  "stop_conditions": [
+    "aparência nova: PENDING_HUMAN até o Felipe decidir (nunca autodeclarar)"
+  ]
+}

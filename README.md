@@ -47,15 +47,15 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 
 | Cômodo | Pasta | Papel | Capacidades (prova) | Lacunas | Fragmentos | Arquivos (py/rb) |
 |---|---|---|---|---|---|---|
-| Cozinha | [`tools/rooms/kitchen/`](tools/rooms/kitchen/) | planeja e constrói | 5 L2, 1 L1, 1 sem prova | 3 | — | 22 (16/2) |
-| Sala | [`tools/rooms/living/`](tools/rooms/living/) | planeja e constrói | 3 L1 | — | — | 39 (22/10) |
-| Quarto | [`tools/rooms/bedroom/`](tools/rooms/bedroom/) | planeja e constrói | 4 L1 | — | — | 16 (13/0) |
-| Banheiro | [`tools/rooms/bathroom/`](tools/rooms/bathroom/) | planeja e constrói | 2 L1 | — | — | 10 (7/0) |
-| Serviço | [`tools/rooms/service/`](tools/rooms/service/) | planeja e constrói | 1 L1 | — | — | 5 (2/0) |
-| Closet | [`tools/rooms/closet/`](tools/rooms/closet/) | reusa outro cômodo (bedroom) | — | 1 | — | 4 (1/0) |
-| Home office | [`tools/rooms/home_office/`](tools/rooms/home_office/) | reusa outro cômodo (bedroom) | — | 1 | — | 4 (1/0) |
-| Varanda | [`tools/rooms/balcony/`](tools/rooms/balcony/) | só consultivo | — | 1 | — | 4 (1/0) |
-| Circulação | [`tools/rooms/circulation/`](tools/rooms/circulation/) | só valida | 1 L1 | — | — | 4 (1/0) |
+| Cozinha | [`tools/rooms/kitchen/`](tools/rooms/kitchen/) | planeja e constrói | 5 L2, 1 L1, 1 sem prova | 3 | 5 | 27 (16/2) |
+| Sala | [`tools/rooms/living/`](tools/rooms/living/) | planeja e constrói | 3 L1 | — | 3 | 42 (22/10) |
+| Quarto | [`tools/rooms/bedroom/`](tools/rooms/bedroom/) | planeja e constrói | 4 L1 | — | 4 | 20 (13/0) |
+| Banheiro | [`tools/rooms/bathroom/`](tools/rooms/bathroom/) | planeja e constrói | 2 L1 | — | 3 | 13 (7/0) |
+| Serviço | [`tools/rooms/service/`](tools/rooms/service/) | planeja e constrói | 1 L1 | — | 1 | 6 (2/0) |
+| Closet | [`tools/rooms/closet/`](tools/rooms/closet/) | reusa outro cômodo (bedroom) | — | 1 | 1 | 5 (1/0) |
+| Home office | [`tools/rooms/home_office/`](tools/rooms/home_office/) | reusa outro cômodo (bedroom) | — | 1 | 1 | 5 (1/0) |
+| Varanda | [`tools/rooms/balcony/`](tools/rooms/balcony/) | só consultivo | — | 1 | 1 | 5 (1/0) |
+| Circulação | [`tools/rooms/circulation/`](tools/rooms/circulation/) | só valida | 1 L1 | — | 1 | 5 (1/0) |
 | Compartilhado | [`tools/rooms/shared/`](tools/rooms/shared/) | peças usadas por ≥ 2 cômodos | 2 capacidades | — | — | 36 |
 
 <!-- rooms-index:end -->
