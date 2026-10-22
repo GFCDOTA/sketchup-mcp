@@ -1,0 +1,67 @@
+{
+ "develop_head": "13b1372c083bbe53b5efb07c46b3fbd34fd03179",
+ "prs": {
+  "342": {
+   "checks": [
+    "SUCCESS"
+   ],
+   "head": "docs/fp046-shaker-parametric-cabinet-spec",
+   "isDraft": false,
+   "mergeable": "UNKNOWN",
+   "state": "MERGED",
+   "title": "docs(fp046): SPEC SDD — marcenaria Shaker parametrica e prova L2"
+  },
+  "344": {
+   "checks": [
+    "SUCCESS"
+   ],
+   "head": "docs/fp047-room-geometry-visual-regression-spec",
+   "isDraft": false,
+   "mergeable": "UNKNOWN",
+   "state": "MERGED",
+   "title": "docs(fp047): SPEC SDD — contrato de regressao geometrica e visual por comodo"
+  },
+  "346": {
+   "checks": [
+    "SUCCESS"
+   ],
+   "head": "docs/fp048-shared-geometry-capability-contract",
+   "isDraft": true,
+   "mergeable": "MERGEABLE",
+   "state": "OPEN",
+   "title": "docs(fp048): SPEC SDD — geometria compartilhada entre cômodos"
+  },
+  "347": {
+   "checks": [
+    "SUCCESS"
+   ],
+   "head": "docs/fp049-composable-wardrobe-assembly-spec",
+   "isDraft": true,
+   "mergeable": "MERGEABLE",
+   "state": "OPEN",
+   "title": "docs(fp049): SPEC SDD — guarda-roupa componível com capabilities compartilhadas"
+  },
+  "355": {
+   "checks": [
+    "SUCCESS"
+   ],
+   "head": "feat/fp050-kitchen-placement-l1-pilot",
+   "isDraft": true,
+   "mergeable": "MERGEABLE",
+   "state": "OPEN",
+   "title": "feat(fp050): piloto L1 para escolher posição de gabinete sem bloquear circulação"
+  },
+  "356": {
+   "checks": [
+    "SUCCESS"
+   ],
+   "head": "docs/fp046-l3-visual-package",
+   "isDraft": false,
+   "mergeable": "UNKNOWN",
+   "state": "MERGED",
+   "title": "docs(fp046): pacote visual L3 da porta Shaker na cozinha (antes x depois) — PENDING_HUMAN"
+  }
+ },
+ "snapshot_date": "2026-10-21",
+ "source": "gh pr view (consulta pontual; o gerador nunca acessa a rede)"
+}
