@@ -22,10 +22,19 @@
   **contrato de alvo por móvel** (FP-052 T0–T1, piloto `DRAFT_BLOCKED`).
 - **Aparência:** nada aprovado em L3 (18 × `NOT_REVIEWED`). Pacote da Shaker aguardando o Felipe (#356).
 
+## Sessão de reorganização (2026-10-22, PRs #360–#369)
+
+- #360 instruções do agente (CLAUDE.md com imports consertados, `.claude/rules/`, 22 skills) · #361 handoff geral + mapa de
+  microfases · #363 **T0.1**: prova L2 cobre o fecho transitivo (`closure_digests`, `EVIDENCE_CLOSURE_STALE`) ·
+  #364 imports do código vivo zerados + handoff por arquivo (`docs/reports/file_audit/`) · #365 índice dos cômodos na raiz ·
+  #366 **fragmentos de especialista** (20, em `tools/rooms/<cômodo>/fragments/`) · #367 SOLID: `shared/parts.py` ·
+  #368 raiz: D-002/D-005 executadas + "O que mora na raiz" · #369 desempenho: snapshot 5,25 s → 2,84 s, saída idêntica.
+- Ferramentas novas: `tools.navigation.{register_evidence,file_audit,rooms_index,builder_detail_audit}`,
+  `tools.rooms.{evidence_closure,specialist_fragments}`.
+
 ## Problemas abertos conhecidos
 
 - Builders Gen1 (guarda-roupa, cama, sofá, rack, mesas) com medidas embutidas; guarda-roupa com corpo em um bloco.
-- Digest do R-18 só cobre o corpo da função listada (fecho transitivo fora) — microfase T0.1.
 - Circulação da SUITE 01 reprova antes e depois (preexistente, #351); D-007 (vão = laje) muda a SUITE 02 → decisão do Felipe.
 - `cabinet.sketchup.inspect` grava scratch ao lado do `.skp` de entrada (T0.2).
 - Room fidelity WARN na planta_74 (8 células × 11 ambientes, open-plan) — honesto, não inventar paredes.

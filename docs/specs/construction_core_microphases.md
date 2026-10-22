@@ -88,6 +88,22 @@ Estado: `PRONTA` (sem bloqueio), `BLOQ-HUMANO` (só o Felipe destrava), `BLOQ-DE
 Cama, sofá, poltrona e mesas (estofado/madeira maciça) **ficam Gen1** até existir alvo FP-052; a única mudança permitida
 neles antes disso é mover medida embutida para a spec com origem (baseline cai, aparência igual, prova FP-047).
 
+## 4.1 Trilha R — refatoração SOLID / design patterns e desempenho (pedido de 2026-10-22)
+
+Mesmas regras da §2: um PR por item, saída provada idêntica (ou L2 refeito quando toca símbolo provado), sem padrão por dogma
+(`.claude/rules` do workspace: interface só com ≥ 2 implementações reais ou fronteira de teste).
+
+| ID | Onde | Entrega | Prova | Custo L2 | Estado |
+|---|---|---|---|---|---|
+| R0 | todo o código vivo | revisão de imports: 0 ciclos, 0 quebrados, 0 `import *`, 24 → 0 não usados; trava no CI | `tests/test_file_audit.py` | nenhum | FEITA (#364) |
+| R1 | `shared/` | primitivas de peça (`part`, `darker`, `place_parts`, `parts_to_boxes`) saem do módulo do sofá para `shared/parts.py` (DIP/SRP); 14 consumidores | saída byte a byte idêntica; trava de direção | nenhum | FEITA (#367) |
+| R2 | gates/planners | caches exatos nos 2 caminhos quentes (erosão do gate de circulação; geometria por consensus) — snapshot 5,25 s → 2,84 s | snapshot idêntico; `tests/test_geometry_hot_paths.py` | nenhum | FEITA (#369) |
+| R3 | `shared/cabinet/sketchup.py` + Shaker | `scratch_dir(src, rótulo)` único para os dois inspects (DRY) e fim do scratch ao lado de `.skp` protegido (= T0.2) | teste vermelho com caminho protegido | gabinete + frente lisa (refazer L2) | PRONTA |
+| R4 | registro de brains | `RoomBrain` (Protocol) para o registro que já existe (`build_brain_registry`): 5 implementações reais → port com tipo explícito | unitários do registro | nenhum (fora dos fechos L2) | PRONTA |
+| R5 | builders Gen1 | medida embutida → spec com origem, um builder por PR, começando pelo guarda-roupa (10 literais) e criado-mudo (22) | baseline cai; aparência igual (FP-047) | nenhum (L1) | PRONTA |
+| R6 | `interior/planners/living_room_planner.py`, `interior/class_specs/` | lógica de cômodo fora do módulo do cômodo → `tools/rooms/living/planning/` (modularização por cômodo) | ownership + suíte; consumidores conferidos | nenhum | BLOQ-DEP (mapear consumidores do pacote `interior`) |
+| R7 | planners | índice espacial (`STRtree`) nos candidatos — **só se** a planta crescer (hoje ~10–20 obstáculos/cômodo) | igualdade do layout escolhido | — | ADIADA (ganho pequeno, risco de mudar ordem) |
+
 ## 5. Pacote de decisão do Felipe (o que destrava a fila)
 
 1. **Veredito L3 da porta Shaker** — `artifacts/review/fp046/l3_package/` (#356): `APPROVED` ou `CHANGES_REQUESTED`. Destrava B2.
