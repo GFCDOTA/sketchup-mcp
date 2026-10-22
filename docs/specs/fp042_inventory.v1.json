@@ -9093,6 +9093,15 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
+      "path": "core/schemas/shared_transform.v1.schema.json",
+      "domain": "shared_domain",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_validation_schemas",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "core/schemas/specialist_fragment.v1.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -13520,6 +13529,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_fp048_shared_transform.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_fp051_baseline.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -17360,6 +17378,15 @@
       "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/geometry_contract.py",
+      "domain": "shared_domain",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_geometry",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {

@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "shared_transform.v1: rigid coordinate mapping for shared components",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_front",
+    "target_front",
+    "pose",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "shared_transform.v1"
+    },
+    "source_front": {
+      "enum": [
+        "+Y",
+        "-Y"
+      ]
+    },
+    "target_front": {
+      "enum": [
+        "+Y",
+        "-Y"
+      ]
+    },
+    "pose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "z",
+        "rotation_deg"
+      ],
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/distance"
+        },
+        "y": {
+          "$ref": "#/$defs/distance"
+        },
+        "z": {
+          "$ref": "#/$defs/distance"
+        },
+        "rotation_deg": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "value",
+            "unit",
+            "origin"
+          ],
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": -360,
+              "maximum": 360
+            },
+            "unit": {
+              "const": "deg"
+            },
+            "origin": {
+              "enum": [
+                "user_request",
+                "consensus",
+                "pdf",
+                "fixture_synthetic"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "execution_authorized": {
+      "const": false
+    }
+  },
+  "$defs": {
+    "distance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "unit",
+        "origin"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "enum": [
+            "m",
+            "cm",
+            "mm"
+          ]
+        },
+        "origin": {
+          "enum": [
+            "user_request",
+            "consensus",
+            "pdf",
+            "fixture_synthetic"
+          ]
+        }
+      }
+    }
+  }
+}
