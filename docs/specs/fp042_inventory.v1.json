@@ -646,7 +646,43 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": ".claude/rules/evidence-and-protected-files.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": ".claude/rules/rooms-and-capabilities.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": ".claude/rules/sketchup-ruby-jobs.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": ".claude/skills/autonomous-fidelity-loop/SKILL.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": ".claude/skills/capability-l2-proof/SKILL.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -853,15 +889,6 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
-      "path": ".claude/skills/capability-l2-proof/SKILL.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "agent_skills_memory",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
       "path": ".claude/specs/autonomous_planta_prep.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
@@ -1007,33 +1034,6 @@
     },
     {
       "path": ".claude/specs/templates/regression_summary_template.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "agent_skills_memory",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": ".claude/rules/rooms-and-capabilities.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "agent_skills_memory",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": ".claude/rules/sketchup-ruby-jobs.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "agent_skills_memory",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": ".claude/rules/evidence-and-protected-files.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -9084,6 +9084,15 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
+      "path": "core/schemas/specialist_fragment.v1.schema.json",
+      "domain": "shared_domain",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_validation_schemas",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "core/schemas/specialist_profile.v1.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -9094,15 +9103,6 @@
     },
     {
       "path": "core/schemas/visual_findings.schema.json",
-      "domain": "shared_domain",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "shared_validation_schemas",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "core/schemas/specialist_fragment.v1.schema.json",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -10248,6 +10248,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "docs/handoffs/2026-10-22_general_app_handoff.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "docs/handoffs/repo_folder_hygiene_2026-06-08.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
@@ -10258,15 +10267,6 @@
     },
     {
       "path": "docs/handoffs/scale_centralization_2026-06-09.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "project_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "docs/handoffs/2026-10-22_general_app_handoff.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -10383,60 +10383,6 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
-      "path": "docs/reports/FP-043_final_validation.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "project_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "docs/reports/FP-044_final_validation.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "project_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "docs/reports/FP-045_F0_baseline.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "project_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "docs/reports/FP-051_P0_baseline.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "project_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "docs/reports/fp051/external_snapshot.json",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "project_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "docs/reports/fp051/fp051_baseline.json",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "project_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
       "path": "docs/reports/construction_core/builder_detail_baseline.v1.json",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
@@ -10447,15 +10393,6 @@
     },
     {
       "path": "docs/reports/construction_core/geometry_hot_paths.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "project_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "docs/reports/file_audit/README.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -10653,6 +10590,69 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "docs/reports/file_audit/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/reports/FP-043_final_validation.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/reports/FP-044_final_validation.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/reports/FP-045_F0_baseline.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/reports/FP-051_P0_baseline.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/reports/fp051/external_snapshot.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/reports/fp051/fp051_baseline.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "docs/screenshots/harness-app/01-pipeline.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -10774,6 +10774,15 @@
     },
     {
       "path": "docs/specs/brain_muscle.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/specs/construction_core_microphases.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -11079,6 +11088,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "docs/specs/FP-053_demo_first_golden_components_and_reuse.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "docs/specs/FP-SOFA-PREMIUM/ALTERATION_REVIEW_CONTRACT.json",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
@@ -11188,15 +11206,6 @@
     },
     {
       "path": "docs/specs/quadrado_demo_spec.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "project_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "docs/specs/construction_core_microphases.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -12863,6 +12872,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_builder_detail_audit.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_cabinet_plan.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -12882,6 +12900,15 @@
     },
     {
       "path": "tests/test_circulation_gate.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_claude_assets.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -13025,7 +13052,25 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_evidence_closure.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_fidelity_loop.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_file_audit.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -13547,6 +13592,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_geometry_hot_paths.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_geometry_sanity_brains.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -14051,6 +14105,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_register_evidence.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_render_bbox_audit.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -14168,6 +14231,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_rooms_index.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_run_deterministic_gates.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -14196,6 +14268,15 @@
     },
     {
       "path": "tests/test_shared_geometry_regression.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_shared_parts.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -14313,6 +14394,15 @@
     },
     {
       "path": "tests/test_soft_barrier_source_audit.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_specialist_fragments.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -14502,87 +14592,6 @@
     },
     {
       "path": "tests/test_window_aperture_geometry.py",
-      "domain": "test",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tests/test_claude_assets.py",
-      "domain": "test",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tests/test_register_evidence.py",
-      "domain": "test",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tests/test_builder_detail_audit.py",
-      "domain": "test",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tests/test_evidence_closure.py",
-      "domain": "test",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tests/test_file_audit.py",
-      "domain": "test",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tests/test_rooms_index.py",
-      "domain": "test",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tests/test_specialist_fragments.py",
-      "domain": "test",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tests/test_shared_parts.py",
-      "domain": "test",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tests/test_geometry_hot_paths.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -15194,6 +15203,15 @@
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
+      "path": "tools/navigation/builder_detail_audit.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
       "path": "tools/navigation/consumers.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
@@ -15204,6 +15222,15 @@
     },
     {
       "path": "tools/navigation/docs_check.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/navigation/file_audit.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
@@ -15230,15 +15257,6 @@
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
-      "path": "tools/navigation/renames.py",
-      "domain": "runtime_or_orchestrator",
-      "disposition": "retain_legacy_public_or_tooling_path",
-      "phase": "P4",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "tool_owner": "cross_room_pipeline_tooling",
-      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
-    },
-    {
       "path": "tools/navigation/register_evidence.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
@@ -15248,16 +15266,7 @@
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
-      "path": "tools/navigation/builder_detail_audit.py",
-      "domain": "runtime_or_orchestrator",
-      "disposition": "retain_legacy_public_or_tooling_path",
-      "phase": "P4",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "tool_owner": "cross_room_pipeline_tooling",
-      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
-    },
-    {
-      "path": "tools/navigation/file_audit.py",
+      "path": "tools/navigation/renames.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
@@ -15851,6 +15860,15 @@
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
+      "path": "tools/rooms/balcony/fragments/pergola_and_planters.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "tools/rooms/balcony/knowledge/index.v1.json",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -15870,15 +15888,6 @@
     },
     {
       "path": "tools/rooms/balcony/specialist.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/balcony/fragments/pergola_and_planters.fragment.v1.json",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -15932,6 +15941,33 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
+      "path": "tools/rooms/bathroom/fragments/layout.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "bathroom_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/bathroom/fragments/vanity.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "bathroom_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/bathroom/fragments/wet_room.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "bathroom_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "tools/rooms/bathroom/knowledge/index.v1.json",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -15970,33 +16006,6 @@
     {
       "path": "tools/rooms/bathroom/validation.py",
       "domain": "room_bathroom",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "bathroom_validation_boundary",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/bathroom/fragments/layout.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "bathroom_validation_boundary",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/bathroom/fragments/vanity.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "bathroom_validation_boundary",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/bathroom/fragments/wet_room.fragment.v1.json",
-      "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
@@ -16056,6 +16065,42 @@
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
       "runtime_owner": "tools.rooms.bedroom",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
+    },
+    {
+      "path": "tools/rooms/bedroom/fragments/bed.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/bedroom/fragments/layout.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/bedroom/fragments/nightstand.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/bedroom/fragments/wardrobe.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
       "path": "tools/rooms/bedroom/furnishing.py",
@@ -16148,42 +16193,6 @@
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
-      "path": "tools/rooms/bedroom/fragments/bed.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/bedroom/fragments/layout.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/bedroom/fragments/nightstand.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/bedroom/fragments/wardrobe.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
       "path": "tools/rooms/capability_catalog.py",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -16208,6 +16217,15 @@
       "phase": "P1",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "architecture_owner": "room_module_registry_or_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/circulation/fragments/gate.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
@@ -16238,21 +16256,21 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "tools/rooms/circulation/fragments/gate.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
       "path": "tools/rooms/closet/__init__.py",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P1",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "architecture_owner": "room_module_registry_or_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/closet/fragments/sliding_doors.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
@@ -16283,15 +16301,6 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "tools/rooms/closet/fragments/sliding_doors.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
       "path": "tools/rooms/dispatch.py",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -16301,12 +16310,30 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
+      "path": "tools/rooms/evidence_closure.py",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "tools/rooms/home_office/__init__.py",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P1",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "architecture_owner": "room_module_registry_or_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/home_office/fragments/desk.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
@@ -16329,15 +16356,6 @@
     },
     {
       "path": "tools/rooms/home_office/specialist.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/home_office/fragments/desk.fragment.v1.json",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -16445,6 +16463,51 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
+      "path": "tools/rooms/kitchen/fragments/cabinetry.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/fragments/countertop_and_sink.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/fragments/ergonomics.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/fragments/layout_and_placement.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/fragments/reference_truth.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "tools/rooms/kitchen/knowledge/index.v1.json",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -16537,51 +16600,6 @@
     {
       "path": "tools/rooms/kitchen/validation/wall_regression.py",
       "domain": "room_kitchen",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "kitchen_validation_boundary",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/kitchen/fragments/cabinetry.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "kitchen_validation_boundary",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/kitchen/fragments/countertop_and_sink.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "kitchen_validation_boundary",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/kitchen/fragments/ergonomics.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "kitchen_validation_boundary",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/kitchen/fragments/layout_and_placement.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "kitchen_validation_boundary",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/kitchen/fragments/reference_truth.fragment.v1.json",
-      "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
@@ -16841,6 +16859,33 @@
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
+      "path": "tools/rooms/living/fragments/case_goods.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/living/fragments/layout.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/living/fragments/sofa.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "tools/rooms/living/furnishing.py",
       "domain": "room_living",
       "disposition": "tools.rooms.living",
@@ -16949,33 +16994,6 @@
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
-      "path": "tools/rooms/living/fragments/case_goods.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/living/fragments/layout.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/living/fragments/sofa.fragment.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
       "path": "tools/rooms/manifest.v1.json",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -17001,6 +17019,15 @@
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
       "runtime_owner": "cross_room_ownership_audit",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
+    },
+    {
+      "path": "tools/rooms/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "tooling_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
       "path": "tools/rooms/reference_provenance.py",
@@ -17039,6 +17066,15 @@
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
+      "path": "tools/rooms/service/fragments/layout.fragment.v1.json",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "tools/rooms/service/knowledge/index.v1.json",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -17067,15 +17103,6 @@
     },
     {
       "path": "tools/rooms/service/specialist.v1.json",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/service/fragments/layout.fragment.v1.json",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -17345,6 +17372,15 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
+      "path": "tools/rooms/shared/parts.py",
+      "domain": "shared",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "tools/rooms/shared/project_paths.py",
       "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
@@ -17408,12 +17444,12 @@
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
-      "path": "tools/rooms/shared/parts.py",
-      "domain": "shared",
+      "path": "tools/rooms/specialist_fragments.py",
+      "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "shared_room_primitives",
+      "architecture_owner": "room_module_governance",
       "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
@@ -17433,33 +17469,6 @@
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "tool_owner": "cross_room_pipeline_tooling",
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
-    },
-    {
-      "path": "tools/rooms/evidence_closure.py",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
-    },
-    {
-      "path": "tools/rooms/README.md",
-      "domain": "documentation_or_agent",
-      "disposition": "retain_path_with_explicit_owner",
-      "phase": "P5",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "document_owner": "tooling_documentation",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
-    },
-    {
-      "path": "tools/rooms/specialist_fragments.py",
-      "domain": "room_module_existing",
-      "disposition": "retain_architecture_boundary_with_explicit_owner",
-      "phase": "P2",
-      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
-      "architecture_owner": "room_module_governance",
-      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
       "path": "tools/sketchup/__init__.py",

@@ -7,7 +7,7 @@
 spec:
   feature: "FP-051 — Aprender capacidades pequenas, compor móveis e mobiliar cômodos"
   escopo_versao: "Comprovar em um fluxo ponta a ponta como uma técnica rastreável vira capacidade executável, é reutilizada em um móvel e passa pelos gates de posicionamento na cozinha real."
-  versao: "1.1.0"
+  versao: "1.2.0"
   status: RASCUNHO_VALIDADO_CONTRA_DEVELOP
   classificacao:
     contexto_delimitado: "Aprendizado técnico verificável e mobiliamento"
@@ -110,6 +110,14 @@ Capacidade reutilizável / móvel entregue / próximo cômodo
 - O primeiro target tem `state=DRAFT_BLOCKED` de propósito: falta referência/detalhamento de peças e há divergência textual LINEAR versus Galley em L entre SPEC e DesignIntent, a reconciliar contra arquitetura.
 - Aprendizado exploratório pode gerar microprovas com status `PROPOSED`; não pode virar móvel entregue nem receber `TARGET_MATCH` até target/versões/aprovação adequados.
 - FP-052/T0–T2 entram **antes** da FP-051/P2–P5 no que toca a entrega de mobiliário. P1 pode calcular lacunas mesmo com alvo bloqueado, mas deve reportar `BLOCKED_TARGET_UNDEFINED` como dependência de produto, não promover o objeto.
+
+### 2.2.2 Novo protocolo de aprendizado: FP-053 — demo-first e pesquisa de reuso
+
+**REGRA OBRIGATÓRIA PARA FP-051/P1–P3:** gap planner detecta a falta da habilidade e consulta, nesta ordem, capability própria atual, fonte de conhecimento/recipe, componente terceiro legalmente reutilizável (incluindo 3D Warehouse por canais permitidos) e a viabilidade de uma micro-demo. Resposta tipada: `REUSE_CAPABILITY`, `IMPORT_ASSET_VERIFIED`, `BUILD_MICRO_DEMO` ou `BLOCKED_MISSING_EVIDENCE`. **Não criar caixas-proxy como fallback.**
+
+O `quadrado` + janela (`docs/specs/quadrado_demo_spec.md`) é o padrão metodológico: entrada mínima → resultado esperado independente → testes vermelhos/verde → SketchUp real → registro → reuso em cenário maior. Para qualquer nova técnica de recorte, gaveta, box, espelho ou encaixe, a aprendizagem é executada e comprovada primeiro numa demo; quando precisa representar um produto já pronto, asset externo verificado é alternativa legítima sem afirmar que o algoritmo foi aprendido. **FP-053** define detalhes: [FP-053](FP-053_demo_first_golden_components_and_reuse.md).
+
+O `source_verified` não é herdado por recipes vizinhas. `L2_PASS` da demo comprova operação, mas não aprova móvel nem posição. Ao concluir demo, **replanejar** a tarefa original e verificar target FP-052, dependências e FP-050; nenhuma execução automática. Termos e licença de terceiros não autorizam scraping ou redistribuição indiscriminada. A FP-051/P2 deve ser reexecutada sob FP-053, sem duplicar builders ou provas existentes.
 
 ### 2.3 Estados: conhecimento não é execução
 
@@ -383,7 +391,9 @@ Reportar quatro contagens separadas: `capabilities_L2_com_prova_vigente`, `furni
 |---|---|---|---|
 | 1.0.0 | 2026-10-21 | ChatGPT/Felipe | SPEC SDD P0–P8, D51-01..07, CA-01..19 |
 | 1.1.0 | 2026-10-21 | Claude (validação contra o código) | Afirmações da spec verificadas por `tools/navigation/fp051_baseline.py` (`spec_claims`): capabilities L2, bindings sem capability, módulos propostos ausentes em `develop`, frames `+Y` (gabinete) × `-Y` (guarda-roupa), `human_review` só no `tips-2021`. **Cinco correções:** (1) vocabulário de estados — reutilizar `PENDING_SKETCHUP` e `BLOCKED_KNOWLEDGE_EVIDENCE` (D51-09); (2) fonte rotulada inspecionada **sem `human_review`** não promove capability (R-03; gaveta: `yt-kitchen-joinery-2024` sem revisão, recipe mistura caixa e ferragem); (3) custo do P4: gate nos dois fluxos + rerun L2 de ambos (D51-08); (4) `hypothesis` não está declarada em `develop` (só no #355); (5) o escopo da `human_review` (uma recipe, um trecho) agora é explícito no R-03 e no baseline (`human_review_other_scope`). Baseline reconciliado: ver P0. |
+| 1.2.0 | 2026-10-22 | ChatGPT | FP-053 demo-first; reuso/3D Warehouse com proveniência e direitos, sem scraping; sequência aprendizado → golden → replanejamento; obsolescência dos drafts #346/#347/#355 corrigida. |
 
 **Achado fora do escopo do P0 — CORRIGIDO depois (2026-10-21, follow-up do #357; o texto abaixo é o achado original):** `shaker_flow.run_request` confere que a fonte do pedido tem *alguma* `human_review`, mas não que ela cobre a **recipe** do pedido (`origin_context.recipe_id`); um `source_verified=true` apontando para outra recipe do mesmo vídeo passaria. Corrigir muda o símbolo e exige refazer o L2 do fluxo (D51-08). Estava medido em `spec_claims` (`flow:source_verified-checks-review-scope`, hoje `ok: true`); evidência do L2 refeito: `artifacts/review/fp046/review_scope_l2/README.md`.
 
-**Não corrigido de propósito:** o exemplo de `furniture_goal.v1` com placeholders é ilustrativo e já diz que deve ser recusado; os PRs #346/#347/#355 seguem em draft (a spec já os trata como bloqueios, não como API pronta).
+**Nota histórica:** o exemplo de `furniture_goal.v1` com placeholders é ilustrativo e permanece inválido como input de execução. Os PRs #346/#347/#355, que eram drafts na versão anterior, foram integrados à `develop`; revisar contratos reais antes de integrar o planner. A criação da FP-053 não representa L2/L3 novo.
+

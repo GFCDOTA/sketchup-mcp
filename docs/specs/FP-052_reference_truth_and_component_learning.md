@@ -7,7 +7,7 @@
 spec:
   feature: "FP-052 — Reference Target Contract: o que construir + como aprender"
   escopo_versao: "Tornar obrigatória uma referência-alvo rastreável para cada componente e móvel, vinculando fonte geométrica, design aprovado, tutorial verificável e critérios de aceite antes da construção final."
-  versao: "1.0.0"
+  versao: "1.1.0"
   status: "RASCUNHO_VALIDADO_CONTRA_DEVELOP"
   classificacao:
     contexto_delimitado: "Reference Lab / Aprendizado de marcenaria / Mobiliamento"
@@ -50,6 +50,14 @@ Hoje `references/sketchup/knowledge/` explica **como** modelar; `artifacts/refer
 - `style.status=HISTORICALLY_APPROVED` é **somente** o registro de uma decisão histórica sobre estilo. Não muda `approval.decision=PENDING` para um móvel individual.
 - Toda alteração de arquivo fonte (SHA), trecho de tutorial, decisão de design, target, símbolo do builder ou SKP invalida as provas vinculadas em seu escopo. Preservar histórico e pedir revalidação, não sobrescrever evidências.
 - Jamais armazenar `execution_authorized=true` em `reference_target`. Autorizar execução pertence ao gate/fluxo do job, separado e tipado, após validar alvo/assembly/placement.
+
+### 2.2.1 A demo comprovada NÃO substitui o target do produto
+
+FP-053 introduz **Golden Component / micro-fixture** como fonte de verdade **do comportamento técnico testado**, inspirada em `docs/specs/quadrado_demo_spec.md`. Esta prova é distinta do `reference_target.v1`, que continua responsável pelo resultado pretendido de cada peça e móvel. Variações de dimensão/transformação devem provar generalização; o sample único não autoriza transferência cega.
+
+Quando existir um asset de terceiros (3D Warehouse, fabricante ou biblioteca local), registrar autor/URL/arquivo/hash/termos aplicáveis, verificar integridade e direitos antes do uso. Asset importado aprovado para **representação** não comprova que a app sabe **construí-lo proceduralmente**. Uso por meio oficial/licenciado; proibir scraping, downloads em massa e redistribuição isolada não autorizada. Se o asset não der suporte ao alvo ou à parametrização exigida, criar demo própria com prova L1/L2.
+
+O agente consulta a FP-053 antes de construir algo ausente, mas **não** pode mudar o target aprovado apenas para fazer a demo passar. Se a demo passar e o alvo da instância continuar `DRAFT_BLOCKED`, bloquear entrega final.
 
 ## 2.3 Procedimento obrigatório de ensino de cada peça
 
@@ -95,7 +103,7 @@ O gate `tools/rooms/reference_targets.py` desta fase é read-only e **não está
 - FP-045 permanece dona dos especialistas, recipes e catálogo de capabilities.
 - FP-046 permanece dona da porta Shaker; a L2 `L2_PASS` existente permanece uma **prova técnica histórica válida em seu escopo**, **não** prova de correspondência a uma frente-alvo individual FP-052.
 - FP-047 compara deltas de SKP; FP-052 adiciona **comparação candidata ↔ referência do objetivo**, distinta de baseline ↔ commit anterior.
-- FP-048/049/050 continuam PRs draft e não são pré-condição para **documentar** os targets; a integração operacional exige revisão dos contratos após o merge.
+- FP-048/049/050 já foram mergeadas; continuam limites L1/documentais onde indicado. Revalidar os contratos e a integração operacional antes de declarar capacidades executáveis. A FP-053 oficializa pesquisa de reuso e prova em micro-fixture antes da construção no apartamento.
 - Não alterar decisões `GOLDEN_SAMPLE_004`; uma mudança estética requer nova variante/decisão, preservando os documentos históricos.
 - Não promover `planta_74.r004.kitchen_base_001` antes de referências/anatomia e conflito resolvido. Decisões em aberto exigem curadoria baseada em fontes, não invenção do agente.
 
