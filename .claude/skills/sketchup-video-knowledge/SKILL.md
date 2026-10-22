@@ -1,11 +1,10 @@
 ---
 name: sketchup-video-knowledge
 description: >-
-  Consulta receitas técnicas extraídas de aulas públicas de SketchUp para modelagem
-  de armários, portas, gavetas, bancadas, componentes e materiais. Use quando
-  precisar comparar técnicas de marcenaria, traduzir GUI para Ruby API ou
-  orientar o futuro sketchup-tooling-specialist. Conhecimento consultivo, não
-  autoriza mutação de geometria.
+  Consulta as recipes técnicas extraídas de aulas públicas de SketchUp
+  (references/sketchup/knowledge/video_recipes.v1.json) para armários, portas, gavetas, bancadas, componentes e
+  materiais, com fonte, trecho e estado da revisão humana. Use para comparar técnicas de marcenaria, traduzir GUI
+  para Ruby API ou orientar o sketchup-tooling-specialist. Consultivo: não autoriza mutação de geometria.
 ---
 
 # Conhecimento técnico — aulas SketchUp (FP-041)

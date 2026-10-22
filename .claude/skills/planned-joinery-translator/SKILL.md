@@ -1,15 +1,12 @@
 ---
 name: planned-joinery-translator
-description: >
-  Agente PLANNED_JOINERY_TRANSLATOR — traduz REFERÊNCIA VISUAL (Pinterest/print/foto) de
-  móvel planejado em GRAMÁTICA de design → componentes SketchUp editáveis, SEM copiar a
-  imagem. Use ao receber imagem/link de ambiente planejado, ou em "referência", "inspiração
-  de cozinha/sala", "Pinterest", "transforma essa foto em planejado", "gramática de design",
-  "móvel planejado a partir de". Regra máxima: o PDF/planta manda na POSIÇÃO (pia, parede,
-  porta, janela, hidráulica, circulação = imutável); a referência manda só na LINGUAGEM.
-  Princípio-chave: loose_object → planned_niche_system. NÃO usar pra extrair parede de PDF
-  (pdf-to-skp-pipeline) nem pra fidelidade SKP×PDF (fidelity-review); ele PRODUZ a
-  DesignGrammarSpec que o planned-furniture-designer / brains consomem.
+description: >-
+  Traduz referência visual (Pinterest, print, foto) de móvel planejado em DesignGrammarSpec — gramática de design →
+  componentes SketchUp editáveis — sem copiar a imagem; princípio loose_object → planned_niche_system. O PDF manda na
+  posição (pia, parede, porta, janela, hidráulica, circulação); a referência, só na linguagem. Use ao receber imagem
+  ou link de ambiente planejado, ou em "referência", "inspiração de cozinha/sala", "Pinterest", "transforma essa foto
+  em planejado", "gramática de design". Não usar para extrair parede de PDF (pdf-to-skp-pipeline) nem para fidelidade
+  SKP×PDF (fidelity-review).
 ---
 
 # PLANNED_JOINERY_TRANSLATOR
@@ -94,7 +91,7 @@ reference_image → design_grammar_tokens → room_constraints(PDF) → DesignGr
 | Editabilidade | `tools/sketchup/inspect/skp_editability_report.rb` | cada módulo = grupo nomeado isolável; 0 geometria solta no root; shell locked |
 | Coerência de linguagem | `tools/validation/style_coherence_gate.py` + olho | paleta/tokens aplicados; sem material default vazando |
 | Proporção realista | olho + dims reais | compacto p/ o apê; nada de cubo genérico |
-| Veredito visual | GPT via Chrome (URL raw) **ou** Felipe | NUNCA auto-julgar IMPROVED/PASS — é humano/GPT |
+| Veredito visual | Felipe, no chat | NUNCA auto-julgar IMPROVED/PASS |
 
 Critério de aceite final: **parece planejado real em material básico, ANTES do V-Ray.** Se
 ainda parece "cubo/Minecraft" ou "marcenaria técnica crua", não passou.
@@ -104,7 +101,7 @@ ainda parece "cubo/Minecraft" ou "marcenaria técnica crua", não passou.
 - NÃO copiar a imagem (extrai gramática, não pixels).
 - NÃO mover âncora do PDF por causa da referência.
 - NÃO deixar objeto solto — aplicar `loose_object → planned_niche_system`.
-- NÃO auto-declarar PASS visual (é do Felipe / GPT).
+- NÃO auto-declarar PASS visual (é do Felipe).
 - NÃO abrir vários cômodos ao mesmo tempo — fechar um (golden-sample) antes de propagar.
 
 ## Saída

@@ -1,11 +1,11 @@
 ---
 name: sketchup-room-knowledge
 description: >-
-  Consulta uma biblioteca segura de modelagem SketchUp por categoria de ambiente
-  (sala, quartos, cozinha, banheiro, lavanderia, varanda, home office, closet,
-  circulação). Separa conteúdo confirmado na documentação e descrições de aulas
-  das adaptações para o projeto. Requer consulta à biblioteca de marcenaria e
-  bloqueia qualquer execução não comprovada.
+  Consulta a biblioteca segura de modelagem SketchUp por categoria de ambiente (sala, quartos, cozinha, banheiro,
+  lavanderia, varanda, home office, closet, circulação), separando o confirmado na documentação e nas aulas das
+  adaptações ao projeto, e bloqueia execução não comprovada. Use ao precisar de técnica de modelagem para um cômodo,
+  antes de propor builder, ou em "como modelar X no SketchUp" para um ambiente. Consultivo: não autoriza mutação de
+  geometria.
 ---
 
 # FP-041 — conhecimento técnico por ambiente

@@ -1,12 +1,11 @@
 ---
 name: reference-to-joinery-translator
-description: >
-  v1 — REFERENCE_TO_KITCHEN_SYSTEM_TRANSLATOR. Compila referência visual CURADA em SISTEMA de
-  cozinha implementável: não só TEMA (cor/material/luz), mas INTELIGÊNCIA DE USO (medidas,
-  ergonomia, manutenção, buildability). Produz analysis (10 saídas) + theme preset + roda 4
-  gates. NÃO é scraper. Regra de ouro: Pinterest = intenção visual (hipótese), PDF/gates =
-  verdade espacial. Use quando o Felipe colar referência de cozinha/planejado, ou pra rodar
-  BATCH_THEME_RENDER de presets na planta_74.
+description: >-
+  Compila referência visual CURADA de cozinha num sistema implementável (REFERENCE_TO_KITCHEN_SYSTEM_TRANSLATOR v1):
+  tema (cor, material, luz) e inteligência de uso (medidas, ergonomia, manutenção, buildability) → analysis com 10
+  saídas + theme preset + 4 gates. Pinterest = intenção visual (hipótese); PDF e gates = verdade espacial. Use quando
+  o Felipe colar referência de cozinha/planejado ou para rodar BATCH_THEME_RENDER de presets na planta_74. Não é
+  scraper.
 ---
 
 # REFERENCE_TO_KITCHEN_SYSTEM_TRANSLATOR (v1)
@@ -51,7 +50,7 @@ Definição: `artifacts/reference_lab/gates/reference_system_gates.md`.
 
 ## Hierarquia absoluta
 PDF na **posição** · gates na **circulação/segurança/manutenção** · referência na **linguagem
-visual** · Felipe/GPT no **PASS**. Tema muda skin/material/luz/câmera; **NUNCA** âncora do PDF
+visual** · Felipe no **PASS**. Tema muda skin/material/luz/câmera; **NUNCA** âncora do PDF
 ou geometria aprovada sem autorização (DECISION 001).
 
 ## Fluxo de lote (BATCH_THEME_RENDER)
@@ -59,7 +58,7 @@ ou geometria aprovada sem autorização (DECISION 001).
 Felipe cola 5–10 refs curadas (inbox/)
   → extrai temas (analyzed/*.analysis.md) → agrupa por linguagem → cria 3–N presets (themes/)
   → aplica na MESMA geometria da planta_74 (skin-swap) → renderiza A/B/C/D (renders/)
-  → roda os 4 gates → GPT/Felipe julga → congela os melhores (GOLDEN_SAMPLES.md)
+  → roda os 4 gates → Felipe julga → congela os melhores (GOLDEN_SAMPLES.md)
 ```
 Driver: `tools/rendering/batch_theme_render.py`. Saída: hero por tema + montagem + ranking (mais vendável /
 autoral / seguro p/ manutenção / arriscado).
@@ -68,7 +67,7 @@ autoral / seguro p/ manutenção / arriscado).
 - tratar Pinterest como verdade técnica (medida = hipótese, valida no PDF/ergonomia);
 - copiar layout/ilha/coifa-gigante/vão-de-poeira da referência;
 - scraping em massa; copiar imagem literalmente;
-- mover âncora do PDF; cravar PASS sozinho (GPT checkpoint, Felipe juiz).
+- mover âncora do PDF; cravar PASS sozinho (Felipe é o juiz).
 
 ## Perfil do Felipe (briefing nativo)
 

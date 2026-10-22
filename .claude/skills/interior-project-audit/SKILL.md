@@ -1,17 +1,12 @@
 ---
 name: interior-project-audit
 description: >-
-  Audita um cômodo mobiliado/renderizado (banho, cozinha, quarto, sala) como um
-  ARQUITETO/EMPRESA DE MOBILIÁRIO REAL assinaria pra OBRA — não como crítico de imagem.
-  Postura de OLHOS DE ÁGUIA (escrutínio agressivo, nada passa batido) + consultoria de
-  LOJA DE MOBILIADOS (todo apontamento vem com sugestão de produto/solução concreta,
-  não só o diagnóstico). Regra central: render bonito NUNCA aprova projeto tecnicamente
-  incompleto. Separa design_score (estética) de execution_status (construtibilidade):
-  PASS/WARN/FAIL técnico vence qualquer nota visual alta. Use ANTES de declarar um
-  cômodo "fechado"/DESIGN_LOCKED, depois que o hero + auditoria 360° (4 cantos) já
-  tiverem veredito visual. Dispara em "fecha o banho/cozinha", "pronto pra obra?",
-  "audita como arquiteto", "isso é fabricável?", "empresa de mobiliário aprovaria
-  isso?", "olhos de águia", "sugere trocas".
+  Audita um cômodo mobiliado/renderizado (banho, cozinha, quarto, sala) como o arquiteto ou a empresa de mobiliário
+  que assinaria para obra: escrutínio agressivo, cada apontamento com produto ou solução concreta, e design_score
+  (estética) separado de execution_status (construtibilidade) — FAIL técnico vence nota visual alta. Use antes de
+  declarar um cômodo fechado/DESIGN_LOCKED, depois que hero + auditoria 360° tiverem veredito do Felipe, ou em "fecha
+  o banho/cozinha", "pronto pra obra?", "audita como arquiteto", "isso é fabricável?", "olhos de águia", "sugere
+  trocas".
 ---
 
 # Interior Project Audit — buildability gate
@@ -35,14 +30,14 @@ nunca só "isso está errado", sempre "troca por X / resolve assim, porque Y".
 ## Quando dispara
 
 Depois que um cômodo já passou por `interior-architect-planner` (DesignIntentSpec) +
-render do hero + auditoria 360° (plan + hero + 4 cantos, ver `gpt-review-gate`), ANTES
+render do hero + auditoria 360° (plan + hero + 4 cantos, com veredito do Felipe), ANTES
 de declarar o cômodo fechado/pronto pra portfólio. Não substitui o veredito visual —
 audita se o que está **por trás** do render é executável.
 
 ## Saída (3 sinais separados, nunca uma nota só)
 
 ```yaml
-design_score: 0..10          # conceito/estética — julgamento humano/GPT
+design_score: 0..10          # conceito/estética — julgamento do Felipe
 visualization_score: 0..10   # qualidade do render em si
 execution_status: PASS | WARN | FAIL   # buildability — determinístico onde der
 ```
@@ -129,13 +124,13 @@ referência construída → geometria → produto real → assembly fit → ergo
 → MEP → área molhada → fabricação → auditoria 360° → DESIGN LOCK → V-Ray (beauty pass)
 ```
 
-## Como consultar (mesmo mecanismo do `gpt-docker-consult`)
+## Como consultar (mesmo mecanismo do `gpt-docker-consult` — dormente; só com pedido do Felipe)
 
 Prompt pro GPT-Docker (:8899) deve pedir explicitamente: (1) vestir o papel de
 arquiteto/designer que ASSINA o projeto, não crítico de imagem; (2) pesquisar
 (browsing) referência construída real da mesma tipologia/escala ANTES de opinar;
 (3) responder gate a gate, não só nota geral. Sem isso o oráculo tende a repetir a
-crítica estética de imagem que já rodou no `gpt-review-gate`.
+crítica estética de imagem (o `gpt-review-gate` é legado).
 
 ## Anti-regras
 

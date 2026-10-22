@@ -28,7 +28,7 @@ artifacts/review/*/*/attempt_*/
 .vscode/
 # .claude/ — ignore by default (local settings, projects state) but
 # version the team-shared subdirs (constitution, agents, commands, hooks,
-# skills, specs, memory, plans, docs, evals + CLAUDE.md + README.md +
+# skills, specs, memory, plans, docs, evals, rules + CLAUDE.md + README.md +
 # constitution.md). scratch/ stays ignored — it's for rascunhos
 # descartáveis.
 .claude/*
@@ -41,6 +41,7 @@ artifacts/review/*/*/attempt_*/
 !.claude/plans/
 !.claude/docs/
 !.claude/evals/
+!.claude/rules/
 !.claude/settings.json
 !.claude/CLAUDE.md
 !.claude/README.md

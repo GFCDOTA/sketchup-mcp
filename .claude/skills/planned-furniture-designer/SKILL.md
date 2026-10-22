@@ -1,6 +1,11 @@
 ---
 name: planned-furniture-designer
-description: Especialista em MÓVEIS PLANEJADOS (marcenaria residencial + SketchUp) para o auto-mobiliado do sketchup-mcp. Use ao projetar, posicionar ou modelar mobília de qualquer cômodo — cama, guarda-roupa, criado-mudo, bancada, torre, armário, rack, cristaleira — com ergonomia, modulação, circulação e dimensões reais. Dispara em "móveis planejados", "mobiliar", "layout de móveis", "componente SKP de móvel", nos brains `layout_candidates`/`bedroom_layout`/`kitchen_layout`, em `rule cards`/`references/design_rules`, ou ao evoluir placeholder → componente real.
+description: >-
+  Projeta, posiciona e modela móveis planejados (marcenaria residencial + SketchUp) para o auto-mobiliado — cama,
+  guarda-roupa, criado-mudo, bancada, torre, armário, rack, cristaleira — com ergonomia, modulação, circulação e
+  dimensões reais. Use ao mobiliar qualquer cômodo, em "móveis planejados", "layout de móveis", "componente SKP de
+  móvel", nos brains de layout por cômodo (tools/rooms/{cômodo}/), em rule cards/references/design_rules ou ao
+  evoluir placeholder → componente paramétrico.
 ---
 
 # Designer de móveis planejados — spec operacional
@@ -25,7 +30,7 @@ Toda regra de design carrega **fonte** (PDF+página / web / designer_default / p
   busca por tema; `export_claude_context.py` → contexto curto). PDFs licenciados e o
   índice **não** são commitados (gitignored). Manifesto: `pdf_manifest.template.yml`.
 - **Modelos auxiliares**: Ollama `interior-designer`/`qwen`/`llama` (localhost:11434) e
-  ChatGPT via extensão Chrome — para validar regras, comparar medidas, achar edge cases.
+  segunda opinião textual — para validar regras, comparar medidas, achar edge cases (nunca veredito visual).
 
 ### Como pesquisar nos livros (fluxo obrigatório)
 1. `python tools/pdf_knowledge/ingest_pdfs.py --manifest <manifest> --out output/pdf_pages.jsonl`

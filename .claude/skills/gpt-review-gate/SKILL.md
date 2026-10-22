@@ -1,12 +1,18 @@
 ---
 name: gpt-review-gate
 description: >-
-  GATE obrigatório de GPT_REVIEW (Modo B) para TODA mudança de APARÊNCIA (render/SKP).
-  O GPT é o validador; o agente NUNCA autojulga IMPROVED/SAME/WORSE/PASS. Use sempre que
-  um render/montagem/SKP muda visualmente e precisa de veredito antes de promover.
+  LEGADO. Fluxo antigo de GPT_REVIEW (prepare → consult → record em tools/oracle/gpt_review.py) que pedia veredito
+  visual ao ChatGPT. Substituído em 2026-07-27: o veredito visual é do Felipe, direto no chat. Use só se o Felipe
+  pedir explicitamente uma revisão pelo GPT, ou para ler o ledger histórico
+  artifacts/review/interior/gpt_review_ledger.jsonl.
+disable-model-invocation: true
 ---
 
-# GPT_REVIEW — gate de validação visual (Modo B)
+# GPT_REVIEW — gate de validação visual (Modo B) — LEGADO
+
+> **Status: substituído em 2026-07-27.** O veredito visual é do Felipe, direto no chat; a evidência fica
+> `PENDING_HUMAN` até ele responder. Este fluxo só roda se ele pedir uma revisão pelo GPT. O código
+> (`tools/oracle/gpt_review.py`) e o ledger seguem válidos como histórico. Texto abaixo = padrão antigo.
 
 > Felipe: "o GPT é o validador, precisa de um STEP de GPT_REVIEW pra ser um gate."
 > Regra-raiz: mudança de aparência = veredito do GPT (texto, schema), **nunca** autojulgado.

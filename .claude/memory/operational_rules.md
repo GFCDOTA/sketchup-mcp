@@ -69,7 +69,8 @@ leitura de código):
 1. **Preferir LLM local** via Ollama (`deepseek-r1:14b` pra
    decisão, `qwen2.5-coder:14b` pra código). Setup em memory
    global: `reference_local_llm_setup.md`.
-2. **Fallback ChatGPT bridge** em `localhost:8765` (`POST /ask`).
+2. **GPT-Docker `:8899`** só se o Felipe pedir (dormente desde 2026-07-27; o bridge `:8765` foi removido em 2026-07-24).
+   Veredito visual nunca vai para LLM: é do Felipe, no chat.
 3. **Decidir + executar** se LLM local e Claude convergem. Só
    perguntar ao humano se for ambiguidade de escopo real.
 4. Dar contexto estruturado: excerto dos arquivos + coords +
