@@ -24,6 +24,8 @@ def owner_for(path: str) -> str | None:
         return EXPLICIT[path]
     if path.startswith(".ai_bridge/"):
         return "agent_handoff"
+    if path.startswith("artifacts/reference_lab/targets/") and path.endswith(".target.v1.json"):
+        return "reference_target_manifest"
     if path.startswith(".claude/"):
         return "agent_skills_memory"
     if path.startswith("docs/") or (path.startswith("projects/") and path.endswith(".md")):
