@@ -7,8 +7,9 @@ Coloca via place_sofa_boxes (generico)."""
 from __future__ import annotations
 
 from tools.rooms.shared.anatomy import NIGHTSTAND_REQUIRED_PARTS, NightstandSpec, nightstand_spec  # noqa: F401,E501
-from tools.rooms.shared.sofa import PT_TO_IN, _p, parts_to_boxes  # noqa: F401
-from tools.rooms.shared.sofa import place_sofa_boxes as place_nightstand_boxes  # noqa: F401
+from tools.rooms.shared.parts import PT_TO_IN, parts_to_boxes  # noqa: F401
+from tools.rooms.shared.parts import part as _p
+from tools.rooms.shared.parts import place_parts as place_nightstand_boxes  # noqa: F401
 
 
 def build_nightstand(spec: NightstandSpec):

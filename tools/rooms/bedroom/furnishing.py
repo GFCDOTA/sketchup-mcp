@@ -178,7 +178,7 @@ def bedroom_designer_boxes(con, room_id):
     # (linguagem única no apê). Troca o bloco chapado 'desk'/'desk_chair'.
     dk_item = next((it for it in items if it.get("type") == "desk"), None)
     if dk_item is not None:
-        from tools.rooms.shared.sofa import _p, place_sofa_boxes
+        from tools.rooms.shared.parts import part as _p, place_parts as place_sofa_boxes
         dfx, dfy = _wd_facing(dk_item)
         dw_m, dd_m, dcen = _wd_dims(dk_item["box"], (dfx, dfy))
         h, tt, lt = 0.75, 0.035, 0.05
@@ -199,7 +199,7 @@ def bedroom_designer_boxes(con, room_id):
                                   "D_m": round(dd_m, 2)}
     dc_item = next((it for it in items if it.get("type") == "desk_chair"), None)
     if dc_item is not None:
-        from tools.rooms.shared.sofa import place_sofa_boxes
+        from tools.rooms.shared.parts import place_parts as place_sofa_boxes
         cfx, cfy = _wd_facing(dc_item)
         _, _, ccen = _wd_dims(dc_item["box"], (cfx, cfy))
         # a cadeira encara a mesa: facing oposto ao da escrivaninha

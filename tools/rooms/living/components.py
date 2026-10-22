@@ -30,7 +30,7 @@ def _oct_in(kind, cx, cy, r_m, z0_m, h_m, rgb, module):
 def _dining_table_rect(w=1.60, d=0.90, h=0.75, top_t=0.04, top_rgb=(108, 80, 58), leg_rgb=(30, 30, 33)):
     """Mesa de jantar RETANGULAR 6 lugares (1.60x0.90 real, joelho >=0.60): tampo
     sólido nogueira + saia + 4 pernas metal inset. Metros, origem no canto."""
-    from tools.rooms.shared.sofa import _p
+    from tools.rooms.shared.parts import part as _p
     lt, ins = 0.08, 0.05
     parts = [_p("top", "top", 0.0, 0.0, w, d, h - top_t, h, top_rgb)]
     parts.append(_p("apron", "saia", ins, ins, w - ins, d - ins, h - top_t - 0.10, h - top_t, leg_rgb))
@@ -42,7 +42,7 @@ def _dining_table_rect(w=1.60, d=0.90, h=0.75, top_t=0.04, top_rgb=(108, 80, 58)
 def _dining_table_square(side=0.92, h=0.76, top_t=0.045, top_rgb=(96, 70, 48), leg_rgb=(30, 30, 33)):
     """Mesa de jantar QUADRADA: tampo SÓLIDO (não fatias/palito) + 4 pernas grossas +
     saia fina. Metros, origem no canto. (preferência do Felipe: quadrada/canto alemão)."""
-    from tools.rooms.shared.sofa import _p
+    from tools.rooms.shared.parts import part as _p
     lt, ins = 0.07, 0.05
     parts = [_p("top", "top", 0.0, 0.0, side, side, h - top_t, h, top_rgb)]          # tampo sólido
     sa = 0.07                                                                          # saia sob o tampo

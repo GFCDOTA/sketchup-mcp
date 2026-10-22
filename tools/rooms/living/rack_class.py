@@ -21,7 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
-from tools.rooms.shared.sofa import _darker, _p   # noqa: E402
+from tools.rooms.shared.parts import darker as _darker, part as _p   # noqa: E402
 
 # ------------------------------------------------------------- TVs (satelite)
 TVS = {"55": (1.23, 0.69), "65": (1.45, 0.81), "75": (1.67, 0.93)}  # (w, h) m

@@ -11,18 +11,9 @@ from __future__ import annotations
 
 from tools.rooms.shared.anatomy import SofaSpec, sofa_spec   # noqa: F401
 
-from core.scale import M_TO_IN as PT_TO_IN  # noqa: E402  (m->in; sofa standalone em metros)
-
-
-def _darker(rgb, f):
-    return [max(0, int(c * f)) for c in rgb]
-
-
-def _p(label, kind, x0, y0, x1, y1, z0, z1, rgb):
-    return {"label": label, "kind": kind,
-            "x0": round(min(x0, x1), 4), "y0": round(min(y0, y1), 4),
-            "x1": round(max(x0, x1), 4), "y1": round(max(y0, y1), 4),
-            "z0": round(z0, 4), "z1": round(z1, 4), "rgb": list(rgb)}
+from tools.rooms.shared.parts import PT_TO_IN, parts_to_boxes  # noqa: E402,F401  (reexport: nomes antigos)
+from tools.rooms.shared.parts import darker as _darker, part as _p  # noqa: E402  (primitivas genericas)
+from tools.rooms.shared.parts import place_parts as place_sofa_boxes  # noqa: E402,F401  (reexport: nome antigo)
 
 
 def _seat_row(kind, prefix, x0, x1, y0, y1, z0, z1, n, gap, rgb, bevel=0.0):
@@ -295,79 +286,6 @@ def build_sofa(spec: SofaSpec):
             "bbox_m": spec.bbox_m(), "front_axis": "-Y",
             "kinds": sorted({p["kind"] for p in parts})}
     return parts, meta
-
-
-def place_sofa_boxes(parts, center_in, facing):
-    """Posiciona o sofa (parts em m, frente=-Y local) na PLANTA: rotaciona pra a
-    frente apontar 'facing' (vetor 2D, ex. sofa->TV) e translada pro center_in (em
-    inches, coords do shell). Desenha cantos ROTACIONADOS (place_layout_skp.rb usa
-    add_face(corners)), entao qualquer angulo funciona."""
-    import math
-    cx_in, cy_in = center_in
-    fx, fy = facing
-    nrm = math.hypot(fx, fy) or 1.0
-    fx, fy = fx / nrm, fy / nrm
-    theta = math.atan2(fx, -fy)        # frente local (0,-1) -> facing
-    ct, st = math.cos(theta), math.sin(theta)
-    W = max(p["x1"] for p in parts)
-    D = max(p["y1"] for p in parts)
-    cxl, cyl = W / 2.0, D / 2.0        # centro local do sofa
-    boxes = []
-    for p in parts:
-        corners = []
-        for lx, ly in ((p["x0"], p["y0"]), (p["x1"], p["y0"]),
-                       (p["x1"], p["y1"]), (p["x0"], p["y1"])):
-            rx, ry = lx - cxl, ly - cyl
-            wx, wy = rx * ct - ry * st, rx * st + ry * ct
-            corners.append([round(cx_in + wx * PT_TO_IN, 2), round(cy_in + wy * PT_TO_IN, 2)])
-        xs = [c[0] for c in corners]
-        ys = [c[1] for c in corners]
-        box = {
-            "kind": p["kind"], "x0": min(xs), "y0": min(ys), "x1": max(xs), "y1": max(ys),
-            "corners": corners,
-            "h_in": round((p["z1"] - p["z0"]) * PT_TO_IN, 2),
-            "z0_in": round(p["z0"] * PT_TO_IN, 2),
-            "rgb": p["rgb"], "label": p["label"], "ambiguous": False, "decorative": False,
-        }
-        # PERFIL (coroamento/arredondado): carrega a face 3D JÁ no mundo (mesma
-        # rotacao theta + translacao dos corners) + o vetor de extrusao, pro
-        # place_layout_skp desenhar as CURVAS em vez de caixa. Padrao p/ qualquer
-        # peca com profile (nao so sofa). z do perfil e ABSOLUTO (em m -> inches).
-        _pxz, _pyz = p.get("profile_xz"), p.get("profile_yz")
-        if _pxz or _pyz:
-            def _w(lx, ly, lz):
-                rx, ry = lx - cxl, ly - cyl
-                wx, wy = rx * ct - ry * st, rx * st + ry * ct
-                return [round(cx_in + wx * PT_TO_IN, 3),
-                        round(cy_in + wy * PT_TO_IN, 3), round(lz * PT_TO_IN, 3)]
-            if _pxz:   # face no plano y=y0 local (pts x,z); extruda local +y por (y1-y0)
-                dep = (p["y1"] - p["y0"]) * PT_TO_IN
-                box["profile_world"] = [_w(px, p["y0"], pz) for (px, pz) in _pxz]
-                box["extrude_vec"] = [round(-st * dep, 3), round(ct * dep, 3), 0.0]
-            else:      # face no plano x=x0 local (pts y,z); extruda local +x por (x1-x0)
-                dep = (p["x1"] - p["x0"]) * PT_TO_IN
-                box["profile_world"] = [_w(p["x0"], py, pz) for (py, pz) in _pyz]
-                box["extrude_vec"] = [round(ct * dep, 3), round(st * dep, 3), 0.0]
-        boxes.append(box)
-    return boxes
-
-
-def parts_to_boxes(parts, ox=0.0, oy=0.0):
-    """Converte parts (m) pro formato boxes do place_layout_skp.rb (in inches, z0_in,
-    h_in, corners). ox/oy desloca o sofa (p/ posicionar varios fixtures lado a lado)."""
-    boxes = []
-    for p in parts:
-        x0, y0, x1, y1 = (p["x0"] + ox) * PT_TO_IN, (p["y0"] + oy) * PT_TO_IN, \
-                         (p["x1"] + ox) * PT_TO_IN, (p["y1"] + oy) * PT_TO_IN
-        boxes.append({
-            "kind": p["kind"], "x0": x0, "y0": y0, "x1": x1, "y1": y1,
-            "corners": [[round(x0, 2), round(y0, 2)], [round(x1, 2), round(y0, 2)],
-                        [round(x1, 2), round(y1, 2)], [round(x0, 2), round(y1, 2)]],
-            "h_in": round((p["z1"] - p["z0"]) * PT_TO_IN, 2),
-            "z0_in": round(p["z0"] * PT_TO_IN, 2),
-            "rgb": p["rgb"], "label": p["label"], "ambiguous": False, "decorative": False,
-        })
-    return boxes
 
 
 if __name__ == "__main__":

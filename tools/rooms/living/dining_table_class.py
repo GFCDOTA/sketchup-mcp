@@ -28,7 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
-from tools.rooms.shared.sofa import _darker, _p   # noqa: E402
+from tools.rooms.shared.parts import darker as _darker, part as _p   # noqa: E402
 
 # ------------------------------------------------- cadeira servida (satelite)
 CHAIR = {"w": 0.45, "d": 0.42, "seat_h": 0.45, "back_h": 0.90, "tuck": 0.05}

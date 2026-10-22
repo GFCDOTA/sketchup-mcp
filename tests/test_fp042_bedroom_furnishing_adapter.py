@@ -43,7 +43,7 @@ def test_empty_ok_designer_preserves_contract(monkeypatch):
 
 
 def test_desk_chair_uses_shared_assembly_and_module(monkeypatch):
-    from tools.rooms.shared import sofa as sofa_builder
+    from tools.rooms.shared import parts as shared_parts
 
     chair = {"type": "desk_chair", "box": SimpleNamespace(bounds=(0, 0, 60, 45)),
              "facing": (0, 1)}
@@ -57,7 +57,7 @@ def test_desk_chair_uses_shared_assembly_and_module(monkeypatch):
         assert parts == furnishing._chair_parts()
         assert facing == (0.0, -1.0)
         return [{"kind": p["kind"]} for p in parts]
-    monkeypatch.setattr(sofa_builder, "place_sofa_boxes", fake_place)
+    monkeypatch.setattr(shared_parts, "place_parts", fake_place)
     boxes, result = furnishing.bedroom_designer_boxes({}, "r003")
     assert len(boxes) == 8
     assert all(b["module"] == "Cadeira escrivaninha" for b in boxes)
@@ -68,7 +68,8 @@ def test_desk_chair_uses_shared_assembly_and_module(monkeypatch):
 def test_fp043_nightstand_materialization_matches_planned_body_and_top(monkeypatch):
     """Regressao: reduzir para 72% nao pode esconder inflacao na materializacao."""
     from shapely.geometry import box
-    from core.scale import M, PT_TO_IN
+
+    from core.scale import PT_TO_IN, M
     from tools.rooms.bedroom import designer
 
     approved_w, approved_d = designer.nightstand_real_dimensions(0.45 * 0.72, 0.40 * 0.72)[:2]

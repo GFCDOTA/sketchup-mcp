@@ -81,7 +81,7 @@ def build_matrix_skp(out_skp, cols=3, pitch_x=4.0, pitch_y=3.2):
     Reusa o provider SU (no-disrupt: pula se SketchUp aberto)."""
     from interior.renderers.render_provider import RenderRequest
     from interior.renderers.sketchup_basic_provider import SketchUpBasicProvider
-    from tools.rooms.shared.sofa import parts_to_boxes
+    from tools.rooms.shared.parts import parts_to_boxes
     boxes = []
     for i, (name, kw) in enumerate(MATRIX):
         spec = derive_spec(**kw)

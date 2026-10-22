@@ -22,7 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
-from tools.rooms.shared.sofa import _darker, _p   # noqa: E402  (primitivas compartilhadas)
+from tools.rooms.shared.parts import darker as _darker, part as _p   # noqa: E402  (primitivas compartilhadas)
 
 # ----------------------------------------------------------------- faixas duras
 CT_RANGES = {

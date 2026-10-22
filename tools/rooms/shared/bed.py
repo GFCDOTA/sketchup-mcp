@@ -9,8 +9,9 @@ colocacao na planta reusa place_sofa_boxes (rotaciona -Y -> facing + translada).
 from __future__ import annotations
 
 from tools.rooms.shared.anatomy import BED_REQUIRED_PARTS, BedSpec, bed_spec  # noqa: F401
-from tools.rooms.shared.sofa import PT_TO_IN, _darker, _p, parts_to_boxes  # noqa: F401
-from tools.rooms.shared.sofa import place_sofa_boxes as place_bed_boxes      # noqa: F401  (generico)
+from tools.rooms.shared.parts import PT_TO_IN, parts_to_boxes  # noqa: F401
+from tools.rooms.shared.parts import darker as _darker, part as _p
+from tools.rooms.shared.parts import place_parts as place_bed_boxes      # noqa: F401  (generico)
 
 
 def build_bed(spec: BedSpec):
