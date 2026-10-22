@@ -9,8 +9,9 @@ place_sofa_boxes (generico: rotaciona -Y -> facing + translada)."""
 from __future__ import annotations
 
 from tools.rooms.shared.anatomy import WARDROBE_REQUIRED_PARTS, WardrobeSpec, wardrobe_spec  # noqa: F401
-from tools.rooms.shared.sofa import PT_TO_IN, _p, parts_to_boxes  # noqa: F401
-from tools.rooms.shared.sofa import place_sofa_boxes as place_wardrobe_boxes  # noqa: F401  (generico)
+from tools.rooms.shared.parts import PT_TO_IN, parts_to_boxes  # noqa: F401
+from tools.rooms.shared.parts import part as _p
+from tools.rooms.shared.parts import place_parts as place_wardrobe_boxes  # noqa: F401  (generico)
 
 MARGIN = 0.03   # margem lateral do conjunto de portas
 

@@ -70,13 +70,13 @@ def test_living_palette_does_not_mutate_protected_accents():
 
 def test_shared_decor_adapter_preserves_lift_position_and_module(monkeypatch):
     from tools.rooms.shared import decor_builders
-    from tools.rooms.shared import sofa as sofa_builder
+    from tools.rooms.shared import parts as shared_parts
 
     original = [{"z0": 0.20, "z1": 0.80}]
     build = Mock(return_value=(original, {"result": "OK"}))
     placed = Mock(return_value=[{"kind": "wall_art"}])
     monkeypatch.setattr(decor_builders, "build_decor", build)
-    monkeypatch.setattr(sofa_builder, "place_sofa_boxes", placed)
+    monkeypatch.setattr(shared_parts, "place_parts", placed)
     result = decor.place_decor_boxes(
         "wall_art", (30, 40), (0, 1), z_lift=1.15, module="Quadro", frame="bronze",
     )

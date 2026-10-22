@@ -8,7 +8,7 @@ from __future__ import annotations
 def _chair_parts():
     """Cadeira de jantar ESTOFADA (frame metal preto + assento/encosto grafite =
     tecido do sofá). Metros, frente = -Y (encosto em +Y). place_sofa_boxes orienta."""
-    from tools.rooms.shared.sofa import _p
+    from tools.rooms.shared.parts import part as _p
     w, d, sh, bh, lt = 0.45, 0.50, 0.45, 0.90, 0.028
     fabric, frame = (74, 72, 78), (26, 26, 29)
     parts = []

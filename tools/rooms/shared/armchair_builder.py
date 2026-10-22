@@ -22,7 +22,8 @@ from __future__ import annotations
 import math
 from dataclasses import asdict, dataclass
 
-from tools.rooms.shared.sofa import _darker, _p, _seat_row, _shear_y
+from tools.rooms.shared.parts import darker as _darker, part as _p
+from tools.rooms.shared.sofa import _seat_row, _shear_y   # estofado: familia do sofa
 
 
 def _lighter(rgb, f):

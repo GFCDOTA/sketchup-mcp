@@ -20,7 +20,8 @@ def living_room_boxes(con, room_id):
     fora da circulacao; rack de MADEIRA na parede-TV (limpa), mesa de centro + tapete
     no eixo entre os dois. Corrige o veredito do GPT (objeto PASS, placement FAIL):
     o solver rejeita sofa em circulacao / sem eixo pra TV. Fallback: brain antigo."""
-    from tools.rooms.shared.sofa import build_sofa, place_sofa_boxes
+    from tools.rooms.shared.parts import place_parts as place_sofa_boxes
+    from tools.rooms.shared.sofa import build_sofa
     from interior.planners.living_room_planner import plan_living
     # provenance de decisões de posicionamento (optimizer_consistency_gate) —
     # achado 2026-08-12: toda busca de posição JÁ usa circulation_gate.gate()
