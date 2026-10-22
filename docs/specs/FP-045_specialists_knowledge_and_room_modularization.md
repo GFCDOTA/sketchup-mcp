@@ -187,6 +187,8 @@ PDF + consensus + fixtures protegidas
 | Sucesso estético | Felipe via `VISUAL_REVIEW` | registro versionado da decisão; nunca IA |
 | Veracidade do teste | runner/log/artefato com SHA-256 | relatório resumido ligado à evidência |
 
+**Contrato transversal FP-052 — alvo específico antes de executar:** o especialista não pode deduzir um produto final apenas da recipe ou do estilo do cômodo. Deve consultar o manifesto `reference_target.v1` (ponteiros para `artifacts/reference_lab/`, PDF/consensus, decisão visual, anatomia/aceites por peça). Ele mantém a responsabilidade de escolher **capabilities**, mas não pode anunciar `FURNITURE_COMPLETE` sem target de instância no estado aprovado e relatório `TARGET_MATCH`. Uma aprovação do golden de cozinha não representa aprovação de cada peça; tutorial só descreve técnica revisada no segmento correspondente. O gate de target ainda é read-only no primeiro PR; a integração à execução é FP-052/T4, sem alteração retroativa de L2 válido.
+
 ### 2.3 Componentes Impactados
 
 | Componente real | Tipo | Detalhe |

@@ -29,4 +29,5 @@ def test_path_owner_does_not_imply_semantic_or_sketchup_proof():
     assert owner_for("HANDOFF.md") is None        # saiu da raiz em FP-043/P2: a raiz não aceita mais documento solto
     assert owner_for("docker-compose.yml") == "infrastructure_compose"
     assert owner_for(".claude/skills/example/SKILL.md") == "agent_skills_memory"
+    assert owner_for("artifacts/reference_lab/targets/p/r/f.target.v1.json") == "reference_target_manifest"
     assert audit_p5_roles({"entries": []})["proof"] == "PATH_AND_ROLE_ONLY_NOT_DOCUMENT_SEMANTICS"

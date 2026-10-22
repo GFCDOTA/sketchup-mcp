@@ -52,6 +52,10 @@ Sem marcenaria exagerada em lavabo pequeno; porta abre/funciona; peças proporci
 **ÁREA DE SERVIÇO** — máquina › tanque › acesso técnico › armazenamento vertical.
 Aproveitar verticalidade; não bloquear acesso; separar fluxo técnico do da cozinha quando possível.
 
+## 3.1 Contrato de alvo de mobiliário (FP-052; obrigatório antes da entrega)
+
+Além do `DesignIntentSpec` do cômodo, consultar `artifacts/reference_lab/targets/<projeto>/<room>/<furniture>.target.v1.json` (contrato `core/schemas/reference_target.v1.schema.json`). É a fonte de verdade **do alvo daquela instância**, que aponta para as fontes reais: PDF/consensus (onde), golden/decisão específica (aparência), anatomia+requisitos por peça (o que), tutorial com recipe e trecho verificado (como). Se não houver target específico aprovado, declarar `BLOCKED_TARGET_UNDEFINED`; continuar só exploração controlada, jamais `DONE`, `TARGET_MATCH` ou execução final. O golden aprovado do cômodo NÃO aprova gavetas, frentes ou armários individuais. Referência técnica sem evidência não vira procedimento atribuído a vídeo. O preflight read-only existe; seu acoplamento à execução é fase FP-052/T4.
+
 ## 4. DesignIntentSpec (OBRIGATÓRIO antes de placement/render)
 
 Um por cômodo, em `artifacts/planta_74/design_intent/<room_id>.json`. Schema:

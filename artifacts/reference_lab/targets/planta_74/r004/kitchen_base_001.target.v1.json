@@ -1,0 +1,131 @@
+{
+  "schema_version": "reference_target.v1",
+  "target_id": "planta_74.r004.kitchen_base_001",
+  "state": "DRAFT_BLOCKED",
+  "project_id": "planta_74",
+  "room_id": "r004",
+  "furniture_kind": "base_cabinet",
+  "functional_intent": "Gabinete inferior editavel e coerente com a cozinha real; dimensoes/posicao serao extraidas e confirmadas, nao inventadas.",
+  "source_refs": [
+    {
+      "id": "pdf",
+      "role": "ARCHITECTURE",
+      "path": "projects/planta_74/source/planta_74.pdf",
+      "sha256": null
+    },
+    {
+      "id": "consensus",
+      "role": "CONSENSUS",
+      "path": "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+      "sha256": null
+    },
+    {
+      "id": "golden_decision",
+      "role": "DESIGN_DECISION",
+      "path": "artifacts/reference_lab/DECISIONS.md",
+      "sha256": null
+    },
+    {
+      "id": "golden_004",
+      "role": "VISUAL",
+      "path": "artifacts/planta_74/furnished/kitchen_angles/cozinha_skp_blackgold_hero_final.png",
+      "sha256": null
+    },
+    {
+      "id": "golden_catalog",
+      "role": "DESIGN_DECISION",
+      "path": "artifacts/reference_lab/GOLDEN_SAMPLES.md",
+      "sha256": null
+    },
+    {
+      "id": "kitchen_design",
+      "role": "TECHNICAL_SPEC",
+      "path": "artifacts/reference_lab/kitchen/spec/COMPLETE_KITCHEN_SPEC.md",
+      "sha256": null
+    },
+    {
+      "id": "kitchen_intent",
+      "role": "ROOM_INTENT",
+      "path": "artifacts/planta_74/design_intent/r004.json",
+      "sha256": null
+    },
+    {
+      "id": "recipes",
+      "role": "TECHNIQUE",
+      "path": "references/sketchup/knowledge/video_recipes.v1.json",
+      "sha256": null
+    }
+  ],
+  "parts": [
+    {
+      "id": "carcass",
+      "target_state": "UNDEFINED",
+      "functional_requirement": "Corpo de gabinete com paineis, vao, fundo, prateleira e hierarquia editavel",
+      "anatomy_and_operations": [],
+      "required_source_ids": [
+        "pdf",
+        "consensus",
+        "kitchen_design"
+      ],
+      "reference_view_ids": [],
+      "acceptance_checks": [],
+      "recipe_ids": [
+        "cabinet.reusable-components"
+      ]
+    },
+    {
+      "id": "front",
+      "target_state": "UNDEFINED",
+      "functional_requirement": "Frente/porta detalhada, com geometria real de paineis e folgas",
+      "anatomy_and_operations": [],
+      "required_source_ids": [
+        "golden_decision",
+        "recipes"
+      ],
+      "reference_view_ids": [],
+      "acceptance_checks": [],
+      "recipe_ids": [
+        "cabinet.front-gaps-and-profiles"
+      ]
+    },
+    {
+      "id": "shelf",
+      "target_state": "UNDEFINED",
+      "functional_requirement": "Prateleira independente e editavel, apoiada sem atravesar carcaca",
+      "anatomy_and_operations": [],
+      "required_source_ids": [
+        "kitchen_design"
+      ],
+      "reference_view_ids": [],
+      "acceptance_checks": [],
+      "recipe_ids": []
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "layout_descriptor_discrepancy",
+      "status": "OPEN",
+      "description": "A SPEC de cozinha usa a expressao LINEAR; o DesignIntent r004 descreve Galley em L (W+S). Nao deduzir coordenadas nem resolver por palpite: conferir planta/consensus e registrar decisao explicita para o alvo.",
+      "sources": [
+        "kitchen_design",
+        "kitchen_intent"
+      ]
+    }
+  ],
+  "style": {
+    "scope": "ROOM_STYLE_ONLY",
+    "status": "HISTORICALLY_APPROVED",
+    "source_ids": [
+      "golden_decision",
+      "golden_catalog",
+      "golden_004"
+    ]
+  },
+  "approval": {
+    "decision": "PENDING",
+    "scope": null,
+    "reviewer": null,
+    "review_record_path": null
+  },
+  "execution_authorized": false
+}
