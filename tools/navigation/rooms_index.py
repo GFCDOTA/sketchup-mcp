@@ -160,11 +160,11 @@ def render_layout(root: Path = ROOT) -> str:
     for f in files:
         counts[f.split("/")[0]] += 1
     lines = [LAYOUT_BEGIN, "", "> Gerado por `python -m tools.navigation.rooms_index --write`; toda entrada versionada da raiz precisa de papel aqui.",
-             "", "| Entrada | Arquivos | Papel |", "|---|---|---|"]
+             "", "| Entrada | Papel |", "|---|---|"]
     for entry in sorted(counts, key=lambda e: (not (root / e).is_dir(), e.lower())):
         role = ROOT_ROLES.get(entry, "**SEM PAPEL DEFINIDO** — decidir antes de manter na raiz")
         label = f"`{entry}/`" if (root / entry).is_dir() else f"`{entry}`"
-        lines.append(f"| {label} | {counts[entry]} | {role} |")
+        lines.append(f"| {label} | {role} |")   # sem contagem: mudaria a cada arquivo novo e obrigaria regenerar todo PR
     lines += ["", "`runs/` existe só localmente (scratch ignorado pelo git).", "", LAYOUT_END]
     return "\n".join(lines)
 
