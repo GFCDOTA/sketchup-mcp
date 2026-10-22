@@ -71,7 +71,7 @@ def _reviewed_recipe(recipe_ids: list[str], catalog: dict, root: Path) -> list[s
         for ref in recipe.get("sources", []):
             review = by_source.get(ref["id"], {}).get("human_review") or {}
             if (review.get("recipe_id") == rid and review.get("segment")
-                    and review["segment"] in ref.get("locator", "")
+                    and review["segment"].replace("–", "-") in ref.get("locator", "").replace("–", "-")
                     and review.get("reviewer")):
                 approved.append(rid)
                 break
