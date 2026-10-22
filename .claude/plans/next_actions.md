@@ -1,19 +1,23 @@
 # Next actions — sketchup-mcp
 
-Fila curta (máx. 5). A fila completa e o estado de cada microfase moram em
-`docs/specs/construction_core_microphases.md` §4 (trilhas T/K/B/L/W/S/C) e §4.1 (trilha R: SOLID, patterns, desempenho).
+> Status após PRs #371–#374 em 2026-10-22. Fila autoritativa: docs/specs/construction_core_microphases.md.
+> CI Linux verde não substitui L2 SketchUp Windows nem revisão humana L3.
 
-> **Snapshot:** 2026-10-22 (fim da sessão de reorganização, PRs #360–#369).
+1. **T0.2 restante:** integrar tools.sketchup.inspect_workspace.plan_inspect_workspace (#373) em cabinet.sketchup.inspect;
+   refazer L2 Windows de todas as capacidades afetadas pelo símbolo/fecho R-18. PREP L1 pronta, integração NÃO feita.
+2. **T0.5 restante:** ligar gate de placement FP-050 a cabinet_flow e shaker_flow sem bypass;
+   usar teste da Golden Demo mesa/cadeira/corredor (#374), e refazer L2 Windows lisa/Shaker. Gate ainda NÃO conectado.
+3. **K1/K2/K4:** revisar tutoriais em segmento exato, alvo FP-052 e ficha da cuba antes de aprender recorte/tampo/gaveta;
+   nenhuma geometry proxy, sem declarar demo técnica aprovada.
+4. **B1 e consumidores:** aplicar shared_transform.v1 (+Y↔−Y) (#372) em micro-fixture antes do guarda-roupa real.
+5. **Com usuário:** L3 Shaker (#356), decisões do alvo kitchen_base_001, D-007/D-009 e CLIs apenas documentadas.
 
-1. **R3 = T0.2 — `scratch_dir` único para os inspects** (gabinete e Shaker) e fim do scratch ao lado de `.skp` protegido;
-   refaz o L2 de `shared.cabinet.parametric` e `kitchen.cabinet.plain-fronts` (skill `capability-l2-proof`).
-2. **T0.3 — FP-051 P1** `plan_furniture_goal()` puro, reportando `BLOCKED_TARGET_UNDEFINED` (FP-052) como dependência.
-3. **T0.5 — placement FP-050 como gate obrigatório** nos dois fluxos da cozinha, refazendo o L2 de ambos.
-4. **R4/R5** — `RoomBrain` (Protocol) no registro de brains; medida embutida → spec, começando pelo guarda-roupa.
-5. **Com o Felipe:** veredito L3 da Shaker (#356), revisão do trecho do tampo (07:09–08:53), decisão sobre as 6 CLIs só
-   documentadas (`docs/reports/file_audit/README.md`) e D-009 (`ops/`).
+## Concluído e não refazer
 
-## Regra de fila
+- **T0.1** (#363): evidência transitiva.
+- **T0.3** (#371): plan_furniture_goal() consultivo, DAG/gap/alvo fail-closed; sem execução.
+- **T0.4** (#372): transformações compartilhadas e testes de propriedades, L1.
+- **T0.2 prep** (#373): scratch seguro somente planejamento, ainda sem alteração de inspector.
+- **T0.5 demo** (#374): corredor sintético com envelope da cadeira, somente oráculo L1.
 
-Concluir um item → o próximo só se tiver valor claro de produto (componente mais fiel/mais detalhado, prova honesta,
-gate falhando, PR aberta). Não inventar trabalho cosmético. Ver `memory/operational_rules.md`.
+Regra: microfases, testes, provas vigentes e encerrar todo PR aberto; jamais promover L1 como L2/L3.

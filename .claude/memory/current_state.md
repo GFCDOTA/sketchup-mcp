@@ -6,7 +6,7 @@
 
 ## Branch base & CI
 
-- `develop` @ `a87d2ad` (merge do #355). `main` recebe `develop` só via merge de release.
+- `develop` @ `f602c446` (merge do #355). `main` recebe `develop` só via merge de release.
 - CI obrigatório (4 checks): pytest 3.11, pytest 3.12, deterministic fidelity gates, mcp server smoke+stdio.
 - Suíte (2026-10-22): `-m "not planta74_scale"` 2555 passed / 30 skipped / 1 xfailed; `PT_TO_M=0.0259 -m planta74_scale` 146 passed.
 
@@ -42,3 +42,12 @@
 ## Oráculos
 
 NOC `:8765` removido (2026-07-24). GPT-Docker `:8899` dormente. Veredito visual: Felipe, no chat.
+
+## Estado pós PRs #371–#374 (2026-10-22)
+
+- T0.3 (#371) foi mergeado: planner de dependências consultivo, target e recipe bloqueiam de forma honesta.
+- T0.4 (#372) foi mergeado: transformação rígida cross-room com Hypothesis, **somente L1**.
+- T0.2 (#373): helper de scratch em runs/ mergeado, **ainda não ligado ao inspector**; L2 Windows pendente.
+- T0.5 (#374): Golden Demo sintética mesa/cadeira/corredor mergeada, **sem ligação ao executor**; L2 Windows pendente.
+- K1/K2/K4 permanecem bloqueadas por revisão escopada de tutorial, referência alvo e ficha técnica.
+- Próximo trabalho fica em .claude/plans/next_actions.md e docs/specs/construction_core_microphases.md.
