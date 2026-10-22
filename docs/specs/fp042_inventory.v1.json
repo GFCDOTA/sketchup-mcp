@@ -10764,6 +10764,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "docs/specs/FP-050_kitchen_wall_placement_pilot.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "docs/specs/FP-051_incremental_learning_furniture_composition.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
@@ -13358,6 +13367,24 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_kitchen_cabinet_placement_properties.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_kitchen_cabinet_placement.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_kitchen_layout_style.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -15930,6 +15957,33 @@
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
       "runtime_owner": "tools.rooms.kitchen",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
+    },
+    {
+      "path": "tools/rooms/kitchen/planning/__init__.py",
+      "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/planning/cabinet_placement.py",
+      "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/kitchen/planning/preview.py",
+      "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "kitchen_validation_boundary",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
     },
     {
       "path": "tools/rooms/kitchen/README.md",
