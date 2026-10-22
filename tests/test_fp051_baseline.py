@@ -153,3 +153,9 @@ def test_candidates_carry_no_dimension_position_or_wall(fid):
     spec = json.dumps(bl.FURNITURE_CANDIDATES[fid], ensure_ascii=False).lower()
     for forbidden in ("mm", "wall_id", "anchor_id", "pose", "width", "depth", "height"):
         assert forbidden not in spec, forbidden
+
+
+def test_flow_checks_that_the_human_review_covers_the_requested_recipe():
+    """Trava da correcao do follow-up do #357: o achado `flow:source_verified-checks-review-scope` precisa continuar resolvido."""
+    claims = {c["id"]: c for c in bl.build()["spec_claims"]}
+    assert claims["flow:source_verified-checks-review-scope"]["ok"] is True

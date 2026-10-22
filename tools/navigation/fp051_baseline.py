@@ -220,11 +220,10 @@ def spec_claims(catalog: dict, sources: dict, root: Path = REPO) -> list[dict]:
           bool(review) and review.get("recipe_id") == "cabinet.front-gaps-and-profiles" and review.get("segment") == "03:13-04:29",
           f"{review.get('recipe_id')} {review.get('segment')}")
     flow = (root / "tools/rooms/kitchen/capabilities/shaker_flow.py").read_text(encoding="utf-8", errors="replace")
-    at = flow.find('.get("human_review")')
     claim("flow:source_verified-checks-review-scope",
           "shaker_flow confere que a revisao humana cobre a recipe do pedido (nao so que a fonte tem alguma revisao)",
-          at >= 0 and '["recipe_id"]' in flow[at:at + 300],
-          "ACHADO: hoje so verifica que a fonte tem human_review; um source_verified=true para OUTRA recipe do mesmo video passaria")
+          'review.get("recipe_id") != ctx.get("recipe_id")' in flow,
+          "corrigido: source_verified=true so passa se a human_review da fonte cobre a recipe do pedido (antes: so exigia alguma revisao)")
     code = {rel: (root / rel).read_text(encoding="utf-8", errors="replace") for rel in
             ("tools/sketchup/knowledge.py", "tools/rooms/kitchen/capabilities/shaker_flow.py")}
     text = "\n".join(code.values())

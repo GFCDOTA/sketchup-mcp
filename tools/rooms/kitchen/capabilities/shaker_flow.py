@@ -142,10 +142,15 @@ def run_request(request: dict, *, out_dir: str | Path, base_skp: str | Path, con
     if not isinstance(shaker_req, dict):                      # inalcancavel com insumos completos; defesa em profundidade
         return finish("BLOCKED_INPUT_INCOMPLETE", reason="faltou o bloco 'shaker'")
     ctx = shaker_req.get("origin_context") if isinstance(shaker_req.get("origin_context"), dict) else {}
-    if ctx.get("source_verified") is True and not (sources.get(ctx.get("source_id")) or {}).get("human_review"):
-        step("source_review", "BLOCKED", source_id=ctx.get("source_id"))
-        return finish("BLOCKED_KNOWLEDGE_EVIDENCE", reason=f"o pedido declara source_verified=true para {ctx.get('source_id')!r}, "
-                      "mas o catalogo nao tem revisao humana registrada para essa fonte (a fonte nunca e presumida)")
+    review = (sources.get(ctx.get("source_id")) or {}).get("human_review") or {}
+    if ctx.get("source_verified") is True and review.get("recipe_id") != ctx.get("recipe_id"):
+        # a revisao humana vale para UMA recipe e UM trecho; outra recipe do mesmo video nao herda (D46-09)
+        step("source_review", "BLOCKED", source_id=ctx.get("source_id"), recipe_id=ctx.get("recipe_id"),
+             reviewed_recipe_id=review.get("recipe_id"), reviewed_segment=review.get("segment"))
+        covered = (f"a revisao registrada cobre {review['recipe_id']!r} ({review.get('segment')})" if review
+                   else "nao ha revisao humana registrada para essa fonte")
+        return finish("BLOCKED_KNOWLEDGE_EVIDENCE", reason=f"o pedido declara source_verified=true para a recipe {ctx.get('recipe_id')!r} "
+                      f"da fonte {ctx.get('source_id')!r}, mas {covered} (a fonte nunca e presumida)")
 
     # planos: pai (4 gates) -> Shaker -> composicao final (gates); so entao require_valid
     cab_req = inputs_to_cabinet_request(request["request_id"], request["inputs"], request.get("materials") or {}, request.get("grain"))

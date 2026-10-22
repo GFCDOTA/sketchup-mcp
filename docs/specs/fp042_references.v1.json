@@ -7277,6 +7277,12 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp046/review_scope_l2/l2_review_scope.py",
+      "blob_sha": "a61ca60331b38be48cb82dcd30d4d0802efeb959",
+      "blob_size": 8215,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp046/promotion_l2/request.json",
       "blob_sha": "c80aaa9369d9603785d14b20873b14602062e5a8",
       "blob_size": 3535,

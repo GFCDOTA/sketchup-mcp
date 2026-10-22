@@ -314,6 +314,28 @@ def test_source_verified_true_needs_a_recorded_human_review(tmp_path, consensus)
     assert _run(w, req)["state"] == "DONE_L2_VERIFIED"
 
 
+def test_human_review_covers_only_the_recipe_it_recorded(tmp_path, consensus):
+    """D46-09: a revisao do Felipe vale para `cabinet.front-gaps-and-profiles` (03:13-04:29). `source_verified=true` para OUTRA recipe do
+    MESMO video (ex.: o tampo, 07:09-08:53) nao herda a revisao."""
+    w = World(tmp_path)
+    for other in ("cabinet.countertop-separate-and-bevel", "cabinet.recessed-shaker-and-louvers", "cabinet.reusable-components"):
+        req = request()
+        req["shaker"]["origin_context"] = {"recipe_id": other, "source_id": "yt-cabinet-tips-2021", "source_verified": True}
+        t = _run(w, req, su=Boom())
+        assert t["state"] == "BLOCKED_KNOWLEDGE_EVIDENCE" and w.state["launches"] == [], other
+        assert "cabinet.front-gaps-and-profiles" in t["reason"] and other in t["reason"]            # diz qual recipe a revisao cobre
+    assert not w.out.exists()
+
+
+def test_declaring_source_verified_false_for_another_recipe_is_still_allowed(tmp_path, consensus):
+    w = World(tmp_path)
+    req = request()
+    req["shaker"]["origin_context"] = {"recipe_id": "cabinet.countertop-separate-and-bevel", "source_id": "yt-cabinet-tips-2021",
+                                       "source_verified": False}
+    t = _run(w, req)
+    assert t["state"] == "DONE_L2_VERIFIED" and t["evidence"]["source_verified"] is False
+
+
 def test_if_the_specialist_stops_releasing_the_capability_the_flow_stops_with_no_way_around(tmp_path, consensus, monkeypatch):
     real = sp.plan
     monkeypatch.setattr(sp, "plan", lambda r, root=sp.ROOT: {"state": "BLOCKED_CAPABILITY_MISSING", "reason": "retirada", "next_step": "x",
