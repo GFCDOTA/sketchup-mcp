@@ -147,6 +147,8 @@ references/sketchup/knowledge/video_recipes.v1.json
 | `sketchup`/Ruby | construir no SketchUp e permitir edição verificável |
 | Felipe | aprovação estética L3 sobre renders da nova porta |
 
+**Extensão FP-052 — referência-alvo da porta Shaker:** `L2_PASS` comprova construção e inspeção das peças na versão testada; **não** prova que a porta corresponde à referência visual de uma instância de gabinete. Uma futura execução de `shaker_flow` deverá exigir `reference_target.v1` com anatomia da frente (montantes, travessas, painel recuado, folgas, juntas, material), imagem de detalhe selecionada, técnica verificável por `recipe_id`, tolerâncias com origem e critérios objetivos de comparação. `GOLDEN_SAMPLE_004` regula a linguagem do cômodo, não autoriza visual L3 da porta. A integração altera símbolo e **exige novo L2** sob R-18, sem invalidar ou reescrever provas históricas neste PR de documentação.
+
 ### 2.3 Componentes Impactados
 
 | Caminho | Impacto | Detalhe |

@@ -184,6 +184,8 @@ origin/develop / candidate commit + PDF/consensus/fixtures
 | Resultado estético | Felipe | só com veredito por commit+hash |
 | Resultado de gates | runner/CI e L2 Windows | produzido em cada execução; nunca copiado de outra versão |
 
+**Segunda dimensão de fidelidade — FP-052:** `strict_identity` e `scoped_change` comparam baseline anterior e candidato. Isso **não prova** que o candidato está próximo do móvel desejado. A comparação **target ↔ candidato**, por `target_id`/versão/part_id, torna-se uma condição independente para declarar entrega: geometria topológica e dimensões objetivas, hierarquia de peças, função/uso e vistas equivalentes (frente/topo/lado/detalhe), com análise de diferença e decisão humana L3. Sem referência aprovada por peça, `BLOCKED_TARGET_UNDEFINED`, mesmo se regressão FP-047 e L2 estiverem verdes. Não reclassificar histórico L2 existente só por introduzir esta SPEC futura.
+
 ### 2.3 Componentes Impactados
 
 | Caminho existente | Impacto | Detalhe |

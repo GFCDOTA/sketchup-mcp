@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "reference_target.v1 — alvo de construção, não autorização de execução",
+  "description": "Contrato ponteiro para fontes existentes no reference_lab, PDF/consensus e recipes. O alvo não reescreve esses arquivos. READY/APPROVED somente com provas verificadas.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "target_id",
+    "state",
+    "project_id",
+    "room_id",
+    "furniture_kind",
+    "functional_intent",
+    "source_refs",
+    "parts",
+    "conflicts",
+    "style",
+    "approval",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "reference_target.v1"
+    },
+    "target_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_.-]+$"
+    },
+    "state": {
+      "enum": [
+        "DRAFT_BLOCKED",
+        "APPROVED_TARGET"
+      ]
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "room_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "furniture_kind": {
+      "type": "string",
+      "minLength": 1
+    },
+    "functional_intent": {
+      "type": "string",
+      "minLength": 8
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "parts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/part"
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/conflict"
+      }
+    },
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "status",
+        "source_ids"
+      ],
+      "properties": {
+        "scope": {
+          "const": "ROOM_STYLE_ONLY"
+        },
+        "status": {
+          "enum": [
+            "HISTORICALLY_APPROVED",
+            "PENDING"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "scope",
+        "reviewer",
+        "review_record_path"
+      ],
+      "properties": {
+        "decision": {
+          "enum": [
+            "PENDING",
+            "APPROVED"
+          ]
+        },
+        "scope": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            null,
+            "FURNITURE_TARGET"
+          ]
+        },
+        "reviewer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "review_record_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "execution_authorized": {
+      "const": false
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "role",
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 2
+        },
+        "role": {
+          "enum": [
+            "ARCHITECTURE",
+            "CONSENSUS",
+            "VISUAL",
+            "DESIGN_DECISION",
+            "ROOM_INTENT",
+            "TECHNIQUE",
+            "TECHNICAL_SPEC"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 5
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "part": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "target_state",
+        "functional_requirement",
+        "anatomy_and_operations",
+        "required_source_ids",
+        "reference_view_ids",
+        "acceptance_checks",
+        "recipe_ids"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 2
+        },
+        "target_state": {
+          "enum": [
+            "UNDEFINED",
+            "PROPOSED",
+            "APPROVED"
+          ]
+        },
+        "functional_requirement": {
+          "type": "string",
+          "minLength": 3
+        },
+        "anatomy_and_operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 4
+          }
+        },
+        "required_source_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "reference_view_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "acceptance_checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 5
+          }
+        },
+        "recipe_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status",
+        "description",
+        "sources"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 3
+        },
+        "status": {
+          "enum": [
+            "OPEN",
+            "RESOLVED"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 8
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

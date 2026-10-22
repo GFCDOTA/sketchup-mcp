@@ -101,6 +101,16 @@ Capacidade reutilizável / móvel entregue / próximo cômodo
 
 **A IA decide qual habilidade vale investigar e propõe código.** Cálculo, dimensões, interseções e provas ficam no Python/Shapely/testes e na inspeção do SketchUp; IA não declara PASS por narrativa.
 
+### 2.2.1 Fonte da verdade do objetivo (FP-052 — nova pré-condição)
+
+**Regra de bloqueio: nenhum móvel vai de DAG para assembly/placement final sem `reference_target.v1` válido, específico da instância e aprovado no escopo das peças envolvidas.** O target é o mapa versionado que liga **o que** construir (forma/anatomia/função e aceitação), **como** (recipes com fonte/trecho/revisão) e **onde** (PDF+consensus+restrições), sem copiar material para um catálogo paralelo. Documentação: [FP-052](FP-052_reference_truth_and_component_learning.md), schema `core/schemas/reference_target.v1.schema.json`, primeiro rascunho `artifacts/reference_lab/targets/planta_74/r004/kitchen_base_001.target.v1.json`.
+
+- `artifacts/reference_lab/DECISIONS.md` e `GOLDEN_SAMPLES.md` já documentam o visual aprovado do **ambiente**; isto **não** aprova anatomia de cada frente/gaveta nem o `.skp` da peça.
+- `references/sketchup/knowledge/video_recipes.v1.json` especifica **técnica** e evidência por recipe; tutorial não determina produto final nem cotas da planta.
+- O primeiro target tem `state=DRAFT_BLOCKED` de propósito: falta referência/detalhamento de peças e há divergência textual LINEAR versus Galley em L entre SPEC e DesignIntent, a reconciliar contra arquitetura.
+- Aprendizado exploratório pode gerar microprovas com status `PROPOSED`; não pode virar móvel entregue nem receber `TARGET_MATCH` até target/versões/aprovação adequados.
+- FP-052/T0–T2 entram **antes** da FP-051/P2–P5 no que toca a entrega de mobiliário. P1 pode calcular lacunas mesmo com alvo bloqueado, mas deve reportar `BLOCKED_TARGET_UNDEFINED` como dependência de produto, não promover o objeto.
+
 ### 2.3 Estados: conhecimento não é execução
 
 Não introduzir catálogo paralelo de status. Utilizar as dimensões independentes já mantidas em `capability_catalog.v1.json`: `knowledge`, `implementation`, `validation`, `visual` (respeitando exatamente o schema e vocabulários existentes). O relatório do ciclo traduz esses estados em decisões para o usuário:
