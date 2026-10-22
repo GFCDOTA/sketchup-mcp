@@ -36,3 +36,9 @@ O piloto usa envelopes 2D, não varredura física de ferragens, colisão 3D, erg
 Para integração futura, a pose e a intenção de parede devem ser validadas no **cabinet_flow** com gate obrigatório antes do job, vinculadas à assinatura do plano: nenhum caminho alternativo de execução pode contornar o gate. Exigir teste L2 SketchUp com salva/reabre/inspeciona e revisão humana L3 para aprovar a aparência e a posição na cozinha real.
 
 Não promover este L1 a “cozinha resolvida” sem essa validação.
+
+## FP-053 — Micro-demo espacial antes da planta real (proposta)
+
+A prova FP-050 atual cobre **gabinete alinhado a parede**. Para resolver o erro da mesa/cadeiras obstruindo corredor, introduzir uma golden demo separada com corredor, porta, mesa, cadeiras ocupadas/afastadas e caminho que precisa permanecer conectado. Casos: cadeira recolhida vs afastada, giro de porta e circulação. O oracle deve validar corredor como caminho livre e envelope funcional de cadeiras, não apenas footprint de mesa/objeto. Rodar L1/propriedades antes de ligar ao layout da sala; depois validar SKP real L2 e revisão L3.
+
+Esta seção documenta apenas a extensão necessária, **não** declara que o solver existente entende corredor conectado nem que os novos testes já existem. Ver [FP-053](FP-053_demo_first_golden_components_and_reuse.md).
