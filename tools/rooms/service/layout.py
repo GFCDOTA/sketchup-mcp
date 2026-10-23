@@ -38,6 +38,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
+import shapely                                                 # noqa: E402
+from shapely import STRtree                                    # noqa: E402
 from shapely.geometry import Point, Polygon, box as _shp_box   # noqa: E402
 from shapely.ops import unary_union                            # noqa: E402
 
@@ -297,7 +299,17 @@ def _table_set(zone, placed, circ):
     """Mesa externa redonda + cadeiras, na maior folga do terraco social. Cada
     cadeira so entra se couber livre — cadeira sem area de uso e' pior que
     cadeira ausente (regra do Felipe: reduzir antes de forcar)."""
+    # Desempenho (2026-10-23): tudo o que NAO depende do candidato sai do laco da grade (antes: buffer de cada obstaculo
+    # refeito para cada ponto x cada diametro, ~45 mil buffers), os obstaculos vao para um STRtree (consulta por
+    # predicado `intersects` = mesmo resultado do `any(...)` linear, O(log O) em vez de O(O)) e a intersecao com a
+    # circulacao so e calculada quando ha contato (sem contato a area e 0). Saida identica: snapshot do apartamento.
     inner = zone.buffer(-0.06)
+    shapely.prepare(inner)                        # muitos `contains` contra o MESMO poligono
+    obstacles = [p.buffer(pm) for p, pm in placed]   # pm = passagem exigida por AQUELE obstaculo
+    obstacle_tree = STRtree(obstacles) if obstacles else None
+    zone_in = zone.buffer(-0.02)
+    shapely.prepare(zone_in)
+    placed_clear = [q.buffer(0.03) for q, _ in placed]
     x0, y0, x1, y1 = zone.bounds
     best = None                                   # (-n_lugares, dist_ao_centro, payload)
     cx0, cy0 = (x0 + x1) / 2, (y0 + y1) / 2
@@ -307,30 +319,36 @@ def _table_set(zone, placed, circ):
         while gx <= x1:
             gy = y0
             while gy <= y1:
-                table = Point(gx, gy).buffer(diam / 2, quad_segs=8)
+                center = Point(gx, gy)
                 gy += 0.05
+                # poda exata: se `inner` contem o disco, contem o centro dele (interior de B esta no interior de A);
+                # ponto x poligono preparado e barato e evita construir o circulo de 32 lados na maioria da grade
+                if not inner.contains(center):
+                    continue
+                table = center.buffer(diam / 2, quad_segs=8)
                 if not inner.contains(table):
                     continue
-                if any(table.intersects(p.buffer(pm)) for p, pm in placed):
-                    continue      # pm = passagem exigida por AQUELE obstaculo
-                if circ is not None and table.intersection(circ).area > _DOOR_TOL_M2:
+                if obstacle_tree is not None and len(obstacle_tree.query(table, predicate="intersects")):
+                    continue
+                if circ is not None and table.intersects(circ) and table.intersection(circ).area > _DOOR_TOL_M2:
                     continue
                 table_ok.append((gx, gy - 0.05, table))
             gx += 0.05
         for tx, ty, table in table_ok:
             chairs = []
+            chairs_clear = []
             for dx, dy in ((0.0, 1.0), (0.0, -1.0), (1.0, 0.0), (-1.0, 0.0)):
                 cc = (tx + dx * (diam / 2 + 0.28), ty + dy * (diam / 2 + 0.28))
                 ch = _shp_box(cc[0] - 0.22, cc[1] - 0.22, cc[0] + 0.22, cc[1] + 0.22)
                 pulled = ch.buffer(0.16)              # cadeira PUXADA precisa caber
-                if not zone.buffer(-0.02).contains(pulled):
+                if not zone_in.contains(pulled):
                     continue
-                if circ is not None and ch.intersection(circ).area > _DOOR_TOL_M2:
+                if circ is not None and ch.intersects(circ) and ch.intersection(circ).area > _DOOR_TOL_M2:
                     continue
-                if any(pulled.intersects(p.buffer(0.03))
-                       for p in [q for q, _ in placed] + [x[0] for x in chairs]):
+                if any(pulled.intersects(c) for c in placed_clear) or any(pulled.intersects(c) for c in chairs_clear):
                     continue
                 chairs.append((ch, cc, (-dx, -dy)))
+                chairs_clear.append(ch.buffer(0.03))
             if len(chairs) < 2:
                 continue
             score = (-len(chairs), (tx - cx0) ** 2 + (ty - cy0) ** 2)

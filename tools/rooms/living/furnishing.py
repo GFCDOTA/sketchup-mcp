@@ -163,6 +163,7 @@ def living_room_boxes(con, room_id):
     # ---- ZONA DE JANTAR (SEMPRE — forma/zona, NÃO estética). Mesa COMPACTA p/ 4 (apê 74m²,
     # nada de trambolho); na maior zona LIVRE longe do estar; NÃO bloqueia porta/passagem
     # (geometry_sanity + overlap conferem). LIVING_ROOM_LAYOUT_FIX_OPTION_A.
+    import shapely
     from shapely.ops import unary_union as _uni
     _occ = [Polygon([(c[0], c[1]) for c in _b["corners"]]) for _b in boxes if _b.get("corners")]
     _free = cell_in.buffer(-M2IN * 0.12).difference(_uni([p.buffer(M2IN * 0.32) for p in _occ]))
@@ -191,9 +192,13 @@ def living_room_boxes(con, room_id):
         _chair_spots = ([(sx, _MD / 2 + _CHAIR_GAP, (0.0, -1.0)) for sx in _seat_xs]
                         + [(sx, -(_MD / 2 + _CHAIR_GAP), (0.0, 1.0)) for sx in _seat_xs])
 
+        # moldes (pecas em m, quadro local) sao os mesmos em todo candidato: construidos UMA vez, so posicionados por
+        # candidato (`place_sofa_boxes` le as pecas, nao as altera)
+        _dtp = _dining_table_rect(w=_MW, d=_MD, top_rgb=(108, 80, 58), leg_rgb=(30, 30, 33))
+        _chair_tpl = _chair_parts()
+
         def _dining_set(cx, cy):
             out_ = []
-            _dtp = _dining_table_rect(w=_MW, d=_MD, top_rgb=(108, 80, 58), leg_rgb=(30, 30, 33))
             for _b in place_sofa_boxes(_dtp, (cx, cy), (0.0, 1.0)):
                 _b["module"] = "Mesa de jantar"
                 out_.append(_b)
@@ -201,7 +206,7 @@ def living_room_boxes(con, room_id):
                 _chc = (cx + _dx * M2IN, cy + _dy * M2IN)
                 _pt = Point(_chc)
                 if cell_in.contains(_pt) and cell_in.exterior.distance(_pt) >= 4:
-                    for _b in place_sofa_boxes(_chair_parts(), _chc, _cf):
+                    for _b in place_sofa_boxes(_chair_tpl, _chc, _cf):
                         _b["module"] = "Cadeira jantar"
                         out_.append(_b)
             out_.append(_oriented_box("pend_cabo", (cx, cy), (0.0, 1.0), 0.032, 0.032,
@@ -221,6 +226,8 @@ def living_room_boxes(con, room_id):
         # cadeira) vence.
         _bx0, _by0, _bx1, _by1 = cell_in.bounds
         _occ_now = _uni(_occ) if _occ else None
+        if _occ_now is not None:
+            shapely.prepare(_occ_now)             # consultado por todo candidato da grade
         from tools.rooms.shared.geometry import door_swing_polygons
         _swings = door_swing_polygons(con)
         _room_door_swings = [
@@ -237,17 +244,29 @@ def living_room_boxes(con, room_id):
         _n_candidates = 0
         _valid_but_swinging = []
 
+        _SEATS_PER_CHAIR = sum(p.get("kind") == "seat" for p in _chair_tpl)
+
+        def _chair_fits(cx, cy, dx, dy):
+            pt = Point(cx + dx * M2IN, cy + dy * M2IN)
+            return cell_in.contains(pt) and cell_in.exterior.distance(pt) >= 4      # mesma regra do _dining_set
+
         def _candidate(cx, cy):
             if not _inside((cx, cy), margin_in=20):
+                return None
+            # poda exata: o candidato so vale com exatamente 2 assentos de cadeira; contar as cadeiras que cabem ANTES de
+            # montar as ~45 caixas da mesa + cadeiras (a checagem original continua abaixo como rede de seguranca)
+            if sum(_chair_fits(cx, cy, dx, dy) for dx, dy, _cf in _chair_spots) * _SEATS_PER_CHAIR != 2:
                 return None
             cand = _dining_set(cx, cy)
             if sum(b.get("kind") == "seat" for b in cand if b.get("module") == "Cadeira jantar") != 2:
                 return None
             if _occ_now is not None:
-                cand_occ = _uni([Polygon([(v[0], v[1]) for v in b["corners"]])
-                                 for b in cand if b.get("corners")])
-                if cand_occ.intersection(_occ_now).area > 50:
-                    return None
+                polys = [Polygon([(v[0], v[1]) for v in b["corners"]]) for b in cand if b.get("corners")]
+                # sem NENHUM contato com a ocupacao a area da intersecao e 0: pula a uniao de ~40 poligonos (teste
+                # vetorizado contra o poligono preparado); havendo contato, o caminho de antes, identico
+                if polys and shapely.intersects(_occ_now, polys).any():
+                    if _uni(polys).intersection(_occ_now).area > 50:
+                        return None
             return cand
 
         def _swing_hit(cand):
