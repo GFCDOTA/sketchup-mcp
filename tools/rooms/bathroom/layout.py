@@ -185,6 +185,63 @@ def _pp(kind, x0, y0, x1, y1, z0_m, z1_m, rgb, module):
             "decorative": kind in ("kb_moldura", "kb_frasco", "kb_toalha", "kb_trilho", "kb_puxador", "kb_haste", "kb_ducha", "kb_ralo", "kb_misturador", "kb_ducha_manual", "kb_argola", "kb_gancho", "kb_papeleira", "kb_escova", "kb_toalheiro", "kb_tapete", "kb_bandeja", "kb_sabonete", "kb_copo", "kb_botao", "kb_guia", "kb_caixilho")}  # trim/decor fino declarado (kb_moldura decorativa)
 
 
+def _box_front(b, door_c):
+    """Frente do box (FONTE UNICA para o desenho e para a interface funcional): a frente corre no eixo maior, do lado da porta
+    do comodo; vidro FIXO de largura `fixw` num extremo e FOLHA DE CORRER no outro (`leaf_lo` = folha no extremo a0).
+    Devolve (horiz, a0, a1, front, back, sin, fixw, leaf_lo); `sin` = sentido do interior do box a partir da frente."""
+    x0, y0, x1, y1 = b.bounds
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    horiz = (x1 - x0) >= (y1 - y0)
+    da, dp = (door_c if door_c is not None else (cx, cy))
+    if horiz:
+        a0, a1, along_door = x0, x1, da
+        front, back = ((y1, y0) if dp >= cy else (y0, y1))
+    else:
+        a0, a1, along_door = y0, y1, dp
+        front, back = ((x1, x0) if da >= cx else (x0, x1))
+    sin = -1.0 if front > back else 1.0
+    fixw = min(M(0.48), (a1 - a0) * 0.45)
+    leaf_lo = abs(along_door - a0) <= abs(along_door - a1)
+    return horiz, a0, a1, front, back, sin, fixw, leaf_lo
+
+
+# Interface funcional EXPLICITA por louca (FP-054 F1C): o builder sabe a parede de apoio (`ws`) e a frente do box — exporta isso
+# em vez de deixar o avaliador adivinhar pela pegada. Nao altera nenhuma caixa.
+_INTERFACE_OF_KIND = {"vaso": ("Vaso", "toilet", "use_face"), "bancada_banho": ("Bancada", "lavatory", "use_face"),
+                      "box": ("Box", "shower", "shower_entry")}
+
+
+def _functional_interfaces(ws_by_kind, bb_by_kind, door_c):
+    out = []
+    for kind, (module, otype, iface) in _INTERFACE_OF_KIND.items():
+        bounds, ws = bb_by_kind.get(kind), ws_by_kind.get(kind)     # bb_by_kind guarda os bounds (pt) da peca
+        if bounds is None or ws is None:
+            continue
+        x0, y0, x1, y1 = bounds
+        if kind == "box":
+            from shapely.geometry import box as _shbox
+            horiz, a0, a1, front, _back, sin, fixw, leaf_lo = _box_front(_shbox(*bounds), door_c)
+            leaf_len = (a1 - fixw + M(0.05)) - a0                # folha do desenho (sobrepoe 5 cm o fixo)
+            s0, s1 = (a0, a1 - leaf_len) if leaf_lo else (a0 + leaf_len, a1)   # folha aberta encosta no extremo oposto
+            seg = ((s0, front), (s1, front)) if horiz else ((front, s0), (front, s1))
+            normal = (0.0, -sin) if horiz else (-sin, 0.0)
+            note = ("porta de correr: folha de comprimento L corre ate o extremo oposto; vao livre = frente - L "
+                    f"(frente {(a1 - a0) / M(1.0):.3f} m, fixo {fixw / M(1.0):.3f} m, folha {leaf_len / M(1.0):.3f} m)")
+        else:
+            if ws["orient"] == "v":
+                fx = x1 if ws["sgn"] > 0 else x0
+                seg, normal = ((fx, y0), (fx, y1)), (float(ws["sgn"]), 0.0)
+            else:
+                fy = y1 if ws["sgn"] > 0 else y0
+                seg, normal = ((x0, fy), (x1, fy)), (0.0, float(ws["sgn"]))
+            note = "face oposta a parede de apoio (ws) escolhida pelo posicionamento"
+        out.append({"module": module, "object_type": otype, "interface": iface,
+                    "segment_in": [[round(p[0] * PT_TO_IN, 3), round(p[1] * PT_TO_IN, 3)] for p in seg],
+                    "normal": [normal[0], normal[1]], "basis": "SEMANTIC_BUILDER",
+                    "source": "tools.rooms.bathroom.layout._functional_interfaces", "note": note})
+    return out
+
+
 def _emit(kind, b, ws, lavabo=False, door_c=None):
     """Geometria CRÍVEL por fixture (substitui a caixa única)."""
     x0, y0, x1, y1 = b.bounds
@@ -364,25 +421,15 @@ def _emit(kind, b, ws, lavabo=False, door_c=None):
         # ducha manual slim; ralo linear. NADA de toalheiro dentro do box.
         gt = M(0.008)
         _pf = M(0.022)
-        horiz = (x1 - x0) >= (y1 - y0)          # frente corre no eixo maior
-        da, dp = (door_c if door_c is not None else (cx, cy))
+        horiz, a0, a1, front, back, sin, fixw, leaf_lo = _box_front(b, door_c)
         if horiz:
-            a0, a1, along_door = x0, x1, da
-            front, back = ((y1, y0) if dp >= cy else (y0, y1))
-            sin = -1.0 if front > back else 1.0             # interior a partir da frente
             def pane(al, ah, off, z0, z1, kd, rgb):
                 return _pp(kd, al, front + sin * M(off), ah,
                            front + sin * (M(off) + gt), z0, z1, rgb, "Box")
         else:
-            a0, a1, along_door = y0, y1, dp
-            front, back = ((x1, x0) if da >= cx else (x0, x1))
-            sin = -1.0 if front > back else 1.0
             def pane(al, ah, off, z0, z1, kd, rgb):
                 return _pp(kd, front + sin * M(off), al,
                            front + sin * (M(off) + gt), ah, z0, z1, rgb, "Box")
-        span = a1 - a0
-        fixw = min(M(0.48), span * 0.45)
-        leaf_lo = abs(along_door - a0) <= abs(along_door - a1)
         if leaf_lo:
             lf0, lf1 = a0, a1 - fixw + M(0.05)
             fx0_, fx1_ = a1 - fixw, a1
@@ -1040,6 +1087,7 @@ def build_boxes(con, room_id):
                          for it in items) if c is not None]
     kinds = [it["kind"] for it in items]
     return items, {"result": "OK", "room_name": sm.get("room_name"),
+                   "functional_interfaces": _functional_interfaces(ws_by_kind, bb_by_kind, door_c),
                    "theme": theme,
                    "n_pecas": len(items), "pecas": kinds,
                    "tem_vaso": "vaso" in kinds, "tem_box": "box" in kinds}
