@@ -85,7 +85,7 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 
 | Cômodo | Pasta | Papel | Capacidades (prova) | Lacunas | Fragmentos | Arquivos (py/rb) |
 |---|---|---|---|---|---|---|
-| Cozinha | [`tools/rooms/kitchen/`](tools/rooms/kitchen/) | planeja e constrói | 5 L2, 1 L1, 1 sem prova | 3 | 5 | 27 (16/2) |
+| Cozinha | [`tools/rooms/kitchen/`](tools/rooms/kitchen/) | planeja e constrói | 3 L2, 3 L1, 1 sem prova | 3 | 5 | 27 (16/2) |
 | Sala | [`tools/rooms/living/`](tools/rooms/living/) | planeja e constrói | 3 L1 | — | 3 | 42 (22/10) |
 | Quarto | [`tools/rooms/bedroom/`](tools/rooms/bedroom/) | planeja e constrói | 4 L1 | — | 4 | 20 (13/0) |
 | Banheiro | [`tools/rooms/bathroom/`](tools/rooms/bathroom/) | planeja e constrói | 2 L1 | — | 3 | 13 (7/0) |

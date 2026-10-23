@@ -31,7 +31,10 @@ Checks (números do Felipe):
   3. cadeira_puxada: o envelope da cadeira PUXADA (recuo de 0.50m a partir da
      mesa) cabe no espaço livre — sem colidir com parede ou móvel.
 
-Uso: gate(con, boxes, room_id) -> {"result": PASS|FAIL, "checks": {...}}
+Uso: gate(con, boxes, room_id) -> {"result": PASS|FAIL|BLOCKED_MISSING_INPUT|NOT_APPLICABLE, "checks": {...},
+"constraints": [ConstraintResult...]} (FP-054 F1, #380): sem portal (ou portal sem ponto interno) o corredor fica
+BLOCKED_MISSING_INPUT; com 1 portal, NOT_APPLICABLE; sem conjunto de jantar, as cadeiras ficam NOT_APPLICABLE. O
+resultado agrega por `core.constraint_result.combine` — nada medido nunca vira PASS.
 Obstáculo = box com z0 < 1.20m e altura real (tapete/decorativo não bloqueia).
 Determinístico, shapely puro, sem I/O.
 """
@@ -46,6 +49,7 @@ from shapely import wkb                               # noqa: E402
 from shapely.geometry import Point, Polygon           # noqa: E402
 from shapely.ops import unary_union                   # noqa: E402
 
+from core.constraint_result import ConstraintResult, combine  # noqa: E402
 from core.scale import PT_TO_IN                       # noqa: E402
 from tools.spatial_model import build_spatial_model   # noqa: E402
 
@@ -109,10 +113,17 @@ def _blockers(boxes):
 
 
 def _portais(sm, cell_in):
+    """Pontos de acesso do cômodo (só os pontos; ver `_portal_points`)."""
+    return _portal_points(sm, cell_in)[0]
+
+
+def _portal_points(sm, cell_in):
     """Pontos de acesso do cômodo: centro de cada zona de porta/passagem,
-    projetado pra DENTRO do cell (2 passos de 0.25m na normal)."""
-    pts = []
-    for dz in (sm["_geom"].get("circ") or []):
+    projetado pra DENTRO do cell (um passo de 0.25m na normal). Devolve
+    (pontos, descartados): zona cujo ponto não cai dentro do cômodo NÃO some
+    em silêncio (FP-054 #380) — vira entrada faltante e bloqueia o corredor."""
+    pts, dropped = [], []
+    for i, dz in enumerate(sm["_geom"].get("circ") or []):
         c = dz.centroid
         p = Point(c.x * PT_TO_IN, c.y * PT_TO_IN)
         if not cell_in.contains(p):
@@ -122,7 +133,9 @@ def _portais(sm, cell_in):
             p = Point(q.x + v[0] / n * 0.25 * M2IN, q.y + v[1] / n * 0.25 * M2IN)
         if cell_in.contains(p):
             pts.append(p)
-    return pts
+        else:
+            dropped.append({"zone": i, "why": "ponto do portal fora do comodo depois da projecao"})
+    return pts, dropped
 
 
 # Portais cujo 'kind' de abertura NÃO é espinha de distribuição (ninguém
@@ -212,6 +225,15 @@ def corridor_slack_m(result: dict) -> float | None:
     return round(min(slacks), 4) if slacks else None
 
 
+def verdict_note(result: dict, context: str) -> str:
+    """Frase de registro para quem aceita PASS ou NOT_APPLICABLE (ex.: gates de plano da cozinha): diz QUAL dos dois foi
+    e, no N/A, por que nada foi medido — para nenhum registro chamar de PASS o que nao se mediu."""
+    if result["result"] == "PASS":
+        return f"zonas de porta livres e circulation_gate PASS {context}"
+    reasons = "; ".join(f"{k}: {v.get('reason_code')}" for k, v in sorted(result.get("checks", {}).items()))
+    return f"zonas de porta livres; circulation_gate {result['result']} {context} ({reasons}) — nada medido, nao e PASS"
+
+
 def gate(con, boxes, room_id, *, decide_only: bool = False):
     """Gate de circulacao do comodo. Com `decide_only=True` (para BUSCAS, que so precisam do veredito): checa as cadeiras
     primeiro (barato) e para no primeiro portal que reprova — o `result` e EXATAMENTE o do gate completo (FAIL se qualquer
@@ -242,7 +264,7 @@ class GateSession:
                                 for x, y in sm["_geom"]["cell"].exterior.coords])
         self.room = str(sm.get("room_name") or "")
         self._base_blockers = self._blockers_in_cell(base_boxes)
-        self.portais = _portais(sm, self.cell_in)
+        self.portais, self.dropped_portals = _portal_points(sm, self.cell_in)
         # portal_role: DECLARADO pelo papel arquitetônico da abertura (kind_v5 — porta real vs destino terminal), não
         # inferido pela largura medida (achado 2026-08-12, revisão GPT-Docker).
         self.roles = [("SECONDARY" if _portal_kind(p, sm) in TERMINAL_OPENING_KINDS else "PRIMARY")
@@ -261,8 +283,8 @@ class GateSession:
         blockers = self._base_blockers + self._blockers_in_cell(extra_boxes)
         if decide_only:
             chair_result = _chair_checks(blockers, cell_in)
-            if not (chair_result[0] and chair_result[1]):
-                return {"result": "FAIL", "room": room, "checks": {}, "decided_by": "cadeiras"}
+            if chair_result[3] is None and not (chair_result[0] and chair_result[1]):
+                return {"result": "FAIL", "room": room, "checks": {}, "constraints": [], "decided_by": "cadeiras"}
         occ = unary_union([g for _, g in blockers]) if blockers else None
         free = cell_in.difference(occ.buffer(0.5)) if occ is not None else cell_in
 
@@ -272,7 +294,19 @@ class GateSession:
         # (ver docstring do modulo; decisao GPT-Docker 2026-08-12).
         portais = self.portais
         corr_ok, detail = True, []
-        if len(portais) >= 2:
+        # Sem portal medivel o corredor NAO e PASS (FP-054 #380): portal descartado ou ausente bloqueia; portal unico
+        # (comodo de passagem unica) e NOT_APPLICABLE explicito. So >= 2 portais sao medidos.
+        corr_status, corr_reason = None, None
+        if self.dropped_portals:
+            corr_status, corr_reason = "BLOCKED_MISSING_INPUT", "PORTAL_WITHOUT_INNER_POINT"
+            detail.append({"erro": "portal sem ponto interno no comodo", "descartados": self.dropped_portals})
+        elif not portais:
+            corr_status, corr_reason = "BLOCKED_MISSING_INPUT", "NO_PORTAL"
+            detail.append({"erro": "nenhum portal no comodo"})
+        elif len(portais) == 1:
+            corr_status, corr_reason = "NOT_APPLICABLE", "SINGLE_PORTAL"
+            detail.append({"erro": "menos de 2 portais no comodo"})
+        if corr_status is None:
             base_pt = portais[0]   # ancora: primeiro portal (mesmo criterio de sempre)
             for p, portal_role in zip(portais, self.roles):
                 if p is base_pt:
@@ -313,31 +347,73 @@ class GateSession:
                     status = "FAIL_BASE_GEOMETRY_TOO_NARROW"
 
                 if decide_only and not ok:
-                    return {"result": "FAIL", "room": room, "checks": {}, "decided_by": "corredor"}
+                    return {"result": "FAIL", "room": room, "checks": {}, "constraints": [], "decided_by": "corredor"}
                 corr_ok &= ok
                 detail.append({"portal": [round(p.x, 1), round(p.y, 1)], "portal_role": portal_role,
                                "conectado": ok, "status": status, "tier": tier,
                                "w_empty_m": w_empty, "w_furnished_m": w_furnished})
-        else:
-            detail.append({"erro": "menos de 2 portais no comodo"})
-        checks["corredor_principal"] = {"result": "PASS" if corr_ok else "FAIL",
+            corr_status, corr_reason = ("PASS", "CORRIDOR_CONNECTED") if corr_ok else ("FAIL", "CORRIDOR_BLOCKED")
+        checks["corredor_principal"] = {"result": corr_status, "reason_code": corr_reason,
                                         "primary_target_m": PRIMARY_TARGET_M,
                                         "secondary_target_m": SECONDARY_TARGET_M,
                                         "shell_floor_m": IMMUTABLE_SHELL_FLOOR_M,
                                         "portais": detail}
 
-        # 2/3) cadeiras: 0.70 atrás + envelope PUXADA
-        behind_ok, pull_ok, cdetail = chair_result if decide_only else _chair_checks(blockers, cell_in)
-        checks["atras_das_cadeiras"] = {"result": "PASS" if behind_ok else "FAIL",
+        # 2/3) cadeiras: 0.70 atrás + envelope PUXADA (N/A sem conjunto de jantar — nada a medir nao e PASS)
+        behind_ok, pull_ok, cdetail, chairs_na = chair_result if decide_only else _chair_checks(blockers, cell_in)
+        if chairs_na:
+            behind_st = pull_st = "NOT_APPLICABLE"
+        else:
+            behind_st, pull_st = ("PASS" if behind_ok else "FAIL"), ("PASS" if pull_ok else "FAIL")
+        checks["atras_das_cadeiras"] = {"result": behind_st, "reason_code": chairs_na or "MEASURED",
                                         "min_m": BEHIND_CHAIR_M, "cadeiras": cdetail}
-        checks["cadeira_puxada"] = {"result": "PASS" if pull_ok else "FAIL", "recuo_m": PULL_M}
+        checks["cadeira_puxada"] = {"result": pull_st, "reason_code": chairs_na or "MEASURED", "recuo_m": PULL_M}
 
-        result = "PASS" if all(c["result"] == "PASS" for c in checks.values()) else "FAIL"
-        return {"result": result, "room": room, "checks": checks}
+        constraints = [_corridor_constraint(corr_status, corr_reason, detail),
+                       *_chair_constraints(behind_st, pull_st, chairs_na, cdetail)]
+        result = combine(c["result"] for c in checks.values())
+        return {"result": result, "room": room, "checks": checks, "constraints": [c.to_dict() for c in constraints]}
+
+
+def _corridor_constraint(status, reason, detail) -> ConstraintResult:
+    """Corredor como `ConstraintResult`: medido = largura mobiliada do PIOR portal (menor folga sobre o exigido)."""
+    if status not in ("PASS", "FAIL"):
+        return ConstraintResult("circulation.corridor", status, reason,
+                                evidence={"why": detail[0].get("erro", reason) if detail else reason, "detail": detail})
+    worst = None
+    for p in detail:
+        w, tier = p.get("w_furnished_m"), p.get("tier")
+        if w is None:
+            continue
+        need = {"principal": PRIMARY_TARGET_M, "secundaria": SECONDARY_TARGET_M}.get(tier)
+        if tier == "shell_estreito":
+            need = p["w_empty_m"] - GEOMETRY_TOLERANCE_M
+        elif tier == "shell_impossivel":
+            w, need = p["w_empty_m"], IMMUTABLE_SHELL_FLOOR_M
+        if worst is None or w - need < worst[0] - worst[1]:
+            worst = (w, round(need, 4), p)
+    return ConstraintResult("circulation.corridor", status, reason, measured=worst[0], threshold=worst[1], units="m",
+                            evidence={"portals_measured": sum(1 for p in detail if p.get("w_furnished_m") is not None),
+                                      "worst_portal": worst[2]})
+
+
+def _chair_constraints(behind_st, pull_st, na_reason, cdetail) -> list[ConstraintResult]:
+    if na_reason:
+        why = {"why": "sem mesa de jantar e cadeiras de jantar identificadas no comodo"}
+        return [ConstraintResult("circulation.behind_chairs", "NOT_APPLICABLE", na_reason, evidence=why),
+                ConstraintResult("circulation.chair_pull", "NOT_APPLICABLE", na_reason, evidence=why)]
+    behind = min(c["livre_atras_m"] for c in cdetail)
+    stuck = sum(1 for c in cdetail if not c["puxada_ok"])
+    return [ConstraintResult("circulation.behind_chairs", behind_st, "MEASURED", measured=behind,
+                             threshold=round(BEHIND_CHAIR_M - 0.25, 4), units="m",
+                             evidence={"chairs": len(cdetail), "note": "medido de um ponto 0,25 m atras do centro da cadeira"}),
+            ConstraintResult("circulation.chair_pull", pull_st, "MEASURED", measured=float(stuck), threshold=0.0,
+                             units="cadeiras_sem_recuo", evidence={"chairs": len(cdetail), "pull_m": PULL_M})]
 
 
 def _chair_checks(blockers, cell_in):
-    """Cadeiras da mesa de jantar: 0,70 m livres atras e cadeira PUXADA cabendo. Devolve (atras_ok, puxada_ok, detalhe)."""
+    """Cadeiras da mesa de jantar: 0,70 m livres atras e cadeira PUXADA cabendo. Devolve (atras_ok, puxada_ok, detalhe,
+    motivo_na): `motivo_na` e None quando ha mesa E cadeiras para medir; senao o codigo de por que nao se aplica."""
     mesa = [g for b, g in blockers if str(b.get("module", "")).startswith("Mesa de jantar")]
     mesa_u = unary_union(mesa) if mesa else None
     # Uma cadeira = varias boxes (foot x4 / frame x2 / seat / back). O box
@@ -373,7 +449,8 @@ def _chair_checks(blockers, cell_in):
             cdetail.append({"cadeira": [round(c.x, 1), round(c.y, 1)],
                             "livre_atras_m": round(livre_atras, 2),
                             "atras_ok": b_ok, "puxada_ok": p_ok})
-    return behind_ok, pull_ok, cdetail
+    na = None if (mesa_u is not None and cad) else ("NO_DINING_TABLE" if mesa_u is None else "NO_DINING_CHAIRS")
+    return behind_ok, pull_ok, cdetail, na
 
 
 def main():

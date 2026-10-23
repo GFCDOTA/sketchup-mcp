@@ -392,7 +392,7 @@
         ]
       },
       "validation": {
-        "state": "L2_PASS",
+        "state": "L1_PASS",
         "fixtures": [
           "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
           "fixtures/synthetic_cabinets/valid_a_base_600.json",
@@ -402,36 +402,7 @@
           "tests/test_kitchen_cabinet_adapter.py",
           "tests/test_kitchen_cabinet_flow.py"
         ],
-        "evidence": [
-          {
-            "ref": "artifacts/review/fp043/p7_kitchen_cabinet/README.md",
-            "sketchup_version": "26.0.429",
-            "commit": "8317dce",
-            "scope": "cozinha da planta_74 (copia do .skp mobiliado): pedido inedito -> gabinete salvo/reaberto/inspecionado, 6 negativos reais + job interrompido; SketchUp 26.0.429; NAO e veredito visual nem projeto de cozinha",
-            "symbol_digests": {
-              "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet": "97fa552cf5e14f6a30ab19a1a3474252d02e652e25b23cbf9c9fb12357d0bf59",
-              "python:tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet": "128a2cad06b8bc61dbacfa200bcbfae1ca4596c13ab51df38623ce39061709ac",
-              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "80b8bd953b0516ad10443be865d73e21b4d15c87b138cddbcdb82c75431063cf"
-            },
-            "closure_digests": {
-              "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet": "7e5bceb48d9e18ef77e2d262a1019fe8187cb481c0ee46a7ae01550d035461fe",
-              "python:tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet": "5c0bcbb6f6ab2f3c613dc758596223a450840b6d9ab3a7f25767a79a6906b48f",
-              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "f14513b1221c6a7a8b0168afb6112fc8d18c066b4f37edd141954ddfffb7e507"
-            }
-          },
-          {
-            "ref": "artifacts/review/fp046/promotion_l2/README.md",
-            "sketchup_version": "26.0.429",
-            "commit": "7820f74",
-            "scope": "rerun do L2 da P7 (script inalterado) depois que cabinet_flow.run_request passou a recusar pedido de Shaker: positivo DONE_L2_VERIFIED, 6 negativos, job interrompido de verdade, canonico identico; SketchUp 26.0.429",
-            "symbol_digests": {
-              "python:tools.rooms.kitchen.capabilities.cabinet_flow.run_request": "9c7b16cbc15b256f23844af7f8d2216a65083b6f991d9a952458bc6403b4c166"
-            },
-            "closure_digests": {
-              "python:tools.rooms.kitchen.capabilities.cabinet_flow.run_request": "875962afcfc9f17ddb967eeb46f221a1c3f54e4b35f93898b8ea3f9c275f0fe3"
-            }
-          }
-        ]
+        "evidence": []
       },
       "visual": {
         "state": "NOT_REVIEWED"
@@ -580,7 +551,7 @@
         ]
       },
       "validation": {
-        "state": "L2_PASS",
+        "state": "L1_PASS",
         "fixtures": [
           "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
           "artifacts/review/fp046/promotion_l2/request.json"
@@ -588,24 +559,7 @@
         "tests": [
           "tests/test_fp046_kitchen_shaker.py"
         ],
-        "evidence": [
-          {
-            "ref": "artifacts/review/fp046/review_scope_l2/README.md",
-            "sketchup_version": "26.0.429",
-            "commit": "4023b78",
-            "scope": "cozinha da planta_74 (copia do .skp mobiliado) pelo fluxo sem contorno, com a human_review conferida CONTRA A RECIPE do pedido: gabinete + Shaker salvos/reabertos/inspecionados, 8 negativos sem SketchUp (inclui source_verified=true para outra recipe do mesmo video), strict_identity FP-047, canonicos intactos; SketchUp 26.0.429; NAO e veredito visual nem projeto de cozinha",
-            "symbol_digests": {
-              "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker": "2b656cce571da5a63c02bc68a3c74d39d38ebaa935dbd434e1e90c1a4d457c3a",
-              "python:tools.rooms.kitchen.capabilities.shaker_flow.run_request": "e6d13a4fdb57e6b2712aec88721bc67dd5cf34ac996d0acd8510d96080f4d44e",
-              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "e9e99a4199eac697b951030d8e325c72e81dd55800d64808ea39e95d4b5f15d4"
-            },
-            "closure_digests": {
-              "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker": "103bd61b5d7ff4784806f11cc1ce609973a4df352aa649f1d0ea6fcfdb881b65",
-              "python:tools.rooms.kitchen.capabilities.shaker_flow.run_request": "0b5ba03772d9f70d47efe17889df87b1736c3ecff4b87f730e3692b62e5f3d9d",
-              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "c005937b797a31880f4a991ca9d7748cae9c57dce4017b9f71726fe24777eb38"
-            }
-          }
-        ]
+        "evidence": []
       },
       "visual": {
         "state": "NOT_REVIEWED"

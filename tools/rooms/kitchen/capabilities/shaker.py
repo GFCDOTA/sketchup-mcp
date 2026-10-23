@@ -78,9 +78,10 @@ def composed_gates(consensus: dict, room_id: str, parent: dict, shaker: dict) ->
     kept = {"parts": [p for p in parent["parts"] if p["id"] != shaker["replaces_part"]], "pose": parent["pose"],
             "request_id": parent["request_id"]}
     composed = [b for b in existing if not b.get("decorative")] + _boxes_for_plan(kept) + _boxes_for_plan(shaker)
-    if circulation_gate.gate(consensus, composed, room_id)["result"] != "PASS":
-        return gates + [_gate("circulation", False, "circulation_gate do projeto reprova com a composicao final")]
-    gates.append(_gate("circulation", True, "zonas de porta livres e circulation_gate PASS com a composicao final"))
+    verdict = circulation_gate.gate(consensus, composed, room_id)
+    if verdict["result"] not in ("PASS", "NOT_APPLICABLE"):          # FAIL e BLOCKED_MISSING_INPUT recusam (FP-054 #380)
+        return gates + [_gate("circulation", False, f"circulation_gate do projeto: {verdict['result']} com a composicao final")]
+    gates.append(_gate("circulation", True, circulation_gate.verdict_note(verdict, "com a composicao final")))
     return gates
 
 
