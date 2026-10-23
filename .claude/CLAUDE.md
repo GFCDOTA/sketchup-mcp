@@ -40,13 +40,17 @@ Estado vivo (PRs, fases, pendências): `.ai_bridge/HANDOFF.md` — ler ao retoma
 ## Comandos
 
 ```bash
-PY=E:/Claude/apps/sketchup-mcp/.venv/Scripts/python.exe          # venv canônico (nunca o Python global)
+uv sync --locked --extra dev --extra mcp                          # primeiro: reconcilia .venv exatamente com uv.lock
+PY=E:/Claude/apps/sketchup-mcp/.venv/Scripts/python.exe            # venv canônico (nunca o Python global)
 $PY -m pytest tests -q -m "not planta74_scale"                    # suíte padrão
 PT_TO_M=0.0259 $PY -m pytest tests -q -m planta74_scale           # testes que exigem a escala da planta_74
 $PY -m ruff check <arquivos tocados>                               # nunca `ruff --fix` num diretório inteiro
 $PY -m tools.rooms.capability_catalog                              # integridade do catálogo (errors = {})
 $PY -m tools.rooms.capability_catalog --digest python:<mod.simbolo> ruby:<caminho.rb>
 ```
+`uv.lock` é a fonte reproduzível das dependências. Se `pyproject.toml` mudar, rode `uv lock` de propósito,
+revise o diff do lock e só então `uv sync --locked ...`. O CI executa `uv lock --check`; não aceite um venv
+local divergente como nova fonte de verdade.
 Rodar sempre de dentro do repo (rodar da raiz do workspace cria caches lá).
 
 ## Níveis de prova (não confundir)
