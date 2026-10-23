@@ -9,11 +9,14 @@
 > Os itens 1, 2 e 4 entram como insumo da F1–F4 quando a fase pedir.
 > **Estado 2026-10-23:** F0 (#383) e F1-01..04 (#384–#387) mergeadas; Suíte 01 resolvida pela decisão do Felipe (#389:
 > sem cadeira da escrivaninha, criado-mudo 1 a 1 in; L2 10/10; visual `PENDING_HUMAN`) e o `su_furnish` volta a materializar.
-> Pré-voo agora inclui parede/giro de porta. Próximo: F1 restante (arco de porta das cadeiras, alcance de portal único) —
+> Pré-voo agora inclui parede/giro de porta. O arco de porta das cadeiras foi fechado no #392. Próximo F1 real:
+> alcance funcional/reachability a partir de portal único + clearances de uso com provenance, sem entrar ainda no solver F2 —
 > `docs/handoffs/2026-10-23_fp054_f0_f1_handoff.md`.
 
-> **DOC-EXT (2026-10-23):** Context7 em `.mcp.json` (dev, não runtime); política `docs/engineering/external-documentation-policy.md`;
-> follow-up: sincronizar `uv.lock` × venv (mcp, matplotlib, ruff divergem; `hypothesis` fora do lock) — `docs/engineering/external-dependencies-matrix.md`.
+> **DOC-EXT (2026-10-23):** Context7 em `.mcp.json` (dev, não runtime); política `docs/engineering/external-documentation-policy.md`.
+> Drift de dependências foi fechado no #393: `uv.lock` é a fonte reproduzível, CI roda `uv lock --check` + `uv sync --locked`.
+> A política também classifica autoridade A–E e exige claim/applicability para thresholds externos. Indexação do próprio repo no
+> Context7 permanece adiada enquanto a FP-054 congela expansão de tutoriais/RAG até F5.
 
 1. **T0.2 restante:** integrar tools.sketchup.inspect_workspace.plan_inspect_workspace (#373) em cabinet.sketchup.inspect;
    refazer L2 Windows de todas as capacidades afetadas pelo símbolo/fecho R-18. PREP L1 pronta, integração NÃO feita.
