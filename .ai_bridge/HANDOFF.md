@@ -2,7 +2,7 @@
 
 > **2026-10-23 — FP-054 tem precedência:** estado em
 > [`docs/handoffs/2026-10-23_fp054_f0_f1_handoff.md`](../docs/handoffs/2026-10-23_fp054_f0_f1_handoff.md)
-> (F0 concluída, F1 em andamento, Suíte 01 aguardando decisão do Felipe — #381).
+> (F0 concluída, F1 em andamento; Suíte 01 resolvida em #389 — visual `PENDING_HUMAN`; estado vivo em `.claude/plans/next_actions.md`).
 
 > **2026-10-22 — LEIA PRIMEIRO:** o estado geral atual está em
 > [`docs/handoffs/2026-10-22_general_app_handoff.md`](../docs/handoffs/2026-10-22_general_app_handoff.md) e a fila de
