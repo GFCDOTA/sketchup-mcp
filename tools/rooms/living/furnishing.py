@@ -275,7 +275,8 @@ def living_room_boxes(con, room_id):
         def _swing_hit(cand):
             return any(
                 Polygon([tuple(pt) for pt in b["corners"]]).intersection(sw).area > 1e-8
-                for b in cand if b.get("module") == "Mesa de jantar" and b.get("corners")
+                # mesa E cadeiras (FP-054 R-06): antes so o tampo era testado e uma cadeira no giro da porta passava
+                for b in cand if b.get("module") in ("Mesa de jantar", "Cadeira jantar") and b.get("corners")
                 for sw in _room_door_swings
             )
 
