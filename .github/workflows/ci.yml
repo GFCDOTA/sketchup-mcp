@@ -107,3 +107,22 @@ jobs:
         env:
           REQUIRE_EXTRAS: "1"
         run: python -m pytest tests/test_mcp_stdout_isolation.py tests/test_su_spawn_detached.py -q -rs
+
+
+  dependency-lock-reconcile:
+    name: dependency lock reconcile (temporary)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Regenerate uv.lock from pyproject.toml
+        run: uv lock
+      - name: Verify locked environment resolves all extras
+        run: uv sync --locked --all-extras
+      - name: Show lock drift
+        run: git diff -- uv.lock || true
+      - name: Upload regenerated lock
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-uv-lock
+          path: uv.lock
