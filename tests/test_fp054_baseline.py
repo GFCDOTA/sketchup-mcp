@@ -153,3 +153,15 @@ def test_dining_search_is_reproduced_with_reasons_for_every_grid_point():
     assert counts["gate_calls_grid"] == sum(n for r, n in counts["grid_by_reason"].items() if not r.startswith("REJECT"))
     assert all(r["reason"] for r in trace["grid"])
     assert trace["chosen"]["gate"] == "PASS"
+
+
+def test_critical_flow_map_paths_exist():
+    import re
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    text = (root / "docs/reports/fp054/f0/critical_flow_map.md").read_text(encoding="utf-8")
+    paths = {p for p in re.findall(r"`([A-Za-z0-9_./-]+\.(?:py|rb|json|pdf|png|skp))`", text)}
+    paths = {p for p in paths if "/" in p}          # nome solto (`x.json`) e desta pasta, nao caminho
+    assert len(paths) >= 25
+    missing = sorted(p for p in paths if not (root / p).exists())
+    assert not missing, missing

@@ -35,9 +35,10 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
 
+from core.scale import M_TO_IN as M2IN  # fonte unica; PT_TO_M nao e usado no processo pai
+
 ROOT = Path(__file__).resolve().parents[2]
 PLANT_PT_TO_M = "0.0259"
-M2IN = 39.3700787402
 PACKAGES = ("shapely", "numpy", "pypdfium2", "Pillow", "matplotlib", "pytest", "hypothesis", "ruff", "mcp")
 PROTECTED = ("fixtures/", "projects/planta_74/source/")
 SKIP_BLOCKED = ("não instalado", "not installed", "privil", "sketchup", "windows", "ruby", "docker", "ollama", "network")
@@ -104,7 +105,9 @@ def protected_hashes() -> list[dict]:
     for line in _git("ls-files", "-s", *PROTECTED).splitlines():
         meta, _, path = line.partition("\t")
         staged[path] = meta.split()[1]
-    canon = [p for p in _git("ls-files", "artifacts/").splitlines() if p.count("/") == 2 and p.endswith(".skp")]
+    # .skp canonico (artifacts/<planta>/*.skp) e os mobiliados (artifacts/<planta>/furnished/*.skp) — regra de evidencia
+    canon = [p for p in _git("ls-files", "artifacts/").splitlines() if p.endswith(".skp")
+             and (p.count("/") == 2 or (p.count("/") == 3 and p.split("/")[2] == "furnished"))]
     for path in canon:
         meta = _git("ls-files", "-s", path).split()
         if meta:
