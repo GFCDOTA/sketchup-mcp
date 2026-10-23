@@ -3,6 +3,8 @@ name: ci
 # A esteira que se valida sozinha: todo PR/push pra develop|main roda os testes
 # de contrato, os gates de fidelidade determinísticos e o smoke do servidor MCP.
 # Tudo SEM SketchUp (os passos que exigem SU degradam via skipif / só rodam local).
+# O uv.lock e' a fonte reproduzivel das dependencias: pyproject declara faixas,
+# uv.lock fixa a resolucao e o CI nunca instala "latest dentro da faixa" por acaso.
 
 on:
   pull_request:
@@ -10,9 +12,6 @@ on:
   push:
     branches: [develop, main]
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 # Cancela runs superados no mesmo ref (não enfileira commits velhos).
 concurrency:
@@ -24,6 +23,17 @@ env:
   MPLBACKEND: Agg
 
 jobs:
+  dependency-lock:
+    name: uv lock is current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: pyproject.toml and uv.lock agree
+        run: uv lock --check
+
   tests:
     name: pytest (py${{ matrix.python }})
     runs-on: ubuntu-latest
@@ -36,21 +46,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-          cache: pip
-          cache-dependency-path: pyproject.toml
-      - name: Install (core + dev)
-        run: pip install -e ".[dev]"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync locked environment (core + dev)
+        run: uv sync --locked --extra dev
       # PT_TO_M (core/scale.py) e' lido UMA vez por processo — nao da pra
       # misturar fixtures sinteticas (default ~0.0352) com a escala real de
       # planta_74 (0.0259, cota-anchored) no MESMO `pytest tests/`. Duas
       # invocacoes, cada uma com o env certo (ver tests/conftest.py).
       - name: Contract + gate test suite (default scale — fixtures sintéticas)
-        run: python -m pytest tests/ -q -m "not planta74_scale"
+        run: uv run --no-sync python -m pytest tests/ -q -m "not planta74_scale"
       - name: Contract + gate test suite (planta_74 real — escala 0.0259)
         if: always()
         env:
           PT_TO_M: "0.0259"
-        run: python -m pytest tests/ -q -m planta74_scale
+        run: uv run --no-sync python -m pytest tests/ -q -m planta74_scale
 
   fidelity-gates:
     name: deterministic fidelity gates
@@ -60,32 +71,33 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: pyproject.toml
-      - name: Install (core)
-        run: pip install -e .
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync locked environment (core)
+        run: uv sync --locked
       # Consensus-only detectors (opening<->host, wall overlap). Puros, sem SU/rede.
       # exit 0=PASS, 1=FAIL, 3=INCOMPLETE — o exit code É o gate.
       - name: FP-042 P6 — binary asset provenance
-        run: python -m tools.rooms.asset_provenance
+        run: uv run --no-sync python -m tools.rooms.asset_provenance
       - name: FP-042 P6 — all canonical reference provenance
-        run: python -m tools.rooms.reference_provenance
+        run: uv run --no-sync python -m tools.rooms.reference_provenance
       - name: FP-042 — strict zero-pending inventory
-        run: python -m tools.rooms.inventory_gate --strict
+        run: uv run --no-sync python -m tools.rooms.inventory_gate --strict
       - name: FP-042 — room boundaries including legacy facades
-        run: python -m tools.rooms.ownership_audit
+        run: uv run --no-sync python -m tools.rooms.ownership_audit
       - name: FP-042 P3 — exact owner coverage
-        run: python -m tools.rooms.p3_ownership
+        run: uv run --no-sync python -m tools.rooms.p3_ownership
       - name: Gate — planta_74
-        run: python -m tools.validation.run_deterministic_gates --fixture planta_74
+        run: uv run --no-sync python -m tools.validation.run_deterministic_gates --fixture planta_74
       - name: Gate — quadrado (micro-fixture canônico)
-        run: python -m tools.validation.run_deterministic_gates --fixture quadrado
+        run: uv run --no-sync python -m tools.validation.run_deterministic_gates --fixture quadrado
       # Scale is checked against an independent source (PDF cota / fixture),
       # NEVER report metadata or environment PT_TO_M. Fails on 0.74x shells.
       - name: FP-043 P3 — absolute scale (planta_74)
-        run: python -m tools.validation.scale_anchor_gate --consensus fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json --report artifacts/planta_74/geometry_report.json
+        run: uv run --no-sync python -m tools.validation.scale_anchor_gate --consensus fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json --report artifacts/planta_74/geometry_report.json
       - name: FP-043 P3 — absolute scale (quadrado)
-        run: python -m tools.validation.scale_anchor_gate --consensus fixtures/quadrado/consensus_with_window.json --report docs/specs/_assets/quadrado_canonical_geometry_report.json
+        run: uv run --no-sync python -m tools.validation.scale_anchor_gate --consensus fixtures/quadrado/consensus_with_window.json --report docs/specs/_assets/quadrado_canonical_geometry_report.json
 
   mcp-server:
     name: mcp server (smoke + stdio handshake)
@@ -95,51 +107,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: pyproject.toml
-      - name: Install (core + dev + mcp)
-        run: pip install -e ".[dev,mcp]"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync locked environment (core + dev + mcp)
+        run: uv sync --locked --extra dev --extra mcp
       # Exercita as tools in-process (as su_* respondem UNAVAILABLE sem SketchUp).
       - name: In-process smoke (18 tools)
-        run: python -m tools.mcp_server.smoke
+        run: uv run --no-sync python -m tools.mcp_server.smoke
       # Sobe o server por stdio (como o Claude Code faz) e fala MCP de verdade.
       - name: Real stdio handshake (initialize / tools-list / call_tool)
-        run: python -m tools.mcp_server.stdio_check
+        run: uv run --no-sync python -m tools.mcp_server.stdio_check
       # Testes que EXIGEM o extra mcp: aqui ele está instalado, então skip = falha (REQUIRE_EXTRAS).
       - name: MCP-dependent tests (strict stdout client, preload) — no silent skip
         env:
           REQUIRE_EXTRAS: "1"
-        run: python -m pytest tests/test_mcp_stdout_isolation.py tests/test_su_spawn_detached.py -q -rs
-
-
-  dependency-lock-reconcile:
-    name: dependency lock reconcile (temporary)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-      - uses: astral-sh/setup-uv@v6
-      - name: Regenerate uv.lock from pyproject.toml
-        run: uv lock
-      - name: Verify locked environment resolves all extras
-        run: uv sync --locked --all-extras
-      - name: Show lock drift
-        run: git diff -- uv.lock || true
-      - name: Commit regenerated lock to PR branch
-        shell: bash
-        run: |
-          if git diff --quiet -- uv.lock; then
-            echo "uv.lock already reconciled"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add uv.lock
-          git commit -m "chore: regenerate uv lock"
-          git push origin HEAD:${{ github.head_ref }}
-      - name: Upload regenerated lock
-        uses: actions/upload-artifact@v4
-        with:
-          name: regenerated-uv-lock
-          path: uv.lock
+        run: uv run --no-sync python -m pytest tests/test_mcp_stdout_isolation.py tests/test_su_spawn_detached.py -q -rs
