@@ -7,6 +7,8 @@
 > F0 baseline → F1 corretude geométrica → F2 solver → F3 modularização/DSA → F4 SketchUp real → F5 rollout.
 > **Congelado até a F5 liberar:** expansão de tutoriais/RAG (item 3 abaixo) — nada é apagado, só não avança.
 > Os itens 1, 2 e 4 entram como insumo da F1–F4 quando a fase pedir.
+> **Estado 2026-10-23:** F0 (#383) e F1-01..04 (#384–#387) mergeadas; `su_furnish` do apartamento recusa até a decisão da
+> Suíte 01 (#381). Detalhe e próximo comando: `docs/handoffs/2026-10-23_fp054_f0_f1_handoff.md`.
 
 1. **T0.2 restante:** integrar tools.sketchup.inspect_workspace.plan_inspect_workspace (#373) em cabinet.sketchup.inspect;
    refazer L2 Windows de todas as capacidades afetadas pelo símbolo/fecho R-18. PREP L1 pronta, integração NÃO feita.
