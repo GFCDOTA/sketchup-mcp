@@ -1,0 +1,81 @@
+{
+ "commit": "91aad4bcbe976d6377e97d0cc053625ae29a6440",
+ "dirty": false,
+ "canonical_before": {
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "69dbbf0394b5197321e511d5518cf6bb0ae6772879a6edfb285d4be36f3fe2be"
+ },
+ "cases": [
+  {
+   "case": "preflight_allows_materialization",
+   "ok": true,
+   "status": "PASS",
+   "blocking": []
+  },
+  {
+   "case": "negative_original_layout_refused_before_sketchup",
+   "ok": true,
+   "status": "BLOCKED_LAYOUT_GATE",
+   "blocking": [
+    [
+     "r000",
+     "circulation"
+    ]
+   ]
+  },
+  {
+   "case": "furnish_ok_and_skp_saved",
+   "ok": true,
+   "status": "OK",
+   "skp_bytes": 3355264,
+   "skp_sha256": "61002331aa754ea30c8e710454c34f01b963ca443f3747a0e213eb9e8f6463d4"
+  },
+  {
+   "case": "reopened_in_another_process",
+   "ok": true,
+   "status": "OK",
+   "nodes": 88
+  },
+  {
+   "case": "suite01_modules_match_plan_xy",
+   "ok": true,
+   "max_xy_error_m": 4.999999999988347e-05,
+   "modules": 7
+  },
+  {
+   "case": "suite01_desk_chair_absent_in_model",
+   "ok": true
+  },
+  {
+   "case": "every_planned_module_is_a_group_in_the_model",
+   "ok": true,
+   "missing": [],
+   "planned": 63
+  },
+  {
+   "case": "canonicals_byte_identical",
+   "ok": true
+  },
+  {
+   "case": "no_scratch_left_inside_artifacts",
+   "ok": true,
+   "leftovers": []
+  },
+  {
+   "case": "all_my_pids_closed",
+   "ok": true,
+   "alive": []
+  }
+ ],
+ "pids": [
+  34092,
+  31660
+ ],
+ "canonical_after": {
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "69dbbf0394b5197321e511d5518cf6bb0ae6772879a6edfb285d4be36f3fe2be"
+ },
+ "note": "Suite 01 #381: decisao do Felipe (sem cadeira da escrivaninha; criado-mudo 1 1 in -y). Aparencia PENDING_HUMAN."
+}

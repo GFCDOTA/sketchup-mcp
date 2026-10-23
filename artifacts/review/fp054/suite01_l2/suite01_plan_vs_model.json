@@ -1,0 +1,37 @@
+[
+ {
+  "module": "SUITE 01 · Cama",
+  "found": true,
+  "max_xy_error_m": 5e-05
+ },
+ {
+  "module": "SUITE 01 · Criado-mudo 1",
+  "found": true,
+  "max_xy_error_m": 2.4e-05
+ },
+ {
+  "module": "SUITE 01 · Criado-mudo 2",
+  "found": true,
+  "max_xy_error_m": 4e-05
+ },
+ {
+  "module": "SUITE 01 · Escrivaninha",
+  "found": true,
+  "max_xy_error_m": 4.2e-05
+ },
+ {
+  "module": "SUITE 01 · Guarda-roupa",
+  "found": true,
+  "max_xy_error_m": 4.6e-05
+ },
+ {
+  "module": "SUITE 01 · Painel cabeceira",
+  "found": true,
+  "max_xy_error_m": 1.2e-05
+ },
+ {
+  "module": "SUITE 01 · rug",
+  "found": true,
+  "max_xy_error_m": 4.8e-05
+ }
+]

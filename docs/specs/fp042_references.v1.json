@@ -5651,6 +5651,42 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/regression_summary.md",
+      "blob_sha": "021d85c01fd05f934a9b3fca81c69578ec1190aa",
+      "blob_size": 3336,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/model_iso_after.png",
+      "blob_sha": "0dafcc1b871354607c6a18f69205046169975fa2",
+      "blob_size": 245680,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/model_top_after.png",
+      "blob_sha": "717d0e6954b6ebe572ee963c3898f9656948677b",
+      "blob_size": 87763,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/side_by_side_before_after.png",
+      "blob_sha": "577cf4b64034a3a3c4d617a86c785ef0416b64ca",
+      "blob_size": 193089,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/suite01_top_after.png",
+      "blob_sha": "b64bb3e35549f4cbef2ac9ea37404c59eb24d56f",
+      "blob_size": 158845,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/planta_74_after.skp",
+      "blob_sha": "a6cc90bfd3971df0a1a5f390d7a874ddd976ce25",
+      "blob_size": 3355264,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/scenes/living_room_modern_warm_minimal/contact_sheet.png",
       "blob_sha": "2c4c31694396fcd03997d46fa844dd6ae306d53a",
       "blob_size": 456493,
@@ -6308,6 +6344,36 @@
       "path": "artifacts/review/fp054/suite01_l2/l2_suite01.py",
       "blob_sha": "7681d06923558fa96d57a8f436fc23d4d691000c",
       "blob_size": 7032,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/suite01_l2/README.md",
+      "blob_sha": "d05128759a8f77e525ace65a33619cf62fe883fd",
+      "blob_size": 3090,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/suite01_l2/furnish_result.json",
+      "blob_sha": "5dc5c8066a162017ca217d0fdda415898f30a8e2",
+      "blob_size": 5617,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/suite01_l2/inspect_summary.json",
+      "blob_sha": "aeba990cde64741e991489b2b00f248140ba40a6",
+      "blob_size": 24342,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/suite01_l2/suite01_plan_vs_model.json",
+      "blob_sha": "f07b9ae3ffac824def9b2a9526d87704a377a1a8",
+      "blob_size": 631,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/suite01_l2/summary.json",
+      "blob_sha": "fe004135dadf826aa0fb4a7b80b6759313231249",
+      "blob_size": 2181,
       "owner_group": "artifacts"
     },
     {

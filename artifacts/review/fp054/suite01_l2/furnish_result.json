@@ -1,0 +1,258 @@
+{
+ "status": "OK",
+ "mode": "interactive",
+ "pid": 34092,
+ "elapsed_s": 13.02,
+ "su_left_running": true,
+ "command": [
+  "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "E:\\Claude\\worktrees\\w-prov\\runs\\fp054_suite01_l2\\out\\furnish\\_furnish_base_planta_74.skp",
+  "-RubyStartup",
+  "E:\\Claude\\worktrees\\w-prov\\tools\\sketchup\\furnish\\place_layout_skp.rb"
+ ],
+ "boxes": 394,
+ "base_skp": "E:\\Claude\\worktrees\\w-prov\\artifacts\\planta_74\\planta_74.skp",
+ "preflight": {
+  "status": "PASS",
+  "rooms": [
+   {
+    "room_id": "r000",
+    "gate": "circulation",
+    "status": "PASS",
+    "reasons": {
+     "atras_das_cadeiras": "NO_DINING_TABLE",
+     "cadeira_puxada": "NO_DINING_TABLE"
+    }
+   },
+   {
+    "room_id": "r000",
+    "gate": "furniture_overlap",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r000",
+    "gate": "room_collisions",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r001",
+    "gate": "circulation",
+    "status": "PASS",
+    "reasons": {
+     "atras_das_cadeiras": "NO_DINING_TABLE",
+     "cadeira_puxada": "NO_DINING_TABLE"
+    }
+   },
+   {
+    "room_id": "r001",
+    "gate": "furniture_overlap",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r001",
+    "gate": "room_collisions",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r002",
+    "gate": "circulation",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r002",
+    "gate": "furniture_overlap",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r002",
+    "gate": "room_collisions",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r003",
+    "gate": "circulation",
+    "status": "PASS",
+    "reasons": {
+     "atras_das_cadeiras": "NO_DINING_TABLE",
+     "cadeira_puxada": "NO_DINING_TABLE"
+    }
+   },
+   {
+    "room_id": "r003",
+    "gate": "furniture_overlap",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r003",
+    "gate": "room_collisions",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r004",
+    "gate": "circulation",
+    "status": "NOT_APPLICABLE",
+    "reasons": {
+     "atras_das_cadeiras": "NO_DINING_TABLE",
+     "cadeira_puxada": "NO_DINING_TABLE",
+     "corredor_principal": "SINGLE_PORTAL"
+    }
+   },
+   {
+    "room_id": "r004",
+    "gate": "furniture_overlap",
+    "status": "NOT_APPLICABLE",
+    "reasons": {
+     "modules": 1
+    }
+   },
+   {
+    "room_id": "r004",
+    "gate": "room_collisions",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r005",
+    "gate": "circulation",
+    "status": "NOT_APPLICABLE",
+    "reasons": {
+     "atras_das_cadeiras": "NO_DINING_TABLE",
+     "cadeira_puxada": "NO_DINING_TABLE",
+     "corredor_principal": "SINGLE_PORTAL"
+    }
+   },
+   {
+    "room_id": "r005",
+    "gate": "furniture_overlap",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r005",
+    "gate": "room_collisions",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r006",
+    "gate": "circulation",
+    "status": "NOT_APPLICABLE",
+    "reasons": {
+     "atras_das_cadeiras": "NO_DINING_TABLE",
+     "cadeira_puxada": "NO_DINING_TABLE",
+     "corredor_principal": "SINGLE_PORTAL"
+    }
+   },
+   {
+    "room_id": "r006",
+    "gate": "furniture_overlap",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r006",
+    "gate": "room_collisions",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r007",
+    "gate": "circulation",
+    "status": "NOT_APPLICABLE",
+    "reasons": {
+     "atras_das_cadeiras": "NO_DINING_TABLE",
+     "cadeira_puxada": "NO_DINING_TABLE",
+     "corredor_principal": "SINGLE_PORTAL"
+    }
+   },
+   {
+    "room_id": "r007",
+    "gate": "furniture_overlap",
+    "status": "PASS",
+    "reasons": {}
+   },
+   {
+    "room_id": "r007",
+    "gate": "room_collisions",
+    "status": "PASS",
+    "reasons": {}
+   }
+  ],
+  "blocking": []
+ },
+ "rooms": [
+  {
+   "room_id": "r000",
+   "name": "SUITE 01",
+   "type": "BEDROOM",
+   "result": "OK",
+   "boxes": 57
+  },
+  {
+   "room_id": "r001",
+   "name": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "type": "SERVICE",
+   "result": "OK",
+   "boxes": 13
+  },
+  {
+   "room_id": "r002",
+   "name": "SALA DE JANTAR | SALA DE ESTAR",
+   "type": "LIVING",
+   "result": "OK",
+   "boxes": 51
+  },
+  {
+   "room_id": "r003",
+   "name": "SUITE 02",
+   "type": "BEDROOM",
+   "result": "OK",
+   "boxes": 47
+  },
+  {
+   "room_id": "r004",
+   "name": "COZINHA",
+   "type": "KITCHEN",
+   "result": "OK",
+   "boxes": 76
+  },
+  {
+   "room_id": "r005",
+   "name": "BANHO 01",
+   "type": "BATHROOM",
+   "result": "OK",
+   "boxes": 59
+  },
+  {
+   "room_id": "r006",
+   "name": "BANHO 02",
+   "type": "BATHROOM",
+   "result": "OK",
+   "boxes": 58
+  },
+  {
+   "room_id": "r007",
+   "name": "LAVABO",
+   "type": "BATHROOM",
+   "result": "OK",
+   "boxes": 33
+  }
+ ],
+ "files": {
+  "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp054_suite01_l2\\out\\furnish\\planta_74_furnished.skp",
+  "before": "E:\\Claude\\worktrees\\w-prov\\runs\\fp054_suite01_l2\\out\\furnish\\planta_74_furnished_before_top.png",
+  "top": "E:\\Claude\\worktrees\\w-prov\\runs\\fp054_suite01_l2\\out\\furnish\\planta_74_furnished_after_top.png",
+  "iso": "E:\\Claude\\worktrees\\w-prov\\runs\\fp054_suite01_l2\\out\\furnish\\planta_74_furnished_after_iso.png",
+  "log": "E:\\Claude\\worktrees\\w-prov\\runs\\fp054_suite01_l2\\out\\furnish\\planta_74_furnished_log.txt"
+ },
+ "visual_review": "mudança de APARÊNCIA: o veredito IMPROVED/SAME/WORSE é do Felipe (VISUAL_REVIEW) — nunca automático"
+}
