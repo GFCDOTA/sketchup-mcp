@@ -173,8 +173,8 @@ def living_room_boxes(con, room_id):
         # P1 do VERDICT 6.5 (Felipe): mesa MENOR e POSIÇÃO ESCOLHIDA PELO GATE
         # — busca candidatos e só aceita onde a circulação PASSA de verdade
         # (90/80cm contínuo por PAPEL do portal + 0.70 atrás + cadeira PUXADA).
+        from tools.circulation_gate import GateSession as _GateSession
         from tools.circulation_gate import corridor_slack_m as _corridor_slack
-        from tools.circulation_gate import gate as _circ_gate
         # 1.00x0.65, 4 lugares (2+2 nos lados COMPRIDOS) — achado 2026-08-12,
         # varredura EXAUSTIVA (grade completa do cômodo, passo 6-8in, overlap
         # real contra sofá/rack, exigindo os 5 portais conectados E folga
@@ -242,6 +242,8 @@ def living_room_boxes(con, room_id):
         # corredor/varanda bloqueados. Resolver PRIMEIRO a circulacao real e
         # refinar LOCALMENTE o candidato com pequeno slide, mantendo ambos gates.
         _best, _best_score, _best_gate_result = None, 999, None
+        # sala + mobilia fixa calculadas UMA vez para todos os candidatos (mesmo veredito do gate completo)
+        _gate_session = _GateSession(con, boxes, room_id)
         _n_candidates = 0
         _valid_but_swinging = []
 
@@ -285,7 +287,7 @@ def living_room_boxes(con, room_id):
                 if cand is None:
                     continue
                 _n_candidates += 1
-                _g = _circ_gate(con, boxes + cand, room_id)
+                _g = _gate_session.check(cand, decide_only=True)
                 if _g["result"] != "PASS":
                     continue
                 if _swing_hit(cand):
@@ -319,7 +321,7 @@ def living_room_boxes(con, room_id):
                     if cand is None or _swing_hit(cand):
                         continue
                     _n_candidates += 1
-                    _g = _circ_gate(con, boxes + cand, room_id)
+                    _g = _gate_session.check(cand, decide_only=True)
                     if _g["result"] == "PASS":
                         _best, _best_score, _best_gate_result = cand, 0, "PASS"
                         break
@@ -365,7 +367,7 @@ def living_room_boxes(con, room_id):
     _perp = (-fny, fnx)
 
     def _clear_of_circulation(parts, facing, base_dist_m=0.70):
-        from tools.circulation_gate import gate as _cgate
+        from tools.circulation_gate import GateSession as _CGateSession
         base = _ahead(base_dist_m)
         # overlap real contra a mobília já colocada (sofá/rack/mesa de jantar/
         # etc. — 'boxes' já reflete o que foi decidido até aqui) — achado
@@ -376,6 +378,7 @@ def living_room_boxes(con, room_id):
         _occ_now = _uni(_occ_polys) if _occ_polys else None
         _best_c, _best_fails = base, None
         _n_tried = 0
+        _coffee_session = _CGateSession(con, boxes, room_id)    # sala + mobilia ja decidida: calculadas uma vez
         cands = [(0.0, 0.0)] + [(along, side) for r in (0.20, 0.40, 0.60, 0.80)
                                 for along, side in ((0, r), (0, -r), (r, 0), (-r, 0),
                                                      (r * 0.7, r * 0.7), (-r * 0.7, r * 0.7),
@@ -394,7 +397,7 @@ def living_room_boxes(con, room_id):
                 if _cand_occ.intersection(_occ_now).area > 50:   # in^2
                     continue
             _n_tried += 1
-            _g = _cgate(con, boxes + _cand, room_id)
+            _g = _coffee_session.check(_cand)
             _nf = sum(1 for p in _g["checks"]["corredor_principal"]["portais"]
                      if not p.get("conectado", True))
             if _nf == 0:

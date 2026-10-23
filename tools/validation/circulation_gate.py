@@ -212,84 +212,132 @@ def corridor_slack_m(result: dict) -> float | None:
     return round(min(slacks), 4) if slacks else None
 
 
-def gate(con, boxes, room_id):
-    from core.spatial_semantics import annotate_all
-    annotate_all(boxes)   # idempotente — garante geometry_intent/interaction_policy
-    sm = build_spatial_model(con, room_id)
-    cell_in = Polygon([(x * PT_TO_IN, y * PT_TO_IN)
-                       for x, y in sm["_geom"]["cell"].exterior.coords])
-    room = str(sm.get("room_name") or "")
-    blockers = _blockers([b for b in boxes
-                          if _footprint(b).intersection(cell_in).area > 1.0])
-    occ = unary_union([g for _, g in blockers]) if blockers else None
-    free = cell_in.difference(occ.buffer(0.5)) if occ is not None else cell_in
+def gate(con, boxes, room_id, *, decide_only: bool = False):
+    """Gate de circulacao do comodo. Com `decide_only=True` (para BUSCAS, que so precisam do veredito): checa as cadeiras
+    primeiro (barato) e para no primeiro portal que reprova — o `result` e EXATAMENTE o do gate completo (FAIL se qualquer
+    check falha); num FAIL antecipado `checks` vem vazio e `decided_by` diz quem reprovou. Num PASS todos os checks foram
+    calculados e a saida e a mesma do modo normal (a busca usa o detalhe para a folga do corredor)."""
+    return GateSession(con, [], room_id).check(boxes, decide_only=decide_only)
 
-    checks: dict = {}
 
-    # 1) corredor principal — dois thresholds + gargalo herdado do shell
-    # (ver docstring do modulo; decisao GPT-Docker 2026-08-12).
-    portais = _portais(sm, cell_in)
-    corr_ok, detail = True, []
-    if len(portais) >= 2:
-        base_pt = portais[0]   # ancora: primeiro portal (mesmo criterio de sempre)
-        for p in portais:
-            # portal_role: DECLARADO pelo papel arquitetônico da abertura
-            # (kind_v5 — porta real vs destino terminal), não inferido pela
-            # largura medida. Explícito pra TODO portal, mesmo a âncora —
-            # achado 2026-08-12 (revisão GPT-Docker): "nunca infira semântica
-            # por forma/dimensão quando ela pode ser declarada".
-            portal_role = ("SECONDARY" if _portal_kind(p, sm) in TERMINAL_OPENING_KINDS
-                           else "PRIMARY")
-            if p is base_pt:
+class GateSession:
+    """O mesmo gate, para BUSCAS que testam muitos candidatos contra a mesma sala e a mesma mobilia fixa: o que so depende
+    do comodo (modelo espacial, celula, portais e seus papeis) e da mobilia fixa (anotacao + pegadas que bloqueiam) e
+    calculado UMA vez; cada `check(extra)` processa so as caixas do candidato. Resultado identico a
+    `gate(con, base + extra, room_id)`: `annotate_all` e `_blockers` trabalham caixa a caixa, entao a lista de bloqueios
+    tem os mesmos itens na mesma ordem (base depois candidato)."""
+
+    def __init__(self, con, base_boxes, room_id):
+        # PREGUICOSA: nada e calculado nem anotado ate o 1o `check` — exatamente quando o gate antigo anotava as caixas.
+        # (Anotar na criacao mudava `_semantics_provenance` de caixas que nenhum candidato chegou a testar.)
+        self._args = (con, base_boxes, room_id)
+        self._ready = False
+
+    def _prepare(self):
+        from core.spatial_semantics import annotate_all
+        con, base_boxes, room_id = self._args
+        annotate_all(base_boxes)   # idempotente — garante geometry_intent/interaction_policy
+        self.sm = sm = build_spatial_model(con, room_id)
+        self.cell_in = Polygon([(x * PT_TO_IN, y * PT_TO_IN)
+                                for x, y in sm["_geom"]["cell"].exterior.coords])
+        self.room = str(sm.get("room_name") or "")
+        self._base_blockers = self._blockers_in_cell(base_boxes)
+        self.portais = _portais(sm, self.cell_in)
+        # portal_role: DECLARADO pelo papel arquitetônico da abertura (kind_v5 — porta real vs destino terminal), não
+        # inferido pela largura medida (achado 2026-08-12, revisão GPT-Docker).
+        self.roles = [("SECONDARY" if _portal_kind(p, sm) in TERMINAL_OPENING_KINDS else "PRIMARY")
+                      for p in self.portais]
+
+    def _blockers_in_cell(self, boxes):
+        return _blockers([b for b in boxes if _footprint(b).intersection(self.cell_in).area > 1.0])
+
+    def check(self, extra_boxes, *, decide_only: bool = False):
+        from core.spatial_semantics import annotate_all
+        if not self._ready:
+            self._prepare()
+            self._ready = True
+        annotate_all(extra_boxes)
+        cell_in, room = self.cell_in, self.room
+        blockers = self._base_blockers + self._blockers_in_cell(extra_boxes)
+        if decide_only:
+            chair_result = _chair_checks(blockers, cell_in)
+            if not (chair_result[0] and chair_result[1]):
+                return {"result": "FAIL", "room": room, "checks": {}, "decided_by": "cadeiras"}
+        occ = unary_union([g for _, g in blockers]) if blockers else None
+        free = cell_in.difference(occ.buffer(0.5)) if occ is not None else cell_in
+
+        checks: dict = {}
+
+        # 1) corredor principal — dois thresholds + gargalo herdado do shell
+        # (ver docstring do modulo; decisao GPT-Docker 2026-08-12).
+        portais = self.portais
+        corr_ok, detail = True, []
+        if len(portais) >= 2:
+            base_pt = portais[0]   # ancora: primeiro portal (mesmo criterio de sempre)
+            for p, portal_role in zip(portais, self.roles):
+                if p is base_pt:
+                    detail.append({"portal": [round(p.x, 1), round(p.y, 1)], "portal_role": portal_role,
+                                   "conectado": True, "status": "PASS", "w_empty_m": None,
+                                   "w_furnished_m": None})
+                    continue
+                w_empty = _bottleneck_width(cell_in, base_pt, p)
+                w_furnished = _bottleneck_width(free, base_pt, p)
+                # target por PAPEL da abertura (fixo), não pela largura medida —
+                # destino terminal (varanda/janela) nunca vira PRIMARY só porque
+                # o shell vazio é largo ali (decisão GPT-Docker 2026-08-12, 2ª
+                # rodada). Doors/passagens reais (espinha de distribuição) SEMPRE
+                # tentam PRIMARY; se o shell vazio não sustenta, degrada pros
+                # tiers abaixo (secundaria/shell_estreito/shell_impossivel) do
+                # mesmo jeito que antes.
+                role_target = SECONDARY_TARGET_M if portal_role == "SECONDARY" else PRIMARY_TARGET_M
+                if w_empty >= role_target:
+                    target, tier = role_target, ("principal" if role_target == PRIMARY_TARGET_M
+                                                 else "secundaria")
+                elif w_empty >= SECONDARY_TARGET_M:
+                    target, tier = SECONDARY_TARGET_M, "secundaria"
+                elif w_empty >= IMMUTABLE_SHELL_FLOOR_M:
+                    target, tier = None, "shell_estreito"   # tratado abaixo (WARN)
+                else:
+                    target, tier = None, "shell_impossivel"
+
+                if tier in ("principal", "secundaria"):
+                    ok = w_furnished >= target
+                    status = "PASS" if ok else "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+                elif tier == "shell_estreito":
+                    # restricao JA existe na planta vazia (Hard Rule #1: nao
+                    # inventar/alargar parede) — so falha se a MOBILIA piorar.
+                    ok = w_furnished >= (w_empty - GEOMETRY_TOLERANCE_M)
+                    status = "PASS_WARN_BASE_GEOMETRY" if ok else "FAIL_FURNITURE_WORSENS_BASE_GEOMETRY"
+                else:  # shell_impossivel
+                    ok = False
+                    status = "FAIL_BASE_GEOMETRY_TOO_NARROW"
+
+                if decide_only and not ok:
+                    return {"result": "FAIL", "room": room, "checks": {}, "decided_by": "corredor"}
+                corr_ok &= ok
                 detail.append({"portal": [round(p.x, 1), round(p.y, 1)], "portal_role": portal_role,
-                               "conectado": True, "status": "PASS", "w_empty_m": None,
-                               "w_furnished_m": None})
-                continue
-            w_empty = _bottleneck_width(cell_in, base_pt, p)
-            w_furnished = _bottleneck_width(free, base_pt, p)
-            # target por PAPEL da abertura (fixo), não pela largura medida —
-            # destino terminal (varanda/janela) nunca vira PRIMARY só porque
-            # o shell vazio é largo ali (decisão GPT-Docker 2026-08-12, 2ª
-            # rodada). Doors/passagens reais (espinha de distribuição) SEMPRE
-            # tentam PRIMARY; se o shell vazio não sustenta, degrada pros
-            # tiers abaixo (secundaria/shell_estreito/shell_impossivel) do
-            # mesmo jeito que antes.
-            role_target = SECONDARY_TARGET_M if portal_role == "SECONDARY" else PRIMARY_TARGET_M
-            if w_empty >= role_target:
-                target, tier = role_target, ("principal" if role_target == PRIMARY_TARGET_M
-                                             else "secundaria")
-            elif w_empty >= SECONDARY_TARGET_M:
-                target, tier = SECONDARY_TARGET_M, "secundaria"
-            elif w_empty >= IMMUTABLE_SHELL_FLOOR_M:
-                target, tier = None, "shell_estreito"   # tratado abaixo (WARN)
-            else:
-                target, tier = None, "shell_impossivel"
+                               "conectado": ok, "status": status, "tier": tier,
+                               "w_empty_m": w_empty, "w_furnished_m": w_furnished})
+        else:
+            detail.append({"erro": "menos de 2 portais no comodo"})
+        checks["corredor_principal"] = {"result": "PASS" if corr_ok else "FAIL",
+                                        "primary_target_m": PRIMARY_TARGET_M,
+                                        "secondary_target_m": SECONDARY_TARGET_M,
+                                        "shell_floor_m": IMMUTABLE_SHELL_FLOOR_M,
+                                        "portais": detail}
 
-            if tier in ("principal", "secundaria"):
-                ok = w_furnished >= target
-                status = "PASS" if ok else "FAIL_FURNITURE_BLOCKING_CIRCULATION"
-            elif tier == "shell_estreito":
-                # restricao JA existe na planta vazia (Hard Rule #1: nao
-                # inventar/alargar parede) — so falha se a MOBILIA piorar.
-                ok = w_furnished >= (w_empty - GEOMETRY_TOLERANCE_M)
-                status = "PASS_WARN_BASE_GEOMETRY" if ok else "FAIL_FURNITURE_WORSENS_BASE_GEOMETRY"
-            else:  # shell_impossivel
-                ok = False
-                status = "FAIL_BASE_GEOMETRY_TOO_NARROW"
+        # 2/3) cadeiras: 0.70 atrás + envelope PUXADA
+        behind_ok, pull_ok, cdetail = chair_result if decide_only else _chair_checks(blockers, cell_in)
+        checks["atras_das_cadeiras"] = {"result": "PASS" if behind_ok else "FAIL",
+                                        "min_m": BEHIND_CHAIR_M, "cadeiras": cdetail}
+        checks["cadeira_puxada"] = {"result": "PASS" if pull_ok else "FAIL", "recuo_m": PULL_M}
 
-            corr_ok &= ok
-            detail.append({"portal": [round(p.x, 1), round(p.y, 1)], "portal_role": portal_role,
-                           "conectado": ok, "status": status, "tier": tier,
-                           "w_empty_m": w_empty, "w_furnished_m": w_furnished})
-    else:
-        detail.append({"erro": "menos de 2 portais no comodo"})
-    checks["corredor_principal"] = {"result": "PASS" if corr_ok else "FAIL",
-                                    "primary_target_m": PRIMARY_TARGET_M,
-                                    "secondary_target_m": SECONDARY_TARGET_M,
-                                    "shell_floor_m": IMMUTABLE_SHELL_FLOOR_M,
-                                    "portais": detail}
+        result = "PASS" if all(c["result"] == "PASS" for c in checks.values()) else "FAIL"
+        return {"result": result, "room": room, "checks": checks}
 
-    # 2/3) cadeiras: 0.70 atrás + envelope PUXADA
+
+def _chair_checks(blockers, cell_in):
+    """Cadeiras da mesa de jantar: 0,70 m livres atras e cadeira PUXADA cabendo. Devolve (atras_ok, puxada_ok, detalhe)."""
     mesa = [g for b, g in blockers if str(b.get("module", "")).startswith("Mesa de jantar")]
     mesa_u = unary_union(mesa) if mesa else None
     # Uma cadeira = varias boxes (foot x4 / frame x2 / seat / back). O box
@@ -325,12 +373,7 @@ def gate(con, boxes, room_id):
             cdetail.append({"cadeira": [round(c.x, 1), round(c.y, 1)],
                             "livre_atras_m": round(livre_atras, 2),
                             "atras_ok": b_ok, "puxada_ok": p_ok})
-    checks["atras_das_cadeiras"] = {"result": "PASS" if behind_ok else "FAIL",
-                                    "min_m": BEHIND_CHAIR_M, "cadeiras": cdetail}
-    checks["cadeira_puxada"] = {"result": "PASS" if pull_ok else "FAIL", "recuo_m": PULL_M}
-
-    result = "PASS" if all(c["result"] == "PASS" for c in checks.values()) else "FAIL"
-    return {"result": result, "room": room, "checks": checks}
+    return behind_ok, pull_ok, cdetail
 
 
 def main():

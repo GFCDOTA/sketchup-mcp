@@ -88,3 +88,29 @@ corredor** (`circulation_gate.corridor_slack_m`): 95 → **37** chamadas, mesma 
 | quente | 5,16 s | 2,27 s | 1,50 s | **0,95 s** (−82%) |
 
 Suíte `planta74_scale`: 59,5 s → **24,7 s**. Trava determinística: a busca chama o gate no máximo 40 vezes.
+
+## Rodada 4 (2026-10-23) — sessão do gate: cada checagem pela metade do custo, mesmo veredito
+
+Pergunta do Felipe: "não dá pra diminuir essas chamadas?". Medido: cada checagem custava ~5,4 ms, e até um FAIL nas
+cadeiras custava 4,3 ms — o custo era **fixo e repetido**: refazer o modelo espacial da sala e as pegadas dos ~90 móveis
+parados em cada uma das 37 checagens, quando só a mesa candidata muda.
+
+- `circulation_gate.GateSession(con, base, sala)`: modelo espacial, célula, portais (e seus papéis) e bloqueios da mobília
+  fixa calculados **uma vez, de forma preguiçosa** (só na 1ª checagem — anotar antes mudava `_semantics_provenance` de
+  caixas que nenhum candidato chegou a testar; o hash pegou). `gate()` virou `GateSession(con, [], sala).check(boxes)`.
+- `decide_only=True` (buscas): cadeiras primeiro e parada no primeiro portal que reprova; num PASS calcula tudo.
+- As duas buscas da sala (mesa de jantar em modo decisão; mesa de centro em modo completo) usam a sessão.
+
+| | antes (develop) | depois |
+|---|---|---|
+| custo por checagem do gate | 5,4 ms | **2,7 ms** |
+| gate na busca (37 checagens) | 0,20 s | **0,10 s** |
+| mobiliar o apartamento (fria / quente) | 1,20 / 0,95 s | **1,04 / 0,83 s** |
+| saída | `c2a57f92…` | `c2a57f92…` (idêntica) |
+
+**Por que não reduzir o NÚMERO de checagens:** as 28 da grade são todas as posições válidas da mesa na sala (passo de
+15 cm) e só 2 passam no gate — a região viável é minúscula. Grade mais grossa pularia essa região e a mesa sairia da sala;
+o ganho de tempo restante (≤ 0,1 s) não paga esse risco. Prova: `tests/test_layout_search_pruning.py` — sessão e gate
+completo com saída idêntica em todos os cômodos da planta; modo decisão com o mesmo veredito; sessão preguiçosa.
+
+**Acumulado (mesma máquina):** mobiliar a planta_74 inteira 5,30 s → **1,04 s** (fria, −80%) e 5,16 s → **0,83 s** (quente, −84%).
