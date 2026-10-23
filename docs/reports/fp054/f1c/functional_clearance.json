@@ -1,0 +1,4484 @@
+{
+ "schema_version": "functional_clearance_report.v2",
+ "mode": "REPORT_ONLY",
+ "evaluations": 23,
+ "summary": {
+  "INVALID": 8,
+  "VALID_BELOW_TARGET": 0,
+  "VALID": 5,
+  "PREFERRED": 7,
+  "BLOCKED_MISSING_INPUT": 0,
+  "NOT_APPLICABLE": 3
+ },
+ "interface_bases": {
+  "SEMANTIC_BUILDER": 18,
+  "SEMANTIC_PDF_ANCHOR": 2
+ },
+ "heuristics": {
+  "USE_ZONE_DEPTH_M": 0.3,
+  "BACKING_TOL_IN (so fallback)": 6.0,
+  "PORTAL_SNAP_M": 0.3,
+  "provenance": "HEURISTIC"
+ },
+ "registry_errors": [],
+ "rows": [
+  {
+   "room_id": "r004",
+   "object_id": "countertop",
+   "object_type": "kitchen_counter",
+   "constraint": "kitchen_counter.front_clearance",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 1.088,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_PDF_ANCHOR",
+   "witness": {
+    "interface": "work_face",
+    "segment": [
+     [
+      85.58,
+      594.28
+     ],
+     [
+      85.58,
+      680.5
+     ]
+    ],
+    "usable_segment": [
+     [
+      85.58,
+      594.28
+     ],
+     [
+      85.58,
+      680.5
+     ]
+    ],
+    "normal": [
+     1.0,
+     0.0
+    ],
+    "note": "bancada apoiada na parede da pia (LEFT, PDF_WEST_WALL); face de trabalho = lado oposto",
+    "footprint": [
+     [
+      60.77,
+      594.28
+     ],
+     [
+      60.77,
+      680.5
+     ],
+     [
+      85.58,
+      680.5
+     ],
+     [
+      85.58,
+      594.28
+     ],
+     [
+      60.77,
+      594.28
+     ]
+    ],
+    "free_shape": [
+     [
+      85.58,
+      594.78
+     ],
+     [
+      85.58,
+      680.0
+     ],
+     [
+      128.41,
+      680.0
+     ],
+     [
+      128.41,
+      594.78
+     ],
+     [
+      85.58,
+      594.78
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.9,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "portal de noticias",
+      "source_ref": "https://catracalivre.com.br/noticias/a-que-distancia-da-parede-sao-instalados-os-moveis-da-cozinha-planejada-e-por-que-isso-e-importante/",
+      "source_version_or_date": "2026-05-15 (consultado 2026-10-23)",
+      "exact_claim_supported": "'a passagem principal deve ter entre 90 cm e 1 m de largura'; 'frente a pia e ao fogao, recomenda-se pelo menos 1 m livre'; 'Em cozinhas estreitas, um corredor de no minimo 90 cm ja permite deslocamento confortavel'",
+      "applicability": "cozinha residencial planejada",
+      "limitations": "nao cita estudo nem norma"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.9,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "EXISTING_PROJECT_DECISION",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy",
+      "source_ref": "core/project_policy.py CIRCULATION_PRIMARY_TARGET_M",
+      "source_version_or_date": "decisao de 2026-08-12",
+      "exact_claim_supported": "0,90 m para rota PRIMARY entre portais (decisao de projeto, residencial planta_74)",
+      "applicability": "corredor entre portais; aplicado a cozinha por analogia",
+      "limitations": "nao e NBR 9050 completa; decisao do projeto"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 1.0,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "portal de noticias",
+      "source_ref": "https://catracalivre.com.br/noticias/a-que-distancia-da-parede-sao-instalados-os-moveis-da-cozinha-planejada-e-por-que-isso-e-importante/",
+      "source_version_or_date": "2026-05-15 (consultado 2026-10-23)",
+      "exact_claim_supported": "'a passagem principal deve ter entre 90 cm e 1 m de largura'; 'frente a pia e ao fogao, recomenda-se pelo menos 1 m livre'; 'Em cozinhas estreitas, um corredor de no minimo 90 cm ja permite deslocamento confortavel'",
+      "applicability": "cozinha residencial planejada",
+      "limitations": "nao cita estudo nem norma"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r004",
+   "object_id": "countertop",
+   "object_type": "kitchen_counter",
+   "constraint": "kitchen_counter.reach_path",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 1.343,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_PDF_ANCHOR",
+   "witness": {
+    "interface": "work_face",
+    "segment": [
+     [
+      85.58,
+      594.28
+     ],
+     [
+      85.58,
+      680.5
+     ]
+    ],
+    "usable_segment": [
+     [
+      85.58,
+      594.28
+     ],
+     [
+      85.58,
+      680.5
+     ]
+    ],
+    "normal": [
+     1.0,
+     0.0
+    ],
+    "note": "bancada apoiada na parede da pia (LEFT, PDF_WEST_WALL); face de trabalho = lado oposto",
+    "footprint": [
+     [
+      60.77,
+      594.28
+     ],
+     [
+      60.77,
+      680.5
+     ],
+     [
+      85.58,
+      680.5
+     ],
+     [
+      85.58,
+      594.28
+     ],
+     [
+      60.77,
+      594.28
+     ]
+    ],
+    "use_zone": [
+     [
+      85.58,
+      594.78
+     ],
+     [
+      85.58,
+      680.0
+     ],
+     [
+      97.39,
+      680.0
+     ],
+     [
+      97.39,
+      594.78
+     ],
+     [
+      85.58,
+      594.78
+     ]
+    ],
+    "portals": [
+     [
+      107.88,
+      608.79
+     ]
+    ],
+    "reachable_region_m": 1.343,
+    "reachable_region": [
+     [
+      [
+       83.3,
+       632.5
+      ],
+      [
+       83.8,
+       632.6
+      ],
+      [
+       83.8,
+       632.6
+      ],
+      [
+       86.3,
+       633.3
+      ],
+      [
+       86.4,
+       633.3
+      ],
+      [
+       88.8,
+       634.3
+      ],
+      [
+       88.8,
+       634.4
+      ],
+      [
+       91.1,
+       635.6
+      ],
+      [
+       91.1,
+       635.6
+      ],
+      [
+       93.3,
+       637.0
+      ],
+      [
+       93.3,
+       637.1
+      ],
+      [
+       95.3,
+       638.7
+      ],
+      [
+       95.4,
+       638.7
+      ],
+      [
+       97.2,
+       640.6
+      ],
+      [
+       97.2,
+       640.6
+      ],
+      [
+       98.9,
+       642.6
+      ],
+      [
+       98.9,
+       642.7
+      ],
+      [
+       100.4,
+       644.8
+      ],
+      [
+       100.4,
+       644.9
+      ],
+      [
+       101.6,
+       647.2
+      ],
+      [
+       101.6,
+       647.2
+      ],
+      [
+       102.1,
+       648.4
+      ],
+      [
+       102.1,
+       618.9
+      ],
+      [
+       96.5,
+       618.9
+      ],
+      [
+       94.7,
+       619.6
+      ],
+      [
+       92.2,
+       620.2
+      ],
+      [
+       89.7,
+       620.6
+      ],
+      [
+       87.1,
+       620.7
+      ],
+      [
+       83.3,
+       620.7
+      ],
+      [
+       83.3,
+       632.5
+      ]
+     ]
+    ],
+    "bottleneck": {
+     "point": [
+      107.88,
+      608.79
+     ],
+     "segment": [
+      [
+       107.88,
+       608.79
+      ],
+      [
+       107.88,
+       608.79
+      ]
+     ],
+     "at": "portal",
+     "width_m": 1.343
+    }
+   },
+   "reference_minimum": {
+    "value": 0.9,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "portal de noticias",
+      "source_ref": "https://catracalivre.com.br/noticias/a-que-distancia-da-parede-sao-instalados-os-moveis-da-cozinha-planejada-e-por-que-isso-e-importante/",
+      "source_version_or_date": "2026-05-15 (consultado 2026-10-23)",
+      "exact_claim_supported": "'a passagem principal deve ter entre 90 cm e 1 m de largura'; 'frente a pia e ao fogao, recomenda-se pelo menos 1 m livre'; 'Em cozinhas estreitas, um corredor de no minimo 90 cm ja permite deslocamento confortavel'",
+      "applicability": "cozinha residencial planejada",
+      "limitations": "nao cita estudo nem norma"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.9,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "EXISTING_PROJECT_DECISION",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy",
+      "source_ref": "core/project_policy.py CIRCULATION_PRIMARY_TARGET_M",
+      "source_version_or_date": "decisao de 2026-08-12",
+      "exact_claim_supported": "0,90 m para rota PRIMARY entre portais (decisao de projeto, residencial planta_74)",
+      "applicability": "corredor entre portais; aplicado a cozinha por analogia",
+      "limitations": "nao e NBR 9050 completa; decisao do projeto"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 1.0,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "portal de noticias",
+      "source_ref": "https://catracalivre.com.br/noticias/a-que-distancia-da-parede-sao-instalados-os-moveis-da-cozinha-planejada-e-por-que-isso-e-importante/",
+      "source_version_or_date": "2026-05-15 (consultado 2026-10-23)",
+      "exact_claim_supported": "'a passagem principal deve ter entre 90 cm e 1 m de largura'; 'frente a pia e ao fogao, recomenda-se pelo menos 1 m livre'; 'Em cozinhas estreitas, um corredor de no minimo 90 cm ja permite deslocamento confortavel'",
+      "applicability": "cozinha residencial planejada",
+      "limitations": "nao cita estudo nem norma"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.front_clearance",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.843,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      539.65,
+      597.92
+     ],
+     [
+      539.65,
+      628.63
+     ]
+    ],
+    "usable_segment": [
+     [
+      539.65,
+      597.92
+     ],
+     [
+      539.65,
+      628.63
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      539.65,
+      628.63
+     ],
+     [
+      558.11,
+      628.63
+     ],
+     [
+      558.11,
+      597.92
+     ],
+     [
+      539.65,
+      597.92
+     ],
+     [
+      539.65,
+      628.63
+     ]
+    ],
+    "free_shape": [
+     [
+      539.65,
+      598.42
+     ],
+     [
+      539.65,
+      628.13
+     ],
+     [
+      506.47,
+      628.13
+     ],
+     [
+      506.47,
+      598.42
+     ],
+     [
+      539.65,
+      598.42
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.55,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/tamanho-de-banheiro-padrao/",
+      "source_version_or_date": "publicado 2025-08-12, modificado 2026-08-27 (consultado 2026-10-23)",
+      "exact_claim_supported": "lavatorio: 'ao menos 55 cm livres na frente para circulacao'",
+      "applicability": "banheiro residencial",
+      "limitations": "nao cita norma; nao da valor frontal para o vaso (a F1B atribuia erradamente o 60 cm do vaso a esta pagina)"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/area-de-circulacao/",
+      "source_version_or_date": "atualizado 2025-08-06 (consultado 2026-10-23)",
+      "exact_claim_supported": "banheiro: 'entre o vaso e a parede frontal: pelo menos 60 cm'; 'entre a pia e o box: ao menos 80 cm' (recomendavel); cozinha: entre bancadas paralelas 'no minimo 1 metro'",
+      "applicability": "residencial, planejamento de layout",
+      "limitations": "cita a NBR 9050 so de forma generica (sem item); a citacao NAO e prova normativa; 80 cm e distancia pia-box, nao folga frontal do lavatorio"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.reach_path",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.941,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      539.65,
+      597.92
+     ],
+     [
+      539.65,
+      628.63
+     ]
+    ],
+    "usable_segment": [
+     [
+      539.65,
+      597.92
+     ],
+     [
+      539.65,
+      628.63
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      539.65,
+      628.63
+     ],
+     [
+      558.11,
+      628.63
+     ],
+     [
+      558.11,
+      597.92
+     ],
+     [
+      539.65,
+      597.92
+     ],
+     [
+      539.65,
+      628.63
+     ]
+    ],
+    "use_zone": [
+     [
+      539.65,
+      598.42
+     ],
+     [
+      539.65,
+      628.13
+     ],
+     [
+      527.84,
+      628.13
+     ],
+     [
+      527.84,
+      598.42
+     ],
+     [
+      539.65,
+      598.42
+     ]
+    ],
+    "portals": [
+     [
+      518.41,
+      615.32
+     ]
+    ],
+    "reachable_region_m": 0.941,
+    "reachable_region": [
+     [
+      [
+       524.9,
+       609.7
+      ],
+      [
+       524.9,
+       612.5
+      ],
+      [
+       525.0,
+       612.4
+      ],
+      [
+       526.7,
+       611.7
+      ],
+      [
+       528.0,
+       611.2
+      ],
+      [
+       527.3,
+       610.9
+      ],
+      [
+       527.3,
+       610.9
+      ],
+      [
+       526.4,
+       610.5
+      ],
+      [
+       525.4,
+       610.0
+      ],
+      [
+       524.9,
+       609.7
+      ]
+     ]
+    ],
+    "bottleneck": {
+     "point": [
+      527.38,
+      611.17
+     ],
+     "segment": [
+      [
+       526.91,
+       611.17
+      ],
+      [
+       527.84,
+       611.17
+      ]
+     ],
+     "width_m": 0.941
+    }
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.entry_front_clearance",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 1.677,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "shower_entry",
+    "segment": [
+     [
+      503.07,
+      565.65
+     ],
+     [
+      519.25,
+      565.65
+     ]
+    ],
+    "usable_segment": [
+     [
+      506.36,
+      565.65
+     ],
+     [
+      519.25,
+      565.65
+     ]
+    ],
+    "normal": [
+     0.0,
+     1.0
+    ],
+    "note": "porta de correr: folha de comprimento L corre ate o extremo oposto; vao livre = frente - L (frente 1.024 m, fixo 0.461 m, folha 0.613 m)",
+    "footprint": [
+     [
+      503.07,
+      534.55
+     ],
+     [
+      503.07,
+      565.65
+     ],
+     [
+      543.55,
+      565.65
+     ],
+     [
+      543.55,
+      534.55
+     ],
+     [
+      503.07,
+      534.55
+     ]
+    ],
+    "free_shape": [
+     [
+      506.86,
+      565.65
+     ],
+     [
+      518.75,
+      565.65
+     ],
+     [
+      518.75,
+      631.67
+     ],
+     [
+      506.86,
+      631.67
+     ],
+     [
+      506.86,
+      565.65
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/tamanho-box-banheiro/",
+      "source_version_or_date": "2026-01-27 (consultado 2026-10-23)",
+      "exact_claim_supported": "'Area livre em frente ao box: pelo menos 60 cm para secagem e troca de roupa'; 'Largura minima de acesso: cerca de 60 cm livres para entrada no box, especialmente em modelos com porta de abrir'",
+      "applicability": "box residencial",
+      "limitations": "sem norma; a largura citada e para porta de abrir — a planta usa porta de CORRER (aplicada por analogia)"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.entry_width",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_ENTRY_WIDTH",
+   "measured": 0.327,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "shower_entry",
+    "segment": [
+     [
+      503.07,
+      565.65
+     ],
+     [
+      519.25,
+      565.65
+     ]
+    ],
+    "usable_segment": [
+     [
+      506.36,
+      565.65
+     ],
+     [
+      519.25,
+      565.65
+     ]
+    ],
+    "normal": [
+     0.0,
+     1.0
+    ],
+    "note": "porta de correr: folha de comprimento L corre ate o extremo oposto; vao livre = frente - L (frente 1.024 m, fixo 0.461 m, folha 0.613 m)",
+    "footprint": [
+     [
+      503.07,
+      534.55
+     ],
+     [
+      503.07,
+      565.65
+     ],
+     [
+      543.55,
+      565.65
+     ],
+     [
+      543.55,
+      534.55
+     ],
+     [
+      503.07,
+      534.55
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/tamanho-box-banheiro/",
+      "source_version_or_date": "2026-01-27 (consultado 2026-10-23)",
+      "exact_claim_supported": "'Area livre em frente ao box: pelo menos 60 cm para secagem e troca de roupa'; 'Largura minima de acesso: cerca de 60 cm livres para entrada no box, especialmente em modelos com porta de abrir'",
+      "applicability": "box residencial",
+      "limitations": "sem norma; a largura citada e para porta de abrir — a planta usa porta de CORRER (aplicada por analogia)"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.reach_path",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.627,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "shower_entry",
+    "segment": [
+     [
+      503.07,
+      565.65
+     ],
+     [
+      519.25,
+      565.65
+     ]
+    ],
+    "usable_segment": [
+     [
+      506.36,
+      565.65
+     ],
+     [
+      519.25,
+      565.65
+     ]
+    ],
+    "normal": [
+     0.0,
+     1.0
+    ],
+    "note": "porta de correr: folha de comprimento L corre ate o extremo oposto; vao livre = frente - L (frente 1.024 m, fixo 0.461 m, folha 0.613 m)",
+    "footprint": [
+     [
+      503.07,
+      534.55
+     ],
+     [
+      503.07,
+      565.65
+     ],
+     [
+      543.55,
+      565.65
+     ],
+     [
+      543.55,
+      534.55
+     ],
+     [
+      503.07,
+      534.55
+     ]
+    ],
+    "use_zone": [
+     [
+      506.86,
+      565.65
+     ],
+     [
+      518.75,
+      565.65
+     ],
+     [
+      518.75,
+      577.46
+     ],
+     [
+      506.86,
+      577.46
+     ],
+     [
+      506.86,
+      565.65
+     ]
+    ],
+    "portals": [
+     [
+      518.41,
+      615.32
+     ]
+    ],
+    "reachable_region_m": 0.627,
+    "reachable_region": [
+     [
+      [
+       518.7,
+       542.3
+      ],
+      [
+       518.7,
+       619.4
+      ],
+      [
+       525.7,
+       619.4
+      ],
+      [
+       525.9,
+       619.2
+      ],
+      [
+       526.8,
+       618.6
+      ],
+      [
+       526.8,
+       603.6
+      ],
+      [
+       526.5,
+       603.5
+      ],
+      [
+       526.5,
+       603.4
+      ],
+      [
+       525.5,
+       602.6
+      ],
+      [
+       525.4,
+       602.6
+      ],
+      [
+       525.0,
+       602.1
+      ],
+      [
+       524.2,
+       601.4
+      ],
+      [
+       523.7,
+       600.9
+      ],
+      [
+       523.7,
+       600.8
+      ],
+      [
+       522.8,
+       599.8
+      ],
+      [
+       522.8,
+       599.8
+      ],
+      [
+       522.1,
+       598.7
+      ],
+      [
+       522.1,
+       598.6
+      ],
+      [
+       521.7,
+       598.0
+      ],
+      [
+       521.2,
+       597.0
+      ],
+      [
+       521.0,
+       596.4
+      ],
+      [
+       520.9,
+       596.4
+      ],
+      [
+       520.5,
+       595.2
+      ],
+      [
+       520.5,
+       595.1
+      ],
+      [
+       520.1,
+       593.9
+      ],
+      [
+       520.1,
+       593.8
+      ],
+      [
+       520.0,
+       593.2
+      ],
+      [
+       519.8,
+       592.1
+      ],
+      [
+       519.8,
+       591.6
+      ],
+      [
+       519.8,
+       591.6
+      ],
+      [
+       519.7,
+       590.7
+      ],
+      [
+       519.7,
+       590.6
+      ],
+      [
+       519.7,
+       590.1
+      ],
+      [
+       519.7,
+       582.9
+      ],
+      [
+       519.7,
+       582.4
+      ],
+      [
+       519.7,
+       582.3
+      ],
+      [
+       519.8,
+       581.4
+      ],
+      [
+       519.8,
+       581.4
+      ],
+      [
+       519.8,
+       580.9
+      ],
+      [
+       520.0,
+       579.8
+      ],
+      [
+       520.1,
+       579.2
+      ],
+      [
+       520.1,
+       579.1
+      ],
+      [
+       520.5,
+       577.9
+      ],
+      [
+       520.5,
+       577.8
+      ],
+      [
+       520.9,
+       576.6
+      ],
+      [
+       521.0,
+       576.6
+      ],
+      [
+       521.2,
+       576.0
+      ],
+      [
+       521.7,
+       575.0
+      ],
+      [
+       522.0,
+       574.4
+      ],
+      [
+       522.1,
+       574.4
+      ],
+      [
+       522.8,
+       573.3
+      ],
+      [
+       522.8,
+       573.2
+      ],
+      [
+       523.6,
+       572.2
+      ],
+      [
+       523.7,
+       572.2
+      ],
+      [
+       524.1,
+       571.7
+      ],
+      [
+       524.9,
+       570.9
+      ],
+      [
+       525.4,
+       570.5
+      ],
+      [
+       525.4,
+       570.4
+      ],
+      [
+       526.4,
+       569.6
+      ],
+      [
+       526.5,
+       569.6
+      ],
+      [
+       527.6,
+       568.9
+      ],
+      [
+       527.6,
+       568.8
+      ],
+      [
+       528.2,
+       568.5
+      ],
+      [
+       529.2,
+       568.0
+      ],
+      [
+       529.8,
+       567.8
+      ],
+      [
+       529.8,
+       567.7
+      ],
+      [
+       531.0,
+       567.3
+      ],
+      [
+       531.1,
+       567.3
+      ],
+      [
+       531.2,
+       567.2
+      ],
+      [
+       531.2,
+       545.0
+      ],
+      [
+       530.6,
+       544.7
+      ],
+      [
+       529.5,
+       544.2
+      ],
+      [
+       528.5,
+       543.6
+      ],
+      [
+       527.5,
+       542.9
+      ],
+      [
+       526.9,
+       542.3
+      ],
+      [
+       518.7,
+       542.3
+      ]
+     ]
+    ],
+    "bottleneck": {
+     "point": [
+      518.92,
+      565.65
+     ],
+     "segment": [
+      [
+       519.1,
+       565.65
+      ],
+      [
+       518.75,
+       565.65
+      ]
+     ],
+     "width_m": 0.627
+    }
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.front_clearance",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.675,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      532.96,
+      579.02
+     ],
+     [
+      532.96,
+      593.98
+     ]
+    ],
+    "usable_segment": [
+     [
+      532.96,
+      579.02
+     ],
+     [
+      532.96,
+      593.98
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      532.53,
+      593.69
+     ],
+     [
+      558.11,
+      593.69
+     ],
+     [
+      558.11,
+      579.32
+     ],
+     [
+      532.53,
+      579.32
+     ],
+     [
+      532.53,
+      593.69
+     ]
+    ],
+    "free_shape": [
+     [
+      532.96,
+      579.52
+     ],
+     [
+      532.96,
+      593.48
+     ],
+     [
+      506.39,
+      593.48
+     ],
+     [
+      506.39,
+      579.52
+     ],
+     [
+      532.96,
+      579.52
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     },
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/area-de-circulacao/",
+      "source_version_or_date": "atualizado 2025-08-06 (consultado 2026-10-23)",
+      "exact_claim_supported": "banheiro: 'entre o vaso e a parede frontal: pelo menos 60 cm'; 'entre a pia e o box: ao menos 80 cm' (recomendavel); cozinha: entre bancadas paralelas 'no minimo 1 metro'",
+      "applicability": "residencial, planejamento de layout",
+      "limitations": "cita a NBR 9050 so de forma generica (sem item); a citacao NAO e prova normativa; 80 cm e distancia pia-box, nao folga frontal do lavatorio"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.reach_path",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.831,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      532.96,
+      579.02
+     ],
+     [
+      532.96,
+      593.98
+     ]
+    ],
+    "usable_segment": [
+     [
+      532.96,
+      579.02
+     ],
+     [
+      532.96,
+      593.98
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      532.53,
+      593.69
+     ],
+     [
+      558.11,
+      593.69
+     ],
+     [
+      558.11,
+      579.32
+     ],
+     [
+      532.53,
+      579.32
+     ],
+     [
+      532.53,
+      593.69
+     ]
+    ],
+    "use_zone": [
+     [
+      532.96,
+      579.52
+     ],
+     [
+      532.96,
+      593.48
+     ],
+     [
+      521.15,
+      593.48
+     ],
+     [
+      521.15,
+      579.52
+     ],
+     [
+      532.96,
+      579.52
+     ]
+    ],
+    "portals": [
+     [
+      518.41,
+      615.32
+     ]
+    ],
+    "reachable_region_m": 0.831,
+    "reachable_region": [
+     [
+      [
+       522.7,
+       615.4
+      ],
+      [
+       522.8,
+       615.4
+      ],
+      [
+       522.8,
+       597.9
+      ],
+      [
+       522.8,
+       597.1
+      ],
+      [
+       522.8,
+       597.1
+      ],
+      [
+       523.0,
+       595.5
+      ],
+      [
+       523.0,
+       595.4
+      ],
+      [
+       523.3,
+       593.8
+      ],
+      [
+       523.3,
+       593.8
+      ],
+      [
+       523.8,
+       592.3
+      ],
+      [
+       523.8,
+       592.2
+      ],
+      [
+       524.4,
+       590.7
+      ],
+      [
+       524.4,
+       590.7
+      ],
+      [
+       525.2,
+       589.3
+      ],
+      [
+       525.2,
+       589.2
+      ],
+      [
+       526.1,
+       587.9
+      ],
+      [
+       526.1,
+       587.9
+      ],
+      [
+       527.1,
+       586.6
+      ],
+      [
+       527.2,
+       586.6
+      ],
+      [
+       528.3,
+       585.4
+      ],
+      [
+       528.3,
+       585.4
+      ],
+      [
+       529.6,
+       584.4
+      ],
+      [
+       529.6,
+       584.4
+      ],
+      [
+       531.0,
+       583.5
+      ],
+      [
+       531.0,
+       583.4
+      ],
+      [
+       532.4,
+       582.7
+      ],
+      [
+       532.5,
+       582.7
+      ],
+      [
+       532.9,
+       582.5
+      ],
+      [
+       525.2,
+       582.5
+      ],
+      [
+       524.4,
+       582.5
+      ],
+      [
+       524.4,
+       582.5
+      ],
+      [
+       522.8,
+       582.3
+      ],
+      [
+       522.8,
+       582.3
+      ],
+      [
+       522.7,
+       582.3
+      ],
+      [
+       522.7,
+       615.4
+      ]
+     ]
+    ],
+    "bottleneck": {
+     "point": [
+      518.41,
+      615.32
+     ],
+     "segment": [
+      [
+       518.41,
+       615.32
+      ],
+      [
+       518.41,
+       615.32
+      ]
+     ],
+     "at": "portal",
+     "width_m": 0.831
+    }
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.front_clearance",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.714,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      372.21,
+      566.39
+     ],
+     [
+      372.21,
+      591.99
+     ]
+    ],
+    "usable_segment": [
+     [
+      372.21,
+      566.39
+     ],
+     [
+      372.21,
+      591.99
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      372.21,
+      566.39
+     ],
+     [
+      372.21,
+      591.98
+     ],
+     [
+      389.88,
+      591.98
+     ],
+     [
+      389.88,
+      566.39
+     ],
+     [
+      372.21,
+      566.39
+     ]
+    ],
+    "free_shape": [
+     [
+      372.21,
+      566.89
+     ],
+     [
+      372.21,
+      591.49
+     ],
+     [
+      344.1,
+      591.49
+     ],
+     [
+      344.1,
+      566.89
+     ],
+     [
+      372.21,
+      566.89
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.55,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/tamanho-de-banheiro-padrao/",
+      "source_version_or_date": "publicado 2025-08-12, modificado 2026-08-27 (consultado 2026-10-23)",
+      "exact_claim_supported": "lavatorio: 'ao menos 55 cm livres na frente para circulacao'",
+      "applicability": "banheiro residencial",
+      "limitations": "nao cita norma; nao da valor frontal para o vaso (a F1B atribuia erradamente o 60 cm do vaso a esta pagina)"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/area-de-circulacao/",
+      "source_version_or_date": "atualizado 2025-08-06 (consultado 2026-10-23)",
+      "exact_claim_supported": "banheiro: 'entre o vaso e a parede frontal: pelo menos 60 cm'; 'entre a pia e o box: ao menos 80 cm' (recomendavel); cozinha: entre bancadas paralelas 'no minimo 1 metro'",
+      "applicability": "residencial, planejamento de layout",
+      "limitations": "cita a NBR 9050 so de forma generica (sem item); a citacao NAO e prova normativa; 80 cm e distancia pia-box, nao folga frontal do lavatorio"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.reach_path",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.86,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      372.21,
+      566.39
+     ],
+     [
+      372.21,
+      591.99
+     ]
+    ],
+    "usable_segment": [
+     [
+      372.21,
+      566.39
+     ],
+     [
+      372.21,
+      591.99
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      372.21,
+      566.39
+     ],
+     [
+      372.21,
+      591.98
+     ],
+     [
+      389.88,
+      591.98
+     ],
+     [
+      389.88,
+      566.39
+     ],
+     [
+      372.21,
+      566.39
+     ]
+    ],
+    "use_zone": [
+     [
+      372.21,
+      566.89
+     ],
+     [
+      372.21,
+      591.49
+     ],
+     [
+      360.4,
+      591.49
+     ],
+     [
+      360.4,
+      566.89
+     ],
+     [
+      372.21,
+      566.89
+     ]
+    ],
+    "portals": [
+     [
+      357.09,
+      580.79
+     ]
+    ],
+    "reachable_region_m": 0.86,
+    "reachable_region": [
+     [
+      [
+       358.5,
+       578.2
+      ],
+      [
+       360.4,
+       578.2
+      ],
+      [
+       359.7,
+       577.9
+      ],
+      [
+       359.6,
+       577.9
+      ],
+      [
+       358.9,
+       577.6
+      ],
+      [
+       358.5,
+       578.2
+      ]
+     ]
+    ],
+    "bottleneck": {
+     "point": [
+      357.09,
+      580.79
+     ],
+     "segment": [
+      [
+       357.09,
+       580.79
+      ],
+      [
+       357.09,
+       580.79
+      ]
+     ],
+     "at": "portal",
+     "width_m": 0.86
+    }
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.entry_front_clearance",
+   "verdict": "INVALID",
+   "reason_code": "INTERFACE_OBSTRUCTED",
+   "measured": 0.0,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "shower_entry",
+    "segment": [
+     [
+      343.89,
+      515.64
+     ],
+     [
+      343.89,
+      527.84
+     ]
+    ],
+    "usable_segment": null,
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "porta de correr: folha de comprimento L corre ate o extremo oposto; vao livre = frente - L (frente 0.800 m, fixo 0.360 m, folha 0.490 m)",
+    "footprint": [
+     [
+      343.5,
+      496.58
+     ],
+     [
+      343.5,
+      527.84
+     ],
+     [
+      375.0,
+      527.84
+     ],
+     [
+      375.0,
+      496.58
+     ],
+     [
+      343.5,
+      496.58
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/tamanho-box-banheiro/",
+      "source_version_or_date": "2026-01-27 (consultado 2026-10-23)",
+      "exact_claim_supported": "'Area livre em frente ao box: pelo menos 60 cm para secagem e troca de roupa'; 'Largura minima de acesso: cerca de 60 cm livres para entrada no box, especialmente em modelos com porta de abrir'",
+      "applicability": "box residencial",
+      "limitations": "sem norma; a largura citada e para porta de abrir — a planta usa porta de CORRER (aplicada por analogia)"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.entry_width",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_ENTRY_WIDTH",
+   "measured": 0.0,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "shower_entry",
+    "segment": [
+     [
+      343.89,
+      515.64
+     ],
+     [
+      343.89,
+      527.84
+     ]
+    ],
+    "usable_segment": null,
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "porta de correr: folha de comprimento L corre ate o extremo oposto; vao livre = frente - L (frente 0.800 m, fixo 0.360 m, folha 0.490 m)",
+    "footprint": [
+     [
+      343.5,
+      496.58
+     ],
+     [
+      343.5,
+      527.84
+     ],
+     [
+      375.0,
+      527.84
+     ],
+     [
+      375.0,
+      496.58
+     ],
+     [
+      343.5,
+      496.58
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/tamanho-box-banheiro/",
+      "source_version_or_date": "2026-01-27 (consultado 2026-10-23)",
+      "exact_claim_supported": "'Area livre em frente ao box: pelo menos 60 cm para secagem e troca de roupa'; 'Largura minima de acesso: cerca de 60 cm livres para entrada no box, especialmente em modelos com porta de abrir'",
+      "applicability": "box residencial",
+      "limitations": "sem norma; a largura citada e para porta de abrir — a planta usa porta de CORRER (aplicada por analogia)"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.reach_path",
+   "verdict": "INVALID",
+   "reason_code": "INTERFACE_OBSTRUCTED",
+   "measured": 0.0,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "shower_entry",
+    "segment": [
+     [
+      343.89,
+      515.64
+     ],
+     [
+      343.89,
+      527.84
+     ]
+    ],
+    "usable_segment": null,
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "porta de correr: folha de comprimento L corre ate o extremo oposto; vao livre = frente - L (frente 0.800 m, fixo 0.360 m, folha 0.490 m)",
+    "footprint": [
+     [
+      343.5,
+      496.58
+     ],
+     [
+      343.5,
+      527.84
+     ],
+     [
+      375.0,
+      527.84
+     ],
+     [
+      375.0,
+      496.58
+     ],
+     [
+      343.5,
+      496.58
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.front_clearance",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.523,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      364.73,
+      547.5
+     ],
+     [
+      364.73,
+      562.46
+     ]
+    ],
+    "usable_segment": [
+     [
+      364.73,
+      547.5
+     ],
+     [
+      364.73,
+      562.46
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      364.3,
+      547.79
+     ],
+     [
+      364.3,
+      562.16
+     ],
+     [
+      389.88,
+      562.16
+     ],
+     [
+      389.88,
+      547.79
+     ],
+     [
+      364.3,
+      547.79
+     ]
+    ],
+    "free_shape": [
+     [
+      364.73,
+      548.0
+     ],
+     [
+      364.73,
+      561.96
+     ],
+     [
+      344.14,
+      561.96
+     ],
+     [
+      344.14,
+      548.0
+     ],
+     [
+      364.73,
+      548.0
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     },
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/area-de-circulacao/",
+      "source_version_or_date": "atualizado 2025-08-06 (consultado 2026-10-23)",
+      "exact_claim_supported": "banheiro: 'entre o vaso e a parede frontal: pelo menos 60 cm'; 'entre a pia e o box: ao menos 80 cm' (recomendavel); cozinha: entre bancadas paralelas 'no minimo 1 metro'",
+      "applicability": "residencial, planejamento de layout",
+      "limitations": "cita a NBR 9050 so de forma generica (sem item); a citacao NAO e prova normativa; 80 cm e distancia pia-box, nao folga frontal do lavatorio"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.reach_path",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.703,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      364.73,
+      547.5
+     ],
+     [
+      364.73,
+      562.46
+     ]
+    ],
+    "usable_segment": [
+     [
+      364.73,
+      547.5
+     ],
+     [
+      364.73,
+      562.46
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      364.3,
+      547.79
+     ],
+     [
+      364.3,
+      562.16
+     ],
+     [
+      389.88,
+      562.16
+     ],
+     [
+      389.88,
+      547.79
+     ],
+     [
+      364.3,
+      547.79
+     ]
+    ],
+    "use_zone": [
+     [
+      364.73,
+      548.0
+     ],
+     [
+      364.73,
+      561.96
+     ],
+     [
+      352.92,
+      561.96
+     ],
+     [
+      352.92,
+      548.0
+     ],
+     [
+      364.73,
+      548.0
+     ]
+    ],
+    "portals": [
+     [
+      357.09,
+      580.79
+     ]
+    ],
+    "reachable_region_m": 0.703,
+    "reachable_region": [
+     [
+      [
+       363.3,
+       524.1
+      ],
+      [
+       362.0,
+       524.1
+      ],
+      [
+       361.3,
+       524.1
+      ],
+      [
+       361.3,
+       524.0
+      ],
+      [
+       361.2,
+       524.0
+      ],
+      [
+       361.2,
+       524.0
+      ],
+      [
+       361.1,
+       524.1
+      ],
+      [
+       361.1,
+       524.1
+      ],
+      [
+       361.1,
+       527.8
+      ],
+      [
+       361.1,
+       528.5
+      ],
+      [
+       361.1,
+       528.6
+      ],
+      [
+       361.0,
+       529.9
+      ],
+      [
+       360.9,
+       530.0
+      ],
+      [
+       360.7,
+       531.3
+      ],
+      [
+       360.7,
+       531.3
+      ],
+      [
+       360.3,
+       532.6
+      ],
+      [
+       360.3,
+       532.7
+      ],
+      [
+       359.7,
+       533.9
+      ],
+      [
+       359.7,
+       534.0
+      ],
+      [
+       359.1,
+       535.2
+      ],
+      [
+       359.1,
+       535.2
+      ],
+      [
+       358.3,
+       536.4
+      ],
+      [
+       358.3,
+       536.4
+      ],
+      [
+       357.8,
+       536.9
+      ],
+      [
+       357.8,
+       569.4
+      ],
+      [
+       357.8,
+       570.1
+      ],
+      [
+       357.8,
+       570.1
+      ],
+      [
+       357.7,
+       571.5
+      ],
+      [
+       357.7,
+       571.5
+      ],
+      [
+       357.4,
+       572.9
+      ],
+      [
+       357.4,
+       572.9
+      ],
+      [
+       357.0,
+       574.2
+      ],
+      [
+       357.0,
+       574.3
+      ],
+      [
+       356.5,
+       575.5
+      ],
+      [
+       356.5,
+       575.6
+      ],
+      [
+       355.8,
+       576.8
+      ],
+      [
+       355.8,
+       576.8
+      ],
+      [
+       355.0,
+       577.9
+      ],
+      [
+       355.0,
+       578.0
+      ],
+      [
+       354.3,
+       578.8
+      ],
+      [
+       354.3,
+       581.3
+      ],
+      [
+       357.9,
+       581.3
+      ],
+      [
+       357.9,
+       566.4
+      ],
+      [
+       357.9,
+       565.7
+      ],
+      [
+       357.9,
+       565.7
+      ],
+      [
+       358.0,
+       564.3
+      ],
+      [
+       358.0,
+       564.3
+      ],
+      [
+       358.3,
+       562.9
+      ],
+      [
+       358.3,
+       562.9
+      ],
+      [
+       358.7,
+       561.6
+      ],
+      [
+       358.7,
+       561.5
+      ],
+      [
+       359.2,
+       560.3
+      ],
+      [
+       359.3,
+       560.2
+      ],
+      [
+       359.9,
+       559.0
+      ],
+      [
+       359.9,
+       559.0
+      ],
+      [
+       360.7,
+       557.9
+      ],
+      [
+       360.7,
+       557.8
+      ],
+      [
+       361.6,
+       556.8
+      ],
+      [
+       361.6,
+       556.7
+      ],
+      [
+       362.6,
+       555.8
+      ],
+      [
+       362.6,
+       555.7
+      ],
+      [
+       363.6,
+       554.9
+      ],
+      [
+       363.7,
+       554.9
+      ],
+      [
+       364.8,
+       554.1
+      ],
+      [
+       364.9,
+       554.1
+      ],
+      [
+       366.1,
+       553.4
+      ],
+      [
+       366.1,
+       553.4
+      ],
+      [
+       367.4,
+       552.9
+      ],
+      [
+       367.4,
+       552.9
+      ],
+      [
+       368.7,
+       552.5
+      ],
+      [
+       368.7,
+       552.5
+      ],
+      [
+       370.1,
+       552.2
+      ],
+      [
+       370.1,
+       552.2
+      ],
+      [
+       371.5,
+       552.1
+      ],
+      [
+       371.5,
+       552.1
+      ],
+      [
+       372.2,
+       552.1
+      ],
+      [
+       376.0,
+       552.1
+      ],
+      [
+       376.0,
+       548.2
+      ],
+      [
+       375.8,
+       548.2
+      ],
+      [
+       374.5,
+       548.0
+      ],
+      [
+       373.1,
+       547.7
+      ],
+      [
+       371.9,
+       547.2
+      ],
+      [
+       370.6,
+       546.7
+      ],
+      [
+       369.5,
+       546.0
+      ],
+      [
+       368.4,
+       545.1
+      ],
+      [
+       367.4,
+       544.2
+      ],
+      [
+       366.5,
+       543.2
+      ],
+      [
+       365.6,
+       542.1
+      ],
+      [
+       364.9,
+       541.0
+      ],
+      [
+       364.4,
+       539.7
+      ],
+      [
+       363.9,
+       538.5
+      ],
+      [
+       363.6,
+       537.1
+      ],
+      [
+       363.4,
+       535.8
+      ],
+      [
+       363.3,
+       534.4
+      ],
+      [
+       363.3,
+       524.1
+      ]
+     ]
+    ],
+    "bottleneck": {
+     "point": [
+      357.86,
+      567.9
+     ],
+     "segment": [
+      [
+       357.48,
+       574.03
+      ],
+      [
+       358.23,
+       561.78
+      ]
+     ],
+     "width_m": 0.703
+    }
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.front_clearance",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.044,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      283.6,
+      671.7
+     ],
+     [
+      314.31,
+      671.7
+     ]
+    ],
+    "usable_segment": [
+     [
+      283.6,
+      671.7
+     ],
+     [
+      314.31,
+      671.7
+     ]
+    ],
+    "normal": [
+     0.0,
+     -1.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      283.6,
+      671.7
+     ],
+     [
+      283.6,
+      689.81
+     ],
+     [
+      314.31,
+      689.81
+     ],
+     [
+      314.31,
+      671.7
+     ],
+     [
+      283.6,
+      671.7
+     ]
+    ],
+    "free_shape": [
+     [
+      284.1,
+      671.7
+     ],
+     [
+      313.81,
+      671.7
+     ],
+     [
+      313.81,
+      669.97
+     ],
+     [
+      284.1,
+      669.97
+     ],
+     [
+      284.1,
+      671.7
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.55,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/tamanho-de-banheiro-padrao/",
+      "source_version_or_date": "publicado 2025-08-12, modificado 2026-08-27 (consultado 2026-10-23)",
+      "exact_claim_supported": "lavatorio: 'ao menos 55 cm livres na frente para circulacao'",
+      "applicability": "banheiro residencial",
+      "limitations": "nao cita norma; nao da valor frontal para o vaso (a F1B atribuia erradamente o 60 cm do vaso a esta pagina)"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/area-de-circulacao/",
+      "source_version_or_date": "atualizado 2025-08-06 (consultado 2026-10-23)",
+      "exact_claim_supported": "banheiro: 'entre o vaso e a parede frontal: pelo menos 60 cm'; 'entre a pia e o box: ao menos 80 cm' (recomendavel); cozinha: entre bancadas paralelas 'no minimo 1 metro'",
+      "applicability": "residencial, planejamento de layout",
+      "limitations": "cita a NBR 9050 so de forma generica (sem item); a citacao NAO e prova normativa; 80 cm e distancia pia-box, nao folga frontal do lavatorio"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.reach_path",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.79,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      283.6,
+      671.7
+     ],
+     [
+      314.31,
+      671.7
+     ]
+    ],
+    "usable_segment": [
+     [
+      283.6,
+      671.7
+     ],
+     [
+      314.31,
+      671.7
+     ]
+    ],
+    "normal": [
+     0.0,
+     -1.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      283.6,
+      671.7
+     ],
+     [
+      283.6,
+      689.81
+     ],
+     [
+      314.31,
+      689.81
+     ],
+     [
+      314.31,
+      671.7
+     ],
+     [
+      283.6,
+      671.7
+     ]
+    ],
+    "use_zone": [
+     [
+      284.1,
+      671.7
+     ],
+     [
+      313.81,
+      671.7
+     ],
+     [
+      313.81,
+      659.89
+     ],
+     [
+      284.1,
+      659.89
+     ],
+     [
+      284.1,
+      671.7
+     ]
+    ],
+    "portals": [
+     [
+      282.13,
+      657.55
+     ]
+    ],
+    "reachable_region_m": 0.79,
+    "reachable_region": [
+     [
+      [
+       281.9,
+       656.4
+      ],
+      [
+       281.9,
+       673.0
+      ],
+      [
+       281.9,
+       673.0
+      ],
+      [
+       283.4,
+       672.7
+      ],
+      [
+       283.4,
+       672.7
+      ],
+      [
+       284.5,
+       672.6
+      ],
+      [
+       284.2,
+       671.9
+      ],
+      [
+       284.2,
+       671.8
+      ],
+      [
+       283.8,
+       670.3
+      ],
+      [
+       283.8,
+       670.2
+      ],
+      [
+       283.7,
+       669.4
+      ],
+      [
+       283.5,
+       668.3
+      ],
+      [
+       283.4,
+       667.7
+      ],
+      [
+       283.4,
+       667.7
+      ],
+      [
+       283.3,
+       666.5
+      ],
+      [
+       283.3,
+       666.5
+      ],
+      [
+       283.3,
+       665.9
+      ],
+      [
+       283.3,
+       656.4
+      ],
+      [
+       281.9,
+       656.4
+      ]
+     ]
+    ],
+    "bottleneck": {
+     "point": [
+      283.96,
+      671.74
+     ],
+     "segment": [
+      [
+       283.81,
+       671.78
+      ],
+      [
+       284.1,
+       671.7
+      ]
+     ],
+     "width_m": 0.79
+    }
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.entry_front_clearance",
+   "verdict": "NOT_APPLICABLE",
+   "reason_code": "OBJECT_ABSENT",
+   "measured": null,
+   "unit": null,
+   "missing_input": [],
+   "interface_basis": null,
+   "witness": {},
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/tamanho-box-banheiro/",
+      "source_version_or_date": "2026-01-27 (consultado 2026-10-23)",
+      "exact_claim_supported": "'Area livre em frente ao box: pelo menos 60 cm para secagem e troca de roupa'; 'Largura minima de acesso: cerca de 60 cm livres para entrada no box, especialmente em modelos com porta de abrir'",
+      "applicability": "box residencial",
+      "limitations": "sem norma; a largura citada e para porta de abrir — a planta usa porta de CORRER (aplicada por analogia)"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.entry_width",
+   "verdict": "NOT_APPLICABLE",
+   "reason_code": "OBJECT_ABSENT",
+   "measured": null,
+   "unit": null,
+   "missing_input": [],
+   "interface_basis": null,
+   "witness": {},
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/tamanho-box-banheiro/",
+      "source_version_or_date": "2026-01-27 (consultado 2026-10-23)",
+      "exact_claim_supported": "'Area livre em frente ao box: pelo menos 60 cm para secagem e troca de roupa'; 'Largura minima de acesso: cerca de 60 cm livres para entrada no box, especialmente em modelos com porta de abrir'",
+      "applicability": "box residencial",
+      "limitations": "sem norma; a largura citada e para porta de abrir — a planta usa porta de CORRER (aplicada por analogia)"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.reach_path",
+   "verdict": "NOT_APPLICABLE",
+   "reason_code": "OBJECT_ABSENT",
+   "measured": null,
+   "unit": null,
+   "missing_input": [],
+   "interface_basis": null,
+   "witness": {},
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "HEURISTIC",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "heuristic",
+      "source_ref": "FP-054 F1C (analogia declarada)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "mesma largura de passagem usada para o vaso, sem fonte propria para esta peca",
+      "applicability": "planta_74",
+      "limitations": "sem fonte externa; precisa de fonte ou decisao do Felipe"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.front_clearance",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.032,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      298.66,
+      669.81
+     ],
+     [
+      314.4,
+      669.81
+     ]
+    ],
+    "usable_segment": [
+     [
+      298.66,
+      669.81
+     ],
+     [
+      314.4,
+      669.81
+     ]
+    ],
+    "normal": [
+     0.0,
+     1.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      299.35,
+      669.41
+     ],
+     [
+      313.72,
+      669.41
+     ],
+     [
+      313.72,
+      643.83
+     ],
+     [
+      299.35,
+      643.83
+     ],
+     [
+      299.35,
+      669.41
+     ]
+    ],
+    "free_shape": [
+     [
+      299.16,
+      669.81
+     ],
+     [
+      313.9,
+      669.81
+     ],
+     [
+      313.9,
+      671.07
+     ],
+     [
+      299.16,
+      671.07
+     ],
+     [
+      299.16,
+      669.81
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     },
+     {
+      "source_tier": "D",
+      "source_type": "blog comercial",
+      "source_ref": "https://planner5d.com/blog/pt/area-de-circulacao/",
+      "source_version_or_date": "atualizado 2025-08-06 (consultado 2026-10-23)",
+      "exact_claim_supported": "banheiro: 'entre o vaso e a parede frontal: pelo menos 60 cm'; 'entre a pia e o box: ao menos 80 cm' (recomendavel); cozinha: entre bancadas paralelas 'no minimo 1 metro'",
+      "applicability": "residencial, planejamento de layout",
+      "limitations": "cita a NBR 9050 so de forma generica (sem item); a citacao NAO e prova normativa; 80 cm e distancia pia-box, nao folga frontal do lavatorio"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     }
+    ]
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.reach_path",
+   "verdict": "INVALID",
+   "reason_code": "PATH_DISCONNECTED",
+   "measured": 0.0,
+   "unit": "m",
+   "missing_input": [],
+   "interface_basis": "SEMANTIC_BUILDER",
+   "witness": {
+    "interface": "use_face",
+    "segment": [
+     [
+      298.66,
+      669.81
+     ],
+     [
+      314.4,
+      669.81
+     ]
+    ],
+    "usable_segment": [
+     [
+      298.66,
+      669.81
+     ],
+     [
+      314.4,
+      669.81
+     ]
+    ],
+    "normal": [
+     0.0,
+     1.0
+    ],
+    "note": "face oposta a parede de apoio (ws) escolhida pelo posicionamento",
+    "footprint": [
+     [
+      299.35,
+      669.41
+     ],
+     [
+      313.72,
+      669.41
+     ],
+     [
+      313.72,
+      643.83
+     ],
+     [
+      299.35,
+      643.83
+     ],
+     [
+      299.35,
+      669.41
+     ]
+    ],
+    "use_zone": [
+     [
+      299.16,
+      669.81
+     ],
+     [
+      313.9,
+      669.81
+     ],
+     [
+      313.9,
+      681.62
+     ],
+     [
+      299.16,
+      681.62
+     ],
+     [
+      299.16,
+      669.81
+     ]
+    ],
+    "portals": [
+     [
+      282.13,
+      657.55
+     ]
+    ],
+    "reachable_region_m": null,
+    "reachable_region": [
+     [
+      [
+       274.0,
+       646.7
+      ],
+      [
+       273.8,
+       647.1
+      ],
+      [
+       273.4,
+       647.6
+      ],
+      [
+       273.0,
+       648.0
+      ],
+      [
+       272.6,
+       648.4
+      ],
+      [
+       272.2,
+       648.7
+      ],
+      [
+       272.2,
+       684.3
+      ],
+      [
+       277.2,
+       684.3
+      ],
+      [
+       277.2,
+       671.7
+      ],
+      [
+       277.2,
+       671.4
+      ],
+      [
+       277.2,
+       671.4
+      ],
+      [
+       277.3,
+       670.8
+      ],
+      [
+       277.3,
+       670.7
+      ],
+      [
+       277.4,
+       670.2
+      ],
+      [
+       277.4,
+       670.1
+      ],
+      [
+       277.6,
+       669.6
+      ],
+      [
+       277.6,
+       669.5
+      ],
+      [
+       277.8,
+       669.0
+      ],
+      [
+       277.8,
+       668.9
+      ],
+      [
+       278.1,
+       668.4
+      ],
+      [
+       278.1,
+       668.4
+      ],
+      [
+       278.4,
+       667.9
+      ],
+      [
+       278.5,
+       667.9
+      ],
+      [
+       278.8,
+       667.4
+      ],
+      [
+       278.9,
+       667.4
+      ],
+      [
+       279.3,
+       667.0
+      ],
+      [
+       279.3,
+       666.9
+      ],
+      [
+       279.8,
+       666.6
+      ],
+      [
+       279.8,
+       666.5
+      ],
+      [
+       280.3,
+       666.2
+      ],
+      [
+       280.3,
+       666.2
+      ],
+      [
+       280.8,
+       665.9
+      ],
+      [
+       280.9,
+       665.9
+      ],
+      [
+       281.4,
+       665.7
+      ],
+      [
+       281.5,
+       665.7
+      ],
+      [
+       282.0,
+       665.5
+      ],
+      [
+       282.1,
+       665.5
+      ],
+      [
+       282.6,
+       665.4
+      ],
+      [
+       282.7,
+       665.4
+      ],
+      [
+       283.3,
+       665.3
+      ],
+      [
+       283.3,
+       665.3
+      ],
+      [
+       283.6,
+       665.3
+      ],
+      [
+       314.3,
+       665.3
+      ],
+      [
+       314.6,
+       665.3
+      ],
+      [
+       314.6,
+       665.3
+      ],
+      [
+       315.2,
+       665.4
+      ],
+      [
+       315.3,
+       665.4
+      ],
+      [
+       315.8,
+       665.5
+      ],
+      [
+       315.9,
+       665.5
+      ],
+      [
+       316.4,
+       665.7
+      ],
+      [
+       316.5,
+       665.7
+      ],
+      [
+       317.0,
+       665.9
+      ],
+      [
+       317.1,
+       665.9
+      ],
+      [
+       317.6,
+       666.2
+      ],
+      [
+       317.6,
+       666.2
+      ],
+      [
+       318.1,
+       666.5
+      ],
+      [
+       318.1,
+       666.6
+      ],
+      [
+       318.6,
+       666.9
+      ],
+      [
+       318.6,
+       667.0
+      ],
+      [
+       319.0,
+       667.4
+      ],
+      [
+       319.1,
+       667.4
+      ],
+      [
+       319.4,
+       667.9
+      ],
+      [
+       319.5,
+       667.9
+      ],
+      [
+       319.8,
+       668.4
+      ],
+      [
+       319.8,
+       668.4
+      ],
+      [
+       320.1,
+       668.9
+      ],
+      [
+       320.1,
+       669.0
+      ],
+      [
+       320.3,
+       669.5
+      ],
+      [
+       320.3,
+       669.6
+      ],
+      [
+       320.5,
+       670.1
+      ],
+      [
+       320.5,
+       670.2
+      ],
+      [
+       320.6,
+       670.5
+      ],
+      [
+       320.6,
+       649.7
+      ],
+      [
+       294.3,
+       649.7
+      ],
+      [
+       293.7,
+       649.7
+      ],
+      [
+       293.2,
+       649.6
+      ],
+      [
+       292.6,
+       649.5
+      ],
+      [
+       292.1,
+       649.3
+      ],
+      [
+       291.5,
+       649.0
+      ],
+      [
+       291.0,
+       648.7
+      ],
+      [
+       290.6,
+       648.4
+      ],
+      [
+       290.1,
+       648.0
+      ],
+      [
+       289.8,
+       647.6
+      ],
+      [
+       289.4,
+       647.1
+      ],
+      [
+       289.2,
+       646.7
+      ],
+      [
+       274.0,
+       646.7
+      ]
+     ]
+    ],
+    "bottleneck": {
+     "point": [
+      299.16,
+      667.55
+     ],
+     "segment": [
+      [
+       299.16,
+       665.29
+      ],
+      [
+       299.16,
+       669.81
+      ]
+     ]
+    }
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     }
+    ]
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "approval": "PENDING_FELIPE",
+    "sources": [
+     {
+      "source_tier": "E",
+      "source_type": "project_policy_proposal",
+      "source_ref": "proposta FP-054 F1B no chat (2026-10-23)",
+      "source_version_or_date": "2026-10-23",
+      "exact_claim_supported": "alvo de projeto proposto, ainda nao aprovado",
+      "applicability": "planta_74",
+      "limitations": "PENDING_FELIPE: nao usar como hard enquanto nao aprovado"
+     }
+    ]
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "approval": "N/A",
+    "sources": [
+     {
+      "source_tier": "D",
+      "source_type": "blog/portal de conteudo",
+      "source_ref": "https://www.auditorioibirapuera.com.br/qual-o-espaco-necessario-para-o-vaso-sanitario/",
+      "source_version_or_date": "ultima atualizacao 2023-05-18 (consultado 2026-10-23)",
+      "exact_claim_supported": "'considere a medida de 60 cm como distancia entre a bacia sanitaria e a parede da frente'; '60 a 80 cm de circulacao entre o vaso e outros objetos'",
+      "applicability": "banheiro residencial, recomendacao de conforto",
+      "limitations": "nao cita norma nem fonte; recomendacao geral, nao minimo obrigatorio"
+     }
+    ]
+   }
+  }
+ ]
+}

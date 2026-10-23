@@ -47,15 +47,16 @@ def test_registry_is_consistent_and_never_claims_normative():
 
 
 def test_threshold_rejects_bad_unit_provenance_and_order():
+    from core.functional_constraints import S_IBIRAPUERA, S_PROPOSAL
     with pytest.raises(ValueError):
-        Threshold(0.6, "cm", "COMFORT_GUIDE", "x")
+        Threshold(0.6, "cm", "COMFORT_GUIDE", (S_IBIRAPUERA,))
     with pytest.raises(ValueError):
-        Threshold(0.6, "m", "FOLK_WISDOM", "x")
+        Threshold(0.6, "m", "FOLK_WISDOM", (S_IBIRAPUERA,))
     with pytest.raises(ValueError):
-        Threshold(0.6, "m", "COMFORT_GUIDE", "")
-    t = Threshold(0.6, "m", "COMFORT_GUIDE", "x")
+        Threshold(0.6, "m", "COMFORT_GUIDE", ())
+    t = Threshold(0.6, "m", "COMFORT_GUIDE", (S_IBIRAPUERA,))
     with pytest.raises(ValueError):
-        FunctionalConstraint("x", "toilet", "front_depth", t, Threshold(0.5, "m", "PROJECT_POLICY", "x"), t)
+        FunctionalConstraint("x", "toilet", "front_depth", t, Threshold(0.5, "m", "PROJECT_POLICY", (S_PROPOSAL,)), t)
 
 
 def test_evaluation_requires_measure_or_missing_input():
@@ -219,10 +220,12 @@ def test_planta74_dry_run_is_complete_deterministic_and_report_only():
     with contextlib.redirect_stdout(io.StringIO()):
         boxes, _ = collect_boxes(con)
     snapshot = json.dumps(boxes, sort_keys=True)
-    a, b = fc.evaluate(con, boxes), fc.evaluate(con, copy.deepcopy(boxes))
+    a, b = fc.evaluate(con, boxes), fc.evaluate(con, copy.deepcopy(boxes))   # sem interfaces: fallback F1B (HEURISTIC)
     assert a == b and a["mode"] == "REPORT_ONLY" and a["registry_errors"] == []
     assert json.dumps(boxes, sort_keys=True) == snapshot                       # avaliar nao muda nenhuma caixa
-    assert a["evaluations"] == 20 and sum(a["summary"].values()) == 20
-    assert a["summary"]["BLOCKED_MISSING_INPUT"] == 0                          # toda peca registrada resolveu a face
+    assert a["evaluations"] == 23 and sum(a["summary"].values()) == 23
+    assert set(a["interface_bases"]) == {"HEURISTIC_GEOMETRY"}
+    blocked = [(r["room_id"], r["constraint"]) for r in a["rows"] if r["verdict"] == "BLOCKED_MISSING_INPUT"]
+    assert blocked == [("r005", "shower.entry_width"), ("r006", "shower.entry_width")]   # heuristica nao sabe o vao
     rows = {(r["room_id"], r["constraint"]): r for r in a["rows"]}
     assert rows[("r004", "kitchen_counter.reach_path")]["verdict"] in ("VALID", "PREFERRED")
