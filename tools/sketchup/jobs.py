@@ -290,9 +290,20 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
         return err
     from tools.furnish_apartment import collect_boxes
 
-    boxes, summary = collect_boxes(json.loads(con_p.read_text("utf-8")))
+    con = json.loads(con_p.read_text("utf-8"))
+    boxes, summary = collect_boxes(con)
     if not boxes:
         return {"status": "FAILED", "reason": "nenhum cômodo gerou móveis", "rooms": summary}
+    # pré-voo OBRIGATÓRIO (FP-054 F1-03): layout que reprova circulação/sobreposição não chega ao SketchUp
+    from tools.validation import layout_preflight
+
+    pre = layout_preflight.preflight(con, boxes, summary)
+    if not layout_preflight.allows_materialization(pre):
+        where = ", ".join(f"{b['room_id']}:{b['gate']}={b['status']}" for b in pre["blocking"])
+        return {"status": "BLOCKED_LAYOUT_GATE", "reason": f"layout reprovado antes do SketchUp ({where})",
+                "preflight": pre, "rooms": [{"room_id": r[0], "name": r[1], "type": r[2], "result": r[3], "boxes": r[4]}
+                                            for r in summary],
+                "next_step": "corrigir o layout do cômodo reprovado (a regra não é relaxada); ver risk register FP-054"}
     d.mkdir(parents=True, exist_ok=True)
     # o shell base costuma ser o .skp CANÔNICO (artifacts/): o SketchUp abre uma
     # cópia, nunca ele — em modo interactive a janela fica aberta depois do job
@@ -319,7 +330,7 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
         env.update(texture_env(style, (REPO / "assets/textures/procedural").resolve()))
     run = run_script(su, script=REPO / "tools" / "sketchup" / "furnish" / "place_layout_skp.rb", done_marker=files["log"],
                      skp_in=base_copy, env_extra=env, timeout_s=timeout_s, mode=mode)
-    out: dict[str, Any] = {**run, "boxes": len(boxes), "base_skp": str(base),
+    out: dict[str, Any] = {**run, "boxes": len(boxes), "base_skp": str(base), "preflight": pre,
                            "rooms": [{"room_id": r[0], "name": r[1], "type": r[2], "result": r[3], "boxes": r[4]}
                                      for r in summary]}
     if run["status"] != "DONE":
