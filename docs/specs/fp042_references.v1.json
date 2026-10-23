@@ -6257,6 +6257,48 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp054/f1_circulation_l2/l2_f1_circulation.py",
+      "blob_sha": "850982a5bb35cf2f103ec512509c3fe95e87e0fb",
+      "blob_size": 10227,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/README.md",
+      "blob_sha": "54a71480e13b5dc5ebb8c05c35c5751f8e5b5f9a",
+      "blob_size": 3579,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/fp047_report.json",
+      "blob_sha": "23cb87d68ff4fc4e565bd8ad7cd8d843b9025fc5",
+      "blob_size": 1229,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/negatives.json",
+      "blob_sha": "99e62cff4bfd42fbce327eda607d81631133d57f",
+      "blob_size": 1133,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/plain_trace.json",
+      "blob_sha": "e260bdaa39e745e47e0c34ba8bdd5b5bb591b066",
+      "blob_size": 10129,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/shaker_trace.json",
+      "blob_sha": "7e8edab8bf4fea50909dab6a3ec811b078821111",
+      "blob_size": 11498,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/summary.json",
+      "blob_sha": "96fac974597054efbc4fd1f0673e4b9037b8b211",
+      "blob_size": 5686,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/variant_sweep/planta_74/contact_sheet.png",
       "blob_sha": "c94419969de5f28d753e87572218c7a817100e24",
       "blob_size": 205290,

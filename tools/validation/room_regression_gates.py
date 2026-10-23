@@ -40,7 +40,7 @@ def run(consensus: dict, boxes: list[dict]) -> dict:
                                                          "detail": f"{type(exc).__name__}: {str(exc)[:120]}"}
             continue
         for name, check in sorted(result["checks"].items()):
-            if check.get("result") == "PASS":
+            if check.get("result") in ("PASS", "NOT_APPLICABLE"):     # N/A declarado nao e achado; BLOCKED e FAIL sao
                 continue
             failing = [p for p in check.get("portais", []) if str(p.get("status", "PASS")).startswith("FAIL")]
             findings[f"CIRC|{rid}|{name}"] = {

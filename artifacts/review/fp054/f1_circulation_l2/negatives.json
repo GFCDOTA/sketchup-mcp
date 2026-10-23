@@ -1,0 +1,27 @@
+{
+ "plain_circulation_blocked_missing_input": {
+  "state": "BLOCKED_PLAN_REFUSED",
+  "pids": [],
+  "reason": "KITCHEN_GATE_FAILED: circulation: circulation_gate do projeto: BLOCKED_MISSING_INPUT com a peca"
+ },
+ "shaker_circulation_blocked_missing_input": {
+  "state": "BLOCKED_PLAN_REFUSED",
+  "pids": [],
+  "reason": "KITCHEN_GATE_FAILED: circulation: circulation_gate do projeto: BLOCKED_MISSING_INPUT com a peca"
+ },
+ "plain_pose_outside_kitchen": {
+  "state": "BLOCKED_PLAN_REFUSED",
+  "pids": [],
+  "reason": "KITCHEN_GATE_FAILED: architecture: fora da cozinha 0.261600 m2; dentro de parede 0.000000 m2"
+ },
+ "shaker_architecture_change": {
+  "state": "BLOCKED_ARCHITECTURE_CHANGE",
+  "pids": [],
+  "reason": "o pedido altera arquitetura derivada do PDF (Hard Rule #1)"
+ },
+ "shaker_source_verified_for_another_recipe": {
+  "state": "BLOCKED_KNOWLEDGE_EVIDENCE",
+  "pids": [],
+  "reason": "o pedido declara source_verified=true para a recipe 'cabinet.countertop-separate-and-bevel' da fonte 'yt-cabinet-tips-2021', mas a revisao registrada cobre 'cabinet.front-gaps-and-profiles' (03:13-04:29) (a fonte nunca e presumida)"
+ }
+}

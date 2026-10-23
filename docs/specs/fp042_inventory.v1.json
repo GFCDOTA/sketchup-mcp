@@ -8383,6 +8383,55 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
+      "path": "artifacts/review/fp054/f1_circulation_l2/l2_f1_circulation.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/fp047_report.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/negatives.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/plain_trace.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/shaker_trace.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f1_circulation_l2/summary.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
       "path": "artifacts/variant_sweep/planta_74/contact_sheet.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -9144,6 +9193,15 @@
     },
     {
       "path": "core/spatial_semantics.py",
+      "domain": "shared_domain",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "core_cross_room_domain",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "core/constraint_result.py",
       "domain": "shared_domain",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -14883,6 +14941,15 @@
     },
     {
       "path": "tests/test_fp054_baseline.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_fp054_f1_circulation_contract.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",

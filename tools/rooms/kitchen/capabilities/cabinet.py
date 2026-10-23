@@ -89,9 +89,9 @@ def plan_kitchen_cabinet(consensus: dict, room_id: str, request: dict) -> dict:
     if blocked > AREA_TOL_M2:
         return refuse(_gate("circulation", False, f"invade zona de porta em {blocked:.6f} m2"))
     verdict = circulation_gate.gate(consensus, [b for b in existing if not b.get("decorative")] + _boxes_for_plan(plan), room_id)
-    if verdict["result"] != "PASS":
-        return refuse(_gate("circulation", False, "circulation_gate do projeto reprova com a peca"))
-    plan["gates"].append(_gate("circulation", True, "zonas de porta livres e circulation_gate PASS com a peca"))
+    if verdict["result"] not in ("PASS", "NOT_APPLICABLE"):          # FAIL e BLOCKED_MISSING_INPUT recusam (FP-054 #380)
+        return refuse(_gate("circulation", False, f"circulation_gate do projeto: {verdict['result']} com a peca"))
+    plan["gates"].append(_gate("circulation", True, circulation_gate.verdict_note(verdict, "com a peca")))
     return plan
 
 
