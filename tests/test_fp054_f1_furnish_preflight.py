@@ -63,10 +63,13 @@ def test_rooms_without_furniture_are_not_checked():
 
 
 @pytest.mark.planta74_scale
-def test_furnish_refuses_the_real_apartment_while_suite01_blocks_its_corridor(tmp_path):
-    """A planta real HOJE: Suite 01 reprova (cadeira da escrivaninha fecha a passagem). Nada pode subir o SketchUp."""
+def test_furnish_refuses_the_real_apartment_while_suite01_blocks_its_corridor(tmp_path, monkeypatch):
+    """Layout ORIGINAL da Suite 01 (sem a decisao #381): a cadeira da escrivaninha fecha a passagem. Nada pode subir o
+    SketchUp. (Com a decisao do Felipe aplicada o apartamento passa — tests/test_fp054_suite01_decision.py.)"""
     from tests.test_sketchup_specialist import FakeSystem, su_with
+    from tools.rooms.bedroom import layout_decisions
     from tools.sketchup import jobs
+    monkeypatch.setattr(layout_decisions, "DECISIONS", ())
 
     def never(cmd, env, handle):
         raise AssertionError("SketchUp subiu com layout reprovado")
@@ -74,3 +77,30 @@ def test_furnish_refuses_the_real_apartment_while_suite01_blocks_its_corridor(tm
     assert r["status"] == "BLOCKED_LAYOUT_GATE", r.get("status")
     assert {"room_id": "r000", "gate": "circulation"} in [{k: b[k] for k in ("room_id", "gate")} for b in r["preflight"]["blocking"]]
     assert not (tmp_path / "out").exists()
+
+
+@pytest.mark.planta74_scale
+def test_preflight_refuses_furniture_inside_a_wall():
+    """Contraprova real (#381): subir o conjunto da cama 2 in na Suite 01 punha o criado-mudo de cima 1,3-1,8 dm2 dentro da
+    parede norte e o pre-voo deixava passar (so media corredor e sobreposicao)."""
+    import contextlib
+    import copy
+    import io
+    import json
+
+    from tools.furnish_apartment import CONSENSUS, collect_boxes
+    from tools.rooms.bedroom import layout_decisions as ld
+    con = json.loads(CONSENSUS.read_text("utf-8"))
+    bad = copy.deepcopy(ld.DECISIONS[0])
+    bad["shift"] = {"names": ["cama_queen", "cabeceira", "criado_mudo_dir", "criado_mudo_esq"],
+                    "dy": {"value": -2.0, "unit": "in", "origin": "user_request"}}
+    saved, ld.DECISIONS = ld.DECISIONS, (bad,)
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            boxes, summary = collect_boxes(con)
+    finally:
+        ld.DECISIONS = saved
+    pre = lp.preflight(con, boxes, summary)
+    assert not lp.allows_materialization(pre)
+    hit = [b for b in pre["blocking"] if b["room_id"] == "r000" and b["gate"] == "room_collisions"]
+    assert hit and any("Criado-mudo 2" in w for w in hit[0]["reasons"]["wall_penetration"])

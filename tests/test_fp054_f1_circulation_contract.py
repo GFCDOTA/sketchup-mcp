@@ -163,7 +163,7 @@ def test_planta74_single_portal_rooms_are_not_applicable_and_others_keep_their_v
     with contextlib.redirect_stdout(io.StringIO()):
         boxes, _ = collect_boxes(con)
     got = {rid: cg.gate(con, boxes, rid)["result"] for rid in ("r000", "r001", "r002", "r003", "r004", "r005", "r006", "r007")}
-    assert got == {"r000": "FAIL",                     # #381: Suite 01 continua reprovada (nao e escopo desta correcao)
+    assert got == {"r000": "PASS",                     # #381: Suite 01 corrigida pela decisao do Felipe (layout_decisions)
                    "r001": "PASS", "r002": "PASS", "r003": "PASS",
                    "r004": "NOT_APPLICABLE", "r005": "NOT_APPLICABLE", "r006": "NOT_APPLICABLE", "r007": "NOT_APPLICABLE"}
 
