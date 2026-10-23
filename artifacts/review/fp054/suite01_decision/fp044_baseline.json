@@ -1,0 +1,58 @@
+{
+ "schema_version": "fp044_baseline.v1",
+ "head": "ad310e5e92e8aae84841f3942bc8a39a617b9b43",
+ "room_box_hashes": {
+  "A.S. | TERRACO SOCIAL | TERRACO TECNICO": "f141af775c81a84c5d8bfe4fd6a926d8f5c2e2da39940191d5c70a41266c099a",
+  "BANHO 01": "5a0cf20fce3fc167647d4f18ed63f5cef25dd7ffe922b45c5d8f1a332dac3760",
+  "BANHO 02": "6af8f46a8430516986e00e186ce491436efeb1df360f20d0d21fd09bd6309921",
+  "COZINHA": "2feb09d792c69decddf09eeb646281019fd0876059334e4b1b35d3b622e00229",
+  "LAVABO": "b62b459cde756bc8a545b1ecf9a6c977664501e5911a668db3e484084f954ec4",
+  "SALA DE JANTAR | SALA DE ESTAR": "6493151645b56fe54b08536b464c63cda07cf88127fb49741cc1af728d0f9999",
+  "SUITE 01": "deed46cb5e35ac6698fcaa7ad4f8395b94758977f7ef3ec652e930451749d6a3",
+  "SUITE 02": "f9319f6bae7643553b0fe7204196d245bf0e35edef185779ea67183b15a49d84"
+ },
+ "canonical_sha256": {
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/geometry_report.json": "f338d56e9848ef675d6f4129d64d7b5d37237b9ea884a170249e5f22c64a3af5",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "69dbbf0394b5197321e511d5518cf6bb0ae6772879a6edfb285d4be36f3fe2be",
+  "fixtures/quadrado/consensus_with_window.json": "d630a795d7e9b953048fa7326ac4eb77e997b429b9cdd04cda4cefa985d72c22"
+ },
+ "root_entries": [
+  ".ai_bridge",
+  ".claude",
+  ".dockerignore",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".impeccable",
+  "CLAUDE.md",
+  "README.md",
+  "artifacts",
+  "assets",
+  "core",
+  "docker-compose.rag.yml",
+  "docs",
+  "fixtures",
+  "interior",
+  "ops",
+  "projects",
+  "pyproject.toml",
+  "references",
+  "tests",
+  "tools",
+  "uv.lock"
+ ],
+ "tools_py_top_level": [
+  "tools/circulation_gate.py",
+  "tools/correction_loop.py",
+  "tools/finding_router.py",
+  "tools/furnish_apartment.py",
+  "tools/furnish_plan.py",
+  "tools/furniture_overlap_gate.py",
+  "tools/geometry_sanity.py",
+  "tools/room_type.py",
+  "tools/spatial_model.py",
+  "tools/trace_view.py"
+ ]
+}

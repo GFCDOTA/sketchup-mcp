@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PT_TO_M = 0.0259
 # Achado REAL e preexistente em develop@23939d9 (medido nesta fatia, nao introduzido por ela): a circulacao da SUITE 01 reprova
 # o corredor principal (portal 2 sem passagem com a mobilia). Fica listado; mudar isto exige olhar o gate, nao editar o teste.
-KNOWN_PREEXISTING = {"CIRC|r000|corredor_principal"}
+KNOWN_PREEXISTING: set[str] = set()   # CIRC|r000|corredor_principal resolvido pela decisao do Felipe (#381, FP-054)
 
 
 def _f(gate, room, metric, key=None):

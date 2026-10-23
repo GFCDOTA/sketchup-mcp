@@ -2838,6 +2838,36 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/model_iso_after.png",
+      "blob_sha": "0dafcc1b871354607c6a18f69205046169975fa2",
+      "blob_size": 245680,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/model_top_after.png",
+      "blob_sha": "717d0e6954b6ebe572ee963c3898f9656948677b",
+      "blob_size": 87763,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/side_by_side_before_after.png",
+      "blob_sha": "577cf4b64034a3a3c4d617a86c785ef0416b64ca",
+      "blob_size": 193089,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/suite01_top_after.png",
+      "blob_sha": "b64bb3e35549f4cbef2ac9ea37404c59eb24d56f",
+      "blob_size": 158845,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fix-fp054-suite01-circulation/final/planta_74_after.skp",
+      "blob_sha": "a6cc90bfd3971df0a1a5f390d7a874ddd976ce25",
+      "blob_size": 3355264,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/scenes/living_room_modern_warm_minimal/contact_sheet.png",
       "blob_sha": "2c4c31694396fcd03997d46fa844dd6ae306d53a",
       "blob_size": 456493,

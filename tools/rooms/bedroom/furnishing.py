@@ -22,7 +22,13 @@ def bedroom_designer_boxes(con, room_id):
     sm, out = bedroom_designer.run(con, room_id, minimalist=True)
     if out.get("result") != "OK":
         return None, out
-    items = out["_winner_items"]
+    # decisoes do Felipe para ESTE comodo (origem user_request, ex. #381 Suite 01) sobre a proposta do designer
+    from tools.rooms.bedroom import layout_decisions
+    items, applied = layout_decisions.apply(con, room_id, out["_winner_items"])
+    if applied:
+        out["applied_decisions"] = applied
+        for d in applied:
+            print(f"[furnish-apt] DECISAO {d['id']} ({d['issue']}, {d['origin']}) aplicada em {room_id}")
     boxes = bedroom_designer._items_to_boxes(items)
     # escala via ENV (default = wall-thickness 0.0352); casa com spatial_model/geometry_sanity.
     # sem isso, footprint dimensionado no PT_TO_M novo (0.0259) era reconvertido a 0.0352 ->

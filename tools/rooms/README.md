@@ -41,8 +41,8 @@ capacidade só existe com símbolo + teste (+ prova L2 para `L2_PASS`). Ver `.cl
 - **Escopo:** Quartos e suites: cama, criados-mudos e guarda-roupa. Planeja em caixas/pecas sobre o shell; nao altera a arquitetura.
 - **Capacidades:** `bedroom.layout.boxes` (L1_PASS); `bedroom.bed.build` (L1_PASS); `bedroom.wardrobe.build` (L1_PASS); `bedroom.wardrobe.gate` (L1_PASS)
 - **Fragmentos do especialista:** `bed`, `layout`, `nightstand`, `wardrobe`
-- **Arquivos (20):**
-  - raiz do módulo: `__init__.py`, `bed_class.py`, `designer.py`, `furnishing.py`, `layout.py`, `specialist.md`, `specialist.v1.json`
+- **Arquivos (21):**
+  - raiz do módulo: `__init__.py`, `bed_class.py`, `designer.py`, `furnishing.py`, `layout.py`, `layout_decisions.py`, `specialist.md`, `specialist.v1.json`
   - `capabilities/`: `__init__.py`, `make_synthetic_bedrooms.py`, `place_bedroom_skp.py`
   - `fragments/`: `bed.fragment.v1.json`, `layout.fragment.v1.json`, `nightstand.fragment.v1.json`, `wardrobe.fragment.v1.json`
   - `knowledge/`: `index.v1.json`
