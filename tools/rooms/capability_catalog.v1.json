@@ -392,7 +392,7 @@
         ]
       },
       "validation": {
-        "state": "L1_PASS",
+        "state": "L2_PASS",
         "fixtures": [
           "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
           "fixtures/synthetic_cabinets/valid_a_base_600.json",
@@ -402,7 +402,26 @@
           "tests/test_kitchen_cabinet_adapter.py",
           "tests/test_kitchen_cabinet_flow.py"
         ],
-        "evidence": []
+        "evidence": [
+          {
+            "ref": "artifacts/review/fp054/f1_circulation_l2/README.md",
+            "sketchup_version": "26.0.429",
+            "commit": "4ad1f33",
+            "scope": "cozinha da planta_74 (copia do .skp mobiliado) depois do contrato novo do circulation_gate (FP-054 #380): gabinete de frentes lisas salvo/reaberto/inspecionado (42 checks), circulacao registrada NOT_APPLICABLE (1 portal) e nao PASS, negativos sem SketchUp (circulacao BLOCKED recusa, pose fora), strict_identity FP-047, canonicos intactos; SketchUp 26.0.429; NAO e veredito visual nem projeto de cozinha",
+            "symbol_digests": {
+              "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet": "fc722abf24946c406d6cc688fba13becab29364d45dc7ebee3a056daa6fdf992",
+              "python:tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet": "128a2cad06b8bc61dbacfa200bcbfae1ca4596c13ab51df38623ce39061709ac",
+              "python:tools.rooms.kitchen.capabilities.cabinet_flow.run_request": "9c7b16cbc15b256f23844af7f8d2216a65083b6f991d9a952458bc6403b4c166",
+              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "80b8bd953b0516ad10443be865d73e21b4d15c87b138cddbcdb82c75431063cf"
+            },
+            "closure_digests": {
+              "python:tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet": "b47d4132e19def0c55a351b880a3dd52f699c3841b3b1b25dbfe1fd9e7de1af0",
+              "python:tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet": "59bd8958df5ecc20e38f21edd9b875e0c2e9db5581ef3524d6423ac32a70455c",
+              "python:tools.rooms.kitchen.capabilities.cabinet_flow.run_request": "875962afcfc9f17ddb967eeb46f221a1c3f54e4b35f93898b8ea3f9c275f0fe3",
+              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "f14513b1221c6a7a8b0168afb6112fc8d18c066b4f37edd141954ddfffb7e507"
+            }
+          }
+        ]
       },
       "visual": {
         "state": "NOT_REVIEWED"
@@ -551,7 +570,7 @@
         ]
       },
       "validation": {
-        "state": "L1_PASS",
+        "state": "L2_PASS",
         "fixtures": [
           "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
           "artifacts/review/fp046/promotion_l2/request.json"
@@ -559,7 +578,24 @@
         "tests": [
           "tests/test_fp046_kitchen_shaker.py"
         ],
-        "evidence": []
+        "evidence": [
+          {
+            "ref": "artifacts/review/fp054/f1_circulation_l2/README.md",
+            "sketchup_version": "26.0.429",
+            "commit": "4ad1f33",
+            "scope": "cozinha da planta_74 (copia do .skp mobiliado) depois do contrato novo do circulation_gate (FP-054 #380): gabinete + Shaker salvos/reabertos/inspecionados (50 checks), circulacao do pai e da composicao registrada NOT_APPLICABLE, negativos sem SketchUp (circulacao BLOCKED recusa, arquitetura, source_verified de outra recipe), strict_identity FP-047, canonicos intactos; SketchUp 26.0.429; NAO e veredito visual nem projeto de cozinha",
+            "symbol_digests": {
+              "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker": "2b656cce571da5a63c02bc68a3c74d39d38ebaa935dbd434e1e90c1a4d457c3a",
+              "python:tools.rooms.kitchen.capabilities.shaker_flow.run_request": "e6d13a4fdb57e6b2712aec88721bc67dd5cf34ac996d0acd8510d96080f4d44e",
+              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "e9e99a4199eac697b951030d8e325c72e81dd55800d64808ea39e95d4b5f15d4"
+            },
+            "closure_digests": {
+              "python:tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker": "9239a3732d86eb2df21a37fa13a8f9fe63c40f53b4296021d683fd05395da9db",
+              "python:tools.rooms.kitchen.capabilities.shaker_flow.run_request": "0b5ba03772d9f70d47efe17889df87b1736c3ecff4b87f730e3692b62e5f3d9d",
+              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "c005937b797a31880f4a991ca9d7748cae9c57dce4017b9f71726fe24777eb38"
+            }
+          }
+        ]
       },
       "visual": {
         "state": "NOT_REVIEWED"

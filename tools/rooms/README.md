@@ -10,7 +10,7 @@ capacidade só existe com símbolo + teste (+ prova L2 para `L2_PASS`). Ver `.cl
 
 - **Papel:** planeja e constrói · estado do perfil `LEGACY_PROVIDER_PRESENT`
 - **Escopo:** Cozinha: layout linear em caixas/pecas com a pia presa a parede oeste do PDF; gabinete parametrico de frentes lisas e porta Shaker (moldura + painel rebaixado) sobre ele. Gavetas e ferragens ainda NAO existem como capacidade.
-- **Capacidades:** `kitchen.layout.galley` (L2_PASS); `kitchen.sink-anchor-guard` (L1_PASS); `kitchen.ergonomics.audit` (UNTESTED); `kitchen.cabinet.plain-fronts` (L1_PASS); `shared.cabinet.parametric` (L2_PASS, shared); `kitchen.cabinet.shaker-door` (L1_PASS); `shared.cabinet.front.shaker` (L2_PASS, shared)
+- **Capacidades:** `kitchen.layout.galley` (L2_PASS); `kitchen.sink-anchor-guard` (L1_PASS); `kitchen.ergonomics.audit` (UNTESTED); `kitchen.cabinet.plain-fronts` (L2_PASS); `shared.cabinet.parametric` (L2_PASS, shared); `kitchen.cabinet.shaker-door` (L2_PASS); `shared.cabinet.front.shaker` (L2_PASS, shared)
 - **Lacunas:** `bind.kitchen.drawer` — gaveta e ferragens: nao ha builder de caixa de gaveta nem fixture L2; so existe a recipe; `bind.kitchen.countertop` — tampo separado com chanfro: sem builder nem fixture; `bind.kitchen.sink-cutout` — recorte de cuba e canal umido: sem builder nem fixture
 - **Fragmentos do especialista:** `cabinetry`, `countertop_and_sink`, `ergonomics`, `layout_and_placement`, `reference_truth`
 - **Arquivos (27):**
