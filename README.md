@@ -103,21 +103,27 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 
 ## Rodar
 
+`uv.lock` é a fonte reproduzível das dependências. Antes de trabalhar numa cópia nova, ou depois de mudança em
+`pyproject.toml` / `uv.lock`, sincronize o ambiente canônico:
+
 ```bash
-pip install -e ".[dev,mcp]"
+uv sync --locked --extra dev --extra mcp
 
 # testes (Python puro). PT_TO_M é lido UMA vez por processo: duas invocações, uma por escala.
-python -m pytest tests/ -q -m "not planta74_scale"
-PT_TO_M=0.0259 python -m pytest tests/ -q -m planta74_scale      # PowerShell: $env:PT_TO_M="0.0259"; …
+uv run --no-sync python -m pytest tests/ -q -m "not planta74_scale"
+PT_TO_M=0.0259 uv run --no-sync python -m pytest tests/ -q -m planta74_scale      # PowerShell: $env:PT_TO_M="0.0259"; …
 
 # gates determinísticos (CI / pre-commit)
-python -m tools.validation.run_deterministic_gates --fixture planta_74
-python -m tools.validation.run_deterministic_gates --fixture quadrado
+uv run --no-sync python -m tools.validation.run_deterministic_gates --fixture planta_74
+uv run --no-sync python -m tools.validation.run_deterministic_gates --fixture quadrado
 
 # servidor MCP (stdio) e o handshake de prova
-python -m tools.mcp_server.smoke
-python -m tools.mcp_server.stdio_check
+uv run --no-sync python -m tools.mcp_server.smoke
+uv run --no-sync python -m tools.mcp_server.stdio_check
 ```
+
+O CI roda `uv lock --check` e instala somente a resolução travada pelo `uv.lock`; um `pyproject.toml`
+alterado sem regenerar o lock falha antes das suítes.
 
 Para **gerar `.skp`** use as tools `su_*` do MCP (`su_build_shell`, `su_furnish`, `su_render`, `su_apply_edits`,
 `su_inspect`, `su_render_vray`): cada uma sobe uma instância própria do SketchUp, grava em `runs/` e só fecha o PID
