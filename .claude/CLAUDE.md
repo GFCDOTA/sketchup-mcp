@@ -60,6 +60,15 @@ Rodar sempre de dentro do repo (rodar da raiz do workspace cria caches lá).
 - `human_review` de uma fonte vale para **uma recipe e um trecho**; outra recipe do mesmo vídeo não herda.
 - Capacidade que não existe **recusa com o motivo** (`BLOCKED_*`); não contornar por outra tool.
 
+## Documentação de tecnologia externa (DOC-EXT)
+
+Antes de mexer em código que depende de lib/SDK/API/CLI/protocolo externo (SketchUp Ruby API, MCP, shapely, pytest…):
+versão local **primeiro** (`uv.lock` → `pyproject.toml` → runtime), depois a doc dessa versão no MCP `context7`
+(`resolve-library-id` → `query-docs` com ID versionado), só então o código; sem doc → registrar a lacuna, doc oficial por outro
+meio ou `BLOCKED: documentation unavailable`. Evidência em `docs/engineering/evidence/` (gate offline DOC-EXT-01). Context7
+**não** é autoridade de domínio (layout, circulação, SPECs, `layout_decisions`, D-xxx). Política:
+`docs/engineering/external-documentation-policy.md`.
+
 ## Todo arquivo novo versionado
 
 Registrar no mesmo PR em `docs/specs/fp042_inventory.v1.json`; evidência em `artifacts/review/**` também em

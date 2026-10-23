@@ -30,6 +30,23 @@ Format ideal:>
 | `geometry_report.json` | novo campo Y | builder |
 | `artifacts/<plant>/<plant>.skp` | novo group Z | Ruby builder |
 
+## External dependencies (opcional — só se a feature toca tecnologia externa)
+
+<Omitir a seção inteira em feature de domínio puro (layout, circulação, gates). Quando tocar lib/SDK/API/CLI externa,
+seguir `docs/engineering/external-documentation-policy.md` (DOC-EXT-01) e declarar:>
+
+```yaml
+external_dependencies:
+  documentation_policy: context7_when_external_api_is_touched
+  dependencies:
+    - name: <lib/sdk/cli>
+      version: <versão local>
+      version_source: <uv.lock|pyproject.toml|runtime|other>
+      docs_required: true
+      context7_library_id: <ex. /modelcontextprotocol/python-sdk/v1.28.0 | null se lacuna>
+      evidence: docs/engineering/evidence/<data>_<dependencia>.json
+```
+
 ## Detection heuristic / algorithm
 
 <Como o builder identifica/lida com a situação que motivou esta

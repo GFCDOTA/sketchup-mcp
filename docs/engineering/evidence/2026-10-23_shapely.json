@@ -1,0 +1,16 @@
+{
+ "schema_version": "external_doc_evidence.v1",
+ "dependency": "shapely",
+ "version": "2.1.2",
+ "version_source": "uv.lock",
+ "documentation_provider": "context7",
+ "library_id": "/shapely/shapely",
+ "version_match": "unversioned",
+ "apis_verified": [
+  "shapely.prepare",
+  "shapely.intersects (vetorizado, 1o argumento preparado)"
+ ],
+ "checked_on": "2026-10-23",
+ "verified": true,
+ "notes": "Smoke test DOC-EXT. Context7 so tem a doc da branch main do shapely (sem a tag 2.1.2): a docstring de intersects documenta a otimizacao com prepare() no 1o argumento. Por ser `unversioned`, as APIs foram conferidas no runtime local 2.1.2 (hasattr(shapely, 'prepare') = True; usadas em tools/rooms/living/furnishing.py). Nenhum codigo alterado."
+}

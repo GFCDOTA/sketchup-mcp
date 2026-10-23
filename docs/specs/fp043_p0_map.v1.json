@@ -23,6 +23,7 @@
     ".dockerignore",
     ".gitattributes",
     ".gitignore",
+    ".mcp.json",
     "CLAUDE.md",
     "README.md",
     "docker-compose.rag.yml",
@@ -123,20 +124,20 @@
     }
   ],
   "summary": {
-    "items": 190,
+    "items": 191,
     "by_disposition": {
-      "retain": 30,
+      "retain": 31,
       "move": 158,
       "decision": 2
     },
     "by_risk": {
-      "low": 55,
+      "low": 56,
       "medium": 72,
       "high": 63
     },
     "by_phase": {
       "P1": 2,
-      "P2": 14,
+      "P2": 15,
       "P3": 1,
       "P4": 170,
       "P5": 1,
@@ -4835,6 +4836,29 @@
         "counts": {
           "tests": 1
         }
+      }
+    },
+    {
+      "item": ".mcp.json",
+      "kind": "file",
+      "disposition": "retain",
+      "destination": null,
+      "phase": "P2",
+      "rationale": "MCP de desenvolvimento dos agentes (Context7, docs de libs externas) no escopo do projeto; não é runtime nem CI. Política: docs/engineering/external-documentation-policy.md (2026-10-23).",
+      "stale_note": null,
+      "risk": "low",
+      "risk_reasons": [],
+      "depth_sensitive": false,
+      "consumers": {
+        "counts": {
+          "code": 1,
+          "docs": 2,
+          "tests": 2
+        },
+        "tests_sample": [
+          "tests/test_fp043_p0_map.py",
+          "tests/test_fp044_root_guard.py"
+        ]
       }
     }
   ]

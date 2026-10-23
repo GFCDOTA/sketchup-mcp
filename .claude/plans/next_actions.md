@@ -12,6 +12,9 @@
 > Pré-voo agora inclui parede/giro de porta. Próximo: F1 restante (arco de porta das cadeiras, alcance de portal único) —
 > `docs/handoffs/2026-10-23_fp054_f0_f1_handoff.md`.
 
+> **DOC-EXT (2026-10-23):** Context7 em `.mcp.json` (dev, não runtime); política `docs/engineering/external-documentation-policy.md`;
+> follow-up: sincronizar `uv.lock` × venv (mcp, matplotlib, ruff divergem; `hypothesis` fora do lock) — `docs/engineering/external-dependencies-matrix.md`.
+
 1. **T0.2 restante:** integrar tools.sketchup.inspect_workspace.plan_inspect_workspace (#373) em cabinet.sketchup.inspect;
    refazer L2 Windows de todas as capacidades afetadas pelo símbolo/fecho R-18. PREP L1 pronta, integração NÃO feita.
 2. **T0.5 restante:** ligar gate de placement FP-050 a cabinet_flow e shaker_flow sem bypass;
