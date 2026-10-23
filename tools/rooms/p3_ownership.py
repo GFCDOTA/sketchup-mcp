@@ -96,6 +96,7 @@ OWNER_TABLE = {
   "tools/rooms/living/sofa_class.py": "tools.rooms.living",
   "tests/test_fp042_furniture_classes_ownership.py": "regression_test_suite",
   "tools/rooms/bedroom/layout_decisions.py": "tools.rooms.bedroom",
+  "tools/rooms/bathroom/solver_policy.py": "tools.rooms.bathroom",
   "tools/rooms/p3_ownership.py": "cross_room_ownership_audit",
   "tests/test_fp042_p3_ownership.py": "regression_test_suite"
 }

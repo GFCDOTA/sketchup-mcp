@@ -13,8 +13,8 @@ capacidade só existe com símbolo + teste (+ prova L2 para `L2_PASS`). Ver `.cl
 - **Capacidades:** `kitchen.layout.galley` (L2_PASS); `kitchen.sink-anchor-guard` (L1_PASS); `kitchen.ergonomics.audit` (UNTESTED); `kitchen.cabinet.plain-fronts` (L2_PASS); `shared.cabinet.parametric` (L2_PASS, shared); `kitchen.cabinet.shaker-door` (L2_PASS); `shared.cabinet.front.shaker` (L2_PASS, shared)
 - **Lacunas:** `bind.kitchen.drawer` — gaveta e ferragens: nao ha builder de caixa de gaveta nem fixture L2; so existe a recipe; `bind.kitchen.countertop` — tampo separado com chanfro: sem builder nem fixture; `bind.kitchen.sink-cutout` — recorte de cuba e canal umido: sem builder nem fixture
 - **Fragmentos do especialista:** `cabinetry`, `countertop_and_sink`, `ergonomics`, `layout_and_placement`, `reference_truth`
-- **Arquivos (28):**
-  - raiz do módulo: `README.md`, `__init__.py`, `anchor_rules.py`, `functional_interfaces.py`, `layout.py`, `specialist.md`, `specialist.v1.json`
+- **Arquivos (29):**
+  - raiz do módulo: `README.md`, `__init__.py`, `anchor_rules.py`, `functional_interfaces.py`, `layout.py`, `solver_policy.py`, `specialist.md`, `specialist.v1.json`
   - `capabilities/`: `__init__.py`, `bake_theme.py`, `cabinet.py`, `cabinet_flow.py`, `ruby/recolor_kitchen_theme.rb`, `ruby/render_kitchen_angles.rb`, `shaker.py`, `shaker_flow.py`, `vray.py`
   - `fragments/`: `cabinetry.fragment.v1.json`, `countertop_and_sink.fragment.v1.json`, `ergonomics.fragment.v1.json`, `layout_and_placement.fragment.v1.json`, `reference_truth.fragment.v1.json`
   - `knowledge/`: `index.v1.json`
@@ -54,8 +54,8 @@ capacidade só existe com símbolo + teste (+ prova L2 para `L2_PASS`). Ver `.cl
 - **Escopo:** Banheiros e lavabo: louca e acessorios; sem marcenaria. Planeja em caixas/pecas sobre o shell.
 - **Capacidades:** `bathroom.layout.boxes` (L1_PASS); `bathroom.wet-room.guard` (L1_PASS)
 - **Fragmentos do especialista:** `layout`, `vanity`, `wet_room`
-- **Arquivos (13):**
-  - raiz do módulo: `__init__.py`, `layout.py`, `specialist.md`, `specialist.v1.json`, `validation.py`
+- **Arquivos (14):**
+  - raiz do módulo: `__init__.py`, `layout.py`, `solver_policy.py`, `specialist.md`, `specialist.v1.json`, `validation.py`
   - `capabilities/`: `__init__.py`, `estudio_banheiro_scene.py`, `render_banho_auto.py`, `render_banho_vray.py`
   - `fragments/`: `layout.fragment.v1.json`, `vanity.fragment.v1.json`, `wet_room.fragment.v1.json`
   - `knowledge/`: `index.v1.json`
