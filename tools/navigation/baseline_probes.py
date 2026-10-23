@@ -498,8 +498,8 @@ def dining_trace() -> dict:
         polys = [Polygon([(v[0], v[1]) for v in b["corners"]]) for b in parts if b.get("corners")]
         if occ_u is not None and unary_union(polys).intersection(occ_u).area > 50:
             return "REJECT_OVERLAP_GT_50IN2", None
-        top = unary_union([Polygon(b["corners"]) for b in place_parts(dtp, (cx, cy), (0.0, 1.0)) if b.get("corners")])
-        hit = any(top.intersection(sw).area > 1e-8 for sw in room_swings)
+        dining = unary_union(polys)                   # mesa + cadeiras (FP-054 R-06: o furnishing confere as duas)
+        hit = any(dining.intersection(sw).area > 1e-8 for sw in room_swings)
         return "GATE", hit
 
     bx0, by0, bx1, by1 = cell.bounds
