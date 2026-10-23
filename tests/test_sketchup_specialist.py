@@ -437,6 +437,10 @@ def test_furnish_abre_copia_e_nunca_o_shell_base(monkeypatch, tmp_path):
     fake.collect_boxes = lambda con: ([{"kind": "bed", "x0": 0, "y0": 0, "x1": 1, "y1": 1}],
                                       [("r1", "Quarto", "BEDROOM", "PASS", 1)])
     monkeypatch.setitem(sys.modules, "tools.furnish_apartment", fake)
+    # este teste e sobre abrir a COPIA; o consensus "{}" nao tem comodo para o pre-voo (FP-054 F1-03) medir — o pre-voo
+    # tem cobertura propria em tests/test_fp054_f1_furnish_preflight.py
+    from tools.validation import layout_preflight
+    monkeypatch.setattr(layout_preflight, "preflight", lambda con, boxes, rooms: {"status": "PASS", "rooms": [], "blocking": []})
     base = tmp_path / "planta_74.skp"
     base.write_bytes(b"CANONICO")
     con = tmp_path / "consensus.json"
