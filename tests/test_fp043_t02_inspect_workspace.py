@@ -49,7 +49,10 @@ def test_symlink_outside_runs_is_blocked(tmp_path):
     source = tmp_path / "artifacts/source.skp"
     source.parent.mkdir()
     source.write_bytes(b"x")
-    (tmp_path / "runs").symlink_to(destination, target_is_directory=True)
+    try:
+        (tmp_path / "runs").symlink_to(destination, target_is_directory=True)
+    except OSError as exc:   # Windows sem Developer Mode/admin: WinError 1314; o CI (Linux) cobre o caso
+        pytest.skip(f"sistema nega symlink: {exc}")
     with pytest.raises(ValueError, match="escaped runs"):
         plan_inspect_workspace(source, job="cabinet_inspect", repo=tmp_path, stamp="fixed_test")
 
