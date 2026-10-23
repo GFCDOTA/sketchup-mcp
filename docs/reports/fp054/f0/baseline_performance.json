@@ -1,0 +1,731 @@
+{
+ "schema_version": "fp054_baseline_performance.v1",
+ "head": "2556f4118537ff9b25ae08b4ceb1f90733e189bd",
+ "hardware": {
+  "machine": "AMD64",
+  "processor": "AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD",
+  "cpu_count": 16,
+  "ram_gb": 61.6
+ },
+ "python": "3.12.13",
+ "timer": "time.perf_counter",
+ "memory": "tracemalloc peak (Python, nao RSS)",
+ "percentile": "posto mais proximo",
+ "synthetic": [
+  {
+   "scene": "S1_4m_n10",
+   "side_m": 4.0,
+   "n_furniture": 10,
+   "seed": 1,
+   "size_range_m": [
+    0.3,
+    0.8
+   ],
+   "pt_to_m": 0.03518518518518518,
+   "input_sha": "095a7fecb6c37635",
+   "repeats": 7,
+   "gate_result": "FAIL",
+   "deterministic": true,
+   "corridor": [
+    {
+     "status": "PASS",
+     "w_empty_m": null,
+     "w_furnished_m": null
+    },
+    {
+     "status": "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+     "w_empty_m": 1.0,
+     "w_furnished_m": 0.77
+    }
+   ],
+   "circulation_gate_cold": {
+    "n": 7,
+    "p50_s": 0.0044,
+    "p95_s": 0.0053,
+    "min_s": 0.0042,
+    "max_s": 0.0053
+   },
+   "circulation_gate_warm": {
+    "n": 7,
+    "p50_s": 0.0017,
+    "p95_s": 0.002,
+    "min_s": 0.0015,
+    "max_s": 0.002
+   },
+   "circulation_gate_peak_mb": 0.09,
+   "calls": {
+    "_bottleneck_width": 2,
+    "_connected_at_width": 10,
+    "_eroded_regions": 10,
+    "buffer": 22,
+    "difference": 4,
+    "unary_union": 2
+   },
+   "overlap_gate": {
+    "n": 3,
+    "p50_s": 0.0005,
+    "p95_s": 0.0006,
+    "min_s": 0.0005,
+    "max_s": 0.0006,
+    "modules": 10,
+    "pairs": 45,
+    "fails": 0,
+    "warns": 0
+   }
+  },
+  {
+   "scene": "S2_4m_n100",
+   "side_m": 4.0,
+   "n_furniture": 100,
+   "seed": 2,
+   "size_range_m": [
+    0.1,
+    0.3
+   ],
+   "pt_to_m": 0.03518518518518518,
+   "input_sha": "7159796cc0caf093",
+   "repeats": 7,
+   "gate_result": "FAIL",
+   "deterministic": true,
+   "corridor": [
+    {
+     "status": "PASS",
+     "w_empty_m": null,
+     "w_furnished_m": null
+    },
+    {
+     "status": "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+     "w_empty_m": 1.0,
+     "w_furnished_m": 0.0
+    }
+   ],
+   "circulation_gate_cold": {
+    "n": 7,
+    "p50_s": 0.0132,
+    "p95_s": 0.0139,
+    "min_s": 0.0131,
+    "max_s": 0.0139
+   },
+   "circulation_gate_warm": {
+    "n": 7,
+    "p50_s": 0.0081,
+    "p95_s": 0.0091,
+    "min_s": 0.0079,
+    "max_s": 0.0091
+   },
+   "circulation_gate_peak_mb": 0.09,
+   "calls": {
+    "_bottleneck_width": 2,
+    "_connected_at_width": 3,
+    "_eroded_regions": 3,
+    "buffer": 8,
+    "difference": 4,
+    "unary_union": 2
+   },
+   "overlap_gate": {
+    "n": 3,
+    "p50_s": 0.0313,
+    "p95_s": 0.0317,
+    "min_s": 0.031,
+    "max_s": 0.0317,
+    "modules": 100,
+    "pairs": 4950,
+    "fails": 2,
+    "warns": 0
+   }
+  },
+  {
+   "scene": "S3_12m_n10",
+   "side_m": 12.0,
+   "n_furniture": 10,
+   "seed": 3,
+   "size_range_m": [
+    0.3,
+    0.8
+   ],
+   "pt_to_m": 0.03518518518518518,
+   "input_sha": "75338c1d6378cb01",
+   "repeats": 7,
+   "gate_result": "FAIL",
+   "deterministic": true,
+   "corridor": [
+    {
+     "status": "PASS",
+     "w_empty_m": null,
+     "w_furnished_m": null
+    },
+    {
+     "status": "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+     "w_empty_m": 1.0,
+     "w_furnished_m": 0.83
+    }
+   ],
+   "circulation_gate_cold": {
+    "n": 7,
+    "p50_s": 0.0039,
+    "p95_s": 0.0049,
+    "min_s": 0.0034,
+    "max_s": 0.0049
+   },
+   "circulation_gate_warm": {
+    "n": 7,
+    "p50_s": 0.0016,
+    "p95_s": 0.0018,
+    "min_s": 0.0015,
+    "max_s": 0.0018
+   },
+   "circulation_gate_peak_mb": 0.09,
+   "calls": {
+    "_bottleneck_width": 2,
+    "_connected_at_width": 10,
+    "_eroded_regions": 10,
+    "buffer": 22,
+    "difference": 4,
+    "unary_union": 2
+   },
+   "overlap_gate": {
+    "n": 3,
+    "p50_s": 0.0005,
+    "p95_s": 0.0005,
+    "min_s": 0.0005,
+    "max_s": 0.0005,
+    "modules": 10,
+    "pairs": 45,
+    "fails": 0,
+    "warns": 0
+   }
+  },
+  {
+   "scene": "S4_12m_n100",
+   "side_m": 12.0,
+   "n_furniture": 100,
+   "seed": 4,
+   "size_range_m": [
+    0.3,
+    0.8
+   ],
+   "pt_to_m": 0.03518518518518518,
+   "input_sha": "252a0ac0d438a268",
+   "repeats": 7,
+   "gate_result": "FAIL",
+   "deterministic": true,
+   "corridor": [
+    {
+     "status": "PASS",
+     "w_empty_m": null,
+     "w_furnished_m": null
+    },
+    {
+     "status": "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+     "w_empty_m": 1.0,
+     "w_furnished_m": 0.52
+    }
+   ],
+   "circulation_gate_cold": {
+    "n": 7,
+    "p50_s": 0.038,
+    "p95_s": 0.0385,
+    "min_s": 0.0371,
+    "max_s": 0.0385
+   },
+   "circulation_gate_warm": {
+    "n": 7,
+    "p50_s": 0.0108,
+    "p95_s": 0.0117,
+    "min_s": 0.0103,
+    "max_s": 0.0117
+   },
+   "circulation_gate_peak_mb": 0.71,
+   "calls": {
+    "_bottleneck_width": 2,
+    "_connected_at_width": 10,
+    "_eroded_regions": 10,
+    "buffer": 22,
+    "difference": 4,
+    "unary_union": 2
+   },
+   "overlap_gate": {
+    "n": 3,
+    "p50_s": 0.0315,
+    "p95_s": 0.0318,
+    "min_s": 0.031,
+    "max_s": 0.0318,
+    "modules": 100,
+    "pairs": 4950,
+    "fails": 14,
+    "warns": 6
+   }
+  },
+  {
+   "scene": "S5_12m_n1000",
+   "side_m": 12.0,
+   "n_furniture": 1000,
+   "seed": 5,
+   "size_range_m": [
+    0.05,
+    0.2
+   ],
+   "pt_to_m": 0.03518518518518518,
+   "input_sha": "852c3b2c063347f7",
+   "repeats": 3,
+   "gate_result": "FAIL",
+   "deterministic": true,
+   "corridor": [
+    {
+     "status": "PASS",
+     "w_empty_m": null,
+     "w_furnished_m": null
+    },
+    {
+     "status": "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+     "w_empty_m": 1.0,
+     "w_furnished_m": 0.0
+    }
+   ],
+   "circulation_gate_cold": {
+    "n": 3,
+    "p50_s": 0.1692,
+    "p95_s": 0.17,
+    "min_s": 0.1605,
+    "max_s": 0.17
+   },
+   "circulation_gate_warm": {
+    "n": 3,
+    "p50_s": 0.1028,
+    "p95_s": 0.105,
+    "min_s": 0.1022,
+    "max_s": 0.105
+   },
+   "circulation_gate_peak_mb": 0.97,
+   "calls": {
+    "_bottleneck_width": 2,
+    "_connected_at_width": 3,
+    "_eroded_regions": 3,
+    "buffer": 8,
+    "difference": 4,
+    "unary_union": 2
+   },
+   "overlap_gate": {
+    "n": 1,
+    "p50_s": 2.8671,
+    "p95_s": 2.8671,
+    "min_s": 2.8671,
+    "max_s": 2.8671,
+    "modules": 1000,
+    "pairs": 499500,
+    "fails": 0,
+    "warns": 0
+   }
+  }
+ ],
+ "planta_74": {
+  "fixture": "planta_74",
+  "pt_to_m": "0.0259",
+  "boxes": 402,
+  "boxes_sha": "41d4aee967fb5ba4",
+  "collect_boxes": {
+   "cold_first_call_s": 0.9639,
+   "warm": {
+    "n": 5,
+    "p50_s": 0.8224,
+    "p95_s": 0.8435,
+    "min_s": 0.7781,
+    "max_s": 0.8435
+   },
+   "peak_mb": 0.74
+  },
+  "room_regression_snapshot": {
+   "snapshot_sha256": "03140fb857c0000454159d3bd046fa91083d68dea3c19737679d56121d6caa13",
+   "capture_s": 0.9727
+  },
+  "rooms": [
+   {
+    "room_id": "r000",
+    "name": "SUITE 01",
+    "type": "BEDROOM",
+    "brain": {
+     "n": 5,
+     "p50_s": 0.0223,
+     "p95_s": 0.0254,
+     "min_s": 0.0211,
+     "max_s": 0.0254
+    },
+    "boxes": 65,
+    "result": "OK",
+    "overlap_gate": {
+     "n": 3,
+     "p50_s": 0.0026,
+     "p95_s": 0.0034,
+     "min_s": 0.0026,
+     "max_s": 0.0034,
+     "modules": 7,
+     "fails": 0,
+     "warns": 0
+    },
+    "circulation_gate": {
+     "n": 3,
+     "p50_s": 0.0123,
+     "p95_s": 0.0128,
+     "min_s": 0.0121,
+     "max_s": 0.0128,
+     "result": "FAIL",
+     "portals_detected": 2,
+     "portal_error": null,
+     "failed_checks": [
+      "corredor_principal"
+     ],
+     "corridor": [
+      {
+       "status": "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+       "w_empty_m": 1.0,
+       "w_furnished_m": 0.0
+      }
+     ]
+    }
+   },
+   {
+    "room_id": "r001",
+    "name": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+    "type": "SERVICE",
+    "brain": {
+     "n": 5,
+     "p50_s": 0.4253,
+     "p95_s": 0.4807,
+     "min_s": 0.4221,
+     "max_s": 0.4807
+    },
+    "boxes": 13,
+    "result": "OK",
+    "overlap_gate": {
+     "n": 3,
+     "p50_s": 0.0007,
+     "p95_s": 0.0008,
+     "min_s": 0.0006,
+     "max_s": 0.0008,
+     "modules": 11,
+     "fails": 0,
+     "warns": 0
+    },
+    "circulation_gate": {
+     "n": 3,
+     "p50_s": 0.0109,
+     "p95_s": 0.0119,
+     "min_s": 0.0109,
+     "max_s": 0.0119,
+     "result": "PASS",
+     "portals_detected": 2,
+     "portal_error": null,
+     "failed_checks": [],
+     "corridor": [
+      {
+       "status": "PASS",
+       "w_empty_m": 1.0,
+       "w_furnished_m": 0.86
+      }
+     ]
+    }
+   },
+   {
+    "room_id": "r002",
+    "name": "SALA DE JANTAR | SALA DE ESTAR",
+    "type": "LIVING",
+    "brain": {
+     "n": 5,
+     "p50_s": 0.321,
+     "p95_s": 0.4663,
+     "min_s": 0.3112,
+     "max_s": 0.4663
+    },
+    "boxes": 51,
+    "result": "OK",
+    "overlap_gate": {
+     "n": 3,
+     "p50_s": 0.0016,
+     "p95_s": 0.0018,
+     "min_s": 0.0014,
+     "max_s": 0.0018,
+     "modules": 6,
+     "fails": 0,
+     "warns": 0
+    },
+    "circulation_gate": {
+     "n": 3,
+     "p50_s": 0.0179,
+     "p95_s": 0.0182,
+     "min_s": 0.0175,
+     "max_s": 0.0182,
+     "result": "PASS",
+     "portals_detected": 5,
+     "portal_error": null,
+     "failed_checks": [],
+     "corridor": [
+      {
+       "status": "PASS",
+       "w_empty_m": 0.88,
+       "w_furnished_m": 0.8
+      },
+      {
+       "status": "PASS",
+       "w_empty_m": 0.88,
+       "w_furnished_m": 0.8
+      },
+      {
+       "status": "PASS",
+       "w_empty_m": 0.88,
+       "w_furnished_m": 0.8
+      },
+      {
+       "status": "PASS",
+       "w_empty_m": 1.0,
+       "w_furnished_m": 1.0
+      }
+     ]
+    }
+   },
+   {
+    "room_id": "r003",
+    "name": "SUITE 02",
+    "type": "BEDROOM",
+    "brain": {
+     "n": 5,
+     "p50_s": 0.0433,
+     "p95_s": 0.0467,
+     "min_s": 0.0425,
+     "max_s": 0.0467
+    },
+    "boxes": 47,
+    "result": "OK",
+    "overlap_gate": {
+     "n": 3,
+     "p50_s": 0.0018,
+     "p95_s": 0.0019,
+     "min_s": 0.0017,
+     "max_s": 0.0019,
+     "modules": 5,
+     "fails": 0,
+     "warns": 0
+    },
+    "circulation_gate": {
+     "n": 3,
+     "p50_s": 0.012,
+     "p95_s": 0.0122,
+     "min_s": 0.0114,
+     "max_s": 0.0122,
+     "result": "PASS",
+     "portals_detected": 2,
+     "portal_error": null,
+     "failed_checks": [],
+     "corridor": [
+      {
+       "status": "PASS",
+       "w_empty_m": 1.0,
+       "w_furnished_m": 0.97
+      }
+     ]
+    }
+   },
+   {
+    "room_id": "r004",
+    "name": "COZINHA",
+    "type": "KITCHEN",
+    "brain": {
+     "n": 5,
+     "p50_s": 0.0019,
+     "p95_s": 0.0024,
+     "min_s": 0.0019,
+     "max_s": 0.0024
+    },
+    "boxes": 76,
+    "result": "OK",
+    "overlap_gate": {
+     "n": 3,
+     "p50_s": 0.0003,
+     "p95_s": 0.0004,
+     "min_s": 0.0002,
+     "max_s": 0.0004,
+     "modules": 1,
+     "fails": 0,
+     "warns": 0
+    },
+    "circulation_gate": {
+     "n": 3,
+     "p50_s": 0.0068,
+     "p95_s": 0.0072,
+     "min_s": 0.0067,
+     "max_s": 0.0072,
+     "result": "PASS",
+     "portals_detected": 1,
+     "portal_error": "menos de 2 portais no comodo",
+     "failed_checks": [],
+     "corridor": []
+    }
+   },
+   {
+    "room_id": "r005",
+    "name": "BANHO 01",
+    "type": "BATHROOM",
+    "brain": {
+     "n": 5,
+     "p50_s": 0.0124,
+     "p95_s": 0.0128,
+     "min_s": 0.0121,
+     "max_s": 0.0128
+    },
+    "boxes": 59,
+    "result": "OK",
+    "overlap_gate": {
+     "n": 3,
+     "p50_s": 0.001,
+     "p95_s": 0.0011,
+     "min_s": 0.001,
+     "max_s": 0.0011,
+     "modules": 4,
+     "fails": 0,
+     "warns": 0
+    },
+    "circulation_gate": {
+     "n": 3,
+     "p50_s": 0.0077,
+     "p95_s": 0.0078,
+     "min_s": 0.0074,
+     "max_s": 0.0078,
+     "result": "PASS",
+     "portals_detected": 1,
+     "portal_error": "menos de 2 portais no comodo",
+     "failed_checks": [],
+     "corridor": []
+    }
+   },
+   {
+    "room_id": "r006",
+    "name": "BANHO 02",
+    "type": "BATHROOM",
+    "brain": {
+     "n": 5,
+     "p50_s": 0.0123,
+     "p95_s": 0.0125,
+     "min_s": 0.0121,
+     "max_s": 0.0125
+    },
+    "boxes": 58,
+    "result": "OK",
+    "overlap_gate": {
+     "n": 3,
+     "p50_s": 0.0011,
+     "p95_s": 0.0011,
+     "min_s": 0.001,
+     "max_s": 0.0011,
+     "modules": 4,
+     "fails": 0,
+     "warns": 0
+    },
+    "circulation_gate": {
+     "n": 3,
+     "p50_s": 0.0075,
+     "p95_s": 0.0076,
+     "min_s": 0.0073,
+     "max_s": 0.0076,
+     "result": "PASS",
+     "portals_detected": 1,
+     "portal_error": "menos de 2 portais no comodo",
+     "failed_checks": [],
+     "corridor": []
+    }
+   },
+   {
+    "room_id": "r007",
+    "name": "LAVABO",
+    "type": "BATHROOM",
+    "brain": {
+     "n": 5,
+     "p50_s": 0.0121,
+     "p95_s": 0.013,
+     "min_s": 0.012,
+     "max_s": 0.013
+    },
+    "boxes": 33,
+    "result": "OK",
+    "overlap_gate": {
+     "n": 3,
+     "p50_s": 0.0007,
+     "p95_s": 0.0009,
+     "min_s": 0.0006,
+     "max_s": 0.0009,
+     "modules": 3,
+     "fails": 0,
+     "warns": 0
+    },
+    "circulation_gate": {
+     "n": 3,
+     "p50_s": 0.0068,
+     "p95_s": 0.0074,
+     "min_s": 0.0068,
+     "max_s": 0.0074,
+     "result": "PASS",
+     "portals_detected": 1,
+     "portal_error": "menos de 2 portais no comodo",
+     "failed_checks": [],
+     "corridor": []
+    }
+   }
+  ],
+  "summary": [
+   [
+    "r000",
+    "SUITE 01",
+    "BEDROOM",
+    "OK",
+    65
+   ],
+   [
+    "r001",
+    "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+    "SERVICE",
+    "OK",
+    13
+   ],
+   [
+    "r002",
+    "SALA DE JANTAR | SALA DE ESTAR",
+    "LIVING",
+    "OK",
+    51
+   ],
+   [
+    "r003",
+    "SUITE 02",
+    "BEDROOM",
+    "OK",
+    47
+   ],
+   [
+    "r004",
+    "COZINHA",
+    "KITCHEN",
+    "OK",
+    76
+   ],
+   [
+    "r005",
+    "BANHO 01",
+    "BATHROOM",
+    "OK",
+    59
+   ],
+   [
+    "r006",
+    "BANHO 02",
+    "BATHROOM",
+    "OK",
+    58
+   ],
+   [
+    "r007",
+    "LAVABO",
+    "BATHROOM",
+    "OK",
+    33
+   ]
+  ]
+ }
+}
