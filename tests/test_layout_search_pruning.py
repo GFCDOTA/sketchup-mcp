@@ -114,3 +114,39 @@ def test_dining_search_stays_cheap_and_still_passes_the_gate():
     mesa = next(d for d in out["placement_decisions"] if d["candidate_id"] == "mesa_de_jantar")
     assert mesa["optimizer"] == "dining_grid_search_v3_slack_ordered_refine" and mesa["gate_result"] == "PASS"
     assert mesa["n_candidates_tried"] <= 40, mesa
+
+
+# ---- GateSession: sala + mobilia fixa calculadas 1x por busca; veredito e saida identicos ao gate completo
+
+@pytest.mark.planta74_scale
+def test_gate_session_and_decision_mode_match_the_full_gate_in_every_room():
+    import copy
+    import json
+    from pathlib import Path
+
+    from tools.orchestration.furnish_apartment import collect_boxes
+    from tools.validation import circulation_gate as cg
+    con = json.loads(Path("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json").read_text("utf-8"))
+    boxes, _summary = collect_boxes(con)
+    checked = 0
+    for room in con["rooms"]:
+        try:
+            full = cg.gate(con, copy.deepcopy(boxes), room["id"])
+        except KeyError:                                   # comodo sem celula resolvida
+            continue
+        half = len(boxes) // 2
+        session = cg.GateSession(con, copy.deepcopy(boxes[:half]), room["id"]).check(copy.deepcopy(boxes[half:]))
+        assert json.dumps(session, sort_keys=True, default=str) == json.dumps(full, sort_keys=True, default=str), room["id"]
+        decided = cg.gate(con, copy.deepcopy(boxes), room["id"], decide_only=True)
+        assert decided["result"] == full["result"], room["id"]
+        if full["result"] == "PASS":
+            assert decided["checks"] == full["checks"]      # no PASS o modo decisao calculou tudo
+        checked += 1
+    assert checked >= 5
+
+
+def test_gate_session_is_lazy_and_never_annotates_before_the_first_check():
+    from tools.validation import circulation_gate as cg
+    base = [{"kind": "sofa", "x0": 0, "y0": 0, "x1": 10, "y1": 10}]
+    cg.GateSession({"rooms": []}, base, "r000")              # nada calculado: nem o modelo espacial e montado
+    assert "interaction_policy" not in base[0] and "geometry_intent" not in base[0]
