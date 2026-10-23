@@ -73,3 +73,18 @@ Prova adicional: `tests/test_layout_search_pruning.py` compara o `_table_set` no
 chamadas). Podar isso exigiria mudar a ordem/estratégia da busca — e com ela, potencialmente, o layout escolhido. Também não
 cacheei o modelo espacial inteiro por cômodo: o ganho (~0,2 s) não paga o estado escondido que vazaria entre testes que fazem
 monkeypatch no construtor.
+
+## Rodada 3 (2026-10-23) — estratégia da busca da mesa de jantar (aprovação visual do Felipe)
+
+Mudança de **estratégia** (não só de implementação), por isso com antes/depois visual em
+`artifacts/review/perf/dining_search_2026-10-23/`. O gate de circulação era chamado 95× na busca da mesa; o mapa exaustivo
+mostrou que 83 reprovam só por corredor (poda pelas cadeiras: ~10%, descartada) e que 67 chamadas eram do refinamento ao
+redor de uma âncora já no limite do corredor (0,81 m p/ 0,80 m). Agora o refinamento começa pela âncora de **maior folga de
+corredor** (`circulation_gate.corridor_slack_m`): 95 → **37** chamadas, mesma posição escolhida, snapshots idênticos.
+
+| Mobiliar a planta_74 inteira | antes de tudo | rodada 1 | rodada 2 | **rodada 3** |
+|---|---|---|---|---|
+| fria | 5,30 s | 2,86 s | 2,06 s | **1,20 s** (−77%) |
+| quente | 5,16 s | 2,27 s | 1,50 s | **0,95 s** (−82%) |
+
+Suíte `planta74_scale`: 59,5 s → **24,7 s**. Trava determinística: a busca chama o gate no máximo 40 vezes.

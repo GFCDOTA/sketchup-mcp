@@ -173,6 +173,7 @@ def living_room_boxes(con, room_id):
         # P1 do VERDICT 6.5 (Felipe): mesa MENOR e POSIÇÃO ESCOLHIDA PELO GATE
         # — busca candidatos e só aceita onde a circulação PASSA de verdade
         # (90/80cm contínuo por PAPEL do portal + 0.70 atrás + cadeira PUXADA).
+        from tools.circulation_gate import corridor_slack_m as _corridor_slack
         from tools.circulation_gate import gate as _circ_gate
         # 1.00x0.65, 4 lugares (2+2 nos lados COMPRIDOS) — achado 2026-08-12,
         # varredura EXAUSTIVA (grade completa do cômodo, passo 6-8in, overlap
@@ -291,7 +292,7 @@ def living_room_boxes(con, room_id):
                     # Guardar layout funcional para o refinamento (maximo 8);
                     # nunca promover este candidato com colisao.
                     if len(_valid_but_swinging) < 8:
-                        _valid_but_swinging.append((_cx, _cy))
+                        _valid_but_swinging.append((_cx, _cy, _corridor_slack(_g)))
                     continue
                 _best, _best_score, _best_gate_result = cand, 0, "PASS"
                 break
@@ -308,7 +309,11 @@ def living_room_boxes(con, room_id):
                  if (dx or dy) and max(abs(dx), abs(dy)) <= 6.0),
                 key=lambda pair: (pair[0] ** 2 + pair[1] ** 2, abs(pair[0]), abs(pair[1]))
             )
-            for bx, by in _valid_but_swinging:
+            # Ordem das ancoras (2026-10-23, aprovada pelo Felipe com antes/depois): primeiro a de MAIOR folga de
+            # corredor. Deslizar a mesa para sair do arco da porta consome corredor; uma ancora ja no limite (ex.: 0,81 m
+            # para alvo 0,80) nao sobrevive ao deslize e gastava dezenas de chamadas do gate. Empate: ordem da grade.
+            _valid_but_swinging.sort(key=lambda a: -(a[2] if a[2] is not None else float("-inf")))
+            for bx, by, _slack in _valid_but_swinging:
                 for dx, dy in _pairs:
                     cand = _candidate(bx + dx, by + dy)
                     if cand is None or _swing_hit(cand):
@@ -328,7 +333,7 @@ def living_room_boxes(con, room_id):
             boxes += _best
             _placement_decisions.append({
                 "candidate_id": "mesa_de_jantar",
-                "optimizer": "dining_grid_search_v2_door_swing_refine",
+                "optimizer": "dining_grid_search_v3_slack_ordered_refine",
                 "canonical_gate": _CANONICAL_GATE_VERSION,
                 "gate_result": _best_gate_result, "score": _best_score,
                 "n_candidates_tried": _n_candidates,
