@@ -82,3 +82,35 @@ CASES = {
 def test_optimized_table_search_returns_exactly_what_the_old_search_returned(name):
     zone, placed, circ = CASES[name]
     assert _normalize(svc._table_set(zone, placed, circ)) == _table_set_reference(zone, placed, circ)
+
+
+# ---- busca da mesa de jantar da sala: ancora com mais folga de corredor primeiro (aprovada pelo Felipe com antes/depois)
+
+def _portal(w_furnished, tier, w_empty=None):
+    return {"w_furnished_m": w_furnished, "tier": tier, "w_empty_m": w_empty}
+
+
+def test_corridor_slack_is_the_tightest_portal_against_its_own_requirement():
+    from tools.validation import circulation_gate as cg
+    result = {"checks": {"corredor_principal": {"portais": [
+        {"w_furnished_m": None},                                            # ancora: nao medida
+        _portal(0.95, "principal"), _portal(0.81, "secundaria"), _portal(0.70, "shell_estreito", w_empty=0.76)]}}}
+    tol = cg.GEOMETRY_TOLERANCE_M
+    expected = min(0.95 - cg.PRIMARY_TARGET_M, 0.81 - cg.SECONDARY_TARGET_M, 0.70 - (0.76 - tol))
+    assert cg.corridor_slack_m(result) == pytest.approx(round(expected, 4))
+    assert cg.corridor_slack_m({"checks": {"corredor_principal": {"portais": [{"w_furnished_m": None}]}}}) is None
+    assert cg.corridor_slack_m({}) is None
+
+
+@pytest.mark.planta74_scale
+def test_dining_search_stays_cheap_and_still_passes_the_gate():
+    """Trava de desempenho deterministica (conta chamadas, nao mede relogio): antes da ordenacao por folga eram 95."""
+    import json
+    from pathlib import Path
+
+    from tools.furnish_apartment import living_room_boxes
+    con = json.loads(Path("fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json").read_text("utf-8"))
+    _boxes, out = living_room_boxes(con, "r002")
+    mesa = next(d for d in out["placement_decisions"] if d["candidate_id"] == "mesa_de_jantar")
+    assert mesa["optimizer"] == "dining_grid_search_v3_slack_ordered_refine" and mesa["gate_result"] == "PASS"
+    assert mesa["n_candidates_tried"] <= 40, mesa

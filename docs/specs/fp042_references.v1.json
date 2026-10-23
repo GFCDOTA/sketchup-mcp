@@ -6245,6 +6245,18 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/perf/dining_search_2026-10-23/sala_antes_depois.png",
+      "blob_sha": "63de9248d3a0ee8f47ad12dcc5567d008af54192",
+      "blob_size": 99286,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/perf/dining_search_2026-10-23/README.md",
+      "blob_sha": "1f305ff4b90102fbc3c94f02807585fd1faca7a5",
+      "blob_size": 1933,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/variant_sweep/planta_74/contact_sheet.png",
       "blob_sha": "c94419969de5f28d753e87572218c7a817100e24",
       "blob_size": 205290,

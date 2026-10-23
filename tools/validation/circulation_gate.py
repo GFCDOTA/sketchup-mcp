@@ -193,6 +193,25 @@ def _bottleneck_width(polygon, pt_a, pt_b, lo=0.50, hi=1.00, tol=0.01):
     return round(lo, 2)
 
 
+def corridor_slack_m(result: dict) -> float | None:
+    """Folga do corredor num resultado do `gate`: menor (largura mobiliada - largura exigida) entre os portais medidos.
+    Exigida = alvo do tier (principal/secundaria) ou a largura do shell vazio menos a tolerancia (shell_estreito).
+    Usada para ORDENAR buscas (quem tem mais folga sobrevive melhor a um deslize); nao muda o veredito do gate.
+    None se nenhum portal foi medido."""
+    slacks = []
+    for p in result.get("checks", {}).get("corredor_principal", {}).get("portais", []):
+        w, tier = p.get("w_furnished_m"), p.get("tier")
+        if w is None:
+            continue
+        if tier == "principal":
+            slacks.append(w - PRIMARY_TARGET_M)
+        elif tier == "secundaria":
+            slacks.append(w - SECONDARY_TARGET_M)
+        elif tier == "shell_estreito" and p.get("w_empty_m") is not None:
+            slacks.append(w - (p["w_empty_m"] - GEOMETRY_TOLERANCE_M))
+    return round(min(slacks), 4) if slacks else None
+
+
 def gate(con, boxes, room_id):
     from core.spatial_semantics import annotate_all
     annotate_all(boxes)   # idempotente — garante geometry_intent/interaction_policy

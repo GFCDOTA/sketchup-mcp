@@ -4720,6 +4720,12 @@
       "blob_sha": "f9f1f2d25eaebf4a40fdcf75443be48aa488340f",
       "blob_size": 71571,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/perf/dining_search_2026-10-23/sala_antes_depois.png",
+      "blob_sha": "63de9248d3a0ee8f47ad12dcc5567d008af54192",
+      "blob_size": 99286,
+      "owner_group": "artifacts"
     }
   ]
 }

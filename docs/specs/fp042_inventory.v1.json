@@ -8369,6 +8369,20 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
+      "path": "artifacts/review/perf/dining_search_2026-10-23/sala_antes_depois.png",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/perf/dining_search_2026-10-23/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
       "path": "artifacts/variant_sweep/planta_74/contact_sheet.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
