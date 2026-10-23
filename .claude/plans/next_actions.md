@@ -3,6 +3,11 @@
 > Status após PRs #371–#374 em 2026-10-22. Fila autoritativa: docs/specs/construction_core_microphases.md.
 > CI Linux verde não substitui L2 SketchUp Windows nem revisão humana L3.
 
+> **2026-10-23 — FP-054 tem precedência** (`docs/specs/FP-054_spatial_core_reliability_program.md`, recebida como FP-045 MASTER):
+> F0 baseline → F1 corretude geométrica → F2 solver → F3 modularização/DSA → F4 SketchUp real → F5 rollout.
+> **Congelado até a F5 liberar:** expansão de tutoriais/RAG (item 3 abaixo) — nada é apagado, só não avança.
+> Os itens 1, 2 e 4 entram como insumo da F1–F4 quando a fase pedir.
+
 1. **T0.2 restante:** integrar tools.sketchup.inspect_workspace.plan_inspect_workspace (#373) em cabinet.sketchup.inspect;
    refazer L2 Windows de todas as capacidades afetadas pelo símbolo/fecho R-18. PREP L1 pronta, integração NÃO feita.
 2. **T0.5 restante:** ligar gate de placement FP-050 a cabinet_flow e shaker_flow sem bypass;
