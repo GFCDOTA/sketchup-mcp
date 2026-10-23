@@ -1,0 +1,547 @@
+{
+ "schema_version": "fp054_baseline_environment.v1",
+ "repo": {
+  "head": "2556f4118537ff9b25ae08b4ceb1f90733e189bd",
+  "branch": "docs/fp054-f0-baseline",
+  "origin_develop": "32a682760552b74c5ce40e7a2d5e2d2a112f2d58",
+  "dirty_files": 3
+ },
+ "python": {
+  "version": "3.12.13",
+  "implementation": "CPython",
+  "executable_is_venv": true
+ },
+ "os": {
+  "system": "Windows",
+  "release": "11",
+  "version": "10.0.26200"
+ },
+ "hardware": {
+  "machine": "AMD64",
+  "processor": "AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD",
+  "cpu_count": 16,
+  "ram_gb": 61.6
+ },
+ "packages": {
+  "shapely": "2.1.2",
+  "numpy": "2.4.6",
+  "pypdfium2": "4.30.0",
+  "Pillow": "11.3.0",
+  "matplotlib": "3.10.9",
+  "pytest": "8.4.2",
+  "hypothesis": "6.170.8",
+  "ruff": "0.15.14",
+  "mcp": "1.28.0",
+  "geos": "3.13.1"
+ },
+ "sketchup": {
+  "platform_supported": true,
+  "exe": "C:\\Program Files\\SketchUp\\SketchUp 2026\\SketchUp\\SketchUp.exe",
+  "exe_found": true,
+  "vray_exe_found": true,
+  "running_instances": 0,
+  "file_version": "26.0.429",
+  "status": "AVAILABLE"
+ },
+ "protected_files": [
+  {
+   "path": "artifacts/planta_74/furnished/bedroom_designer_r000.skp",
+   "sha256": "528fa5b33c64609c5e378f572eadd1555f344b6f4e5cfe5d162b8790e1ad4125",
+   "git_blob": "864927c5bf12fe53cfdfe4618b66dc6f0cf3b918",
+   "matches_index": true
+  },
+  {
+   "path": "artifacts/planta_74/furnished/bedroom_designer_r003.skp",
+   "sha256": "29e9311467f11b8cba9534139d9e78a12149d8620c7c1d220d854e44518e1353",
+   "git_blob": "9727ccbc2af3a46d66b2df06caa5c0bbcab98b35",
+   "matches_index": true
+  },
+  {
+   "path": "artifacts/planta_74/furnished/planta_74_bedroom_r000.skp",
+   "sha256": "272f80231766f03ffc08c730b75fad1c5012e48d1ce2a923791bdcae44773890",
+   "git_blob": "f777e1946aefe77db1778d0d3ed9c3554f88c1de",
+   "matches_index": true
+  },
+  {
+   "path": "artifacts/planta_74/furnished/planta_74_bedroom_r003.skp",
+   "sha256": "c9694ee4b82675f996bc9c4ae0b91dff76215044bd36afd56d330ad56528d088",
+   "git_blob": "7beb81b38aa1669fdf67a245acc1af03f8648794",
+   "matches_index": true
+  },
+  {
+   "path": "artifacts/planta_74/furnished/planta_74_furnished.skp",
+   "sha256": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+   "git_blob": "2527193e460cc05715cf8fdbee49224761f69134",
+   "matches_index": true
+  },
+  {
+   "path": "artifacts/planta_74/furnished/planta_74_furnished_black_wood_gold.skp",
+   "sha256": "a31f2d111f74b2301fea703f997e7211400adf92f50c324a7c59578f74f5348d",
+   "git_blob": "6bbb25d8f2845f95f2941edb7197ae9bf0f22c6d",
+   "matches_index": true
+  },
+  {
+   "path": "artifacts/planta_74/furnished/planta_74_furnished_with_sofa_premium.skp",
+   "sha256": "6e71cecb7c5caece74b0a3c218b9023598d85f9b29d3f988575b706e6b781480",
+   "git_blob": "c4b9f27687c3ff039c95d22d08779e2381c33fe0",
+   "matches_index": true
+  },
+  {
+   "path": "artifacts/planta_74/planta_74.skp",
+   "sha256": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+   "git_blob": "265019f3c914a0af546b850986dbdb9b65b50e2e",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/components/circulation_table_chair/case_001_golden.json",
+   "sha256": "13e48aaf0512e0a0a779068b4bee0bc02923fcec957f35a8df8ed8ad5ee25a31",
+   "git_blob": "3ad47109a7e2fc0a435b858d522ec978fa53aa60",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json",
+   "sha256": "adeace53cdb3dba1b7ca8d5bb78a5d6d70d1adb17a903ee6b8082f188d750aa2",
+   "git_blob": "d910dcbc54e1276ded44adbbf75a8c4c1621fc28",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/planta_74/human_openings_annotation.png",
+   "sha256": "18a283ae8ca307167deb0a84b6f56810261c712c8ea564706a71ce0d12e4e269",
+   "git_blob": "c6d66d4800b2c23cb34a10ac5ccbd76077934b6a",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/planta_74/human_soft_barriers_annotation.png",
+   "sha256": "bfcf02ae13e299356fde0a7dfed9df5979051425f8757d789e6b2a64bcda5971",
+   "git_blob": "684e0a99cf09df0f07718c1a695c8a99d2bdcbb4",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/planta_74/human_walls_annotation.png",
+   "sha256": "e668efd9e93202c6834b7edefa89d42f0f691cf6665128a7296c55d5108091f4",
+   "git_blob": "51d94ff95c2d8ce42851d7ff842d3c18f738acb2",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/planta_74/known_warnings.json",
+   "sha256": "c75ea7c0233ff42c1949d20deeac2e3a9c90241bb953dd55c3b1aae301a42fe7",
+   "git_blob": "8bb6f4d0d83e9329086639ba05fe74a20e12509b",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/planta_74/semantic_zones.json",
+   "sha256": "ceef8cd4ccd90e06d847a11ee41267cc626a15ea0efecb13de86bf84039fafc3",
+   "git_blob": "9b0cf24a1ec765457989c78de944a2f7404127e0",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/quadrado/consensus_with_window.json",
+   "sha256": "f4a45a19d33de5713194ab09ec971dbb647948df765da62aa5ad0712f1960293",
+   "git_blob": "f7f5b051aaa857848ee2145bc0e6d5f594b268ed",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/scene_intents/living_room_black_wood_gold_boutique.json",
+   "sha256": "31159a9008535c63fdba2a9fb78c0fcf3ffd56f033bd3cb598634f861cae9c12",
+   "git_blob": "5f958b28ef321f258e82ce5a2eafa91050dda066",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/scene_intents/living_room_modern_warm_minimal.json",
+   "sha256": "2ee4f1dd1e613e44ec3563672add6091d57e6d4a551be2aa97637e22c5a3b843",
+   "git_blob": "ab1ccbe065f60c81768873c2f3ec101d4d5de219",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_cabinets/fp046_shaker_valid_a.json",
+   "sha256": "78f457a2fecf4b383f9b8a821f2df6ece408ef8eab33063f72fa439ee84362a6",
+   "git_blob": "848d91bd6a1f1964bf217bb31c7f65444f0d30d4",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_cabinets/holdout_c.json",
+   "sha256": "9e55e19836bb8b778d8f3bbc1c9b9085a92db2206b2e81d8f94190f54c380d63",
+   "git_blob": "ae1dfb59030a64b5e884b0001b5bcf8546cd9042",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_cabinets/invalid_impossible.json",
+   "sha256": "70595ead21681271d152a0d581339dbc3b25f4de27b9da377793298340e52a0e",
+   "git_blob": "266cde3b654f005e867a0c102c0609c6cca215a6",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_cabinets/invalid_incomplete.json",
+   "sha256": "72eff6b434d80f51fae0b9041135cc2b81a89d48f2407982363cb709a010d9c9",
+   "git_blob": "d0c66eb2817c4054fe2bf031eb21adb30924c4a7",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_cabinets/valid_a_base_600.json",
+   "sha256": "764d7caf052dd895d7448802424c17f811114251ebf6d58e8b14732827d46a80",
+   "git_blob": "02443b5b2977594a85ba068d2cd4ddd3f3848af0",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_cabinets/valid_b_tall_900.json",
+   "sha256": "d137c8ec39666fc22d4c919a722389c9071376553e356ae85b85b94d773e4916",
+   "git_blob": "8a2124c6a17cc3de274e4c60d656022f35fcfa45",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_rooms/bedroom_large_18m2.json",
+   "sha256": "54edc8ba39875633a358fe7149030a821317c5701e162441a7e2a9c697e84cee",
+   "git_blob": "36e989ebbbf13c62b04dd5df63f59aa188d46685",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_rooms/bedroom_medium_14m2.json",
+   "sha256": "a0cad3dd8031c9d7d1fddba0b7d52c972b5bcbdac5d8494f9326f7a4eac5fd36",
+   "git_blob": "5f1882bd88723ee0d6ffe3e2a931ea37a55c3997",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_rooms/bedroom_medium_14m2_inner_face.json",
+   "sha256": "b2adf0119486abb0fc72878d23c6ea8f660625bd47654ba2017f495d1cb048af",
+   "git_blob": "46fa0e0bc6e9ec32dd0eba0366bc3ca42eca5e4d",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_rooms/bedroom_small_9m2.json",
+   "sha256": "b10900bacb5e7dcb8a21f70b6befb11215d0f34c60c4905f9a8f9e13df8d4564",
+   "git_blob": "a4285cfa5565e6997ed10af61592aee1969082c6",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_rooms/living_large_rect_28m2.json",
+   "sha256": "4b14d342e352bc3dfd3531feddc6cd486aa1a0be6dfbfe115b55e65a3d27113a",
+   "git_blob": "c21803506941bfe720c8b4410a95351a29d66120",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_rooms/living_long_narrow.json",
+   "sha256": "17b1cef884419563183408ceb64df7fbdbcbe1e4464b7a65e328f4363d4eec41",
+   "git_blob": "3928ad2f7d1c51a12320ef19d0a771c69f36dc0a",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_rooms/living_medium_rect_18m2.json",
+   "sha256": "88e1f5e33991f9ed00a28102a452216a2b369b872634f4a8574586ceff6bde62",
+   "git_blob": "30fe53636346425e1497b8e6af33fe7ebd6d2d8f",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/synthetic_rooms/living_small_rect_10m2.json",
+   "sha256": "bb6e285cd719c784a65a00c1b92a8fd53f7ba5dba84d94056fbb32aba7a1cd42",
+   "git_blob": "9ecbab8ba912f482f5dd2d4843fe52c98bf8224e",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/README.md",
+   "sha256": "6d04e79cbdcd44b16c059c70f98e3884ac92c1d9fd08e8a873ccf4433e007cd4",
+   "git_blob": "54cdee8d4d04b129ae6d8ca3997883b97f4c0ded",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_current_iso_suspicious.expected.json",
+   "sha256": "930bf4aa194d19af733a1c31aef507e25b2ca790be71d65ab4bec85edf6ddbe2",
+   "git_blob": "c7ee5e9d4434e1d560f26913b577bb0085d90ce1",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_current_iso_suspicious.png",
+   "sha256": "0a2bf9814eef39502d420d9090ed957922b43efe7027ad061880f3f177925933",
+   "git_blob": "f48e10dd87c3100d20bffbf0bd5250a37abdacea",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_current_top_suspicious.expected.json",
+   "sha256": "e16e170d8f21fcdc11a70442d405e79abdb91586987d65ac924438bae66294ca",
+   "git_blob": "8c0d931b9317b5bcebb985414b1cf38ad6ac4509",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_current_top_suspicious.png",
+   "sha256": "ef0d98b1cf3aecb7bd432fea908ae82e010d95c4eed077d43774fd9e87e30f7f",
+   "git_blob": "a0cae1dd866cdf401375e1292090c49eb90b9bbc",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_orphan_glass_parapet_labelled.expected.json",
+   "sha256": "8e60c1ca1d924d119b22a1ae38d3770881aecc6f087cd80ee4b6dd09f8bbc8ee",
+   "git_blob": "58a3eacce3d881cd1571413c7df0c2e9b1806127",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_orphan_glass_parapet_labelled.png",
+   "sha256": "bcc6c4d887db0b74839be3dd6b1e2936df21c9398dfc81aa0cf40e8b7fedcd4c",
+   "git_blob": "2a7457f103155c14e9627e8476f6ee741a7fa7d3",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_orphan_glass_parapet_marked.expected.json",
+   "sha256": "1d7a2e43c80b47afe2ff42e2f81638ef16f52dbc66883d64d15273a2cc39a670",
+   "git_blob": "dec5d842ff91d2cb488f14b92237bdcb121f1dc1",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_orphan_glass_parapet_marked.png",
+   "sha256": "50669af3f8e28ce5a0503697315860a225bc44f82d020e55fa27e6c85c22f899",
+   "git_blob": "60d819b8860060084ef8068300e7e60b75730afc",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_suspicious_openings_iso.expected.json",
+   "sha256": "48cdc4ead1449631783c43954c785ffd4b4996b542134a8378ee003ca7362a9d",
+   "git_blob": "8e826fe7907ff1f11bd4391d3f7eee3481e1bb6f",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_suspicious_openings_iso.png",
+   "sha256": "f27aabe57936ea23e1ca20463b25c328a16e6cebd1cb11f808d34cf200666370",
+   "git_blob": "302e91203f2db7631af903c3c181c519482d8e06",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_wall_stubs_labelled.expected.json",
+   "sha256": "d8f61ae9d0bf39361f244c73a6f3854a353f93443aa7f799f9f3d7215b1a372b",
+   "git_blob": "ac77a7f83418592a89f837a327b92b7fab77d9d2",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_wall_stubs_labelled.png",
+   "sha256": "53bf1f6bf790a9cf665dfb4b7e5692e3f15a89655af8ce0fdc78e262edbf711a",
+   "git_blob": "4f1a8fee4ac535a8c464a1cd80f381e1f9285566",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_wall_stubs_marked.expected.json",
+   "sha256": "7dd12247c50633a2a02a9f7d0b47a4c537a76a340c392bd1a150e74004d4ea8c",
+   "git_blob": "b008e4ff0c1ebe26c4ee3040fd93b1ae084378bd",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_real/bad_wall_stubs_marked.png",
+   "sha256": "201a1b4ac638bab3751f0b6b4aff2a05cb0587693c7e53ef13b76f9a3c2d30c9",
+   "git_blob": "022aac641c46f8fb95cf6cfc1ee3c6965cd39b6f",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_floating_door_synthetic.expected.json",
+   "sha256": "916ca045675de8a4aa805c53e117a6ba0f29d3a719ef5a6576efe9cb6df32923",
+   "git_blob": "da36fd715520ef554537c4a1bae0adfe77a04ea0",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_floating_door_synthetic.png",
+   "sha256": "698173ab99661da2bbfb4d4dfa963379004bb4fb1b805a3088a760adeee1c344",
+   "git_blob": "995793dc12ebf1d6e281cae8f80f5a06bdcd1cf5",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_floor_leak_synthetic.expected.json",
+   "sha256": "03ad8e74c90451622694c568f81b5a2831352ed87debbe73f725a15c62b45ba8",
+   "git_blob": "5277f756092994b2ba4f809c4d910220e4fe348f",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_floor_leak_synthetic.png",
+   "sha256": "8dd8309774ccf689cb996e1bf61fbc6b6bcd4e9403a8243a868ca4b0622450f4",
+   "git_blob": "40d4554ce44bdf08ce24818cf7ff696cebec2ea4",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_full_height_window_void_synthetic.expected.json",
+   "sha256": "bfed1f59e6550cc70fb4e674a4583d0a60fb0d3fc8d51c87d62e12a7df9eb7b1",
+   "git_blob": "cb1010f13579ac10f377a596683e73a4e7b9ba26",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_full_height_window_void_synthetic.png",
+   "sha256": "97fbb591ad66cdbb632644df958aef3c0c49268ebeb25402856c40a479d0d226",
+   "git_blob": "5355eb14f34451b2e97ead17c9ababb72de5af97",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_misplaced_soft_barrier_synthetic.expected.json",
+   "sha256": "4425d8065cf4349b288309de6e20d743a1fed39ddb94acd320b1b5b428d3445a",
+   "git_blob": "201aabbb216f48ddae7c0cb0f83d5a7c45f02624",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_misplaced_soft_barrier_synthetic.png",
+   "sha256": "190798ae2326be3f3ea4627a19944d2903ebda85c9ef73bfa5b4bff523dabd48",
+   "git_blob": "ccfdfa018d0df3c4ccb98b99a918b14361d339d6",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_misplaced_window_synthetic.expected.json",
+   "sha256": "afbd96ff2f4ad2b66d5952e7ddfa838b767a7fa42a15b704b66924b56b89bb11",
+   "git_blob": "044b876b00cae473c052bca7ccdd148bb61ab1f5",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_misplaced_window_synthetic.png",
+   "sha256": "a7875d6123e1e2e655e6b6be50d1095802beb4418344186c48b77ae58f0939ab",
+   "git_blob": "991be1fcac05bb165b305cf51974bc3cda935fcb",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_missing_wall_continuation_synthetic.expected.json",
+   "sha256": "8277e190cb75e45f8e7971a7f2b050a99154cf8f5b83ee7d7fa7d84b7f50780b",
+   "git_blob": "26878d59a628c8342b69d7e7e41b977ca0a65780",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_missing_wall_continuation_synthetic.png",
+   "sha256": "6dc5877fe84b7c83db336c147b9b0f842c8c8d91b6b4dbb9c27608a7c24d1d60",
+   "git_blob": "9d3adb91e45bdbdb583710c28c0aaacfa95e372b",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_orphan_glass_panel_synthetic.expected.json",
+   "sha256": "bcc112dbe202ea00636f1e46cdd1cf6b2bd11ffb21e3f8d5cae1e8a8e129f22a",
+   "git_blob": "9706c14b54eac0110ad21616a9a256d404471ac2",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_orphan_glass_panel_synthetic.png",
+   "sha256": "f9907e8d3142c75d8e340a2f09e244027b7c246a677ee6a569f8e2776547817d",
+   "git_blob": "71676d96cb58f70183d404de19ddd513a65aabe3",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_wall_stub_synthetic.expected.json",
+   "sha256": "03a5384920838d61c7938924ea147a55552deafab5ea4124965c1cd6e35c66a1",
+   "git_blob": "1d4170907cd535a17c48b05ac3d2a409e388181a",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/bad_synthetic/bad_wall_stub_synthetic.png",
+   "sha256": "7750d09eaa27d8c6a81f54689a417e98e45e39b7a2cb1c720e05b2fedbf0e0e7",
+   "git_blob": "79c21e41117587986f1b3fe4cb1edb0a3ed4c212",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/good_real/good_planta_74_current_iso.expected.json",
+   "sha256": "b4f655e447be2719f3301298a87cd35131a94161bd275f2279b11a95bd455c33",
+   "git_blob": "f054928353214d419ed8e8dac87d390979d85da0",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/good_real/good_planta_74_current_iso.png",
+   "sha256": "f591f7cbed486e5017d3ec7ff2f782474e85985619178d57b1c6094236185784",
+   "git_blob": "a9d288256ca437ed31294db55a94627bd4b61f14",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/good_real/good_planta_74_current_side_by_side.expected.json",
+   "sha256": "b72797b7508dadd46ededbb7afc3f7481a365c53c7a3121cd94b02141b98631c",
+   "git_blob": "18ca3a1cd9badcecadccff1667c5ea7e5fc4279e",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/good_real/good_planta_74_current_side_by_side.png",
+   "sha256": "e2bebe1076e55d2c61940b3b5e009feb7eb0177d7e08739c721a93e42ebaae67",
+   "git_blob": "595c9284999bd2c209915225de6e963967bf1f75",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/good_real/good_planta_74_current_top.expected.json",
+   "sha256": "e5eb8561c4888f93792b26c7dd43c40a8e192ed8d9d8d2027bf636765980bd1b",
+   "git_blob": "701d52067480a90d32a2df22b8eceb7adf8d1971",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/good_real/good_planta_74_current_top.png",
+   "sha256": "b6a905f10e8a011221bb13031770818fecabf6d910bdb19cbfe02a77cb0cc0a5",
+   "git_blob": "6e07eacfde19e0aeff6ea99eb17ea9f70c19d721",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/good_synthetic/good_clean_shell_hosted_openings_synthetic.expected.json",
+   "sha256": "d414668845d29f05678c5ac183519f4681f281268216dd2c784e0f25a311a1ab",
+   "git_blob": "d8dd619424be8c5e769a9bd048e0233d602688ea",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/good_synthetic/good_clean_shell_hosted_openings_synthetic.png",
+   "sha256": "e79a0d43e4c58c6b83c8d926922c812df6d86f84b2d05cd1dd6038255221628e",
+   "git_blob": "37c23250b3ec1ad5af57e2f5f5234988ce3b2987",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_examples/manifest.json",
+   "sha256": "92634a87a4df8c4c571882e15e948b653b4ede049d57a95f34d14b674f6e67f4",
+   "git_blob": "12812a798810f8fd3e3c5b08268196ccafaa9e2a",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_negative/README.md",
+   "sha256": "2b3f674c6e743323828b840daf7cad1ba25247514aa76d17d1a72e55319e4f0b",
+   "git_blob": "b82e4d8f260d14d4d1187939bb3920812a97a191",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_negative/floating_door/consensus.json",
+   "sha256": "c96390e782047c4651194914a5fe6b9c26e81bf7ac468064e61cab10169ee037",
+   "git_blob": "f124680dac6d861a0ac6dbe82d199a7c4810afcc",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_negative/floating_door/geometry_report.json",
+   "sha256": "520dab958d4c21338c4d88710686d4eb06c77601592888d9860bf98083e81a36",
+   "git_blob": "195f74f1ec4ea31e93d5912971c8071bed6a7205",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_negative/full_height_window/consensus.json",
+   "sha256": "ce776486a368ad3877376f29763e7a9004945de0a40838224d7b816136db8976",
+   "git_blob": "943674374bdb49affd7512c60cc288a5250b7032",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_negative/full_height_window/geometry_report.json",
+   "sha256": "e77f172f1b9e318058c706b2426962a0d3500f73c9a36157e452da16493ae2ea",
+   "git_blob": "2b3fb458da70c9d18e78b52f3cb6f230687ded21",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_negative/orphan_glass/consensus.json",
+   "sha256": "979183e04ce154e5f2b2c63c1bdf99de42d9250172581af731f34ae03582cb90",
+   "git_blob": "59766a0feb8672ab53e406f915567ad4ab7b54cd",
+   "matches_index": true
+  },
+  {
+   "path": "fixtures/visual_oracle_negative/orphan_glass/geometry_report.json",
+   "sha256": "058899c2afc368a36f23c15470504be91e3bf61e4c61265db3ea1f74147f5180",
+   "git_blob": "fe9f43e433bede97ed214636548ee882dffb5c6d",
+   "matches_index": true
+  },
+  {
+   "path": "projects/planta_74/source/planta_74.pdf",
+   "sha256": "81722670c0281ee4caff473b2037d42ac3b41ef248abc57b49eeecebd795067a",
+   "git_blob": "91d81dacba3ff50ac9213b33e25e67b9a259e43a",
+   "matches_index": true
+  }
+ ],
+ "scale": {
+  "PT_TO_M_env": null,
+  "note": "PT_TO_M e lido no import de core.scale"
+ },
+ "harness_app": {
+  "path": "E:\\Claude\\apps\\harness-app",
+  "remote": "https://github.com/GFCDOTA/harness-app",
+  "branch": "develop",
+  "develop": "0928e75",
+  "dirty_files": 0
+ },
+ "open_prs": {
+  "GFCDOTA/sketchup-mcp": [],
+  "GFCDOTA/harness-app": []
+ },
+ "protected_summary": {
+  "files": 80,
+  "all_match_index": true
+ }
+}

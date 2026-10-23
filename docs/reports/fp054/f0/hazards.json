@@ -1,0 +1,6618 @@
+{
+ "counts": {
+  "broad_except": 113,
+  "env_read": 82,
+  "global_stmt": 3,
+  "importorskip": 17,
+  "module_cache": 1,
+  "module_constant": 174,
+  "name_semantics": 32,
+  "noqa": 311,
+  "scale_constant": 15,
+  "silent_except": 180,
+  "skip": 13,
+  "skipif": 47,
+  "sys_path_mutation": 78,
+  "type_ignore": 3,
+  "xfail": 2
+ },
+ "noqa_codes": {
+  "E402": 191,
+  "BLE001": 60,
+  "F401": 42,
+  "E731": 20,
+  "S603": 8,
+  "S607": 4,
+  "D102": 2,
+  "N802": 2,
+  "E501": 2,
+  "F821": 1
+ },
+ "duplicated_constants": [
+  {
+   "name": "ANCHOR_MAX_M",
+   "modules": [
+    "tools/rooms/bedroom/validation/bed_placement_gate.py",
+    "tools/rooms/living/validation/sofa_placement_gate.py",
+    "tools/validation/scene_spatial_gate.py"
+   ],
+   "values": [
+    "0.45",
+    "0.5"
+   ],
+   "diverges": true
+  },
+  {
+   "name": "CLEAR_M",
+   "modules": [
+    "tools/rooms/bedroom/validation/bed_placement_gate.py",
+    "tools/rooms/living/validation/sofa_placement_gate.py"
+   ],
+   "values": [
+    "0.45",
+    "0.55"
+   ],
+   "diverges": true
+  },
+  {
+   "name": "COMODO_FOLGA_M",
+   "modules": [
+    "tools/rooms/bedroom/layout.py",
+    "tools/rooms/living/planning/layout_candidates.py"
+   ],
+   "values": [
+    "0.06"
+   ],
+   "diverges": false
+  },
+  {
+   "name": "EMBED_DIM",
+   "modules": [
+    "ops/estudio-front/rag_chat.py",
+    "tools/knowledge/rag_embed_backend.py"
+   ],
+   "values": [
+    "768"
+   ],
+   "diverges": false
+  },
+  {
+   "name": "EPS",
+   "modules": [
+    "tools/rooms/kitchen/planning/cabinet_placement.py",
+    "tools/rooms/shared/cabinet/shaker/plan.py",
+    "tools/rooms/shared/cabinet/validation.py",
+    "tools/validation/scene_spatial_gate.py"
+   ],
+   "values": [
+    "1e-06",
+    "1e-08",
+    "1e-09"
+   ],
+   "diverges": true
+  },
+  {
+   "name": "M2IN",
+   "modules": [
+    "tools/navigation/baseline_probes.py",
+    "tools/rooms/kitchen/layout.py",
+    "tools/rooms/service/layout.py",
+    "tools/validation/circulation_gate.py",
+    "tools/validation/furniture_overlap_gate.py",
+    "tools/validation/style_coherence_gate.py"
+   ],
+   "values": [
+    "39.3700787402"
+   ],
+   "diverges": false
+  },
+  {
+   "name": "MARGIN_M",
+   "modules": [
+    "tools/rooms/bedroom/designer.py",
+    "tools/rooms/bedroom/layout.py",
+    "tools/rooms/living/planning/layout_candidates.py"
+   ],
+   "values": [
+    "0.03"
+   ],
+   "diverges": false
+  },
+  {
+   "name": "MAX_BYTES",
+   "modules": [
+    "tools/navigation/consumers.py",
+    "tools/validation/gate_filefetch.py"
+   ],
+   "values": [
+    "200000",
+    "3000000"
+   ],
+   "diverges": true
+  },
+  {
+   "name": "MAX_CHARS",
+   "modules": [
+    "tools/knowledge/project_memory_db.py",
+    "tools/knowledge/rag_freshness.py"
+   ],
+   "values": [
+    "4000"
+   ],
+   "diverges": false
+  },
+  {
+   "name": "MIN_CHARS",
+   "modules": [
+    "tools/knowledge/project_memory_db.py",
+    "tools/knowledge/rag_freshness.py"
+   ],
+   "values": [
+    "20",
+    "30"
+   ],
+   "diverges": true
+  },
+  {
+   "name": "PDF_SCALE",
+   "modules": [
+    "tools/rendering/pdf_overlay_verify.py",
+    "tools/validation/opening_audit.py"
+   ],
+   "values": [
+    "3.0"
+   ],
+   "diverges": false
+  },
+  {
+   "name": "TOL_CIRC_M2",
+   "modules": [
+    "tools/rooms/bedroom/layout.py",
+    "tools/rooms/living/planning/layout_candidates.py"
+   ],
+   "values": [
+    "0.02"
+   ],
+   "diverges": false
+  },
+  {
+   "name": "TOL_WALL_M2",
+   "modules": [
+    "tools/rooms/bedroom/layout.py",
+    "tools/rooms/living/planning/layout_candidates.py"
+   ],
+   "values": [
+    "0.06"
+   ],
+   "diverges": false
+  }
+ ],
+ "findings": [
+  {
+   "path": "core/observability/__init__.py",
+   "line": 115,
+   "kind": "global_stmt",
+   "detail": "_clock"
+  },
+  {
+   "path": "core/observability/__init__.py",
+   "line": 122,
+   "kind": "env_read",
+   "detail": "?"
+  },
+  {
+   "path": "core/observability/__init__.py",
+   "line": 123,
+   "kind": "env_read",
+   "detail": "?"
+  },
+  {
+   "path": "core/observability/__init__.py",
+   "line": 221,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "core/observability/__init__.py",
+   "line": 252,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "core/observability/events.py",
+   "line": 22,
+   "kind": "module_constant",
+   "detail": "SCHEMA_VERSION=1"
+  },
+  {
+   "path": "core/observability/events.py",
+   "line": 201,
+   "kind": "silent_except",
+   "detail": "(ValueError, TypeError, KeyError)"
+  },
+  {
+   "path": "core/observability/gates.py",
+   "line": 170,
+   "kind": "silent_except",
+   "detail": "(TypeError, ValueError)"
+  },
+  {
+   "path": "core/observability/redact.py",
+   "line": 30,
+   "kind": "module_constant",
+   "detail": "_MAX_STR=512"
+  },
+  {
+   "path": "core/observability/redact.py",
+   "line": 31,
+   "kind": "module_constant",
+   "detail": "_MAX_LIST=64"
+  },
+  {
+   "path": "core/observability/replay.py",
+   "line": 312,
+   "kind": "silent_except",
+   "detail": "(ValueError, TypeError)"
+  },
+  {
+   "path": "core/observability/sink.py",
+   "line": 37,
+   "kind": "noqa",
+   "detail": "D102"
+  },
+  {
+   "path": "core/observability/sink.py",
+   "line": 40,
+   "kind": "noqa",
+   "detail": "D102"
+  },
+  {
+   "path": "core/observability/sink.py",
+   "line": 101,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "core/observability/sink.py",
+   "line": 107,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "core/observability/sink.py",
+   "line": 129,
+   "kind": "global_stmt",
+   "detail": "_sink"
+  },
+  {
+   "path": "core/scale.py",
+   "line": 38,
+   "kind": "env_read",
+   "detail": "PT_TO_M"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 24,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 26,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 27,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 28,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 45,
+   "kind": "module_constant",
+   "detail": "WALL_T=0.12"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 46,
+   "kind": "module_constant",
+   "detail": "FLOOR_T=0.04"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 47,
+   "kind": "module_constant",
+   "detail": "HERO_BACK_GAP=0.05"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 48,
+   "kind": "module_constant",
+   "detail": "TABLE_GAP=0.4"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 49,
+   "kind": "module_constant",
+   "detail": "RUG_TUCK=0.15"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 50,
+   "kind": "module_constant",
+   "detail": "ART_GAP=0.25"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 51,
+   "kind": "module_constant",
+   "detail": "SIDE_GAP=0.05"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 52,
+   "kind": "module_constant",
+   "detail": "OPPOSITE_GAP=1.5"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 53,
+   "kind": "module_constant",
+   "detail": "ACCENT_LATERAL=0.55"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 54,
+   "kind": "module_constant",
+   "detail": "ACCENT_TURN_DEG=12"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 56,
+   "kind": "module_constant",
+   "detail": "CURTAIN_FRAME_OVER=0.4"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 57,
+   "kind": "module_constant",
+   "detail": "CURTAIN_SLIM_T=0.025"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 58,
+   "kind": "module_constant",
+   "detail": "CURTAIN_SLIM_AMP=0.04"
+  },
+  {
+   "path": "interior/composer/scene_composer.py",
+   "line": 140,
+   "kind": "name_semantics",
+   "detail": "if cam.get(\"kind\") not in (\"three_quarter_human\", \"top\", \"front\"):"
+  },
+  {
+   "path": "interior/planners/living_room_planner.py",
+   "line": 13,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/planners/living_room_planner.py",
+   "line": 15,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/planners/placement_brain.py",
+   "line": 21,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/planners/placement_brain.py",
+   "line": 22,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/planners/placement_brain.py",
+   "line": 23,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/planners/placement_brain.py",
+   "line": 24,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/planners/placement_brain.py",
+   "line": 26,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/planners/placement_brain.py",
+   "line": 27,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/planners/placement_brain.py",
+   "line": 29,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/renderers/__init__.py",
+   "line": 6,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "interior/renderers/__init__.py",
+   "line": 29,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "interior/renderers/__init__.py",
+   "line": 29,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "interior/renderers/sketchup_basic_provider.py",
+   "line": 61,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "interior/renderers/sketchup_basic_provider.py",
+   "line": 84,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "interior/renderers/sketchup_basic_provider.py",
+   "line": 84,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "interior/renderers/sketchup_basic_provider.py",
+   "line": 117,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/renderers/vray_final_provider.py",
+   "line": 81,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "interior/renderers/vray_final_provider.py",
+   "line": 96,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "interior/renderers/vray_final_provider.py",
+   "line": 96,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "interior/renderers/vray_final_provider.py",
+   "line": 117,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "interior/renderers/vray_final_provider.py",
+   "line": 117,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "interior/renderers/vray_final_provider.py",
+   "line": 125,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "interior/renderers/vray_final_provider.py",
+   "line": 125,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "interior/renderers/vray_final_provider.py",
+   "line": 141,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/semantics/room_graph.py",
+   "line": 15,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/semantics/room_graph.py",
+   "line": 16,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/semantics/room_graph.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/semantics/wall_affordance.py",
+   "line": 16,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/semantics/wall_affordance.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/semantics/wall_affordance.py",
+   "line": 18,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "interior/validators/bed_gate.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/validators/bed_placement_gate.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/validators/furniture_visual_gate.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/validators/nightstand_gate.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/validators/scene_spatial_gate.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/validators/sofa_placement_gate.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/validators/validation_report.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "interior/validators/wardrobe_gate.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "ops/estudio-front/knowledge_ingest.py",
+   "line": 28,
+   "kind": "module_constant",
+   "detail": "CHUNK_CHARS=1200"
+  },
+  {
+   "path": "ops/estudio-front/knowledge_ingest.py",
+   "line": 29,
+   "kind": "module_constant",
+   "detail": "CHUNK_OVERLAP=150"
+  },
+  {
+   "path": "ops/estudio-front/knowledge_ingest.py",
+   "line": 111,
+   "kind": "silent_except",
+   "detail": "rc.InfraUnavailable"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 29,
+   "kind": "env_read",
+   "detail": "QDRANT_URL"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 30,
+   "kind": "env_read",
+   "detail": "OLLAMA_URL"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 31,
+   "kind": "env_read",
+   "detail": "EMBED_MODEL"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 32,
+   "kind": "env_read",
+   "detail": "CHAT_MODEL"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 39,
+   "kind": "module_constant",
+   "detail": "EMBED_DIM=768"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 73,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 78,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 78,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 160,
+   "kind": "silent_except",
+   "detail": "InfraUnavailable"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 168,
+   "kind": "silent_except",
+   "detail": "InfraUnavailable"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 210,
+   "kind": "silent_except",
+   "detail": "InfraUnavailable"
+  },
+  {
+   "path": "ops/estudio-front/rag_chat.py",
+   "line": 270,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "ops/estudio-front/server.py",
+   "line": 43,
+   "kind": "noqa",
+   "detail": "N802"
+  },
+  {
+   "path": "ops/estudio-front/server.py",
+   "line": 71,
+   "kind": "silent_except",
+   "detail": "(ValueError, json.JSONDecodeError)"
+  },
+  {
+   "path": "ops/estudio-front/server.py",
+   "line": 74,
+   "kind": "noqa",
+   "detail": "N802"
+  },
+  {
+   "path": "ops/estudio-front/server.py",
+   "line": 101,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "ops/estudio-front/server.py",
+   "line": 115,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "ops/estudio-front/server.py",
+   "line": 133,
+   "kind": "env_read",
+   "detail": "ESTUDIO_BIND"
+  },
+  {
+   "path": "ops/estudio-front/server.py",
+   "line": 134,
+   "kind": "env_read",
+   "detail": "ESTUDIO_PORT"
+  },
+  {
+   "path": "tests/conftest.py",
+   "line": 50,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tests/conftest.py",
+   "line": 54,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_armchair_class.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_armchair_class.py",
+   "line": 14,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_armchair_class.py",
+   "line": 81,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_auto_camera.py",
+   "line": 8,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_auto_camera.py",
+   "line": 10,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_auto_camera.py",
+   "line": 11,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_auto_camera.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_auto_decider.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_auto_decider_gate.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_bathrooms_style.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_bathrooms_style.py",
+   "line": 154,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_bathrooms_style.py",
+   "line": 198,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_bed_class.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_bed_class.py",
+   "line": 13,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_bed_class.py",
+   "line": 115,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_bedroom_layout.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_bedroom_layout.py",
+   "line": 102,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _PLANTA.exists(), reason=\"planta_74 fixture absent\")"
+  },
+  {
+   "path": "tests/test_bedroom_layout.py",
+   "line": 142,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _PLANTA.exists(), reason=\"planta_74 fixture absent\")"
+  },
+  {
+   "path": "tests/test_coffee_table_class.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_coffee_table_class.py",
+   "line": 69,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_consult_bridge.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_correction_fixes.py",
+   "line": 8,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 81,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 82,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 92,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 93,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 127,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 145,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 175,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 196,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 257,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_correction_loop.py",
+   "line": 287,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_dining_table_class.py",
+   "line": 13,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_dining_table_class.py",
+   "line": 111,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_file_audit.py",
+   "line": 22,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tests/test_file_audit.py",
+   "line": 23,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tests/test_file_audit.py",
+   "line": 24,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tests/test_file_audit.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tests/test_fp043_room_collisions.py",
+   "line": 22,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_fp043_t02_inspect_workspace.py",
+   "line": 55,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_fp046_kitchen_shaker.py",
+   "line": 61,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_fp046_shaker_sketchup.py",
+   "line": 211,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_fp047_diff.py",
+   "line": 262,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_fp047_gates.py",
+   "line": 129,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_fp051_baseline.py",
+   "line": 36,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_fp051_baseline.py",
+   "line": 37,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_fp054_baseline.py",
+   "line": 67,
+   "kind": "noqa",
+   "detail": "E501"
+  },
+  {
+   "path": "tests/test_fp054_baseline.py",
+   "line": 80,
+   "kind": "xfail",
+   "detail": "text = \"import pytest\\n@pytest.mark.xfail(reason='x')\\ndef test_a(): pass\\n\\ndef test_b():\\n    pytest.skip('ruby nao in"
+  },
+  {
+   "path": "tests/test_geometry_hot_paths.py",
+   "line": 59,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tests/test_geometry_sanity_brains.py",
+   "line": 9,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_geometry_sanity_brains.py",
+   "line": 10,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_intent_to_scene.py",
+   "line": 16,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_intent_to_scene.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_intent_to_scene.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_intent_to_scene.py",
+   "line": 22,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_intent_to_scene.py",
+   "line": 253,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_kitchen_cabinet_placement_properties.py",
+   "line": 7,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_kitchen_cabinet_placement_properties.py",
+   "line": 8,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_kitchen_layout_style.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_kitchen_layout_style.py",
+   "line": 21,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_layout_rules.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_layout_rules.py",
+   "line": 95,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _PLANTA.exists(), reason=\"planta_74 fixture absent\")"
+  },
+  {
+   "path": "tests/test_layout_rules.py",
+   "line": 108,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _PLANTA.exists(), reason=\"planta_74 fixture absent\")"
+  },
+  {
+   "path": "tests/test_layout_search_pruning.py",
+   "line": 135,
+   "kind": "silent_except",
+   "detail": "KeyError"
+  },
+  {
+   "path": "tests/test_negative_dogfood.py",
+   "line": 126,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_opening_host_audit.py",
+   "line": 70,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_opening_host_audit.py",
+   "line": 80,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_opening_routing_invariants.py",
+   "line": 198,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_opening_routing_invariants.py",
+   "line": 235,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_overlay_diff.py",
+   "line": 102,
+   "kind": "skipif",
+   "detail": "pytestmark_data = pytest.mark.skipif(not _HAVE_DATA, reason=\"gate test data absent\")"
+  },
+  {
+   "path": "tests/test_overlay_diff.py",
+   "line": 106,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_overlay_diff.py",
+   "line": 130,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_place_layout_geom.py",
+   "line": 17,
+   "kind": "skipif",
+   "detail": "pytestmark = pytest.mark.skipif(RUBY is None, reason=\"ruby não instalado\")"
+  },
+  {
+   "path": "tests/test_quadrado_canonical_smoke.py",
+   "line": 183,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_quadrado_canonical_smoke.py",
+   "line": 204,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_quadrado_canonical_smoke.py",
+   "line": 225,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_quadrado_canonical_smoke.py",
+   "line": 244,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_rack_class.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_rack_class.py",
+   "line": 95,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_rag_embed_backend.py",
+   "line": 25,
+   "kind": "skipif",
+   "detail": "requires_infra = pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_rag_embed_backend.py",
+   "line": 157,
+   "kind": "silent_except",
+   "detail": "reb.InfraUnavailable"
+  },
+  {
+   "path": "tests/test_rag_embed_backend.py",
+   "line": 176,
+   "kind": "silent_except",
+   "detail": "reb.InfraUnavailable"
+  },
+  {
+   "path": "tests/test_rag_embed_backend.py",
+   "line": 204,
+   "kind": "silent_except",
+   "detail": "reb.InfraUnavailable"
+  },
+  {
+   "path": "tests/test_railing_real_build.py",
+   "line": 26,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _REPORT.exists(), reason=\"railing_source_fix build absent\")"
+  },
+  {
+   "path": "tests/test_railing_real_build.py",
+   "line": 37,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _REPORT.exists(), reason=\"railing_source_fix build absent\")"
+  },
+  {
+   "path": "tests/test_regenerate_consensus.py",
+   "line": 43,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _PLANTA.exists(), reason=\"planta_74 fixture absent\")"
+  },
+  {
+   "path": "tests/test_room_modes.py",
+   "line": 30,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not SYNTH.exists(), reason=\"synthetic rooms absent\")"
+  },
+  {
+   "path": "tests/test_room_modes.py",
+   "line": 45,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not PLANTA.exists(), reason=\"planta_74 fixture absent\")"
+  },
+  {
+   "path": "tests/test_room_modes.py",
+   "line": 54,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not SYNTH.exists(), reason=\"synthetic rooms absent\")"
+  },
+  {
+   "path": "tests/test_room_type.py",
+   "line": 88,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _PLANTA.exists(), reason=\"planta_74 fixture absent\")"
+  },
+  {
+   "path": "tests/test_room_type.py",
+   "line": 105,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _PLANTA.exists(), reason=\"planta_74 fixture absent\")"
+  },
+  {
+   "path": "tests/test_run_deterministic_gates.py",
+   "line": 34,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _PLANTA.exists(), reason=\"planta_74 fixture absent\")"
+  },
+  {
+   "path": "tests/test_run_deterministic_gates.py",
+   "line": 44,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not (_PLANTA.exists() and _RENDER.exists()),"
+  },
+  {
+   "path": "tests/test_run_deterministic_gates.py",
+   "line": 47,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_run_deterministic_gates.py",
+   "line": 48,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_run_deterministic_gates.py",
+   "line": 55,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not _QUAD.exists(), reason=\"quadrado fixture absent\")"
+  },
+  {
+   "path": "tests/test_semantic_zones.py",
+   "line": 36,
+   "kind": "skipif",
+   "detail": "pytestmark = pytest.mark.skipif(not _has_fixtures(), reason=\"planta_74 fixtures absent\")"
+  },
+  {
+   "path": "tests/test_shell_parts.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_side_by_side_composer.py",
+   "line": 25,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_side_by_side_composer.py",
+   "line": 63,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_sketchup_ruby_jobs.py",
+   "line": 17,
+   "kind": "skipif",
+   "detail": "pytestmark = pytest.mark.skipif(RUBY is None, reason=\"ruby não instalado\")"
+  },
+  {
+   "path": "tests/test_sofa_class.py",
+   "line": 15,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_sofa_class.py",
+   "line": 16,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_sofa_class.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_sofa_class.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_sofa_class.py",
+   "line": 80,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_su_job_info.py",
+   "line": 31,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_su_job_info.py",
+   "line": 34,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_su_job_info.py",
+   "line": 36,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_su_job_info.py",
+   "line": 37,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_su_job_info.py",
+   "line": 48,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tests/test_su_job_info.py",
+   "line": 50,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_su_job_info.py",
+   "line": 55,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(sys.platform != \"win32\", reason=\"Job Object é do Windows\")"
+  },
+  {
+   "path": "tests/test_su_job_info.py",
+   "line": 63,
+   "kind": "importorskip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_su_job_info.py",
+   "line": 77,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(sys.platform != \"win32\", reason=\"Job Object é do Windows\")"
+  },
+  {
+   "path": "tests/test_su_spawn_detached.py",
+   "line": 41,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(not hasattr(subprocess, \"CREATE_BREAKAWAY_FROM_JOB\"), reason=\"flag só no Windows\")"
+  },
+  {
+   "path": "tests/test_suites_style.py",
+   "line": 79,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_synthetic_polygon_convention.py",
+   "line": 95,
+   "kind": "xfail",
+   "detail": "@pytest.mark.xfail(strict=True, reason=\"FP-043 P3a-03: planner mobilia sobre a laje (tuck 0,4*t); trocar o vao global \""
+  },
+  {
+   "path": "tests/test_taste_writeback_recall.py",
+   "line": 25,
+   "kind": "skipif",
+   "detail": "requires_infra = pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_taste_writeback_recall.py",
+   "line": 87,
+   "kind": "silent_except",
+   "detail": "reb.InfraUnavailable"
+  },
+  {
+   "path": "tests/test_theme_palette.py",
+   "line": 14,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tests/test_visual_oracle_negative_fixtures.py",
+   "line": 115,
+   "kind": "skip",
+   "detail": ""
+  },
+  {
+   "path": "tests/test_wall_overlap_audit.py",
+   "line": 62,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif(_load(\"quadrado\", \"consensus_with_window.json\") is None,"
+  },
+  {
+   "path": "tests/test_wall_overlap_audit.py",
+   "line": 68,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_wall_shell_canonical.py",
+   "line": 240,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_wall_shell_canonical.py",
+   "line": 261,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_wall_shell_canonical.py",
+   "line": 299,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_wall_shell_canonical.py",
+   "line": 362,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_wall_stub_canonicalization.py",
+   "line": 156,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_window_aperture_contract.py",
+   "line": 208,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_window_aperture_contract.py",
+   "line": 235,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_window_aperture_geometry.py",
+   "line": 78,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_window_aperture_geometry.py",
+   "line": 97,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_window_aperture_geometry.py",
+   "line": 134,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_window_aperture_geometry.py",
+   "line": 157,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tests/test_window_aperture_geometry.py",
+   "line": 196,
+   "kind": "skipif",
+   "detail": "@pytest.mark.skipif("
+  },
+  {
+   "path": "tools/circulation_gate.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/claude_bridge/_paths.py",
+   "line": 22,
+   "kind": "env_read",
+   "detail": "CLAUDE_WORKSPACE_ROOT"
+  },
+  {
+   "path": "tools/claude_bridge/_paths.py",
+   "line": 45,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/claude_bridge/_paths.py",
+   "line": 52,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/claude_bridge/skp_inventory.py",
+   "line": 18,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/claude_bridge/skp_inventory.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/claude_bridge/skp_inventory.py",
+   "line": 37,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/claude_bridge/skp_inventory.py",
+   "line": 133,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/claude_bridge/skp_inventory.py",
+   "line": 149,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/correction_loop.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/finding_router.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/furnish_apartment.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/furnish_plan.py",
+   "line": 23,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/furnish_plan.py",
+   "line": 39,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/furnish_plan.py",
+   "line": 72,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/furniture_overlap_gate.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/geometry_sanity.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/interior_studio/architect_program.py",
+   "line": 43,
+   "kind": "env_read",
+   "detail": "RAG_BACKEND"
+  },
+  {
+   "path": "tools/interior_studio/architect_program.py",
+   "line": 135,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/architect_program.py",
+   "line": 135,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/architect_program.py",
+   "line": 196,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/architect_program.py",
+   "line": 196,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/architect_program.py",
+   "line": 279,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/architect_program.py",
+   "line": 279,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 90,
+   "kind": "env_read",
+   "detail": "AUTO_DECIDER_MAX_DECISIONS"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 93,
+   "kind": "env_read",
+   "detail": "AUTO_DECIDER_MAX_GATE_CALLS"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 135,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 135,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 280,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 280,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 305,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 305,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 333,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 333,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 357,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 357,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/auto_decider.py",
+   "line": 429,
+   "kind": "silent_except",
+   "detail": "FileNotFoundError"
+  },
+  {
+   "path": "tools/interior_studio/consult_gpt_bridge/__init__.py",
+   "line": 9,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/interior_studio/consult_gpt_bridge/answer_parser.py",
+   "line": 27,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/consult_gpt_bridge/answer_parser.py",
+   "line": 27,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/consult_gpt_bridge/answer_parser.py",
+   "line": 262,
+   "kind": "silent_except",
+   "detail": "(json.JSONDecodeError, ValueError)"
+  },
+  {
+   "path": "tools/interior_studio/consult_gpt_bridge/openai_client.py",
+   "line": 13,
+   "kind": "env_read",
+   "detail": "OPENAI_API_KEY"
+  },
+  {
+   "path": "tools/interior_studio/consult_gpt_bridge/store.py",
+   "line": 94,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/consult_gpt_bridge/store.py",
+   "line": 94,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/consult_gpt_bridge/store.py",
+   "line": 113,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/consult_gpt_bridge/store.py",
+   "line": 113,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/curator.py",
+   "line": 57,
+   "kind": "env_read",
+   "detail": "CURATOR_MAX_DECISIONS"
+  },
+  {
+   "path": "tools/interior_studio/curator.py",
+   "line": 70,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/curator.py",
+   "line": 70,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/cycles.py",
+   "line": 45,
+   "kind": "silent_except",
+   "detail": "(json.JSONDecodeError, OSError)"
+  },
+  {
+   "path": "tools/interior_studio/cycles.py",
+   "line": 56,
+   "kind": "silent_except",
+   "detail": "(json.JSONDecodeError, OSError)"
+  },
+  {
+   "path": "tools/interior_studio/decision_judge.py",
+   "line": 118,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/decision_judge.py",
+   "line": 118,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/gpt_review_bundle.py",
+   "line": 59,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/interior_studio/gpt_review_bundle.py",
+   "line": 72,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/interior_studio/interior_quality_scorecard.py",
+   "line": 31,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/interior_studio/interior_quality_scorecard.py",
+   "line": 33,
+   "kind": "scale_constant",
+   "detail": "IN_PER_M=39.3700787402"
+  },
+  {
+   "path": "tools/interior_studio/interior_quality_scorecard.py",
+   "line": 45,
+   "kind": "module_constant",
+   "detail": "DETAIL_MIN=3"
+  },
+  {
+   "path": "tools/interior_studio/interior_quality_scorecard.py",
+   "line": 46,
+   "kind": "module_constant",
+   "detail": "ANCHOR_FLUSH_CM=8.0"
+  },
+  {
+   "path": "tools/interior_studio/interior_quality_scorecard.py",
+   "line": 47,
+   "kind": "module_constant",
+   "detail": "ANCHOR_WARN_CM=22.0"
+  },
+  {
+   "path": "tools/interior_studio/interior_quality_scorecard.py",
+   "line": 89,
+   "kind": "env_read",
+   "detail": "'PT_TO_M'"
+  },
+  {
+   "path": "tools/interior_studio/interior_quality_scorecard.py",
+   "line": 179,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/interior_quality_scorecard.py",
+   "line": 179,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/interns.py",
+   "line": 68,
+   "kind": "module_constant",
+   "detail": "_FOOT_DEFAULT=0.4"
+  },
+  {
+   "path": "tools/interior_studio/interns.py",
+   "line": 250,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/interns.py",
+   "line": 250,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/interns.py",
+   "line": 276,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/interns.py",
+   "line": 276,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/learning_patch.py",
+   "line": 36,
+   "kind": "silent_except",
+   "detail": "(json.JSONDecodeError, OSError)"
+  },
+  {
+   "path": "tools/interior_studio/learning_patch.py",
+   "line": 47,
+   "kind": "silent_except",
+   "detail": "(json.JSONDecodeError, OSError)"
+  },
+  {
+   "path": "tools/interior_studio/learning_patch.py",
+   "line": 64,
+   "kind": "silent_except",
+   "detail": "ValueError"
+  },
+  {
+   "path": "tools/interior_studio/learning_patch.py",
+   "line": 115,
+   "kind": "silent_except",
+   "detail": "(json.JSONDecodeError, OSError)"
+  },
+  {
+   "path": "tools/interior_studio/project_state.py",
+   "line": 86,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/project_state.py",
+   "line": 86,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/project_state.py",
+   "line": 208,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/project_state.py",
+   "line": 208,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/proposals.py",
+   "line": 39,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/proposals.py",
+   "line": 39,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/reference_packs.py",
+   "line": 43,
+   "kind": "silent_except",
+   "detail": "(json.JSONDecodeError, OSError)"
+  },
+  {
+   "path": "tools/interior_studio/render_judge.py",
+   "line": 57,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/render_judge.py",
+   "line": 57,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/studio_log.py",
+   "line": 52,
+   "kind": "silent_except",
+   "detail": "json.JSONDecodeError"
+  },
+  {
+   "path": "tools/interior_studio/vision_describe.py",
+   "line": 28,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/interior_studio/vision_describe.py",
+   "line": 28,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/vision_describe.py",
+   "line": 55,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/interior_studio/vision_describe.py",
+   "line": 55,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/knowledge/corpus_to_rag.py",
+   "line": 175,
+   "kind": "silent_except",
+   "detail": "(AttributeError, ValueError)"
+  },
+  {
+   "path": "tools/knowledge/project_memory_db.py",
+   "line": 46,
+   "kind": "env_read",
+   "detail": "OLLAMA_URL"
+  },
+  {
+   "path": "tools/knowledge/project_memory_db.py",
+   "line": 47,
+   "kind": "env_read",
+   "detail": "EMBED_MODEL"
+  },
+  {
+   "path": "tools/knowledge/project_memory_db.py",
+   "line": 49,
+   "kind": "module_constant",
+   "detail": "MAX_CHARS=4000"
+  },
+  {
+   "path": "tools/knowledge/project_memory_db.py",
+   "line": 50,
+   "kind": "module_constant",
+   "detail": "MIN_CHARS=30"
+  },
+  {
+   "path": "tools/knowledge/project_memory_db.py",
+   "line": 186,
+   "kind": "silent_except",
+   "detail": "json.JSONDecodeError"
+  },
+  {
+   "path": "tools/knowledge/project_memory_db.py",
+   "line": 382,
+   "kind": "silent_except",
+   "detail": "(AttributeError, ValueError)"
+  },
+  {
+   "path": "tools/knowledge/rag_embed_backend.py",
+   "line": 30,
+   "kind": "env_read",
+   "detail": "QDRANT_URL"
+  },
+  {
+   "path": "tools/knowledge/rag_embed_backend.py",
+   "line": 31,
+   "kind": "env_read",
+   "detail": "OLLAMA_URL"
+  },
+  {
+   "path": "tools/knowledge/rag_embed_backend.py",
+   "line": 32,
+   "kind": "env_read",
+   "detail": "EMBED_MODEL"
+  },
+  {
+   "path": "tools/knowledge/rag_embed_backend.py",
+   "line": 33,
+   "kind": "env_read",
+   "detail": "RAG_COLLECTION"
+  },
+  {
+   "path": "tools/knowledge/rag_embed_backend.py",
+   "line": 34,
+   "kind": "module_constant",
+   "detail": "EMBED_DIM=768"
+  },
+  {
+   "path": "tools/knowledge/rag_embed_backend.py",
+   "line": 72,
+   "kind": "silent_except",
+   "detail": "InfraUnavailable"
+  },
+  {
+   "path": "tools/knowledge/rag_embed_backend.py",
+   "line": 80,
+   "kind": "silent_except",
+   "detail": "InfraUnavailable"
+  },
+  {
+   "path": "tools/knowledge/rag_freshness.py",
+   "line": 73,
+   "kind": "module_constant",
+   "detail": "MAX_CHARS=4000"
+  },
+  {
+   "path": "tools/knowledge/rag_freshness.py",
+   "line": 74,
+   "kind": "module_constant",
+   "detail": "MIN_CHARS=20"
+  },
+  {
+   "path": "tools/knowledge/rag_freshness.py",
+   "line": 319,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 293,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 293,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 307,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 307,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 345,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 345,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 375,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 375,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 461,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 461,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 517,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 517,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 520,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 520,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 852,
+   "kind": "noqa",
+   "detail": "F821"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 854,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/knowledge/reference_db.py",
+   "line": 854,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/knowledge/reference_grammar.py",
+   "line": 289,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/knowledge/retrieval_eval.py",
+   "line": 38,
+   "kind": "module_constant",
+   "detail": "CORPUS_SIZE=12"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 38,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 40,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 48,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 49,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 50,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 51,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 54,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 55,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 56,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 57,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 63,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 64,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 65,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 66,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 67,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 68,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 69,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 70,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 71,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 110,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 125,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 301,
+   "kind": "env_read",
+   "detail": "'PT_TO_M'"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 309,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 309,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 314,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 314,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 326,
+   "kind": "env_read",
+   "detail": "'PT_TO_M'"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 329,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/mcp_server/server.py",
+   "line": 329,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/mcp_server/smoke.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/mcp_server/smoke.py",
+   "line": 37,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/mcp_server/smoke.py",
+   "line": 37,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/mcp_server/smoke.py",
+   "line": 112,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/mcp_server/smoke.py",
+   "line": 112,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/mcp_server/smoke.py",
+   "line": 133,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/mcp_server/smoke.py",
+   "line": 133,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/mcp_server/stdio_isolation.py",
+   "line": 49,
+   "kind": "global_stmt",
+   "detail": "_ISOLATED"
+  },
+  {
+   "path": "tools/navigation/baseline_inventory.py",
+   "line": 159,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tools/navigation/baseline_inventory.py",
+   "line": 447,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tools/navigation/baseline_probes.py",
+   "line": 40,
+   "kind": "scale_constant",
+   "detail": "M2IN=39.3700787402"
+  },
+  {
+   "path": "tools/navigation/baseline_probes.py",
+   "line": 88,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/navigation/baseline_probes.py",
+   "line": 88,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/navigation/baseline_probes.py",
+   "line": 124,
+   "kind": "env_read",
+   "detail": "GH_EXE"
+  },
+  {
+   "path": "tools/navigation/baseline_probes.py",
+   "line": 152,
+   "kind": "env_read",
+   "detail": "PT_TO_M"
+  },
+  {
+   "path": "tools/navigation/baseline_probes.py",
+   "line": 308,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tools/navigation/baseline_probes.py",
+   "line": 445,
+   "kind": "name_semantics",
+   "detail": "if decide_only and any(str(b.get(\"module\", \"\")).startswith(\"Mesa de jantar\") for b in extra):"
+  },
+  {
+   "path": "tools/navigation/baseline_probes.py",
+   "line": 448,
+   "kind": "name_semantics",
+   "detail": "if b.get(\"module\") == \"Mesa de jantar\" and b.get(\"corners\")])"
+  },
+  {
+   "path": "tools/navigation/baseline_probes.py",
+   "line": 480,
+   "kind": "name_semantics",
+   "detail": "seats_per_chair = sum(p.get(\"kind\") == \"seat\" for p in chair)"
+  },
+  {
+   "path": "tools/navigation/consumers.py",
+   "line": 31,
+   "kind": "module_constant",
+   "detail": "MAX_BYTES=3000000"
+  },
+  {
+   "path": "tools/navigation/consumers.py",
+   "line": 90,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/navigation/consumers.py",
+   "line": 98,
+   "kind": "silent_except",
+   "detail": "SyntaxError"
+  },
+  {
+   "path": "tools/navigation/docs_check.py",
+   "line": 28,
+   "kind": "module_constant",
+   "detail": "MAX_HOPS=3"
+  },
+  {
+   "path": "tools/navigation/file_audit.py",
+   "line": 208,
+   "kind": "silent_except",
+   "detail": "FileNotFoundError"
+  },
+  {
+   "path": "tools/navigation/file_audit.py",
+   "line": 214,
+   "kind": "silent_except",
+   "detail": "json.JSONDecodeError"
+  },
+  {
+   "path": "tools/navigation/fp051_baseline.py",
+   "line": 251,
+   "kind": "name_semantics",
+   "detail": "front = next(p for p in plan[\"parts\"] if p[\"name\"] == \"front\")"
+  },
+  {
+   "path": "tools/navigation/fp051_baseline.py",
+   "line": 256,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/navigation/fp051_baseline.py",
+   "line": 256,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/navigation/fp051_baseline.py",
+   "line": 264,
+   "kind": "silent_except",
+   "detail": "(OSError, subprocess.CalledProcessError)"
+  },
+  {
+   "path": "tools/oracle/ask_gpt_gate.py",
+   "line": 73,
+   "kind": "module_constant",
+   "detail": "BRIDGE_HEALTH_TIMEOUT_SEC=5"
+  },
+  {
+   "path": "tools/oracle/ask_gpt_gate.py",
+   "line": 74,
+   "kind": "module_constant",
+   "detail": "BRIDGE_CALL_TIMEOUT_SEC=260"
+  },
+  {
+   "path": "tools/oracle/gpt_docker_visual_score.py",
+   "line": 70,
+   "kind": "silent_except",
+   "detail": "(urllib.error.URLError, TimeoutError, OSError)"
+  },
+  {
+   "path": "tools/oracle/gpt_review.py",
+   "line": 184,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/oracle/make_gpt_review_sheet.py",
+   "line": 23,
+   "kind": "env_read",
+   "detail": "SOFA_EVAL_DIR"
+  },
+  {
+   "path": "tools/oracle/make_gpt_review_sheet.py",
+   "line": 57,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/oracle/negative_dogfood.py",
+   "line": 44,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/oracle/negative_dogfood.py",
+   "line": 174,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/oracle/negative_dogfood.py",
+   "line": 184,
+   "kind": "type_ignore",
+   "detail": ""
+  },
+  {
+   "path": "tools/oracle/negative_dogfood.py",
+   "line": 186,
+   "kind": "type_ignore",
+   "detail": ""
+  },
+  {
+   "path": "tools/oracle/ollama_bridge.py",
+   "line": 23,
+   "kind": "env_read",
+   "detail": "OLLAMA_HOST"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 45,
+   "kind": "module_constant",
+   "detail": "ORACLE_BRIDGE_HEALTH_TIMEOUT_SEC=5"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 46,
+   "kind": "module_constant",
+   "detail": "ORACLE_BRIDGE_CALL_TIMEOUT_SEC=120"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 50,
+   "kind": "module_constant",
+   "detail": "ORACLE_BRIDGE_VISION_TIMEOUT_SEC=300"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 53,
+   "kind": "module_constant",
+   "detail": "OLLAMA_HEALTH_TIMEOUT_SEC=5"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 54,
+   "kind": "module_constant",
+   "detail": "OLLAMA_GENERATE_TIMEOUT_SEC=600"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 294,
+   "kind": "silent_except",
+   "detail": "json.JSONDecodeError"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 301,
+   "kind": "silent_except",
+   "detail": "(urllib.error.URLError, OSError)"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 630,
+   "kind": "silent_except",
+   "detail": "(urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, json.JSONDecodeError)"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 770,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/oracle/oracle_providers.py",
+   "line": 890,
+   "kind": "silent_except",
+   "detail": "json.JSONDecodeError"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 64,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 112,
+   "kind": "silent_except",
+   "detail": "(OSError, json.JSONDecodeError)"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 261,
+   "kind": "module_constant",
+   "detail": "ORACLE_BRIDGE_TIMEOUT_SEC=5"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 346,
+   "kind": "name_semantics",
+   "detail": "if (op.get(\"kind_v5\") or op.get(\"kind\")) == \"window\""
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 368,
+   "kind": "name_semantics",
+   "detail": "if (op.get(\"kind_v5\") or op.get(\"kind\")) == \"interior_door\""
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 391,
+   "kind": "name_semantics",
+   "detail": "if (op.get(\"kind_v5\") or op.get(\"kind\")) == \"glazed_balcony\""
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 412,
+   "kind": "name_semantics",
+   "detail": "if not g.get(\"name\", \"\").startswith(\"DoorLeaf_Group\"):"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 439,
+   "kind": "name_semantics",
+   "detail": "if (op.get(\"kind_v5\") or op.get(\"kind\")) == \"window\""
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 504,
+   "kind": "name_semantics",
+   "detail": "if not g.get(\"name\", \"\").startswith(\"WindowGlass_Group\"):"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 532,
+   "kind": "name_semantics",
+   "detail": "if not g.get(\"name\", \"\").startswith(\"WindowGlass_Group\"):"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 639,
+   "kind": "silent_except",
+   "detail": "(urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError)"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 715,
+   "kind": "type_ignore",
+   "detail": ""
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 769,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 801,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 1307,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/oracle/run_skp_visual_review.py",
+   "line": 1320,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/correction/correction_fixes.py",
+   "line": 159,
+   "kind": "module_constant",
+   "detail": "_MAX_NUDGE_PASSES=5"
+  },
+  {
+   "path": "tools/orchestration/correction/correction_loop.py",
+   "line": 57,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/correction/correction_loop.py",
+   "line": 57,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/orchestration/correction/correction_loop.py",
+   "line": 84,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/correction/correction_loop.py",
+   "line": 84,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/orchestration/correction/correction_loop.py",
+   "line": 198,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/correction/correction_loop.py",
+   "line": 375,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/correction/jsonl_io.py",
+   "line": 36,
+   "kind": "silent_except",
+   "detail": "ValueError"
+  },
+  {
+   "path": "tools/orchestration/fidelity_loop.py",
+   "line": 52,
+   "kind": "silent_except",
+   "detail": "ValueError"
+  },
+  {
+   "path": "tools/orchestration/fidelity_loop.py",
+   "line": 145,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 21,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 27,
+   "kind": "env_read",
+   "detail": "PT_TO_M"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 28,
+   "kind": "env_read",
+   "detail": "'PT_TO_M'"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 29,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 30,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 31,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 32,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 33,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 34,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 37,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 38,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 39,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 40,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 46,
+   "kind": "env_read",
+   "detail": "FURNISH_BASE_SKP"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 60,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 60,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 119,
+   "kind": "env_read",
+   "detail": "FURNISH_STYLE"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 191,
+   "kind": "silent_except",
+   "detail": "PermissionError"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 207,
+   "kind": "env_read",
+   "detail": "FURNISH_STYLE"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 244,
+   "kind": "env_read",
+   "detail": "FURNISH_STYLE"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 250,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 250,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 260,
+   "kind": "env_read",
+   "detail": "FURNISH_STYLE"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 263,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/furnish_apartment.py",
+   "line": 263,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/orchestration/promote_artifact.py",
+   "line": 44,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/orchestration/promote_artifact.py",
+   "line": 153,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/promote_artifact.py",
+   "line": 205,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/promote_artifact.py",
+   "line": 269,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/promote_canonical.py",
+   "line": 74,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/variant_axes.py",
+   "line": 66,
+   "kind": "silent_except",
+   "detail": "(OSError, json.JSONDecodeError)"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 40,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 48,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 49,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 50,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 51,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 199,
+   "kind": "env_read",
+   "detail": "FURNISH_STYLE"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 244,
+   "kind": "silent_except",
+   "detail": "(OSError, json.JSONDecodeError)"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 335,
+   "kind": "silent_except",
+   "detail": "ValueError"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 402,
+   "kind": "env_read",
+   "detail": "'FURNISH_STYLE'"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 424,
+   "kind": "env_read",
+   "detail": "SWEEP_SHELL"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 541,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/orchestration/variant_sweep.py",
+   "line": 541,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/pdf_knowledge/export_claude_context.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/pdf_knowledge/ingest_pdfs.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/pdf_knowledge/search_pdf_index.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/quadrado/render_view.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rendering/auto_camera.py",
+   "line": 18,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rendering/auto_camera.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/auto_camera.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/auto_camera.py",
+   "line": 22,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/auto_camera.py",
+   "line": 23,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/auto_camera.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/batch_theme_render.py",
+   "line": 115,
+   "kind": "env_read",
+   "detail": "BATCH_RENDER"
+  },
+  {
+   "path": "tools/rendering/compose_side_by_side.py",
+   "line": 34,
+   "kind": "module_constant",
+   "detail": "DEFAULT_TARGET_HEIGHT=600"
+  },
+  {
+   "path": "tools/rendering/compose_side_by_side.py",
+   "line": 35,
+   "kind": "module_constant",
+   "detail": "DEFAULT_GAP_PX=20"
+  },
+  {
+   "path": "tools/rendering/compose_side_by_side.py",
+   "line": 36,
+   "kind": "module_constant",
+   "detail": "DEFAULT_TITLE_BAND_PX=60"
+  },
+  {
+   "path": "tools/rendering/compose_side_by_side.py",
+   "line": 37,
+   "kind": "module_constant",
+   "detail": "DEFAULT_PDF_SCALE=2.0"
+  },
+  {
+   "path": "tools/rendering/compose_side_by_side.py",
+   "line": 83,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/rendering/compose_side_by_side.py",
+   "line": 193,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/rendering/gen_textures.py",
+   "line": 18,
+   "kind": "module_constant",
+   "detail": "SZ=512"
+  },
+  {
+   "path": "tools/rendering/material_review.py",
+   "line": 27,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rendering/material_review.py",
+   "line": 29,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/material_review.py",
+   "line": 145,
+   "kind": "silent_except",
+   "detail": "PermissionError"
+  },
+  {
+   "path": "tools/rendering/pdf_overlay_verify.py",
+   "line": 20,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rendering/pdf_overlay_verify.py",
+   "line": 24,
+   "kind": "module_constant",
+   "detail": "PDF_SCALE=3.0"
+  },
+  {
+   "path": "tools/rendering/pdf_overlay_verify.py",
+   "line": 43,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/rendering/pdf_overlay_verify.py",
+   "line": 54,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/rendering/pdf_overlay_verify.py",
+   "line": 69,
+   "kind": "name_semantics",
+   "detail": "doors = [o for o in con[\"openings\"] if (o.get(\"kind_v5\") or o.get(\"kind\")) in (\"interior_door\", \"interior_passage\")]"
+  },
+  {
+   "path": "tools/rendering/quadrado/render_view.py",
+   "line": 28,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rendering/quadrado/render_view.py",
+   "line": 29,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/quadrado/render_view.py",
+   "line": 30,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/quadrado/render_view.py",
+   "line": 73,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/rendering/quadrado/render_view.py",
+   "line": 87,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/rendering/render_parts_iso.py",
+   "line": 16,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/render_parts_iso.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/render_scene_views.py",
+   "line": 26,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rendering/render_scene_views.py",
+   "line": 27,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/render_scene_views.py",
+   "line": 28,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/render_scene_views.py",
+   "line": 138,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/rendering/render_scene_views.py",
+   "line": 138,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/rendering/render_scene_vray.py",
+   "line": 31,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rendering/render_scene_vray.py",
+   "line": 32,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/render_scene_vray.py",
+   "line": 33,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rendering/ruby/material_review.rb",
+   "line": 37,
+   "kind": "silent_except",
+   "detail": "shown.each { |g| (bb.add(g.bounds) rescue nil) }"
+  },
+  {
+   "path": "tools/rendering/ruby/material_review.rb",
+   "line": 49,
+   "kind": "silent_except",
+   "detail": "(view.zoom(shown) rescue nil)   # enquadra os moveis visiveis mantendo a direcao"
+  },
+  {
+   "path": "tools/rendering/ruby/material_review.rb",
+   "line": 66,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/rendering/ruby/material_review.rb",
+   "line": 69,
+   "kind": "silent_except",
+   "detail": "groups.each { |g| (g.hidden = false) rescue nil }   # restaura p/ a proxima came"
+  },
+  {
+   "path": "tools/room_type.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bathroom/capabilities/estudio_banheiro_scene.py",
+   "line": 25,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bathroom/capabilities/estudio_banheiro_scene.py",
+   "line": 26,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bathroom/capabilities/render_banho_auto.py",
+   "line": 21,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bathroom/capabilities/render_banho_auto.py",
+   "line": 26,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bathroom/capabilities/render_banho_auto.py",
+   "line": 30,
+   "kind": "module_constant",
+   "detail": "WALL_PAD=8.0"
+  },
+  {
+   "path": "tools/rooms/bathroom/capabilities/render_banho_auto.py",
+   "line": 31,
+   "kind": "module_constant",
+   "detail": "FILL_PAD=18.0"
+  },
+  {
+   "path": "tools/rooms/bathroom/capabilities/render_banho_vray.py",
+   "line": 22,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bathroom/capabilities/render_banho_vray.py",
+   "line": 23,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bathroom/layout.py",
+   "line": 14,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bathroom/layout.py",
+   "line": 15,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bathroom/layout.py",
+   "line": 16,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bathroom/layout.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bathroom/layout.py",
+   "line": 18,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bathroom/layout.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bathroom/layout.py",
+   "line": 21,
+   "kind": "module_constant",
+   "detail": "BOX_MIN_AREA_M2=2.8"
+  },
+  {
+   "path": "tools/rooms/bathroom/layout.py",
+   "line": 658,
+   "kind": "name_semantics",
+   "detail": "if (zmin < 2.10 and p.get(\"kind\") == \"kb_escova\""
+  },
+  {
+   "path": "tools/rooms/bathroom/layout.py",
+   "line": 1039,
+   "kind": "name_semantics",
+   "detail": "items = [c for c in (clip_box_outside(it, _wall_in) if it.get(\"kind\") in (\"kb_ralo\", \"box_vidro\") else it"
+  },
+  {
+   "path": "tools/rooms/bathroom/validation.py",
+   "line": 19,
+   "kind": "name_semantics",
+   "detail": "and not str(box.get(\"kind\")).startswith(\"kb_\")"
+  },
+  {
+   "path": "tools/rooms/bedroom/bed_class.py",
+   "line": 24,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bedroom/bed_class.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/bed_class.py",
+   "line": 26,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/bed_class.py",
+   "line": 210,
+   "kind": "module_constant",
+   "detail": "NIGHTSTAND_TOL=0.08"
+  },
+  {
+   "path": "tools/rooms/bedroom/bed_class.py",
+   "line": 211,
+   "kind": "module_constant",
+   "detail": "NIGHTSTAND_MAX_DEPTH=0.45"
+  },
+  {
+   "path": "tools/rooms/bedroom/capabilities/make_synthetic_bedrooms.py",
+   "line": 38,
+   "kind": "module_constant",
+   "detail": "WALL_T_PTS=5.4"
+  },
+  {
+   "path": "tools/rooms/bedroom/capabilities/place_bedroom_skp.py",
+   "line": 22,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bedroom/capabilities/place_bedroom_skp.py",
+   "line": 23,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/capabilities/place_bedroom_skp.py",
+   "line": 27,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/designer.py",
+   "line": 36,
+   "kind": "module_constant",
+   "detail": "NIGHTSTAND_TOP_EXTRA=0.02"
+  },
+  {
+   "path": "tools/rooms/bedroom/designer.py",
+   "line": 52,
+   "kind": "module_constant",
+   "detail": "DESK_PULL_M=0.7"
+  },
+  {
+   "path": "tools/rooms/bedroom/designer.py",
+   "line": 55,
+   "kind": "module_constant",
+   "detail": "NS_GAP=0.05"
+  },
+  {
+   "path": "tools/rooms/bedroom/designer.py",
+   "line": 62,
+   "kind": "module_constant",
+   "detail": "CORRIDOR_MIN=0.6"
+  },
+  {
+   "path": "tools/rooms/bedroom/designer.py",
+   "line": 64,
+   "kind": "module_constant",
+   "detail": "MARGIN_M=0.03"
+  },
+  {
+   "path": "tools/rooms/bedroom/designer.py",
+   "line": 65,
+   "kind": "module_constant",
+   "detail": "TOL=0.02"
+  },
+  {
+   "path": "tools/rooms/bedroom/designer.py",
+   "line": 66,
+   "kind": "module_constant",
+   "detail": "COMODO_FOLGA=0.06"
+  },
+  {
+   "path": "tools/rooms/bedroom/designer.py",
+   "line": 768,
+   "kind": "silent_except",
+   "detail": "PermissionError"
+  },
+  {
+   "path": "tools/rooms/bedroom/furnishing.py",
+   "line": 61,
+   "kind": "name_semantics",
+   "detail": "boxes = [b for b in boxes if b.get(\"kind\") not in (\"bed\", \"headboard\")] + bed_parts"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 32,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 33,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 46,
+   "kind": "module_constant",
+   "detail": "WARDROBE_DEPTH=0.6"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 47,
+   "kind": "module_constant",
+   "detail": "WARDROBE_HEIGHT=2.2"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 54,
+   "kind": "module_constant",
+   "detail": "WARDROBE_FRONT_MIN=0.75"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 55,
+   "kind": "module_constant",
+   "detail": "PASSAGE_M=0.6"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 57,
+   "kind": "module_constant",
+   "detail": "MARGIN_M=0.03"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 58,
+   "kind": "module_constant",
+   "detail": "TOL_CIRC_M2=0.02"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 59,
+   "kind": "module_constant",
+   "detail": "TOL_WALL_M2=0.06"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 60,
+   "kind": "module_constant",
+   "detail": "COMODO_FOLGA_M=0.06"
+  },
+  {
+   "path": "tools/rooms/bedroom/layout.py",
+   "line": 61,
+   "kind": "module_constant",
+   "detail": "KING_MIN_ROOM_DIM_M=3.6"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_gate.py",
+   "line": 16,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_gate.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py",
+   "line": 27,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py",
+   "line": 28,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py",
+   "line": 29,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py",
+   "line": 30,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py",
+   "line": 31,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py",
+   "line": 33,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py",
+   "line": 34,
+   "kind": "module_constant",
+   "detail": "ANCHOR_MAX_M=0.5"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py",
+   "line": 35,
+   "kind": "module_constant",
+   "detail": "CLEAR_M=0.55"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py",
+   "line": 36,
+   "kind": "module_constant",
+   "detail": "AREA_TOL=0.05"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/nightstand_gate.py",
+   "line": 16,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/nightstand_gate.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/wardrobe_gate.py",
+   "line": 17,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/bedroom/validation/wardrobe_gate.py",
+   "line": 18,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/kitchen/anchor_rules.py",
+   "line": 12,
+   "kind": "module_constant",
+   "detail": "TOUCH_TOL_IN=6.0"
+  },
+  {
+   "path": "tools/rooms/kitchen/anchor_rules.py",
+   "line": 51,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/rooms/kitchen/anchor_rules.py",
+   "line": 51,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/bake_theme.py",
+   "line": 21,
+   "kind": "env_read",
+   "detail": "KITCHEN_THEME"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/cabinet.py",
+   "line": 19,
+   "kind": "module_constant",
+   "detail": "AREA_TOL_M2=1e-06"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/ruby/recolor_kitchen_theme.rb",
+   "line": 53,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/ruby/recolor_kitchen_theme.rb",
+   "line": 62,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+   "line": 38,
+   "kind": "silent_except",
+   "detail": "(g.hidden = true) rescue nil"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+   "line": 43,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['Texture'] = false) rescue nil"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+   "line": 44,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['DisplayColorByLayer'] = false) rescue nil"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+   "line": 46,
+   "kind": "silent_except",
+   "detail": "(si['DisplayShadows'] = true) rescue nil"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+   "line": 47,
+   "kind": "silent_except",
+   "detail": "(si['Light'] = 78) rescue nil"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+   "line": 48,
+   "kind": "silent_except",
+   "detail": "(si['Dark'] = 42) rescue nil"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+   "line": 77,
+   "kind": "silent_except",
+   "detail": "ents.grep(Sketchup::Group).each { |g| (g.hidden = false) rescue nil }"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 22,
+   "kind": "env_read",
+   "detail": "'BASE_SKP'"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 22,
+   "kind": "env_read",
+   "detail": "BASE_SKP"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 29,
+   "kind": "env_read",
+   "detail": "PT_TO_M"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 30,
+   "kind": "env_read",
+   "detail": "'PT_TO_M'"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 31,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 35,
+   "kind": "env_read",
+   "detail": "ISO"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 36,
+   "kind": "env_read",
+   "detail": "FNUM"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 37,
+   "kind": "env_read",
+   "detail": "SHUTTER"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 38,
+   "kind": "env_read",
+   "detail": "SKY"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 39,
+   "kind": "env_read",
+   "detail": "BURN"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 40,
+   "kind": "env_read",
+   "detail": "FILL_INT"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 41,
+   "kind": "env_read",
+   "detail": "VRAY_FOV"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 55,
+   "kind": "env_read",
+   "detail": "VRAY_ISOLATE"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 56,
+   "kind": "env_read",
+   "detail": "VRAY_CAM"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 61,
+   "kind": "env_read",
+   "detail": "VRAY_EYE"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 62,
+   "kind": "env_read",
+   "detail": "'VRAY_EYE'"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 62,
+   "kind": "env_read",
+   "detail": "'VRAY_TARGET'"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 82,
+   "kind": "env_read",
+   "detail": "KEY_X"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 82,
+   "kind": "env_read",
+   "detail": "KEY_Y"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 83,
+   "kind": "env_read",
+   "detail": "KEY_Z"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 84,
+   "kind": "env_read",
+   "detail": "KEY_INT"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 84,
+   "kind": "env_read",
+   "detail": "KEY_R"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 87,
+   "kind": "env_read",
+   "detail": "FILL2_INT"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 91,
+   "kind": "env_read",
+   "detail": "FILL3_X"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 91,
+   "kind": "env_read",
+   "detail": "FILL3_Y"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 92,
+   "kind": "env_read",
+   "detail": "FILL3_Z"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 93,
+   "kind": "env_read",
+   "detail": "FILL3_INT"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 93,
+   "kind": "env_read",
+   "detail": "FILL3_R"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 101,
+   "kind": "env_read",
+   "detail": "LED_INT"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 104,
+   "kind": "env_read",
+   "detail": "SUN"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 104,
+   "kind": "env_read",
+   "detail": "SUN_SIZE"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 105,
+   "kind": "env_read",
+   "detail": "KITCHEN_THEME"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 106,
+   "kind": "env_read",
+   "detail": "NOISE"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 106,
+   "kind": "env_read",
+   "detail": "SHADE"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 118,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 124,
+   "kind": "env_read",
+   "detail": "CROP_X0"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 124,
+   "kind": "env_read",
+   "detail": "CROP_X1"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 125,
+   "kind": "env_read",
+   "detail": "CROP_Y0"
+  },
+  {
+   "path": "tools/rooms/kitchen/capabilities/vray.py",
+   "line": 125,
+   "kind": "env_read",
+   "detail": "CROP_Y1"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 14,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 15,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 16,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 18,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 21,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 22,
+   "kind": "module_constant",
+   "detail": "COUNTER_DEPTH=0.6"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 23,
+   "kind": "module_constant",
+   "detail": "COUNTER_H=0.9"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 30,
+   "kind": "module_constant",
+   "detail": "CEILING_H=2.7"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 31,
+   "kind": "module_constant",
+   "detail": "MALEIRO_DEPTH=0.6"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 32,
+   "kind": "module_constant",
+   "detail": "BANCADA_MIN_DEPTH=0.35"
+  },
+  {
+   "path": "tools/rooms/kitchen/layout.py",
+   "line": 57,
+   "kind": "scale_constant",
+   "detail": "M2IN=39.3700787402"
+  },
+  {
+   "path": "tools/rooms/kitchen/planning/cabinet_placement.py",
+   "line": 18,
+   "kind": "module_constant",
+   "detail": "EPS=1e-08"
+  },
+  {
+   "path": "tools/rooms/kitchen/planning/cabinet_placement.py",
+   "line": 19,
+   "kind": "module_constant",
+   "detail": "MAX_CANDIDATES=5000"
+  },
+  {
+   "path": "tools/rooms/kitchen/validation/ergonomics.py",
+   "line": 16,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/kitchen/validation/ergonomics.py",
+   "line": 18,
+   "kind": "scale_constant",
+   "detail": "IN2CM=2.54"
+  },
+  {
+   "path": "tools/rooms/kitchen/validation/ergonomics.py",
+   "line": 156,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/rooms/kitchen/validation/ergonomics.py",
+   "line": 156,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/rooms/kitchen/validation/wall_regression.py",
+   "line": 25,
+   "kind": "module_constant",
+   "detail": "EPS_PT=4.0"
+  },
+  {
+   "path": "tools/rooms/kitchen/validation/wall_regression.py",
+   "line": 26,
+   "kind": "module_constant",
+   "detail": "MIN_NEW_PT=18.0"
+  },
+  {
+   "path": "tools/rooms/living/armchair_class.py",
+   "line": 23,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/armchair_class.py",
+   "line": 24,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/render_sala_eyelevel.rb",
+   "line": 36,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['Texture'] = false) rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/render_sala_eyelevel.rb",
+   "line": 37,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['DisplayColorByLayer'] = false) rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/render_sala_eyelevel.rb",
+   "line": 39,
+   "kind": "silent_except",
+   "detail": "(si['DisplayShadows'] = true) rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/render_sala_eyelevel.rb",
+   "line": 40,
+   "kind": "silent_except",
+   "detail": "(si['Light'] = 80) rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/render_sala_eyelevel.rb",
+   "line": 41,
+   "kind": "silent_except",
+   "detail": "(si['Dark'] = 45) rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_premium_harness.rb",
+   "line": 133,
+   "kind": "broad_except",
+   "detail": "rescue => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_premium_harness.rb",
+   "line": 134,
+   "kind": "silent_except",
+   "detail": "cutter.erase! rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_premium_harness.rb",
+   "line": 166,
+   "kind": "broad_except",
+   "detail": "rescue => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_premium_integrate.rb",
+   "line": 127,
+   "kind": "broad_except",
+   "detail": "rescue => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_premium_integrate.rb",
+   "line": 128,
+   "kind": "silent_except",
+   "detail": "cutter.erase! rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_premium_integrate.rb",
+   "line": 170,
+   "kind": "broad_except",
+   "detail": "rescue => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_3seat_v1.rb",
+   "line": 130,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_3seat_v1.rb",
+   "line": 134,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb",
+   "line": 77,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb",
+   "line": 84,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb",
+   "line": 90,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb",
+   "line": 94,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_from_config.rb",
+   "line": 20,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_from_config.rb",
+   "line": 24,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb",
+   "line": 196,
+   "kind": "silent_except",
+   "detail": "ro['RenderMode'] = 3 rescue nil      # 3 = Shaded with textures"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb",
+   "line": 197,
+   "kind": "silent_except",
+   "detail": "ro['Texture'] = true rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb",
+   "line": 198,
+   "kind": "silent_except",
+   "detail": "ro['DisplayColorByLayer'] = false rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 70,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 107,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 212,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 219,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 243,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 267,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 298,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 372,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, b, c); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 373,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, c, d); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 388,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, b, bb); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 389,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, bb, ab); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 391,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(perim.map { |p| Geom::Point3d.new(p.x, p.y, z0i) }); "
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 401,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 474,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, b, c); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 475,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, c, d); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 489,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, b, bb); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 490,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, bb, ab); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 492,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(perim.map { |p| Geom::Point3d.new(p.x, p.y, z0i) }); "
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 499,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 585,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, b, c); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 586,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, c, d); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 599,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, b, bb); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 600,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(a, bb, ab); rescue StandardError; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 602,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(perim.map { |p| Geom::Point3d.new(p.x, yb, p.z) }); r"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "line": 609,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 20,
+   "kind": "silent_except",
+   "detail": "FileUtils.mkdir_p(DIR) rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 23,
+   "kind": "silent_except",
+   "detail": "def flush(arr, log); File.write(log, arr.join(\"\\n\") + \"\\n\") rescue nil; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 36,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 67,
+   "kind": "silent_except",
+   "detail": "begin; b[:sheen_amount] = 0.35; b[:sheen_glossiness] = 0.5; b[:sheen_color] = VR"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 68,
+   "kind": "silent_except",
+   "detail": "begin; b[:roughness] = 0.85; b[:option_use_roughness] = true; b[:reflect] = VRay"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 72,
+   "kind": "silent_except",
+   "detail": "uvw = (b[:diffuse][:uvwgen] rescue nil)"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 76,
+   "kind": "silent_except",
+   "detail": "rescue; end"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 96,
+   "kind": "silent_except",
+   "detail": "scam[:auto_exposure] = 1 rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 97,
+   "kind": "silent_except",
+   "detail": "scam[:auto_white_balance] = 1 rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 100,
+   "kind": "silent_except",
+   "detail": "sky[:intensity_multiplier] = 0.7 rescue nil if sky"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 111,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 118,
+   "kind": "silent_except",
+   "detail": "renderer.wait rescue nil"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "line": 129,
+   "kind": "broad_except",
+   "detail": "rescue => e"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_class_matrix.py",
+   "line": 17,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_class_matrix.py",
+   "line": 18,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_class_matrix.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_class_matrix.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_class_matrix.py",
+   "line": 21,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_class_matrix.py",
+   "line": 26,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_fabric_material.py",
+   "line": 36,
+   "kind": "module_constant",
+   "detail": "THREADS_PER_TILE=128"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py",
+   "line": 16,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py",
+   "line": 18,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py",
+   "line": 21,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_premium_harness.py",
+   "line": 58,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_compare.py",
+   "line": 14,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_compare.py",
+   "line": 15,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_compare.py",
+   "line": 16,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_compare.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_compare.py",
+   "line": 18,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_compare.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_compare.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_room.py",
+   "line": 13,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_room.py",
+   "line": 14,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_room.py",
+   "line": 15,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_room.py",
+   "line": 16,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_room.py",
+   "line": 17,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_room.py",
+   "line": 18,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/capabilities/sofa_venezia_room.py",
+   "line": 35,
+   "kind": "name_semantics",
+   "detail": "q[\"rgb\"] = LEG if p.get(\"kind\") == \"foot\" else GRAPHITE"
+  },
+  {
+   "path": "tools/rooms/living/coffee_table_class.py",
+   "line": 24,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/coffee_table_class.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/coffee_table_class.py",
+   "line": 54,
+   "kind": "module_constant",
+   "detail": "SOFA_XL=2.6"
+  },
+  {
+   "path": "tools/rooms/living/coffee_table_class.py",
+   "line": 55,
+   "kind": "module_constant",
+   "detail": "SOFA_LEN_FRAC_XL_LO=0.44"
+  },
+  {
+   "path": "tools/rooms/living/components.py",
+   "line": 13,
+   "kind": "scale_constant",
+   "detail": "M2IN=39.3700787402 (local)"
+  },
+  {
+   "path": "tools/rooms/living/dining_table_class.py",
+   "line": 30,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/dining_table_class.py",
+   "line": 31,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/dining_table_class.py",
+   "line": 35,
+   "kind": "module_constant",
+   "detail": "PLACE_W=0.62"
+  },
+  {
+   "path": "tools/rooms/living/dining_table_class.py",
+   "line": 36,
+   "kind": "module_constant",
+   "detail": "PLACE_W_MIN=0.55"
+  },
+  {
+   "path": "tools/rooms/living/dining_table_class.py",
+   "line": 37,
+   "kind": "module_constant",
+   "detail": "PLACE_D=0.4"
+  },
+  {
+   "path": "tools/rooms/living/dining_table_class.py",
+   "line": 38,
+   "kind": "module_constant",
+   "detail": "CLEAR_USE=0.9"
+  },
+  {
+   "path": "tools/rooms/living/dining_table_class.py",
+   "line": 49,
+   "kind": "module_constant",
+   "detail": "KNEE_MIN=0.6"
+  },
+  {
+   "path": "tools/rooms/living/furnishing.py",
+   "line": 66,
+   "kind": "scale_constant",
+   "detail": "M2IN=39.3700787402 (local)"
+  },
+  {
+   "path": "tools/rooms/living/furnishing.py",
+   "line": 250,
+   "kind": "name_semantics",
+   "detail": "_SEATS_PER_CHAIR = sum(p.get(\"kind\") == \"seat\" for p in _chair_tpl)"
+  },
+  {
+   "path": "tools/rooms/living/furnishing.py",
+   "line": 264,
+   "kind": "name_semantics",
+   "detail": "if sum(b.get(\"kind\") == \"seat\" for b in cand if b.get(\"module\") == \"Cadeira jantar\") != 2:"
+  },
+  {
+   "path": "tools/rooms/living/furnishing.py",
+   "line": 278,
+   "kind": "name_semantics",
+   "detail": "for b in cand if b.get(\"module\") == \"Mesa de jantar\" and b.get(\"corners\")"
+  },
+  {
+   "path": "tools/rooms/living/furnishing.py",
+   "line": 439,
+   "kind": "env_read",
+   "detail": "FURNISH_STYLE"
+  },
+  {
+   "path": "tools/rooms/living/planner.py",
+   "line": 18,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/planner.py",
+   "line": 19,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/planner.py",
+   "line": 20,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/planner.py",
+   "line": 21,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/planner.py",
+   "line": 22,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/planner.py",
+   "line": 23,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/planner.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/planning/layout_candidates.py",
+   "line": 33,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/rooms/living/planning/layout_candidates.py",
+   "line": 47,
+   "kind": "module_constant",
+   "detail": "MARGIN_M=0.03"
+  },
+  {
+   "path": "tools/rooms/living/planning/layout_candidates.py",
+   "line": 48,
+   "kind": "module_constant",
+   "detail": "TOL_CIRC_M2=0.02"
+  },
+  {
+   "path": "tools/rooms/living/planning/layout_candidates.py",
+   "line": 49,
+   "kind": "module_constant",
+   "detail": "TOL_WALL_M2=0.06"
+  },
+  {
+   "path": "tools/rooms/living/planning/layout_candidates.py",
+   "line": 50,
+   "kind": "module_constant",
+   "detail": "COMODO_FOLGA_M=0.06"
+  },
+  {
+   "path": "tools/rooms/living/planning/layout_candidates.py",
+   "line": 51,
+   "kind": "module_constant",
+   "detail": "SOFA_TV_TARGET_M=2.8"
+  },
+  {
+   "path": "tools/rooms/living/rack_class.py",
+   "line": 23,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/rack_class.py",
+   "line": 24,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/sofa_class.py",
+   "line": 24,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/sofa_class.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/sofa_class.py",
+   "line": 136,
+   "kind": "module_constant",
+   "detail": "PLINTH_FOOT=0.02"
+  },
+  {
+   "path": "tools/rooms/living/sofa_class.py",
+   "line": 138,
+   "kind": "module_constant",
+   "detail": "ARM_MASS_THRESHOLD=0.22"
+  },
+  {
+   "path": "tools/rooms/living/sofa_class.py",
+   "line": 139,
+   "kind": "module_constant",
+   "detail": "ARM_RELIEF_STD=0.05"
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 27,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 28,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 29,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 30,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 32,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 33,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 35,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 37,
+   "kind": "module_constant",
+   "detail": "ANCHOR_MAX_M=0.45"
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 38,
+   "kind": "module_constant",
+   "detail": "FOCAL_MAX_ANG=30.0"
+  },
+  {
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py",
+   "line": 39,
+   "kind": "module_constant",
+   "detail": "CLEAR_M=0.45"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 39,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 41,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 42,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 43,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 44,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 46,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 47,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 48,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 50,
+   "kind": "scale_constant",
+   "detail": "IN2M=0.0254"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 51,
+   "kind": "scale_constant",
+   "detail": "M2IN=39.3700787402"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 63,
+   "kind": "module_constant",
+   "detail": "_AS_MAX_X_M=3.26"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 64,
+   "kind": "module_constant",
+   "detail": "_TEC_MIN_X_M=5.95"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 65,
+   "kind": "module_constant",
+   "detail": "_AS_MIN_Y_M=11.3"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 83,
+   "kind": "module_constant",
+   "detail": "_CLEAR_M=0.04"
+  },
+  {
+   "path": "tools/rooms/service/layout.py",
+   "line": 84,
+   "kind": "module_constant",
+   "detail": "_DOOR_TOL_M2=0.02"
+  },
+  {
+   "path": "tools/rooms/shared/bed.py",
+   "line": 11,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/bed.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/bed.py",
+   "line": 14,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/__init__.py",
+   "line": 6,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/__init__.py",
+   "line": 7,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+   "line": 155,
+   "kind": "broad_except",
+   "detail": "rescue Exception # rubocop:disable Lint/RescueException"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+   "line": 73,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+   "line": 176,
+   "kind": "broad_except",
+   "detail": "rescue Exception # rubocop:disable Lint/RescueException"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/shaker/__init__.py",
+   "line": 8,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/shaker/__init__.py",
+   "line": 9,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/shaker/plan.py",
+   "line": 24,
+   "kind": "module_constant",
+   "detail": "EPS=1e-09"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/shaker/plan.py",
+   "line": 84,
+   "kind": "name_semantics",
+   "detail": "front = next((x for x in parent_plan[\"parts\"] if x[\"name\"] == p.target_front and x[\"role\"] == \"front\"), None)"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/shaker/validation.py",
+   "line": 36,
+   "kind": "name_semantics",
+   "detail": "panel = next((x for x in parts if x[\"name\"] == \"recessed_panel\"), None)"
+  },
+  {
+   "path": "tools/rooms/shared/cabinet/validation.py",
+   "line": 14,
+   "kind": "module_constant",
+   "detail": "EPS=1e-09"
+  },
+  {
+   "path": "tools/rooms/shared/clearance.py",
+   "line": 18,
+   "kind": "module_constant",
+   "detail": "EPS_AREA_PT2=0.01"
+  },
+  {
+   "path": "tools/rooms/shared/decor_builders.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/geometry.py",
+   "line": 108,
+   "kind": "scale_constant",
+   "detail": "M2IN=39.3700787402 (local)"
+  },
+  {
+   "path": "tools/rooms/shared/geometry.py",
+   "line": 142,
+   "kind": "name_semantics",
+   "detail": "if (op.get(\"kind_v5\") or op.get(\"kind\")) not in (\"interior_door\", \"door\"):"
+  },
+  {
+   "path": "tools/rooms/shared/layout_rules.py",
+   "line": 15,
+   "kind": "module_constant",
+   "detail": "MIN_SOFA_TV=2.3"
+  },
+  {
+   "path": "tools/rooms/shared/layout_rules.py",
+   "line": 16,
+   "kind": "module_constant",
+   "detail": "MAX_SOFA_TV=4.0"
+  },
+  {
+   "path": "tools/rooms/shared/layout_rules.py",
+   "line": 17,
+   "kind": "module_constant",
+   "detail": "MIN_TV_DEPTH=2.3"
+  },
+  {
+   "path": "tools/rooms/shared/layout_rules.py",
+   "line": 18,
+   "kind": "module_constant",
+   "detail": "MIN_DOOR_CLEAR_M=0.6"
+  },
+  {
+   "path": "tools/rooms/shared/layout_rules.py",
+   "line": 19,
+   "kind": "module_constant",
+   "detail": "PASSAGE_MIN_M=0.8"
+  },
+  {
+   "path": "tools/rooms/shared/layout_rules.py",
+   "line": 21,
+   "kind": "module_constant",
+   "detail": "RESPIRO_IDEAL=0.6"
+  },
+  {
+   "path": "tools/rooms/shared/layout_rules.py",
+   "line": 22,
+   "kind": "module_constant",
+   "detail": "MAX_PLANNED_WALL_GAP_M=0.02"
+  },
+  {
+   "path": "tools/rooms/shared/nightstand.py",
+   "line": 9,
+   "kind": "noqa",
+   "detail": "F401,E501"
+  },
+  {
+   "path": "tools/rooms/shared/nightstand.py",
+   "line": 10,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/nightstand.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/parts.py",
+   "line": 15,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/shell_parts.py",
+   "line": 25,
+   "kind": "module_constant",
+   "detail": "WALL_CUT_M=1.1"
+  },
+  {
+   "path": "tools/rooms/shared/shell_parts.py",
+   "line": 26,
+   "kind": "scale_constant",
+   "detail": "M_TO_IN=39.3700787402"
+  },
+  {
+   "path": "tools/rooms/shared/shell_parts.py",
+   "line": 96,
+   "kind": "name_semantics",
+   "detail": "(doors if str(o.get(\"kind\")) == \"door\" else windows).append(span)"
+  },
+  {
+   "path": "tools/rooms/shared/sofa.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/sofa.py",
+   "line": 14,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/rooms/shared/sofa.py",
+   "line": 15,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/rooms/shared/sofa.py",
+   "line": 16,
+   "kind": "noqa",
+   "detail": "E402,F401"
+  },
+  {
+   "path": "tools/rooms/shared/spatial_model.py",
+   "line": 30,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/spatial_model.py",
+   "line": 33,
+   "kind": "module_constant",
+   "detail": "CIRC_M=0.85"
+  },
+  {
+   "path": "tools/rooms/shared/spatial_model.py",
+   "line": 34,
+   "kind": "module_constant",
+   "detail": "MIN_USEFUL_M=1.2"
+  },
+  {
+   "path": "tools/rooms/shared/spatial_model.py",
+   "line": 35,
+   "kind": "module_constant",
+   "detail": "SOFA_MIN_DEPTH_M=2.2"
+  },
+  {
+   "path": "tools/rooms/shared/spatial_model.py",
+   "line": 85,
+   "kind": "module_constant",
+   "detail": "_GEOMETRY_CACHE_MAX=8"
+  },
+  {
+   "path": "tools/rooms/shared/wardrobe.py",
+   "line": 11,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/wardrobe.py",
+   "line": 12,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/wardrobe.py",
+   "line": 14,
+   "kind": "noqa",
+   "detail": "F401"
+  },
+  {
+   "path": "tools/rooms/shared/wardrobe.py",
+   "line": 16,
+   "kind": "module_constant",
+   "detail": "MARGIN=0.03"
+  },
+  {
+   "path": "tools/sketchup/disarm_autoruns.py",
+   "line": 69,
+   "kind": "silent_except",
+   "detail": "FileNotFoundError"
+  },
+  {
+   "path": "tools/sketchup/furnish/build_furniture_skp.rb",
+   "line": 67,
+   "kind": "broad_except",
+   "detail": "begin; ents.add_face(bp[i], bp[j], tp[j], tp[i]); rescue StandardError; end   # "
+  },
+  {
+   "path": "tools/sketchup/furnish/build_furniture_skp.rb",
+   "line": 69,
+   "kind": "broad_except",
+   "detail": "begin; ents.add_face(tp); rescue StandardError; end                            #"
+  },
+  {
+   "path": "tools/sketchup/furnish/build_furniture_skp.rb",
+   "line": 80,
+   "kind": "silent_except",
+   "detail": "begin; model.definitions.purge_unused; model.materials.purge_unused; rescue Stan"
+  },
+  {
+   "path": "tools/sketchup/furnish/build_furniture_skp.rb",
+   "line": 96,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/sketchup/furnish/furnish_plan.rb",
+   "line": 97,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/sketchup/furnish/place_layout_skp.py",
+   "line": 26,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/sketchup/furnish/place_layout_skp.py",
+   "line": 170,
+   "kind": "env_read",
+   "detail": "FURNISH_STYLE"
+  },
+  {
+   "path": "tools/sketchup/furnish/place_layout_skp.rb",
+   "line": 57,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/sketchup/furnish/place_layout_skp.rb",
+   "line": 159,
+   "kind": "broad_except",
+   "detail": "n.times { |i| j = (i + 1) % n; begin; g.entities.add_face(bp[i], bp[j], tp[j], t"
+  },
+  {
+   "path": "tools/sketchup/furnish/place_layout_skp.rb",
+   "line": 160,
+   "kind": "silent_except",
+   "detail": "begin; g.entities.add_face(tp); rescue StandardError; end"
+  },
+  {
+   "path": "tools/sketchup/furnish/place_layout_skp.rb",
+   "line": 206,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/sketchup/furnish/place_layout_skp.rb",
+   "line": 212,
+   "kind": "silent_except",
+   "detail": "mod_groups.each { |k, g| (g.hidden = true) rescue nil if k.include?('PeleTeto') "
+  },
+  {
+   "path": "tools/sketchup/furnish/place_layout_skp.rb",
+   "line": 216,
+   "kind": "silent_except",
+   "detail": "mod_groups.each_value { |mg| (furn_bb.add(mg.bounds) rescue nil) }"
+  },
+  {
+   "path": "tools/sketchup/furnish/place_layout_skp.rb",
+   "line": 235,
+   "kind": "silent_except",
+   "detail": "(gp.locked = true; nlock += 1) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/inspect/screenshot_camera.rb",
+   "line": 12,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['Texture'] = true) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/inspect/skp_editability_report.rb",
+   "line": 72,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['Texture'] = false) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/inspect/skp_editability_report.rb",
+   "line": 73,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['DisplayColorByLayer'] = false) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/inspect/skp_editability_report.rb",
+   "line": 75,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['DrawHorizon'] = false) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/inspect/skp_editability_report.rb",
+   "line": 76,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['BackgroundColor'] = Sketchup::Color.new(108, 114, 124)"
+  },
+  {
+   "path": "tools/sketchup/inspect/skp_editability_report.rb",
+   "line": 77,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['SkyColor'] = Sketchup::Color.new(108, 114, 124)) rescu"
+  },
+  {
+   "path": "tools/sketchup/inspect/skp_editability_report.rb",
+   "line": 78,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['DisplaySky'] = false) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/inspect/skp_editability_report.rb",
+   "line": 80,
+   "kind": "silent_except",
+   "detail": "(si['DisplayShadows'] = true) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/inspect/skp_editability_report.rb",
+   "line": 81,
+   "kind": "silent_except",
+   "detail": "(si['Light'] = 70) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/inspect/skp_editability_report.rb",
+   "line": 82,
+   "kind": "silent_except",
+   "detail": "(si['Dark'] = 50) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/jobs.py",
+   "line": 350,
+   "kind": "noqa",
+   "detail": "S603"
+  },
+  {
+   "path": "tools/sketchup/jobs.py",
+   "line": 415,
+   "kind": "noqa",
+   "detail": "E731"
+  },
+  {
+   "path": "tools/sketchup/jobs.py",
+   "line": 446,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/sketchup/jobs.py",
+   "line": 446,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/sketchup/ops.py",
+   "line": 39,
+   "kind": "module_constant",
+   "detail": "MAX_OPS=200"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 103,
+   "kind": "noqa",
+   "detail": "S603"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 104,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 106,
+   "kind": "noqa",
+   "detail": "S603"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 123,
+   "kind": "noqa",
+   "detail": "S603,S607"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 128,
+   "kind": "noqa",
+   "detail": "S603,S607"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 146,
+   "kind": "noqa",
+   "detail": "S603,S607"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 148,
+   "kind": "silent_except",
+   "detail": "(OSError, subprocess.SubprocessError)"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 164,
+   "kind": "noqa",
+   "detail": "S603,S607"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 174,
+   "kind": "noqa",
+   "detail": "S603"
+  },
+  {
+   "path": "tools/sketchup/process.py",
+   "line": 214,
+   "kind": "silent_except",
+   "detail": "ValueError"
+  },
+  {
+   "path": "tools/sketchup/ruby/apply_edits.rb",
+   "line": 133,
+   "kind": "broad_except",
+   "detail": "rescue Exception # rubocop:disable Lint/RescueException"
+  },
+  {
+   "path": "tools/sketchup/ruby/inspect_model.rb",
+   "line": 34,
+   "kind": "silent_except",
+   "detail": "'tag' => (e.layer.name rescue nil),"
+  },
+  {
+   "path": "tools/sketchup/ruby/inspect_model.rb",
+   "line": 57,
+   "kind": "silent_except",
+   "detail": "units = (model.options['UnitsOptions']['LengthUnit'] rescue nil)"
+  },
+  {
+   "path": "tools/sketchup/ruby/render_views.rb",
+   "line": 19,
+   "kind": "silent_except",
+   "detail": "(model.rendering_options['Texture'] = true) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/ruby/render_views.rb",
+   "line": 69,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/sketchup/ruby/skmcp_launch.rb",
+   "line": 20,
+   "kind": "broad_except",
+   "detail": "rescue Exception => e # rubocop:disable Lint/RescueException — ScriptError també"
+  },
+  {
+   "path": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "line": 113,
+   "kind": "broad_except",
+   "detail": "rescue StandardError"
+  },
+  {
+   "path": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "line": 121,
+   "kind": "broad_except",
+   "detail": "rescue Exception => e # rubocop:disable Lint/RescueException — ScriptError també"
+  },
+  {
+   "path": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "line": 126,
+   "kind": "silent_except",
+   "detail": "result['sketchup_version'] = (Sketchup.version rescue nil)"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 88,
+   "kind": "module_constant",
+   "detail": "SNAP_EPS_PTS=0.1"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 94,
+   "kind": "module_constant",
+   "detail": "MIN_SLIVER_AREA_PTS2=0.5"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 216,
+   "kind": "module_constant",
+   "detail": "JUNCTION_TOL_PTS=0.5"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 662,
+   "kind": "module_constant",
+   "detail": "FLOOR_SNAP_EPS_PTS=6.0"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 663,
+   "kind": "module_constant",
+   "detail": "FLOOR_CELL_MIN_AREA_PTS2=50.0"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 664,
+   "kind": "module_constant",
+   "detail": "FLOOR_UNDER_FRAC=0.4"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 668,
+   "kind": "module_constant",
+   "detail": "FLOOR_SIMPLIFY_TOL_PTS=0.5"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 745,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 905,
+   "kind": "silent_except",
+   "detail": "(json.JSONDecodeError, OSError)"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 981,
+   "kind": "env_read",
+   "detail": "CI"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 982,
+   "kind": "env_read",
+   "detail": "GITHUB_ACTIONS"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 1137,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 1137,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 1200,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 1200,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 1236,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py",
+   "line": 1257,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "line": 339,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "line": 467,
+   "kind": "silent_except",
+   "detail": "f = (g.entities.add_face(pts) rescue nil)"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "line": 560,
+   "kind": "silent_except",
+   "detail": "concrete = (parent_ents.model.materials['plan_parapet'] rescue nil)"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "line": 570,
+   "kind": "silent_except",
+   "detail": "bface = (se.add_face(base_quad) rescue nil)"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "line": 582,
+   "kind": "silent_except",
+   "detail": "glass_mat = (parent_ents.model.materials['plan_glass'] rescue nil) || material"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "line": 627,
+   "kind": "silent_except",
+   "detail": "face = (se.add_face(quad) rescue nil)"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "line": 1147,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "line": 1158,
+   "kind": "silent_except",
+   "detail": "frame_mat = (parent_ents.model.materials['plan_window_frame'] rescue nil) || gla"
+  },
+  {
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "line": 1757,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => err"
+  },
+  {
+   "path": "tools/sketchup/vray/vray_export.rb",
+   "line": 16,
+   "kind": "silent_except",
+   "detail": "(g.hidden = false) rescue nil if g.name.to_s.include?('PeleTeto')"
+  },
+  {
+   "path": "tools/sketchup/vray/vray_export.rb",
+   "line": 23,
+   "kind": "silent_except",
+   "detail": "(g.hidden = true) rescue nil if subs.any? { |sb| nm.include?(sb.strip.downcase) "
+  },
+  {
+   "path": "tools/sketchup/vray/vray_export.rb",
+   "line": 122,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/sketchup/vray/vray_export.rb",
+   "line": 141,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/sketchup/vray/vray_export.rb",
+   "line": 183,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/sketchup/vray/vray_export.rb",
+   "line": 199,
+   "kind": "silent_except",
+   "detail": "(g.hidden = !keep) rescue nil"
+  },
+  {
+   "path": "tools/sketchup/vray/vray_export.rb",
+   "line": 269,
+   "kind": "silent_except",
+   "detail": "ctx = (VRay::Context.active rescue nil)"
+  },
+  {
+   "path": "tools/sketchup/vray/vray_export.rb",
+   "line": 280,
+   "kind": "broad_except",
+   "detail": "rescue StandardError => e"
+  },
+  {
+   "path": "tools/spatial_model.py",
+   "line": 12,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 43,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 44,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 45,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 46,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 47,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 49,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 50,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 52,
+   "kind": "scale_constant",
+   "detail": "M2IN=39.3700787402"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 57,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 65,
+   "kind": "module_constant",
+   "detail": "CORRIDOR_M=0.9"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 72,
+   "kind": "module_constant",
+   "detail": "WALKABLE_MAX_Z_M=0.06"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 73,
+   "kind": "module_constant",
+   "detail": "HEAD_MAX_Z0_M=1.2"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 150,
+   "kind": "module_cache",
+   "detail": "_eroded_regions @lru_cache(maxsize=2048)"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 341,
+   "kind": "name_semantics",
+   "detail": "mesa = [g for b, g in blockers if str(b.get(\"module\", \"\")).startswith(\"Mesa de jantar\")]"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 352,
+   "kind": "name_semantics",
+   "detail": "if str(b.get(\"module\", \"\")).startswith(\"Cadeira\") and b.get(\"kind\") == \"seat\"}"
+  },
+  {
+   "path": "tools/validation/circulation_gate.py",
+   "line": 356,
+   "kind": "name_semantics",
+   "detail": "if not str(b.get(\"module\", \"\")).startswith((\"Cadeira\", \"Mesa de jantar\"))])"
+  },
+  {
+   "path": "tools/validation/collision_envelope_gate.py",
+   "line": 33,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/collision_envelope_gate.py",
+   "line": 35,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/collision_envelope_gate.py",
+   "line": 81,
+   "kind": "name_semantics",
+   "detail": "if str(b.get(\"module\", \"\")).lower().startswith(\"cadeira\")}"
+  },
+  {
+   "path": "tools/validation/collision_envelope_gate.py",
+   "line": 87,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/validation/collision_envelope_gate.py",
+   "line": 87,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/validation/diagnose_wall_stubs.py",
+   "line": 39,
+   "kind": "module_constant",
+   "detail": "STUB_MAX_LENGTH_RATIO=1.5"
+  },
+  {
+   "path": "tools/validation/diagnose_wall_stubs.py",
+   "line": 40,
+   "kind": "module_constant",
+   "detail": "STUB_WIDTH_TOLERANCE=0.2"
+  },
+  {
+   "path": "tools/validation/diagnose_wall_stubs.py",
+   "line": 41,
+   "kind": "module_constant",
+   "detail": "STUB_MIN_ATTACHED_RATIO=0.25"
+  },
+  {
+   "path": "tools/validation/diagnose_wall_stubs.py",
+   "line": 103,
+   "kind": "silent_except",
+   "detail": "ValueError"
+  },
+  {
+   "path": "tools/validation/door_swing_audit.py",
+   "line": 34,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/door_swing_audit.py",
+   "line": 41,
+   "kind": "module_constant",
+   "detail": "MATCH_FACTOR=1.6"
+  },
+  {
+   "path": "tools/validation/door_swing_audit.py",
+   "line": 43,
+   "kind": "module_constant",
+   "detail": "RADIUS_WIDTH_TOL=0.5"
+  },
+  {
+   "path": "tools/validation/door_swing_audit.py",
+   "line": 45,
+   "kind": "module_constant",
+   "detail": "CLOSED_PATH_TOL_PT=1.0"
+  },
+  {
+   "path": "tools/validation/door_swing_audit.py",
+   "line": 66,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/validation/door_swing_audit.py",
+   "line": 84,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/validation/door_swing_audit.py",
+   "line": 93,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/validation/flat_white_gate.py",
+   "line": 27,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/flat_white_gate.py",
+   "line": 30,
+   "kind": "module_constant",
+   "detail": "WHITE_FRAC_FAIL=0.55"
+  },
+  {
+   "path": "tools/validation/flat_white_gate.py",
+   "line": 31,
+   "kind": "module_constant",
+   "detail": "WHITE_FRAC_WARN=0.3"
+  },
+  {
+   "path": "tools/validation/flat_white_gate.py",
+   "line": 36,
+   "kind": "module_constant",
+   "detail": "NEUTRAL_DOM_WARN=0.9"
+  },
+  {
+   "path": "tools/validation/flat_white_gate.py",
+   "line": 37,
+   "kind": "module_constant",
+   "detail": "NEUTRAL_CONTRAST_MAX=15.0"
+  },
+  {
+   "path": "tools/validation/flat_white_gate.py",
+   "line": 39,
+   "kind": "module_constant",
+   "detail": "BLANK_STD_WARN=3.0"
+  },
+  {
+   "path": "tools/validation/furniture_overlap_gate.py",
+   "line": 22,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/furniture_overlap_gate.py",
+   "line": 24,
+   "kind": "scale_constant",
+   "detail": "M2IN=39.3700787402"
+  },
+  {
+   "path": "tools/validation/furniture_overlap_gate.py",
+   "line": 26,
+   "kind": "module_constant",
+   "detail": "AREA_MIN_M2=0.04"
+  },
+  {
+   "path": "tools/validation/furniture_overlap_gate.py",
+   "line": 27,
+   "kind": "module_constant",
+   "detail": "FRAC_MIN=0.12"
+  },
+  {
+   "path": "tools/validation/furniture_overlap_gate.py",
+   "line": 28,
+   "kind": "module_constant",
+   "detail": "FRAC_FAIL=0.3"
+  },
+  {
+   "path": "tools/validation/furniture_overlap_gate.py",
+   "line": 85,
+   "kind": "name_semantics",
+   "detail": "if any(e in str(b.get(\"kind\", \"\")).lower() for e in (\"tapete\", \"rug\")):"
+  },
+  {
+   "path": "tools/validation/furniture_overlap_gate.py",
+   "line": 90,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/validation/furniture_overlap_gate.py",
+   "line": 90,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/validation/furniture_visual_gate.py",
+   "line": 17,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/furniture_wall_gap.py",
+   "line": 18,
+   "kind": "module_constant",
+   "detail": "WARDROBE_MIN_H_IN=40.0"
+  },
+  {
+   "path": "tools/validation/gate_filefetch.py",
+   "line": 20,
+   "kind": "module_constant",
+   "detail": "MAX_BYTES=200000"
+  },
+  {
+   "path": "tools/validation/gate_filefetch.py",
+   "line": 45,
+   "kind": "silent_except",
+   "detail": "(ValueError, OSError)"
+  },
+  {
+   "path": "tools/validation/generalization_gate.py",
+   "line": 20,
+   "kind": "module_constant",
+   "detail": "MIN_PARTS=4"
+  },
+  {
+   "path": "tools/validation/generalization_gate.py",
+   "line": 50,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/validation/geometry_sanity.py",
+   "line": 20,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/geometry_sanity.py",
+   "line": 21,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/geometry_sanity.py",
+   "line": 22,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/geometry_sanity.py",
+   "line": 24,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/geometry_sanity.py",
+   "line": 25,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/geometry_sanity.py",
+   "line": 27,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/geometry_sanity.py",
+   "line": 30,
+   "kind": "module_constant",
+   "detail": "DOOR_CLEARANCE_IN=22.0"
+  },
+  {
+   "path": "tools/validation/geometry_sanity.py",
+   "line": 33,
+   "kind": "module_constant",
+   "detail": "OUTSIDE_BUFFER_IN=8.0"
+  },
+  {
+   "path": "tools/validation/opening_audit.py",
+   "line": 33,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/opening_audit.py",
+   "line": 37,
+   "kind": "module_constant",
+   "detail": "MAX_DOOR_M=1.0"
+  },
+  {
+   "path": "tools/validation/opening_audit.py",
+   "line": 38,
+   "kind": "module_constant",
+   "detail": "PDF_SCALE=3.0"
+  },
+  {
+   "path": "tools/validation/optimizer_consistency_gate.py",
+   "line": 30,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/pdf_height_labels_audit.py",
+   "line": 38,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/pdf_height_labels_audit.py",
+   "line": 45,
+   "kind": "module_constant",
+   "detail": "LABEL_MATCH_MAX_PT=40.0"
+  },
+  {
+   "path": "tools/validation/pdf_height_labels_audit.py",
+   "line": 46,
+   "kind": "module_constant",
+   "detail": "HEIGHT_TOL_M=0.05"
+  },
+  {
+   "path": "tools/validation/pdf_height_labels_audit.py",
+   "line": 50,
+   "kind": "module_constant",
+   "detail": "SOURCED_TIEBREAK_PT=3.0"
+  },
+  {
+   "path": "tools/validation/railing_exact_match_gate.py",
+   "line": 26,
+   "kind": "module_constant",
+   "detail": "LENGTH_TOL_M=0.1"
+  },
+  {
+   "path": "tools/validation/render_bbox_audit.py",
+   "line": 44,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/validation/repo_health_gate.py",
+   "line": 90,
+   "kind": "silent_except",
+   "detail": "OSError"
+  },
+  {
+   "path": "tools/validation/room_collisions.py",
+   "line": 14,
+   "kind": "scale_constant",
+   "detail": "IN_TO_M=0.0254"
+  },
+  {
+   "path": "tools/validation/room_collisions.py",
+   "line": 15,
+   "kind": "module_constant",
+   "detail": "WALKABLE_TOP_M=0.02"
+  },
+  {
+   "path": "tools/validation/room_collisions.py",
+   "line": 16,
+   "kind": "module_constant",
+   "detail": "DOOR_LEAF_TOP_M=2.1"
+  },
+  {
+   "path": "tools/validation/room_regression_diff.py",
+   "line": 27,
+   "kind": "module_constant",
+   "detail": "COORD_EPS_IN=1e-06"
+  },
+  {
+   "path": "tools/validation/room_regression_diff.py",
+   "line": 271,
+   "kind": "scale_constant",
+   "detail": "PLANTA_74_PT_TO_M=0.0259"
+  },
+  {
+   "path": "tools/validation/room_regression_gates.py",
+   "line": 14,
+   "kind": "module_constant",
+   "detail": "WORSEN_EPS=0.1"
+  },
+  {
+   "path": "tools/validation/room_regression_gates.py",
+   "line": 38,
+   "kind": "broad_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/validation/room_regression_gates.py",
+   "line": 38,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/validation/scale_anchor_gate.py",
+   "line": 50,
+   "kind": "name_semantics",
+   "detail": "if g.get(\"name\") == \"PlanShell_Group\"]"
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 44,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 45,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 48,
+   "kind": "module_constant",
+   "detail": "ART_CENTER_TOL=0.05"
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 50,
+   "kind": "module_constant",
+   "detail": "CURTAIN_TOL=0.05"
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 51,
+   "kind": "module_constant",
+   "detail": "CURTAIN_MAX_COVER=0.55"
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 52,
+   "kind": "module_constant",
+   "detail": "QUADRANT_MIN_SHARE=0.07"
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 54,
+   "kind": "module_constant",
+   "detail": "ANCHOR_MAX_M=0.45"
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 55,
+   "kind": "module_constant",
+   "detail": "CORRIDOR_W=0.7"
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 56,
+   "kind": "module_constant",
+   "detail": "EPS=1e-06"
+  },
+  {
+   "path": "tools/validation/scene_spatial_gate.py",
+   "line": 252,
+   "kind": "name_semantics",
+   "detail": "if p.get(\"item\") == \"curtain\" and p.get(\"kind\") == \"panel_fold\"]"
+  },
+  {
+   "path": "tools/validation/semantic_geometry_contract_gate.py",
+   "line": 38,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/semantic_geometry_contract_gate.py",
+   "line": 40,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/semantic_geometry_contract_gate.py",
+   "line": 41,
+   "kind": "noqa",
+   "detail": "E402"
+  },
+  {
+   "path": "tools/validation/style_coherence_gate.py",
+   "line": 20,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/style_coherence_gate.py",
+   "line": 22,
+   "kind": "scale_constant",
+   "detail": "M2IN=39.3700787402"
+  },
+  {
+   "path": "tools/validation/style_coherence_gate.py",
+   "line": 23,
+   "kind": "module_constant",
+   "detail": "FOOTPRINT_RATIO_WARN=0.42"
+  },
+  {
+   "path": "tools/validation/style_coherence_gate.py",
+   "line": 24,
+   "kind": "module_constant",
+   "detail": "FOOTPRINT_RATIO_FAIL=0.58"
+  },
+  {
+   "path": "tools/validation/style_coherence_gate.py",
+   "line": 25,
+   "kind": "module_constant",
+   "detail": "RACK_MAX_M=1.25"
+  },
+  {
+   "path": "tools/validation/style_coherence_gate.py",
+   "line": 42,
+   "kind": "env_read",
+   "detail": "'FURNISH_STYLE'"
+  },
+  {
+   "path": "tools/validation/style_coherence_gate.py",
+   "line": 80,
+   "kind": "noqa",
+   "detail": "BLE001"
+  },
+  {
+   "path": "tools/validation/style_coherence_gate.py",
+   "line": 80,
+   "kind": "silent_except",
+   "detail": "Exception"
+  },
+  {
+   "path": "tools/validation/validation_report.py",
+   "line": 15,
+   "kind": "sys_path_mutation",
+   "detail": ""
+  },
+  {
+   "path": "tools/validation/wall_exact_match_gate.py",
+   "line": 27,
+   "kind": "module_constant",
+   "detail": "MISSING_PT=8.0"
+  },
+  {
+   "path": "tools/validation/wall_exact_match_gate.py",
+   "line": 28,
+   "kind": "module_constant",
+   "detail": "JUNCTION_GAP_PT=6.0"
+  }
+ ]
+}

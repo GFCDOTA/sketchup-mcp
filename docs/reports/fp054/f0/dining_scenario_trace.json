@@ -1,0 +1,6931 @@
+{
+ "schema_version": "fp054_dining_trace.v1",
+ "fixture": "planta_74",
+ "room_id": "r002",
+ "pt_to_m": 0.0259,
+ "seed": null,
+ "rng": "nenhum — grade deterministica de 6 in + refino em passos de 0,5 in ordenado por folga",
+ "inputs": {
+  "consensus_sha": "7ff04cd7bea6b043",
+  "table_m": [
+   1.0,
+   0.65
+  ],
+  "chair_gap_m": 0.3,
+  "grid_step_in": 6,
+  "refine_step_in": 0.5,
+  "refine_radius_in": 6.0,
+  "base_boxes": 22,
+  "door_swings_in_room": 6
+ },
+ "proof_spy_is_passive": {
+  "living_sha_plain": "be40e95c2102d757",
+  "living_sha_spied": "be40e95c2102d757",
+  "identical": true
+ },
+ "census_aligned_with_spy": true,
+ "counts": {
+  "grid_points": 1040,
+  "grid_by_reason": {
+   "GATE_FAIL_CADEIRAS": 9,
+   "GATE_FAIL_CORREDOR": 17,
+   "PASS_BUT_DOOR_SWING": 2,
+   "REJECT_CHAIRS_NOT_2": 230,
+   "REJECT_MARGIN_20IN": 772,
+   "REJECT_OVERLAP_GT_50IN2": 10
+  },
+  "gate_calls_grid": 28,
+  "gate_calls_refine": 9,
+  "gate_calls_total": 37
+ },
+ "placement_decision": {
+  "candidate_id": "mesa_de_jantar",
+  "optimizer": "dining_grid_search_v3_slack_ordered_refine",
+  "canonical_gate": "circulation_gate.py::gate/2026-08-12-role-based",
+  "gate_result": "PASS",
+  "score": 0,
+  "n_candidates_tried": 37
+ },
+ "chosen": {
+  "phase": "refine",
+  "table_center_in": [
+   190.5,
+   668.5
+  ],
+  "gate": "PASS",
+  "decided_by": null,
+  "failed_checks": {},
+  "corridor_slack_m": 0.0
+ },
+ "grid": [
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 95,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 101,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 107,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 113,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 119,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 125,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 131,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 137,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 143,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 662,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CADEIRAS",
+   "gate": "FAIL",
+   "decided_by": "cadeiras",
+   "failed_checks": {
+    "corredor_principal": "FAIL",
+    "atras_das_cadeiras": "FAIL",
+    "cadeira_puxada": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+   ],
+   "swing_hit": true,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    149.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 149,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 662,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CADEIRAS",
+   "gate": "FAIL",
+   "decided_by": "cadeiras",
+   "failed_checks": {
+    "corredor_principal": "FAIL",
+    "atras_das_cadeiras": "FAIL",
+    "cadeira_puxada": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+   ],
+   "swing_hit": true,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    155.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 155,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 662,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+   ],
+   "swing_hit": true,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    161.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 161,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 662,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+   ],
+   "swing_hit": true,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    167.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 167,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 662,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+   ],
+   "swing_hit": true,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    173.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 173,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+   ],
+   "swing_hit": true,
+   "corridor_slack_m": -0.06,
+   "spy_center_in": [
+    179.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+   ],
+   "swing_hit": true,
+   "corridor_slack_m": -0.03,
+   "spy_center_in": [
+    179.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 179,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 662,
+   "reason": "PASS_BUT_DOOR_SWING",
+   "gate": "PASS",
+   "decided_by": null,
+   "failed_checks": {},
+   "portal_status": [
+    "PASS",
+    "PASS",
+    "PASS",
+    "PASS",
+    "PASS"
+   ],
+   "swing_hit": true,
+   "corridor_slack_m": 0.01,
+   "spy_center_in": [
+    185.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 668,
+   "reason": "PASS_BUT_DOOR_SWING",
+   "gate": "PASS",
+   "decided_by": null,
+   "failed_checks": {},
+   "portal_status": [
+    "PASS",
+    "PASS",
+    "PASS",
+    "PASS",
+    "PASS"
+   ],
+   "swing_hit": true,
+   "corridor_slack_m": 0.08,
+   "spy_center_in": [
+    185.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 185,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 548,
+   "reason": "GATE_FAIL_CADEIRAS",
+   "gate": "FAIL",
+   "decided_by": "cadeiras",
+   "failed_checks": {
+    "corredor_principal": "FAIL",
+    "atras_das_cadeiras": "FAIL",
+    "cadeira_puxada": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "PASS",
+    "PASS",
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    191.0,
+    548.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.12,
+   "spy_center_in": [
+    191.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.02,
+   "spy_center_in": [
+    191.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 191,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.24,
+   "spy_center_in": [
+    197.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.12,
+   "spy_center_in": [
+    197.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 197,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    203.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.2,
+   "spy_center_in": [
+    203.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 203,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    209.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.25,
+   "spy_center_in": [
+    209.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 209,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 548,
+   "reason": "REJECT_OVERLAP_GT_50IN2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 554,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 560,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 566,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 572,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 578,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 584,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 590,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 596,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 602,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 608,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 614,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CADEIRAS",
+   "gate": "FAIL",
+   "decided_by": "cadeiras",
+   "failed_checks": {
+    "corredor_principal": "FAIL",
+    "atras_das_cadeiras": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    215.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.25,
+   "spy_center_in": [
+    215.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 215,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 620,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CADEIRAS",
+   "gate": "FAIL",
+   "decided_by": "cadeiras",
+   "failed_checks": {
+    "corredor_principal": "FAIL",
+    "atras_das_cadeiras": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    221.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.25,
+   "spy_center_in": [
+    221.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 221,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    227.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CORREDOR",
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.25,
+   "spy_center_in": [
+    227.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 227,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CADEIRAS",
+   "gate": "FAIL",
+   "decided_by": "cadeiras",
+   "failed_checks": {
+    "corredor_principal": "FAIL",
+    "atras_das_cadeiras": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    233.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CADEIRAS",
+   "gate": "FAIL",
+   "decided_by": "cadeiras",
+   "failed_checks": {
+    "corredor_principal": "FAIL",
+    "atras_das_cadeiras": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.25,
+   "spy_center_in": [
+    233.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 233,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 626,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 632,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 638,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 644,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 650,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 656,
+   "reason": "REJECT_CHAIRS_NOT_2"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 662,
+   "reason": "GATE_FAIL_CADEIRAS",
+   "gate": "FAIL",
+   "decided_by": "cadeiras",
+   "failed_checks": {
+    "corredor_principal": "FAIL",
+    "atras_das_cadeiras": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.8,
+   "spy_center_in": [
+    239.0,
+    662.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 668,
+   "reason": "GATE_FAIL_CADEIRAS",
+   "gate": "FAIL",
+   "decided_by": "cadeiras",
+   "failed_checks": {
+    "corredor_principal": "FAIL",
+    "atras_das_cadeiras": "FAIL"
+   },
+   "portal_status": [
+    "PASS",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "FAIL_FURNITURE_BLOCKING_CIRCULATION",
+    "PASS"
+   ],
+   "swing_hit": false,
+   "corridor_slack_m": -0.25,
+   "spy_center_in": [
+    239.0,
+    668.0
+   ]
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 239,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 245,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 251,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 257,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 263,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 269,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 275,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 281,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 287,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 293,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 299,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 305,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 311,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 317,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 323,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 530,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 536,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 542,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 548,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 554,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 560,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 566,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 572,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 578,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 584,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 590,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 596,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 602,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 608,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 614,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 620,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 626,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 632,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 638,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 644,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 650,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 656,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 662,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 668,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 674,
+   "reason": "REJECT_MARGIN_20IN"
+  },
+  {
+   "phase": "grid",
+   "cx_in": 329,
+   "cy_in": 680,
+   "reason": "REJECT_MARGIN_20IN"
+  }
+ ],
+ "refine": [
+  {
+   "phase": "refine",
+   "table_center_in": [
+    189.5,
+    666.0
+   ],
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "corridor_slack_m": -0.03
+  },
+  {
+   "phase": "refine",
+   "table_center_in": [
+    190.0,
+    667.0
+   ],
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "corridor_slack_m": -0.02
+  },
+  {
+   "phase": "refine",
+   "table_center_in": [
+    189.5,
+    665.5
+   ],
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "corridor_slack_m": -0.03
+  },
+  {
+   "phase": "refine",
+   "table_center_in": [
+    190.0,
+    666.5
+   ],
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "corridor_slack_m": -0.03
+  },
+  {
+   "phase": "refine",
+   "table_center_in": [
+    189.0,
+    664.5
+   ],
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "corridor_slack_m": -0.04
+  },
+  {
+   "phase": "refine",
+   "table_center_in": [
+    190.0,
+    666.0
+   ],
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "corridor_slack_m": -0.03
+  },
+  {
+   "phase": "refine",
+   "table_center_in": [
+    189.5,
+    665.0
+   ],
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "corridor_slack_m": -0.04
+  },
+  {
+   "phase": "refine",
+   "table_center_in": [
+    190.5,
+    668.0
+   ],
+   "gate": "FAIL",
+   "decided_by": "corredor",
+   "failed_checks": {
+    "corredor_principal": "FAIL"
+   },
+   "corridor_slack_m": -0.01
+  },
+  {
+   "phase": "refine",
+   "table_center_in": [
+    190.5,
+    668.5
+   ],
+   "gate": "PASS",
+   "decided_by": null,
+   "failed_checks": {},
+   "corridor_slack_m": 0.0
+  }
+ ]
+}

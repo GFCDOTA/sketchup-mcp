@@ -1,0 +1,178 @@
+{
+ "schema_version": "fp054_baseline_tests.v1",
+ "head": "2556f4118537ff9b25ae08b4ceb1f90733e189bd",
+ "python": "3.12.13",
+ "profiles": {
+  "default_scale": {
+   "counts": {
+    "blocked_env": 19,
+    "passed": 2714,
+    "skipped": 11,
+    "xfailed": 1
+   },
+   "total": 2745,
+   "skip_reasons": {
+    "BLOCKED_ENV: ruby não instalado": 14,
+    "SKIP: este shell já roda dentro de um Job Object (aninhado: a consulta devolve o externo); meça com `su_status.server_job` no servidor real": 4,
+    "BLOCKED_ENV: Qdrant/Ollama off — teste de integração pulado (CI-safe)": 3,
+    "SKIP: escala da planta_74 (PT_TO_M=0.0259) nao ativa": 2,
+    "SKIP: quadrado geometry_report.json not present": 2,
+    "BLOCKED_ENV: sistema nega symlink: [WinError 1314] O cliente não tem o privilégio necessário: 'C:\\\\Users\\\\felip_local\\\\AppData\\\\Local\\\\Temp\\\\pytest-of-Fe": 1,
+    "XFAIL: FP-043 P3a-03: planner mobilia sobre a laje (tuck 0,4*t); trocar o vao global tira layout valido da SUITE 02 e quebra o anchor da pia -> cor": 1,
+    "BLOCKED_ENV: Qdrant/Ollama off — integração pulada (InfraUnavailable, CI-safe)": 1,
+    "SKIP: quadrado_v3_aperture not built — run build_plan_shell_skp first": 1,
+    "SKIP: quadrado_v3_aperture not built": 1,
+    "SKIP: quadrado geometry_report.json not present (run build_plan_shell_skp with REPORT_OUT to populate)": 1
+   },
+   "failures": [],
+   "slowest": [
+    {
+     "test": "tests.test_variant_sweep::test_su_free_sweep_smoke_4_variants",
+     "s": 5.144
+    },
+    {
+     "test": "tests.test_rag_embed_backend::test_probes_false_on_dead_ports",
+     "s": 3.028
+    },
+    {
+     "test": "tests.test_fp054_baseline::test_inventory_reconciles_with_git_ls_files",
+     "s": 2.89
+    },
+    {
+     "test": "tests.test_oracle_providers::test_chatgpt_bridge_call_writes_package_on_unavailable",
+     "s": 2.458
+    },
+    {
+     "test": "tests.test_oracle_providers::test_ollama_provider_call_writes_package_on_unavailable",
+     "s": 2.064
+    },
+    {
+     "test": "tests.test_oracle_providers::test_chatgpt_bridge_probe_returns_false_when_unreachable",
+     "s": 2.056
+    },
+    {
+     "test": "tests.test_ask_gpt_gate::test_run_gate_default_offline_returns_SKIPPED_OFFLINE",
+     "s": 2.055
+    },
+    {
+     "test": "tests.test_ask_gpt_gate::test_run_gate_require_consult_offline_returns_BLOCKED",
+     "s": 2.049
+    },
+    {
+     "test": "tests.test_skp_visual_review_contract::test_check_oracle_bridge_returns_bool",
+     "s": 2.048
+    },
+    {
+     "test": "tests.test_oracle_providers::test_ollama_provider_probe_returns_false_when_unreachable",
+     "s": 2.045
+    },
+    {
+     "test": "tests.test_rag_embed_backend::test_embed_raises_infra_unavailable_on_dead_port",
+     "s": 2.043
+    },
+    {
+     "test": "tests.test_ask_gpt_gate::test_probe_bridge_returns_false_when_closed_port",
+     "s": 2.041
+    },
+    {
+     "test": "tests.test_vision_queue_consumer::test_offline_bridge_blocks_honestly",
+     "s": 2.029
+    },
+    {
+     "test": "tests.test_file_audit::test_real_repo_import_graph_stays_clean",
+     "s": 1.539
+    },
+    {
+     "test": "tests.test_rag_freshness::test_guard_rejects_stale_corpus_version",
+     "s": 1.438
+    }
+   ],
+   "command": " pytest tests -q -m \"not planta74_scale\"",
+   "exit_code": 0,
+   "wall_s": 129.3,
+   "tail": [
+    "2714 passed, 30 skipped, 114 deselected, 1 xfailed in 128.65s (0:02:08)"
+   ]
+  },
+  "planta74_scale": {
+   "counts": {
+    "passed": 150
+   },
+   "total": 150,
+   "skip_reasons": {},
+   "failures": [],
+   "slowest": [
+    {
+     "test": "tests.test_fp047_diff::test_real_planta74_snapshot_is_deterministic_and_matches_registry_rooms",
+     "s": 1.752
+    },
+    {
+     "test": "tests.test_layout_search_pruning::test_gate_session_and_decision_mode_match_the_full_gate_in_every_room",
+     "s": 1.188
+    },
+    {
+     "test": "tests.test_fp047_gates::test_real_baseline_has_no_wall_or_door_finding_and_only_the_known_circulation_one",
+     "s": 1.006
+    },
+    {
+     "test": "tests.test_fp047_gates::test_end_to_end_strict_identity_on_real_snapshot_passes_with_the_known_finding_listed",
+     "s": 0.98
+    },
+    {
+     "test": "tests.test_circulation_gate::test_circulation_passes_in_production",
+     "s": 0.975
+    },
+    {
+     "test": "tests.test_fp044_baseline::test_estado_atual_e_identico_a_linha_de_base",
+     "s": 0.923
+    },
+    {
+     "test": "tests.test_fp044_baseline::test_mudanca_de_caixas_ou_de_canonico_e_detectada",
+     "s": 0.918
+    },
+    {
+     "test": "tests.test_fp054_baseline::test_dining_search_is_reproduced_with_reasons_for_every_grid_point",
+     "s": 0.861
+    },
+    {
+     "test": "tests.test_fp047_gates::test_hosted_structural_and_walkable_pieces_use_the_existing_exceptions_without_disabling_the_gate",
+     "s": 0.427
+    },
+    {
+     "test": "tests.test_layout_search_pruning::test_dining_search_stays_cheap_and_still_passes_the_gate",
+     "s": 0.332
+    },
+    {
+     "test": "tests.test_living_room_style::test_tv_exists_in_production",
+     "s": 0.32
+    },
+    {
+     "test": "tests.test_fp046_kitchen_shaker::test_same_key_is_not_redone_and_other_request_gets_another_key",
+     "s": 0.29
+    },
+    {
+     "test": "tests.test_fp047_gates::test_furniture_inside_a_wall_is_a_wall_finding_and_fails_the_regression",
+     "s": 0.276
+    },
+    {
+     "test": "tests.test_fp047_gates::test_decorative_in_the_swing_blocks_but_decorative_in_the_wall_is_not_a_wall_finding",
+     "s": 0.246
+    },
+    {
+     "test": "tests.test_fp046_kitchen_shaker::test_l2_proof_in_the_catalog_points_to_evidence_made_on_the_current_symbols",
+     "s": 0.213
+    }
+   ],
+   "command": "PT_TO_M=0.0259 pytest tests -q -m \"planta74_scale\"",
+   "exit_code": 0,
+   "wall_s": 25.4,
+   "tail": [
+    "150 passed, 2746 deselected in 24.76s"
+   ]
+  }
+ },
+ "not_covered": [
+  "L2 SketchUp real (fora do pytest; BLOCKED_L2 no CI Linux)",
+  "L3 visual (Felipe)"
+ ]
+}

@@ -1,0 +1,6335 @@
+{
+ "nodes": [
+  {
+   "id": ".github/workflows/ci.yml",
+   "kind": "ci",
+   "path": ".github/workflows/ci.yml"
+  },
+  {
+   "id": "core",
+   "kind": "python",
+   "path": "core/__init__.py"
+  },
+  {
+   "id": "core.domain",
+   "kind": "python",
+   "path": "core/domain/__init__.py"
+  },
+  {
+   "id": "core.domain.ids",
+   "kind": "python",
+   "path": "core/domain/ids.py"
+  },
+  {
+   "id": "core.domain.iteration_result",
+   "kind": "python",
+   "path": "core/domain/iteration_result.py"
+  },
+  {
+   "id": "core.domain.knowledge_types",
+   "kind": "python",
+   "path": "core/domain/knowledge_types.py"
+  },
+  {
+   "id": "core.domain.retrieval_trace",
+   "kind": "python",
+   "path": "core/domain/retrieval_trace.py"
+  },
+  {
+   "id": "core.domain.room_registry",
+   "kind": "python",
+   "path": "core/domain/room_registry.py"
+  },
+  {
+   "id": "core.observability",
+   "kind": "python",
+   "path": "core/observability/__init__.py"
+  },
+  {
+   "id": "core.observability.context",
+   "kind": "python",
+   "path": "core/observability/context.py"
+  },
+  {
+   "id": "core.observability.events",
+   "kind": "python",
+   "path": "core/observability/events.py"
+  },
+  {
+   "id": "core.observability.gates",
+   "kind": "python",
+   "path": "core/observability/gates.py"
+  },
+  {
+   "id": "core.observability.llm",
+   "kind": "python",
+   "path": "core/observability/llm.py"
+  },
+  {
+   "id": "core.observability.redact",
+   "kind": "python",
+   "path": "core/observability/redact.py"
+  },
+  {
+   "id": "core.observability.replay",
+   "kind": "python",
+   "path": "core/observability/replay.py"
+  },
+  {
+   "id": "core.observability.retrieval",
+   "kind": "python",
+   "path": "core/observability/retrieval.py"
+  },
+  {
+   "id": "core.observability.sink",
+   "kind": "python",
+   "path": "core/observability/sink.py"
+  },
+  {
+   "id": "core.observability.taxonomy",
+   "kind": "python",
+   "path": "core/observability/taxonomy.py"
+  },
+  {
+   "id": "core.project_policy",
+   "kind": "python",
+   "path": "core/project_policy.py"
+  },
+  {
+   "id": "core.project_sources",
+   "kind": "python",
+   "path": "core/project_sources.py"
+  },
+  {
+   "id": "core.scale",
+   "kind": "python",
+   "path": "core/scale.py"
+  },
+  {
+   "id": "core.schemas",
+   "kind": "python",
+   "path": "core/schemas/__init__.py"
+  },
+  {
+   "id": "core.spatial_semantics",
+   "kind": "python",
+   "path": "core/spatial_semantics.py"
+  },
+  {
+   "id": "interior",
+   "kind": "python",
+   "path": "interior/__init__.py"
+  },
+  {
+   "id": "interior.class_specs",
+   "kind": "python",
+   "path": "interior/class_specs/__init__.py"
+  },
+  {
+   "id": "interior.composer",
+   "kind": "python",
+   "path": "interior/composer/__init__.py"
+  },
+  {
+   "id": "interior.composer.scene_composer",
+   "kind": "python",
+   "path": "interior/composer/scene_composer.py"
+  },
+  {
+   "id": "interior.planners",
+   "kind": "python",
+   "path": "interior/planners/__init__.py"
+  },
+  {
+   "id": "interior.planners.living_room_planner",
+   "kind": "python",
+   "path": "interior/planners/living_room_planner.py"
+  },
+  {
+   "id": "interior.planners.placement_brain",
+   "kind": "python",
+   "path": "interior/planners/placement_brain.py"
+  },
+  {
+   "id": "interior.renderers",
+   "kind": "python",
+   "path": "interior/renderers/__init__.py"
+  },
+  {
+   "id": "interior.renderers.enscape_preview_provider",
+   "kind": "python",
+   "path": "interior/renderers/enscape_preview_provider.py"
+  },
+  {
+   "id": "interior.renderers.render_provider",
+   "kind": "python",
+   "path": "interior/renderers/render_provider.py"
+  },
+  {
+   "id": "interior.renderers.sketchup_basic_provider",
+   "kind": "python",
+   "path": "interior/renderers/sketchup_basic_provider.py"
+  },
+  {
+   "id": "interior.renderers.vray_final_provider",
+   "kind": "python",
+   "path": "interior/renderers/vray_final_provider.py"
+  },
+  {
+   "id": "interior.schemas",
+   "kind": "python",
+   "path": "interior/schemas/__init__.py"
+  },
+  {
+   "id": "interior.semantics",
+   "kind": "python",
+   "path": "interior/semantics/__init__.py"
+  },
+  {
+   "id": "interior.semantics.room_graph",
+   "kind": "python",
+   "path": "interior/semantics/room_graph.py"
+  },
+  {
+   "id": "interior.semantics.wall_affordance",
+   "kind": "python",
+   "path": "interior/semantics/wall_affordance.py"
+  },
+  {
+   "id": "interior.specs",
+   "kind": "python",
+   "path": "interior/specs/__init__.py"
+  },
+  {
+   "id": "interior.style_packs",
+   "kind": "python",
+   "path": "interior/style_packs/__init__.py"
+  },
+  {
+   "id": "interior.validators",
+   "kind": "python",
+   "path": "interior/validators/__init__.py"
+  },
+  {
+   "id": "interior.validators.bed_gate",
+   "kind": "python",
+   "path": "interior/validators/bed_gate.py"
+  },
+  {
+   "id": "interior.validators.bed_placement_gate",
+   "kind": "python",
+   "path": "interior/validators/bed_placement_gate.py"
+  },
+  {
+   "id": "interior.validators.furniture_visual_gate",
+   "kind": "python",
+   "path": "interior/validators/furniture_visual_gate.py"
+  },
+  {
+   "id": "interior.validators.nightstand_gate",
+   "kind": "python",
+   "path": "interior/validators/nightstand_gate.py"
+  },
+  {
+   "id": "interior.validators.scene_spatial_gate",
+   "kind": "python",
+   "path": "interior/validators/scene_spatial_gate.py"
+  },
+  {
+   "id": "interior.validators.sofa_placement_gate",
+   "kind": "python",
+   "path": "interior/validators/sofa_placement_gate.py"
+  },
+  {
+   "id": "interior.validators.validation_report",
+   "kind": "python",
+   "path": "interior/validators/validation_report.py"
+  },
+  {
+   "id": "interior.validators.wardrobe_gate",
+   "kind": "python",
+   "path": "interior/validators/wardrobe_gate.py"
+  },
+  {
+   "id": "mcp:furniture_class_derive",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:kitchen_ergonomics_audit",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:list_capabilities",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:promote_canonical",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:reference_to_grammar",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:room_gates",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:run_deterministic_gates",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:skp_inventory",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:su_apply_edits",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:su_build_shell",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:su_close",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:su_furnish",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:su_inspect",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:su_open",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:su_render",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:su_render_vray",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:su_status",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "mcp:validate_grammar_spec",
+   "kind": "mcp_tool",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "ops/estudio-front/knowledge_ingest.py",
+   "kind": "python",
+   "path": "ops/estudio-front/knowledge_ingest.py"
+  },
+  {
+   "id": "ops/estudio-front/rag_chat.py",
+   "kind": "python",
+   "path": "ops/estudio-front/rag_chat.py"
+  },
+  {
+   "id": "ops/estudio-front/server.py",
+   "kind": "python",
+   "path": "ops/estudio-front/server.py"
+  },
+  {
+   "id": "pytest",
+   "kind": "ci_tool"
+  },
+  {
+   "id": "tools.circulation_gate",
+   "kind": "python",
+   "path": "tools/circulation_gate.py"
+  },
+  {
+   "id": "tools.claude_bridge",
+   "kind": "python",
+   "path": "tools/claude_bridge/__init__.py"
+  },
+  {
+   "id": "tools.claude_bridge._paths",
+   "kind": "python",
+   "path": "tools/claude_bridge/_paths.py"
+  },
+  {
+   "id": "tools.claude_bridge.skp_inventory",
+   "kind": "python",
+   "path": "tools/claude_bridge/skp_inventory.py"
+  },
+  {
+   "id": "tools.correction_loop",
+   "kind": "python",
+   "path": "tools/correction_loop.py"
+  },
+  {
+   "id": "tools.finding_router",
+   "kind": "python",
+   "path": "tools/finding_router.py"
+  },
+  {
+   "id": "tools.furnish_apartment",
+   "kind": "python",
+   "path": "tools/furnish_apartment.py"
+  },
+  {
+   "id": "tools.furnish_plan",
+   "kind": "python",
+   "path": "tools/furnish_plan.py"
+  },
+  {
+   "id": "tools.furniture_overlap_gate",
+   "kind": "python",
+   "path": "tools/furniture_overlap_gate.py"
+  },
+  {
+   "id": "tools.geometry_sanity",
+   "kind": "python",
+   "path": "tools/geometry_sanity.py"
+  },
+  {
+   "id": "tools.interior_studio",
+   "kind": "python",
+   "path": "tools/interior_studio/__init__.py"
+  },
+  {
+   "id": "tools.interior_studio.architect_program",
+   "kind": "python",
+   "path": "tools/interior_studio/architect_program.py"
+  },
+  {
+   "id": "tools.interior_studio.auditor",
+   "kind": "python",
+   "path": "tools/interior_studio/auditor.py"
+  },
+  {
+   "id": "tools.interior_studio.auto_decider",
+   "kind": "python",
+   "path": "tools/interior_studio/auto_decider.py"
+  },
+  {
+   "id": "tools.interior_studio.consult_gpt_bridge",
+   "kind": "python",
+   "path": "tools/interior_studio/consult_gpt_bridge/__init__.py"
+  },
+  {
+   "id": "tools.interior_studio.consult_gpt_bridge.answer_parser",
+   "kind": "python",
+   "path": "tools/interior_studio/consult_gpt_bridge/answer_parser.py"
+  },
+  {
+   "id": "tools.interior_studio.consult_gpt_bridge.contracts",
+   "kind": "python",
+   "path": "tools/interior_studio/consult_gpt_bridge/contracts.py"
+  },
+  {
+   "id": "tools.interior_studio.consult_gpt_bridge.ingest",
+   "kind": "python",
+   "path": "tools/interior_studio/consult_gpt_bridge/ingest.py"
+  },
+  {
+   "id": "tools.interior_studio.consult_gpt_bridge.openai_client",
+   "kind": "python",
+   "path": "tools/interior_studio/consult_gpt_bridge/openai_client.py"
+  },
+  {
+   "id": "tools.interior_studio.consult_gpt_bridge.prompt_builder",
+   "kind": "python",
+   "path": "tools/interior_studio/consult_gpt_bridge/prompt_builder.py"
+  },
+  {
+   "id": "tools.interior_studio.consult_gpt_bridge.store",
+   "kind": "python",
+   "path": "tools/interior_studio/consult_gpt_bridge/store.py"
+  },
+  {
+   "id": "tools.interior_studio.curator",
+   "kind": "python",
+   "path": "tools/interior_studio/curator.py"
+  },
+  {
+   "id": "tools.interior_studio.cycles",
+   "kind": "python",
+   "path": "tools/interior_studio/cycles.py"
+  },
+  {
+   "id": "tools.interior_studio.decision_judge",
+   "kind": "python",
+   "path": "tools/interior_studio/decision_judge.py"
+  },
+  {
+   "id": "tools.interior_studio.gpt_review_bundle",
+   "kind": "python",
+   "path": "tools/interior_studio/gpt_review_bundle.py"
+  },
+  {
+   "id": "tools.interior_studio.interior_quality_scorecard",
+   "kind": "python",
+   "path": "tools/interior_studio/interior_quality_scorecard.py"
+  },
+  {
+   "id": "tools.interior_studio.interns",
+   "kind": "python",
+   "path": "tools/interior_studio/interns.py"
+  },
+  {
+   "id": "tools.interior_studio.learning_patch",
+   "kind": "python",
+   "path": "tools/interior_studio/learning_patch.py"
+  },
+  {
+   "id": "tools.interior_studio.project_state",
+   "kind": "python",
+   "path": "tools/interior_studio/project_state.py"
+  },
+  {
+   "id": "tools.interior_studio.proposals",
+   "kind": "python",
+   "path": "tools/interior_studio/proposals.py"
+  },
+  {
+   "id": "tools.interior_studio.reference_packs",
+   "kind": "python",
+   "path": "tools/interior_studio/reference_packs.py"
+  },
+  {
+   "id": "tools.interior_studio.render_fingerprint",
+   "kind": "python",
+   "path": "tools/interior_studio/render_fingerprint.py"
+  },
+  {
+   "id": "tools.interior_studio.render_judge",
+   "kind": "python",
+   "path": "tools/interior_studio/render_judge.py"
+  },
+  {
+   "id": "tools.interior_studio.studio_log",
+   "kind": "python",
+   "path": "tools/interior_studio/studio_log.py"
+  },
+  {
+   "id": "tools.interior_studio.theme_registry",
+   "kind": "python",
+   "path": "tools/interior_studio/theme_registry.py"
+  },
+  {
+   "id": "tools.interior_studio.vision_describe",
+   "kind": "python",
+   "path": "tools/interior_studio/vision_describe.py"
+  },
+  {
+   "id": "tools.knowledge",
+   "kind": "python",
+   "path": "tools/knowledge/__init__.py"
+  },
+  {
+   "id": "tools.knowledge.corpus_to_rag",
+   "kind": "python",
+   "path": "tools/knowledge/corpus_to_rag.py"
+  },
+  {
+   "id": "tools.knowledge.furniture_reference_analyzer",
+   "kind": "python",
+   "path": "tools/knowledge/furniture_reference_analyzer.py"
+  },
+  {
+   "id": "tools.knowledge.pdf",
+   "kind": "python",
+   "path": "tools/knowledge/pdf/__init__.py"
+  },
+  {
+   "id": "tools.knowledge.pdf.export_claude_context",
+   "kind": "python",
+   "path": "tools/knowledge/pdf/export_claude_context.py"
+  },
+  {
+   "id": "tools.knowledge.pdf.ingest_pdfs",
+   "kind": "python",
+   "path": "tools/knowledge/pdf/ingest_pdfs.py"
+  },
+  {
+   "id": "tools.knowledge.pdf.search_pdf_index",
+   "kind": "python",
+   "path": "tools/knowledge/pdf/search_pdf_index.py"
+  },
+  {
+   "id": "tools.knowledge.project_memory_db",
+   "kind": "python",
+   "path": "tools/knowledge/project_memory_db.py"
+  },
+  {
+   "id": "tools.knowledge.rag_embed_backend",
+   "kind": "python",
+   "path": "tools/knowledge/rag_embed_backend.py"
+  },
+  {
+   "id": "tools.knowledge.rag_freshness",
+   "kind": "python",
+   "path": "tools/knowledge/rag_freshness.py"
+  },
+  {
+   "id": "tools.knowledge.reference_db",
+   "kind": "python",
+   "path": "tools/knowledge/reference_db.py"
+  },
+  {
+   "id": "tools.knowledge.reference_grammar",
+   "kind": "python",
+   "path": "tools/knowledge/reference_grammar.py"
+  },
+  {
+   "id": "tools.knowledge.retrieval_eval",
+   "kind": "python",
+   "path": "tools/knowledge/retrieval_eval.py"
+  },
+  {
+   "id": "tools.knowledge.taste_writeback",
+   "kind": "python",
+   "path": "tools/knowledge/taste_writeback.py"
+  },
+  {
+   "id": "tools.mcp_server",
+   "kind": "python",
+   "path": "tools/mcp_server/__init__.py"
+  },
+  {
+   "id": "tools.mcp_server.server",
+   "kind": "python",
+   "path": "tools/mcp_server/server.py"
+  },
+  {
+   "id": "tools.mcp_server.smoke",
+   "kind": "python",
+   "path": "tools/mcp_server/smoke.py"
+  },
+  {
+   "id": "tools.mcp_server.stdio_check",
+   "kind": "python",
+   "path": "tools/mcp_server/stdio_check.py"
+  },
+  {
+   "id": "tools.mcp_server.stdio_isolation",
+   "kind": "python",
+   "path": "tools/mcp_server/stdio_isolation.py"
+  },
+  {
+   "id": "tools.navigation",
+   "kind": "python",
+   "path": "tools/navigation/__init__.py"
+  },
+  {
+   "id": "tools.navigation.baseline_inventory",
+   "kind": "python",
+   "path": "tools/navigation/baseline_inventory.py"
+  },
+  {
+   "id": "tools.navigation.baseline_probes",
+   "kind": "python",
+   "path": "tools/navigation/baseline_probes.py"
+  },
+  {
+   "id": "tools.navigation.builder_detail_audit",
+   "kind": "python",
+   "path": "tools/navigation/builder_detail_audit.py"
+  },
+  {
+   "id": "tools.navigation.consumers",
+   "kind": "python",
+   "path": "tools/navigation/consumers.py"
+  },
+  {
+   "id": "tools.navigation.docs_check",
+   "kind": "python",
+   "path": "tools/navigation/docs_check.py"
+  },
+  {
+   "id": "tools.navigation.file_audit",
+   "kind": "python",
+   "path": "tools/navigation/file_audit.py"
+  },
+  {
+   "id": "tools.navigation.fp051_baseline",
+   "kind": "python",
+   "path": "tools/navigation/fp051_baseline.py"
+  },
+  {
+   "id": "tools.navigation.p0_map",
+   "kind": "python",
+   "path": "tools/navigation/p0_map.py"
+  },
+  {
+   "id": "tools.navigation.register_evidence",
+   "kind": "python",
+   "path": "tools/navigation/register_evidence.py"
+  },
+  {
+   "id": "tools.navigation.renames",
+   "kind": "python",
+   "path": "tools/navigation/renames.py"
+  },
+  {
+   "id": "tools.navigation.rooms_index",
+   "kind": "python",
+   "path": "tools/navigation/rooms_index.py"
+  },
+  {
+   "id": "tools.oracle",
+   "kind": "python",
+   "path": "tools/oracle/__init__.py"
+  },
+  {
+   "id": "tools.oracle.ask_gpt_gate",
+   "kind": "python",
+   "path": "tools/oracle/ask_gpt_gate.py"
+  },
+  {
+   "id": "tools.oracle.consult_tier",
+   "kind": "python",
+   "path": "tools/oracle/consult_tier.py"
+  },
+  {
+   "id": "tools.oracle.gpt_docker_visual_score",
+   "kind": "python",
+   "path": "tools/oracle/gpt_docker_visual_score.py"
+  },
+  {
+   "id": "tools.oracle.gpt_review",
+   "kind": "python",
+   "path": "tools/oracle/gpt_review.py"
+  },
+  {
+   "id": "tools.oracle.human_verdict",
+   "kind": "python",
+   "path": "tools/oracle/human_verdict.py"
+  },
+  {
+   "id": "tools.oracle.make_gpt_review_sheet",
+   "kind": "python",
+   "path": "tools/oracle/make_gpt_review_sheet.py"
+  },
+  {
+   "id": "tools.oracle.negative_dogfood",
+   "kind": "python",
+   "path": "tools/oracle/negative_dogfood.py"
+  },
+  {
+   "id": "tools.oracle.ollama_bridge",
+   "kind": "python",
+   "path": "tools/oracle/ollama_bridge.py"
+  },
+  {
+   "id": "tools.oracle.oracle_providers",
+   "kind": "python",
+   "path": "tools/oracle/oracle_providers.py"
+  },
+  {
+   "id": "tools.oracle.run_skp_visual_review",
+   "kind": "python",
+   "path": "tools/oracle/run_skp_visual_review.py"
+  },
+  {
+   "id": "tools.orchestration",
+   "kind": "python",
+   "path": "tools/orchestration/__init__.py"
+  },
+  {
+   "id": "tools.orchestration.correction",
+   "kind": "python",
+   "path": "tools/orchestration/correction/__init__.py"
+  },
+  {
+   "id": "tools.orchestration.correction.correction_finding",
+   "kind": "python",
+   "path": "tools/orchestration/correction/correction_finding.py"
+  },
+  {
+   "id": "tools.orchestration.correction.correction_fixes",
+   "kind": "python",
+   "path": "tools/orchestration/correction/correction_fixes.py"
+  },
+  {
+   "id": "tools.orchestration.correction.correction_loop",
+   "kind": "python",
+   "path": "tools/orchestration/correction/correction_loop.py"
+  },
+  {
+   "id": "tools.orchestration.correction.finding_router",
+   "kind": "python",
+   "path": "tools/orchestration/correction/finding_router.py"
+  },
+  {
+   "id": "tools.orchestration.correction.jsonl_io",
+   "kind": "python",
+   "path": "tools/orchestration/correction/jsonl_io.py"
+  },
+  {
+   "id": "tools.orchestration.correction.vision_queue_consumer",
+   "kind": "python",
+   "path": "tools/orchestration/correction/vision_queue_consumer.py"
+  },
+  {
+   "id": "tools.orchestration.fidelity_loop",
+   "kind": "python",
+   "path": "tools/orchestration/fidelity_loop.py"
+  },
+  {
+   "id": "tools.orchestration.furnish_apartment",
+   "kind": "python",
+   "path": "tools/orchestration/furnish_apartment.py"
+  },
+  {
+   "id": "tools.orchestration.promote_artifact",
+   "kind": "python",
+   "path": "tools/orchestration/promote_artifact.py"
+  },
+  {
+   "id": "tools.orchestration.promote_canonical",
+   "kind": "python",
+   "path": "tools/orchestration/promote_canonical.py"
+  },
+  {
+   "id": "tools.orchestration.regenerate_consensus",
+   "kind": "python",
+   "path": "tools/orchestration/regenerate_consensus.py"
+  },
+  {
+   "id": "tools.orchestration.variant_axes",
+   "kind": "python",
+   "path": "tools/orchestration/variant_axes.py"
+  },
+  {
+   "id": "tools.orchestration.variant_sweep",
+   "kind": "python",
+   "path": "tools/orchestration/variant_sweep.py"
+  },
+  {
+   "id": "tools.pdf_knowledge",
+   "kind": "python",
+   "path": "tools/pdf_knowledge/__init__.py"
+  },
+  {
+   "id": "tools.pdf_knowledge.export_claude_context",
+   "kind": "python",
+   "path": "tools/pdf_knowledge/export_claude_context.py"
+  },
+  {
+   "id": "tools.pdf_knowledge.ingest_pdfs",
+   "kind": "python",
+   "path": "tools/pdf_knowledge/ingest_pdfs.py"
+  },
+  {
+   "id": "tools.pdf_knowledge.search_pdf_index",
+   "kind": "python",
+   "path": "tools/pdf_knowledge/search_pdf_index.py"
+  },
+  {
+   "id": "tools.quadrado",
+   "kind": "python",
+   "path": "tools/quadrado/__init__.py"
+  },
+  {
+   "id": "tools.quadrado.render_view",
+   "kind": "python",
+   "path": "tools/quadrado/render_view.py"
+  },
+  {
+   "id": "tools.rendering",
+   "kind": "python",
+   "path": "tools/rendering/__init__.py"
+  },
+  {
+   "id": "tools.rendering.auto_camera",
+   "kind": "python",
+   "path": "tools/rendering/auto_camera.py"
+  },
+  {
+   "id": "tools.rendering.batch_theme_render",
+   "kind": "python",
+   "path": "tools/rendering/batch_theme_render.py"
+  },
+  {
+   "id": "tools.rendering.compose_side_by_side",
+   "kind": "python",
+   "path": "tools/rendering/compose_side_by_side.py"
+  },
+  {
+   "id": "tools.rendering.crop_render",
+   "kind": "python",
+   "path": "tools/rendering/crop_render.py"
+  },
+  {
+   "id": "tools.rendering.gen_textures",
+   "kind": "python",
+   "path": "tools/rendering/gen_textures.py"
+  },
+  {
+   "id": "tools.rendering.material_review",
+   "kind": "python",
+   "path": "tools/rendering/material_review.py"
+  },
+  {
+   "id": "tools.rendering.overlay_diff",
+   "kind": "python",
+   "path": "tools/rendering/overlay_diff.py"
+  },
+  {
+   "id": "tools.rendering.pdf_overlay_verify",
+   "kind": "python",
+   "path": "tools/rendering/pdf_overlay_verify.py"
+  },
+  {
+   "id": "tools.rendering.quadrado",
+   "kind": "python",
+   "path": "tools/rendering/quadrado/__init__.py"
+  },
+  {
+   "id": "tools.rendering.quadrado.render_view",
+   "kind": "python",
+   "path": "tools/rendering/quadrado/render_view.py"
+  },
+  {
+   "id": "tools.rendering.render_parts_iso",
+   "kind": "python",
+   "path": "tools/rendering/render_parts_iso.py"
+  },
+  {
+   "id": "tools.rendering.render_scene_views",
+   "kind": "python",
+   "path": "tools/rendering/render_scene_views.py"
+  },
+  {
+   "id": "tools.rendering.render_scene_vray",
+   "kind": "python",
+   "path": "tools/rendering/render_scene_vray.py"
+  },
+  {
+   "id": "tools.rendering.theme_palette",
+   "kind": "python",
+   "path": "tools/rendering/theme_palette.py"
+  },
+  {
+   "id": "tools.rendering.tweak_vrscene",
+   "kind": "python",
+   "path": "tools/rendering/tweak_vrscene.py"
+  },
+  {
+   "id": "tools.room_type",
+   "kind": "python",
+   "path": "tools/room_type.py"
+  },
+  {
+   "id": "tools.rooms",
+   "kind": "python",
+   "path": "tools/rooms/__init__.py"
+  },
+  {
+   "id": "tools.rooms.architecture_ownership",
+   "kind": "python",
+   "path": "tools/rooms/architecture_ownership.py"
+  },
+  {
+   "id": "tools.rooms.asset_provenance",
+   "kind": "python",
+   "path": "tools/rooms/asset_provenance.py"
+  },
+  {
+   "id": "tools.rooms.balcony",
+   "kind": "python",
+   "path": "tools/rooms/balcony/__init__.py"
+  },
+  {
+   "id": "tools.rooms.bathroom",
+   "kind": "python",
+   "path": "tools/rooms/bathroom/__init__.py"
+  },
+  {
+   "id": "tools.rooms.bathroom.capabilities",
+   "kind": "python",
+   "path": "tools/rooms/bathroom/capabilities/__init__.py"
+  },
+  {
+   "id": "tools.rooms.bathroom.capabilities.estudio_banheiro_scene",
+   "kind": "python",
+   "path": "tools/rooms/bathroom/capabilities/estudio_banheiro_scene.py"
+  },
+  {
+   "id": "tools.rooms.bathroom.capabilities.render_banho_auto",
+   "kind": "python",
+   "path": "tools/rooms/bathroom/capabilities/render_banho_auto.py"
+  },
+  {
+   "id": "tools.rooms.bathroom.capabilities.render_banho_vray",
+   "kind": "python",
+   "path": "tools/rooms/bathroom/capabilities/render_banho_vray.py"
+  },
+  {
+   "id": "tools.rooms.bathroom.layout",
+   "kind": "python",
+   "path": "tools/rooms/bathroom/layout.py"
+  },
+  {
+   "id": "tools.rooms.bathroom.validation",
+   "kind": "python",
+   "path": "tools/rooms/bathroom/validation.py"
+  },
+  {
+   "id": "tools.rooms.bedroom",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/__init__.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.bed_class",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/bed_class.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.capabilities",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/capabilities/__init__.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.capabilities.make_synthetic_bedrooms",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/capabilities/make_synthetic_bedrooms.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.capabilities.place_bedroom_skp",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/capabilities/place_bedroom_skp.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.designer",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/designer.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.furnishing",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/furnishing.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.layout",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/layout.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.validation",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/validation/__init__.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.validation.bed_gate",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/validation/bed_gate.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.validation.bed_placement_gate",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/validation/bed_placement_gate.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.validation.nightstand_gate",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/validation/nightstand_gate.py"
+  },
+  {
+   "id": "tools.rooms.bedroom.validation.wardrobe_gate",
+   "kind": "python",
+   "path": "tools/rooms/bedroom/validation/wardrobe_gate.py"
+  },
+  {
+   "id": "tools.rooms.capability_catalog",
+   "kind": "python",
+   "path": "tools/rooms/capability_catalog.py"
+  },
+  {
+   "id": "tools.rooms.circulation",
+   "kind": "python",
+   "path": "tools/rooms/circulation/__init__.py"
+  },
+  {
+   "id": "tools.rooms.closet",
+   "kind": "python",
+   "path": "tools/rooms/closet/__init__.py"
+  },
+  {
+   "id": "tools.rooms.dispatch",
+   "kind": "python",
+   "path": "tools/rooms/dispatch.py"
+  },
+  {
+   "id": "tools.rooms.evidence_closure",
+   "kind": "python",
+   "path": "tools/rooms/evidence_closure.py"
+  },
+  {
+   "id": "tools.rooms.furniture_goals",
+   "kind": "python",
+   "path": "tools/rooms/furniture_goals.py"
+  },
+  {
+   "id": "tools.rooms.home_office",
+   "kind": "python",
+   "path": "tools/rooms/home_office/__init__.py"
+  },
+  {
+   "id": "tools.rooms.inventory_gate",
+   "kind": "python",
+   "path": "tools/rooms/inventory_gate.py"
+  },
+  {
+   "id": "tools.rooms.kitchen",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/__init__.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.anchor_rules",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/anchor_rules.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.capabilities",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/capabilities/__init__.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.capabilities.bake_theme",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/capabilities/bake_theme.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.capabilities.cabinet",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/capabilities/cabinet.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/capabilities/cabinet_flow.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.capabilities.shaker",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/capabilities/shaker.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/capabilities/shaker_flow.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.capabilities.vray",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/capabilities/vray.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.layout",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/layout.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.planning",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/planning/__init__.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.planning.cabinet_placement",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/planning/cabinet_placement.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.planning.preview",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/planning/preview.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.validation",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/validation/__init__.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.validation.ergonomics",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/validation/ergonomics.py"
+  },
+  {
+   "id": "tools.rooms.kitchen.validation.wall_regression",
+   "kind": "python",
+   "path": "tools/rooms/kitchen/validation/wall_regression.py"
+  },
+  {
+   "id": "tools.rooms.knowledge_ownership",
+   "kind": "python",
+   "path": "tools/rooms/knowledge_ownership.py"
+  },
+  {
+   "id": "tools.rooms.living",
+   "kind": "python",
+   "path": "tools/rooms/living/__init__.py"
+  },
+  {
+   "id": "tools.rooms.living.armchair_class",
+   "kind": "python",
+   "path": "tools/rooms/living/armchair_class.py"
+  },
+  {
+   "id": "tools.rooms.living.capabilities",
+   "kind": "python",
+   "path": "tools/rooms/living/capabilities/__init__.py"
+  },
+  {
+   "id": "tools.rooms.living.capabilities.make_synthetic_rooms",
+   "kind": "python",
+   "path": "tools/rooms/living/capabilities/make_synthetic_rooms.py"
+  },
+  {
+   "id": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "kind": "python",
+   "path": "tools/rooms/living/capabilities/sofa_class_matrix.py"
+  },
+  {
+   "id": "tools.rooms.living.capabilities.sofa_fabric_material",
+   "kind": "python",
+   "path": "tools/rooms/living/capabilities/sofa_fabric_material.py"
+  },
+  {
+   "id": "tools.rooms.living.capabilities.sofa_furnish_fase1_compare",
+   "kind": "python",
+   "path": "tools/rooms/living/capabilities/sofa_furnish_fase1_compare.py"
+  },
+  {
+   "id": "tools.rooms.living.capabilities.sofa_premium_harness",
+   "kind": "python",
+   "path": "tools/rooms/living/capabilities/sofa_premium_harness.py"
+  },
+  {
+   "id": "tools.rooms.living.capabilities.sofa_venezia_compare",
+   "kind": "python",
+   "path": "tools/rooms/living/capabilities/sofa_venezia_compare.py"
+  },
+  {
+   "id": "tools.rooms.living.capabilities.sofa_venezia_room",
+   "kind": "python",
+   "path": "tools/rooms/living/capabilities/sofa_venezia_room.py"
+  },
+  {
+   "id": "tools.rooms.living.coffee_table_class",
+   "kind": "python",
+   "path": "tools/rooms/living/coffee_table_class.py"
+  },
+  {
+   "id": "tools.rooms.living.components",
+   "kind": "python",
+   "path": "tools/rooms/living/components.py"
+  },
+  {
+   "id": "tools.rooms.living.dining_table_class",
+   "kind": "python",
+   "path": "tools/rooms/living/dining_table_class.py"
+  },
+  {
+   "id": "tools.rooms.living.furnishing",
+   "kind": "python",
+   "path": "tools/rooms/living/furnishing.py"
+  },
+  {
+   "id": "tools.rooms.living.planner",
+   "kind": "python",
+   "path": "tools/rooms/living/planner.py"
+  },
+  {
+   "id": "tools.rooms.living.planning",
+   "kind": "python",
+   "path": "tools/rooms/living/planning/__init__.py"
+  },
+  {
+   "id": "tools.rooms.living.planning.layout_candidates",
+   "kind": "python",
+   "path": "tools/rooms/living/planning/layout_candidates.py"
+  },
+  {
+   "id": "tools.rooms.living.rack_class",
+   "kind": "python",
+   "path": "tools/rooms/living/rack_class.py"
+  },
+  {
+   "id": "tools.rooms.living.sofa_class",
+   "kind": "python",
+   "path": "tools/rooms/living/sofa_class.py"
+  },
+  {
+   "id": "tools.rooms.living.validation",
+   "kind": "python",
+   "path": "tools/rooms/living/validation/__init__.py"
+  },
+  {
+   "id": "tools.rooms.living.validation.sofa_gate",
+   "kind": "python",
+   "path": "tools/rooms/living/validation/sofa_gate.py"
+  },
+  {
+   "id": "tools.rooms.living.validation.sofa_placement_gate",
+   "kind": "python",
+   "path": "tools/rooms/living/validation/sofa_placement_gate.py"
+  },
+  {
+   "id": "tools.rooms.ownership_audit",
+   "kind": "python",
+   "path": "tools/rooms/ownership_audit.py"
+  },
+  {
+   "id": "tools.rooms.p3_ownership",
+   "kind": "python",
+   "path": "tools/rooms/p3_ownership.py"
+  },
+  {
+   "id": "tools.rooms.reference_provenance",
+   "kind": "python",
+   "path": "tools/rooms/reference_provenance.py"
+  },
+  {
+   "id": "tools.rooms.reference_targets",
+   "kind": "python",
+   "path": "tools/rooms/reference_targets.py"
+  },
+  {
+   "id": "tools.rooms.registry",
+   "kind": "python",
+   "path": "tools/rooms/registry.py"
+  },
+  {
+   "id": "tools.rooms.service",
+   "kind": "python",
+   "path": "tools/rooms/service/__init__.py"
+  },
+  {
+   "id": "tools.rooms.service.layout",
+   "kind": "python",
+   "path": "tools/rooms/service/layout.py"
+  },
+  {
+   "id": "tools.rooms.shared",
+   "kind": "python",
+   "path": "tools/rooms/shared/__init__.py"
+  },
+  {
+   "id": "tools.rooms.shared.anatomy",
+   "kind": "python",
+   "path": "tools/rooms/shared/anatomy.py"
+  },
+  {
+   "id": "tools.rooms.shared.armchair_builder",
+   "kind": "python",
+   "path": "tools/rooms/shared/armchair_builder.py"
+  },
+  {
+   "id": "tools.rooms.shared.bed",
+   "kind": "python",
+   "path": "tools/rooms/shared/bed.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/__init__.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.assembly",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/assembly.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.model",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/model.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.plan",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/plan.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.shaker",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/shaker/__init__.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.shaker.model",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/shaker/model.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.shaker.plan",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/shaker/plan.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/shaker/sketchup.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.shaker.validation",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/shaker/validation.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.sketchup",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/sketchup.py"
+  },
+  {
+   "id": "tools.rooms.shared.cabinet.validation",
+   "kind": "python",
+   "path": "tools/rooms/shared/cabinet/validation.py"
+  },
+  {
+   "id": "tools.rooms.shared.circulation_oracle",
+   "kind": "python",
+   "path": "tools/rooms/shared/circulation_oracle.py"
+  },
+  {
+   "id": "tools.rooms.shared.clearance",
+   "kind": "python",
+   "path": "tools/rooms/shared/clearance.py"
+  },
+  {
+   "id": "tools.rooms.shared.contact_sheet",
+   "kind": "python",
+   "path": "tools/rooms/shared/contact_sheet.py"
+  },
+  {
+   "id": "tools.rooms.shared.decor",
+   "kind": "python",
+   "path": "tools/rooms/shared/decor.py"
+  },
+  {
+   "id": "tools.rooms.shared.decor_anatomy_spec",
+   "kind": "python",
+   "path": "tools/rooms/shared/decor_anatomy_spec.py"
+  },
+  {
+   "id": "tools.rooms.shared.decor_builders",
+   "kind": "python",
+   "path": "tools/rooms/shared/decor_builders.py"
+  },
+  {
+   "id": "tools.rooms.shared.furniture",
+   "kind": "python",
+   "path": "tools/rooms/shared/furniture.py"
+  },
+  {
+   "id": "tools.rooms.shared.geometry",
+   "kind": "python",
+   "path": "tools/rooms/shared/geometry.py"
+  },
+  {
+   "id": "tools.rooms.shared.geometry_contract",
+   "kind": "python",
+   "path": "tools/rooms/shared/geometry_contract.py"
+  },
+  {
+   "id": "tools.rooms.shared.layout_rules",
+   "kind": "python",
+   "path": "tools/rooms/shared/layout_rules.py"
+  },
+  {
+   "id": "tools.rooms.shared.materials",
+   "kind": "python",
+   "path": "tools/rooms/shared/materials.py"
+  },
+  {
+   "id": "tools.rooms.shared.nightstand",
+   "kind": "python",
+   "path": "tools/rooms/shared/nightstand.py"
+  },
+  {
+   "id": "tools.rooms.shared.parts",
+   "kind": "python",
+   "path": "tools/rooms/shared/parts.py"
+  },
+  {
+   "id": "tools.rooms.shared.project_paths",
+   "kind": "python",
+   "path": "tools/rooms/shared/project_paths.py"
+  },
+  {
+   "id": "tools.rooms.shared.room_type",
+   "kind": "python",
+   "path": "tools/rooms/shared/room_type.py"
+  },
+  {
+   "id": "tools.rooms.shared.semantic_zones",
+   "kind": "python",
+   "path": "tools/rooms/shared/semantic_zones.py"
+  },
+  {
+   "id": "tools.rooms.shared.shell_parts",
+   "kind": "python",
+   "path": "tools/rooms/shared/shell_parts.py"
+  },
+  {
+   "id": "tools.rooms.shared.sofa",
+   "kind": "python",
+   "path": "tools/rooms/shared/sofa.py"
+  },
+  {
+   "id": "tools.rooms.shared.spatial_model",
+   "kind": "python",
+   "path": "tools/rooms/shared/spatial_model.py"
+  },
+  {
+   "id": "tools.rooms.shared.wardrobe",
+   "kind": "python",
+   "path": "tools/rooms/shared/wardrobe.py"
+  },
+  {
+   "id": "tools.rooms.specialist_fragments",
+   "kind": "python",
+   "path": "tools/rooms/specialist_fragments.py"
+  },
+  {
+   "id": "tools.rooms.specialists",
+   "kind": "python",
+   "path": "tools/rooms/specialists.py"
+  },
+  {
+   "id": "tools.rooms.tooling_ownership",
+   "kind": "python",
+   "path": "tools/rooms/tooling_ownership.py"
+  },
+  {
+   "id": "tools.sketchup",
+   "kind": "python",
+   "path": "tools/sketchup/__init__.py"
+  },
+  {
+   "id": "tools.sketchup.batch",
+   "kind": "python",
+   "path": "tools/sketchup/batch.py"
+  },
+  {
+   "id": "tools.sketchup.disarm_autoruns",
+   "kind": "python",
+   "path": "tools/sketchup/disarm_autoruns.py"
+  },
+  {
+   "id": "tools.sketchup.furnish",
+   "kind": "python",
+   "path": "tools/sketchup/furnish/__init__.py"
+  },
+  {
+   "id": "tools.sketchup.furnish.place_layout_skp",
+   "kind": "python",
+   "path": "tools/sketchup/furnish/place_layout_skp.py"
+  },
+  {
+   "id": "tools.sketchup.inspect_workspace",
+   "kind": "python",
+   "path": "tools/sketchup/inspect_workspace.py"
+  },
+  {
+   "id": "tools.sketchup.jobs",
+   "kind": "python",
+   "path": "tools/sketchup/jobs.py"
+  },
+  {
+   "id": "tools.sketchup.knowledge",
+   "kind": "python",
+   "path": "tools/sketchup/knowledge.py"
+  },
+  {
+   "id": "tools.sketchup.legacy_process",
+   "kind": "python",
+   "path": "tools/sketchup/legacy_process.py"
+  },
+  {
+   "id": "tools.sketchup.ops",
+   "kind": "python",
+   "path": "tools/sketchup/ops.py"
+  },
+  {
+   "id": "tools.sketchup.paths",
+   "kind": "python",
+   "path": "tools/sketchup/paths.py"
+  },
+  {
+   "id": "tools.sketchup.process",
+   "kind": "python",
+   "path": "tools/sketchup/process.py"
+  },
+  {
+   "id": "tools.sketchup.runner_safety",
+   "kind": "python",
+   "path": "tools/sketchup/runner_safety.py"
+  },
+  {
+   "id": "tools.sketchup.shell",
+   "kind": "python",
+   "path": "tools/sketchup/shell/__init__.py"
+  },
+  {
+   "id": "tools.sketchup.shell.build_plan_shell_skp",
+   "kind": "python",
+   "path": "tools/sketchup/shell/build_plan_shell_skp.py"
+  },
+  {
+   "id": "tools.spatial_model",
+   "kind": "python",
+   "path": "tools/spatial_model.py"
+  },
+  {
+   "id": "tools.trace_view",
+   "kind": "python",
+   "path": "tools/trace_view.py"
+  },
+  {
+   "id": "tools.validation",
+   "kind": "python",
+   "path": "tools/validation/__init__.py"
+  },
+  {
+   "id": "tools.validation.circulation_gate",
+   "kind": "python",
+   "path": "tools/validation/circulation_gate.py"
+  },
+  {
+   "id": "tools.validation.collision_envelope_gate",
+   "kind": "python",
+   "path": "tools/validation/collision_envelope_gate.py"
+  },
+  {
+   "id": "tools.validation.diagnose_wall_stubs",
+   "kind": "python",
+   "path": "tools/validation/diagnose_wall_stubs.py"
+  },
+  {
+   "id": "tools.validation.door_swing_audit",
+   "kind": "python",
+   "path": "tools/validation/door_swing_audit.py"
+  },
+  {
+   "id": "tools.validation.flat_white_gate",
+   "kind": "python",
+   "path": "tools/validation/flat_white_gate.py"
+  },
+  {
+   "id": "tools.validation.fp044_baseline",
+   "kind": "python",
+   "path": "tools/validation/fp044_baseline.py"
+  },
+  {
+   "id": "tools.validation.furniture_overlap_gate",
+   "kind": "python",
+   "path": "tools/validation/furniture_overlap_gate.py"
+  },
+  {
+   "id": "tools.validation.furniture_visual_gate",
+   "kind": "python",
+   "path": "tools/validation/furniture_visual_gate.py"
+  },
+  {
+   "id": "tools.validation.furniture_wall_gap",
+   "kind": "python",
+   "path": "tools/validation/furniture_wall_gap.py"
+  },
+  {
+   "id": "tools.validation.gate_filefetch",
+   "kind": "python",
+   "path": "tools/validation/gate_filefetch.py"
+  },
+  {
+   "id": "tools.validation.gate_util",
+   "kind": "python",
+   "path": "tools/validation/gate_util.py"
+  },
+  {
+   "id": "tools.validation.gate_verdict",
+   "kind": "python",
+   "path": "tools/validation/gate_verdict.py"
+  },
+  {
+   "id": "tools.validation.generalization_gate",
+   "kind": "python",
+   "path": "tools/validation/generalization_gate.py"
+  },
+  {
+   "id": "tools.validation.geometry_sanity",
+   "kind": "python",
+   "path": "tools/validation/geometry_sanity.py"
+  },
+  {
+   "id": "tools.validation.opening_aperture_audit",
+   "kind": "python",
+   "path": "tools/validation/opening_aperture_audit.py"
+  },
+  {
+   "id": "tools.validation.opening_audit",
+   "kind": "python",
+   "path": "tools/validation/opening_audit.py"
+  },
+  {
+   "id": "tools.validation.opening_host_audit",
+   "kind": "python",
+   "path": "tools/validation/opening_host_audit.py"
+  },
+  {
+   "id": "tools.validation.optimizer_consistency_gate",
+   "kind": "python",
+   "path": "tools/validation/optimizer_consistency_gate.py"
+  },
+  {
+   "id": "tools.validation.parapet_not_railing_fallback_gate",
+   "kind": "python",
+   "path": "tools/validation/parapet_not_railing_fallback_gate.py"
+  },
+  {
+   "id": "tools.validation.pdf_height_labels_audit",
+   "kind": "python",
+   "path": "tools/validation/pdf_height_labels_audit.py"
+  },
+  {
+   "id": "tools.validation.position_fidelity_gate",
+   "kind": "python",
+   "path": "tools/validation/position_fidelity_gate.py"
+  },
+  {
+   "id": "tools.validation.railing_exact_match_gate",
+   "kind": "python",
+   "path": "tools/validation/railing_exact_match_gate.py"
+  },
+  {
+   "id": "tools.validation.render_bbox_audit",
+   "kind": "python",
+   "path": "tools/validation/render_bbox_audit.py"
+  },
+  {
+   "id": "tools.validation.repo_health_gate",
+   "kind": "python",
+   "path": "tools/validation/repo_health_gate.py"
+  },
+  {
+   "id": "tools.validation.room_collisions",
+   "kind": "python",
+   "path": "tools/validation/room_collisions.py"
+  },
+  {
+   "id": "tools.validation.room_regression",
+   "kind": "python",
+   "path": "tools/validation/room_regression.py"
+  },
+  {
+   "id": "tools.validation.room_regression_diff",
+   "kind": "python",
+   "path": "tools/validation/room_regression_diff.py"
+  },
+  {
+   "id": "tools.validation.room_regression_gates",
+   "kind": "python",
+   "path": "tools/validation/room_regression_gates.py"
+  },
+  {
+   "id": "tools.validation.run_deterministic_gates",
+   "kind": "python",
+   "path": "tools/validation/run_deterministic_gates.py"
+  },
+  {
+   "id": "tools.validation.scale_anchor_gate",
+   "kind": "python",
+   "path": "tools/validation/scale_anchor_gate.py"
+  },
+  {
+   "id": "tools.validation.scene_spatial_gate",
+   "kind": "python",
+   "path": "tools/validation/scene_spatial_gate.py"
+  },
+  {
+   "id": "tools.validation.semantic_geometry_contract_gate",
+   "kind": "python",
+   "path": "tools/validation/semantic_geometry_contract_gate.py"
+  },
+  {
+   "id": "tools.validation.soft_barrier_source_audit",
+   "kind": "python",
+   "path": "tools/validation/soft_barrier_source_audit.py"
+  },
+  {
+   "id": "tools.validation.style_coherence_gate",
+   "kind": "python",
+   "path": "tools/validation/style_coherence_gate.py"
+  },
+  {
+   "id": "tools.validation.validation_report",
+   "kind": "python",
+   "path": "tools/validation/validation_report.py"
+  },
+  {
+   "id": "tools.validation.visual_regression_gate",
+   "kind": "python",
+   "path": "tools/validation/visual_regression_gate.py"
+  },
+  {
+   "id": "tools.validation.wall_exact_match_gate",
+   "kind": "python",
+   "path": "tools/validation/wall_exact_match_gate.py"
+  },
+  {
+   "id": "tools.validation.wall_overlap_audit",
+   "kind": "python",
+   "path": "tools/validation/wall_overlap_audit.py"
+  },
+  {
+   "id": "tools/quadrado/render_view.rb",
+   "kind": "ruby",
+   "path": "tools/quadrado/render_view.rb"
+  },
+  {
+   "id": "tools/rendering/quadrado/render_view.rb",
+   "kind": "ruby",
+   "path": "tools/rendering/quadrado/render_view.rb"
+  },
+  {
+   "id": "tools/rendering/ruby/material_review.rb",
+   "kind": "ruby",
+   "path": "tools/rendering/ruby/material_review.rb"
+  },
+  {
+   "id": "tools/rooms/kitchen/capabilities/ruby/recolor_kitchen_theme.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/kitchen/capabilities/ruby/recolor_kitchen_theme.rb"
+  },
+  {
+   "id": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/kitchen/capabilities/ruby/render_kitchen_angles.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/render_sala_eyelevel.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/render_sala_eyelevel.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/sofa_premium_harness.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/sofa_premium_harness.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/sofa_premium_integrate.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/sofa_premium_integrate.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_3seat_v1.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_3seat_v1.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_from_config.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_from_config.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_components.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_components.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb"
+  },
+  {
+   "id": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb"
+  },
+  {
+   "id": "tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/shared/cabinet/ruby/cabinet_build.rb"
+  },
+  {
+   "id": "tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb"
+  },
+  {
+   "id": "tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/shared/cabinet/ruby/shaker_build.rb"
+  },
+  {
+   "id": "tools/rooms/shared/cabinet/ruby/shaker_inspect.rb",
+   "kind": "ruby",
+   "path": "tools/rooms/shared/cabinet/ruby/shaker_inspect.rb"
+  },
+  {
+   "id": "tools/sketchup/furnish/build_furniture_skp.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/furnish/build_furniture_skp.rb"
+  },
+  {
+   "id": "tools/sketchup/furnish/furnish_plan.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/furnish/furnish_plan.rb"
+  },
+  {
+   "id": "tools/sketchup/furnish/place_layout_geom.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/furnish/place_layout_geom.rb"
+  },
+  {
+   "id": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/furnish/place_layout_skp.rb"
+  },
+  {
+   "id": "tools/sketchup/inspect/inspect_skp.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/inspect/inspect_skp.rb"
+  },
+  {
+   "id": "tools/sketchup/inspect/screenshot_camera.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/inspect/screenshot_camera.rb"
+  },
+  {
+   "id": "tools/sketchup/inspect/skp_editability_report.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/inspect/skp_editability_report.rb"
+  },
+  {
+   "id": "tools/sketchup/ruby/apply_edits.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/ruby/apply_edits.rb"
+  },
+  {
+   "id": "tools/sketchup/ruby/inspect_model.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/ruby/inspect_model.rb"
+  },
+  {
+   "id": "tools/sketchup/ruby/render_views.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/ruby/render_views.rb"
+  },
+  {
+   "id": "tools/sketchup/ruby/skmcp_core.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/ruby/skmcp_core.rb"
+  },
+  {
+   "id": "tools/sketchup/ruby/skmcp_launch.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/ruby/skmcp_launch.rb"
+  },
+  {
+   "id": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/ruby/skmcp_runtime.rb"
+  },
+  {
+   "id": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/shell/build_plan_shell_skp.rb"
+  },
+  {
+   "id": "tools/sketchup/vray/vray_export.rb",
+   "kind": "ruby",
+   "path": "tools/sketchup/vray/vray_export.rb"
+  }
+ ],
+ "edges": [
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "pytest",
+   "kind": "ci_runs"
+  },
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "tools.mcp_server.smoke",
+   "kind": "ci_runs"
+  },
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "tools.mcp_server.stdio_check",
+   "kind": "ci_runs"
+  },
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "tools.rooms.asset_provenance",
+   "kind": "ci_runs"
+  },
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "tools.rooms.inventory_gate",
+   "kind": "ci_runs"
+  },
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "tools.rooms.ownership_audit",
+   "kind": "ci_runs"
+  },
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "tools.rooms.p3_ownership",
+   "kind": "ci_runs"
+  },
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "tools.rooms.reference_provenance",
+   "kind": "ci_runs"
+  },
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "tools.validation.run_deterministic_gates",
+   "kind": "ci_runs"
+  },
+  {
+   "src": ".github/workflows/ci.yml",
+   "dst": "tools.validation.scale_anchor_gate",
+   "kind": "ci_runs"
+  },
+  {
+   "src": "core.domain.ids",
+   "dst": "core.domain.room_registry",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability",
+   "dst": "core.observability.context",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability",
+   "dst": "core.observability.events",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability",
+   "dst": "core.observability.llm",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability",
+   "dst": "core.observability.redact",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "core.observability",
+   "dst": "core.observability.retrieval",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability",
+   "dst": "core.observability.sink",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability",
+   "dst": "core.observability.taxonomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability.context",
+   "dst": "core.domain.ids",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability.events",
+   "dst": "core.observability.taxonomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability.gates",
+   "dst": "core.observability",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "core.observability.replay",
+   "dst": "core.observability.events",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability.replay",
+   "dst": "tools.orchestration.correction.jsonl_io",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "core.observability.retrieval",
+   "dst": "core.observability.taxonomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability.sink",
+   "dst": "core.observability.events",
+   "kind": "import_top"
+  },
+  {
+   "src": "core.observability.sink",
+   "dst": "tools.orchestration.correction.jsonl_io",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "interior.composer.scene_composer",
+   "dst": "tools.rooms.living.sofa_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.composer.scene_composer",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.composer.scene_composer",
+   "dst": "tools.rooms.shared.decor_builders",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.composer.scene_composer",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.planners.living_room_planner",
+   "dst": "tools.rooms.living.planner",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.planners.placement_brain",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.planners.placement_brain",
+   "dst": "interior.semantics.room_graph",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.planners.placement_brain",
+   "dst": "interior.semantics.wall_affordance",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.planners.placement_brain",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.planners.placement_brain",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.renderers",
+   "dst": "interior.renderers.enscape_preview_provider",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "interior.renderers",
+   "dst": "interior.renderers.render_provider",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.renderers",
+   "dst": "interior.renderers.sketchup_basic_provider",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "interior.renderers",
+   "dst": "interior.renderers.vray_final_provider",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "interior.renderers.enscape_preview_provider",
+   "dst": "interior.renderers.render_provider",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.renderers.render_provider",
+   "dst": "tools/sketchup/furnish/build_furniture_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "interior.renderers.render_provider",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "interior.renderers.sketchup_basic_provider",
+   "dst": "interior.renderers.render_provider",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.renderers.sketchup_basic_provider",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "interior.renderers.sketchup_basic_provider",
+   "dst": "tools.rooms.shared.nightstand",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "interior.renderers.sketchup_basic_provider",
+   "dst": "tools.sketchup.legacy_process",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.renderers.sketchup_basic_provider",
+   "dst": "tools/sketchup/furnish/build_furniture_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "interior.renderers.sketchup_basic_provider",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "interior.renderers.vray_final_provider",
+   "dst": "interior.renderers.render_provider",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.renderers.vray_final_provider",
+   "dst": "tools.rendering.tweak_vrscene",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "interior.renderers.vray_final_provider",
+   "dst": "tools.sketchup.legacy_process",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.renderers.vray_final_provider",
+   "dst": "tools/sketchup/vray/vray_export.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "interior.semantics.room_graph",
+   "dst": "tools.room_type",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.semantics.room_graph",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.semantics.wall_affordance",
+   "dst": "interior.semantics.room_graph",
+   "kind": "import_top"
+  },
+  {
+   "src": "interior.semantics.wall_affordance",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "mcp:kitchen_ergonomics_audit",
+   "dst": "tools.rooms.kitchen.validation.ergonomics",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:list_capabilities",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:list_capabilities",
+   "dst": "tools.sketchup.ops",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:promote_canonical",
+   "dst": "tools.orchestration.promote_canonical",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:reference_to_grammar",
+   "dst": "tools.knowledge.reference_grammar",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:room_gates",
+   "dst": "tools.furniture_overlap_gate",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:room_gates",
+   "dst": "tools.validation.style_coherence_gate",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:run_deterministic_gates",
+   "dst": "tools.validation.run_deterministic_gates",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:skp_inventory",
+   "dst": "tools.claude_bridge.skp_inventory",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:su_apply_edits",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:su_build_shell",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:su_close",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:su_furnish",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:su_inspect",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:su_open",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:su_render",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:su_render_vray",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:su_status",
+   "dst": "tools.sketchup.jobs",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "mcp:validate_grammar_spec",
+   "dst": "tools.knowledge.reference_grammar",
+   "kind": "mcp_calls"
+  },
+  {
+   "src": "ops/estudio-front/rag_chat.py",
+   "dst": "core.observability",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "ops/estudio-front/rag_chat.py",
+   "dst": "core.observability.llm",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "ops/estudio-front/rag_chat.py",
+   "dst": "core.observability.retrieval",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.claude_bridge.skp_inventory",
+   "dst": "tools.claude_bridge._paths",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.furnish_plan",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.furnish_plan",
+   "dst": "tools/sketchup/furnish/furnish_plan.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.interior_studio.architect_program",
+   "dst": "core.observability",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.architect_program",
+   "dst": "core.observability.llm",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.architect_program",
+   "dst": "core.observability.retrieval",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.architect_program",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.architect_program",
+   "dst": "tools.interior_studio.project_state",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.architect_program",
+   "dst": "tools.interior_studio.proposals",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.architect_program",
+   "dst": "tools.knowledge.rag_freshness",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.architect_program",
+   "dst": "tools.knowledge.reference_db",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.auditor",
+   "dst": "tools.interior_studio.interns",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.auditor",
+   "dst": "tools.interior_studio.project_state",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.auditor",
+   "dst": "tools.interior_studio.proposals",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.auditor",
+   "dst": "tools.interior_studio.reference_packs",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.auto_decider",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.auto_decider",
+   "dst": "tools.furniture_overlap_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.auto_decider",
+   "dst": "tools.geometry_sanity",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.auto_decider",
+   "dst": "tools.interior_studio.decision_judge",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.auto_decider",
+   "dst": "tools.interior_studio.proposals",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.auto_decider",
+   "dst": "tools.oracle.ask_gpt_gate",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.auto_decider",
+   "dst": "tools.orchestration.correction.jsonl_io",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge",
+   "dst": "tools.interior_studio.consult_gpt_bridge.answer_parser",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge",
+   "dst": "tools.interior_studio.consult_gpt_bridge.contracts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge",
+   "dst": "tools.interior_studio.consult_gpt_bridge.ingest",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge",
+   "dst": "tools.interior_studio.consult_gpt_bridge.openai_client",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge",
+   "dst": "tools.interior_studio.consult_gpt_bridge.prompt_builder",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge",
+   "dst": "tools.interior_studio.consult_gpt_bridge.store",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge.ingest",
+   "dst": "tools.interior_studio.consult_gpt_bridge.answer_parser",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge.ingest",
+   "dst": "tools.interior_studio.consult_gpt_bridge.contracts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge.ingest",
+   "dst": "tools.interior_studio.consult_gpt_bridge.store",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge.prompt_builder",
+   "dst": "tools.interior_studio.consult_gpt_bridge.contracts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.consult_gpt_bridge.store",
+   "dst": "tools.interior_studio.consult_gpt_bridge.contracts",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.curator",
+   "dst": "tools.claude_bridge._paths",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.curator",
+   "dst": "tools.interior_studio.auto_decider",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.curator",
+   "dst": "tools.knowledge.rag_embed_backend",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.curator",
+   "dst": "tools.knowledge.rag_freshness",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.curator",
+   "dst": "tools.knowledge.taste_writeback",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.decision_judge",
+   "dst": "tools.interior_studio.interns",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.interior_quality_scorecard",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.interior_quality_scorecard",
+   "dst": "tools.room_type",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.interns",
+   "dst": "tools.interior_studio.architect_program",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.interns",
+   "dst": "tools.interior_studio.proposals",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.learning_patch",
+   "dst": "tools.interior_studio.consult_gpt_bridge.ingest",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.learning_patch",
+   "dst": "tools.interior_studio.cycles",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.learning_patch",
+   "dst": "tools.interior_studio.gpt_review_bundle",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.project_state",
+   "dst": "tools.interior_studio.cycles",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.project_state",
+   "dst": "tools.interior_studio.proposals",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.interior_studio.project_state",
+   "dst": "tools.interior_studio.reference_packs",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.reference_packs",
+   "dst": "tools.interior_studio.cycles",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.render_fingerprint",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.interior_studio.render_judge",
+   "dst": "tools.interior_studio.render_fingerprint",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.render_judge",
+   "dst": "tools.interior_studio.theme_registry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.interior_studio.render_judge",
+   "dst": "tools.interior_studio.vision_describe",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.knowledge.corpus_to_rag",
+   "dst": "tools.knowledge.reference_db",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.knowledge.corpus_to_rag",
+   "dst": "tools.oracle.human_verdict",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.knowledge.corpus_to_rag",
+   "dst": "tools.orchestration.correction.jsonl_io",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.knowledge.furniture_reference_analyzer",
+   "dst": "tools/sketchup/inspect/inspect_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.knowledge.rag_embed_backend",
+   "dst": "core.observability",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.knowledge.reference_db",
+   "dst": "core.observability",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.knowledge.reference_db",
+   "dst": "core.observability.retrieval",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.knowledge.reference_db",
+   "dst": "core.observability.taxonomy",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.knowledge.reference_db",
+   "dst": "tools.knowledge.rag_embed_backend",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.knowledge.reference_db",
+   "dst": "tools.knowledge.rag_freshness",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.knowledge.reference_db",
+   "dst": "tools.knowledge.reference_grammar",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.knowledge.retrieval_eval",
+   "dst": "tools.knowledge.reference_db",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.knowledge.taste_writeback",
+   "dst": "tools.knowledge.rag_freshness",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.knowledge.taste_writeback",
+   "dst": "tools.oracle.human_verdict",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.knowledge.taste_writeback",
+   "dst": "tools.orchestration.correction.jsonl_io",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.claude_bridge.skp_inventory",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.furniture_overlap_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.knowledge.reference_grammar",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.mcp_server.stdio_isolation",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.orchestration.promote_canonical",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.rooms.bedroom.bed_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.rooms.kitchen.validation.ergonomics",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.rooms.living.armchair_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.rooms.living.coffee_table_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.rooms.living.dining_table_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.rooms.living.rack_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.rooms.living.sofa_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.sketchup.jobs",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.sketchup.ops",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.validation.run_deterministic_gates",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools.validation.style_coherence_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.mcp_server.server",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.mcp_server.smoke",
+   "dst": "tools.mcp_server.server",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.navigation.baseline_inventory",
+   "dst": "tools.navigation.file_audit",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.room_type",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.rooms.dispatch",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.rooms.living.components",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.rooms.living.furnishing",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.rooms.shared.furniture",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.sketchup.process",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.spatial_model",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.validation.circulation_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.validation.furniture_overlap_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.baseline_probes",
+   "dst": "tools.validation.room_regression_diff",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.docs_check",
+   "dst": "tools.navigation.consumers",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.navigation.fp051_baseline",
+   "dst": "tools.rooms.capability_catalog",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.fp051_baseline",
+   "dst": "tools.rooms.evidence_closure",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.fp051_baseline",
+   "dst": "tools.rooms.shared.cabinet",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.fp051_baseline",
+   "dst": "tools.rooms.shared.wardrobe",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.navigation.p0_map",
+   "dst": "tools.navigation.consumers",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.navigation.renames",
+   "dst": "tools.navigation.consumers",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.ask_gpt_gate",
+   "dst": "tools.oracle.consult_tier",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.ask_gpt_gate",
+   "dst": "tools.validation.gate_verdict",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.gpt_review",
+   "dst": "tools.interior_studio.project_state",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.oracle.negative_dogfood",
+   "dst": "core.project_sources",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.negative_dogfood",
+   "dst": "tools.oracle.oracle_providers",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.negative_dogfood",
+   "dst": "tools.oracle.run_skp_visual_review",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.negative_dogfood",
+   "dst": "tools.rendering.compose_side_by_side",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.oracle.ollama_bridge",
+   "dst": "core.observability",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.ollama_bridge",
+   "dst": "core.observability.llm",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.run_skp_visual_review",
+   "dst": "core.project_sources",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.run_skp_visual_review",
+   "dst": "tools.oracle.ask_gpt_gate",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.run_skp_visual_review",
+   "dst": "tools.oracle.oracle_providers",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.oracle.run_skp_visual_review",
+   "dst": "tools.rendering.compose_side_by_side",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.oracle.run_skp_visual_review",
+   "dst": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_finding",
+   "dst": "tools.finding_router",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_fixes",
+   "dst": "tools.furniture_overlap_gate",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_fixes",
+   "dst": "tools.validation.wall_overlap_audit",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "core.observability",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "core.observability.taxonomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "tools.claude_bridge._paths",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "tools.finding_router",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "tools.orchestration.correction.correction_finding",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "tools.orchestration.correction.correction_fixes",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "tools.orchestration.correction.jsonl_io",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "tools.orchestration.variant_axes",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "tools.orchestration.variant_sweep",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "tools.validation.opening_host_audit",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.correction.correction_loop",
+   "dst": "tools.validation.wall_overlap_audit",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.correction.vision_queue_consumer",
+   "dst": "tools.oracle.oracle_providers",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.correction.vision_queue_consumer",
+   "dst": "tools.oracle.run_skp_visual_review",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.correction.vision_queue_consumer",
+   "dst": "tools.orchestration.correction.correction_finding",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.correction.vision_queue_consumer",
+   "dst": "tools.orchestration.correction.jsonl_io",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "core.spatial_semantics",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.claude_bridge._paths",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.orchestration.variant_axes",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.orchestration.variant_sweep",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.room_type",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.bathroom.layout",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.bathroom.validation",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.bedroom.furnishing",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.dispatch",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.kitchen.layout",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.kitchen.validation",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.living.components",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.living.furnishing",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.service.layout",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.shared.decor",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.shared.furniture",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.shared.materials",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.rooms.shared.project_paths",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools.validation.flat_white_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.furnish_apartment",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.orchestration.promote_artifact",
+   "dst": "core.project_sources",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.regenerate_consensus",
+   "dst": "tools.validation.opening_host_audit",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.variant_axes",
+   "dst": "tools.rendering.batch_theme_render",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_axes",
+   "dst": "tools.rooms.shared.materials",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.furniture_overlap_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.geometry_sanity",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.oracle.oracle_providers",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.oracle.run_skp_visual_review",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.orchestration.correction.jsonl_io",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.orchestration.correction.vision_queue_consumer",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.orchestration.variant_axes",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.rendering.theme_palette",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.room_type",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.rooms.living.planning.layout_candidates",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.rooms.shared.materials",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.rooms.shared.shell_parts",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.orchestration.variant_sweep",
+   "dst": "tools.sketchup.furnish.place_layout_skp",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.auto_camera",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.auto_camera",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.auto_camera",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.gen_textures",
+   "dst": "tools/sketchup/vray/vray_export.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rendering.material_review",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.material_review",
+   "dst": "tools.sketchup.legacy_process",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.material_review",
+   "dst": "tools/rendering/ruby/material_review.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rendering.material_review",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rendering.overlay_diff",
+   "dst": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rendering.pdf_overlay_verify",
+   "dst": "core.project_sources",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.quadrado.render_view",
+   "dst": "tools.sketchup.batch",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.quadrado.render_view",
+   "dst": "tools.sketchup.process",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.quadrado.render_view",
+   "dst": "tools/quadrado/render_view.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rendering.quadrado.render_view",
+   "dst": "tools/rendering/quadrado/render_view.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rendering.quadrado.render_view",
+   "dst": "tools/sketchup/ruby/skmcp_launch.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rendering.render_scene_views",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.render_scene_views",
+   "dst": "interior.renderers.render_provider",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.render_scene_views",
+   "dst": "interior.renderers.sketchup_basic_provider",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.render_scene_views",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.render_scene_views",
+   "dst": "tools/sketchup/furnish/build_furniture_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rendering.render_scene_vray",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.render_scene_vray",
+   "dst": "interior.renderers.render_provider",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.render_scene_vray",
+   "dst": "interior.renderers.sketchup_basic_provider",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.render_scene_vray",
+   "dst": "tools.rendering.render_scene_views",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.render_scene_vray",
+   "dst": "tools.rendering.tweak_vrscene",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rendering.render_scene_vray",
+   "dst": "tools.sketchup.batch",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.render_scene_vray",
+   "dst": "tools.sketchup.process",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rendering.render_scene_vray",
+   "dst": "tools/sketchup/vray/vray_export.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.bathroom.capabilities.estudio_banheiro_scene",
+   "dst": "interior.composer.scene_composer",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bathroom.capabilities.estudio_banheiro_scene",
+   "dst": "tools.geometry_sanity",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bathroom.capabilities.estudio_banheiro_scene",
+   "dst": "tools.rendering.render_scene_views",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bathroom.capabilities.render_banho_auto",
+   "dst": "tools.rooms.bathroom.layout",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bathroom.capabilities.render_banho_vray",
+   "dst": "tools.rendering.tweak_vrscene",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bathroom.capabilities.render_banho_vray",
+   "dst": "tools/sketchup/vray/vray_export.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.bathroom.layout",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bathroom.layout",
+   "dst": "core.spatial_semantics",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bathroom.layout",
+   "dst": "tools.rooms.shared.clearance",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bathroom.layout",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bathroom.layout",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bathroom.layout",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.bedroom.bed_class",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.bed_class",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.bed_class",
+   "dst": "tools.rooms.shared.bed",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.bed_class",
+   "dst": "tools.rooms.shared.contact_sheet",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.capabilities.place_bedroom_skp",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.capabilities.place_bedroom_skp",
+   "dst": "tools.rooms.bedroom.layout",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.capabilities.place_bedroom_skp",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.bedroom.designer",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.designer",
+   "dst": "tools.rooms.bedroom.capabilities.make_synthetic_bedrooms",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.designer",
+   "dst": "tools.rooms.bedroom.layout",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.designer",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.designer",
+   "dst": "tools.sketchup.legacy_process",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.designer",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.designer",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.bedroom.furnishing",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.furnishing",
+   "dst": "tools.rooms.bedroom.designer",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.furnishing",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.furnishing",
+   "dst": "tools.rooms.shared.bed",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.furnishing",
+   "dst": "tools.rooms.shared.furniture",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.furnishing",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.furnishing",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.furnishing",
+   "dst": "tools.rooms.shared.wardrobe",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.layout",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.layout",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.layout",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.bed_gate",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.bed_gate",
+   "dst": "tools.rooms.shared.bed",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.bed_placement_gate",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.bed_placement_gate",
+   "dst": "interior.planners.placement_brain",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.bed_placement_gate",
+   "dst": "tools.rooms.bedroom.designer",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.bed_placement_gate",
+   "dst": "tools.rooms.bedroom.layout",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.bed_placement_gate",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.nightstand_gate",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.nightstand_gate",
+   "dst": "tools.rooms.shared.nightstand",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.wardrobe_gate",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.bedroom.validation.wardrobe_gate",
+   "dst": "tools.rooms.shared.wardrobe",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.capability_catalog",
+   "dst": "core.schemas",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.capability_catalog",
+   "dst": "tools.rooms.evidence_closure",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.dispatch",
+   "dst": "tools.room_type",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.furniture_goals",
+   "dst": "core.schemas",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.furniture_goals",
+   "dst": "tools.rooms.capability_catalog",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.furniture_goals",
+   "dst": "tools.rooms.evidence_closure",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.furniture_goals",
+   "dst": "tools.rooms.reference_targets",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.furniture_goals",
+   "dst": "tools.rooms.specialists",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.anchor_rules",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.anchor_rules",
+   "dst": "tools.room_type",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.anchor_rules",
+   "dst": "tools.rooms.kitchen.layout",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.anchor_rules",
+   "dst": "tools.spatial_model",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.bake_theme",
+   "dst": "tools.sketchup.legacy_process",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.bake_theme",
+   "dst": "tools/rooms/kitchen/capabilities/ruby/recolor_kitchen_theme.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet",
+   "dst": "tools.rooms.kitchen.anchor_rules",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet",
+   "dst": "tools.rooms.kitchen.layout",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet",
+   "dst": "tools.rooms.shared.cabinet",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet",
+   "dst": "tools.rooms.shared.cabinet.plan",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet",
+   "dst": "tools.rooms.shared.cabinet.sketchup",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet",
+   "dst": "tools.rooms.shared.spatial_model",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet",
+   "dst": "tools.sketchup.shell.build_plan_shell_skp",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet",
+   "dst": "tools.validation.circulation_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "core.domain.room_registry",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "tools.rooms.capability_catalog",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "tools.rooms.kitchen.anchor_rules",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "tools.rooms.kitchen.capabilities.cabinet",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "tools.rooms.shared.cabinet",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "tools.rooms.shared.cabinet.sketchup",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "tools.rooms.specialists",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "tools.sketchup.jobs",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "dst": "tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker",
+   "dst": "tools.rooms.kitchen.anchor_rules",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker",
+   "dst": "tools.rooms.kitchen.capabilities.cabinet",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker",
+   "dst": "tools.rooms.kitchen.layout",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker",
+   "dst": "tools.rooms.shared.cabinet.plan",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker",
+   "dst": "tools.rooms.shared.cabinet.shaker",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker",
+   "dst": "tools.rooms.shared.spatial_model",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker",
+   "dst": "tools.sketchup.shell.build_plan_shell_skp",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker",
+   "dst": "tools.validation.circulation_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "core.domain.room_registry",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.rooms.capability_catalog",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.rooms.kitchen.anchor_rules",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.rooms.kitchen.capabilities.cabinet_flow",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.rooms.kitchen.capabilities.shaker",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.rooms.shared.cabinet",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.rooms.shared.cabinet.shaker",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.rooms.shared.cabinet.sketchup",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.rooms.specialists",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools.sketchup.jobs",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.shaker_flow",
+   "dst": "tools/rooms/shared/cabinet/ruby/shaker_inspect.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.vray",
+   "dst": "tools.rendering.tweak_vrscene",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.vray",
+   "dst": "tools.sketchup.legacy_process",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.capabilities.vray",
+   "dst": "tools/sketchup/vray/vray_export.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.kitchen.layout",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.layout",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.layout",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.planning.preview",
+   "dst": "tools.rooms.kitchen.planning.cabinet_placement",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.kitchen.validation",
+   "dst": "tools.rooms.kitchen.anchor_rules",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.validation.ergonomics",
+   "dst": "tools.geometry_sanity",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.validation.ergonomics",
+   "dst": "tools.rooms.kitchen.anchor_rules",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.validation.ergonomics",
+   "dst": "tools.rooms.kitchen.layout",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.kitchen.validation.wall_regression",
+   "dst": "tools.validation.gate_util",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.armchair_class",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.armchair_class",
+   "dst": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.armchair_class",
+   "dst": "tools.rooms.shared.armchair_builder",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "dst": "interior.renderers.render_provider",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "dst": "interior.renderers.sketchup_basic_provider",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "dst": "tools.rooms.living.sofa_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "dst": "tools.rooms.living.validation.sofa_gate",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "dst": "tools.rooms.shared.contact_sheet",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_furnish_fase1_compare",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_furnish_fase1_compare",
+   "dst": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_furnish_fase1_compare",
+   "dst": "tools.rooms.living.sofa_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_furnish_fase1_compare",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_furnish_fase1_compare",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_premium_harness",
+   "dst": "tools.rooms.living.sofa_class",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_premium_harness",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_premium_harness",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_premium_harness.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_compare",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_compare",
+   "dst": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_compare",
+   "dst": "tools.rooms.living.sofa_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_compare",
+   "dst": "tools.rooms.living.validation.sofa_gate",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_compare",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_compare",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_room",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_room",
+   "dst": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_room",
+   "dst": "tools.rooms.living.capabilities.sofa_venezia_compare",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_room",
+   "dst": "tools.rooms.living.sofa_class",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.capabilities.sofa_venezia_room",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.coffee_table_class",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.coffee_table_class",
+   "dst": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.coffee_table_class",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.components",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.dining_table_class",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.dining_table_class",
+   "dst": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.dining_table_class",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "interior.planners.living_room_planner",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "interior.semantics.wall_affordance",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.circulation_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.rooms.living.coffee_table_class",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.rooms.living.components",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.rooms.living.rack_class",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.rooms.living.sofa_class",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.rooms.shared.decor",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.rooms.shared.furniture",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.furnishing",
+   "dst": "tools.spatial_model",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.planner",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.planner",
+   "dst": "interior.semantics.wall_affordance",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.planner",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.planner",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.planning.layout_candidates",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.planning.layout_candidates",
+   "dst": "tools.rooms.shared.layout_rules",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.planning.layout_candidates",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.rack_class",
+   "dst": "tools.rendering.render_parts_iso",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.rack_class",
+   "dst": "tools.rooms.living.capabilities.sofa_class_matrix",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.rack_class",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.sofa_class",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.validation.sofa_gate",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.validation.sofa_gate",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.validation.sofa_placement_gate",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.validation.sofa_placement_gate",
+   "dst": "interior.planners.living_room_planner",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.living.validation.sofa_placement_gate",
+   "dst": "interior.semantics.wall_affordance",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.validation.sofa_placement_gate",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.living.validation.sofa_placement_gate",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.p3_ownership",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_premium_harness.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.p3_ownership",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_premium_integrate.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.p3_ownership",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_3seat_v1.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.p3_ownership",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.p3_ownership",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_from_config.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.p3_ownership",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_components.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.p3_ownership",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.p3_ownership",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.p3_ownership",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_vray_render.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.registry",
+   "dst": "core.domain.room_registry",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.service.layout",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.service.layout",
+   "dst": "tools.rooms.shared.geometry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.service.layout",
+   "dst": "tools.rooms.shared.project_paths",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.service.layout",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.armchair_builder",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.armchair_builder",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.bed",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.bed",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet",
+   "dst": "tools.rooms.shared.cabinet.model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet",
+   "dst": "tools.rooms.shared.cabinet.plan",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.assembly",
+   "dst": "tools.rooms.shared.cabinet.model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.plan",
+   "dst": "tools.rooms.shared.cabinet.assembly",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.plan",
+   "dst": "tools.rooms.shared.cabinet.model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.plan",
+   "dst": "tools.rooms.shared.cabinet.validation",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker",
+   "dst": "tools.rooms.shared.cabinet.shaker.model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker",
+   "dst": "tools.rooms.shared.cabinet.shaker.plan",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.model",
+   "dst": "tools.rooms.shared.cabinet.model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.plan",
+   "dst": "tools.rooms.shared.cabinet.assembly",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.plan",
+   "dst": "tools.rooms.shared.cabinet.model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.plan",
+   "dst": "tools.rooms.shared.cabinet.plan",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.plan",
+   "dst": "tools.rooms.shared.cabinet.shaker.model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.plan",
+   "dst": "tools.rooms.shared.cabinet.shaker.validation",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "dst": "tools.rooms.shared.cabinet.plan",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "dst": "tools.rooms.shared.cabinet.shaker.plan",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "dst": "tools.rooms.shared.cabinet.sketchup",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "dst": "tools.sketchup.batch",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "dst": "tools.sketchup.paths",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "dst": "tools.sketchup.process",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "dst": "tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.sketchup",
+   "dst": "tools/rooms/shared/cabinet/ruby/shaker_inspect.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.validation",
+   "dst": "tools.rooms.shared.cabinet.shaker.model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.shaker.validation",
+   "dst": "tools.rooms.shared.cabinet.validation",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.sketchup",
+   "dst": "tools.rooms.shared.cabinet.plan",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.sketchup",
+   "dst": "tools.sketchup.batch",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.sketchup",
+   "dst": "tools.sketchup.paths",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.sketchup",
+   "dst": "tools.sketchup.process",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.sketchup",
+   "dst": "tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.sketchup",
+   "dst": "tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.validation",
+   "dst": "tools.rooms.shared.cabinet.assembly",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.cabinet.validation",
+   "dst": "tools.rooms.shared.cabinet.model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.clearance",
+   "dst": "tools.sketchup.shell.build_plan_shell_skp",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.shared.decor",
+   "dst": "tools.rooms.shared.decor_builders",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.shared.decor",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.shared.decor_builders",
+   "dst": "tools.rooms.shared.decor_anatomy_spec",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.decor_builders",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.shared.furniture",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.shared.geometry",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.geometry_contract",
+   "dst": "core.schemas",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.materials",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.shared.materials",
+   "dst": "tools/sketchup/vray/vray_export.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.shared.nightstand",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.nightstand",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.parts",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.parts",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.shared.shell_parts",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.rooms.shared.sofa",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.sofa",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.sofa",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.rooms.shared.spatial_model",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.spatial_model",
+   "dst": "tools.sketchup.shell.build_plan_shell_skp",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.wardrobe",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.shared.wardrobe",
+   "dst": "tools.rooms.shared.parts",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.specialist_fragments",
+   "dst": "core.schemas",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.specialists",
+   "dst": "core.schemas",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.specialists",
+   "dst": "tools.rooms.capability_catalog",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.rooms.specialists",
+   "dst": "tools.rooms.registry",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup",
+   "dst": "tools/sketchup/ruby/skmcp_launch.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.batch",
+   "dst": "tools.sketchup.process",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.batch",
+   "dst": "tools.sketchup.runner_safety",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.batch",
+   "dst": "tools/sketchup/ruby/skmcp_launch.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.batch",
+   "dst": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.furnish.place_layout_skp",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.furnish.place_layout_skp",
+   "dst": "tools.rooms.living.planning.layout_candidates",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.furnish.place_layout_skp",
+   "dst": "tools.rooms.shared.materials",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.furnish.place_layout_skp",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.inspect_workspace",
+   "dst": "tools.sketchup.paths",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools.rendering.tweak_vrscene",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools.rooms.shared.materials",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools.sketchup.batch",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools.sketchup.ops",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools.sketchup.paths",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools.sketchup.process",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools.sketchup.shell.build_plan_shell_skp",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools.validation.run_deterministic_gates",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.jobs",
+   "dst": "tools/sketchup/vray/vray_export.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.ops",
+   "dst": "tools.sketchup.paths",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.ops",
+   "dst": "tools/sketchup/ruby/apply_edits.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.ops",
+   "dst": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.process",
+   "dst": "tools/sketchup/ruby/skmcp_launch.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.shell.build_plan_shell_skp",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.shell.build_plan_shell_skp",
+   "dst": "tools.orchestration.promote_canonical",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.shell.build_plan_shell_skp",
+   "dst": "tools.sketchup.batch",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.shell.build_plan_shell_skp",
+   "dst": "tools.sketchup.process",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.shell.build_plan_shell_skp",
+   "dst": "tools.sketchup.runner_safety",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.sketchup.shell.build_plan_shell_skp",
+   "dst": "tools.validation.run_deterministic_gates",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.shell.build_plan_shell_skp",
+   "dst": "tools.validation.scale_anchor_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.sketchup.shell.build_plan_shell_skp",
+   "dst": "tools/sketchup/ruby/skmcp_launch.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.sketchup.shell.build_plan_shell_skp",
+   "dst": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.trace_view",
+   "dst": "core.observability.replay",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.trace_view",
+   "dst": "core.observability.sink",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.circulation_gate",
+   "dst": "core.project_policy",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.circulation_gate",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.circulation_gate",
+   "dst": "core.spatial_semantics",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.circulation_gate",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.circulation_gate",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.collision_envelope_gate",
+   "dst": "core.spatial_semantics",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.collision_envelope_gate",
+   "dst": "tools.circulation_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.collision_envelope_gate",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.collision_envelope_gate",
+   "dst": "tools.room_type",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.diagnose_wall_stubs",
+   "dst": "tools.sketchup.shell.build_plan_shell_skp",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.door_swing_audit",
+   "dst": "core.project_sources",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.flat_white_gate",
+   "dst": "tools.interior_studio.render_fingerprint",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.flat_white_gate",
+   "dst": "tools/sketchup/furnish/place_layout_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.validation.fp044_baseline",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.furniture_overlap_gate",
+   "dst": "core.spatial_semantics",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.furniture_overlap_gate",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.furniture_overlap_gate",
+   "dst": "tools.room_type",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.furniture_visual_gate",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.geometry_sanity",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.geometry_sanity",
+   "dst": "core.spatial_semantics",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.geometry_sanity",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.geometry_sanity",
+   "dst": "tools.spatial_model",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.opening_aperture_audit",
+   "dst": "tools.rendering.overlay_diff",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.opening_audit",
+   "dst": "core.project_sources",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.optimizer_consistency_gate",
+   "dst": "tools.circulation_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.optimizer_consistency_gate",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.optimizer_consistency_gate",
+   "dst": "tools.room_type",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.parapet_not_railing_fallback_gate",
+   "dst": "tools.validation.soft_barrier_source_audit",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.pdf_height_labels_audit",
+   "dst": "core.project_sources",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.position_fidelity_gate",
+   "dst": "tools.validation.gate_util",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.position_fidelity_gate",
+   "dst": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.validation.railing_exact_match_gate",
+   "dst": "tools/sketchup/shell/build_plan_shell_skp.rb",
+   "kind": "runs_ruby"
+  },
+  {
+   "src": "tools.validation.room_collisions",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.room_collisions",
+   "dst": "tools.rooms.shared.clearance",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.room_regression",
+   "dst": "core.domain.room_registry",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.room_regression",
+   "dst": "core.schemas",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.room_regression_diff",
+   "dst": "core.scale",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.room_regression_diff",
+   "dst": "tools.orchestration.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.room_regression_diff",
+   "dst": "tools.validation.fp044_baseline",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.room_regression_diff",
+   "dst": "tools.validation.room_regression",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.room_regression_diff",
+   "dst": "tools.validation.room_regression_gates",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.room_regression_gates",
+   "dst": "tools.validation.circulation_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.room_regression_gates",
+   "dst": "tools.validation.room_collisions",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.run_deterministic_gates",
+   "dst": "core.observability.gates",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.run_deterministic_gates",
+   "dst": "tools.rendering.overlay_diff",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.run_deterministic_gates",
+   "dst": "tools.validation.opening_host_audit",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.run_deterministic_gates",
+   "dst": "tools.validation.parapet_not_railing_fallback_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.run_deterministic_gates",
+   "dst": "tools.validation.position_fidelity_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.run_deterministic_gates",
+   "dst": "tools.validation.railing_exact_match_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.run_deterministic_gates",
+   "dst": "tools.validation.render_bbox_audit",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.run_deterministic_gates",
+   "dst": "tools.validation.scale_anchor_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.run_deterministic_gates",
+   "dst": "tools.validation.wall_overlap_audit",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.scale_anchor_gate",
+   "dst": "core.scale",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.scene_spatial_gate",
+   "dst": "interior.composer.scene_composer",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.scene_spatial_gate",
+   "dst": "tools.rooms.shared.decor_anatomy_spec",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.semantic_geometry_contract_gate",
+   "dst": "core.spatial_semantics",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.semantic_geometry_contract_gate",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.semantic_geometry_contract_gate",
+   "dst": "tools.geometry_sanity",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools.validation.semantic_geometry_contract_gate",
+   "dst": "tools.room_type",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.style_coherence_gate",
+   "dst": "tools.furnish_apartment",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.style_coherence_gate",
+   "dst": "tools.rooms.shared.materials",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.style_coherence_gate",
+   "dst": "tools.spatial_model",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "interior.validators.bed_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "interior.validators.bed_placement_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "interior.validators.furniture_visual_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "interior.validators.nightstand_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "interior.validators.sofa_placement_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "interior.validators.wardrobe_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "tools.rooms.living.validation.sofa_gate",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "tools.rooms.shared.anatomy",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "tools.rooms.shared.bed",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "tools.rooms.shared.nightstand",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "tools.rooms.shared.sofa",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.validation_report",
+   "dst": "tools.rooms.shared.wardrobe",
+   "kind": "import_lazy"
+  },
+  {
+   "src": "tools.validation.wall_exact_match_gate",
+   "dst": "tools.validation.gate_util",
+   "kind": "import_top"
+  },
+  {
+   "src": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_3seat_v1.rb",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_eval_suite.rb",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/living/capabilities/ruby/sofa_program/build_sofa_from_config.rb",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_components.rb",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_components.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_generator.rb",
+   "dst": "tools/rooms/living/capabilities/ruby/sofa_program/sofa_primitives.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+   "dst": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb",
+   "dst": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+   "dst": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/rooms/shared/cabinet/ruby/shaker_inspect.rb",
+   "dst": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/sketchup/furnish/place_layout_skp.rb",
+   "dst": "tools/sketchup/furnish/place_layout_geom.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/sketchup/ruby/apply_edits.rb",
+   "dst": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/sketchup/ruby/inspect_model.rb",
+   "dst": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/sketchup/ruby/render_views.rb",
+   "dst": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "kind": "ruby_require"
+  },
+  {
+   "src": "tools/sketchup/ruby/skmcp_runtime.rb",
+   "dst": "tools/sketchup/ruby/skmcp_core.rb",
+   "kind": "ruby_require"
+  }
+ ],
+ "mcp_tools": {
+  "list_capabilities": [
+   "tools.sketchup.jobs",
+   "tools.sketchup.ops"
+  ],
+  "run_deterministic_gates": [
+   "tools.validation.run_deterministic_gates"
+  ],
+  "furniture_class_derive": [],
+  "reference_to_grammar": [
+   "tools.knowledge.reference_grammar"
+  ],
+  "validate_grammar_spec": [
+   "tools.knowledge.reference_grammar"
+  ],
+  "room_gates": [
+   "tools.furniture_overlap_gate",
+   "tools.validation.style_coherence_gate"
+  ],
+  "kitchen_ergonomics_audit": [
+   "tools.rooms.kitchen.validation.ergonomics"
+  ],
+  "promote_canonical": [
+   "tools.orchestration.promote_canonical"
+  ],
+  "skp_inventory": [
+   "tools.claude_bridge.skp_inventory"
+  ],
+  "su_status": [
+   "tools.sketchup.jobs"
+  ],
+  "su_open": [
+   "tools.sketchup.jobs"
+  ],
+  "su_close": [
+   "tools.sketchup.jobs"
+  ],
+  "su_inspect": [
+   "tools.sketchup.jobs"
+  ],
+  "su_render": [
+   "tools.sketchup.jobs"
+  ],
+  "su_apply_edits": [
+   "tools.sketchup.jobs"
+  ],
+  "su_build_shell": [
+   "tools.sketchup.jobs"
+  ],
+  "su_furnish": [
+   "tools.sketchup.jobs"
+  ],
+  "su_render_vray": [
+   "tools.sketchup.jobs"
+  ]
+ },
+ "top_fan_in": [
+  [
+   "core.scale",
+   34
+  ],
+  [
+   "tools.spatial_model",
+   20
+  ],
+  [
+   "tools.rooms.shared.anatomy",
+   16
+  ],
+  [
+   "tools.furnish_apartment",
+   15
+  ],
+  [
+   "tools.rooms.shared.parts",
+   15
+  ],
+  [
+   "tools.rooms.shared.geometry",
+   12
+  ],
+  [
+   "tools.rooms.shared.sofa",
+   11
+  ],
+  [
+   "tools.room_type",
+   11
+  ],
+  [
+   "tools.rendering.render_parts_iso",
+   11
+  ],
+  [
+   "tools.orchestration.correction.jsonl_io",
+   8
+  ],
+  [
+   "tools.rooms.living.capabilities.sofa_class_matrix",
+   8
+  ],
+  [
+   "tools.rooms.living.sofa_class",
+   8
+  ],
+  [
+   "tools.sketchup.process",
+   8
+  ],
+  [
+   "core.observability",
+   7
+  ],
+  [
+   "core.project_sources",
+   7
+  ],
+  [
+   "interior.renderers.render_provider",
+   7
+  ],
+  [
+   "core.spatial_semantics",
+   7
+  ],
+  [
+   "tools.rooms.shared.cabinet.model",
+   6
+  ],
+  [
+   "tools.rooms.shared.materials",
+   6
+  ],
+  [
+   "tools.sketchup.legacy_process",
+   6
+  ],
+  [
+   "tools.rooms.kitchen.anchor_rules",
+   6
+  ],
+  [
+   "core.schemas",
+   6
+  ],
+  [
+   "tools.rooms.shared.cabinet.plan",
+   6
+  ],
+  [
+   "tools.sketchup.shell.build_plan_shell_skp",
+   6
+  ],
+  [
+   "tools.sketchup.batch",
+   6
+  ]
+ ],
+ "package_edges": [
+  [
+   "tools.rooms.living",
+   "tools.rooms.shared",
+   25
+  ],
+  [
+   "tools.rooms.bedroom",
+   "tools.rooms.shared",
+   17
+  ],
+  [
+   "tools.rooms.kitchen",
+   "tools.rooms.shared",
+   14
+  ],
+  [
+   "tools.validation",
+   "tools.rooms.shared",
+   9
+  ],
+  [
+   "tools.orchestration",
+   "tools.rooms.shared",
+   8
+  ],
+  [
+   "tools.rooms.living",
+   "tools.rendering",
+   8
+  ],
+  [
+   "tools.rooms.shared",
+   "tools.sketchup",
+   8
+  ],
+  [
+   "tools.validation",
+   "tools.furnish_apartment",
+   8
+  ],
+  [
+   "tools.rooms.kitchen",
+   "tools.sketchup",
+   6
+  ],
+  [
+   "tools.validation",
+   "interior.validators",
+   6
+  ],
+  [
+   "tools.interior_studio",
+   "tools.knowledge",
+   5
+  ],
+  [
+   "tools.mcp_server",
+   "tools.rooms.living",
+   5
+  ],
+  [
+   "tools.navigation",
+   "tools.rooms.shared",
+   5
+  ],
+  [
+   "tools.orchestration",
+   "tools.validation",
+   5
+  ],
+  [
+   "tools.rendering",
+   "tools.sketchup",
+   5
+  ],
+  [
+   "tools.rooms.bedroom",
+   "core.scale",
+   5
+  ],
+  [
+   "tools.validation",
+   "core.scale",
+   5
+  ],
+  [
+   "tools.validation",
+   "core.spatial_semantics",
+   5
+  ],
+  [
+   "tools.knowledge",
+   "core.observability",
+   4
+  ],
+  [
+   "tools.orchestration",
+   "tools.oracle",
+   4
+  ],
+  [
+   "tools.orchestration",
+   "tools.rooms.living",
+   4
+  ],
+  [
+   "tools.rendering",
+   "interior.renderers",
+   4
+  ],
+  [
+   "tools.rooms.kitchen",
+   "core.scale",
+   4
+  ],
+  [
+   "tools.rooms.living",
+   "core.scale",
+   4
+  ],
+  [
+   "tools.rooms.living",
+   "tools.spatial_model",
+   4
+  ],
+  [
+   "tools.validation",
+   "tools.room_type",
+   4
+  ],
+  [
+   "interior.composer",
+   "tools.rooms.shared",
+   3
+  ],
+  [
+   "ops/estudio-front/rag_chat.py",
+   "core.observability",
+   3
+  ],
+  [
+   "tools.interior_studio",
+   "core.observability",
+   3
+  ],
+  [
+   "tools.navigation",
+   "tools.validation",
+   3
+  ],
+  [
+   "tools.orchestration",
+   "tools.rendering",
+   3
+  ],
+  [
+   "tools.rendering",
+   "core.scale",
+   3
+  ],
+  [
+   "tools.rooms.bedroom",
+   "tools.spatial_model",
+   3
+  ],
+  [
+   "tools.rooms.kitchen",
+   "tools.validation",
+   3
+  ],
+  [
+   "tools.rooms.living",
+   "interior.semantics",
+   3
+  ],
+  [
+   "tools.rooms.shared",
+   "core.scale",
+   3
+  ],
+  [
+   "tools.sketchup",
+   "core.scale",
+   3
+  ],
+  [
+   "tools.sketchup",
+   "tools.validation",
+   3
+  ],
+  [
+   "tools.validation",
+   "core.project_sources",
+   3
+  ],
+  [
+   "tools.validation",
+   "tools.spatial_model",
+   3
+  ],
+  [
+   "core.observability",
+   "tools.orchestration",
+   2
+  ],
+  [
+   "interior.planners",
+   "interior.semantics",
+   2
+  ],
+  [
+   "interior.renderers",
+   "tools.rooms.shared",
+   2
+  ],
+  [
+   "interior.renderers",
+   "tools.sketchup",
+   2
+  ],
+  [
+   "interior.semantics",
+   "tools.spatial_model",
+   2
+  ],
+  [
+   "tools.interior_studio",
+   "tools.furnish_apartment",
+   2
+  ],
+  [
+   "tools.knowledge",
+   "tools.oracle",
+   2
+  ],
+  [
+   "tools.knowledge",
+   "tools.orchestration",
+   2
+  ],
+  [
+   "tools.mcp_server",
+   "tools.sketchup",
+   2
+  ],
+  [
+   "tools.mcp_server",
+   "tools.validation",
+   2
+  ],
+  [
+   "tools.navigation",
+   "tools.rooms.living",
+   2
+  ],
+  [
+   "tools.oracle",
+   "core.observability",
+   2
+  ],
+  [
+   "tools.oracle",
+   "core.project_sources",
+   2
+  ],
+  [
+   "tools.oracle",
+   "tools.rendering",
+   2
+  ],
+  [
+   "tools.orchestration",
+   "core.observability",
+   2
+  ],
+  [
+   "tools.orchestration",
+   "tools.claude_bridge",
+   2
+  ],
+  [
+   "tools.orchestration",
+   "tools.finding_router",
+   2
+  ],
+  [
+   "tools.orchestration",
+   "tools.furniture_overlap_gate",
+   2
+  ],
+  [
+   "tools.orchestration",
+   "tools.room_type",
+   2
+  ],
+  [
+   "tools.orchestration",
+   "tools.rooms.bathroom",
+   2
+  ],
+  [
+   "tools.orchestration",
+   "tools.rooms.kitchen",
+   2
+  ],
+  [
+   "tools.rendering",
+   "tools.furnish_apartment",
+   2
+  ],
+  [
+   "tools.rooms.bathroom",
+   "tools.rendering",
+   2
+  ],
+  [
+   "tools.rooms.bathroom",
+   "tools.rooms.shared",
+   2
+  ],
+  [
+   "tools.rooms.kitchen",
+   "core.domain",
+   2
+  ],
+  [
+   "tools.rooms.kitchen",
+   "tools.rooms.capability_catalog",
+   2
+  ],
+  [
+   "tools.rooms.kitchen",
+   "tools.rooms.specialists",
+   2
+  ],
+  [
+   "tools.rooms.kitchen",
+   "tools.spatial_model",
+   2
+  ],
+  [
+   "tools.rooms.living",
+   "interior.planners",
+   2
+  ],
+  [
+   "tools.rooms.living",
+   "interior.renderers",
+   2
+  ],
+  [
+   "tools.rooms.service",
+   "tools.rooms.shared",
+   2
+  ],
+  [
+   "tools.sketchup",
+   "tools.rooms.shared",
+   2
+  ],
+  [
+   "tools.trace_view",
+   "core.observability",
+   2
+  ],
+  [
+   "tools.validation",
+   "tools.circulation_gate",
+   2
+  ],
+  [
+   "tools.validation",
+   "tools.rendering",
+   2
+  ],
+  [
+   "core.observability",
+   "core.domain",
+   1
+  ],
+  [
+   "interior.composer",
+   "tools.rooms.living",
+   1
+  ],
+  [
+   "interior.planners",
+   "core.scale",
+   1
+  ],
+  [
+   "interior.planners",
+   "tools.rooms.living",
+   1
+  ],
+  [
+   "interior.planners",
+   "tools.rooms.shared",
+   1
+  ],
+  [
+   "interior.planners",
+   "tools.spatial_model",
+   1
+  ],
+  [
+   "interior.renderers",
+   "tools.rendering",
+   1
+  ],
+  [
+   "interior.semantics",
+   "tools.room_type",
+   1
+  ],
+  [
+   "tools.furnish_plan",
+   "core.scale",
+   1
+  ],
+  [
+   "tools.interior_studio",
+   "core.scale",
+   1
+  ],
+  [
+   "tools.interior_studio",
+   "tools.claude_bridge",
+   1
+  ],
+  [
+   "tools.interior_studio",
+   "tools.furniture_overlap_gate",
+   1
+  ],
+  [
+   "tools.interior_studio",
+   "tools.geometry_sanity",
+   1
+  ],
+  [
+   "tools.interior_studio",
+   "tools.oracle",
+   1
+  ],
+  [
+   "tools.interior_studio",
+   "tools.orchestration",
+   1
+  ],
+  [
+   "tools.interior_studio",
+   "tools.room_type",
+   1
+  ],
+  [
+   "tools.mcp_server",
+   "tools.claude_bridge",
+   1
+  ],
+  [
+   "tools.mcp_server",
+   "tools.furniture_overlap_gate",
+   1
+  ],
+  [
+   "tools.mcp_server",
+   "tools.knowledge",
+   1
+  ],
+  [
+   "tools.mcp_server",
+   "tools.orchestration",
+   1
+  ],
+  [
+   "tools.mcp_server",
+   "tools.rooms.bedroom",
+   1
+  ],
+  [
+   "tools.mcp_server",
+   "tools.rooms.kitchen",
+   1
+  ],
+  [
+   "tools.navigation",
+   "core.scale",
+   1
+  ],
+  [
+   "tools.navigation",
+   "tools.furnish_apartment",
+   1
+  ],
+  [
+   "tools.navigation",
+   "tools.room_type",
+   1
+  ],
+  [
+   "tools.navigation",
+   "tools.rooms.capability_catalog",
+   1
+  ],
+  [
+   "tools.navigation",
+   "tools.rooms.dispatch",
+   1
+  ],
+  [
+   "tools.navigation",
+   "tools.rooms.evidence_closure",
+   1
+  ],
+  [
+   "tools.navigation",
+   "tools.sketchup",
+   1
+  ],
+  [
+   "tools.navigation",
+   "tools.spatial_model",
+   1
+  ],
+  [
+   "tools.oracle",
+   "tools.interior_studio",
+   1
+  ],
+  [
+   "tools.oracle",
+   "tools.validation",
+   1
+  ],
+  [
+   "tools.orchestration",
+   "core.project_sources",
+   1
+  ],
+  [
+   "tools.orchestration",
+   "core.scale",
+   1
+  ],
+  [
+   "tools.orchestration",
+   "core.spatial_semantics",
+   1
+  ],
+  [
+   "tools.orchestration",
+   "tools.furnish_apartment",
+   1
+  ],
+  [
+   "tools.orchestration",
+   "tools.geometry_sanity",
+   1
+  ],
+  [
+   "tools.orchestration",
+   "tools.rooms.bedroom",
+   1
+  ],
+  [
+   "tools.orchestration",
+   "tools.rooms.dispatch",
+   1
+  ],
+  [
+   "tools.orchestration",
+   "tools.rooms.service",
+   1
+  ],
+  [
+   "tools.orchestration",
+   "tools.sketchup",
+   1
+  ],
+  [
+   "tools.rendering",
+   "core.project_sources",
+   1
+  ],
+  [
+   "tools.rendering",
+   "tools.spatial_model",
+   1
+  ],
+  [
+   "tools.rooms.bathroom",
+   "core.scale",
+   1
+  ],
+  [
+   "tools.rooms.bathroom",
+   "core.spatial_semantics",
+   1
+  ],
+  [
+   "tools.rooms.bathroom",
+   "interior.composer",
+   1
+  ],
+  [
+   "tools.rooms.bathroom",
+   "tools.geometry_sanity",
+   1
+  ],
+  [
+   "tools.rooms.bathroom",
+   "tools.spatial_model",
+   1
+  ],
+  [
+   "tools.rooms.bedroom",
+   "interior.planners",
+   1
+  ],
+  [
+   "tools.rooms.bedroom",
+   "tools.rendering",
+   1
+  ],
+  [
+   "tools.rooms.bedroom",
+   "tools.sketchup",
+   1
+  ],
+  [
+   "tools.rooms.capability_catalog",
+   "core.schemas",
+   1
+  ],
+  [
+   "tools.rooms.capability_catalog",
+   "tools.rooms.evidence_closure",
+   1
+  ],
+  [
+   "tools.rooms.dispatch",
+   "tools.room_type",
+   1
+  ],
+  [
+   "tools.rooms.furniture_goals",
+   "core.schemas",
+   1
+  ],
+  [
+   "tools.rooms.furniture_goals",
+   "tools.rooms.capability_catalog",
+   1
+  ],
+  [
+   "tools.rooms.furniture_goals",
+   "tools.rooms.evidence_closure",
+   1
+  ],
+  [
+   "tools.rooms.furniture_goals",
+   "tools.rooms.reference_targets",
+   1
+  ],
+  [
+   "tools.rooms.furniture_goals",
+   "tools.rooms.specialists",
+   1
+  ],
+  [
+   "tools.rooms.kitchen",
+   "tools.geometry_sanity",
+   1
+  ],
+  [
+   "tools.rooms.kitchen",
+   "tools.rendering",
+   1
+  ],
+  [
+   "tools.rooms.kitchen",
+   "tools.room_type",
+   1
+  ],
+  [
+   "tools.rooms.living",
+   "tools.circulation_gate",
+   1
+  ],
+  [
+   "tools.rooms.registry",
+   "core.domain",
+   1
+  ],
+  [
+   "tools.rooms.service",
+   "core.scale",
+   1
+  ],
+  [
+   "tools.rooms.service",
+   "tools.spatial_model",
+   1
+  ],
+  [
+   "tools.rooms.shared",
+   "core.schemas",
+   1
+  ],
+  [
+   "tools.rooms.shared",
+   "tools.spatial_model",
+   1
+  ],
+  [
+   "tools.rooms.specialist_fragments",
+   "core.schemas",
+   1
+  ],
+  [
+   "tools.rooms.specialists",
+   "core.schemas",
+   1
+  ],
+  [
+   "tools.rooms.specialists",
+   "tools.rooms.capability_catalog",
+   1
+  ],
+  [
+   "tools.rooms.specialists",
+   "tools.rooms.registry",
+   1
+  ],
+  [
+   "tools.sketchup",
+   "tools.furnish_apartment",
+   1
+  ],
+  [
+   "tools.sketchup",
+   "tools.orchestration",
+   1
+  ],
+  [
+   "tools.sketchup",
+   "tools.rendering",
+   1
+  ],
+  [
+   "tools.sketchup",
+   "tools.rooms.living",
+   1
+  ],
+  [
+   "tools.validation",
+   "core.domain",
+   1
+  ],
+  [
+   "tools.validation",
+   "core.observability",
+   1
+  ],
+  [
+   "tools.validation",
+   "core.project_policy",
+   1
+  ],
+  [
+   "tools.validation",
+   "core.schemas",
+   1
+  ],
+  [
+   "tools.validation",
+   "interior.composer",
+   1
+  ],
+  [
+   "tools.validation",
+   "tools.geometry_sanity",
+   1
+  ],
+  [
+   "tools.validation",
+   "tools.interior_studio",
+   1
+  ],
+  [
+   "tools.validation",
+   "tools.orchestration",
+   1
+  ],
+  [
+   "tools.validation",
+   "tools.rooms.living",
+   1
+  ],
+  [
+   "tools.validation",
+   "tools.sketchup",
+   1
+  ]
+ ]
+}

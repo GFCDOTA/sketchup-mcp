@@ -1,0 +1,54 @@
+{
+ "schema_version": "fp054_gate_probes.v1",
+ "probes": [
+  {
+   "id": "P1_one_portal_room_split_by_furniture",
+   "expected": "BLOCKED_MISSING_INPUT (ou NOT_APPLICABLE explicito)",
+   "observed": "PASS",
+   "corridor_detail": [
+    {
+     "erro": "menos de 2 portais no comodo"
+    }
+   ],
+   "false_pass": true
+  },
+  {
+   "id": "P2_zero_portals",
+   "expected": "BLOCKED_MISSING_INPUT",
+   "observed": "PASS",
+   "corridor_detail": [
+    {
+     "erro": "menos de 2 portais no comodo"
+    }
+   ],
+   "false_pass": true
+  },
+  {
+   "id": "P3_two_portals_split_control",
+   "expected": "FAIL",
+   "observed": "FAIL",
+   "false_pass": false
+  },
+  {
+   "id": "P4_chair_named_pt",
+   "expected": "FAIL (cadeira sem 0,70 m atras e sem recuo)",
+   "observed": "FAIL",
+   "chairs_measured": 1,
+   "behind": "FAIL",
+   "false_pass": false
+  },
+  {
+   "id": "P5_chair_named_en",
+   "expected": "FAIL (cadeira sem 0,70 m atras e sem recuo)",
+   "observed": "PASS",
+   "chairs_measured": 0,
+   "behind": "PASS",
+   "false_pass": true
+  }
+ ],
+ "false_pass_ids": [
+  "P1_one_portal_room_split_by_furniture",
+  "P2_zero_portals",
+  "P5_chair_named_en"
+ ]
+}
