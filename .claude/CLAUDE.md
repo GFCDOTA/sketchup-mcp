@@ -70,7 +70,9 @@ Antes de mexer em código que depende de lib/SDK/API/CLI/protocolo externo (Sket
 versão local **primeiro** (`uv.lock` → `pyproject.toml` → runtime), depois a doc dessa versão no MCP `context7`
 (`resolve-library-id` → `query-docs` com ID versionado), só então o código; sem doc → registrar a lacuna, doc oficial por outro
 meio ou `BLOCKED: documentation unavailable`. Evidência em `docs/engineering/evidence/` (gate offline DOC-EXT-01). Context7
-**não** é autoridade de domínio (layout, circulação, SPECs, `layout_decisions`, D-xxx). Política:
+**não** é autoridade de domínio (layout, circulação, SPECs, `layout_decisions`, D-xxx). Para thresholds externos de ergonomia,
+acessibilidade/folga/dimensão funcional: pesquisar antes de codar, classificar a fonte A–E, registrar a afirmação exata e
+aplicabilidade; blog/guia não vira norma e regra de acessibilidade não vira regra universal por analogia. Política:
 `docs/engineering/external-documentation-policy.md`.
 
 ## Todo arquivo novo versionado
@@ -83,7 +85,7 @@ Registrar no mesmo PR em `docs/specs/fp042_inventory.v1.json`; evidência em `ar
 
 - `git fetch --all --prune` antes de decisão remota; worktree isolada em `E:/Claude/worktrees/` quando houver paralelismo.
 - Um commit = uma intenção; mensagem no imperativo com prefixo de tipo. PR pequena; nunca deixar PR aberta no fim da sessão.
-- Merge só com os **4 checks verdes no head exato** (pytest 3.11, pytest 3.12, deterministic fidelity gates, mcp server smoke+stdio):
+- Merge só com os **5 checks verdes no head exato** (uv lock current, pytest 3.11, pytest 3.12, deterministic fidelity gates, mcp server smoke+stdio):
   `gh pr merge <n> --merge --match-head-commit <sha>`. `gh`: `"/c/Program Files/GitHub CLI/gh.exe"`, `unset GH_TOKEN`, sempre `--repo GFCDOTA/sketchup-mcp`.
 - Relatório/evidência histórica não se reescreve: nova evidência datada ao lado.
 
