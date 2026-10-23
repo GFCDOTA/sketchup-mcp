@@ -47,6 +47,28 @@ external_dependencies:
       evidence: docs/engineering/evidence/<data>_<dependencia>.json
 ```
 
+## External sources for domain thresholds (opcional)
+
+<Omitir quando a feature não introduz nenhuma afirmação/medida externa nova. Não usar este bloco para dependências de software;
+essas ficam em `external_dependencies`. Para ergonomia, acessibilidade, folgas e dimensões funcionais, registrar:>
+
+```yaml
+external_sources:
+  - claim_id: <identificador estável>
+    rule_class: <NORMATIVE|TECHNICAL_REFERENCE|PROJECT_POLICY|COMFORT_GUIDE|HEURISTIC>
+    source_type: <standard|law|government|vendor|institutional|professional|blog|internal>
+    source_tier: <A|B|C|D|E>
+    source_ref: <documento/URL/título>
+    source_version_or_date: <versão/data|null>
+    exact_claim_supported: <o que a fonte realmente afirma, sem ampliar por analogia>
+    applicability: <para quais ambientes/usuários/condições vale>
+    project_use: <como a feature usa a afirmação>
+    limitations: <lacunas, divergências ou necessidade de fonte primária>
+```
+
+Regras de autoridade: `docs/engineering/external-documentation-policy.md`. Fonte secundária citando norma não autoriza
+`NORMATIVE`; recomendação de conforto não vira hard minimum; regra de acessibilidade exige aplicabilidade comprovada.
+
 ## Detection heuristic / algorithm
 
 <Como o builder identifica/lida com a situação que motivou esta
