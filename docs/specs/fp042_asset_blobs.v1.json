@@ -4756,6 +4756,12 @@
       "blob_sha": "63de9248d3a0ee8f47ad12dcc5567d008af54192",
       "blob_size": 99286,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f1b/planta74_functional_clearance.png",
+      "blob_sha": "90013402cbc79120fec0e9fcb049b740e712b957",
+      "blob_size": 60789,
+      "owner_group": "artifacts"
     }
   ]
 }

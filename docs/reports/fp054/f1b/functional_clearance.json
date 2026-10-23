@@ -1,0 +1,2376 @@
+{
+ "schema_version": "functional_clearance_report.v1",
+ "mode": "REPORT_ONLY",
+ "evaluations": 20,
+ "summary": {
+  "INVALID": 7,
+  "VALID_BELOW_TARGET": 0,
+  "VALID": 5,
+  "PREFERRED": 6,
+  "BLOCKED_MISSING_INPUT": 0,
+  "NOT_APPLICABLE": 2
+ },
+ "heuristics": {
+  "USE_ZONE_DEPTH_M": 0.3,
+  "BACKING_TOL_IN": 6.0,
+  "PORTAL_SNAP_M": 0.3,
+  "provenance": "HEURISTIC"
+ },
+ "registry_errors": [],
+ "rows": [
+  {
+   "room_id": "r004",
+   "object_id": "countertop",
+   "object_type": "kitchen_counter",
+   "constraint": "kitchen_counter.front_clearance",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 1.088,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      85.58,
+      680.5
+     ],
+     [
+      85.58,
+      594.28
+     ]
+    ],
+    "normal": [
+     1.0,
+     0.0
+    ],
+    "contract": "opposite_longest_backing_side",
+    "free_shape": [
+     [
+      85.58,
+      680.0
+     ],
+     [
+      85.58,
+      594.78
+     ],
+     [
+      128.41,
+      594.78
+     ],
+     [
+      128.41,
+      680.0
+     ],
+     [
+      85.58,
+      680.0
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.9,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "guias de planejamento (planner5d area de circulacao; catracalivre): 90 cm-1 m de passagem; ~1 m livre na frente de pia/fogao",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.9,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "core/project_policy.py CIRCULATION_PRIMARY_TARGET_M = 0,90 (decisao de projeto existente, residencial planta_74)",
+    "approval": "EXISTING_PROJECT_DECISION"
+   },
+   "preferred": {
+    "value": 1.0,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "guias de planejamento (planner5d area de circulacao; catracalivre): 90 cm-1 m de passagem; ~1 m livre na frente de pia/fogao",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r004",
+   "object_id": "countertop",
+   "object_type": "kitchen_counter",
+   "constraint": "kitchen_counter.reach_path",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 1.343,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      85.58,
+      680.5
+     ],
+     [
+      85.58,
+      594.28
+     ]
+    ],
+    "normal": [
+     1.0,
+     0.0
+    ],
+    "contract": "opposite_longest_backing_side",
+    "use_zone": [
+     [
+      85.58,
+      680.0
+     ],
+     [
+      85.58,
+      594.78
+     ],
+     [
+      97.39,
+      594.78
+     ],
+     [
+      97.39,
+      680.0
+     ],
+     [
+      85.58,
+      680.0
+     ]
+    ],
+    "portals": 1,
+    "connected_at_m": 0.3
+   },
+   "reference_minimum": {
+    "value": 0.9,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "guias de planejamento (planner5d area de circulacao; catracalivre): 90 cm-1 m de passagem; ~1 m livre na frente de pia/fogao",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.9,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "core/project_policy.py CIRCULATION_PRIMARY_TARGET_M = 0,90 (decisao de projeto existente, residencial planta_74)",
+    "approval": "EXISTING_PROJECT_DECISION"
+   },
+   "preferred": {
+    "value": 1.0,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "guias de planejamento (planner5d area de circulacao; catracalivre): 90 cm-1 m de passagem; ~1 m livre na frente de pia/fogao",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.front_clearance",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.843,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      539.65,
+      597.92
+     ],
+     [
+      539.65,
+      628.63
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "contract": "opposite_longest_backing_side",
+    "free_shape": [
+     [
+      539.65,
+      598.42
+     ],
+     [
+      539.65,
+      628.13
+     ],
+     [
+      506.46,
+      628.13
+     ],
+     [
+      506.46,
+      598.42
+     ],
+     [
+      539.65,
+      598.42
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.55,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "guia de planejamento citado na pesquisa de 2026-10-23: >= 55 cm livres na frente do lavatorio",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.reach_path",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.941,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      539.65,
+      597.92
+     ],
+     [
+      539.65,
+      628.63
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "contract": "opposite_longest_backing_side",
+    "use_zone": [
+     [
+      539.65,
+      598.42
+     ],
+     [
+      539.65,
+      628.13
+     ],
+     [
+      527.84,
+      628.13
+     ],
+     [
+      527.84,
+      598.42
+     ],
+     [
+      539.65,
+      598.42
+     ]
+    ],
+    "portals": 1,
+    "connected_at_m": 0.3
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.opening_clearance",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_OPENING_DISK_DIAMETER",
+   "measured": 0.527,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      503.07,
+      565.65
+     ],
+     [
+      543.55,
+      565.65
+     ]
+    ],
+    "normal": [
+     -0.0,
+     1.0
+    ],
+    "contract": "single_free_side",
+    "free_shape": [
+     [
+      533.68,
+      576.03
+     ],
+     [
+      533.67,
+      575.52
+     ],
+     [
+      533.63,
+      575.02
+     ],
+     [
+      533.57,
+      574.51
+     ],
+     [
+      533.49,
+      574.01
+     ],
+     [
+      533.37,
+      573.51
+     ],
+     [
+      533.24,
+      573.02
+     ],
+     [
+      533.08,
+      572.54
+     ],
+     [
+      532.9,
+      572.06
+     ],
+     [
+      532.69,
+      571.6
+     ],
+     [
+      532.46,
+      571.14
+     ],
+     [
+      532.21,
+      570.7
+     ],
+     [
+      531.94,
+      570.27
+     ],
+     [
+      531.64,
+      569.85
+     ],
+     [
+      531.33,
+      569.45
+     ],
+     [
+      531.0,
+      569.07
+     ],
+     [
+      530.65,
+      568.7
+     ],
+     [
+      530.28,
+      568.35
+     ],
+     [
+      529.89,
+      568.01
+     ],
+     [
+      529.49,
+      567.7
+     ],
+     [
+      529.07,
+      567.41
+     ],
+     [
+      528.64,
+      567.14
+     ],
+     [
+      528.2,
+      566.88
+     ],
+     [
+      527.75,
+      566.66
+     ],
+     [
+      527.28,
+      566.45
+     ],
+     [
+      526.81,
+      566.27
+     ],
+     [
+      526.32,
+      566.11
+     ],
+     [
+      525.83,
+      565.97
+     ],
+     [
+      525.33,
+      565.86
+     ],
+     [
+      524.83,
+      565.77
+     ],
+     [
+      524.33,
+      565.71
+     ],
+     [
+      523.82,
+      565.67
+     ],
+     [
+      523.31,
+      565.66
+     ],
+     [
+      522.8,
+      565.67
+     ],
+     [
+      522.29,
+      565.71
+     ],
+     [
+      521.79,
+      565.77
+     ],
+     [
+      521.29,
+      565.86
+     ],
+     [
+      520.79,
+      565.97
+     ],
+     [
+      520.3,
+      566.11
+     ],
+     [
+      519.82,
+      566.27
+     ],
+     [
+      519.34,
+      566.45
+     ],
+     [
+      518.88,
+      566.66
+     ],
+     [
+      518.42,
+      566.88
+     ],
+     [
+      517.98,
+      567.14
+     ],
+     [
+      517.55,
+      567.41
+     ],
+     [
+      517.13,
+      567.7
+     ],
+     [
+      516.73,
+      568.01
+     ],
+     [
+      516.34,
+      568.35
+     ],
+     [
+      515.98,
+      568.7
+     ],
+     [
+      515.62,
+      569.07
+     ],
+     [
+      515.29,
+      569.45
+     ],
+     [
+      514.98,
+      569.85
+     ],
+     [
+      514.68,
+      570.27
+     ],
+     [
+      514.41,
+      570.7
+     ],
+     [
+      514.16,
+      571.14
+     ],
+     [
+      513.93,
+      571.6
+     ],
+     [
+      513.73,
+      572.06
+     ],
+     [
+      513.54,
+      572.54
+     ],
+     [
+      513.38,
+      573.02
+     ],
+     [
+      513.25,
+      573.51
+     ],
+     [
+      513.14,
+      574.01
+     ],
+     [
+      513.05,
+      574.51
+     ],
+     [
+      512.99,
+      575.02
+     ],
+     [
+      512.95,
+      575.52
+     ],
+     [
+      512.94,
+      576.03
+     ],
+     [
+      512.95,
+      576.54
+     ],
+     [
+      512.99,
+      577.05
+     ],
+     [
+      513.05,
+      577.56
+     ],
+     [
+      513.14,
+      578.06
+     ],
+     [
+      513.25,
+      578.55
+     ],
+     [
+      513.38,
+      579.05
+     ],
+     [
+      513.54,
+      579.53
+     ],
+     [
+      513.73,
+      580.0
+     ],
+     [
+      513.93,
+      580.47
+     ],
+     [
+      514.16,
+      580.92
+     ],
+     [
+      514.41,
+      581.37
+     ],
+     [
+      514.68,
+      581.8
+     ],
+     [
+      514.98,
+      582.21
+     ],
+     [
+      515.29,
+      582.62
+     ],
+     [
+      515.62,
+      583.0
+     ],
+     [
+      515.98,
+      583.37
+     ],
+     [
+      516.34,
+      583.72
+     ],
+     [
+      516.73,
+      584.05
+     ],
+     [
+      517.13,
+      584.37
+     ],
+     [
+      517.55,
+      584.66
+     ],
+     [
+      517.98,
+      584.93
+     ],
+     [
+      518.42,
+      585.18
+     ],
+     [
+      518.88,
+      585.41
+     ],
+     [
+      519.34,
+      585.62
+     ],
+     [
+      519.82,
+      585.8
+     ],
+     [
+      520.3,
+      585.96
+     ],
+     [
+      520.79,
+      586.1
+     ],
+     [
+      521.29,
+      586.21
+     ],
+     [
+      521.79,
+      586.3
+     ],
+     [
+      522.29,
+      586.36
+     ],
+     [
+      522.8,
+      586.4
+     ],
+     [
+      523.31,
+      586.41
+     ],
+     [
+      523.82,
+      586.4
+     ],
+     [
+      524.33,
+      586.36
+     ],
+     [
+      524.83,
+      586.3
+     ],
+     [
+      525.33,
+      586.21
+     ],
+     [
+      525.83,
+      586.1
+     ],
+     [
+      526.32,
+      585.96
+     ],
+     [
+      526.81,
+      585.8
+     ],
+     [
+      527.28,
+      585.62
+     ],
+     [
+      527.75,
+      585.41
+     ],
+     [
+      528.2,
+      585.18
+     ],
+     [
+      528.64,
+      584.93
+     ],
+     [
+      529.07,
+      584.66
+     ],
+     [
+      529.49,
+      584.37
+     ],
+     [
+      529.89,
+      584.05
+     ],
+     [
+      530.28,
+      583.72
+     ],
+     [
+      530.65,
+      583.37
+     ],
+     [
+      531.0,
+      583.0
+     ],
+     [
+      531.33,
+      582.62
+     ],
+     [
+      531.64,
+      582.21
+     ],
+     [
+      531.94,
+      581.8
+     ],
+     [
+      532.21,
+      581.37
+     ],
+     [
+      532.46,
+      580.92
+     ],
+     [
+      532.69,
+      580.47
+     ],
+     [
+      532.9,
+      580.0
+     ],
+     [
+      533.08,
+      579.53
+     ],
+     [
+      533.24,
+      579.05
+     ],
+     [
+      533.37,
+      578.55
+     ],
+     [
+      533.49,
+      578.06
+     ],
+     [
+      533.57,
+      577.56
+     ],
+     [
+      533.63,
+      577.05
+     ],
+     [
+      533.67,
+      576.54
+     ],
+     [
+      533.68,
+      576.03
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "TECHNICAL_REFERENCE",
+    "source": "ABNT NBR 9050:2020 citada por terceiros (lawinsider 'boxes comuns'): area livre de 0,60 m de diametro; vao 0,60 m em edificacao existente, 0,80 m em nova — fonte primaria NAO conferida, por isso TECHNICAL_REFERENCE e nao NORMATIVE",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "TECHNICAL_REFERENCE",
+    "source": "ABNT NBR 9050:2020 citada por terceiros (lawinsider 'boxes comuns'): area livre de 0,60 m de diametro; vao 0,60 m em edificacao existente, 0,80 m em nova — fonte primaria NAO conferida, por isso TECHNICAL_REFERENCE e nao NORMATIVE",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.reach_path",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.65,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      503.07,
+      565.65
+     ],
+     [
+      543.55,
+      565.65
+     ]
+    ],
+    "normal": [
+     -0.0,
+     1.0
+    ],
+    "contract": "single_free_side",
+    "use_zone": [
+     [
+      503.57,
+      565.65
+     ],
+     [
+      543.05,
+      565.65
+     ],
+     [
+      543.05,
+      577.46
+     ],
+     [
+      503.57,
+      577.46
+     ],
+     [
+      503.57,
+      565.65
+     ]
+    ],
+    "portals": 1,
+    "connected_at_m": 0.3
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "TECHNICAL_REFERENCE",
+    "source": "ABNT NBR 9050:2020 citada por terceiros (lawinsider 'boxes comuns'): area livre de 0,60 m de diametro; vao 0,60 m em edificacao existente, 0,80 m em nova — fonte primaria NAO conferida, por isso TECHNICAL_REFERENCE e nao NORMATIVE",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.front_clearance",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.664,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      532.53,
+      579.32
+     ],
+     [
+      532.53,
+      593.69
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "contract": "opposite_single_backing_wall",
+    "free_shape": [
+     [
+      532.53,
+      579.82
+     ],
+     [
+      532.53,
+      593.19
+     ],
+     [
+      506.39,
+      593.19
+     ],
+     [
+      506.39,
+      579.82
+     ],
+     [
+      532.53,
+      579.82
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm | auditorioibirapuera.com.br, espaco para o vaso: 60 cm entre a bacia e a parede da frente (guia, nao norma)",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r005",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.reach_path",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.831,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      532.53,
+      579.32
+     ],
+     [
+      532.53,
+      593.69
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "contract": "opposite_single_backing_wall",
+    "use_zone": [
+     [
+      532.53,
+      579.82
+     ],
+     [
+      532.53,
+      593.19
+     ],
+     [
+      520.72,
+      593.19
+     ],
+     [
+      520.72,
+      579.82
+     ],
+     [
+      532.53,
+      579.82
+     ]
+    ],
+    "portals": 1,
+    "connected_at_m": 0.3
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.front_clearance",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.714,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      372.21,
+      566.39
+     ],
+     [
+      372.21,
+      591.98
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "contract": "opposite_longest_backing_side",
+    "free_shape": [
+     [
+      372.21,
+      566.89
+     ],
+     [
+      372.21,
+      591.48
+     ],
+     [
+      344.1,
+      591.48
+     ],
+     [
+      344.1,
+      566.89
+     ],
+     [
+      372.21,
+      566.89
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.55,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "guia de planejamento citado na pesquisa de 2026-10-23: >= 55 cm livres na frente do lavatorio",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.reach_path",
+   "verdict": "PREFERRED",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.86,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      372.21,
+      566.39
+     ],
+     [
+      372.21,
+      591.98
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "contract": "opposite_longest_backing_side",
+    "use_zone": [
+     [
+      372.21,
+      566.89
+     ],
+     [
+      372.21,
+      591.48
+     ],
+     [
+      360.4,
+      591.48
+     ],
+     [
+      360.4,
+      566.89
+     ],
+     [
+      372.21,
+      566.89
+     ]
+    ],
+    "portals": 1,
+    "connected_at_m": 0.3
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.opening_clearance",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_OPENING_DISK_DIAMETER",
+   "measured": 0.558,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      343.5,
+      527.84
+     ],
+     [
+      375.0,
+      527.84
+     ]
+    ],
+    "normal": [
+     -0.0,
+     1.0
+    ],
+    "contract": "single_free_side",
+    "free_shape": [
+     [
+      370.23,
+      538.83
+     ],
+     [
+      370.22,
+      538.3
+     ],
+     [
+      370.18,
+      537.76
+     ],
+     [
+      370.12,
+      537.22
+     ],
+     [
+      370.02,
+      536.69
+     ],
+     [
+      369.91,
+      536.17
+     ],
+     [
+      369.76,
+      535.65
+     ],
+     [
+      369.59,
+      535.13
+     ],
+     [
+      369.4,
+      534.63
+     ],
+     [
+      369.18,
+      534.14
+     ],
+     [
+      368.94,
+      533.66
+     ],
+     [
+      368.67,
+      533.19
+     ],
+     [
+      368.38,
+      532.73
+     ],
+     [
+      368.07,
+      532.29
+     ],
+     [
+      367.74,
+      531.87
+     ],
+     [
+      367.39,
+      531.46
+     ],
+     [
+      367.02,
+      531.07
+     ],
+     [
+      366.63,
+      530.7
+     ],
+     [
+      366.22,
+      530.34
+     ],
+     [
+      365.79,
+      530.01
+     ],
+     [
+      365.35,
+      529.7
+     ],
+     [
+      364.9,
+      529.41
+     ],
+     [
+      364.43,
+      529.15
+     ],
+     [
+      363.95,
+      528.9
+     ],
+     [
+      363.45,
+      528.69
+     ],
+     [
+      362.95,
+      528.49
+     ],
+     [
+      362.44,
+      528.32
+     ],
+     [
+      361.92,
+      528.18
+     ],
+     [
+      361.39,
+      528.06
+     ],
+     [
+      360.86,
+      527.97
+     ],
+     [
+      360.33,
+      527.9
+     ],
+     [
+      359.79,
+      527.86
+     ],
+     [
+      359.25,
+      527.85
+     ],
+     [
+      358.71,
+      527.86
+     ],
+     [
+      358.17,
+      527.9
+     ],
+     [
+      357.64,
+      527.97
+     ],
+     [
+      357.11,
+      528.06
+     ],
+     [
+      356.58,
+      528.18
+     ],
+     [
+      356.06,
+      528.32
+     ],
+     [
+      355.55,
+      528.49
+     ],
+     [
+      355.05,
+      528.69
+     ],
+     [
+      354.55,
+      528.9
+     ],
+     [
+      354.07,
+      529.15
+     ],
+     [
+      353.6,
+      529.41
+     ],
+     [
+      353.15,
+      529.7
+     ],
+     [
+      352.71,
+      530.01
+     ],
+     [
+      352.28,
+      530.34
+     ],
+     [
+      351.87,
+      530.7
+     ],
+     [
+      351.48,
+      531.07
+     ],
+     [
+      351.11,
+      531.46
+     ],
+     [
+      350.76,
+      531.87
+     ],
+     [
+      350.43,
+      532.29
+     ],
+     [
+      350.12,
+      532.73
+     ],
+     [
+      349.83,
+      533.19
+     ],
+     [
+      349.56,
+      533.66
+     ],
+     [
+      349.32,
+      534.14
+     ],
+     [
+      349.1,
+      534.63
+     ],
+     [
+      348.91,
+      535.13
+     ],
+     [
+      348.74,
+      535.65
+     ],
+     [
+      348.59,
+      536.17
+     ],
+     [
+      348.48,
+      536.69
+     ],
+     [
+      348.38,
+      537.22
+     ],
+     [
+      348.32,
+      537.76
+     ],
+     [
+      348.28,
+      538.3
+     ],
+     [
+      348.27,
+      538.83
+     ],
+     [
+      348.28,
+      539.37
+     ],
+     [
+      348.32,
+      539.91
+     ],
+     [
+      348.38,
+      540.45
+     ],
+     [
+      348.48,
+      540.98
+     ],
+     [
+      348.59,
+      541.5
+     ],
+     [
+      348.74,
+      542.02
+     ],
+     [
+      348.91,
+      542.53
+     ],
+     [
+      349.1,
+      543.04
+     ],
+     [
+      349.32,
+      543.53
+     ],
+     [
+      349.56,
+      544.01
+     ],
+     [
+      349.83,
+      544.48
+     ],
+     [
+      350.12,
+      544.94
+     ],
+     [
+      350.43,
+      545.38
+     ],
+     [
+      350.76,
+      545.8
+     ],
+     [
+      351.11,
+      546.21
+     ],
+     [
+      351.48,
+      546.6
+     ],
+     [
+      351.87,
+      546.97
+     ],
+     [
+      352.28,
+      547.33
+     ],
+     [
+      352.71,
+      547.66
+     ],
+     [
+      353.15,
+      547.97
+     ],
+     [
+      353.6,
+      548.26
+     ],
+     [
+      354.07,
+      548.52
+     ],
+     [
+      354.55,
+      548.76
+     ],
+     [
+      355.05,
+      548.98
+     ],
+     [
+      355.55,
+      549.18
+     ],
+     [
+      356.06,
+      549.35
+     ],
+     [
+      356.58,
+      549.49
+     ],
+     [
+      357.11,
+      549.61
+     ],
+     [
+      357.64,
+      549.7
+     ],
+     [
+      358.17,
+      549.77
+     ],
+     [
+      358.71,
+      549.81
+     ],
+     [
+      359.25,
+      549.82
+     ],
+     [
+      359.79,
+      549.81
+     ],
+     [
+      360.33,
+      549.77
+     ],
+     [
+      360.86,
+      549.7
+     ],
+     [
+      361.39,
+      549.61
+     ],
+     [
+      361.92,
+      549.49
+     ],
+     [
+      362.44,
+      549.35
+     ],
+     [
+      362.95,
+      549.18
+     ],
+     [
+      363.45,
+      548.98
+     ],
+     [
+      363.95,
+      548.76
+     ],
+     [
+      364.43,
+      548.52
+     ],
+     [
+      364.9,
+      548.26
+     ],
+     [
+      365.35,
+      547.97
+     ],
+     [
+      365.79,
+      547.66
+     ],
+     [
+      366.22,
+      547.33
+     ],
+     [
+      366.63,
+      546.97
+     ],
+     [
+      367.02,
+      546.6
+     ],
+     [
+      367.39,
+      546.21
+     ],
+     [
+      367.74,
+      545.8
+     ],
+     [
+      368.07,
+      545.38
+     ],
+     [
+      368.38,
+      544.94
+     ],
+     [
+      368.67,
+      544.48
+     ],
+     [
+      368.94,
+      544.01
+     ],
+     [
+      369.18,
+      543.53
+     ],
+     [
+      369.4,
+      543.04
+     ],
+     [
+      369.59,
+      542.53
+     ],
+     [
+      369.76,
+      542.02
+     ],
+     [
+      369.91,
+      541.5
+     ],
+     [
+      370.02,
+      540.98
+     ],
+     [
+      370.12,
+      540.45
+     ],
+     [
+      370.18,
+      539.91
+     ],
+     [
+      370.22,
+      539.37
+     ],
+     [
+      370.23,
+      538.83
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "TECHNICAL_REFERENCE",
+    "source": "ABNT NBR 9050:2020 citada por terceiros (lawinsider 'boxes comuns'): area livre de 0,60 m de diametro; vao 0,60 m em edificacao existente, 0,80 m em nova — fonte primaria NAO conferida, por isso TECHNICAL_REFERENCE e nao NORMATIVE",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "TECHNICAL_REFERENCE",
+    "source": "ABNT NBR 9050:2020 citada por terceiros (lawinsider 'boxes comuns'): area livre de 0,60 m de diametro; vao 0,60 m em edificacao existente, 0,80 m em nova — fonte primaria NAO conferida, por isso TECHNICAL_REFERENCE e nao NORMATIVE",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.reach_path",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.499,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      343.5,
+      527.84
+     ],
+     [
+      375.0,
+      527.84
+     ]
+    ],
+    "normal": [
+     -0.0,
+     1.0
+    ],
+    "contract": "single_free_side",
+    "use_zone": [
+     [
+      344.0,
+      527.84
+     ],
+     [
+      374.5,
+      527.84
+     ],
+     [
+      374.5,
+      539.65
+     ],
+     [
+      344.0,
+      539.65
+     ],
+     [
+      344.0,
+      527.84
+     ]
+    ],
+    "portals": 1,
+    "connected_at_m": 0.3
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "TECHNICAL_REFERENCE",
+    "source": "ABNT NBR 9050:2020 citada por terceiros (lawinsider 'boxes comuns'): area livre de 0,60 m de diametro; vao 0,60 m em edificacao existente, 0,80 m em nova — fonte primaria NAO conferida, por isso TECHNICAL_REFERENCE e nao NORMATIVE",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.front_clearance",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.515,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      364.3,
+      547.79
+     ],
+     [
+      364.3,
+      562.16
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "contract": "opposite_single_backing_wall",
+    "free_shape": [
+     [
+      364.3,
+      548.29
+     ],
+     [
+      364.3,
+      561.66
+     ],
+     [
+      344.02,
+      561.66
+     ],
+     [
+      344.02,
+      548.29
+     ],
+     [
+      364.3,
+      548.29
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm | auditorioibirapuera.com.br, espaco para o vaso: 60 cm entre a bacia e a parede da frente (guia, nao norma)",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r006",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.reach_path",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.703,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      364.3,
+      547.79
+     ],
+     [
+      364.3,
+      562.16
+     ]
+    ],
+    "normal": [
+     -1.0,
+     0.0
+    ],
+    "contract": "opposite_single_backing_wall",
+    "use_zone": [
+     [
+      364.3,
+      548.29
+     ],
+     [
+      364.3,
+      561.66
+     ],
+     [
+      352.49,
+      561.66
+     ],
+     [
+      352.49,
+      548.29
+     ],
+     [
+      364.3,
+      548.29
+     ]
+    ],
+    "portals": 1,
+    "connected_at_m": 0.3
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.front_clearance",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.044,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      314.31,
+      671.7
+     ],
+     [
+      283.6,
+      671.7
+     ]
+    ],
+    "normal": [
+     -0.0,
+     -1.0
+    ],
+    "contract": "opposite_longest_backing_side",
+    "free_shape": [
+     [
+      313.81,
+      671.7
+     ],
+     [
+      284.1,
+      671.7
+     ],
+     [
+      284.1,
+      669.97
+     ],
+     [
+      313.81,
+      669.97
+     ],
+     [
+      313.81,
+      671.7
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.55,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "guia de planejamento citado na pesquisa de 2026-10-23: >= 55 cm livres na frente do lavatorio",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Bancada",
+   "object_type": "lavatory",
+   "constraint": "lavatory.reach_path",
+   "verdict": "VALID",
+   "reason_code": "MEASURED_PATH_WIDTH",
+   "measured": 0.79,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      314.31,
+      671.7
+     ],
+     [
+      283.6,
+      671.7
+     ]
+    ],
+    "normal": [
+     -0.0,
+     -1.0
+    ],
+    "contract": "opposite_longest_backing_side",
+    "use_zone": [
+     [
+      313.81,
+      671.7
+     ],
+     [
+      284.1,
+      671.7
+     ],
+     [
+      284.1,
+      659.89
+     ],
+     [
+      313.81,
+      659.89
+     ],
+     [
+      313.81,
+      671.7
+     ]
+    ],
+    "portals": 1,
+    "connected_at_m": 0.3
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.opening_clearance",
+   "verdict": "NOT_APPLICABLE",
+   "reason_code": "OBJECT_ABSENT",
+   "measured": null,
+   "unit": null,
+   "missing_input": [],
+   "witness": {},
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "TECHNICAL_REFERENCE",
+    "source": "ABNT NBR 9050:2020 citada por terceiros (lawinsider 'boxes comuns'): area livre de 0,60 m de diametro; vao 0,60 m em edificacao existente, 0,80 m em nova — fonte primaria NAO conferida, por isso TECHNICAL_REFERENCE e nao NORMATIVE",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "TECHNICAL_REFERENCE",
+    "source": "ABNT NBR 9050:2020 citada por terceiros (lawinsider 'boxes comuns'): area livre de 0,60 m de diametro; vao 0,60 m em edificacao existente, 0,80 m em nova — fonte primaria NAO conferida, por isso TECHNICAL_REFERENCE e nao NORMATIVE",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Box",
+   "object_type": "shower",
+   "constraint": "shower.reach_path",
+   "verdict": "NOT_APPLICABLE",
+   "reason_code": "OBJECT_ABSENT",
+   "measured": null,
+   "unit": null,
+   "missing_input": [],
+   "witness": {},
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "TECHNICAL_REFERENCE",
+    "source": "ABNT NBR 9050:2020 citada por terceiros (lawinsider 'boxes comuns'): area livre de 0,60 m de diametro; vao 0,60 m em edificacao existente, 0,80 m em nova — fonte primaria NAO conferida, por isso TECHNICAL_REFERENCE e nao NORMATIVE",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.front_clearance",
+   "verdict": "INVALID",
+   "reason_code": "MEASURED_FRONT_DEPTH",
+   "measured": 0.044,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      299.35,
+      669.41
+     ],
+     [
+      313.72,
+      669.41
+     ]
+    ],
+    "normal": [
+     -0.0,
+     1.0
+    ],
+    "contract": "opposite_single_backing_wall",
+    "free_shape": [
+     [
+      299.85,
+      669.41
+     ],
+     [
+      313.22,
+      669.41
+     ],
+     [
+      313.22,
+      671.14
+     ],
+     [
+      299.85,
+      671.14
+     ],
+     [
+      299.85,
+      669.41
+     ]
+    ]
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm | auditorioibirapuera.com.br, espaco para o vaso: 60 cm entre a bacia e a parede da frente (guia, nao norma)",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  },
+  {
+   "room_id": "r007",
+   "object_id": "Vaso",
+   "object_type": "toilet",
+   "constraint": "toilet.reach_path",
+   "verdict": "INVALID",
+   "reason_code": "PATH_DISCONNECTED",
+   "measured": 0.0,
+   "unit": "m",
+   "missing_input": [],
+   "witness": {
+    "use_face": [
+     [
+      299.35,
+      669.41
+     ],
+     [
+      313.72,
+      669.41
+     ]
+    ],
+    "normal": [
+     -0.0,
+     1.0
+    ],
+    "contract": "opposite_single_backing_wall",
+    "use_zone": [
+     [
+      299.85,
+      669.41
+     ],
+     [
+      313.22,
+      669.41
+     ],
+     [
+      313.22,
+      681.22
+     ],
+     [
+      299.85,
+      681.22
+     ],
+     [
+      299.85,
+      669.41
+     ]
+    ],
+    "portals": 1,
+    "connected_at_m": null
+   },
+   "reference_minimum": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   },
+   "project_target": {
+    "value": 0.6,
+    "unit": "m",
+    "provenance": "PROJECT_POLICY",
+    "source": "proposta FP-054 F1B de 2026-10-23 no chat; aguardando aprovacao do Felipe",
+    "approval": "PENDING_FELIPE"
+   },
+   "preferred": {
+    "value": 0.8,
+    "unit": "m",
+    "provenance": "COMFORT_GUIDE",
+    "source": "Planner 5D, tamanho padrao de banheiro (guia de planejamento): ~60 cm livres na frente da bacia; circulacao 60-80 cm",
+    "approval": "N/A"
+   }
+  }
+ ]
+}
