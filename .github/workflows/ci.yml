@@ -11,6 +11,9 @@ on:
     branches: [develop, main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 # Cancela runs superados no mesmo ref (não enfileira commits velhos).
 concurrency:
   group: ci-${{ github.ref }}
@@ -114,6 +117,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: astral-sh/setup-uv@v6
       - name: Regenerate uv.lock from pyproject.toml
         run: uv lock
@@ -121,6 +126,18 @@ jobs:
         run: uv sync --locked --all-extras
       - name: Show lock drift
         run: git diff -- uv.lock || true
+      - name: Commit regenerated lock to PR branch
+        shell: bash
+        run: |
+          if git diff --quiet -- uv.lock; then
+            echo "uv.lock already reconciled"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add uv.lock
+          git commit -m "chore: regenerate uv lock"
+          git push origin HEAD:${{ github.head_ref }}
       - name: Upload regenerated lock
         uses: actions/upload-artifact@v4
         with:
