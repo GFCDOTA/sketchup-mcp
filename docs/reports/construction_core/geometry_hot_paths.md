@@ -47,3 +47,29 @@ antes e depois é **byte a byte idêntico**, na 1ª e na 2ª chamada. Testes de 
 - O restante (~1,3 s em candidatos dos planners) exigiria mudar o algoritmo de busca (ex.: índice espacial `STRtree` por
   cômodo). Com ~10–20 obstáculos por cômodo o ganho esperado é pequeno e o risco de mudar a ordem dos candidatos (e com
   ela o layout escolhido) é real. Fica registrado como próxima microfase **só se** a planta crescer.
+
+## Rodada 2 (2026-10-23) — busca de posição: invariantes fora do laço, índice espacial e podas exatas
+
+Perfil do `develop` depois da rodada 1: ~300 mil chamadas individuais ao shapely, concentradas em dois laços de busca.
+
+| Onde | Antes | Problema (DSA) | Mudança exata |
+|---|---|---|---|
+| `service/layout._table_set` (mesa do terraço) | 1,23 s | `p.buffer(pm)` de cada obstáculo e `zone.buffer(-0.02)` recalculados **para cada ponto da grade × diâmetro** (invariante dentro do laço); teste de obstáculo linear O(C·O); `intersection(circ).area` mesmo sem contato | buffers e polígonos preparados calculados 1× por chamada; `STRtree` com predicado `intersects` (O(log O), mesmo resultado do `any(...)`); intersecção só com contato; **poda**: disco contido ⇒ centro contido, testa o centro (ponto × polígono preparado) antes de construir o círculo |
+| `living/furnishing._candidate` (jantar da sala) | 1,09 s | moldes da mesa/cadeira refeitos por candidato; união de ~40 polígonos por candidato só para saber se encosta em móvel | moldes 1× por chamada; união só quando algum polígono toca a ocupação (`shapely.intersects` vetorizado contra polígono preparado — sem contato a área é 0); **poda**: candidato exige exatamente 2 assentos, então conta as cadeiras que cabem antes de montar as ~45 caixas (a checagem original continua como rede de segurança) |
+
+**Resultado (3 rodadas intercaladas, mesma máquina, processo novo a cada medição):**
+
+| Mobiliar a planta_74 inteira | antes de tudo (`af910c7`) | rodada 1 (`456bea7`) | rodada 2 |
+|---|---|---|---|
+| 1ª chamada (fria) | 5,30 s | 2,86 s | **2,06 s** (−61%) |
+| chamadas seguintes (quente) | 5,16 s | 2,27 s | **1,50 s** (−71%) |
+| saída | `c2a57f92…` | `c2a57f92…` | `c2a57f92…` — **idêntica** |
+
+Suíte `planta74_scale`: 59,5 s (antes de tudo) → 32,6 s (rodada 1) → **27,7 s**; sweep SU-free de 4 variantes: 21,8 s → 11,2 s → **9,4 s**.
+Prova adicional: `tests/test_layout_search_pruning.py` compara o `_table_set` novo com a implementação antiga **literal** em 7 zonas
+(livre, obstáculos, circulação, L, nada cabe, desce para 0,80 e 0,60 m) — saída igual em todas.
+
+**O que ficou de fora (de propósito):** o gate de circulação ainda é chamado por candidato da grade da sala (~0,9 s em 95
+chamadas). Podar isso exigiria mudar a ordem/estratégia da busca — e com ela, potencialmente, o layout escolhido. Também não
+cacheei o modelo espacial inteiro por cômodo: o ganho (~0,2 s) não paga o estado escondido que vazaria entre testes que fazem
+monkeypatch no construtor.
