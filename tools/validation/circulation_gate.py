@@ -50,6 +50,7 @@ from shapely.geometry import Point, Polygon           # noqa: E402
 from shapely.ops import unary_union                   # noqa: E402
 
 from core.constraint_result import ConstraintResult, combine  # noqa: E402
+from core.furniture_roles import is_seat, resolve_role  # noqa: E402
 from core.scale import PT_TO_IN                       # noqa: E402
 from tools.spatial_model import build_spatial_model   # noqa: E402
 
@@ -360,17 +361,18 @@ class GateSession:
                                         "portais": detail}
 
         # 2/3) cadeiras: 0.70 atrás + envelope PUXADA (N/A sem conjunto de jantar — nada a medir nao e PASS)
-        behind_ok, pull_ok, cdetail, chairs_na = chair_result if decide_only else _chair_checks(blockers, cell_in)
-        if chairs_na:
-            behind_st = pull_st = "NOT_APPLICABLE"
+        behind_ok, pull_ok, cdetail, unmeasured = chair_result if decide_only else _chair_checks(blockers, cell_in)
+        if unmeasured:                             # (status, motivo): N/A sem conjunto; BLOCKED com assento sem papel
+            behind_st = pull_st = unmeasured[0]
         else:
             behind_st, pull_st = ("PASS" if behind_ok else "FAIL"), ("PASS" if pull_ok else "FAIL")
-        checks["atras_das_cadeiras"] = {"result": behind_st, "reason_code": chairs_na or "MEASURED",
+        chair_reason = unmeasured[1] if unmeasured else "MEASURED"
+        checks["atras_das_cadeiras"] = {"result": behind_st, "reason_code": chair_reason,
                                         "min_m": BEHIND_CHAIR_M, "cadeiras": cdetail}
-        checks["cadeira_puxada"] = {"result": pull_st, "reason_code": chairs_na or "MEASURED", "recuo_m": PULL_M}
+        checks["cadeira_puxada"] = {"result": pull_st, "reason_code": chair_reason, "recuo_m": PULL_M}
 
         constraints = [_corridor_constraint(corr_status, corr_reason, detail),
-                       *_chair_constraints(behind_st, pull_st, chairs_na, cdetail)]
+                       *_chair_constraints(behind_st, pull_st, unmeasured, cdetail)]
         result = combine(c["result"] for c in checks.values())
         return {"result": result, "room": room, "checks": checks, "constraints": [c.to_dict() for c in constraints]}
 
@@ -397,11 +399,19 @@ def _corridor_constraint(status, reason, detail) -> ConstraintResult:
                                       "worst_portal": worst[2]})
 
 
-def _chair_constraints(behind_st, pull_st, na_reason, cdetail) -> list[ConstraintResult]:
-    if na_reason:
-        why = {"why": "sem mesa de jantar e cadeiras de jantar identificadas no comodo"}
-        return [ConstraintResult("circulation.behind_chairs", "NOT_APPLICABLE", na_reason, evidence=why),
-                ConstraintResult("circulation.chair_pull", "NOT_APPLICABLE", na_reason, evidence=why)]
+_UNMEASURED_WHY = {
+    "NO_DINING_TABLE": "sem mesa de jantar (papel dining_table) no comodo",
+    "NO_DINING_CHAIRS": "mesa de jantar sem cadeira de jantar (papel dining_chair) no comodo",
+    "SEAT_ROLE_UNDECLARED": "assento sem papel declarado (furniture_role / core.furniture_roles.MODULE_ROLE): pode ser cadeira de jantar",
+}
+
+
+def _chair_constraints(behind_st, pull_st, unmeasured, cdetail) -> list[ConstraintResult]:
+    if unmeasured:
+        status, reason = unmeasured
+        why = {"why": _UNMEASURED_WHY[reason]}
+        return [ConstraintResult("circulation.behind_chairs", status, reason, evidence=why),
+                ConstraintResult("circulation.chair_pull", status, reason, evidence=why)]
     behind = min(c["livre_atras_m"] for c in cdetail)
     stuck = sum(1 for c in cdetail if not c["puxada_ok"])
     return [ConstraintResult("circulation.behind_chairs", behind_st, "MEASURED", measured=behind,
@@ -413,8 +423,11 @@ def _chair_constraints(behind_st, pull_st, na_reason, cdetail) -> list[Constrain
 
 def _chair_checks(blockers, cell_in):
     """Cadeiras da mesa de jantar: 0,70 m livres atras e cadeira PUXADA cabendo. Devolve (atras_ok, puxada_ok, detalhe,
-    motivo_na): `motivo_na` e None quando ha mesa E cadeiras para medir; senao o codigo de por que nao se aplica."""
-    mesa = [g for b, g in blockers if str(b.get("module", "")).startswith("Mesa de jantar")]
+    nao_medido): `nao_medido` e None quando mediu; senao (status, motivo) — NOT_APPLICABLE sem mesa ou sem cadeira de jantar,
+    BLOCKED_MISSING_INPUT se algum assento nao tem papel declarado (FP-054 #382: papel vem de `core.furniture_roles`,
+    nunca de prefixo do nome do modulo)."""
+    roles = [resolve_role(b)[0] for b, _ in blockers]
+    mesa = [g for (b, g), r in zip(blockers, roles) if r == "dining_table"]
     mesa_u = unary_union(mesa) if mesa else None
     # Uma cadeira = varias boxes (foot x4 / frame x2 / seat / back). O box
     # kind="seat" ja e o footprint INTEIRO da cadeira (_chair_parts: pernas,
@@ -424,12 +437,11 @@ def _chair_checks(blockers, cell_in):
     # partia as giradas 90 graus); clusterizar por buffer de 0.08m fundia as 2
     # cadeiras lado a lado da mesa 1.00x0.65 (centros a 0.50m, assento 0.42m
     # -> gap real 0.08m < 2x0.08) numa "cadeira" so, medida pelo ponto medio.
-    cad = {i: [g] for i, (b, g) in enumerate(blockers)
-           if str(b.get("module", "")).startswith("Cadeira") and b.get("kind") == "seat"}
+    cad = {i: [g] for i, ((b, g), r) in enumerate(zip(blockers, roles)) if r == "dining_chair" and is_seat(b)}
+    undeclared_seat = any(r is None and is_seat(b) for (b, _), r in zip(blockers, roles))
     behind_ok, pull_ok, cdetail = True, True, []
-    if mesa_u is not None and cad:
-        others = unary_union([g for b, g in blockers
-                              if not str(b.get("module", "")).startswith(("Cadeira", "Mesa de jantar"))])
+    if mesa_u is not None and cad and not undeclared_seat:
+        others = unary_union([g for (b, g), r in zip(blockers, roles) if r not in ("dining_chair", "dining_table")])
         for key, gs in cad.items():
             cg = unary_union(gs)
             c = cg.centroid
@@ -449,8 +461,11 @@ def _chair_checks(blockers, cell_in):
             cdetail.append({"cadeira": [round(c.x, 1), round(c.y, 1)],
                             "livre_atras_m": round(livre_atras, 2),
                             "atras_ok": b_ok, "puxada_ok": p_ok})
-    na = None if (mesa_u is not None and cad) else ("NO_DINING_TABLE" if mesa_u is None else "NO_DINING_CHAIRS")
-    return behind_ok, pull_ok, cdetail, na
+    if undeclared_seat:
+        return behind_ok, pull_ok, cdetail, ("BLOCKED_MISSING_INPUT", "SEAT_ROLE_UNDECLARED")
+    if mesa_u is None or not cad:
+        return behind_ok, pull_ok, cdetail, ("NOT_APPLICABLE", "NO_DINING_TABLE" if mesa_u is None else "NO_DINING_CHAIRS")
+    return behind_ok, pull_ok, cdetail, None
 
 
 def main():
