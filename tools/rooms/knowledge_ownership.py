@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 INVENTORY = ROOT / "docs/specs/fp042_inventory.v1.json"
 EXPLICIT = {
     ".impeccable/config.json": "agent_configuration",
+    ".mcp.json": "agent_tooling_configuration",
     "CLAUDE.md": "agent_project_instructions",
     "README.md": "project_readme",
     "docker-compose.rag.yml": "infrastructure_compose",

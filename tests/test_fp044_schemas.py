@@ -12,7 +12,8 @@ from core.schemas import SCHEMA_DIR, load, schema_path
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS = ("capability_catalog.v1", "correction_finding", "curadoria_verdict", "decision_audit_record",
              "design_spec_bundle", "furniture_goal.v1", "judged_variant", "rag_writeback_record", "reference_target.v1", "room_regression_report.v1", "shared_transform.v1", "specialist_fragment.v1",
-             "room_regression_request.v1", "specialist_profile.v1", "visual_findings")  # + 2 do FP-047/F1
+             "room_regression_request.v1", "specialist_profile.v1", "visual_findings",  # + 2 do FP-047/F1
+             "external_doc_evidence.v1")  # DOC-EXT-01 (docs/engineering)
 
 
 def _tracked() -> list[str]:

@@ -151,6 +151,7 @@ ROOT_ROLES = {
     "docker-compose.rag.yml": "Qdrant opcional do RAG (degrada para busca facetada se estiver desligado)",
     ".gitignore": "o que não versiona (`runs/`, scratch, caches)", ".gitattributes": "normalização de fim de linha",
     ".dockerignore": "contexto do build do compose do RAG",
+    ".mcp.json": "MCP de DESENVOLVIMENTO dos agentes (Context7, docs de libs externas); nao e runtime — ver `docs/engineering/`",
 }
 
 

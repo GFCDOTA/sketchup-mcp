@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # Entradas versionadas da raiz hoje. Alvo final (FP-044 §6): sem ops/ scripts/ .impeccable/ (configs/ renders/ textures/ sairam na F2; schemas/ na F3).
 ROOT_ALLOWED = {
     # arquivos do projeto
-    ".dockerignore", ".gitattributes", ".gitignore", "CLAUDE.md", "README.md", "docker-compose.rag.yml",
+    ".dockerignore", ".gitattributes", ".gitignore", ".mcp.json", "CLAUDE.md", "README.md", "docker-compose.rag.yml",
     "pyproject.toml", "uv.lock",   # docker-compose.yml (dashboard morto) arquivado em 2026-10-22 (D-002)
     # pastas com papel claro
     ".ai_bridge", ".claude", ".github", "artifacts", "assets", "core", "docs", "fixtures", "interior", "projects",

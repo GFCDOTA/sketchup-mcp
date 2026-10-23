@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "external_doc_evidence.v1",
+  "title": "Evidencia de documentacao externa (DOC-EXT-01)",
+  "description": "Registro de que a documentacao de uma tecnologia externa foi consultada NA VERSAO usada pelo repositorio, ou de que ela nao existe (lacuna declarada). Gravado pelo agente durante o desenvolvimento; validado offline por tools.navigation.external_doc_evidence. Nao e autoridade de dominio.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "dependency", "version", "version_source", "documentation_provider", "version_match",
+               "apis_verified", "checked_on", "verified", "notes"],
+  "properties": {
+    "schema_version": {"const": "external_doc_evidence.v1"},
+    "dependency": {"type": "string", "minLength": 1, "description": "nome do pacote/SDK/CLI (pacote Python = nome do uv.lock)"},
+    "version": {"type": "string", "minLength": 1, "description": "versao local que o codigo usa"},
+    "version_source": {"enum": ["uv.lock", "pyproject.toml", "runtime", "other"]},
+    "lockfile_version": {"type": ["string", "null"], "description": "versao no uv.lock quando difere do runtime (divergencia registrada)"},
+    "documentation_provider": {"enum": ["context7", "official_docs", "none"]},
+    "library_id": {"type": ["string", "null"], "description": "ID Context7 (preferir o versionado) ou URL da doc oficial"},
+    "version_match": {"enum": ["exact", "nearest", "unversioned", "unavailable"]},
+    "apis_verified": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "checked_on": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "verified": {"type": "boolean"},
+    "notes": {"type": "string"}
+  }
+}

@@ -1,0 +1,17 @@
+{
+ "schema_version": "external_doc_evidence.v1",
+ "dependency": "mcp",
+ "version": "1.28.0",
+ "version_source": "runtime",
+ "lockfile_version": "1.28.1",
+ "documentation_provider": "context7",
+ "library_id": "/modelcontextprotocol/python-sdk/v1.28.0",
+ "version_match": "exact",
+ "apis_verified": [
+  "mcp.server.fastmcp.FastMCP",
+  "FastMCP.tool (decorator @mcp.tool())"
+ ],
+ "checked_on": "2026-10-23",
+ "verified": true,
+ "notes": "Smoke test DOC-EXT. Versao lida do venv canonico (1.28.0); o uv.lock pina 1.28.1 (divergencia: follow-up). query-docs no ID versionado v1.28.0 devolveu docs/server.md da tag v1.28.0 com `from mcp.server.fastmcp import FastMCP` e `@mcp.tool()` — mesmo padrao de tools/mcp_server/server.py; conferido no runtime local (FastMCP('x').tool chamavel). Nenhum codigo alterado."
+}
