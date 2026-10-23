@@ -44,6 +44,7 @@ class DegreesOfFreedom:
     allow_mirror_entry: bool = False                         # box: trocar o lado da frente (porta) dentro do mesmo volume
     provenance: str = "PROJECT_POLICY"
     source: str = ""
+    rotations_deg: tuple[int, ...] = (0,)                    # giros do volume em torno do proprio centro (multiplos de 90)
 
     def errors(self) -> list[str]:
         lo, hi = self.slide_along_wall_m
@@ -54,6 +55,8 @@ class DegreesOfFreedom:
             out.append("passo precisa ser positivo")
         if not self.source:
             out.append("grau de liberdade sem fonte/decisao")
+        if 0 not in self.rotations_deg or any(r % 90 for r in self.rotations_deg):
+            out.append("giros precisam incluir 0 e ser multiplos de 90")
         return out
 
     def slide_values(self) -> list[float]:
