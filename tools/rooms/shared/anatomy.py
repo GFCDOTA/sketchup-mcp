@@ -233,6 +233,15 @@ class WardrobeSpec:
     door_t: float = 0.03         # espessura da porta (proud da frente)
     door_gap: float = 0.02       # fresta entre portas (divisao vertical)
     handle_h: float = 0.40       # altura util do puxador
+    # Proporcoes de CLASSE do guarda-roupa (antes literais no builder); origem em WARDROBE_MEASURE_ORIGINS.
+    plinth_setback: float = 0.04    # recuo do rodape em relacao ao corpo (cada lado e a frente/fundo)
+    door_margin: float = 0.03       # margem lateral do conjunto de portas
+    door_bottom_offset: float = 0.02  # folga da porta acima do rodape
+    door_top_offset: float = 0.03   # folga da porta abaixo do topo
+    handle_w: float = 0.03          # largura do puxador (barra vertical)
+    handle_proud: float = 0.04      # quanto o puxador avanca alem da espessura da porta
+    handle_inset_far: float = 0.06  # recuo da borda externa da porta (porta do lado esquerdo do centro)
+    handle_inset_near: float = 0.03  # recuo da borda externa da porta (porta do lado direito do centro)
     body_rgb: tuple = (96, 74, 54)      # corpo madeira escura
     door_rgb: tuple = (132, 106, 78)    # portas madeira/laca mais clara (le como painel)
     handle_rgb: tuple = (44, 44, 48)    # puxador metal escuro
@@ -255,6 +264,13 @@ class WardrobeSpec:
         d["n_doors"] = self.n_doors()
         d["required_parts"] = list(WARDROBE_REQUIRED_PARTS)
         return d
+
+
+# Origem de cada proporcao acima: valor de classe declarado no codigo (nao vem do PDF nem de pedido). Sem este mapa, uma medida
+# embutida parece decisao de projeto; com ele o gate de origem ve que e default declarado e pode ser sobrescrito pelo pedido.
+WARDROBE_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "plinth_setback", "door_margin", "door_bottom_offset", "door_top_offset", "handle_w", "handle_proud",
+    "handle_inset_far", "handle_inset_near")}
 
 
 def wardrobe_spec(width=1.80, depth=0.58, height=2.20, **overrides):

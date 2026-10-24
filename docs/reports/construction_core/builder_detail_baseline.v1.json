@@ -28,9 +28,9 @@
     },
     "tools/rooms/shared/wardrobe.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 10,
-      "distinct": 4,
-      "module_float_constants": 1
+      "embedded_float_literals": 0,
+      "distinct": 0,
+      "module_float_constants": 0
     },
     "tools/rooms/shared/bed.py": {
       "generation": "gen1_class_builder",
@@ -93,5 +93,5 @@
       "module_float_constants": 100
     }
   },
-  "total_gen1": 491
+  "total_gen1": 481
 }
