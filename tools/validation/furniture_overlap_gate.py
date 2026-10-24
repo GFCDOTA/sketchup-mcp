@@ -101,7 +101,7 @@ def _module_geom(boxes):
     return out
 
 
-def iter_overlap_pairs(geoms):
+def iter_overlap_pairs(geoms, area_min_m2=None, frac_min=None):
     """Núcleo CANÔNICO ÚNICO do pairwise loop — geoms: module -> (footprint,
     z0_in, z1_in, host_kinds) (saída de _module_geom). Aplica EXCLUDE,
     _is_embedded/host relationship e os thresholds Z_EPS_IN/AREA_MIN_M2/FRAC_MIN
@@ -110,7 +110,11 @@ def iter_overlap_pairs(geoms):
     reimplementa o loop (achado 2026-08-12: correction_fixes.py tinha cópia
     própria do MESMO loop, quebrou silenciosamente quando _module_geom mudou
     de forma — exatamente o anti-padrão "duplicated policy" que motivou o
-    optimizer_consistency_gate). Yields (mod_a, mod_b, inter_m2, frac)."""
+    optimizer_consistency_gate). Yields (mod_a, mod_b, inter_m2, frac).
+    `area_min_m2`/`frac_min` (padrao = AREA_MIN_M2/FRAC_MIN) existem para o solver FP-054, que precisa de um limiar estrito
+    para pecas que ELE moveu (o builder tolera roçar; o solver nao pode propor interpenetracao)."""
+    area_min_m2 = AREA_MIN_M2 if area_min_m2 is None else area_min_m2
+    frac_min = FRAC_MIN if frac_min is None else frac_min
     geoms = {m: g for m, g in geoms.items()
              if not any(e in m.lower() for e in EXCLUDE)}
     mods = sorted(geoms)
@@ -130,11 +134,11 @@ def iter_overlap_pairs(geoms):
             if z_ov <= Z_EPS_IN:                       # alturas não se cruzam -> ok (empilhado)
                 continue
             inter = pa.intersection(pb).area / (M2IN * M2IN)   # m²
-            if inter < AREA_MIN_M2:
+            if inter < area_min_m2:
                 continue
             amin = min(pa.area, pb.area) / (M2IN * M2IN)
             frac = inter / amin if amin else 0.0
-            if frac >= FRAC_MIN:
+            if frac >= frac_min:
                 yield mods[i], mods[j], inter, frac
 
 

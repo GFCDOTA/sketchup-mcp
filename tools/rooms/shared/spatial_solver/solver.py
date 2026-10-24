@@ -17,7 +17,7 @@ from tools.rooms.shared.spatial_solver.candidates import (
 from tools.rooms.shared.spatial_solver.contracts import SolverProblem, validate_problem
 from tools.rooms.shared.spatial_solver.engine import evaluate_layout
 
-DEFAULT_MAX_CANDIDATES = 5000
+DEFAULT_MAX_CANDIDATES = 10000                # cobre o maior espaco declarado hoje (6 724, banheiros)
 NEIGHBORHOOD_IN = 39.37
 
 

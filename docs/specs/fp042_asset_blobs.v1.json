@@ -4792,6 +4792,30 @@
       "blob_sha": "fe1d95858ed47196a4362f794032d0ae1579868c",
       "blob_size": 86965,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f2e/r004_before_after.png",
+      "blob_sha": "ebb22a1bda9990263647f9a1aa6a8e412261ccb8",
+      "blob_size": 47290,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f2e/r005_before_after.png",
+      "blob_sha": "12cd6ec006d5837fa4db052105937d9d42b9bac4",
+      "blob_size": 102749,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f2e/r006_before_after.png",
+      "blob_sha": "4da5bed99ab159516da6e13cb298c0081a5355db",
+      "blob_size": 116765,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f2e/r007_before_after.png",
+      "blob_sha": "d7259e4a689be983c1c7e883b4c128e8c6f3b8a7",
+      "blob_size": 118552,
+      "owner_group": "artifacts"
     }
   ]
 }
