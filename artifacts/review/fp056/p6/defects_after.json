@@ -1,0 +1,207 @@
+{
+ "defects_after": [
+  {
+   "key": "r000|CONTAINMENT|rug",
+   "cause": "R1",
+   "measure": 0.056,
+   "unit": "m",
+   "baseline_measure": 0.056
+  },
+  {
+   "key": "r000|WALL|rug",
+   "cause": "R1",
+   "measure": 0.05603,
+   "unit": "m",
+   "baseline_measure": 0.05603
+  },
+  {
+   "key": "r003|CONTAINMENT|rug",
+   "cause": "R1",
+   "measure": 0.0559,
+   "unit": "m",
+   "baseline_measure": 0.0559
+  },
+  {
+   "key": "r003|WALL|rug",
+   "cause": "R1",
+   "measure": 0.05593,
+   "unit": "m",
+   "baseline_measure": 0.05593
+  },
+  {
+   "key": "r004|CONTAINMENT|base_cabinet_01",
+   "cause": "R1",
+   "measure": 0.0046,
+   "unit": "m",
+   "baseline_measure": 0.0046
+  },
+  {
+   "key": "r004|CONTAINMENT|countertop",
+   "cause": "R1",
+   "measure": 0.0046,
+   "unit": "m",
+   "baseline_measure": 0.0046
+  },
+  {
+   "key": "r004|WALL|backsplash",
+   "cause": "R1",
+   "measure": 0.00052,
+   "unit": "m",
+   "baseline_measure": 0.00052
+  },
+  {
+   "key": "r004|WALL|base_cabinet_01",
+   "cause": "R1",
+   "measure": 0.00462,
+   "unit": "m",
+   "baseline_measure": 0.00462
+  },
+  {
+   "key": "r004|WALL|countertop",
+   "cause": "R1",
+   "measure": 0.00464,
+   "unit": "m",
+   "baseline_measure": 0.00464
+  },
+  {
+   "key": "r005|CONTAINMENT|Box",
+   "cause": "R1",
+   "measure": 0.062,
+   "unit": "m",
+   "baseline_measure": 0.062
+  },
+  {
+   "key": "r005|WALL|Box",
+   "cause": "R1",
+   "measure": 0.05082,
+   "unit": "m",
+   "baseline_measure": 0.05082
+  },
+  {
+   "key": "r006|CONTAINMENT|Box",
+   "cause": "R2",
+   "measure": 0.0224,
+   "unit": "m",
+   "baseline_measure": 0.0224
+  },
+  {
+   "key": "r006|WALL|Box",
+   "cause": "R2",
+   "measure": 0.0171,
+   "unit": "m",
+   "baseline_measure": 0.0171
+  },
+  {
+   "key": "r000|CONTAINMENT|Guarda-roupa",
+   "cause": "R2b",
+   "measure": 0.0078,
+   "unit": "m",
+   "baseline_measure": 0.0078
+  },
+  {
+   "key": "r002|CONTAINMENT|Painel TV",
+   "cause": "R2b",
+   "measure": 0.0091,
+   "unit": "m",
+   "baseline_measure": 0.0091
+  },
+  {
+   "key": "r003|CONTAINMENT|Painel cabeceira",
+   "cause": "R2b",
+   "measure": 0.0152,
+   "unit": "m",
+   "baseline_measure": 0.0152
+  },
+  {
+   "key": "r005|CONTAINMENT|Bancada",
+   "cause": "R2b",
+   "measure": 0.0193,
+   "unit": "m",
+   "baseline_measure": 0.0193
+  },
+  {
+   "key": "r006|CONTAINMENT|Bancada",
+   "cause": "R2b",
+   "measure": 0.0191,
+   "unit": "m",
+   "baseline_measure": 0.0191
+  },
+  {
+   "key": "r000|OBJECTS|Cama+Painel cabeceira",
+   "cause": "R3",
+   "measure": 0.03002,
+   "unit": "m",
+   "baseline_measure": 0.03002
+  },
+  {
+   "key": "r003|OBJECTS|Cama+Painel cabeceira",
+   "cause": "R3",
+   "measure": 0.02992,
+   "unit": "m",
+   "baseline_measure": 0.02992
+  },
+  {
+   "key": "r004|OBJECTS|backsplash+cooktop_module",
+   "cause": "R3",
+   "measure": 0.04623,
+   "unit": "m",
+   "baseline_measure": 0.04623
+  },
+  {
+   "key": "r004|OBJECTS|backsplash+sink_module",
+   "cause": "R3",
+   "measure": 0.04621,
+   "unit": "m",
+   "baseline_measure": 0.04621
+  },
+  {
+   "key": "r005|OBJECTS|Bancada+Enxoval",
+   "cause": "R3",
+   "measure": 0.0887,
+   "unit": "m",
+   "baseline_measure": 0.0887
+  },
+  {
+   "key": "r005|OBJECTS|Enxoval+Espelho",
+   "cause": "R3",
+   "measure": 0.03104,
+   "unit": "m",
+   "baseline_measure": 0.03104
+  },
+  {
+   "key": "r005|OBJECTS|Enxoval+Vaso",
+   "cause": "R3",
+   "measure": 0.16383,
+   "unit": "m",
+   "baseline_measure": 0.16383
+  },
+  {
+   "key": "r006|OBJECTS|Bancada+Enxoval",
+   "cause": "R3",
+   "measure": 0.09392,
+   "unit": "m",
+   "baseline_measure": 0.09392
+  },
+  {
+   "key": "r006|OBJECTS|Enxoval+Espelho",
+   "cause": "R3",
+   "measure": 0.03092,
+   "unit": "m",
+   "baseline_measure": 0.03092
+  },
+  {
+   "key": "r000|DOOR|h_o003",
+   "cause": "R5",
+   "measure": 41.0,
+   "unit": "deg",
+   "baseline_measure": 41.0
+  },
+  {
+   "key": "r003|DOOR|h_o004",
+   "cause": "R5",
+   "measure": 74.0,
+   "unit": "deg",
+   "baseline_measure": 74.0
+  }
+ ]
+}
