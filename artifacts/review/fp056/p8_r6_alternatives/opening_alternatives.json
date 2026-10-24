@@ -1,0 +1,18 @@
+{
+  "note": "Alternativas no nivel do BUILDER do box (abertura/vidro fixo), solver F2 por alternativa. Medidas em develop@5a42624 (sessao 2026-10-24). Todas INFEASIBLE.",
+  "r005_BANHO_01": [
+    {"alt": "atual (vidro fixo 0,36)", "status": "INFEASIBLE", "candidates": 6724, "violations": ["SHOWER_ENTRY_WIDTH: vao livre 0,327 de 0,411 declarados (min 0,60)"]},
+    {"alt": "vidro fixo 0,30", "status": "INFEASIBLE", "candidates": 6724, "violations": ["SHOWER_ENTRY_WIDTH: 0,166 de 0,250", "SHOWER_REACH_PATH: gargalo"]},
+    {"alt": "vidro fixo 0,24", "status": "INFEASIBLE", "candidates": 6724, "violations": ["SHOWER_ENTRY_WIDTH: 0,106 de 0,190", "SHOWER_REACH_PATH: PATH_DISCONNECTED"]},
+    {"alt": "abertura 0,42", "status": "INFEASIBLE", "candidates": 6724, "violations": ["SHOWER_ENTRY_WIDTH: 0,286 de 0,370", "SHOWER_REACH_PATH: gargalo"]},
+    {"alt": "abertura 0,48", "status": "INFEASIBLE", "candidates": 6724, "violations": ["SHOWER_ENTRY_WIDTH: 0,346 de 0,430"]}
+  ],
+  "r006_BANHO_02": [
+    {"alt": "atual", "status": "INFEASIBLE", "candidates": 6724, "violations": ["SHOWER_ENTRY_WIDTH: 0,310 de 0,310 declarados (min 0,60)", "SHOWER_REACH_PATH: 0,499 (min 0,60)", "TOILET_FRONT_CLEARANCE: 0,523 (min 0,60)"]},
+    {"alt": "abertura 0,48", "status": "INFEASIBLE", "candidates": 6724, "violations": ["SHOWER_ENTRY_WIDTH: 0,430 de 0,430 declarados (min 0,60)", "SHOWER_REACH_PATH: 0,499", "TOILET_FRONT_CLEARANCE: 0,523"]}
+  ],
+  "r007_LAVABO": [
+    {"alt": "atual", "status": "INFEASIBLE", "candidates": 1681, "violations": ["TOILET_FRONT_CLEARANCE: 0,515 (min 0,60)"]},
+    {"alt": "abertura 0,48 (sem box no lavabo: sem efeito esperado)", "status": "INFEASIBLE", "candidates": 1681, "violations": ["TOILET_FRONT_CLEARANCE: 0,515"]}
+  ]
+}

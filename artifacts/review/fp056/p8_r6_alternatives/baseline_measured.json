@@ -1,0 +1,106 @@
+{
+ "r005": {
+  "name": "BANHO 01",
+  "status": "INFEASIBLE",
+  "candidates": 6724,
+  "seconds": 623,
+  "hard_violations": [
+   {
+    "code": "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+    "object_id": "r005:Box",
+    "detail": "vao livre 0.327 m de 0.411 m declarados",
+    "measured": 0.327,
+    "threshold": 0.6,
+    "unit": "m",
+    "culprit": "WALL",
+    "constraint": "shower.entry_width"
+   }
+  ],
+  "moves": [
+   "r005:Vaso"
+  ],
+  "metrics": {
+   "hard_violations": 1,
+   "min_margin_m": -0.273,
+   "sum_margin_m": 1.917,
+   "measured_rules": 7
+  }
+ },
+ "r006": {
+  "name": "BANHO 02",
+  "status": "INFEASIBLE",
+  "candidates": 6724,
+  "seconds": 620,
+  "hard_violations": [
+   {
+    "code": "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+    "object_id": "r006:Box",
+    "detail": "vao livre 0.310 m de 0.310 m declarados",
+    "measured": 0.31,
+    "threshold": 0.6,
+    "unit": "m",
+    "culprit": "DECLARED_ENTRY",
+    "constraint": "shower.entry_width"
+   },
+   {
+    "code": "FUNCTIONAL_SHOWER_REACH_PATH",
+    "object_id": "r006:Box",
+    "detail": "MEASURED_PATH_WIDTH; gargalo em [354.19, 562.73]",
+    "measured": 0.499,
+    "threshold": 0.6,
+    "unit": "m",
+    "culprit": "BOTTLENECK",
+    "constraint": "shower.reach_path"
+   },
+   {
+    "code": "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+    "object_id": "r006:Vaso",
+    "detail": "MEASURED_FRONT_DEPTH",
+    "measured": 0.523,
+    "threshold": 0.6,
+    "unit": "m",
+    "culprit": "WALL",
+    "constraint": "toilet.front_clearance"
+   }
+  ],
+  "moves": [
+   "r006:Bancada",
+   "r006:Box",
+   "r006:Vaso"
+  ],
+  "metrics": {
+   "hard_violations": 3,
+   "min_margin_m": -0.29,
+   "sum_margin_m": -0.019,
+   "measured_rules": 7
+  }
+ },
+ "r007": {
+  "name": "LAVABO",
+  "status": "INFEASIBLE",
+  "candidates": 1681,
+  "seconds": 130,
+  "hard_violations": [
+   {
+    "code": "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+    "object_id": "r007:Vaso",
+    "detail": "MEASURED_FRONT_DEPTH",
+    "measured": 0.515,
+    "threshold": 0.6,
+    "unit": "m",
+    "culprit": "WALL",
+    "constraint": "toilet.front_clearance"
+   }
+  ],
+  "moves": [
+   "r007:Bancada",
+   "r007:Vaso"
+  ],
+  "metrics": {
+   "hard_violations": 1,
+   "min_margin_m": -0.085,
+   "sum_margin_m": 0.678,
+   "measured_rules": 4
+  }
+ }
+}
