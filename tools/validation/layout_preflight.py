@@ -5,6 +5,8 @@ antes do SketchUp. Este pre-voo roda, para cada comodo que recebeu movel:
 
   - `circulation_gate.gate` (corredor entre portais + cadeiras), com o contrato tipado da F1-01;
   - a sobreposicao movel-sobre-movel do comodo (`furniture_overlap_gate.pairwise_overlap`, mesmo nucleo do gate MCP);
+  - interpenetracao ENTRE MODULOS no gemeo em caixas (`box_geometry`), baseline-aware: o limiar por modulo do `furniture_overlap`
+    nao ve 3 cm de papeleira dentro do gabinete; aqui defeito OBJECTS NOVO ou PIOR que o registro (FP-055 P4) reprova (#502);
   - movel dentro de parede, sobre guarda-corpo/peitoril (FP-056 #434), no giro de porta e na VARREDURA REAL da folha (#500;
     o que ja esta em `docs/governance/known_gaps.json: door_sweep` e baseline conhecido, nao reprova de novo) (`room_collisions.audit`, o mesmo da regressao FP-047) — acrescentado depois que
     uma variante da Suite 01 (#381) punha o criado-mudo 1,8 dm2 dentro da parede e passava;
@@ -19,7 +21,28 @@ from __future__ import annotations
 
 from core.constraint_result import combine
 
-GATES = ("circulation", "furniture_overlap", "room_collisions")
+GATES = ("circulation", "furniture_overlap", "module_interpenetration", "room_collisions")
+
+
+def planta74_twin(consensus_path) -> dict | None:
+    """Contexto do gemeo para a planta_74 (unica com baseline registrado); None para outro consensus: nada medido, NOT_APPLICABLE."""
+    import json
+    from pathlib import Path
+
+    from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS
+    if Path(consensus_path).resolve() != Path(PLANTA_74_CONSENSUS).resolve():
+        return None
+    root = Path(__file__).resolve().parents[2]
+    base = json.loads((root / "artifacts/review/fp055/p4/defect_baseline.json").read_text("utf-8"))["defects"]
+    from tools.validation import known_gaps
+    return {"consensus_path": Path(PLANTA_74_CONSENSUS), "baseline": base, "borderline": set(known_gaps.load().get("twin_borderline", {}))}
+
+
+def _interpenetration(twin_regression: dict, room_id: str) -> tuple[str, dict]:
+    prefix = f"{room_id}|OBJECTS|"
+    new = [d["key"] for d in twin_regression["new"] if d["key"].startswith(prefix)]
+    worse = [d["key"] for d in twin_regression["worse"] if d["key"].startswith(prefix)]
+    return ("FAIL", {"new": new, "worse": worse}) if new or worse else ("PASS", {})
 
 
 def _circulation(con: dict, boxes: list[dict], room_id: str) -> tuple[str, dict]:
@@ -57,8 +80,9 @@ def _collisions(audit: dict, room_name: str, n_boxes: int) -> tuple[str, dict]:
     return "PASS", {}
 
 
-def preflight(con: dict, boxes: list[dict], rooms) -> dict:
-    """rooms = resumo do `collect_boxes`: (room_id, nome, tipo, resultado, n_caixas). So comodos com caixas entram."""
+def preflight(con: dict, boxes: list[dict], rooms, twin: dict | None = None) -> dict:
+    """rooms = resumo do `collect_boxes`: (room_id, nome, tipo, resultado, n_caixas). So comodos com caixas entram.
+    `twin` (opcional, `planta74_twin`): liga a interpenetracao entre modulos contra o baseline; sem ele o gate e NOT_APPLICABLE."""
     import copy
 
     from tools.validation import room_collisions
@@ -67,6 +91,15 @@ def preflight(con: dict, boxes: list[dict], rooms) -> dict:
         audit, audit_error = room_collisions.audit(con, copy.deepcopy(boxes)), None
     except Exception as exc:  # noqa: BLE001 — vira BLOCKED por comodo abaixo
         audit, audit_error = None, f"{type(exc).__name__}: {str(exc)[:160]}"
+    twin_reg, twin_error = None, None
+    if twin is not None:
+        try:
+            from tools.validation import box_geometry, defect_baseline
+            reports = box_geometry.validate_boxes(con, copy.deepcopy(boxes), twin["consensus_path"])
+            twin_reg = defect_baseline.regression(reports, twin["baseline"])
+            twin_reg["new"] = [d for d in twin_reg["new"] if d["key"] not in twin.get("borderline", ())]
+        except Exception as exc:  # noqa: BLE001 — gemeo quebrado e achado: BLOCKED por comodo
+            twin_error = f"{type(exc).__name__}: {str(exc)[:160]}"
     for room_id, name, _type, _result, n_boxes in rooms:
         if not n_boxes:
             continue
@@ -75,8 +108,15 @@ def preflight(con: dict, boxes: list[dict], rooms) -> dict:
             if audit_error:
                 raise RuntimeError(audit_error)
             return _collisions(audit, name, len(room_boxes))
+        def interpenetration(room_id=room_id):
+            if twin is None:
+                return "NOT_APPLICABLE", {"twin": "sem baseline para este consensus"}
+            if twin_error:
+                raise RuntimeError(twin_error)
+            return _interpenetration(twin_reg, room_id)
         for gate, run in (("circulation", lambda: _circulation(con, boxes, room_id)),
                           ("furniture_overlap", lambda: _overlap(room_boxes)),
+                          ("module_interpenetration", interpenetration),
                           ("room_collisions", collisions)):
             try:
                 status, reasons = run()

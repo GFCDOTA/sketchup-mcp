@@ -203,7 +203,7 @@ def main(argv=None):
 
     # FP-055 P3 (#424): o mesmo pre-voo obrigatorio do su_furnish (circulacao, sobreposicao, parede/barreira/giro de porta).
     from tools.validation import layout_preflight
-    pre = layout_preflight.preflight(con, boxes, summary)
+    pre = layout_preflight.preflight(con, boxes, summary, layout_preflight.planta74_twin(CONSENSUS))
     if not layout_preflight.allows_materialization(pre):
         print(f"[furnish-apt] PRE-VOO {pre['status']}: nao materializa.")
         for row in pre["blocking"]:
