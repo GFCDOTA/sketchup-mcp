@@ -295,6 +295,15 @@ class NightstandSpec:
     foot_h: float = 0.08
     top_t: float = 0.03          # espessura do tampo
     drawer_t: float = 0.02       # frente da gaveta (proud)
+    # Proporcoes de CLASSE do criado-mudo (antes literais no builder); origem em NIGHTSTAND_MEASURE_ORIGINS.
+    foot_size: float = 0.05           # lado da secao quadrada do pe
+    edge_inset: float = 0.02          # recuo dos pes e do corpo em relacao ao tampo
+    drawer_bottom_gap: float = 0.04   # folga da gaveta acima dos pes
+    drawer_top_gap: float = 0.03      # folga da gaveta abaixo do tampo
+    drawer_side_inset: float = 0.05   # recuo lateral da frente da gaveta
+    knob_half_w: float = 0.03         # meia largura do puxador
+    knob_proud: float = 0.04          # quanto o puxador avanca alem da frente da gaveta
+    knob_half_h: float = 0.015        # meia altura do puxador
     body_rgb: tuple = (120, 95, 68)     # corpo madeira
     top_rgb: tuple = (82, 64, 48)       # tampo mais escuro (contraste)
     drawer_rgb: tuple = (142, 116, 86)  # frente de gaveta mais clara
@@ -314,6 +323,12 @@ class NightstandSpec:
         d["bbox_m"] = self.bbox_m()
         d["required_parts"] = list(NIGHTSTAND_REQUIRED_PARTS)
         return d
+
+
+# Origem de cada proporcao acima: valor de classe declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+NIGHTSTAND_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "foot_size", "edge_inset", "drawer_bottom_gap", "drawer_top_gap", "drawer_side_inset", "knob_half_w", "knob_proud",
+    "knob_half_h")}
 
 
 def nightstand_spec(width=0.45, depth=0.40, height=0.55, **overrides):
