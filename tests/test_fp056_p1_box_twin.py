@@ -37,7 +37,7 @@ def test_box_twin_reproduces_the_built_defects_of_the_rooms_not_touched_by_the_f
 
 
 @pytest.mark.planta74_scale
-def test_service_fix_resolves_the_as_defects_without_new_ones():
+def test_service_fix_resolves_four_as_defects_and_the_omitted_counter_stays_a_program_regression():
     from tools.furnish_apartment import collect_boxes
     from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS
     from tools.validation import box_geometry as bx
@@ -47,6 +47,12 @@ def test_service_fix_resolves_the_as_defects_without_new_ones():
         boxes, _ = collect_boxes(con)
     rep = bx.validate_boxes(con, boxes, PLANTA_74_CONSENSUS, {"r001": "A.S. | TERRACO SOCIAL | TERRACO TECNICO"})
     base = json.loads((ROOT / "artifacts/review/fp055/p4/defect_baseline.json").read_text("utf-8"))["defects"]
-    r = db.regression(rep, base)
-    assert r["status"] == "PASS" and not r["new"]
-    assert {k for k in r["resolved"]} == {b["key"] for b in base if b["room_id"] == "r001"}
+    program = json.loads((ROOT / "artifacts/review/fp056/p2/program_baseline.json").read_text("utf-8"))["program"]
+    r = db.regression(rep, base, program)
+    assert not r["new"] and not r["worse"]
+    # 4 corrigidos por POSICAO; a bancada gourmet foi OMITIDA (circulacao) — o defeito dela sumiu com a peca, nao foi
+    # corrigido, e a perda de programa fica reprovada ate a decisao AS-1 do Felipe (docs/reports/fp056/p2/README.md)
+    assert set(r["resolved"]) == {"r001|CONTAINMENT|Armario de servico", "r001|CONTAINMENT|Condensadora",
+                                  "r001|CONTAINMENT|Jardineira", "r001|CONTAINMENT|Maquina de lavar"}
+    assert r["vanished_with_piece"] == ["r001|CONTAINMENT|Bancada gourmet"]
+    assert r["status"] == "FAIL" and r["missing_program"] == ["r001|PROGRAM|Bancada gourmet", "r001|PROGRAM|Banqueta"]

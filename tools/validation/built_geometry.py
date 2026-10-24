@@ -270,6 +270,7 @@ def validate_room(idx: dict, room_id: str, room_name: str, *, doors=None, walls=
     floor = room_floor(idx, room_id)
     walls = walls if walls is not None else built_walls(idx)
     mods = module_groups(idx, room_name)
+    out["modules"] = sorted(mods)                       # programa construido (o gate de nao regressao confere o que sumiu)
     if floor is None or floor.is_empty or not mods:
         out["checks"] = {k: "BLOCKED" for k in keys}
         out["findings"].append({"check": "ALL", "reason": "piso construido ausente" if floor is None or floor.is_empty

@@ -95,7 +95,7 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 | Home office | [`tools/rooms/home_office/`](tools/rooms/home_office/) | reusa outro cômodo (bedroom) | — | 1 | 1 | 5 (1/0) |
 | Varanda | [`tools/rooms/balcony/`](tools/rooms/balcony/) | só consultivo | — | 1 | 1 | 5 (1/0) |
 | Circulação | [`tools/rooms/circulation/`](tools/rooms/circulation/) | só valida | 1 L1 | — | 1 | 5 (1/0) |
-| Compartilhado | [`tools/rooms/shared/`](tools/rooms/shared/) | peças usadas por ≥ 2 cômodos | 2 capacidades | — | — | 48 |
+| Compartilhado | [`tools/rooms/shared/`](tools/rooms/shared/) | peças usadas por ≥ 2 cômodos | 2 capacidades | — | — | 49 |
 
 <!-- rooms-index:end -->
 

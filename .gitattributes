@@ -1,2 +1,6 @@
 # mvnw e script sh: CRLF quebra o shebang em CI Linux (gotcha ja pago antes).
 inspector-desktop/mvnw text eol=lf
+
+# Evidencia bruta (FP-056 P2): bytes preservados exatamente como capturados (sem conversao CRLF<->LF), para o SHA-256 gravado
+# no momento da captura continuar valendo no repositorio. Convencao: artifacts/review/<frente>/<fase>/raw_evidence/
+artifacts/review/**/raw_evidence/** -text

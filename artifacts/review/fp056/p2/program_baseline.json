@@ -1,0 +1,86 @@
+{
+ "source_geometry": "artifacts/review/fp055/p4/raw/baseline_original_inspect_geometry.json",
+ "source_sha256": "5bd62f5071bcab5cf01a917ab68dcc037d246ef1c184b3c5078023b9c50a4c5e",
+ "note": "programa (modulos construidos) por comodo no apartamento ORIGINAL; complementa defect_baseline.json da FP-055 P4",
+ "program": {
+  "r000": [
+   "Cama",
+   "Criado-mudo 1",
+   "Criado-mudo 2",
+   "Escrivaninha",
+   "Guarda-roupa",
+   "Painel cabeceira",
+   "rug"
+  ],
+  "r001": [
+   "Armario de servico",
+   "Bancada gourmet",
+   "Banqueta",
+   "Churrasqueira",
+   "Coifa",
+   "Condensadora",
+   "Jardineira",
+   "Maquina de lavar",
+   "Prateleira servico",
+   "Tanque",
+   "Varal de teto"
+  ],
+  "r002": [
+   "Cadeira jantar",
+   "Mesa de jantar",
+   "Painel TV",
+   "Pendente",
+   "Rack TV",
+   "Sofa",
+   "TV",
+   "Tapete"
+  ],
+  "r003": [
+   "Cama",
+   "Criado-mudo 1",
+   "Criado-mudo 2",
+   "Guarda-roupa",
+   "Painel cabeceira",
+   "rug"
+  ],
+  "r004": [
+   "backsplash",
+   "base_cabinet_01",
+   "cooktop_module",
+   "countertop",
+   "decor_board",
+   "decor_vaso",
+   "fridge",
+   "hood",
+   "sink_module",
+   "upper_cabinet_01",
+   "upper_cabinet_02"
+  ],
+  "r005": [
+   "Bancada",
+   "Box",
+   "Enxoval",
+   "Espelho",
+   "Pele",
+   "PeleTeto",
+   "Vaso"
+  ],
+  "r006": [
+   "Bancada",
+   "Box",
+   "Enxoval",
+   "Espelho",
+   "Pele",
+   "PeleTeto",
+   "Vaso"
+  ],
+  "r007": [
+   "Bancada",
+   "Enxoval",
+   "Espelho",
+   "Pele",
+   "PeleTeto",
+   "Vaso"
+  ]
+ }
+}
