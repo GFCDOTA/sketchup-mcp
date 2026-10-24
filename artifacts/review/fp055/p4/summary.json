@@ -1,0 +1,1722 @@
+{
+ "commit": "ac3c1c9683ff57efa1edce0fbfd34ae8316e0083",
+ "dirty": false,
+ "cases": [
+  {
+   "case": "A_fixture_valid",
+   "status": "BUILT",
+   "proposal": {
+    "proposal_id": "r_syn:r_syn:Vaso:+0.34",
+    "room_id": "r_syn",
+    "status": "FEASIBLE",
+    "candidate_id": "r_syn:Vaso:+0.34",
+    "moves": [
+     {
+      "object_id": "r_syn:Vaso",
+      "slide_m": 0.34,
+      "mirrored": false,
+      "rotation_deg": 0
+     }
+    ],
+    "hard_violations": [],
+    "metrics": {
+     "hard_violations": 0,
+     "min_margin_m": 0.469,
+     "sum_margin_m": 1.604,
+     "measured_rules": 2
+    },
+    "rank": 1,
+    "candidates_total": 41,
+    "explanation": "viavel; primeira da ordem",
+    "algorithm_version": "fp054-f2.v1",
+    "policy_version": "bathroom.solver_policy.v1"
+   },
+   "build": {
+    "status": "BUILT",
+    "valid": true,
+    "geometric_validity": "PASS",
+    "functional_validity": "PASS",
+    "functional": {
+     "r_syn": {
+      "status": "PASS",
+      "hard_violations": [],
+      "basis": "motor F2 sobre as caixas provadas iguais ao construido (<= 5 mm)"
+     }
+    },
+    "visual": "PENDING_HUMAN",
+    "raw_evidence": {
+     "inspect_geometry": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\geometry\\inspect_geometry_result.json",
+     "sha256": "14b56e7e85f89e44b347d0a49d4a9daa8a76f64e54f87364e978bdbca7feba58",
+     "bytes": 16340
+    },
+    "validator": {
+     "built_geometry": "v2 (area/contato/profundidade direcional + movimento de porta)",
+     "eps_depth_m": 0.0005
+    },
+    "coordinate_contract": {
+     "status": "OK",
+     "shell": {
+      "pt_to_m": 0.03518518518518518,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.expected_pt_to_m(E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\consensus_synthetic.json)",
+      "pt_to_in": 1.385243511227763
+     },
+     "process": {
+      "pt_to_m": 0.03518518518518518,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.PT_TO_M (processo)",
+      "pt_to_in": 1.385243511227763
+     },
+     "transforms": [
+      {
+       "from": "consensus",
+       "to": "plano",
+       "op": "x pt_to_m (0.03518519 m/pt)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "plano",
+       "to": "caixas solver/builder",
+       "op": "/ 0.0254 (m -> in)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "caixas",
+       "to": "mundo SketchUp",
+       "op": "identidade (polegadas)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "mundo SketchUp",
+       "to": "inspecao",
+       "op": "x 0.0254 (in -> m)",
+       "origin": "PDF (0,0)"
+      }
+     ],
+     "reason": null
+    },
+    "frame_verification": {
+     "wall_iou": 0.9998,
+     "min_iou": 0.95,
+     "expected_area_m2": 1.748,
+     "built_area_m2": 1.748,
+     "thresholds": {
+      "cover_min": 0.99,
+      "excess_max": 0.01,
+      "hausdorff_max_m": 0.01,
+      "dim_tol_m": 0.01
+     },
+     "walls_checked": 4,
+     "walls_failed": [],
+     "per_wall": [
+      {
+       "wall": "w_bottom",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w_top",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w_left",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w_right",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      }
+     ],
+     "status": "OK"
+    },
+    "environment": {
+     "r_syn": {
+      "room_id": "r_syn",
+      "room": "SINTETICO",
+      "checks": {
+       "EXTRACTION": "PASS",
+       "CONTAINMENT": "PASS",
+       "WALL": "PASS",
+       "DOOR": "PASS",
+       "OBJECTS": "PASS"
+      },
+      "findings": [],
+      "finishes": [],
+      "version": "v2",
+      "eps_depth_m": 0.0005,
+      "extraction_gap_m": {
+       "Vaso": 0.0,
+       "Armario": 0.0
+      },
+      "floor_area_m2": 5.3969,
+      "floor_parts": 1,
+      "door_motion": {}
+     }
+    },
+    "environment_status": {
+     "r_syn": "PASS"
+    },
+    "proposal_conformance": true,
+    "legacy_bbox_check_not_decisive": {
+     "problems": [],
+     "would_pass": true
+    },
+    "unsafe_skip_scale_check": false,
+    "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\build\\planta_74_furnished.skp",
+    "skp_sha256": "fba0a19cc409639f2e284b1478388035e2826d233631ffb84b58b0926e49bd0f",
+    "renders": {
+     "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\build\\planta_74_furnished.skp",
+     "before": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\build\\planta_74_furnished_before_top.png",
+     "top": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\build\\planta_74_furnished_after_top.png",
+     "iso": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\build\\planta_74_furnished_after_iso.png",
+     "log": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\build\\planta_74_furnished_log.txt"
+    },
+    "build_result": {
+     "requested": [
+      "SINTETICO · Armario",
+      "SINTETICO · Vaso"
+     ],
+     "built": [
+      "SINTETICO · Armario",
+      "SINTETICO · Vaso"
+     ],
+     "omitted": {},
+     "divergences": [],
+     "sketchup_version": "26.0.429",
+     "errors": []
+    },
+    "sketchup_version": "26.0.429",
+    "pids_opened": [
+     3300,
+     33608,
+     39544
+    ],
+    "pids_closed": [
+     {
+      "status": "PARTIAL",
+      "closed": [],
+      "still_running": [
+       3300
+      ]
+     },
+     {
+      "status": "CLOSED",
+      "closed": [
+       33608
+      ],
+      "still_running": []
+     },
+     {
+      "status": "CLOSED",
+      "closed": [
+       39544
+      ],
+      "still_running": []
+     }
+    ]
+   },
+   "ledger": {
+    "builder.tools.rooms.bathroom.layout.build_boxes": {
+     "state": "CONSUMED",
+     "trail": [
+      {
+       "state": "AVAILABLE",
+       "evidence": null
+      },
+      {
+       "state": "INVOKED",
+       "evidence": "caixas do comodo (estado ORIGINAL)"
+      },
+      {
+       "state": "CONSUMED",
+       "evidence": "r_syn: caixas do builder = estado ORIGINAL do problema"
+      }
+     ]
+    },
+    "f1c.functional_interfaces": {
+     "state": "CONSUMED",
+     "trail": [
+      {
+       "state": "AVAILABLE",
+       "evidence": null
+      },
+      {
+       "state": "INVOKED",
+       "evidence": "collect_interfaces(con, caixas)"
+      },
+      {
+       "state": "CONSUMED",
+       "evidence": "r_syn: 1 interface(s) semantica(s) no problema"
+      }
+     ]
+    },
+    "f2.spatial_solver": {
+     "state": "VALIDATED",
+     "trail": [
+      {
+       "state": "AVAILABLE",
+       "evidence": null
+      },
+      {
+       "state": "INVOKED",
+       "evidence": "r_syn: 41/41 candidatos"
+      },
+      {
+       "state": "CONSUMED",
+       "evidence": "r_syn: proposta r_syn:r_syn:Vaso:+0.34 (FEASIBLE) da ordem lexicografica"
+      },
+      {
+       "state": "REFLECTED_IN_MODEL",
+       "evidence": "['r_syn']: reaberto no SketchUp, 2 grupos <= 5 mm da proposta"
+      },
+      {
+       "state": "VALIDATED",
+       "evidence": "['r_syn']: construido x ambiente real PASS (piso, parede, porta, objetos) e contrato de referencial OK"
+      }
+     ]
+    },
+    "recipe.cabinet.materials-and-texture-direction": {
+     "state": "SELECTED",
+     "trail": [
+      {
+       "state": "AVAILABLE",
+       "evidence": null
+      },
+      {
+       "state": "SELECTED",
+       "evidence": "recipe_ids do especialista bathroom"
+      }
+     ]
+    },
+    "recipe.cabinet.sink-and-wet-channel-cutouts": {
+     "state": "SELECTED",
+     "trail": [
+      {
+       "state": "AVAILABLE",
+       "evidence": null
+      },
+      {
+       "state": "SELECTED",
+       "evidence": "recipe_ids do especialista bathroom"
+      }
+     ]
+    },
+    "specialist.bathroom": {
+     "state": "CONSUMED",
+     "trail": [
+      {
+       "state": "AVAILABLE",
+       "evidence": null
+      },
+      {
+       "state": "INVOKED",
+       "evidence": "perfil bathroom (LEGACY_PROVIDER_PRESENT) + bathroom.solver_policy.v1"
+      },
+      {
+       "state": "CONSUMED",
+       "evidence": "solver_policy -> 1 objeto(s) do problema com ancora/DOF do especialista"
+      }
+     ]
+    }
+   },
+   "pt_to_m": 0.03518518518518518
+  },
+  {
+   "case": "B_fixture_notch",
+   "status": "BUILT_FAILS_ENVIRONMENT",
+   "build": {
+    "status": "BUILT_FAILS_ENVIRONMENT",
+    "valid": false,
+    "geometric_validity": "FAIL",
+    "functional_validity": "NOT_EXECUTED",
+    "functional": {
+     "r_syn": {
+      "status": "NOT_EXECUTED",
+      "reason": "sem avaliador funcional"
+     }
+    },
+    "visual": "PENDING_HUMAN",
+    "raw_evidence": {
+     "inspect_geometry": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\B_fixture_notch\\geometry\\inspect_geometry_result.json",
+     "sha256": "5938ce2277b4fede87026d5ec9f0ccd7cd0f6cfdc2706396ed72d3c2efe3d767",
+     "bytes": 15131
+    },
+    "validator": {
+     "built_geometry": "v2 (area/contato/profundidade direcional + movimento de porta)",
+     "eps_depth_m": 0.0005
+    },
+    "coordinate_contract": {
+     "status": "OK",
+     "shell": {
+      "pt_to_m": 0.03518518518518518,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.expected_pt_to_m(E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\B_fixture_notch\\consensus_synthetic.json)",
+      "pt_to_in": 1.385243511227763
+     },
+     "process": {
+      "pt_to_m": 0.03518518518518518,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.PT_TO_M (processo)",
+      "pt_to_in": 1.385243511227763
+     },
+     "transforms": [
+      {
+       "from": "consensus",
+       "to": "plano",
+       "op": "x pt_to_m (0.03518519 m/pt)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "plano",
+       "to": "caixas solver/builder",
+       "op": "/ 0.0254 (m -> in)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "caixas",
+       "to": "mundo SketchUp",
+       "op": "identidade (polegadas)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "mundo SketchUp",
+       "to": "inspecao",
+       "op": "x 0.0254 (in -> m)",
+       "origin": "PDF (0,0)"
+      }
+     ],
+     "reason": null
+    },
+    "frame_verification": {
+     "wall_iou": 0.9998,
+     "min_iou": 0.95,
+     "expected_area_m2": 2.128,
+     "built_area_m2": 2.128,
+     "thresholds": {
+      "cover_min": 0.99,
+      "excess_max": 0.01,
+      "hausdorff_max_m": 0.01,
+      "dim_tol_m": 0.01
+     },
+     "walls_checked": 6,
+     "walls_failed": [],
+     "per_wall": [
+      {
+       "wall": "w0",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w1",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w2",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w3",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w4",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w5",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      }
+     ],
+     "status": "OK"
+    },
+    "environment": {
+     "r_syn": {
+      "room_id": "r_syn",
+      "room": "SINTETICO",
+      "checks": {
+       "EXTRACTION": "PASS",
+       "CONTAINMENT": "FAIL",
+       "WALL": "PASS",
+       "DOOR": "PASS",
+       "OBJECTS": "PASS"
+      },
+      "findings": [
+       {
+        "check": "CONTAINMENT",
+        "module": "Armario",
+        "outside_depth_m": 1.095,
+        "outside_m2": 0.25
+       }
+      ],
+      "finishes": [],
+      "version": "v2",
+      "eps_depth_m": 0.0005,
+      "extraction_gap_m": {
+       "Armario": 0.0
+      },
+      "floor_area_m2": 5.7069,
+      "floor_parts": 1,
+      "door_motion": {}
+     }
+    },
+    "environment_status": {
+     "r_syn": "FAIL"
+    },
+    "proposal_conformance": true,
+    "legacy_bbox_check_not_decisive": {
+     "problems": [],
+     "would_pass": true
+    },
+    "unsafe_skip_scale_check": false,
+    "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\B_fixture_notch\\build\\planta_74_furnished.skp",
+    "skp_sha256": "90e5db3dd33fa97b6cc53c72a02210b6c7b966b25cdde2c3169c49b4adc6fe75",
+    "renders": {
+     "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\B_fixture_notch\\build\\planta_74_furnished.skp",
+     "before": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\B_fixture_notch\\build\\planta_74_furnished_before_top.png",
+     "top": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\B_fixture_notch\\build\\planta_74_furnished_after_top.png",
+     "iso": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\B_fixture_notch\\build\\planta_74_furnished_after_iso.png",
+     "log": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\B_fixture_notch\\build\\planta_74_furnished_log.txt"
+    },
+    "build_result": {
+     "requested": [
+      "SINTETICO · Armario"
+     ],
+     "built": [
+      "SINTETICO · Armario"
+     ],
+     "omitted": {},
+     "divergences": [],
+     "sketchup_version": "26.0.429",
+     "errors": []
+    },
+    "sketchup_version": "26.0.429",
+    "pids_opened": [
+     19936,
+     25496,
+     38928
+    ],
+    "pids_closed": [
+     {
+      "status": "CLOSED",
+      "closed": [
+       19936
+      ],
+      "still_running": []
+     },
+     {
+      "status": "CLOSED",
+      "closed": [
+       25496
+      ],
+      "still_running": []
+     },
+     {
+      "status": "CLOSED",
+      "closed": [
+       38928
+      ],
+      "still_running": []
+     }
+    ]
+   },
+   "pt_to_m": 0.03518518518518518
+  },
+  {
+   "case": "C_scale_mismatch",
+   "status": "BLOCKED_SCALE_MISMATCH / forced:BUILT_FAILS_ENVIRONMENT",
+   "guarded": {
+    "status": "BLOCKED_SCALE_MISMATCH",
+    "coordinate_contract": {
+     "status": "BLOCKED_SCALE_MISMATCH",
+     "shell": {
+      "pt_to_m": 0.03518518518518518,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.expected_pt_to_m(E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\consensus_synthetic.json)",
+      "pt_to_in": 1.385243511227763
+     },
+     "process": {
+      "pt_to_m": 0.0259,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.PT_TO_M (processo)",
+      "pt_to_in": 1.0196850393700787
+     },
+     "transforms": [
+      {
+       "from": "consensus",
+       "to": "plano",
+       "op": "x pt_to_m (0.02590000 m/pt)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "plano",
+       "to": "caixas solver/builder",
+       "op": "/ 0.0254 (m -> in)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "caixas",
+       "to": "mundo SketchUp",
+       "op": "identidade (polegadas)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "mundo SketchUp",
+       "to": "inspecao",
+       "op": "x 0.0254 (in -> m)",
+       "origin": "PDF (0,0)"
+      }
+     ],
+     "reason": "shell em 0.035185 m/pt e caixas em 0.025900 m/pt (fator 1.3585)"
+    },
+    "valid": false
+   },
+   "forced": {
+    "status": "BUILT_FAILS_ENVIRONMENT",
+    "valid": false,
+    "geometric_validity": "BLOCKED",
+    "functional_validity": "NOT_EXECUTED",
+    "functional": {
+     "r_syn": {
+      "status": "NOT_EXECUTED",
+      "reason": "sem avaliador funcional"
+     }
+    },
+    "visual": "PENDING_HUMAN",
+    "raw_evidence": {
+     "inspect_geometry": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\C_forced\\geometry\\inspect_geometry_result.json",
+     "sha256": "06a1681643648bd61263f7e897148b588adbabd17c965b574b98b4b12f79d396",
+     "bytes": 16280
+    },
+    "validator": {
+     "built_geometry": "v2 (area/contato/profundidade direcional + movimento de porta)",
+     "eps_depth_m": 0.0005
+    },
+    "coordinate_contract": {
+     "status": "BLOCKED_SCALE_MISMATCH",
+     "shell": {
+      "pt_to_m": 0.03518518518518518,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.expected_pt_to_m(E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\consensus_synthetic.json)",
+      "pt_to_in": 1.385243511227763
+     },
+     "process": {
+      "pt_to_m": 0.0259,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.PT_TO_M (processo)",
+      "pt_to_in": 1.0196850393700787
+     },
+     "transforms": [
+      {
+       "from": "consensus",
+       "to": "plano",
+       "op": "x pt_to_m (0.02590000 m/pt)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "plano",
+       "to": "caixas solver/builder",
+       "op": "/ 0.0254 (m -> in)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "caixas",
+       "to": "mundo SketchUp",
+       "op": "identidade (polegadas)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "mundo SketchUp",
+       "to": "inspecao",
+       "op": "x 0.0254 (in -> m)",
+       "origin": "PDF (0,0)"
+      }
+     ],
+     "reason": "shell em 0.035185 m/pt e caixas em 0.025900 m/pt (fator 1.3585)"
+    },
+    "frame_verification": {
+     "wall_iou": 0.9998,
+     "min_iou": 0.95,
+     "expected_area_m2": 1.748,
+     "built_area_m2": 1.748,
+     "thresholds": {
+      "cover_min": 0.99,
+      "excess_max": 0.01,
+      "hausdorff_max_m": 0.01,
+      "dim_tol_m": 0.01
+     },
+     "walls_checked": 4,
+     "walls_failed": [],
+     "per_wall": [
+      {
+       "wall": "w_bottom",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w_top",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w_left",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "w_right",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      }
+     ],
+     "status": "OK"
+    },
+    "environment": {
+     "r_syn": {
+      "room_id": "r_syn",
+      "room": "SINTETICO",
+      "checks": {
+       "EXTRACTION": "PASS",
+       "CONTAINMENT": "FAIL",
+       "WALL": "FAIL",
+       "DOOR": "PASS",
+       "OBJECTS": "PASS"
+      },
+      "findings": [
+       {
+        "check": "CONTAINMENT",
+        "module": "Armario",
+        "outside_depth_m": 0.9536,
+        "outside_m2": 0.38144
+       },
+       {
+        "check": "WALL",
+        "module": "Armario",
+        "class": "PENETRATION",
+        "area_m2": 0.076,
+        "contact_m": 0.382,
+        "depth_m": 0.42001,
+        "inscribed_m": 0.19,
+        "part": "/body#49063",
+        "regions": [
+         {
+          "area_m2": 0.076,
+          "mtd_m": 0.42001,
+          "mtd_dir": [
+           1.0,
+           0.0
+          ],
+          "perpendicular_m": 0.46651
+         }
+        ]
+       }
+      ],
+      "finishes": [],
+      "version": "v2",
+      "eps_depth_m": 0.0005,
+      "extraction_gap_m": {
+       "Vaso": 0.0,
+       "Armario": 0.0
+      },
+      "floor_area_m2": 5.3969,
+      "floor_parts": 1,
+      "door_motion": {}
+     }
+    },
+    "environment_status": {
+     "r_syn": "FAIL"
+    },
+    "proposal_conformance": true,
+    "legacy_bbox_check_not_decisive": {
+     "problems": [
+      {
+       "room": "r_syn",
+       "group": "SINTETICO · Armario",
+       "outside_floor_m": 0.8776
+      }
+     ],
+     "would_pass": false
+    },
+    "unsafe_skip_scale_check": true,
+    "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\C_forced\\build\\planta_74_furnished.skp",
+    "skp_sha256": "39ae0a1fc4b1f84082da3ded2cab9abc60d2bbafc3c5546d517f9ff1ce4c48e9",
+    "renders": {
+     "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\C_forced\\build\\planta_74_furnished.skp",
+     "before": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\C_forced\\build\\planta_74_furnished_before_top.png",
+     "top": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\C_forced\\build\\planta_74_furnished_after_top.png",
+     "iso": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\C_forced\\build\\planta_74_furnished_after_iso.png",
+     "log": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\C_forced\\build\\planta_74_furnished_log.txt"
+    },
+    "build_result": {
+     "requested": [
+      "SINTETICO · Armario",
+      "SINTETICO · Vaso"
+     ],
+     "built": [
+      "SINTETICO · Armario",
+      "SINTETICO · Vaso"
+     ],
+     "omitted": {},
+     "divergences": [],
+     "sketchup_version": "26.0.429",
+     "errors": []
+    },
+    "sketchup_version": "26.0.429",
+    "pids_opened": [
+     31680,
+     31920,
+     36588
+    ],
+    "pids_closed": [
+     {
+      "status": "CLOSED",
+      "closed": [
+       31680
+      ],
+      "still_running": []
+     },
+     {
+      "status": "CLOSED",
+      "closed": [
+       31920
+      ],
+      "still_running": []
+     },
+     {
+      "status": "CLOSED",
+      "closed": [
+       36588
+      ],
+      "still_running": []
+     }
+    ]
+   }
+  },
+  {
+   "case": "D_real_r006",
+   "status": "BUILT_FAILS_ENVIRONMENT",
+   "proposal": {
+    "proposal_id": "r006:r006:Bancada:+0.10|r006:Box:+0.00R270|r006:Vaso:+0.20",
+    "room_id": "r006",
+    "status": "INFEASIBLE",
+    "candidate_id": "r006:Bancada:+0.10|r006:Box:+0.00R270|r006:Vaso:+0.20",
+    "moves": [
+     {
+      "object_id": "r006:Bancada",
+      "slide_m": 0.1,
+      "mirrored": false,
+      "rotation_deg": 0
+     },
+     {
+      "object_id": "r006:Box",
+      "slide_m": 0.0,
+      "mirrored": false,
+      "rotation_deg": 270
+     },
+     {
+      "object_id": "r006:Vaso",
+      "slide_m": 0.2,
+      "mirrored": false,
+      "rotation_deg": 0
+     }
+    ],
+    "hard_violations": [
+     {
+      "code": "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+      "object_id": "r006:Box",
+      "detail": "vao livre 0.310 m de 0.310 m declarados",
+      "measured": 0.31,
+      "threshold": 0.6,
+      "unit": "m",
+      "culprit": "DECLARED_ENTRY",
+      "constraint": "shower.entry_width"
+     },
+     {
+      "code": "FUNCTIONAL_SHOWER_REACH_PATH",
+      "object_id": "r006:Box",
+      "detail": "MEASURED_PATH_WIDTH; gargalo em [354.19, 562.73]",
+      "measured": 0.499,
+      "threshold": 0.6,
+      "unit": "m",
+      "culprit": "BOTTLENECK",
+      "constraint": "shower.reach_path"
+     },
+     {
+      "code": "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+      "object_id": "r006:Vaso",
+      "detail": "MEASURED_FRONT_DEPTH",
+      "measured": 0.523,
+      "threshold": 0.6,
+      "unit": "m",
+      "culprit": "WALL",
+      "constraint": "toilet.front_clearance"
+     }
+    ],
+    "metrics": {
+     "hard_violations": 3,
+     "min_margin_m": -0.29,
+     "sum_margin_m": -0.019,
+     "measured_rules": 7
+    },
+    "rank": 1,
+    "candidates_total": 6724,
+    "explanation": "INVIAVEL (3 violacao(oes) rigida(s): FUNCTIONAL_SHOWER_ENTRY_WIDTH, FUNCTIONAL_SHOWER_REACH_PATH, FUNCTIONAL_TOILET_FRONT_CLEARANCE); primeira da ordem",
+    "algorithm_version": "fp054-f2.v1",
+    "policy_version": "bathroom.solver_policy.v1"
+   },
+   "build": {
+    "status": "BUILT_FAILS_ENVIRONMENT",
+    "valid": false,
+    "geometric_validity": "FAIL",
+    "functional_validity": "NOT_EXECUTED",
+    "functional": {
+     "r006": {
+      "status": "NOT_EXECUTED",
+      "reason": "geometria nao aprovada"
+     }
+    },
+    "visual": "PENDING_HUMAN",
+    "raw_evidence": {
+     "inspect_geometry": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\D_real_r006\\geometry\\inspect_geometry_result.json",
+     "sha256": "1154b13191cc486ec1bde52f4880a6d443465a0a9c1535a3e1d5cb8198471206",
+     "bytes": 1370356
+    },
+    "validator": {
+     "built_geometry": "v2 (area/contato/profundidade direcional + movimento de porta)",
+     "eps_depth_m": 0.0005
+    },
+    "coordinate_contract": {
+     "status": "OK",
+     "shell": {
+      "pt_to_m": 0.0259,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.expected_pt_to_m(E:\\Claude\\worktrees\\w-prov\\fixtures\\planta_74\\consensus_with_human_walls_and_soft_barriers.json)",
+      "pt_to_in": 1.0196850393700787
+     },
+     "process": {
+      "pt_to_m": 0.0259,
+      "origin_pt": [
+       0.0,
+       0.0
+      ],
+      "flip_y": false,
+      "source": "core.scale.PT_TO_M (processo)",
+      "pt_to_in": 1.0196850393700787
+     },
+     "transforms": [
+      {
+       "from": "consensus",
+       "to": "plano",
+       "op": "x pt_to_m (0.02590000 m/pt)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "plano",
+       "to": "caixas solver/builder",
+       "op": "/ 0.0254 (m -> in)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "caixas",
+       "to": "mundo SketchUp",
+       "op": "identidade (polegadas)",
+       "origin": "PDF (0,0)"
+      },
+      {
+       "from": "mundo SketchUp",
+       "to": "inspecao",
+       "op": "x 0.0254 (in -> m)",
+       "origin": "PDF (0,0)"
+      }
+     ],
+     "reason": null
+    },
+    "frame_verification": {
+     "wall_iou": 0.9996,
+     "min_iou": 0.95,
+     "expected_area_m2": 8.025,
+     "built_area_m2": 8.024,
+     "thresholds": {
+      "cover_min": 0.99,
+      "excess_max": 0.01,
+      "hausdorff_max_m": 0.01,
+      "dim_tol_m": 0.01
+     },
+     "walls_checked": 20,
+     "walls_failed": [],
+     "per_wall": [
+      {
+       "wall": "m001",
+       "ok": true,
+       "cover": 0.9998,
+       "excess": 0.0,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m002",
+       "ok": true,
+       "cover": 0.9997,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0001,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m003",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0002,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m004",
+       "ok": true,
+       "cover": 0.9996,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0001,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m005",
+       "ok": true,
+       "cover": 1.0,
+       "excess": 0.0005,
+       "hausdorff_m": 0.0001,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m006",
+       "ok": true,
+       "cover": 0.9997,
+       "excess": 0.0,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m007",
+       "ok": true,
+       "cover": 0.9996,
+       "excess": 0.0,
+       "hausdorff_m": 0.0001,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m008",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0002,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m009",
+       "ok": true,
+       "cover": 0.9999,
+       "excess": 0.0004,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m010",
+       "ok": true,
+       "cover": 0.9996,
+       "excess": 0.0,
+       "hausdorff_m": 0.0001,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m011",
+       "ok": true,
+       "cover": 0.9997,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0001,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 0.0,
+        "removed_max_extent_m": 0.0
+       }
+      },
+      {
+       "wall": "m012",
+       "ok": true,
+       "cover": 0.9997,
+       "excess": 0.0,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 5e-07,
+        "removed_max_extent_m": 0.05002
+       }
+      },
+      {
+       "wall": "m013",
+       "ok": true,
+       "cover": 1.0,
+       "excess": 0.0003,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 1.85e-06,
+        "removed_max_extent_m": 0.18986
+       }
+      },
+      {
+       "wall": "m014",
+       "ok": true,
+       "cover": 0.9996,
+       "excess": 0.0,
+       "hausdorff_m": 0.0001,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 1.96e-06,
+        "removed_max_extent_m": 0.18984
+       }
+      },
+      {
+       "wall": "m015",
+       "ok": true,
+       "cover": 0.9998,
+       "excess": 0.0,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 1.55e-06,
+        "removed_max_extent_m": 0.05003
+       }
+      },
+      {
+       "wall": "m016",
+       "ok": true,
+       "cover": 0.9997,
+       "excess": 0.0001,
+       "hausdorff_m": 0.0001,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 9.7e-07,
+        "removed_max_extent_m": 0.05004
+       }
+      },
+      {
+       "wall": "m017",
+       "ok": true,
+       "cover": 1.0,
+       "excess": 0.0005,
+       "hausdorff_m": 0.0001,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 1.72e-06,
+        "removed_max_extent_m": 0.04997
+       }
+      },
+      {
+       "wall": "m018",
+       "ok": true,
+       "cover": 0.9996,
+       "excess": 0.0,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0001,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 3.48e-06,
+        "removed_max_extent_m": 0.05003
+       }
+      },
+      {
+       "wall": "m019",
+       "ok": true,
+       "cover": 1.0,
+       "excess": 0.0003,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 1.51e-06,
+        "removed_max_extent_m": 0.05001
+       }
+      },
+      {
+       "wall": "m020",
+       "ok": true,
+       "cover": 1.0,
+       "excess": 0.0003,
+       "hausdorff_m": 0.0,
+       "d_length_m": 0.0,
+       "d_thickness_m": 0.0,
+       "normalization": {
+        "op": "opening",
+        "radius_m": 0.002,
+        "join": "mitre",
+        "removed_expected_m2": 0.0,
+        "removed_built_m2": 5e-07,
+        "removed_max_extent_m": 0.05
+       }
+      }
+     ],
+     "status": "OK"
+    },
+    "environment": {
+     "r006": {
+      "room_id": "r006",
+      "room": "BANHO 02",
+      "checks": {
+       "EXTRACTION": "PASS",
+       "CONTAINMENT": "FAIL",
+       "WALL": "FAIL",
+       "DOOR": "PASS",
+       "OBJECTS": "FAIL"
+      },
+      "findings": [
+       {
+        "check": "CONTAINMENT",
+        "module": "Bancada",
+        "outside_depth_m": 0.02758,
+        "outside_m2": 0.021346
+       },
+       {
+        "check": "CONTAINMENT",
+        "module": "Box",
+        "outside_depth_m": 0.0335,
+        "outside_m2": 0.00651
+       },
+       {
+        "check": "WALL",
+        "module": "Box",
+        "class": "PENETRATION",
+        "area_m2": 0.005538,
+        "contact_m": 0.7952,
+        "depth_m": 0.0071,
+        "inscribed_m": 0.0071,
+        "part": "/kb_piso_box#66613",
+        "regions": [
+         {
+          "area_m2": 0.005538,
+          "mtd_m": 0.0071,
+          "mtd_dir": [
+           0.0,
+           1.0
+          ],
+          "perpendicular_m": 0.0071
+         }
+        ]
+       },
+       {
+        "check": "OBJECTS",
+        "modules": [
+         "Enxoval",
+         "Espelho"
+        ],
+        "class": "PENETRATION",
+        "area_m2": 0.00052299,
+        "contact_m": 0.0318,
+        "depth_m": 0.03092,
+        "inscribed_m": 0.0149,
+        "parts": [
+         "/kb_gancho#67694",
+         "/espelho#65429"
+        ],
+        "z_overlap_m": 0.0399
+       },
+       {
+        "check": "OBJECTS",
+        "modules": [
+         "Enxoval",
+         "Vaso"
+        ],
+        "class": "PENETRATION",
+        "area_m2": 0.01120208,
+        "contact_m": 0.3221,
+        "depth_m": 0.11002,
+        "inscribed_m": 0.0998,
+        "parts": [
+         "/kb_papeleira#67595",
+         "/vaso#65626"
+        ],
+        "z_overlap_m": 0.0599
+       }
+      ],
+      "finishes": [
+       {
+        "module": "Pele",
+        "outside_floor_m2": 0.18823,
+        "max_protrusion_m": 0.3443
+       }
+      ],
+      "version": "v2",
+      "eps_depth_m": 0.0005,
+      "extraction_gap_m": {
+       "Bancada": 0.0,
+       "Espelho": 0.0,
+       "Vaso": 0.0,
+       "Box": 0.0,
+       "Pele": 0.0,
+       "PeleTeto": 0.0,
+       "Enxoval": 0.0
+      },
+      "floor_area_m2": 2.7169,
+      "floor_parts": 1,
+      "door_motion": {
+       "h_o006": {
+        "max_open_deg": 90.0,
+        "blocked_by": null,
+        "required_deg": 90.0,
+        "ok": true,
+        "leaf_z_m": [
+         0.0,
+         2.1
+        ]
+       }
+      }
+     }
+    },
+    "environment_status": {
+     "r006": "FAIL"
+    },
+    "proposal_conformance": true,
+    "legacy_bbox_check_not_decisive": {
+     "problems": [
+      {
+       "room": "r006",
+       "group": "BANHO 02 · Pele",
+       "outside_floor_m": 0.0201
+      }
+     ],
+     "would_pass": false
+    },
+    "unsafe_skip_scale_check": false,
+    "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\D_real_r006\\build\\planta_74_furnished.skp",
+    "skp_sha256": "26390fd92f896287c3946531e911760d9bd7f1036e8c6d52513f57014801730f",
+    "renders": {
+     "skp": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\D_real_r006\\build\\planta_74_furnished.skp",
+     "before": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\D_real_r006\\build\\planta_74_furnished_before_top.png",
+     "top": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\D_real_r006\\build\\planta_74_furnished_after_top.png",
+     "iso": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\D_real_r006\\build\\planta_74_furnished_after_iso.png",
+     "log": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\D_real_r006\\build\\planta_74_furnished_log.txt"
+    },
+    "build_result": {
+     "requested": [
+      "BANHO 02 · Bancada",
+      "BANHO 02 · Box",
+      "BANHO 02 · Enxoval",
+      "BANHO 02 · Espelho",
+      "BANHO 02 · Pele",
+      "BANHO 02 · PeleTeto",
+      "BANHO 02 · Vaso"
+     ],
+     "built": [
+      "BANHO 02 · Bancada",
+      "BANHO 02 · Box",
+      "BANHO 02 · Enxoval",
+      "BANHO 02 · Espelho",
+      "BANHO 02 · Pele",
+      "BANHO 02 · PeleTeto",
+      "BANHO 02 · Vaso"
+     ],
+     "omitted": {},
+     "divergences": [],
+     "sketchup_version": "26.0.429",
+     "errors": []
+    },
+    "sketchup_version": "26.0.429",
+    "pids_opened": [
+     1276,
+     38092,
+     41768
+    ],
+    "pids_closed": [
+     {
+      "status": "CLOSED",
+      "closed": [
+       1276
+      ],
+      "still_running": []
+     },
+     {
+      "status": "CLOSED",
+      "closed": [
+       38092
+      ],
+      "still_running": []
+     },
+     {
+      "status": "CLOSED",
+      "closed": [
+       41768
+      ],
+      "still_running": []
+     }
+    ]
+   },
+   "runtime": "OK"
+  }
+ ],
+ "protected_unchanged": true,
+ "raw_geometry_sha256": {
+  "A_fixture_valid\\geometry\\inspect_geometry_result.json": "14b56e7e85f89e44b347d0a49d4a9daa8a76f64e54f87364e978bdbca7feba58",
+  "B_fixture_notch\\geometry\\inspect_geometry_result.json": "5938ce2277b4fede87026d5ec9f0ccd7cd0f6cfdc2706396ed72d3c2efe3d767",
+  "C_forced\\geometry\\inspect_geometry_result.json": "06a1681643648bd61263f7e897148b588adbabd17c965b574b98b4b12f79d396",
+  "D_real_r006\\geometry\\inspect_geometry_result.json": "1154b13191cc486ec1bde52f4880a6d443465a0a9c1535a3e1d5cb8198471206"
+ },
+ "overlays": {
+  "A_fixture_valid": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\A_fixture_valid\\raw_geometry_overlay.png",
+  "B_fixture_notch": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\B_fixture_notch\\raw_geometry_overlay.png",
+  "C_forced": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\C_forced\\raw_geometry_overlay.png",
+  "D_real_r006": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\D_real_r006\\raw_geometry_overlay.png"
+ },
+ "validator_comparison": {
+  "returncode": 0,
+  "tail": "planta_74 (8 comodos;  r000  SUITE 01         v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR_SWING': 'FAIL', 'OBJECTS': 'FAIL'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR': 'FAIL', 'OBJECTS': 'FAIL'}\nplanta_74 (8 comodos;  r001  A.S. | TERRACO S v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'PASS', 'DOOR_SWING': 'PASS', 'OBJECTS': 'PASS'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'PASS', 'DOOR': 'PASS', 'OBJECTS': 'PASS'}\nplanta_74 (8 comodos;  r002  SALA DE JANTAR | v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'PASS', 'WALL': 'PASS', 'DOOR_SWING': 'PASS', 'OBJECTS': 'PASS'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'PASS', 'DOOR': 'PASS', 'OBJECTS': 'PASS'}\n      MUDOU CONTAINMENT: PASS -> FAIL  v2: [{'check': 'CONTAINMENT', 'module': 'Painel TV', 'outside_depth_m': 0.0091, 'outside_m2': 0.000456}]\nplanta_74 (8 comodos;  r003  SUITE 02         v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR_SWING': 'FAIL', 'OBJECTS': 'FAIL'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR': 'FAIL', 'OBJECTS': 'FAIL'}\nplanta_74 (8 comodos;  r004  COZINHA          v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'PASS', 'WALL': 'FAIL', 'DOOR_SWING': 'PASS', 'OBJECTS': 'FAIL'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR': 'PASS', 'OBJECTS': 'FAIL'}\n      MUDOU CONTAINMENT: PASS -> FAIL  v2: [{'check': 'CONTAINMENT', 'module': 'base_cabinet_01', 'outside_depth_m': 0.0046, 'outside_m2': 0.002761}, {'check': 'CONTAINMENT', 'module': 'countertop', 'outside_depth_m': 0.0046, 'outside_m2': 0.002898}]\nplanta_74 (8 comodos;  r005  BANHO 01         v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR_SWING': 'PASS', 'OBJECTS': 'FAIL'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR': 'PASS', 'OBJECTS': 'FAIL'}\nplanta_74 (8 comodos;  r006  BANHO 02         v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR_SWING': 'PASS', 'OBJECTS': 'FAIL'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR': 'PASS', 'OBJECTS': 'FAIL'}\nplanta_74 (8 comodos;  r007  LAVABO           v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'PASS', 'WALL': 'PASS', 'DOOR_SWING': 'PASS', 'OBJECTS': 'FAIL'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'PASS', 'WALL': 'PASS', 'DOOR': 'PASS', 'OBJECTS': 'PASS'}\n      MUDOU OBJECTS: FAIL -> PASS  v2: []\nA_fixture_valid        r_syn SINTETICO        v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'PASS', 'WALL': 'PASS', 'DOOR_SWING': 'PASS', 'OBJECTS': 'PASS'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'PASS', 'WALL': 'PASS', 'DOOR': 'PASS', 'OBJECTS': 'PASS'}\nB_fixture_notch        r_syn SINTETICO        v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'PASS', 'DOOR_SWING': 'PASS', 'OBJECTS': 'PASS'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'PASS', 'DOOR': 'PASS', 'OBJECTS': 'PASS'}\nC_forced               r_syn SINTETICO        v1={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR_SWING': 'PASS', 'OBJECTS': 'PASS'} v2={'EXTRACTION': 'PASS', 'CONTAINMENT': 'FAIL', 'WALL': 'FAIL', 'DOOR': 'PASS', 'OBJECTS': 'PASS'}\nmudancas de classificacao: 3\n",
+  "file": "E:\\Claude\\worktrees\\w-prov\\runs\\fp055\\p4h\\validator_comparison.json"
+ },
+ "expectations": {
+  "A_fixture_valid": true,
+  "B_fixture_notch": true,
+  "C_scale_mismatch": true,
+  "D_real_r006": true
+ },
+ "result": "PASS"
+}

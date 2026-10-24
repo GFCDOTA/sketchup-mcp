@@ -1,0 +1,668 @@
+{
+ "source_geometry": "planta_74 ORIGINAL (geracao limpa a8cde14, snapshot 5426c0087bdfcdc6), inspect_geometry",
+ "source_sha256": "5bd62f5071bcab5cf01a917ab68dcc037d246ef1c184b3c5078023b9c50a4c5e",
+ "validator": "built_geometry.validate_room v2",
+ "defects": [
+  {
+   "key": "r000|CONTAINMENT|Guarda-roupa",
+   "room_id": "r000",
+   "room": "SUITE 01",
+   "check": "CONTAINMENT",
+   "measure": 0.0078,
+   "unit": "m",
+   "cause": "R2b",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Guarda-roupa",
+    "outside_depth_m": 0.0078,
+    "outside_m2": 0.004446
+   }
+  },
+  {
+   "key": "r000|CONTAINMENT|rug",
+   "room_id": "r000",
+   "room": "SUITE 01",
+   "check": "CONTAINMENT",
+   "measure": 0.056,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "rug",
+    "outside_depth_m": 0.056,
+    "outside_m2": 0.120714
+   }
+  },
+  {
+   "key": "r000|DOOR|h_o003",
+   "room_id": "r000",
+   "room": "SUITE 01",
+   "check": "DOOR",
+   "measure": 41.0,
+   "unit": "deg",
+   "cause": "R5",
+   "blocked_by": "rug",
+   "finding": {
+    "check": "DOOR",
+    "door": "h_o003",
+    "max_open_deg": 49.0,
+    "blocked_by": "rug",
+    "required_deg": 90.0,
+    "ok": false,
+    "leaf_z_m": [
+     0.0,
+     2.1
+    ]
+   }
+  },
+  {
+   "key": "r000|OBJECTS|Cama+Painel cabeceira",
+   "room_id": "r000",
+   "room": "SUITE 01",
+   "check": "OBJECTS",
+   "measure": 0.03002,
+   "unit": "m",
+   "cause": "R3",
+   "finding": {
+    "check": "OBJECTS",
+    "modules": [
+     "Cama",
+     "Painel cabeceira"
+    ],
+    "class": "PENETRATION",
+    "area_m2": 0.00603603,
+    "contact_m": 0.0,
+    "depth_m": 0.03002,
+    "inscribed_m": 0.0201,
+    "parts": [
+     "/cabeceira#51816",
+     "/ks_bronze#52789"
+    ],
+    "z_overlap_m": 0.0201
+   }
+  },
+  {
+   "key": "r000|WALL|rug",
+   "room_id": "r000",
+   "room": "SUITE 01",
+   "check": "WALL",
+   "measure": 0.05603,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "WALL",
+    "module": "rug",
+    "class": "PENETRATION",
+    "area_m2": 0.1203944,
+    "contact_m": 2.2629,
+    "depth_m": 0.05603,
+    "inscribed_m": 0.056,
+    "part": "/tapete#51642"
+   }
+  },
+  {
+   "key": "r001|CONTAINMENT|Armario de servico",
+   "room_id": "r001",
+   "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "check": "CONTAINMENT",
+   "measure": 0.0331,
+   "unit": "m",
+   "cause": "R2b",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Armario de servico",
+    "outside_depth_m": 0.0331,
+    "outside_m2": 0.014921
+   }
+  },
+  {
+   "key": "r001|CONTAINMENT|Bancada gourmet",
+   "room_id": "r001",
+   "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "check": "CONTAINMENT",
+   "measure": 0.2032,
+   "unit": "m",
+   "cause": "R2a",
+   "barriers": [
+    "SoftBarrier_Group_8"
+   ],
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Bancada gourmet",
+    "outside_depth_m": 0.2032,
+    "outside_m2": 0.349704
+   }
+  },
+  {
+   "key": "r001|CONTAINMENT|Condensadora",
+   "room_id": "r001",
+   "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "check": "CONTAINMENT",
+   "measure": 0.02868,
+   "unit": "m",
+   "cause": "R2a",
+   "barriers": [
+    "SoftBarrier_Group_8"
+   ],
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Condensadora",
+    "outside_depth_m": 0.02868,
+    "outside_m2": 0.009176
+   }
+  },
+  {
+   "key": "r001|CONTAINMENT|Jardineira",
+   "room_id": "r001",
+   "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "check": "CONTAINMENT",
+   "measure": 0.15613,
+   "unit": "m",
+   "cause": "R2a",
+   "barriers": [
+    "SoftBarrier_Group_8",
+    "SoftBarrier_Group_9"
+   ],
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Jardineira",
+    "outside_depth_m": 0.15613,
+    "outside_m2": 0.074218
+   }
+  },
+  {
+   "key": "r001|CONTAINMENT|Maquina de lavar",
+   "room_id": "r001",
+   "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "check": "CONTAINMENT",
+   "measure": 0.21146,
+   "unit": "m",
+   "cause": "R2b",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Maquina de lavar",
+    "outside_depth_m": 0.21146,
+    "outside_m2": 0.073859
+   }
+  },
+  {
+   "key": "r002|CONTAINMENT|Painel TV",
+   "room_id": "r002",
+   "room": "SALA DE JANTAR | SALA DE ESTAR",
+   "check": "CONTAINMENT",
+   "measure": 0.0091,
+   "unit": "m",
+   "cause": "R2b",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Painel TV",
+    "outside_depth_m": 0.0091,
+    "outside_m2": 0.000456
+   }
+  },
+  {
+   "key": "r003|CONTAINMENT|Painel cabeceira",
+   "room_id": "r003",
+   "room": "SUITE 02",
+   "check": "CONTAINMENT",
+   "measure": 0.0152,
+   "unit": "m",
+   "cause": "R2b",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Painel cabeceira",
+    "outside_depth_m": 0.0152,
+    "outside_m2": 0.020976
+   }
+  },
+  {
+   "key": "r003|CONTAINMENT|rug",
+   "room_id": "r003",
+   "room": "SUITE 02",
+   "check": "CONTAINMENT",
+   "measure": 0.0559,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "rug",
+    "outside_depth_m": 0.0559,
+    "outside_m2": 0.129121
+   }
+  },
+  {
+   "key": "r003|DOOR|h_o004",
+   "room_id": "r003",
+   "room": "SUITE 02",
+   "check": "DOOR",
+   "measure": 74.0,
+   "unit": "deg",
+   "cause": "R5",
+   "blocked_by": "rug",
+   "finding": {
+    "check": "DOOR",
+    "door": "h_o004",
+    "max_open_deg": 16.0,
+    "blocked_by": "rug",
+    "required_deg": 90.0,
+    "ok": false,
+    "leaf_z_m": [
+     0.0,
+     2.1
+    ]
+   }
+  },
+  {
+   "key": "r003|OBJECTS|Cama+Painel cabeceira",
+   "room_id": "r003",
+   "room": "SUITE 02",
+   "check": "OBJECTS",
+   "measure": 0.02992,
+   "unit": "m",
+   "cause": "R3",
+   "finding": {
+    "check": "OBJECTS",
+    "modules": [
+     "Cama",
+     "Painel cabeceira"
+    ],
+    "class": "PENETRATION",
+    "area_m2": 0.006,
+    "contact_m": 0.0,
+    "depth_m": 0.02992,
+    "inscribed_m": 0.02,
+    "parts": [
+     "/cabeceira#56407",
+     "/ks_bronze#57309"
+    ],
+    "z_overlap_m": 0.0201
+   }
+  },
+  {
+   "key": "r003|WALL|rug",
+   "room_id": "r003",
+   "room": "SUITE 02",
+   "check": "WALL",
+   "measure": 0.05593,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "WALL",
+    "module": "rug",
+    "class": "PENETRATION",
+    "area_m2": 0.12911782,
+    "contact_m": 2.4795,
+    "depth_m": 0.05593,
+    "inscribed_m": 0.0559,
+    "part": "/tapete#56249"
+   }
+  },
+  {
+   "key": "r004|CONTAINMENT|base_cabinet_01",
+   "room_id": "r004",
+   "room": "COZINHA",
+   "check": "CONTAINMENT",
+   "measure": 0.0046,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "base_cabinet_01",
+    "outside_depth_m": 0.0046,
+    "outside_m2": 0.002761
+   }
+  },
+  {
+   "key": "r004|CONTAINMENT|countertop",
+   "room_id": "r004",
+   "room": "COZINHA",
+   "check": "CONTAINMENT",
+   "measure": 0.0046,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "countertop",
+    "outside_depth_m": 0.0046,
+    "outside_m2": 0.002898
+   }
+  },
+  {
+   "key": "r004|OBJECTS|backsplash+cooktop_module",
+   "room_id": "r004",
+   "room": "COZINHA",
+   "check": "OBJECTS",
+   "measure": 0.04623,
+   "unit": "m",
+   "cause": "R3",
+   "finding": {
+    "check": "OBJECTS",
+    "modules": [
+     "backsplash",
+     "cooktop_module"
+    ],
+    "class": "PENETRATION",
+    "area_m2": 0.02014782,
+    "contact_m": 0.8742,
+    "depth_m": 0.04623,
+    "inscribed_m": 0.0462,
+    "parts": [
+     "/kc_backsplash#58582",
+     "/kc_vidro#58879"
+    ],
+    "z_overlap_m": 0.0051
+   }
+  },
+  {
+   "key": "r004|OBJECTS|backsplash+sink_module",
+   "room_id": "r004",
+   "room": "COZINHA",
+   "check": "OBJECTS",
+   "measure": 0.04621,
+   "unit": "m",
+   "cause": "R3",
+   "finding": {
+    "check": "OBJECTS",
+    "modules": [
+     "backsplash",
+     "sink_module"
+    ],
+    "class": "PENETRATION",
+    "area_m2": 0.01756524,
+    "contact_m": 0.7624,
+    "depth_m": 0.04621,
+    "inscribed_m": 0.0462,
+    "parts": [
+     "/kc_backsplash#58582",
+     "/kc_cuba#58649"
+    ],
+    "z_overlap_m": 0.0016
+   }
+  },
+  {
+   "key": "r004|WALL|backsplash",
+   "room_id": "r004",
+   "room": "COZINHA",
+   "check": "WALL",
+   "measure": 0.00052,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "WALL",
+    "module": "backsplash",
+    "class": "PENETRATION",
+    "area_m2": 2.005e-05,
+    "contact_m": 0.0421,
+    "depth_m": 0.00052,
+    "inscribed_m": 0.0005,
+    "part": "/kc_backsplash#58549"
+   }
+  },
+  {
+   "key": "r004|WALL|base_cabinet_01",
+   "room_id": "r004",
+   "room": "COZINHA",
+   "check": "WALL",
+   "measure": 0.00462,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "WALL",
+    "module": "base_cabinet_01",
+    "class": "PENETRATION",
+    "area_m2": 0.00276092,
+    "contact_m": 0.6104,
+    "depth_m": 0.00462,
+    "inscribed_m": 0.0046,
+    "part": "/kc_corpo#58092"
+   }
+  },
+  {
+   "key": "r004|WALL|countertop",
+   "room_id": "r004",
+   "room": "COZINHA",
+   "check": "WALL",
+   "measure": 0.00464,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "WALL",
+    "module": "countertop",
+    "class": "PENETRATION",
+    "area_m2": 0.00289846,
+    "contact_m": 0.6403,
+    "depth_m": 0.00464,
+    "inscribed_m": 0.0046,
+    "part": "/kc_tampo#58514"
+   }
+  },
+  {
+   "key": "r005|CONTAINMENT|Bancada",
+   "room_id": "r005",
+   "room": "BANHO 01",
+   "check": "CONTAINMENT",
+   "measure": 0.0193,
+   "unit": "m",
+   "cause": "R2b",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Bancada",
+    "outside_depth_m": 0.0193,
+    "outside_m2": 0.015054
+   }
+  },
+  {
+   "key": "r005|CONTAINMENT|Box",
+   "room_id": "r005",
+   "room": "BANHO 01",
+   "check": "CONTAINMENT",
+   "measure": 0.062,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Box",
+    "outside_depth_m": 0.062,
+    "outside_m2": 0.033576
+   }
+  },
+  {
+   "key": "r005|OBJECTS|Bancada+Enxoval",
+   "room_id": "r005",
+   "room": "BANHO 01",
+   "check": "OBJECTS",
+   "measure": 0.0887,
+   "unit": "m",
+   "cause": "R3",
+   "finding": {
+    "check": "OBJECTS",
+    "modules": [
+     "Bancada",
+     "Enxoval"
+    ],
+    "class": "PENETRATION",
+    "area_m2": 0.00885226,
+    "contact_m": 0.1008,
+    "depth_m": 0.0887,
+    "inscribed_m": 0.0887,
+    "parts": [
+     "/gabinete#60634",
+     "/kb_papeleira#63160"
+    ],
+    "z_overlap_m": 0.0599
+   }
+  },
+  {
+   "key": "r005|OBJECTS|Enxoval+Espelho",
+   "room_id": "r005",
+   "room": "BANHO 01",
+   "check": "OBJECTS",
+   "measure": 0.03104,
+   "unit": "m",
+   "cause": "R3",
+   "finding": {
+    "check": "OBJECTS",
+    "modules": [
+     "Enxoval",
+     "Espelho"
+    ],
+    "class": "PENETRATION",
+    "area_m2": 0.000522,
+    "contact_m": 0.032,
+    "depth_m": 0.03104,
+    "inscribed_m": 0.015,
+    "parts": [
+     "/kb_gancho#63226",
+     "/espelho#60994"
+    ],
+    "z_overlap_m": 0.0399
+   }
+  },
+  {
+   "key": "r005|OBJECTS|Enxoval+Vaso",
+   "room_id": "r005",
+   "room": "BANHO 01",
+   "check": "OBJECTS",
+   "measure": 0.16383,
+   "unit": "m",
+   "cause": "R3",
+   "finding": {
+    "check": "OBJECTS",
+    "modules": [
+     "Enxoval",
+     "Vaso"
+    ],
+    "class": "PENETRATION",
+    "area_m2": 0.04285728,
+    "contact_m": 0.4376,
+    "depth_m": 0.16383,
+    "inscribed_m": 0.1638,
+    "parts": [
+     "/kb_tapete#63291",
+     "/vaso#61397"
+    ],
+    "z_overlap_m": 0.0071
+   }
+  },
+  {
+   "key": "r005|WALL|Box",
+   "room_id": "r005",
+   "room": "BANHO 01",
+   "check": "WALL",
+   "measure": 0.05082,
+   "unit": "m",
+   "cause": "R1",
+   "finding": {
+    "check": "WALL",
+    "module": "Box",
+    "class": "PENETRATION",
+    "area_m2": 0.00351028,
+    "contact_m": 0.1717,
+    "depth_m": 0.05082,
+    "inscribed_m": 0.0508,
+    "part": "/kb_trilho#62015"
+   }
+  },
+  {
+   "key": "r006|CONTAINMENT|Bancada",
+   "room_id": "r006",
+   "room": "BANHO 02",
+   "check": "CONTAINMENT",
+   "measure": 0.0191,
+   "unit": "m",
+   "cause": "R2b",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Bancada",
+    "outside_depth_m": 0.0191,
+    "outside_m2": 0.012415
+   }
+  },
+  {
+   "key": "r006|CONTAINMENT|Box",
+   "room_id": "r006",
+   "room": "BANHO 02",
+   "check": "CONTAINMENT",
+   "measure": 0.0224,
+   "unit": "m",
+   "cause": "R2",
+   "finding": {
+    "check": "CONTAINMENT",
+    "module": "Box",
+    "outside_depth_m": 0.0224,
+    "outside_m2": 0.001456
+   }
+  },
+  {
+   "key": "r006|OBJECTS|Bancada+Enxoval",
+   "room_id": "r006",
+   "room": "BANHO 02",
+   "check": "OBJECTS",
+   "measure": 0.09392,
+   "unit": "m",
+   "cause": "R3",
+   "finding": {
+    "check": "OBJECTS",
+    "modules": [
+     "Bancada",
+     "Enxoval"
+    ],
+    "class": "PENETRATION",
+    "area_m2": 0.00937122,
+    "contact_m": 0.1008,
+    "depth_m": 0.09392,
+    "inscribed_m": 0.0939,
+    "parts": [
+     "/gabinete#63361",
+     "/kb_papeleira#65887"
+    ],
+    "z_overlap_m": 0.0599
+   }
+  },
+  {
+   "key": "r006|OBJECTS|Enxoval+Espelho",
+   "room_id": "r006",
+   "room": "BANHO 02",
+   "check": "OBJECTS",
+   "measure": 0.03092,
+   "unit": "m",
+   "cause": "R3",
+   "finding": {
+    "check": "OBJECTS",
+    "modules": [
+     "Enxoval",
+     "Espelho"
+    ],
+    "class": "PENETRATION",
+    "area_m2": 0.00052299,
+    "contact_m": 0.0318,
+    "depth_m": 0.03092,
+    "inscribed_m": 0.0149,
+    "parts": [
+     "/kb_gancho#65986",
+     "/espelho#63721"
+    ],
+    "z_overlap_m": 0.0399
+   }
+  },
+  {
+   "key": "r006|WALL|Box",
+   "room_id": "r006",
+   "room": "BANHO 02",
+   "check": "WALL",
+   "measure": 0.0171,
+   "unit": "m",
+   "cause": "R2",
+   "finding": {
+    "check": "WALL",
+    "module": "Box",
+    "class": "PENETRATION",
+    "area_m2": 0.00037791,
+    "contact_m": 0.0573,
+    "depth_m": 0.0171,
+    "inscribed_m": 0.0171,
+    "part": "/kb_perfil#64775"
+   }
+  }
+ ]
+}

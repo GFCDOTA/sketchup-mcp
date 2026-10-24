@@ -1,0 +1,880 @@
+{
+ "inputs": {
+  "D_real_r006": "1154b13191cc486ec1bde52f4880a6d443465a0a9c1535a3e1d5cb8198471206",
+  "A_fixture_valid": "14b56e7e85f89e44b347d0a49d4a9daa8a76f64e54f87364e978bdbca7feba58",
+  "B_fixture_notch": "5938ce2277b4fede87026d5ec9f0ccd7cd0f6cfdc2706396ed72d3c2efe3d767",
+  "C_forced": "06a1681643648bd61263f7e897148b588adbabd17c965b574b98b4b12f79d396"
+ },
+ "cases": {
+  "planta_74 (8 comodos; r006 = proposta diagnostica)": [
+   {
+    "room_id": "r000",
+    "room": "SUITE 01",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR_SWING": "FAIL",
+     "OBJECTS": "FAIL"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR": "FAIL",
+     "OBJECTS": "FAIL"
+    },
+    "changes": [],
+    "v2_findings": [
+     {
+      "check": "CONTAINMENT",
+      "module": "Guarda-roupa",
+      "outside_depth_m": 0.0078,
+      "outside_m2": 0.004446
+     },
+     {
+      "check": "CONTAINMENT",
+      "module": "rug",
+      "outside_depth_m": 0.056,
+      "outside_m2": 0.120714
+     },
+     {
+      "check": "WALL",
+      "module": "rug",
+      "class": "PENETRATION",
+      "area_m2": 0.1203944,
+      "contact_m": 2.2629,
+      "depth_m": 0.05603,
+      "inscribed_m": 0.056,
+      "part": "/tapete#51642",
+      "regions": [
+       {
+        "area_m2": 0.1203944,
+        "mtd_m": 0.05603,
+        "mtd_dir": [
+         0.0,
+         1.0
+        ],
+        "perpendicular_m": 0.05603
+       }
+      ]
+     },
+     {
+      "check": "DOOR",
+      "door": "h_o003",
+      "max_open_deg": 49.0,
+      "blocked_by": "rug",
+      "required_deg": 90.0,
+      "ok": false,
+      "leaf_z_m": [
+       0.0,
+       2.1
+      ]
+     },
+     {
+      "check": "OBJECTS",
+      "modules": [
+       "Cama",
+       "Painel cabeceira"
+      ],
+      "class": "PENETRATION",
+      "area_m2": 0.00603603,
+      "contact_m": 0.0,
+      "depth_m": 0.03002,
+      "inscribed_m": 0.0201,
+      "parts": [
+       "/cabeceira#51816",
+       "/ks_bronze#52789"
+      ],
+      "z_overlap_m": 0.0201
+     }
+    ],
+    "door_motion": {
+     "h_o003": {
+      "max_open_deg": 49.0,
+      "blocked_by": "rug",
+      "required_deg": 90.0,
+      "ok": false,
+      "leaf_z_m": [
+       0.0,
+       2.1
+      ]
+     }
+    },
+    "finishes": []
+   },
+   {
+    "room_id": "r001",
+    "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "PASS",
+     "DOOR_SWING": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "PASS",
+     "DOOR": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "changes": [],
+    "v2_findings": [
+     {
+      "check": "CONTAINMENT",
+      "module": "Armario de servico",
+      "outside_depth_m": 0.0331,
+      "outside_m2": 0.014921
+     },
+     {
+      "check": "CONTAINMENT",
+      "module": "Bancada gourmet",
+      "outside_depth_m": 0.2032,
+      "outside_m2": 0.349704
+     },
+     {
+      "check": "CONTAINMENT",
+      "module": "Condensadora",
+      "outside_depth_m": 0.02868,
+      "outside_m2": 0.009176
+     },
+     {
+      "check": "CONTAINMENT",
+      "module": "Jardineira",
+      "outside_depth_m": 0.15613,
+      "outside_m2": 0.074218
+     },
+     {
+      "check": "CONTAINMENT",
+      "module": "Maquina de lavar",
+      "outside_depth_m": 0.21146,
+      "outside_m2": 0.073859
+     }
+    ],
+    "door_motion": {
+     "h_o005": {
+      "max_open_deg": 90.0,
+      "blocked_by": null,
+      "required_deg": 90.0,
+      "ok": true,
+      "leaf_z_m": [
+       0.0,
+       2.1
+      ]
+     }
+    },
+    "finishes": []
+   },
+   {
+    "room_id": "r002",
+    "room": "SALA DE JANTAR | SALA DE ESTAR",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "PASS",
+     "WALL": "PASS",
+     "DOOR_SWING": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "PASS",
+     "DOOR": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "changes": [
+     {
+      "check": "CONTAINMENT",
+      "v1": "PASS",
+      "v2": "FAIL",
+      "v1_findings": [],
+      "v2_findings": [
+       {
+        "check": "CONTAINMENT",
+        "module": "Painel TV",
+        "outside_depth_m": 0.0091,
+        "outside_m2": 0.000456
+       }
+      ]
+     }
+    ],
+    "v2_findings": [
+     {
+      "check": "CONTAINMENT",
+      "module": "Painel TV",
+      "outside_depth_m": 0.0091,
+      "outside_m2": 0.000456
+     }
+    ],
+    "door_motion": {
+     "h_o000": {
+      "max_open_deg": 90.0,
+      "blocked_by": null,
+      "required_deg": 90.0,
+      "ok": true,
+      "leaf_z_m": [
+       0.0,
+       2.1
+      ]
+     }
+    },
+    "finishes": []
+   },
+   {
+    "room_id": "r003",
+    "room": "SUITE 02",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR_SWING": "FAIL",
+     "OBJECTS": "FAIL"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR": "FAIL",
+     "OBJECTS": "FAIL"
+    },
+    "changes": [],
+    "v2_findings": [
+     {
+      "check": "CONTAINMENT",
+      "module": "Painel cabeceira",
+      "outside_depth_m": 0.0152,
+      "outside_m2": 0.020976
+     },
+     {
+      "check": "CONTAINMENT",
+      "module": "rug",
+      "outside_depth_m": 0.0559,
+      "outside_m2": 0.129121
+     },
+     {
+      "check": "WALL",
+      "module": "rug",
+      "class": "PENETRATION",
+      "area_m2": 0.12911782,
+      "contact_m": 2.4795,
+      "depth_m": 0.05593,
+      "inscribed_m": 0.0559,
+      "part": "/tapete#56249",
+      "regions": [
+       {
+        "area_m2": 0.1065454,
+        "mtd_m": 0.05593,
+        "mtd_dir": [
+         -1.0,
+         0.0
+        ],
+        "perpendicular_m": 0.05593
+       },
+       {
+        "area_m2": 0.02257242,
+        "mtd_m": 0.05591,
+        "mtd_dir": [
+         -1.0,
+         0.0
+        ],
+        "perpendicular_m": 0.05591
+       }
+      ]
+     },
+     {
+      "check": "DOOR",
+      "door": "h_o004",
+      "max_open_deg": 16.0,
+      "blocked_by": "rug",
+      "required_deg": 90.0,
+      "ok": false,
+      "leaf_z_m": [
+       0.0,
+       2.1
+      ]
+     },
+     {
+      "check": "OBJECTS",
+      "modules": [
+       "Cama",
+       "Painel cabeceira"
+      ],
+      "class": "PENETRATION",
+      "area_m2": 0.006,
+      "contact_m": 0.0,
+      "depth_m": 0.02992,
+      "inscribed_m": 0.02,
+      "parts": [
+       "/cabeceira#56407",
+       "/ks_bronze#57309"
+      ],
+      "z_overlap_m": 0.0201
+     }
+    ],
+    "door_motion": {
+     "h_o004": {
+      "max_open_deg": 16.0,
+      "blocked_by": "rug",
+      "required_deg": 90.0,
+      "ok": false,
+      "leaf_z_m": [
+       0.0,
+       2.1
+      ]
+     }
+    },
+    "finishes": []
+   },
+   {
+    "room_id": "r004",
+    "room": "COZINHA",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "PASS",
+     "WALL": "FAIL",
+     "DOOR_SWING": "PASS",
+     "OBJECTS": "FAIL"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR": "PASS",
+     "OBJECTS": "FAIL"
+    },
+    "changes": [
+     {
+      "check": "CONTAINMENT",
+      "v1": "PASS",
+      "v2": "FAIL",
+      "v1_findings": [],
+      "v2_findings": [
+       {
+        "check": "CONTAINMENT",
+        "module": "base_cabinet_01",
+        "outside_depth_m": 0.0046,
+        "outside_m2": 0.002761
+       },
+       {
+        "check": "CONTAINMENT",
+        "module": "countertop",
+        "outside_depth_m": 0.0046,
+        "outside_m2": 0.002898
+       }
+      ]
+     }
+    ],
+    "v2_findings": [
+     {
+      "check": "CONTAINMENT",
+      "module": "base_cabinet_01",
+      "outside_depth_m": 0.0046,
+      "outside_m2": 0.002761
+     },
+     {
+      "check": "CONTAINMENT",
+      "module": "countertop",
+      "outside_depth_m": 0.0046,
+      "outside_m2": 0.002898
+     },
+     {
+      "check": "WALL",
+      "module": "backsplash",
+      "class": "PENETRATION",
+      "area_m2": 2.005e-05,
+      "contact_m": 0.0421,
+      "depth_m": 0.00052,
+      "inscribed_m": 0.0005,
+      "part": "/kc_backsplash#58549",
+      "regions": [
+       {
+        "area_m2": 2.005e-05,
+        "mtd_m": 0.00052,
+        "mtd_dir": [
+         0.195,
+         0.981
+        ],
+        "perpendicular_m": 0.00052
+       }
+      ]
+     },
+     {
+      "check": "WALL",
+      "module": "base_cabinet_01",
+      "class": "PENETRATION",
+      "area_m2": 0.00276092,
+      "contact_m": 0.6104,
+      "depth_m": 0.00462,
+      "inscribed_m": 0.0046,
+      "part": "/kc_corpo#58092",
+      "regions": [
+       {
+        "area_m2": 0.00276092,
+        "mtd_m": 0.00462,
+        "mtd_dir": [
+         0.0,
+         1.0
+        ],
+        "perpendicular_m": 0.00462
+       }
+      ]
+     },
+     {
+      "check": "WALL",
+      "module": "countertop",
+      "class": "PENETRATION",
+      "area_m2": 0.00289846,
+      "contact_m": 0.6403,
+      "depth_m": 0.00464,
+      "inscribed_m": 0.0046,
+      "part": "/kc_tampo#58514",
+      "regions": [
+       {
+        "area_m2": 0.00289846,
+        "mtd_m": 0.00464,
+        "mtd_dir": [
+         0.0,
+         1.0
+        ],
+        "perpendicular_m": 0.00464
+       }
+      ]
+     },
+     {
+      "check": "OBJECTS",
+      "modules": [
+       "backsplash",
+       "cooktop_module"
+      ],
+      "class": "PENETRATION",
+      "area_m2": 0.02014782,
+      "contact_m": 0.8742,
+      "depth_m": 0.04623,
+      "inscribed_m": 0.0462,
+      "parts": [
+       "/kc_backsplash#58582",
+       "/kc_vidro#58879"
+      ],
+      "z_overlap_m": 0.0051
+     },
+     {
+      "check": "OBJECTS",
+      "modules": [
+       "backsplash",
+       "sink_module"
+      ],
+      "class": "PENETRATION",
+      "area_m2": 0.01756524,
+      "contact_m": 0.7624,
+      "depth_m": 0.04621,
+      "inscribed_m": 0.0462,
+      "parts": [
+       "/kc_backsplash#58582",
+       "/kc_cuba#58649"
+      ],
+      "z_overlap_m": 0.0016
+     }
+    ],
+    "door_motion": {},
+    "finishes": []
+   },
+   {
+    "room_id": "r005",
+    "room": "BANHO 01",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR_SWING": "PASS",
+     "OBJECTS": "FAIL"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR": "PASS",
+     "OBJECTS": "FAIL"
+    },
+    "changes": [],
+    "v2_findings": [
+     {
+      "check": "CONTAINMENT",
+      "module": "Bancada",
+      "outside_depth_m": 0.0193,
+      "outside_m2": 0.015054
+     },
+     {
+      "check": "CONTAINMENT",
+      "module": "Box",
+      "outside_depth_m": 0.062,
+      "outside_m2": 0.033576
+     },
+     {
+      "check": "WALL",
+      "module": "Box",
+      "class": "PENETRATION",
+      "area_m2": 0.00351028,
+      "contact_m": 0.1717,
+      "depth_m": 0.05082,
+      "inscribed_m": 0.0508,
+      "part": "/kb_trilho#62015",
+      "regions": [
+       {
+        "area_m2": 0.00351028,
+        "mtd_m": 0.05082,
+        "mtd_dir": [
+         1.0,
+         0.0
+        ],
+        "perpendicular_m": 0.05082
+       }
+      ]
+     },
+     {
+      "check": "OBJECTS",
+      "modules": [
+       "Bancada",
+       "Enxoval"
+      ],
+      "class": "PENETRATION",
+      "area_m2": 0.00885226,
+      "contact_m": 0.1008,
+      "depth_m": 0.0887,
+      "inscribed_m": 0.0887,
+      "parts": [
+       "/gabinete#60634",
+       "/kb_papeleira#63160"
+      ],
+      "z_overlap_m": 0.0599
+     },
+     {
+      "check": "OBJECTS",
+      "modules": [
+       "Enxoval",
+       "Espelho"
+      ],
+      "class": "PENETRATION",
+      "area_m2": 0.000522,
+      "contact_m": 0.032,
+      "depth_m": 0.03104,
+      "inscribed_m": 0.015,
+      "parts": [
+       "/kb_gancho#63226",
+       "/espelho#60994"
+      ],
+      "z_overlap_m": 0.0399
+     },
+     {
+      "check": "OBJECTS",
+      "modules": [
+       "Enxoval",
+       "Vaso"
+      ],
+      "class": "PENETRATION",
+      "area_m2": 0.04285728,
+      "contact_m": 0.4376,
+      "depth_m": 0.16383,
+      "inscribed_m": 0.1638,
+      "parts": [
+       "/kb_tapete#63291",
+       "/vaso#61397"
+      ],
+      "z_overlap_m": 0.0071
+     }
+    ],
+    "door_motion": {
+     "h_o002": {
+      "max_open_deg": 90.0,
+      "blocked_by": null,
+      "required_deg": 90.0,
+      "ok": true,
+      "leaf_z_m": [
+       0.0,
+       2.1
+      ]
+     }
+    },
+    "finishes": [
+     {
+      "module": "Pele",
+      "outside_floor_m2": 0.22895,
+      "max_protrusion_m": 0.3912
+     }
+    ]
+   },
+   {
+    "room_id": "r006",
+    "room": "BANHO 02",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR_SWING": "PASS",
+     "OBJECTS": "FAIL"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR": "PASS",
+     "OBJECTS": "FAIL"
+    },
+    "changes": [],
+    "v2_findings": [
+     {
+      "check": "CONTAINMENT",
+      "module": "Bancada",
+      "outside_depth_m": 0.02758,
+      "outside_m2": 0.021346
+     },
+     {
+      "check": "CONTAINMENT",
+      "module": "Box",
+      "outside_depth_m": 0.0335,
+      "outside_m2": 0.00651
+     },
+     {
+      "check": "WALL",
+      "module": "Box",
+      "class": "PENETRATION",
+      "area_m2": 0.005538,
+      "contact_m": 0.7952,
+      "depth_m": 0.0071,
+      "inscribed_m": 0.0071,
+      "part": "/kb_piso_box#66613",
+      "regions": [
+       {
+        "area_m2": 0.005538,
+        "mtd_m": 0.0071,
+        "mtd_dir": [
+         0.0,
+         1.0
+        ],
+        "perpendicular_m": 0.0071
+       }
+      ]
+     },
+     {
+      "check": "OBJECTS",
+      "modules": [
+       "Enxoval",
+       "Espelho"
+      ],
+      "class": "PENETRATION",
+      "area_m2": 0.00052299,
+      "contact_m": 0.0318,
+      "depth_m": 0.03092,
+      "inscribed_m": 0.0149,
+      "parts": [
+       "/kb_gancho#67694",
+       "/espelho#65429"
+      ],
+      "z_overlap_m": 0.0399
+     },
+     {
+      "check": "OBJECTS",
+      "modules": [
+       "Enxoval",
+       "Vaso"
+      ],
+      "class": "PENETRATION",
+      "area_m2": 0.01120208,
+      "contact_m": 0.3221,
+      "depth_m": 0.11002,
+      "inscribed_m": 0.0998,
+      "parts": [
+       "/kb_papeleira#67595",
+       "/vaso#65626"
+      ],
+      "z_overlap_m": 0.0599
+     }
+    ],
+    "door_motion": {
+     "h_o006": {
+      "max_open_deg": 90.0,
+      "blocked_by": null,
+      "required_deg": 90.0,
+      "ok": true,
+      "leaf_z_m": [
+       0.0,
+       2.1
+      ]
+     }
+    },
+    "finishes": [
+     {
+      "module": "Pele",
+      "outside_floor_m2": 0.18823,
+      "max_protrusion_m": 0.3443
+     }
+    ]
+   },
+   {
+    "room_id": "r007",
+    "room": "LAVABO",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "PASS",
+     "WALL": "PASS",
+     "DOOR_SWING": "PASS",
+     "OBJECTS": "FAIL"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "PASS",
+     "WALL": "PASS",
+     "DOOR": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "changes": [
+     {
+      "check": "OBJECTS",
+      "v1": "FAIL",
+      "v2": "PASS",
+      "v1_findings": [
+       {
+        "check": "OBJECTS",
+        "modules": [
+         "Bancada",
+         "Enxoval"
+        ],
+        "area_m2": 0.0182
+       }
+      ],
+      "v2_findings": []
+     }
+    ],
+    "v2_findings": [],
+    "door_motion": {
+     "h_o001": {
+      "max_open_deg": 90.0,
+      "blocked_by": null,
+      "required_deg": 90.0,
+      "ok": true,
+      "leaf_z_m": [
+       0.0,
+       2.1
+      ]
+     }
+    },
+    "finishes": [
+     {
+      "module": "Pele",
+      "outside_floor_m2": 0.04686,
+      "max_protrusion_m": 0.0203
+     }
+    ]
+   }
+  ],
+  "A_fixture_valid": [
+   {
+    "room_id": "r_syn",
+    "room": "SINTETICO",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "PASS",
+     "WALL": "PASS",
+     "DOOR_SWING": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "PASS",
+     "WALL": "PASS",
+     "DOOR": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "changes": [],
+    "v2_findings": [],
+    "door_motion": {},
+    "finishes": []
+   }
+  ],
+  "B_fixture_notch": [
+   {
+    "room_id": "r_syn",
+    "room": "SINTETICO",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "PASS",
+     "DOOR_SWING": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "PASS",
+     "DOOR": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "changes": [],
+    "v2_findings": [
+     {
+      "check": "CONTAINMENT",
+      "module": "Armario",
+      "outside_depth_m": 1.095,
+      "outside_m2": 0.25
+     }
+    ],
+    "door_motion": {},
+    "finishes": []
+   }
+  ],
+  "C_forced": [
+   {
+    "room_id": "r_syn",
+    "room": "SINTETICO",
+    "v1": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR_SWING": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "v2": {
+     "EXTRACTION": "PASS",
+     "CONTAINMENT": "FAIL",
+     "WALL": "FAIL",
+     "DOOR": "PASS",
+     "OBJECTS": "PASS"
+    },
+    "changes": [],
+    "v2_findings": [
+     {
+      "check": "CONTAINMENT",
+      "module": "Armario",
+      "outside_depth_m": 0.9536,
+      "outside_m2": 0.38144
+     },
+     {
+      "check": "WALL",
+      "module": "Armario",
+      "class": "PENETRATION",
+      "area_m2": 0.076,
+      "contact_m": 0.382,
+      "depth_m": 0.42001,
+      "inscribed_m": 0.19,
+      "part": "/body#49063",
+      "regions": [
+       {
+        "area_m2": 0.076,
+        "mtd_m": 0.42001,
+        "mtd_dir": [
+         1.0,
+         0.0
+        ],
+        "perpendicular_m": 0.46651
+       }
+      ]
+     }
+    ],
+    "door_motion": {},
+    "finishes": []
+   }
+  ]
+ },
+ "classification_changes": 3
+}

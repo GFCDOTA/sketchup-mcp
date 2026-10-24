@@ -268,7 +268,7 @@ def _pids(job_result: dict) -> set[int]:
 
 def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str, str], base_skp: Path, out_dir: Path,
           ledger: CapabilityLedger, *, consensus: dict, consensus_path, diagnostic: bool = False,
-          unsafe_skip_scale_check: bool = False, functional=None, su=None) -> dict[str, Any]:
+          unsafe_skip_scale_check: bool = False, functional=None, defect_baseline=None, su=None) -> dict[str, Any]:
     """Constroi a proposta no SketchUp real (copia em `out_dir`), reabre em outro processo e valida DUAS coisas:
       1. proposta x construido (grupos "<comodo> · <modulo>" no bbox de mundo, 5 mm) — prova que o builder obedeceu;
       2. construido x ambiente real (`tools.validation.built_geometry` sobre as faces do modelo reaberto: poligono do piso,
@@ -327,6 +327,9 @@ def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str,
     raw_geo = Path(glob.glob(str(out_dir / "geometry" / "*result*.json"))[0])
     raw_evidence = {"inspect_geometry": str(raw_geo), "sha256": _sha(raw_geo), "bytes": raw_geo.stat().st_size}
     env_status = {rid: bg.status(r) for rid, r in env_reports.items()}
+    # nao regressao (FP-055 P4): defeito novo ou pior que o registrado do apartamento original reprova a geracao
+    from tools.validation.defect_baseline import regression
+    regress = regression(env_reports, defect_baseline) if defect_baseline is not None else {"status": "NOT_EXECUTED"}
     env_ok = contract["status"] == "OK" and all(s == "PASS" for s in env_status.values())
     if unsafe_skip_scale_check or contract["status"] != "OK" or "BLOCKED" in env_status.values():
         geometric = "BLOCKED"
@@ -345,7 +348,8 @@ def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str,
                              "basis": "motor F2 sobre as caixas provadas iguais ao construido (<= 5 mm)"}
     fstat = [r["status"] for r in func_reports.values()]
     functional_validity = ("NOT_EXECUTED" if "NOT_EXECUTED" in fstat else "FAIL" if "FAIL" in fstat else "PASS")
-    valid = geometric == "PASS" and functional_validity == "PASS" and not bad
+    valid = (geometric == "PASS" and functional_validity == "PASS" and not bad
+             and regress["status"] in ("PASS", "NOT_EXECUTED"))
     if conform and ledger.state("f2.spatial_solver") == "CONSUMED":
         ledger.reflect("f2.spatial_solver", f"{sorted(rooms)}: reaberto no SketchUp, {len(built)} grupos <= "
                                             f"{CONFORMANCE_TOL_M * 1000:.0f} mm da proposta")
@@ -369,6 +373,7 @@ def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str,
     legacy = inside_built_shell(res["nodes"], boxes, rooms)          # so comparacao: o cheque antigo NAO decide nada
     return {"status": status, "valid": valid, "geometric_validity": geometric, "functional_validity": functional_validity,
             "functional": func_reports, "visual": "PENDING_HUMAN", "raw_evidence": raw_evidence,
+            "regression": regress,
             "validator": {"built_geometry": "v2 (area/contato/profundidade direcional + movimento de porta)",
                           "eps_depth_m": bg.EPS_DEPTH},
             "coordinate_contract": chain, "frame_verification": contract,
