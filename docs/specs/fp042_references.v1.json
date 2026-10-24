@@ -6707,6 +6707,42 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/README.md",
+      "blob_sha": "872625781233775d43fa8c7e8b95a71e51e69706",
+      "blob_size": 3987,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/opening_alternatives.json",
+      "blob_sha": "a69c5583e9f503b6be54de661c61755897df79d3",
+      "blob_size": 1757,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/baseline_measured.json",
+      "blob_sha": "0f3c2a8343a7905a55d04e27f05a25fbab4ee697",
+      "blob_size": 2234,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/whatif_thresholds.json",
+      "blob_sha": "e6e83aa20831894fc0b183ab0af02affa739474c",
+      "blob_size": 803,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/probe_baseline.py",
+      "blob_sha": "3c4638488c6b9bb38b9e79634ecd6aaed5c3cb70",
+      "blob_size": 1489,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/probe_whatif.py",
+      "blob_sha": "5c2705eaca07f77850b6488a36a05d433265a0ea",
+      "blob_size": 2130,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/variant_sweep/planta_74/contact_sheet.png",
       "blob_sha": "c94419969de5f28d753e87572218c7a817100e24",
       "blob_size": 205290,
