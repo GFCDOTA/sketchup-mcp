@@ -25,6 +25,34 @@ def wall_mass_pt(con: dict):
     return unary_union(pieces)
 
 
+SOFT_BARRIER_THICKNESS_IN = 1.5   # espessura CONSTRUIDA da barreira (`SOFT_BARRIER_THICKNESS_IN` no shell Ruby; teste de contrato textual)
+
+
+def barrier_is_sourced(sb: dict) -> bool:
+    """Mesma regra do shell (`barrier_source` em build_plan_shell_skp.rb): so barreira com tipo, confirmacao humana ou texto do
+    PDF vira geometria. Traco sem fonte (sb000-sb007 da planta_74) NAO e construido e nao e barreira para este gate."""
+    return bool(str(sb.get("barrier_type") or "").strip() or sb.get("human_confirmed") or sb.get("confirmed")
+                or sb.get("pdf_text") or sb.get("source_label"))
+
+
+def soft_barrier_masses_pt(con: dict) -> list[tuple[str, object, float | None]]:
+    """[(id, massa em pontos, altura em m ou None)] de cada guarda-corpo/peitoril/mureta CONSTRUIDO (com fonte), com a espessura que o
+    shell constroi (1,5 pol; a laje, em `compute_room_floors`, recua mais: meia parede de cada lado). Altura ausente = None: quem consome trata como barreira
+    de qualquer altura (fecha para o lado seguro), nunca inventa uma medida (FP-056 contrato 3)."""
+    from shapely.geometry import LineString
+
+    from core.scale import PT_TO_M
+    half_pt = SOFT_BARRIER_THICKNESS_IN * 0.0254 / 2.0 / PT_TO_M
+    out = []
+    for sb in con.get("soft_barriers", []) or []:
+        pts = sb.get("polyline_pts") or []
+        if len(pts) >= 2 and barrier_is_sourced(sb):
+            h = sb.get("height_m")
+            out.append((str(sb["id"]), LineString([tuple(p) for p in pts]).buffer(half_pt, cap_style=2, join_style=2),
+                        float(h) if h is not None else None))
+    return out
+
+
 def door_swings_pt(con: dict) -> dict[str, Polygon]:
     """Giro da folha de cada porta interior: quarto de circulo (raio = largura do vao) a partir da dobradica, do lado do swing."""
     walls = {w["id"]: w for w in con["walls"]}

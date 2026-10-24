@@ -5,7 +5,7 @@ antes do SketchUp. Este pre-voo roda, para cada comodo que recebeu movel:
 
   - `circulation_gate.gate` (corredor entre portais + cadeiras), com o contrato tipado da F1-01;
   - a sobreposicao movel-sobre-movel do comodo (`furniture_overlap_gate.pairwise_overlap`, mesmo nucleo do gate MCP);
-  - movel dentro de parede e no giro de porta (`room_collisions.audit`, o mesmo da regressao FP-047) — acrescentado depois que
+  - movel dentro de parede, sobre guarda-corpo/peitoril (FP-056 #434) e no giro de porta (`room_collisions.audit`, o mesmo da regressao FP-047) — acrescentado depois que
     uma variante da Suite 01 (#381) punha o criado-mudo 1,8 dm2 dentro da parede e passava;
 
 e agrega por `core.constraint_result.combine`. Quem materializa so segue com PASS ou NOT_APPLICABLE. Gate que quebra (excecao)
@@ -45,8 +45,9 @@ def _collisions(audit: dict, room_name: str, n_boxes: int) -> tuple[str, dict]:
     data = audit.get(room_name) or {}
     walls = [f"{x['module']}/{x['label']} {x['area_cm2']} cm2" for x in data.get("wall_penetration", [])]
     swings = [f"{x['door']}:{x['module']}/{x['label']} {x['area_cm2']} cm2" for x in data.get("door_swing_hits", [])]
-    if walls or swings:
-        return "FAIL", {"wall_penetration": walls, "door_swing_hits": swings}
+    barriers = [f"{x['barrier']}:{x['module']}/{x['label']} {x['area_cm2']} cm2" for x in data.get("barrier_penetration", [])]
+    if walls or swings or barriers:
+        return "FAIL", {"wall_penetration": walls, "door_swing_hits": swings, "barrier_penetration": barriers}
     return "PASS", {}
 
 

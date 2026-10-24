@@ -380,6 +380,17 @@ def build_boxes(con, room_id):
 
     sm = build_spatial_model(con, room_id)
     cell = _cell_m(sm)
+    # FP-056 P3 (#434): a laje entra FLOOR_UNDER_FRAC sob a barreira (RC-A) e a peca encostada no limite do cell entrava
+    # ate 5 mm na mureta/peitoril construidos. A zona de mobiliar perde a massa das barreiras COM FONTE (as que o shell
+    # constroi); o traco sem fonte nao e construido e ja recorta a laje.
+    from shapely.affinity import scale as _scale
+
+    from tools.rooms.shared.clearance import soft_barrier_masses_pt
+    masses = [m for _id, m, _h in soft_barrier_masses_pt(con)]
+    if masses:
+        cell = cell.difference(_scale(unary_union(masses), PT_TO_M, PT_TO_M, origin=(0, 0)))
+        if cell.geom_type != "Polygon":
+            cell = max(cell.geoms, key=lambda g: g.area)
     circ = _circ_m(sm)
     zones, err = _split_zones(con, room_id, cell)
     if zones is None:
@@ -489,6 +500,7 @@ def build_boxes(con, room_id):
 
 def main():
     import json
+
     from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS
     con = json.loads(PLANTA_74_CONSENSUS.read_text("utf-8"))
     boxes, out = build_boxes(con, "r001")

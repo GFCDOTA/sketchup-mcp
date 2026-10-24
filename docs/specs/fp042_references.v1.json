@@ -4157,6 +4157,12 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p3/fp044_baseline.json",
+      "blob_sha": "5efcfa7afa071d12774e4a7e6fcebaa4ec4d5ed4",
+      "blob_size": 2159,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
       "blob_size": 335219,
