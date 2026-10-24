@@ -73,6 +73,22 @@ def extraction_gap_m(group: dict) -> float | None:
 
 
 def room_floor(idx: dict, room_id: str):
+    """Poligono EFETIVO do comodo: a laje construida MENOS a massa de parede construida. A laje do shell entra
+    FLOOR_UNDER_FRAC (0,4) x espessura sob a parede (D-007, FP-043 P3a-03); usar a laje crua aceitaria movel ate 0,4t dentro
+    da parede. Sem parede construida: a laje crua (o cheque WALL fica BLOCKED nesse caso)."""
+    g = idx.get(f"Floor_Group_{room_id}")
+    if not g:
+        return None
+    slab = footprint(g, zmax_m=None)
+    walls = built_walls(idx)
+    if slab is None or walls is None or walls.is_empty:
+        return slab
+    from core.plan_frame import polygonal
+    return polygonal(slab.difference(walls))
+
+
+def room_slab(idx: dict, room_id: str):
+    """A laje construida crua (inclui o trecho sob a parede) — so para registro/overlay, nunca para contencao."""
     g = idx.get(f"Floor_Group_{room_id}")
     return footprint(g, zmax_m=None) if g else None
 

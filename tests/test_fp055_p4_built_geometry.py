@@ -269,3 +269,19 @@ def test_normalization_is_recorded_per_wall_and_never_reaches_the_safety_checks(
     haste = _group("COMODO · Haste", [box(1.3, 0.5, 1.303, 0.503)], 0.0, 1.0)
     rep2 = bg.validate_room(_model(haste, extra=[LEAF]), "r1", "COMODO", doors=_door())
     assert rep2["checks"]["DOOR"] == "FAIL"
+
+
+def test_slab_tucked_under_the_wall_is_not_room_and_does_not_hide_a_piece_inside_the_wall():
+    # a laje do shell entra 0,4 x espessura sob a parede (D-007): um movel 5 cm DENTRO da parede ficaria "na laje"
+    t = 0.15
+    slab = box(-0.4 * t, -0.4 * t, 4.0, 4.0)
+    walls = box(-t, -t, 4.0 + t, 0.0).union(box(-t, -t, 0.0, 4.0 + t))
+    idx = bg.group_index({"groups": [
+        {"name": "Floor_Group_r1", "zmin_m": 0, "zmax_m": 0, "projected_faces": [_face(slab)], "bbox_world_m": _bbox([slab], 0, 0)},
+        _group("PlanShell_Group", [walls], 0.0, 2.7), _group("COMODO · Armario", [box(1.0, -0.05, 1.6, 0.55)], 0.0, 2.0)]})
+    eff = bg.room_floor(idx, "r1")
+    assert eff.bounds[1] >= -1e-9 and bg.room_slab(idx, "r1").bounds[1] < -0.05
+    rep = bg.validate_room(idx, "r1", "COMODO", doors={})
+    c = [f for f in rep["findings"] if f["check"] == "CONTAINMENT"]
+    assert rep["checks"]["CONTAINMENT"] == "FAIL" and abs(c[0]["outside_depth_m"] - 0.05) < 1e-3
+    assert rep["checks"]["WALL"] == "FAIL"

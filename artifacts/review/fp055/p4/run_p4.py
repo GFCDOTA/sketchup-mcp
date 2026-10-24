@@ -241,16 +241,19 @@ def overlay(case_dir: Path, rooms: dict[str, str], title: str) -> str | None:
                 xs, ys = q.exterior.xy
                 ax.fill(xs, ys, **kw)
     w = bg.built_walls(idx)
-    if w is not None:
-        draw(w, fc="#424242", ec="none")
     for rid, name in rooms.items():
+        s = bg.room_slab(idx, rid)
+        if s is not None:
+            draw(s, fc="#ffe0b2", ec="none")                      # laje crua (inclui o trecho sob a parede, D-007)
         f = bg.room_floor(idx, rid)
         if f is not None:
-            draw(f, fc="#fff8e1", ec="#795548", lw=1.2)
+            draw(f, fc="#fff8e1", ec="#795548", lw=1.2)          # poligono efetivo (laje - parede): o da contencao
         for m, g in bg.module_groups(idx, name).items():
             for fp, _z0, _z1, _p in bg.parts(g):
                 if fp is not None and fp.area > 0:
                     draw(fp, fc="#1565c0", alpha=0.35, ec="#0d47a1", lw=0.4)
+    if w is not None:
+        draw(w, fc="#424242", ec="none", alpha=0.85)             # paredes POR CIMA (como no render do SketchUp)
     ax.set_aspect("equal")
     ax.set_title(title, fontsize=10)
     out = case_dir / "raw_geometry_overlay.png"
