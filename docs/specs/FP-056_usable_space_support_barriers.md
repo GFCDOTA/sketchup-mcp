@@ -3,7 +3,7 @@
 ```yaml
 id: FP-056
 versao: 1.0.0
-status: RASCUNHO              # contratos definidos; implementação começa pelo contrato 1
+status: EM_EXECUCAO           # P0 (causa-raiz) entregue; segue pela ordem de fases abaixo
 prioridade: P0_CRITICAL
 origem: achados da FP-055 P4 (geometria construída da planta_74, 2026-10-23) + pedido do Felipe no chat
 dependencias: [FP-043 (D-007, P3a-03), FP-054 (solver F2), FP-055 (contrato de referencial, validação do construído)]
@@ -88,14 +88,27 @@ começa em 0,900). Não é colisão, é falta de apoio.
 
 Evidência bruta (SHA-256) e cálculo: `artifacts/review/fp055/p4/`.
 
-## Ordem de correção (na origem)
-1. Contrato 1: `UsablePlacementRegion` derivada da arquitetura construída. Planejadores e solver passam a usá-la; gate de
-   proposta. Fecha R1 e o `xfail` da D-007.
-2. Contrato 3: barreiras na região utilizável (R2 da A.S.) e porta com folga inferior construída e tapete (R5).
-3. Contrato 2: modos de apoio declarados por peça e validados (R4).
-4. Contratos de vizinhança entre peças compostas (R3), no especialista dono da composição.
-Cada passo: teste vermelho a partir do defeito registrado → correção no gerador → prova no SketchUp real → decisão visual do
-Felipe quando a aparência muda (nada aprovado é alterado em silêncio; o impacto é declarado antes).
+## Causas-raiz (P0, `docs/reports/fp056/p0/README.md`)
+- **RC-A:** os planejadores mobiliam a laje construtiva (`spatial_model.build_spatial_model` usa `compute_room_floors`, que
+  entra 0,4·t sob a parede e sob a barreira). Sintomas: R1.
+- **RC-B:** erro de unidade no planejador da A.S. (`service/layout.py` `_cell_m`/`_circ_m` tratam pontos como polegadas;
+  zona 1,9% menor). Sintomas: os seis da A.S. antes rotulados R2a/R2b. **Corrige a leitura anterior desta SPEC**, que
+  atribuía esses casos à barreira de varanda e à falta de laje.
+- **RC-C:** composição sem contrato de vizinhança. Sintomas: R3.
+- **RC-D:** porta construída sem folga inferior × tapete. Sintomas: R5.
+- Sem causa provada: 4 ocorrências R2 de 0,8 a 1,9 cm, junto a parede.
+
+## Fases (cada uma: teste vermelho a partir do defeito → correção no gerador → prova → PR com CI verde)
+| Fase | Entrega | Fecha |
+|---|---|---|
+| P0 | causa-raiz + testes `xfail(strict)` (esta PR) | — |
+| P1 | RC-B: unidade da A.S. | os 6 da A.S. (a medir) |
+| P2 | contrato 1: `UsablePlacementRegion` no `spatial_model` (laje − massa de parede − barreiras), planejadores e solver passam a usá-la; gate de proposta antes do SketchUp; impacto nas decisões aprovadas declarado antes; L2 da cozinha revogado e refeito (R-18) | R1, xfail D-007 |
+| P3 | contrato 3: barreiras como limite; porta com folga inferior construída × tapete (decisão de projeto registrada se precisar do Felipe) | R5 |
+| P4 | contrato 2: modo de apoio declarado por peça e validado no construído | bandeja e outros flutuantes |
+| P5 | RC-C: contratos de vizinhança por especialista | R3 |
+| P6 | geração nova completa da planta_74 + defeitos corrigidos × remanescentes contra o baseline | — |
+Depois: FP-055 P5–P9 (conhecimento, cômodos restantes, gates de CI, geração limpa integrada, reconciliação).
 
 ## Gate de não regressão (vigente desde a FP-055 P4)
 O registro acima é o **baseline de defeitos**. Uma proposta ou geração que crie um defeito novo, ou piore um existente
