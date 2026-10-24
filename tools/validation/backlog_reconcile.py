@@ -167,7 +167,11 @@ def apply(moves: list[Move], current_status: dict[int, str | None], set_status, 
         if current_status.get(m.issue) != m.frm:
             out["skipped"].append((m.issue, "CONCURRENT_CHANGE"))
             continue
-        set_status(m.issue, m.to)
+        try:
+            set_status(m.issue, m.to)
+        except Exception as exc:  # noqa: BLE001 — um cartao com erro nao aborta os demais; fica registrado
+            out["skipped"].append((m.issue, f"ERROR {type(exc).__name__}: {str(exc)[:120]}"))
+            continue
         out["applied"].append((m.issue, m.frm, m.to))
     return out
 
@@ -201,6 +205,10 @@ def main(argv: list[str]) -> int:
         status_by = {c["number"]: c["status"] for c in cards}
 
         def set_status(n, status):
+            if n not in ids:                                   # Issue aberta fora do Project: cria o cartao (uma vez)
+                added = json.loads(_gh("project", "item-add", PROJECT, "--owner", OWNER, "--format", "json",
+                                       "--url", f"https://github.com/{REPO}/issues/{n}"))
+                ids[n] = added["id"]
             opt = next(o["id"] for o in fields["Status"]["options"] if o["name"] == status)
             _gh("project", "item-edit", "--id", ids[n], "--project-id", PROJECT_ID, "--field-id", fields["Status"]["id"],
                 "--single-select-option-id", opt)

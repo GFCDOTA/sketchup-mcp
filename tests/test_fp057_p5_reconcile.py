@@ -120,3 +120,15 @@ def test_closure_before_the_policy_date_is_not_pulled_back_to_gpt_review():
     i = issue(1, ["gpt-review-required"], state="CLOSED", comments=[EVID])
     i["closedAt"] = "2026-10-20T10:00:00Z"
     assert moves(run([i], [card(1, "Done")])) == {}
+
+
+def test_one_card_that_errors_is_recorded_and_does_not_abort_the_others():
+    ms = [br.Move(1, "Backlog", "Ready", "x"), br.Move(2, "Backlog", "Ready", "x")]
+    done = []
+
+    def set_status(n, s):
+        if n == 1:
+            raise KeyError(1)
+        done.append(n)
+    out = br.apply(ms, {1: "Backlog", 2: "Backlog"}, set_status, 5000, "2026-11-01T01:00:00Z")
+    assert done == [2] and out["skipped"][0][0] == 1 and out["skipped"][0][1].startswith("ERROR KeyError")
