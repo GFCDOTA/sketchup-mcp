@@ -10,7 +10,7 @@ Regras (cada uma devolve um `Finding` com codigo estavel):
 - PROOF_WITHOUT_EVIDENCE   "Estado da prova" acima de NOT_TESTED sem comentario de evidencia.
 - PROOF_LABEL_MISMATCH     label `prova:X` diferente do campo do Project.
 - BLOCKED_LABEL_MISMATCH   Status Blocked sem label `blocked`, ou label `blocked` fora de Blocked.
-- DEPENDENCY_OPEN          item Done com dependencia (#N) ainda aberta.
+- DEPENDENCY_OPEN          item Done com dependencia (#N) ainda aberta (Epic pai aberto nao bloqueia o filho).
 - DEPENDENCY_UNKNOWN       dependencia aponta para Issue inexistente.
 - NOT_IN_PROJECT           Issue aberta fora do Project.
 
@@ -96,7 +96,7 @@ def check(issues: dict[int, dict], items: dict[int, dict] | None, exceptions: di
                     dep = issues.get(d)
                     if dep is None:
                         found.append(Finding(n, "DEPENDENCY_UNKNOWN", f"#{d}"))
-                    elif dep["state"] == "OPEN":
+                    elif dep["state"] == "OPEN" and not any(lab["name"] == "tipo:epic" for lab in dep["labels"]):
                         found.append(Finding(n, "DEPENDENCY_OPEN", f"Done com #{d} aberta"))
         if done and not _has_evidence(iss):
             found.append(Finding(n, "DONE_WITHOUT_EVIDENCE", "sem comentario '**Evidencia' com commit/teste"))
