@@ -6671,6 +6671,24 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp055/p7/qualification_2026-10-24/README.md",
+      "blob_sha": "1e73b8350eab5b55548462d6806fd51fe644583c",
+      "blob_size": 2325,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p7/qualification_2026-10-24/summary.json",
+      "blob_sha": "7ed32644d15e77cd46ce7427b6dbd04fbb97681b",
+      "blob_size": 4619,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p7/qualification_2026-10-24/regression.json",
+      "blob_sha": "9382ebd8ad32ab0ce7483a742001aef6bb403984",
+      "blob_size": 521,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp056/p1/fp044_baseline.json",
       "blob_sha": "67f01f178285760a22b2f48cb7a540b6c21129d3",
       "blob_size": 2160,
