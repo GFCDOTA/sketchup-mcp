@@ -3,11 +3,13 @@
 Complementa `backlog_gate` (que compara Issues x Project). Aqui so Issues, labels, corpo e SPECs; roda no CI sem token de Projects.
 
 - ACCEPTANCE_MISSING        Issue aberta (nao Epic) sem secao de criterios de aceite com ao menos um item `- [ ]`.
-- BLOCK_REASON_MISSING      label `blocked` sem exatamente um `bloqueio:<causa>` (technical | dependency | evidence | human-decision).
+- BLOCK_REASON_MISSING      label `blocked` sem exatamente um `bloqueio:<causa>` (technical | dependency | evidence | human-decision |
+                           external | environment: taxonomia da FP-057).
 - BLOCK_REASON_WITHOUT_BLOCK  `bloqueio:*` numa Issue sem `blocked` (ou fechada): causa de bloqueio que nao bloqueia mais.
 - BLOCK_EPIC                Epic agregadora com `blocked` ou `aprovacao-humana-pendente`: Epic nao e decisao humana individual.
 - BLOCK_HUMAN_FLAG_MISMATCH `bloqueio:human-decision` sem `aprovação-humana-pendente` (ou o inverso fora de Epic).
 - BLOCK_HUMAN_NO_ALTERNATIVES  decisao humana sem secao `Alternativas` e `Recomenda`: o dono recebe opcoes verificadas, nao um pedido aberto.
+- BLOCK_EXTERNAL_NO_REQUIREMENT  `bloqueio:external` sem secao `Requisito externo`; `bloqueio:environment` sem secao `Recuperação`.
 - BLOCK_DEPENDENCY_STALE    `bloqueio:dependency` cujas dependencias (#N do corpo) estao todas fechadas (ou nenhuma aberta).
 - SPEC_LABEL_UNKNOWN        label `spec:X` sem arquivo `docs/specs/X*.md` (X = o que vier antes de `/`).
 
@@ -24,7 +26,7 @@ from pathlib import Path
 from tools.validation.backlog_gate import REPO, Finding, _gh
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-CAUSES = ("technical", "dependency", "evidence", "human-decision")
+CAUSES = ("technical", "dependency", "evidence", "human-decision", "external", "environment")
 HUMAN_FLAG = "aprovação-humana-pendente"
 _ACCEPT = re.compile(r"critérios? de aceite", re.IGNORECASE)
 _CHECK = re.compile(r"^\s*-\s*\[[ xX]\]", re.MULTILINE)
@@ -66,6 +68,10 @@ def check(issues: dict[int, dict], specs: set[str], exceptions: dict | None = No
             found.append(Finding(n, "BLOCK_HUMAN_FLAG_MISMATCH", f"human-decision={human}, flag={HUMAN_FLAG in names}"))
         if open_ and human and not (re.search(r"alternativas", body, re.I) and re.search(r"recomenda", body, re.I)):
             found.append(Finding(n, "BLOCK_HUMAN_NO_ALTERNATIVES", "decisao humana sem 'Alternativas' e 'Recomendação'"))
+        if open_ and "external" in causes and not re.search(r"requisito externo", body, re.I):
+            found.append(Finding(n, "BLOCK_EXTERNAL_NO_REQUIREMENT", "bloqueio externo sem secao 'Requisito externo'"))
+        if open_ and "environment" in causes and not re.search(r"recupera[çc][ãa]o", body, re.I):
+            found.append(Finding(n, "BLOCK_EXTERNAL_NO_REQUIREMENT", "bloqueio de ambiente sem secao 'Recuperação'"))
         if open_ and "dependency" in causes:
             m = _DEPS.search(body)
             deps = [int(x) for x in re.findall(r"#(\d+)", m.group(1))] if m else []
