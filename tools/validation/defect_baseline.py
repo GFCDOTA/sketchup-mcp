@@ -78,8 +78,16 @@ def build_baseline(idx: dict, rooms: dict[str, str], doors: dict) -> list[dict]:
     return sorted(rows, key=lambda r: r["key"])
 
 
-def regression(reports: dict[str, dict], baseline: list[dict]) -> dict[str, Any]:
-    """`reports`: {room_id: validate_room(...)} da geracao nova. So os comodos presentes em `reports` sao comparados."""
+def program_baseline(idx: dict, rooms: dict[str, str]) -> dict[str, list[str]]:
+    """Modulos construidos por comodo no apartamento ORIGINAL (o programa que uma geracao nova nao pode perder calada)."""
+    return {rid: sorted(bg.module_groups(idx, name)) for rid, name in rooms.items()}
+
+
+def regression(reports: dict[str, dict], baseline: list[dict], program: dict[str, list[str]] | None = None,
+               accepted_omissions: dict[str, str] | None = None) -> dict[str, Any]:
+    """`reports`: {room_id: validate_room(...)} da geracao nova. So os comodos presentes em `reports` sao comparados.
+    `program`: modulos do original por comodo; modulo que SUMIU reprova (comodo esvaziado nao conta como "resolvido"),
+    salvo se estiver em `accepted_omissions` ({"rid|PROGRAM|modulo": motivo}) - omissao so por decisao registrada."""
     base = {b["key"]: b for b in baseline}
     rooms = set(reports)
     new, worse, seen = [], [], set()
@@ -95,6 +103,21 @@ def regression(reports: dict[str, dict], baseline: list[dict]) -> dict[str, Any]
                 new.append({"key": k, "measure": m})
             elif m > b["measure"] + (0.5 if b["unit"] == "deg" else WORSE_TOL_M):
                 worse.append({"key": k, "measure": m, "baseline": b["measure"]})
-    resolved = sorted(k for k, b in base.items() if b["room_id"] in rooms and k not in seen)
-    return {"status": "FAIL" if new or worse else "PASS", "new": new, "worse": worse, "resolved": resolved,
+    missing, accepted = [], []
+    for rid in rooms:
+        have = set(reports[rid].get("modules") or [])
+        for m in (program or {}).get(rid, []):
+            if m not in have:
+                k = f"{rid}|PROGRAM|{m}"
+                (accepted if k in (accepted_omissions or {}) else missing).append(k)
+    present = {rid: set(reports[rid].get("modules") or []) for rid in rooms}
+
+    def _still_there(b):            # defeito "resolvido" so se as pecas dele continuam no comodo (nao por sumico)
+        f = b.get("finding", {})
+        mods = f.get("modules") or ([f["module"]] if f.get("module") else [])
+        return all(m in present[b["room_id"]] for m in mods)
+    resolved = sorted(k for k, b in base.items() if b["room_id"] in rooms and k not in seen and _still_there(b))
+    vanished = sorted(k for k, b in base.items() if b["room_id"] in rooms and k not in seen and not _still_there(b))
+    return {"status": "FAIL" if new or worse or missing else "PASS", "new": new, "worse": worse, "resolved": resolved,
+            "vanished_with_piece": vanished, "missing_program": missing, "accepted_omissions": accepted,
             "compared_rooms": sorted(rooms), "worse_tol_m": WORSE_TOL_M}
