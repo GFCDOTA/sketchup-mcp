@@ -101,3 +101,30 @@ def test_python_barrier_thickness_matches_the_shell_ruby_constant():
     rb = Path(__file__).resolve().parents[1] / "tools/sketchup/shell/build_plan_shell_skp.rb"
     m = re.search(r"^SOFT_BARRIER_THICKNESS_IN\s*=\s*([0-9.]+)", rb.read_text("utf-8"), re.M)
     assert m and float(m.group(1)) == SOFT_BARRIER_THICKNESS_IN
+
+
+@pytest.mark.planta74_scale
+def test_service_planner_does_not_cross_a_built_barrier_through_the_zone_slit(monkeypatch):
+    # Variante verificada na decisao AS-1 (churrasqueira 0,85/0,70 m): a Jardineira caia sobre a mureta h_sb001 (437 cm2)
+    # porque a fenda de 3,8 cm da barreira no cell sumia sob a tolerancia de 2 cm de `contains`.
+    import contextlib
+    import io
+
+    from tools.rooms.service import layout as svc
+    con = _con()
+    orig = svc._programa
+
+    def wider(zones):
+        prog = orig(zones)
+        for p in prog:
+            if p["kind"] in ("churrasqueira", "coifa"):
+                p["widths"] = [0.85, 0.70]
+        return prog
+    monkeypatch.setattr(svc, "_programa", wider)
+    with contextlib.redirect_stdout(io.StringIO()):
+        boxes, _out = svc.build_boxes(con, "r001")
+    for b in boxes:
+        b["room"] = "A.S."
+    audit = room_collisions.audit(con, boxes)
+    assert audit["A.S."]["barrier_penetration"] == []
+    assert {"Bancada gourmet", "Banqueta"} <= {b["module"] for b in boxes}        # a variante tambem devolve o programa
