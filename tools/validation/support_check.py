@@ -8,6 +8,11 @@ ON_SURFACE: a face inferior apoiada na face superior do suporte (folga <= EPS_DE
 suporte. Flutuando acima de EPS_DEPTH = FAIL (`gap_m`); abaixo do topo = penetracao, reportada pelo gate de objetos.
 O limiar e o mesmo do validador do construido (`penetration.EPS_DEPTH`) — nenhum limiar muda aqui.
 
+Nivel MODULO (P4b): `MODULE_SUPPORT` declara o modo de cada modulo (grupo do .skp). FLOOR: o ponto mais baixo do modulo
+a no maximo EPS_DEPTH do piso. WALL_MOUNTED: a pegada do modulo toca a massa de parede (distancia <= EPS_DEPTH) — a folga
+real aparece como `NOT_IN_CONTACT`. CEILING e SUSPENDED_INTENTIONAL: declarados, `NOT_EVALUATED` (falta medir forro/fixacao).
+Modulo sem declaracao vai para `undeclared` (BLOCKED na spec): nunca deduzido por proximidade.
+
 Uso:  PT_TO_M=0.0259 python -m tools.validation.support_check   (relatorio da planta_74)
 """
 from __future__ import annotations
@@ -29,6 +34,51 @@ DECLARED: dict[str, tuple[str, tuple[str, ...]]] = {
     "kb_sabonete": ("ON_SURFACE", ("Enxoval:kb_bandeja", "Bancada")),   # sobre a bandeja, ou direto no tampo se nao houver
     "kb_copo": ("ON_SURFACE", ("Enxoval:kb_bandeja", "Bancada")),
 }
+
+
+FLOOR_MODULES = ("Armario de servico", "Cadeira jantar", "Cama", "Churrasqueira", "Escrivaninha", "Guarda-roupa", "Jardineira",
+                 "Maquina de lavar", "Mesa de jantar", "Rack TV", "Sofa", "Tanque", "Tapete", "base_cabinet_01", "rug")
+WALL_MODULES = ("Coifa", "hood", "upper_cabinet_01", "upper_cabinet_02", "Espelho", "Prateleira servico", "backsplash",
+                "Painel cabeceira", "Painel TV")
+CEILING_MODULES = ("PeleTeto", "Varal de teto")
+SUSPENDED_MODULES = ("Pendente",)
+MODULE_SUPPORT: dict[str, str] = {**{m: "FLOOR" for m in FLOOR_MODULES}, **{m: "WALL_MOUNTED" for m in WALL_MODULES},
+                                  **{m: "CEILING" for m in CEILING_MODULES},
+                                  **{m: "SUSPENDED_INTENTIONAL" for m in SUSPENDED_MODULES}}
+
+
+def check_modules(boxes: list[dict], con: dict) -> dict:
+    """Apoio por MODULO. {'findings': [...], 'evaluated': n, 'not_evaluated': [...], 'undeclared': [...]}."""
+    from core.scale import PT_TO_IN, PT_TO_M
+    from tools.rooms.shared.clearance import box_footprint_pt, wall_mass_pt
+    walls = wall_mass_pt(con)
+    mods: dict[tuple[str, str], list[dict]] = {}
+    for b in boxes:
+        if b.get("corners") and b.get("room") and b.get("module"):
+            mods.setdefault((b["room"], b["module"]), []).append(b)
+    findings, evaluated, not_eval, undeclared = [], 0, [], []
+    for (room, name), parts in sorted(mods.items()):
+        mode = MODULE_SUPPORT.get(name)
+        if mode is None:
+            undeclared.append(f"{room} · {name}")
+            continue
+        if mode in ("CEILING", "SUSPENDED_INTENTIONAL"):
+            not_eval.append(f"{room} · {name}: {mode}")
+            continue
+        evaluated += 1
+        if mode == "FLOOR":
+            gap = min(_z(b)[0] for b in parts)
+            if gap > EPS_DEPTH:
+                findings.append({"check": "SUPPORT", "module": name, "room": room, "code": "NOT_ON_FLOOR", "gap_m": round(gap, 4),
+                                 "detail": f"ponto mais baixo {gap * 100:.1f} cm acima do piso"})
+        else:  # WALL_MOUNTED: o hospedeiro e a parede ou a pele de parede (modulo `Pele`) do mesmo comodo
+            skins = [box_footprint_pt(k, PT_TO_IN) for k in mods.get((room, "Pele"), [])]
+            host = unary_union([walls, *[f for f in skins if f is not None]])
+            dist = min(box_footprint_pt(b, PT_TO_IN).distance(host) for b in parts if box_footprint_pt(b, PT_TO_IN) is not None) * PT_TO_M
+            if dist > EPS_DEPTH:
+                findings.append({"check": "SUPPORT", "module": name, "room": room, "code": "NOT_IN_CONTACT", "gap_m": round(dist, 4),
+                                 "detail": f"a {dist * 100:.1f} cm da parede"})
+    return {"findings": findings, "evaluated": evaluated, "not_evaluated": not_eval, "undeclared": undeclared}
 
 
 def _poly(b: dict) -> Polygon:
@@ -83,8 +133,9 @@ def main() -> int:
     with contextlib.redirect_stdout(io.StringIO()):
         boxes, _ = collect_boxes(con)
     rep = check_support(boxes)
+    rep["modules"] = check_modules(boxes, con)
     print(json.dumps(rep, indent=1, ensure_ascii=False))
-    return 1 if rep["findings"] else 0
+    return 1 if rep["findings"] or rep["modules"]["findings"] else 0
 
 
 if __name__ == "__main__":

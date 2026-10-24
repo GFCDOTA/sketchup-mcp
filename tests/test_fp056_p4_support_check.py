@@ -62,3 +62,81 @@ def test_planta74_floating_accessories_are_exactly_the_known_baseline_and_none_g
     assert set(got) <= set(KNOWN), f"defeito de apoio NOVO: {set(got) - set(KNOWN)}"
     for k, gap in got.items():
         assert gap <= KNOWN[k] + 0.0005, f"{k} piorou: {gap} > {KNOWN[k]}"
+
+# ---------------------------------------------------------------------------------------------------------------------
+# P4b: apoio por MODULO (FLOOR e WALL_MOUNTED)
+def _con():
+    from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS
+    return json.loads(PLANTA_74_CONSENSUS.read_text("utf-8"))
+
+
+def mbox(module, z0_m, z1_m, cx_m, cy_m, room="R", half=0.10):
+    d = half * IN
+    cx, cy = cx_m * IN, cy_m * IN
+    return {"kind": "k", "module": module, "room": room, "z0_in": z0_m * IN, "h_in": (z1_m - z0_m) * IN,
+            "corners": [[cx - d, cy - d], [cx + d, cy - d], [cx + d, cy + d], [cx - d, cy + d]]}
+
+
+def _on_wall_and_in_the_air(con):
+    """(x, y) em metros de um ponto SOBRE a massa de parede e de um ponto a mais de 0,8 m de qualquer parede."""
+    from core.scale import PT_TO_M
+    from tools.rooms.shared.clearance import wall_mass_pt
+    walls = wall_mass_pt(con)
+    on = walls.representative_point()
+    room = next(r for r in con["rooms"] if "SALA" in r["name"])
+    from shapely.geometry import Polygon
+    from shapely.ops import polylabel
+    air = polylabel(Polygon(room["polygon_pts"]).difference(walls), 1.0)    # ponto mais longe de qualquer parede
+    assert air.distance(walls) * PT_TO_M > 0.8
+    return (on.x * PT_TO_M, on.y * PT_TO_M), (air.x * PT_TO_M, air.y * PT_TO_M)
+
+
+@pytest.mark.planta74_scale
+def test_floor_module_off_the_floor_fails_and_one_resting_on_it_passes():
+    from tools.validation.support_check import check_modules
+    con = _con()
+    rep = check_modules([mbox("Cama", 0.05, 0.6, 1, 1), mbox("Sofa", 0.0003, 0.8, 3, 3)], con)
+    assert [(f["module"], f["code"], f["gap_m"]) for f in rep["findings"]] == [("Cama", "NOT_ON_FLOOR", 0.05)]
+    assert rep["evaluated"] == 2 and rep["undeclared"] == []
+
+
+@pytest.mark.planta74_scale
+def test_wall_mounted_module_must_touch_the_wall_and_the_gap_is_measured():
+    from tools.validation.support_check import check_modules
+    con = _con()
+    (wx, wy), (ax, ay) = _on_wall_and_in_the_air(con)
+    ok = check_modules([mbox("Espelho", 1.0, 1.6, wx, wy)], con)
+    assert ok["findings"] == []
+    bad = check_modules([mbox("Espelho", 1.0, 1.6, ax, ay)], con)
+    assert [f["code"] for f in bad["findings"]] == ["NOT_IN_CONTACT"] and bad["findings"][0]["gap_m"] > 0.7
+
+
+@pytest.mark.planta74_scale
+def test_undeclared_and_unmeasured_modes_are_reported_never_judged():
+    from tools.validation.support_check import check_modules
+    con = _con()
+    rep = check_modules([mbox("Modulo novo", 0.5, 0.9, 1, 1), mbox("Pendente", 1.8, 2.7, 2, 2)], con)
+    assert rep["findings"] == [] and rep["evaluated"] == 0
+    assert rep["undeclared"] == ["R · Modulo novo"] and rep["not_evaluated"] == ["R · Pendente: SUSPENDED_INTENTIONAL"]
+
+
+# Retrato medido em 2026-10-24 (develop@911d745): modulos fixados na parede que NAO a tocam. Defeito conhecido (FP-056 P4):
+# nao corrigido aqui (muda posicao/aparencia; A.S. depende da decisao AS-1). Nao pode piorar nem ganhar item novo.
+KNOWN_MODULES = {("A.S. | TERRACO SOCIAL | TERRACO TECNICO", "Coifa"): 0.7533, ("A.S. | TERRACO SOCIAL | TERRACO TECNICO", "Prateleira servico"): 0.3465,
+                 ("COZINHA", "hood"): 0.0632, ("COZINHA", "upper_cabinet_02"): 0.0172, ("SALA DE JANTAR | SALA DE ESTAR", "Painel TV"): 0.0111,
+                 ("SUITE 01", "Painel cabeceira"): 0.005, ("SUITE 02", "Painel cabeceira"): 0.005}
+
+
+@pytest.mark.planta74_scale
+def test_planta74_module_support_findings_are_exactly_the_known_baseline_and_none_got_worse():
+    from tools.furnish_apartment import collect_boxes
+    from tools.validation.support_check import check_modules
+    con = _con()
+    with contextlib.redirect_stdout(io.StringIO()):
+        boxes, _ = collect_boxes(con)
+    rep = check_modules(boxes, con)
+    got = {(f["room"], f["module"]): f["gap_m"] for f in rep["findings"]}
+    assert set(got) <= set(KNOWN_MODULES), f"defeito de apoio NOVO: {set(got) - set(KNOWN_MODULES)}"
+    for k, gap in got.items():
+        assert gap <= KNOWN_MODULES[k] + 0.0005, f"{k} piorou: {gap} > {KNOWN_MODULES[k]}"
+    assert rep["evaluated"] >= 30      # o que ja e julgado nao pode voltar a ficar sem declaracao
