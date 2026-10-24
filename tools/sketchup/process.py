@@ -24,6 +24,18 @@ from pathlib import Path
 from typing import Any, Protocol
 
 IMAGE = "SketchUp.exe"
+
+
+def run_text(cmd: list[str], **kw) -> subprocess.CompletedProcess:
+    """`subprocess.run` capturando texto que NUNCA levanta por byte invalido: `tasklist`/`powershell` falam a pagina OEM do console e,
+    sob `python -X utf8`, o `text=True` estrito derrubava a thread leitora e devolvia `stdout=None` (lido como "nenhum SketchUp
+    rodando"). Aqui os bytes sao decodificados com `errors="replace"`: o PID (so digitos) sobrevive, o titulo vira lixo legivel."""
+    done = subprocess.run(cmd, capture_output=True, **kw)  # noqa: S603
+
+    def text(raw) -> str:
+        return raw if isinstance(raw, str) else (raw or b"").decode("utf-8", "replace")
+    return subprocess.CompletedProcess(done.args, done.returncode, text(done.stdout), text(done.stderr))
+
 EXE_DEFAULT = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 PLUGINS_DEFAULT = r"%APPDATA%\SketchUp\SketchUp 2026\SketchUp\Plugins"
 VRAY_EXE_DEFAULT = (r"C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp"
@@ -120,8 +132,7 @@ class PidHandle:
         self.pid = int(pid)
 
     def poll(self) -> int | None:
-        out = subprocess.run(["tasklist", "/FO", "CSV", "/NH", "/FI", f"PID eq {self.pid}"],  # noqa: S603,S607
-                             capture_output=True, text=True).stdout
+        out = run_text(["tasklist", "/FO", "CSV", "/NH", "/FI", f"PID eq {self.pid}"]).stdout
         return None if f'"{self.pid}"' in out else 0
 
     def terminate(self) -> None:
@@ -143,8 +154,7 @@ def spawn_outside_job(cmd: list[str]) -> Handle | None:
     script = ("$r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='" + line + "'}; "
               "if ($r.ReturnValue -ne 0) { exit 2 }; Write-Output $r.ProcessId")
     try:
-        done = subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],  # noqa: S603,S607
-                              capture_output=True, text=True, timeout=30)
+        done = run_text(["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script], timeout=30)
     except (OSError, subprocess.SubprocessError):
         return None
     pid = (done.stdout or "").strip().splitlines()[-1:] or [""]
@@ -161,10 +171,7 @@ class System:
         return Path(path).exists()
 
     def tasklist(self) -> str:
-        out = subprocess.run(  # noqa: S603,S607 — comando fixo, sem entrada do usuário
-            ["tasklist", "/FO", "CSV", "/NH", "/FI", f"IMAGENAME eq {IMAGE}"],
-            capture_output=True, text=True,
-        )
+        out = run_text(["tasklist", "/FO", "CSV", "/NH", "/FI", f"IMAGENAME eq {IMAGE}"])   # comando fixo, sem entrada do usuário
         return out.stdout or ""
 
     def taskkill_pid(self, pid: int, *, force: bool) -> int:
