@@ -1,0 +1,2544 @@
+{
+"taken": "2026-10-24",
+"issues": [
+{
+"number": 519,
+"title": "FP-057 P7 — adoção nas FP-055/FP-056",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P7"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "spec:FP-057"
+}
+],
+"body": "**Dependências:** #518\r\n\n## Critérios de aceite\r\n- [ ] Ao concluir uma tarefa real, o executor seleciona e começa a próxima sozinho\r\n- [ ] Relatório `AUTONOMOUS ENGINEERING STATUS` versionado"
+},
+{
+"number": 518,
+"title": "FP-057 P6 — prova de recuperação ponta a ponta no GitHub",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P6"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "spec:FP-057"
+}
+],
+"body": "**Dependências:** #517\r\n\n## Critérios de aceite\r\n- [ ] Tarefa sintética: selecionar, implementar, PR, check reprovado de propósito, corrigir, concluir, reiniciar sem duplicar\r\n- [ ] Revisão independente pendente permanece bloqueada enquanto outras tarefas avançam\r\n- [ ] Nenhum artefato oficial alterado"
+},
+{
+"number": 517,
+"title": "FP-057 P5 — reconciliação do board com rate limit",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P5"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "spec:FP-057"
+}
+],
+"body": "**Dependências:** #516\r\n\n## Critérios de aceite\r\n- [ ] Transições da SPEC §10 sem cartão duplicado\r\n- [ ] Rate limit e falta de token tratados e reportados (automação parcial)"
+},
+{
+"number": 516,
+"title": "FP-057 P4 — revisão independente verificável e reforço do Guardian",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P4"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "spec:FP-057"
+}
+],
+"body": "**Dependências:** #515\r\n\n## Critérios de aceite\r\n- [ ] Marcador GPT forjado rejeitado; aprovação liga PR + SHA + revisor + veredito + data\r\n- [ ] Novo commit invalida aprovação do SHA anterior\r\n- [ ] Falha de coleta de evidência não libera merge; proteção efetiva testada"
+},
+{
+"number": 515,
+"title": "FP-057 P3 — entrada de defeitos e análise de impacto",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P3"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "spec:FP-057"
+}
+],
+"body": "**Dependências:** #514\r\n\n## Critérios de aceite\r\n- [ ] Defeito novo gera Issue com critérios; duplicado reutiliza a existente\r\n- [ ] Mudança de contrato lista consumidores e SPECs afetados\r\n- [ ] Falha crítica reordena prioridades; independente não paralisa"
+},
+{
+"number": 514,
+"title": "FP-057 P2 — scheduler, estado de execução e recuperação",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P2"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "spec:FP-057"
+}
+],
+"body": "**Dependências:** #513\r\n\n## Critérios de aceite\r\n- [ ] Manifesto durável sem segredos; claim/lease por Issue\r\n- [ ] Reiniciar em cada ponto (investigação, edição, PR aberto, CI pendente, merge, board) não duplica nem perde trabalho"
+},
+{
+"number": 513,
+"title": "FP-057 P1 — descoberta de tarefas e grafo de dependências",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P1"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "spec:FP-057"
+}
+],
+"body": "**Dependências:** #512\r\n\n## Critérios de aceite\r\n- [ ] Grafo detecta referência inexistente, ciclo, dependência resolvida/equivocada e Epic usada como bloqueio\r\n- [ ] Elegibilidade e priorização conforme a SPEC §4\r\n- [ ] O agente identifica o próximo trabalho elegível sem intervenção (casos A–E testados)"
+},
+{
+"number": 512,
+"title": "FP-057 P0 — mapa do fluxo atual, lacunas e taxonomia de bloqueios",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "spec:FP-057"
+},
+{
+"name": "fase:P0"
+}
+],
+"body": "**Dependências:** #511\r\n\n## Critérios de aceite\r\n- [ ] Mapa e lacunas comprovadas em `docs/reports/fp057/p0/README.md`\r\n- [ ] Taxonomia EXTERNAL/ENVIRONMENT no gate, com teste\r\n- [ ] SPEC FP-057 versionada"
+},
+{
+"number": 511,
+"title": "[EPIC] FP-057 — Orquestração autônoma de engenharia e execução contínua do backlog",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "tipo:epic"
+},
+{
+"name": "spec:FP-057"
+},
+{
+"name": "fase:P0"
+}
+],
+"body": "**Dependências:** —\r\n\n## Critérios de aceite\r\n- [ ] Definition of Done da SPEC (§15) cumprida e provada ponta a ponta."
+},
+{
+"number": 508,
+"title": "DECISÃO — secret BACKLOG_PROJECT_TOKEN para mover cartões do Project no Actions",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "fase:governança"
+},
+{
+"name": "bloqueio:external"
+}
+],
+"body": "**Dependências:** #415\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada nesta Issue.\r\n- [ ] Se (a): execução do `quality-guardian` com `BACKLOG_PROJECT_TOKEN` confere o Project (sem erro de permissão)."
+},
+{
+"number": 507,
+"title": "Promover develop → main para ativar a rotina diária e o relatório semanal",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "fase:governança"
+}
+],
+"body": "**Dependências:** #409\n\n## Critérios de aceite\n- [ ] `develop` promovida a `main` por PR (nunca push direto) com os 8 checks verdes.\n- [ ] `gh workflow list` mostra `quality-guardian` e `audit-report` ativos e uma execução `schedule` ou `workflow_dispatch` bem-sucedida."
+},
+{
+"number": 504,
+"title": "Quality Guardian — gates, política de PR, checks obrigatórios e auditoria periódica",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "prio:P0"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "fase:governança"
+},
+{
+"name": "prova:INTEGRATION_PASS"
+}
+],
+"body": "**Dependências:** #409\n\n## Critérios de aceite\n- [ ] Workflow `quality-guardian` com os 3 checks (`qg: backlog, issues and specs`, `qg: PR policy`, `qg: geometry, program and integration`) passando num PR real.\n- [ ] Checks obrigatórios ativos em `develop` e `main`, **verificados** por `GET branches/<b>/protection`.\n- [ ] 27 Issues bloqueadas reclassificadas por causa (technical | dependency | evidence | human-decision), Epic não é decisão humana, decisões com alternativas verificadas e recomendação.\n- [ ] Fluxo PR ↔ Issue ↔ board (`board_sync`) e política de revisão GPT independente (`review_policy.json`).\n- [ ] Relatório de auditoria versionado em `docs/reports/audit/` (PRs, bloqueios por causa, defeitos, regress"
+},
+{
+"number": 503,
+"title": "Verificar a alternativa D-007 (laje sem entrar sob a parede) sem o cache de geometria",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-043"
+},
+{
+"name": "tipo:technical-debt"
+},
+{
+"name": "fase:P3a"
+}
+],
+"body": "**Dependências:** #412\r\n\n## Critérios de aceite\r\n- [ ] Medição com a constante alterada nos planejadores E no validador (sem artefato de cache)\r\n- [ ] Resultado (layout, defeitos, pré-voo) comentado na #447\r\n\r\n> Origem: Quality Guardian P0 (reconciliação dos bloqueios, 2026-10-25)."
+},
+{
+"number": 502,
+"title": "Verificar com pré-voo e gêmeo as alternativas R3 dos banhos e da cozinha",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P5"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #410\r\n\n## Critérios de aceite\r\n- [ ] Cada correção candidata medida (defeito novo/pior, pré-voo, custo L2) e registrada em `artifacts/review/fp056/p7/`\r\n- [ ] Pré-voo reprova interpenetração nova entre módulos (baseline-aware)\r\n- [ ] Resultado resumido na #495\r\n\r\n> Origem: Quality Guardian P0 (reconciliação dos bloqueios, 2026-10-25)."
+},
+{
+"number": 501,
+"title": "Verificar com o solver as alternativas de R6 (banhos e lavabo INFEASIBLE)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P6"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #410\r\n\n## Critérios de aceite\r\n- [ ] Para cada alternativa: status F2 (FEASIBLE/INFEASIBLE), violações duras e efeito no layout, em `artifacts/review/fp056/p7/`\r\n- [ ] Recomendação técnica escrita na #446 com a alternativa viável de menor impacto, sem aplicar nada\r\n\r\n> Origem: Quality Guardian P0 (reconciliação dos bloqueios, 2026-10-25)."
+},
+{
+"number": 500,
+"title": "Pré-voo: giro real da folha (varredura com espessura) e acabamento mais grosso que a folga inferior",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:P3"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #410\r\n\n## Critérios de aceite\r\n- [ ] Pré-voo usa a varredura real da folha e a folga inferior construída (hoje 0)\r\n- [ ] Defeito novo ou pior da classe reprova; os 2 registrados (R5) ficam como baseline conhecido\r\n- [ ] Teste vermelho a partir de h_o003/h_o004 e negativo sintético\r\n\r\n> Origem: Quality Guardian P0 (reconciliação dos bloqueios, 2026-10-25)."
+},
+{
+"number": 497,
+"title": "DECISÃO — regra ≥ 2 portas reprova o guarda-roupa de 0,8 m (1 porta) da Suíte 02",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:P6"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415 · relacionada: #428\r\n\n## Critério de aceite\r\n- [ ] Alternativa escolhida; se (a), o valor da largura mínima.\r\n- [ ] Gate passa a bloquear (fail closed) quando a regra estiver coerente com o programa."
+},
+{
+"number": 496,
+"title": "process.py: decodificação da saída de tasklist/powershell sob -X utf8 devolve vazio",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:P3b"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-043"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #412\n\n## Critério de aceite\n- [ ] Teste que força saída não-UTF-8 do `tasklist`/`powershell` e prova que o resultado não vira \"vazio = nenhum processo\".\n- [ ] `encoding` e `errors=\"replace\"` explícitos nas leituras; PID nunca inferido de saída vazia por erro de decodificação."
+},
+{
+"number": 495,
+"title": "DECISÃO R3 — 9 interpenetrações entre peças vizinhas (cama×painel, backsplash, enxoval dos banhos)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:P5"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415 (Epic de decisões) · bloqueia #437\r\n\n## Critério de aceite\r\n- [ ] Felipe escolhe por grupo (suítes / cozinha / banhos).\r\n- [ ] Impacto visual declarado; L2 refeito onde tocar símbolo provado; pré-voo passa a ver a classe de defeito."
+},
+{
+"number": 491,
+"title": "FP-056 P4c — declarar o modo de apoio dos 26 módulos restantes e medir CEILING/SUSPENDED",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P4"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #410, #436\n\n## Critério de aceite\n- [ ] Os 26 módulos declarados (ou justificativa registrada) e `undeclared == []` na planta_74.\n- [ ] Modos `CEILING` e `SUSPENDED_INTENTIONAL` com medição (forro/fixação), sem PASS por omissão.\n- [ ] Defeitos novos medidos entram no baseline com decisão; nenhum limiar muda."
+},
+{
+"number": 490,
+"title": "Escritores legados restantes ainda gravam em artifacts/ sem política de saída",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:P1"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #409 · relacionada: #423\n\n## Critério de aceite\n- [ ] Todo escritor listado no `execution_graph.md` usa `resolve_output_dir` (saída em `runs/` por padrão; oficial só com flag).\n- [ ] Teste de varredura: nenhum módulo em `tools/` define saída fixa em `artifacts/` sem passar pela política."
+},
+{
+"number": 488,
+"title": "A.S.: churrasqueira, coifa e prateleira de serviço sem parede de apoio (75 / 75 / 35 cm)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:P4"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:bug"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #410, #436, #442, #484\r\n\n## Critério de aceite\r\n- [ ] Causa provada (parede, mureta ou erro de zona) e registrada na SPEC FP-056.\r\n- [ ] Churrasqueira, Coifa e Prateleira em contato com o hospedeiro correto, ou decisão registrada; retrato `KNOWN_MODULES` atualizado."
+},
+{
+"number": 486,
+"title": "DECISÃO R5 — porta × tapete: Suíte 01 abre 49° e Suíte 02 abre 16° (folga inferior da folha ou tapete)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:P3"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415 (Epic de decisões) · bloqueia #435\r\n\n## Critério de aceite\r\n- [ ] Felipe escolhe a alternativa (e o valor, se (a)).\r\n- [ ] Impacto declarado; L2 refeito (R-18) e veredito visual."
+},
+{
+"number": 484,
+"title": "FP-056 RC-E — traços sem fonte (sb000–sb007) recortam laje e cell de todos os cômodos sem serem construídos",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:P3"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:bug"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415 (Epic de decisões) · bloqueia #431, #433, #438\r\n\n## Critério de aceite\r\n- [ ] Felipe escolhe a alternativa nesta Issue.\r\n- [ ] Impacto em layouts aprovados declarado antes de aplicar; L2 refeito (R-18) e veredito visual.\r\n\r\nOrigem: auditoria FP-056 P3a (PR da #434)."
+},
+{
+"number": 480,
+"title": "CI 3.11 × 3.12 e marker planta74_scale: garantir que os checks obrigatórios cobrem os gates novos",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P8"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-043"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #414\n\n## Critérios de aceite\n- [ ] Gates FP-055/056 no CI obrigatório\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 479,
+"title": "Qualificação SketchUp 26 real versionada (versão, bridge, Ruby sha) como pré-condição de INTELLIGENT_BUILD",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P7"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #414\n\n## Critérios de aceite\n- [ ] Matriz abrir/construir/salvar/reabrir/inspecionar registrada com PID e versão\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 478,
+"title": "Fecho L2 (R-18): revisar closure_digests após qualquer mudança em build_spatial_model / helpers",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:T0.1"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #414\n\n## Critérios de aceite\n- [ ] Gate acusa EVIDENCE_CLOSURE_STALE; refazer L2 quando necessário\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 477,
+"title": "Core de construção C1 — Porta de correr do closet",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:M7"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #413, #472\r\n\n## Critérios de aceite\r\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 476,
+"title": "Core de construção S1 — Armário de lavanderia reusando carcaça + frentes",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:M6"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #413\n\n## Critérios de aceite\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 475,
+"title": "Core de construção W1 — Gabinete de pia do banheiro (carcaça + tampo + recorte)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:M5"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #413, #465, #468\r\n\n## Critérios de aceite\r\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 474,
+"title": "Core de construção L1 — Rack da sala como composição de shared.cabinet",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:M4"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #413, #467\r\n\n## Critérios de aceite\r\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 473,
+"title": "Core de construção B3 — Criado-mudo como gabinete paramétrico",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:M3"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #413\n\n## Critérios de aceite\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 472,
+"title": "Core de construção B2 — Portas do guarda-roupa reusam frente lisa/Shaker",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:M2"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #413, #448, #471\r\n\n## Critérios de aceite\r\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 471,
+"title": "Core de construção B1 — Guarda-roupa em painéis (fim do bloco `corpo`)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:M1"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #413, #447\r\n\n## Critérios de aceite\r\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 470,
+"title": "Core de construção K6 — Rodapé (sóculo) recuado como peça",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:K6"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "bloqueio:evidence"
+}
+],
+"body": "**Dependências:** #413\n\n## Critérios de aceite\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 469,
+"title": "Core de construção K5 — Envelope de giro da porta e puxador",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:K5"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "bloqueio:evidence"
+}
+],
+"body": "**Dependências:** #413\n\n## Critérios de aceite\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 468,
+"title": "Core de construção K4 — Recorte de cuba no tampo",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:K4"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #413, #450, #465\r\n\n## Critérios de aceite\r\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 467,
+"title": "Core de construção K3 — Gabinete completo (carcaça + frente + prateleira + gaveta)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:K3"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #413, #449, #466\r\n\n## Critérios de aceite\r\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 466,
+"title": "Core de construção K2 — Gaveta: só a caixa",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:K2"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #413, #449\r\n\n## Critérios de aceite\r\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 465,
+"title": "Core de construção K1 — Tampo da cozinha como peça própria (balanço, espessura, bevel real)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:K1"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #413, #449\r\n\n## Critérios de aceite\r\n- [ ] Definição de pronto §2 do mapa: teste vermelho antes, medida do pedido, L2 refeito se tocar símbolo provado, aparência PENDING_HUMAN\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 464,
+"title": "Backlog de tools/ legado e duplicações (FP-044 F4/F5)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:F4-F5"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-044"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #412\n\n## Critérios de aceite\n- [ ] F4/F5 destravadas por D-009/D-008 e fechadas\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 463,
+"title": "Trilha R6 — lógica de sala fora de interior/ → tools/rooms/living/planning/",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:R6"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #413\n\n## Critérios de aceite\n- [ ] Mapear consumidores do pacote `interior`\n- [ ] Ownership + suíte verdes\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 462,
+"title": "Trilha R5 — medida embutida → spec com origem nos builders Gen1 (guarda-roupa, criado-mudo primeiro)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:R5"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #413\n\n## Critérios de aceite\n- [ ] Baseline de literais cai (491 hoje)\n- [ ] Aparência igual (FP-047)\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 461,
+"title": "Trilha R4 — RoomBrain (Protocol) para o registro de brains",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:R4"
+},
+{
+"name": "prio:P3"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #413\n\n## Critérios de aceite\n- [ ] Port tipado, 5 implementações reais, unitários do registro\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 460,
+"title": "Trilha R3 — scratch_dir único para os inspects (gabinete + Shaker); nunca ao lado de .skp protegido",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:R3"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #413\n\n## Critérios de aceite\n- [ ] Teste vermelho com caminho protegido\n- [ ] L2 refeito (gabinete + frente lisa)\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 459,
+"title": "FP-043 P7/P8 — missão vertical E2E e auditoria final: conferir PARTIAL/BLOCKED restantes",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P7-P8"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-043"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #412\n\n## Critérios de aceite\n- [ ] `docs/reports/FP-043_final_validation.md` reconciliado com develop\n- [ ] Status por subfase honesto\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 458,
+"title": "FP-043 P6b — gabinete paramétrico no SketchUp (save/reopen/edit/rotate) e T0.2 / T0.5 L2 pendentes",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P6b"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-043"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #412, #460\r\n\n## Critérios de aceite\r\n- [ ] T0.2 (#373) e T0.5 (#374): L2 refeito em commit limpo\r\n- [ ] Skill capability-l2-proof\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 457,
+"title": "FP-043 P3b — executor SketchUp seguro: smoke Windows de launchers e MCP estrito (su_* via cliente real)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P3b"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-043"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #412\n\n## Critérios de aceite\n- [ ] su_status/build_shell/furnish/inspect/apply_edits/close/open/render provados no cliente real\n- [ ] Smoke Windows dos launchers (PR #296) feito\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 456,
+"title": "Acompanhar #380 / #381 / #382 (circulation_gate e Suíte 01) no Project",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:F1"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-054"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #411\n\n## Critérios de aceite\n- [ ] Cada issue com estado verificado contra develop; fechar as já corrigidas (F1-01 fixou #380; confirmar #381/#382)\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 455,
+"title": "FP-054 F5 — escala para todos os ambientes, governança e liberação",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:F5"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-054"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #454\n\n## Critérios de aceite\n- [ ] Matriz de capacidades e lacunas assinada com evidência\n- [ ] Libera FP-051/052/053\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 454,
+"title": "FP-054 F4 — campanha end-to-end com SketchUp real (round-trip e medição independente)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:F4"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-054"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #411, #453\n\n## Critérios de aceite\n- [ ] abrir, construir, salvar, reabrir, inspecionar IDs/transform/unidade/colisões/percurso\n- [ ] Anexos de evidência versionados\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 453,
+"title": "FP-054 F3 — micropartições, DSA, benchmark e arquitetura",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:F3"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-054"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #411\n\n## Critérios de aceite\n- [ ] Comportamento preservado + ganho medido (p50/p95, RSS)\n- [ ] Sem duplicidade de owner; ADR antes de adotar OR-Tools/scipy\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 452,
+"title": "REVISÃO VISUAL — nenhuma capacidade tem visual APPROVED (0 cômodos em L3)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 451,
+"title": "DECISÃO FP-043 D-001/D-003/D-004 — referência `quadrado`, `furnish_plan`, `trace_view`",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 450,
+"title": "DECISÃO — ficha técnica da cuba e ok hidráulico (K4)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 449,
+"title": "DECISÃO — revisão dos trechos de vídeo (tampo 07:09–08:53; caixa de gaveta) e alvo kitchen_base_001",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 448,
+"title": "DECISÃO — veredito L3 da porta Shaker (artifacts/review/fp046/l3_package/)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 447,
+"title": "DECISÃO D-007 — vão de mobiliar = laje (antes de qualquer mudança que toque a Suíte 02/B1)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415, #484, #503\r\n\n## Critérios de aceite\r\r\r\n- [ ] Alternativa escolhida registrada na issue\r\r\r\n- [ ] Impacto declarado antes de aplicar\r\r\r\n\r\r\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 446,
+"title": "DECISÃO R6 — Banhos e Lavabo INFEASIBLE no grau de liberdade atual (vão do box, parede/louça do vaso)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:evidence"
+}
+],
+"body": "**Dependências:** #415, #501\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 445,
+"title": "DECISÃO B-1 — Banhos 01/02: louça afastada da parede invade giro da porta (66°, 2°)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #415, #484\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 444,
+"title": "DECISÃO S1-1 — Suíte 01: circulação reprova na região utilizável",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #415, #484\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 443,
+"title": "DECISÃO S2-1 — Suíte 02: 7,33 m² utilizáveis, programa atual não cabe",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #415, #484\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 442,
+"title": "DECISÃO AS-1 — A.S./terraço social: churrasqueira 1,00 m × bancada gourmet + cuba; tanque e secadora",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "aprovação-humana-pendente"
+},
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:human-decision"
+}
+],
+"body": "**Dependências:** #415\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 441,
+"title": "DECISÃO K-1 — Cozinha: bancada 0,63 m × faixa da porta (5,6 cm na parede)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:Decisão"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:BLOCKED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #415, #484\r\n\n## Critérios de aceite\r\n- [ ] Alternativa escolhida registrada na issue\r\n- [ ] Impacto declarado antes de aplicar\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 440,
+"title": "Guardar gate de não regressão do baseline de defeitos no CI",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P2"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #414\n\n## Critérios de aceite\n- [ ] CI reprova defeito novo ou pior\n- [ ] Baseline nunca editado para aceitar defeito novo\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 439,
+"title": "FP-056 P6 — geração nova completa da planta_74 e defeitos corrigidos × remanescentes vs baseline",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P6"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "prova:SKETCHUP_PASS"
+}
+],
+"body": "**Dependências:** #431, #434, #435, #436, #418\n\n## Critérios de aceite\n- [ ] Geração completa no SketchUp real\n- [ ] Relatório defeito a defeito contra `artifacts/review/fp055/p4/defect_baseline.json`\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 438,
+"title": "FP-056 — investigar 4 ocorrências R2 de 0,8–1,9 cm junto à parede (sem causa provada)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P2"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:bug"
+}
+],
+"body": "**Dependências:** #410, #484\r\n\n## Critérios de aceite\r\n- [ ] Causa provada ou classificadas como ruído com medida\r\n- [ ] Suíte 01 guarda-roupa, Sala painel TV, Suíte 02 painel cabeceira, Banho 01 bancada\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 437,
+"title": "FP-056 P5 — contrato de vizinhança por especialista (R3: cama×painel, backsplash×cuba, papeleira, tapete×vaso)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:P5"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:story"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #410, #495, #502\r\n\n## Critérios de aceite\r\r\n- [ ] Cada composição declara vizinhança; R3 zerado ou decisão registrada\r\r\n\r\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 436,
+"title": "FP-056 P4 — modo de apoio declarado por peça (FLOOR/ON_SURFACE/WALL_MOUNTED/CEILING/SUSPENDED) e validado no construído",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P4"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #410\n\n## Critérios de aceite\n- [ ] Sem declaração = BLOCKED; flutuando sem SUSPENDED_INTENTIONAL = FAIL\n- [ ] Bandeja do Lavabo (2,0 cm acima do tampo) corrigida ou reprovada\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 435,
+"title": "FP-056 P3 — porta com folga inferior construída × tapete (R5: h_o003 abre 49°, h_o004 abre 16°)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "blocked"
+},
+{
+"name": "fase:P3"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:bug"
+},
+{
+"name": "bloqueio:dependency"
+}
+],
+"body": "**Dependências:** #410, #486, #500\r\n\n## Critérios de aceite\r\r\n- [ ] Porta abre o exigido ou decisão de projeto registrada\r\r\n- [ ] Folga inferior não modelada é registrada como tal\r\r\n\r\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 434,
+"title": "FP-056 P3 — barreiras (SoftBarrier, guarda-corpo, peitoril) como limite do espaço utilizável",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:P3"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #410\r\n\n## Critérios de aceite\r\n- [ ] Guarda-corpo limita piso utilizável; peitoril bloqueia móvel alto\r\n- [ ] Teste vermelho a partir de R2a (confirmar se RC-B já cobriu tudo)\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 433,
+"title": "FP-056 P2 — fechar xfail(strict) D-007 'nenhum móvel dentro da parede' sem alterar a laje",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P2"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #431, #447, #484\r\n\n## Critérios de aceite\r\r\n- [ ] `tests/test_synthetic_polygon_convention.py:95` passa sem xfail\r\r\n- [ ] FP-043 D-007 marcada RESOLVIDA\r\r\n\r\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 432,
+"title": "FP-056 P2 — Lavabo adota a região utilizável (sem efeito colateral medido)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P2"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #431\n\n## Critérios de aceite\n- [ ] Lavabo usa a região; defeitos não pioram; gêmeo em caixas + gate de circulação PASS\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 431,
+"title": "FP-056 P2 — planejadores adotam UsablePlacementRegion (um por cômodo, só com melhora estrita)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P2"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #410, #447, #484\r\n\n## Critérios de aceite\r\r\n- [ ] Cada planejador adota a região só se: sem defeito novo, sem perda de programa não decidida, sem gate pior (D-010)\r\r\n- [ ] Impacto nas decisões aprovadas declarado antes\r\r\n- [ ] L2 da cozinha revogado e refeito (R-18)\r\r\n\r\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 430,
+"title": "Runtime: servidor MCP da sessão carrega commit velho; checkout do MCP deve ficar em origin/develop",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P1"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #414\n\n## Critérios de aceite\n- [ ] `su_status` com `runtime_identity` OK no perfil INTELLIGENT_BUILD\n- [ ] Procedimento de reinício do MCP documentado\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 429,
+"title": "Catálogo: circulation.gate aponta símbolo diferente do que os brains chamam",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P7"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:technical-debt"
+}
+],
+"body": "**Dependências:** #414\n\n## Critérios de aceite\n- [ ] Símbolo do catálogo = símbolo realmente executado (`GateSession.check`)\n- [ ] Fecho R-18 coerente\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 428,
+"title": "Gates fora do fluxo: living.sofa.gate, bedroom.wardrobe.gate, kitchen.ergonomics.audit (UNTESTED)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P6"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #417, #497\r\n\n## Critérios de aceite\r\n- [ ] Cada gate no fluxo do orquestrador ou removido do catálogo com justificativa\r\n- [ ] `kitchen.ergonomics.audit` sai de UNTESTED\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 427,
+"title": "bathroom.wet-room.guard só loga, não bloqueia",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:P6"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:bug"
+}
+],
+"body": "**Dependências:** #409\n\n## Critérios de aceite\n- [ ] Violação do guard bloqueia (fail closed) com teste negativo\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 426,
+"title": "4 capacidades de marcenaria L2_PASS nunca são invocadas pela geração do apartamento",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P5"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #416\n\n## Critérios de aceite\n- [ ] `shared.cabinet.parametric`, `kitchen.cabinet.plain-fronts`, `kitchen.cabinet.shaker-door`, `shared.cabinet.front.shaker` INVOKED→CONSUMED→REFLECTED na planta real\n- [ ] L2 preservado (R-18)\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 425,
+"title": "collect_boxes descarta out['functional_interfaces'] (F1C do banheiro) no caminho legado",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:P3/P7"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:bug"
+}
+],
+"body": "**Dependências:** #409\n\n## Critérios de aceite\n- [ ] Campo obrigatório nunca descartado em silêncio\n- [ ] Teste de mutação reprova o descarte\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 424,
+"title": "furnish_apartment.main não roda o pré-voo de circulação/sobreposição que su_furnish roda",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:P2/P3"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:bug"
+}
+],
+"body": "**Dependências:** #409\n\n## Critérios de aceite\n- [ ] Pré-voo obrigatório também no caminho legado, ou caminho legado vira adaptador de `LEGACY_DIAGNOSTIC`\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 423,
+"title": "furnish_apartment.main e bake_theme.py gravam direto em artifacts/planta_74/furnished/ sem gate",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:P1/P3"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:bug"
+}
+],
+"body": "**Dependências:** #409\n\n## Critérios de aceite\n- [ ] Saída padrão em `runs/`\n- [ ] Escrita oficial só com `allow_official_write` + gates verdes + aprovação humana\n- [ ] Teste negativo: escrita sem flag falha\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 422,
+"title": "Perfil INTELLIGENT_BUILD: comparação proposta × construído no SketchUp",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P4/P8"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #409, #421\r\n\n## Critérios de aceite\r\n- [ ] `INTELLIGENT_BUILD` constrói em `runs/` só com pré-condições\r\n- [ ] Diff proposta × construído com tolerância declarada\r\n\r\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 421,
+"title": "FP-055 P4 — reconciliar: Banho 02 vertical no SketchUp real (INFEASIBLE comprovado ou UNKNOWN justificado)",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "fase:P4"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:task"
+},
+{
+"name": "prova:SKETCHUP_PASS"
+}
+],
+"body": "**Dependências:** #409\n\n## Critérios de aceite\n- [ ] Resultado real no SU registrado (válido, INFEASIBLE comprovado ou UNKNOWN com motivo)\n- [ ] Spec e relatório concordam sobre o que a P4 entregou\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 420,
+"title": "FP-055 P9 — reconciliação final, estado por capacidade, 0 PR aberta",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P9"
+},
+{
+"name": "prio:P2"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:task"
+}
+],
+"body": "**Dependências:** #419\n\n## Critérios de aceite\n- [ ] Matriz AVAILABLE→VALIDATED por capacidade sem lacuna escondida\n- [ ] 0 PR aberta\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 419,
+"title": "FP-055 P8 — geração limpa integrada com manifesto, renders e overlays novos",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P8"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #409, #417, #418\n\n## Critérios de aceite\n- [ ] Reprodutível pelo `RunManifest` com equivalência semântica\n- [ ] Renders e overlays gerados do manifesto\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 418,
+"title": "FP-055 P7 — gates de CI + qualificação SketchUp real + relatório de não consumidos + mutação de integração",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P7"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:UNIT_PASS"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #409, #414\n\n## Critérios de aceite\n- [ ] Mutação: pipeline que descarta interface (ex.: `functional_interfaces`) ou roda código velho FALHA\n- [ ] Relatório de capacidades não CONSUMED no CI\n- [ ] Qualificação SU real versionada\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 417,
+"title": "FP-055 P6 — expansão do orquestrador por cômodo (Banho 01, Lavabo, Cozinha, Suítes, Sala, Serviço, A.S.)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P6"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #409, #416\n\n## Critérios de aceite\n- [ ] Todo cômodo com estado final explícito (INTEGRATED / INFEASIBLE / NOT_INTEGRATED + motivo)\n- [ ] `solver_policy` para quarto, sala e serviço\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 416,
+"title": "FP-055 P5 — receitas → operação → implementação → prova",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P5"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:story"
+}
+],
+"body": "**Dependências:** #409\n\n## Critérios de aceite\n- [ ] Separar regra funcional / receita construtiva / referência estética\n- [ ] Uma técnica de marcenaria compartilhada usada por 2 componentes\n- [ ] Integração via adaptador sem tocar símbolos L2 (R-18)\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 415,
+"title": "[EPIC] Decisões de projeto pendentes do Felipe",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:—"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:epic"
+}
+],
+"body": "**Dependências:** —\n\n## Critérios de aceite\n- [ ] Cada decisão registrada na issue com a alternativa escolhida e o impacto declarado\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 414,
+"title": "[EPIC] Qualidade: CI, provas L1/L2 e SketchUp real",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P7"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:epic"
+}
+],
+"body": "**Dependências:** —\n\n## Critérios de aceite\n- [ ] Pipeline que descarta interface ou roda código velho falha de forma demonstrável\n- [ ] Campanha SketchUp real documentada\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 413,
+"title": "[EPIC] Core de construção — microfases T0/K/B/L/W/S/C e trilha R",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:T0-C1"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:construction_core_microphases"
+},
+{
+"name": "tipo:epic"
+}
+],
+"body": "**Dependências:** —\n\n## Critérios de aceite\n- [ ] Fila de `construction_core_microphases.md` com estado atualizado por PR\n- [ ] Gen1→Gen2 nos builders priorizados\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 412,
+"title": "[EPIC] FP-042/043 — Modularização e dívida técnica residual",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P3b-P8"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-043"
+},
+{
+"name": "tipo:epic"
+}
+],
+"body": "**Dependências:** —\n\n## Critérios de aceite\n- [ ] P3b/P6b/P7/P8 com status honesto (DONE/PARTIAL/BLOCKED) e evidência\n- [ ] Decisões D-001, D-003, D-004, D-007 resolvidas ou registradas\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 411,
+"title": "[EPIC] FP-054 — Núcleo espacial: fechar F3, F4, F5",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:F3-F5"
+},
+{
+"name": "prio:P1"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-054"
+},
+{
+"name": "tipo:epic"
+}
+],
+"body": "**Dependências:** —\n\n## Critérios de aceite\n- [ ] F3 micropartições/DSA com ganho medido\n- [ ] F4 campanha SketchUp real\n- [ ] F5 matriz de capacidades e lacunas assinada\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 410,
+"title": "[EPIC] FP-056 — Espaço utilizável, apoio físico e barreiras (P2–P6)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P2-P6"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-056"
+},
+{
+"name": "tipo:epic"
+}
+],
+"body": "**Dependências:** —\n\n## Critérios de aceite\n- [ ] Defeitos R1–R6 do baseline resolvidos na origem ou com decisão registrada\n- [ ] xfail(strict) D-007 passa sem alterar a laje\n- [ ] Gate de não regressão sem defeito novo/pior\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 409,
+"title": "[EPIC] FP-055 — Pipeline inteligente integrado (P5–P9)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "fase:P5-P9"
+},
+{
+"name": "prio:P0"
+},
+{
+"name": "prova:NOT_TESTED"
+},
+{
+"name": "spec:FP-055"
+},
+{
+"name": "tipo:epic"
+}
+],
+"body": "**Dependências:** —\n\n## Critérios de aceite\n- [ ] Todas as fases P5–P9 da spec fechadas com gate verificado\n- [ ] Nenhuma capacidade fica em AVAILABLE sem estado final explícito\n- [ ] 0 PR aberta ao concluir\n\n> Origem: auditoria de backlog em `origin/develop` (2026-10-24). Estado marcado como 'confirmar' deve ser verificado no código antes de iniciar."
+},
+{
+"number": 382,
+"title": "circulation_gate: cadeira/mesa reconhecidas só por nome em português (FP-054 R-03)",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [],
+"body": ""
+},
+{
+"number": 381,
+"title": "Suíte 01: layout materializado com circulação FAIL (cadeira fecha a passagem) (FP-054 R-02)",
+"state": "OPEN",
+"stateReason": "",
+"labels": [
+{
+"name": "prova:SKETCHUP_PASS"
+}
+],
+"body": "## Critérios de aceite\n- [x] Pré-voo recusa o layout original e a decisão da Suíte 01 passa (`91aad4b`).\n- [x] L2 no SketchUp real em commit limpo: 10/10 (`7229d19`, `artifacts/review/fp054/suite01_l2/`).\n- [ ] Veredito visual do Felipe (`APPROVED`/`CHANGES_REQUESTED`) registrado nesta Issue."
+},
+{
+"number": 380,
+"title": "circulation_gate: PASS vazio em cômodo com < 2 portais (FP-054 R-01)",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [],
+"body": ""
+},
+{
+"number": 122,
+"title": "planta_74: close global_visual_fidelity WARN advisory (post-PR #121)",
+"state": "CLOSED",
+"stateReason": "COMPLETED",
+"labels": [
+{
+"name": "documentation"
+}
+],
+"body": ""
+}
+]
+}
