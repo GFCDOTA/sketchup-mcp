@@ -306,6 +306,20 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
                 "preflight": pre, "rooms": [{"room_id": r[0], "name": r[1], "type": r[2], "result": r[3], "boxes": r[4]}
                                             for r in summary],
                 "next_step": "corrigir o layout do cômodo reprovado (a regra não é relaxada); ver risk register FP-054"}
+    from tools.sketchup.runtime_identity import check as runtime_check
+    out = place_boxes(boxes, base=base, d=d, style=style, mode=mode, timeout_s=timeout_s, su=su)
+    out.update({"base_skp": str(base), "preflight": pre,
+                # FP-055 P1: este caminho e o perfil LEGACY_DIAGNOSTIC — registra qual codigo gerou, nunca valida
+                "profile": "LEGACY_DIAGNOSTIC", "runtime_identity": runtime_check("LEGACY_DIAGNOSTIC"),
+                "rooms": [{"room_id": r[0], "name": r[1], "type": r[2], "result": r[3], "boxes": r[4]} for r in summary]})
+    return out
+
+
+def place_boxes(boxes: list[dict], *, base: Path, d: Path, style: str | None = None, mode: str | None = None,
+                timeout_s: int = 300, su: SketchUp | None = None) -> dict[str, Any]:
+    """Materializa CAIXAS JA DECIDIDAS no shell `base` (copia em `d`) com `place_layout_skp.rb`. Nao decide layout nem roda
+    gate: quem chama (furnish legado, orquestrador FP-055) ja fez isso. Saida: o `run` do job + `files` + status OK/FAILED."""
+    su = _su(su)
     d.mkdir(parents=True, exist_ok=True)
     # o shell base costuma ser o .skp CANÔNICO (artifacts/): o SketchUp abre uma
     # cópia, nunca ele — em modo interactive a janela fica aberta depois do job
@@ -332,12 +346,7 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
         env.update(texture_env(style, (REPO / "assets/textures/procedural").resolve()))
     run = run_script(su, script=REPO / "tools" / "sketchup" / "furnish" / "place_layout_skp.rb", done_marker=files["log"],
                      skp_in=base_copy, env_extra=env, timeout_s=timeout_s, mode=mode)
-    from tools.sketchup.runtime_identity import check as runtime_check
-    out: dict[str, Any] = {**run, "boxes": len(boxes), "base_skp": str(base), "preflight": pre,
-                           # FP-055 P1: este caminho e o perfil LEGACY_DIAGNOSTIC — registra qual codigo gerou, nunca valida
-                           "profile": "LEGACY_DIAGNOSTIC", "runtime_identity": runtime_check("LEGACY_DIAGNOSTIC"),
-                           "rooms": [{"room_id": r[0], "name": r[1], "type": r[2], "result": r[3], "boxes": r[4]}
-                                     for r in summary]}
+    out: dict[str, Any] = {**run, "boxes": len(boxes)}
     if run["status"] != "DONE":
         return out
     log = files["log"].read_text("utf-8", errors="replace")

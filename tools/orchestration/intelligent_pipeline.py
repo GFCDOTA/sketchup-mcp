@@ -174,11 +174,111 @@ def run(request: GenerationRequest, *, runtime_check=None, max_candidates=None) 
         manifest["rooms"].append(rec)
         manifest.setdefault("_proposals", {})[rid] = prop
     manifest["ledger"] = ledger.to_dict()
+    manifest["_ledger"] = ledger                         # objeto vivo para o estagio de construcao (nao serializado)
     # valido so se TODO comodo pedido foi planejado e e viavel: NOT_INTEGRATED/BLOCKED/INFEASIBLE derrubam (fail closed)
     manifest["valid"] = bool(manifest["rooms"]) and all(x["status"] == "FEASIBLE" for x in manifest["rooms"])
     manifest["status"] = ("DRY_RUN_COMPLETE" if request.generation_profile == "INTELLIGENT_DRY_RUN" else "PLANNED")
     manifest["not_integrated"] = sorted(x["room_id"] for x in manifest["rooms"] if x["status"] == "NOT_INTEGRATED")
     return manifest
+
+
+# ----------------------------------------------------------------------------------------- P4: construcao + conferencia
+CONFORMANCE_TOL_M = 0.005          # 5 mm: a materializacao das caixas foi medida em 0,0 mm (auditoria 2026-10-23)
+IN2M = 0.0254
+
+
+def compose_boxes(all_boxes: list[dict], proposals: dict[str, LayoutProposal], room_names: dict[str, str]) -> list[dict]:
+    """Planta = caixas de base com as de cada comodo planejado TROCADAS pelas da proposta (o builder constroi a proposta)."""
+    replaced = {room_names[rid] for rid, p in proposals.items() if p.boxes}
+    out = [b for b in all_boxes if b.get("room") not in replaced]
+    for rid, p in proposals.items():
+        out += [dict(b) for b in p.boxes]
+    return out
+
+
+def module_bbox_m(parts: list[dict]) -> tuple[list[float], list[float]]:
+    xs = [c[0] for b in parts for c in b["corners"]]
+    ys = [c[1] for b in parts for c in b["corners"]]
+    z0 = [float(b.get("z0_in") or 0) for b in parts]
+    z1 = [float(b.get("z0_in") or 0) + float(b.get("h_in") or 0) for b in parts]
+    return [min(xs) * IN2M, min(ys) * IN2M, min(z0) * IN2M], [max(xs) * IN2M, max(ys) * IN2M, max(z1) * IN2M]
+
+
+def conformance(nodes: list[dict], boxes: list[dict], rooms: list[str], tol_m: float = CONFORMANCE_TOL_M):
+    """Proposta x MODELO REABERTO, por grupo "<comodo> · <modulo>": bbox do mundo dentro da tolerancia."""
+    by_name = {n["name"]: n for n in nodes if n.get("bbox_world_m")}
+    requested, built, omitted, div = [], [], {}, []
+    for room in rooms:
+        for mod in sorted({b.get("module") for b in boxes if b.get("room") == room and b.get("corners")}):
+            key = f"{room} · {mod}"
+            requested.append(key)
+            node = by_name.get(key)
+            if node is None:
+                omitted[key] = "grupo ausente no modelo reaberto"
+                continue
+            built.append(key)
+            pmin, pmax = module_bbox_m([b for b in boxes if b.get("room") == room and b.get("module") == mod
+                                        and b.get("corners")])
+            bmin, bmax = node["bbox_world_m"]["min"], node["bbox_world_m"]["max"]
+            d = max(abs(a - c) for a, c in zip(pmin + pmax, bmin + bmax))
+            if d > tol_m:
+                div.append({"group": key, "max_delta_m": round(d, 4), "proposal": [pmin, pmax], "built": [bmin, bmax]})
+    return requested, built, omitted, div
+
+
+def _pids(obj) -> set[int]:
+    out: set[int] = set()
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k == "pid" and isinstance(v, int):
+                out.add(v)
+            else:
+                out |= _pids(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            out |= _pids(v)
+    return out
+
+
+def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str, str], base_skp: Path, out_dir: Path,
+          ledger: CapabilityLedger, *, diagnostic: bool = False, su=None) -> dict[str, Any]:
+    """Constroi a proposta no SketchUp real (copia em `out_dir`), reabre em outro processo, confere e fecha os PIDs que abriu.
+    Proposta nao viavel so e construida com `diagnostic=True` — e o resultado sai rotulado DIAGNOSTIC_NOT_VALID."""
+    from tools.sketchup import jobs
+    bad = sorted(rid for rid, p in proposals.items() if not p.buildable_as_valid)
+    if bad and not diagnostic:
+        return {"status": "BLOCKED_NOT_FEASIBLE", "rooms": bad, "valid": False}
+    boxes = compose_boxes(all_boxes, proposals, room_names)
+    opened: set[int] = set()
+    try:
+        placed = jobs.place_boxes(boxes, base=base_skp, d=out_dir / "build", mode="interactive", su=su)
+        opened |= _pids(placed)
+        if placed.get("status") != "OK":
+            return {"status": "BUILD_FAILED", "placed": placed, "valid": False}
+        skp = Path(placed["files"]["skp"])
+        insp = jobs.inspect_model(str(skp), max_depth=1, out_dir=str(out_dir / "inspect"), mode="interactive", su=su)
+        opened |= _pids(insp)
+        res = insp.get("result") or {}
+        if not res.get("ok"):
+            return {"status": "INSPECT_FAILED", "inspect": insp, "valid": False}
+    finally:
+        closed = [jobs.close(pid=p, force=True, confirm=True, su=su) for p in sorted(opened)]
+    rooms = [room_names[r] for r in proposals]
+    req, built, omitted, div = conformance(res["nodes"], boxes, rooms)
+    from core.pipeline_contracts import BuildResult
+    br = BuildResult(tuple(req), tuple(built), omitted, tuple(div), str(res.get("sketchup_version") or "UNKNOWN"))
+    conform = not omitted and not div
+    for rid, p in proposals.items():
+        if conform and ledger.state("f2.spatial_solver") == "CONSUMED":
+            ledger.reflect("f2.spatial_solver", f"{rid}: {p.proposal_id} reaberto no SketchUp, {len(built)} grupos <= "
+                                                f"{CONFORMANCE_TOL_M * 1000:.0f} mm")
+            if p.buildable_as_valid:
+                ledger.validate("f2.spatial_solver", f"{rid}: proposta FEASIBLE + construido conforme")
+    valid = conform and not bad
+    return {"status": "BUILT" if valid else ("DIAGNOSTIC_NOT_VALID" if conform else "BUILT_NONCONFORMING"),
+            "valid": valid, "skp": str(skp), "skp_sha256": _sha(skp), "renders": placed.get("files"),
+            "build_result": br.__dict__, "sketchup_version": br.sketchup_version, "pids_opened": sorted(opened),
+            "pids_closed": closed}
 
 
 def write(manifest: dict, out_dir: Path) -> Path:
