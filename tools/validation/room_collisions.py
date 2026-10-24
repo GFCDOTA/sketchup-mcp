@@ -4,12 +4,24 @@ Mesma geometria e classificacao do `planta_check` do L2 FP-042 (que mede o `.skp
 planner seja reproduzivel em segundos e protegido por teste. `FURNITURE`/`FIXTURE` nao podem entrar na parede nem ficar no
 giro de uma porta; pecas `STRUCTURAL` (laje/pele/teto) entram sob a parede POR DESENHO (tuck 0,4*espessura) e nao sao auditadas
 aqui; piso e acabamento rente ao chao (topo <= 2 cm) sao caminhaveis.
+
+Guarda-corpo, peitoril e mureta (`soft_barriers`) tambem limitam o piso utilizavel (FP-056 contrato 3, #434): mobiliario cuja
+base fica abaixo do topo da barreira e cuja pegada a cruza e `barrier_penetration`. Barreira sem altura declarada bloqueia
+qualquer altura (lado seguro); a altura nunca e inventada.
 """
 from __future__ import annotations
 
 from collections import defaultdict
 
-from tools.rooms.shared.clearance import EPS_AREA_PT2, box_footprint_pt, depth_cm, door_swings_pt, wall_mass_pt
+from tools.rooms.shared.clearance import (
+    EPS_AREA_PT2,
+    box_footprint_pt,
+    depth_cm,
+    door_swings_pt,
+    soft_barrier_masses_pt,
+    wall_mass_pt,
+)
+from tools.validation.penetration import EPS_DEPTH
 
 IN_TO_M = 0.0254
 WALKABLE_TOP_M = 0.02          # topo ate 2 cm = piso/acabamento: nao bloqueia giro de porta
@@ -23,7 +35,8 @@ def audit(consensus: dict, boxes: list[dict]) -> dict[str, dict[str, list[dict]]
     from core.scale import PT_TO_IN, PT_TO_M
     walls = wall_mass_pt(consensus)
     swings = door_swings_pt(consensus)
-    out: dict[str, dict[str, list[dict]]] = defaultdict(lambda: {"wall_penetration": [], "door_swing_hits": []})
+    barriers = soft_barrier_masses_pt(consensus)
+    out: dict[str, dict[str, list[dict]]] = defaultdict(lambda: {"wall_penetration": [], "door_swing_hits": [], "barrier_penetration": []})
     for b in boxes:
         room = str(b.get("room"))
         out[room]                                              # garante a chave mesmo sem achado
@@ -41,6 +54,12 @@ def audit(consensus: dict, boxes: list[dict]) -> dict[str, dict[str, list[dict]]
         if inter.area > EPS_AREA_PT2 and not hosted and intent in AUDITED_INTENTS:
             out[room]["wall_penetration"].append({"module": b.get("module"), "label": b.get("label") or b.get("kind"),
                                                   "area_cm2": round(inter.area * PT_TO_M**2 * 1e4, 1), "depth_cm": depth_cm(inter, PT_TO_M)})
+        if not hosted and intent in AUDITED_INTENTS:
+            for sb_id, mass, top in barriers:
+                hit = fp.intersection(mass)
+                if hit.area > EPS_AREA_PT2 and (top is None or z0 < top) and depth_cm(hit, PT_TO_M) / 100.0 > EPS_DEPTH:
+                    out[room]["barrier_penetration"].append({"barrier": sb_id, "module": b.get("module"), "label": b.get("label") or b.get("kind"),
+                                                             "area_cm2": round(hit.area * PT_TO_M**2 * 1e4, 1), "depth_cm": depth_cm(hit, PT_TO_M)})
         if ip.get("circulation") != "WALKABLE" and z1 > WALKABLE_TOP_M and z0 < DOOR_LEAF_TOP_M:
             for door_id, sw in swings.items():
                 hit = fp.intersection(sw)
@@ -55,5 +74,6 @@ def findings(consensus: dict, boxes: list[dict]) -> list[str]:
     rows = []
     for room, d in audit(consensus, boxes).items():
         rows += [f"{room}: parede {x['module']}/{x['label']} {x['depth_cm']} cm ({x['area_cm2']} cm2)" for x in d["wall_penetration"]]
+        rows += [f"{room}: barreira {x['barrier']} {x['module']}/{x['label']} {x['depth_cm']} cm ({x['area_cm2']} cm2)" for x in d["barrier_penetration"]]
         rows += [f"{room}: giro {x['door']} {x['module']}/{x['label']} {x['area_cm2']} cm2" for x in d["door_swing_hits"]]
     return sorted(rows)
