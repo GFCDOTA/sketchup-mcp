@@ -1,5 +1,9 @@
 # Handoff — sketchup-mcp
 
+> **2026-10-24 — LEIA PRIMEIRO:** orquestração autônoma do backlog (FP-057) e Quality Guardian em
+> [`docs/handoffs/2026-10-24_fp057_autonomous_orchestration_handoff.md`](../docs/handoffs/2026-10-24_fp057_autonomous_orchestration_handoff.md).
+> **Atenção (#533):** os checks `qg:*` passavam em falso até o PR 534 (pipefail) ser mergeado; PRs 534/535/539 aguardam revisão independente (#524).
+
 > **2026-10-23 — FP-054 tem precedência:** estado em
 > [`docs/handoffs/2026-10-23_fp054_f0_f1_handoff.md`](../docs/handoffs/2026-10-23_fp054_f0_f1_handoff.md)
 > (F0 concluída, F1 em andamento; Suíte 01 resolvida em #389 — visual `PENDING_HUMAN`; estado vivo em `.claude/plans/next_actions.md`).
