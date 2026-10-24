@@ -63,6 +63,17 @@ descartado em silêncio (o descarte de `out["functional_interfaces"]` é o caso-
 | P8 | geração limpa integrada + manifesto + renders e overlays novos | reproduzível pelo manifesto, com equivalência semântica |
 | P9 | reconciliação final, estado por capacidade | nenhuma lacuna escondida; 0 PR aberta |
 
+### Estado em 2026-10-24 (backlog: GitHub Project #1)
+| Fase | Estado | Evidência / Issue |
+|---|---|---|
+| P0–P3 | feitas | `docs/reports/fp055/p0..p3/` |
+| P4 | validação do construído feita; vertical Banho 02 real a reconciliar | #421, #422 |
+| Caminho legado | endurecido: saída segura, pré-voo obrigatório, guard de banheiro bloqueante, interfaces expostas | #423, #424, #425, #427; #490 (demais escritores) |
+| P5 receitas → operação | não iniciada | #416 |
+| P6 expansão por cômodo | não iniciada | #417 |
+| P7 gates | parcial: gate de consumo e relatório de não consumidos; falta qualificação SU como pré-condição e mutação do orquestrador integrado | #418, #479; `docs/reports/fp055/p7/` |
+| P8/P9 | dependem de P5–P7 e da FP-056 P6 | #419, #420 |
+
 ## Regressão obrigatória
 Os 8 defeitos (baseline em `docs/reports/fp055/p0/baseline_manifest.json`) ficam medidos antes e depois. Nunca se corrige
 mexendo em limiar ou tirando validação. A F2 já mostrou que, no grau de liberdade declarado, os três banheiros são INFEASIBLE:
