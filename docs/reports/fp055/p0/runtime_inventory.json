@@ -1,0 +1,30 @@
+{
+ "audit_checkout": {
+  "path": "E:/Claude/worktrees/w-prov",
+  "head": "aebbdfc7c90e48381e756eb1d942ed3a797c699c",
+  "origin_develop": "aebbdfc7c90e48381e756eb1d942ed3a797c699c",
+  "dirty": true
+ },
+ "mcp_server": {
+  "config": "E:/Claude/.mcp.json",
+  "command": "E:/Claude/apps/sketchup-mcp/.venv/Scripts/python.exe",
+  "cwd": "E:/Claude/apps/sketchup-mcp",
+  "pythonpath": "E:/Claude/apps/sketchup-mcp",
+  "checkout_head": "90d44338a67377c69783a76e469b3dfbd9d325f5",
+  "branch": "develop",
+  "ahead_of_origin_develop": 0,
+  "behind_origin_develop": 102,
+  "dirty_entries": [
+   "?? worktrees/"
+  ]
+ },
+ "worktrees": [
+  "E:/Claude/apps/sketchup-mcp                                                                                   90d4433 [develop]",
+  "C:/Users/felip_local/AppData/Local/Temp/claude/E--Claude/1a0122f9-7260-474a-9009-96d9942517fb/scratchpad/base 50ab4e0 (detached HEAD)",
+  "E:/Claude/apps/sketchup-mcp/worktrees/w-audit                                                                 a8cde14 (detached HEAD)",
+  "E:/Claude/worktrees/w-audit                                                                                   a8cde14 (detached HEAD)",
+  "E:/Claude/worktrees/w-fp047                                                                                   2b1dc55 [feat/fp047-f3-gates]",
+  "E:/Claude/worktrees/w-gates                                                                                   1035e34 [docs/fp044-d007-diagnosis]",
+  "E:/Claude/worktrees/w-prov                                                                                    aebbdfc [docs/fp055-p0-baseline]"
+ ]
+}

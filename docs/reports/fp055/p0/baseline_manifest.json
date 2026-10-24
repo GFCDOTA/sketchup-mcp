@@ -1,0 +1,99 @@
+{
+ "fp": "FP-055",
+ "phase": "P0",
+ "origin_develop": "aebbdfc7c90e48381e756eb1d942ed3a797c699c",
+ "audit_head": "aebbdfc7c90e48381e756eb1d942ed3a797c699c",
+ "protected_files_sha256": {
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts\\planta_74\\furnished\\bedroom_designer_r000.skp": "528fa5b33c64609c5e378f572eadd1555f344b6f4e5cfe5d162b8790e1ad4125",
+  "artifacts\\planta_74\\furnished\\bedroom_designer_r003.skp": "29e9311467f11b8cba9534139d9e78a12149d8620c7c1d220d854e44518e1353",
+  "artifacts\\planta_74\\furnished\\planta_74_bedroom_r000.skp": "272f80231766f03ffc08c730b75fad1c5012e48d1ce2a923791bdcae44773890",
+  "artifacts\\planta_74\\furnished\\planta_74_bedroom_r003.skp": "c9694ee4b82675f996bc9c4ae0b91dff76215044bd36afd56d330ad56528d088",
+  "artifacts\\planta_74\\furnished\\planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+  "artifacts\\planta_74\\furnished\\planta_74_furnished_black_wood_gold.skp": "a31f2d111f74b2301fea703f997e7211400adf92f50c324a7c59578f74f5348d",
+  "artifacts\\planta_74\\furnished\\planta_74_furnished_with_sofa_premium.skp": "6e71cecb7c5caece74b0a3c218b9023598d85f9b29d3f988575b706e6b781480",
+  "fixtures\\planta_74\\consensus_with_human_walls_and_soft_barriers.json": "adeace53cdb3dba1b7ca8d5bb78a5d6d70d1adb17a903ee6b8082f188d750aa2",
+  "fixtures\\planta_74\\human_openings_annotation.png": "18a283ae8ca307167deb0a84b6f56810261c712c8ea564706a71ce0d12e4e269",
+  "fixtures\\planta_74\\human_soft_barriers_annotation.png": "bfcf02ae13e299356fde0a7dfed9df5979051425f8757d789e6b2a64bcda5971",
+  "fixtures\\planta_74\\human_walls_annotation.png": "e668efd9e93202c6834b7edefa89d42f0f691cf6665128a7296c55d5108091f4",
+  "fixtures\\planta_74\\known_warnings.json": "c75ea7c0233ff42c1949d20deeac2e3a9c90241bb953dd55c3b1aae301a42fe7",
+  "fixtures\\planta_74\\semantic_zones.json": "ceef8cd4ccd90e06d847a11ee41267cc626a15ea0efecb13de86bf84039fafc3",
+  "fixtures\\quadrado\\consensus_with_window.json": "f4a45a19d33de5713194ab09ec971dbb647948df765da62aa5ad0712f1960293"
+ },
+ "pdf_candidates": {
+  "projects\\planta_74\\source\\planta_74.pdf": "81722670c0281ee4caff473b2037d42ac3b41ef248abc57b49eeecebd795067a",
+  "runs\\dining_search\\before_tree\\projects\\planta_74\\source\\planta_74.pdf": "81722670c0281ee4caff473b2037d42ac3b41ef248abc57b49eeecebd795067a"
+ },
+ "planta_snapshot": {
+  "snapshot_sha256": "5426c0087bdfcdc61c19710102c4f3ed530b6e623a224ba9c6702bc25dfcf026",
+  "part_count": 394
+ },
+ "known_hard_violations": [
+  {
+   "room": "r005",
+   "code": "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+   "object": "r005:Box",
+   "culprit": "WALL",
+   "measured_m": 0.327
+  },
+  {
+   "room": "r006",
+   "code": "FUNCTIONAL_SHOWER_ENTRY_FRONT_CLEARANCE",
+   "object": "r006:Box",
+   "culprit": "WALL",
+   "measured_m": 0.0
+  },
+  {
+   "room": "r006",
+   "code": "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+   "object": "r006:Box",
+   "culprit": "WALL",
+   "measured_m": 0.0
+  },
+  {
+   "room": "r006",
+   "code": "FUNCTIONAL_SHOWER_REACH_PATH",
+   "object": "r006:Box",
+   "culprit": "INTERFACE_OBSTRUCTED",
+   "measured_m": 0.0
+  },
+  {
+   "room": "r006",
+   "code": "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+   "object": "r006:Vaso",
+   "culprit": "WALL",
+   "measured_m": 0.523
+  },
+  {
+   "room": "r007",
+   "code": "FUNCTIONAL_LAVATORY_FRONT_CLEARANCE",
+   "object": "r007:Bancada",
+   "culprit": "Vaso",
+   "measured_m": 0.044
+  },
+  {
+   "room": "r007",
+   "code": "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+   "object": "r007:Vaso",
+   "culprit": "Bancada",
+   "measured_m": 0.032
+  },
+  {
+   "room": "r007",
+   "code": "FUNCTIONAL_TOILET_REACH_PATH",
+   "object": "r007:Vaso",
+   "culprit": "PATH_DISCONNECTED",
+   "measured_m": 0.0
+  }
+ ],
+ "rendered_old_models": {
+  "artifacts/planta_74/furnished/planta_74_furnished_with_sofa_premium.skp": "git 4500916 (2026-07-11), sofa_premium_integrate.rb sobre mobiliado anterior; nunca regerado",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "git 6c562b3 (2026-09-19), furnish_apartment.main; anterior a decisoes Suite 01 (#389), brain SERVICE atual e F1C/F2"
+ },
+ "clean_generation_2026_10_23": {
+  "commit": "a8cde14",
+  "snapshot_equal": true,
+  "pieces": 394,
+  "evidence": "E:/Claude/worktrees/w-audit/runs/clean_20261023_205743/manifest.json (scratch, nao versionado)"
+ }
+}

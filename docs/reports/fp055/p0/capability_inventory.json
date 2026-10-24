@@ -1,0 +1,791 @@
+{
+ "capabilities": [
+  {
+   "id": "kitchen.layout.galley",
+   "room": "kitchen",
+   "catalog_validation": "L2_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": true,
+   "consumed_basis": [
+    "caixas -> LAYOUT_BOXES -> place_layout_skp.rb"
+   ],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.kitchen.layout.build_boxes"
+   ],
+   "symbols_ruby": [
+    "tools/sketchup/furnish/place_layout_skp.rb"
+   ],
+   "invoked_python": [
+    "tools.rooms.kitchen.layout.build_boxes"
+   ]
+  },
+  {
+   "id": "kitchen.sink-anchor-guard",
+   "room": "kitchen",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": true,
+   "consumed_basis": [
+    "via require_kitchen_anchor: aborta o build se a pia migrar"
+   ],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.kitchen.anchor_rules.validate"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": [
+    "tools.rooms.kitchen.anchor_rules.validate"
+   ]
+  },
+  {
+   "id": "kitchen.ergonomics.audit",
+   "room": "kitchen",
+   "catalog_validation": "UNTESTED",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "consumed_basis": [],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.kitchen.validation.ergonomics.audit"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": []
+  },
+  {
+   "id": "shared.cabinet.parametric",
+   "room": "shared",
+   "catalog_validation": "L2_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "consumed_basis": [],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.shared.cabinet.plan.plan_cabinet",
+    "tools.rooms.shared.cabinet.plan.require_valid",
+    "tools.rooms.shared.cabinet.sketchup.materialize",
+    "tools.rooms.shared.cabinet.sketchup.inspect",
+    "tools.rooms.shared.cabinet.sketchup.verify"
+   ],
+   "symbols_ruby": [
+    "tools/rooms/shared/cabinet/ruby/cabinet_build.rb",
+    "tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb"
+   ],
+   "invoked_python": []
+  },
+  {
+   "id": "kitchen.cabinet.plain-fronts",
+   "room": "kitchen",
+   "catalog_validation": "L2_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "consumed_basis": [],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.kitchen.capabilities.cabinet.plan_kitchen_cabinet",
+    "tools.rooms.kitchen.capabilities.cabinet.materialize_kitchen_cabinet",
+    "tools.rooms.kitchen.capabilities.cabinet_flow.run_request",
+    "tools.rooms.shared.cabinet.plan.plan_cabinet"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": []
+  },
+  {
+   "id": "kitchen.cabinet.shaker-door",
+   "room": "kitchen",
+   "catalog_validation": "L2_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "consumed_basis": [],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.kitchen.capabilities.shaker.plan_kitchen_shaker",
+    "tools.rooms.kitchen.capabilities.shaker_flow.run_request",
+    "tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": []
+  },
+  {
+   "id": "shared.cabinet.front.shaker",
+   "room": "shared",
+   "catalog_validation": "L2_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "consumed_basis": [],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door",
+    "tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker",
+    "tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker",
+    "tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker",
+    "tools.rooms.shared.cabinet.shaker.sketchup.verify_shaker"
+   ],
+   "symbols_ruby": [
+    "tools/rooms/shared/cabinet/ruby/shaker_build.rb",
+    "tools/rooms/shared/cabinet/ruby/shaker_inspect.rb"
+   ],
+   "invoked_python": []
+  },
+  {
+   "id": "living.layout.boxes",
+   "room": "living",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": true,
+   "consumed_basis": [
+    "caixas -> LAYOUT_BOXES -> place_layout_skp.rb"
+   ],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.living.furnishing.living_room_boxes"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": [
+    "tools.rooms.living.furnishing.living_room_boxes"
+   ]
+  },
+  {
+   "id": "living.sofa.class",
+   "room": "living",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": true,
+   "consumed_basis": [
+    "transitivo: dimensoes do sofa usadas pelo brain da sala"
+   ],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.living.sofa_class.derive_living_sofa"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": [
+    "tools.rooms.living.sofa_class.derive_living_sofa"
+   ]
+  },
+  {
+   "id": "living.sofa.gate",
+   "room": "living",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "consumed_basis": [],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.living.validation.sofa_gate.gate"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": []
+  },
+  {
+   "id": "bedroom.layout.boxes",
+   "room": "bedroom",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": true,
+   "consumed_basis": [
+    "caixas -> LAYOUT_BOXES -> place_layout_skp.rb"
+   ],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.bedroom.furnishing.bedroom_designer_boxes"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": [
+    "tools.rooms.bedroom.furnishing.bedroom_designer_boxes"
+   ]
+  },
+  {
+   "id": "bedroom.bed.build",
+   "room": "bedroom",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": true,
+   "consumed_basis": [
+    "transitivo: pecas da cama dentro das caixas do brain do quarto"
+   ],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.shared.bed.build_bed"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": [
+    "tools.rooms.shared.bed.build_bed"
+   ]
+  },
+  {
+   "id": "bedroom.wardrobe.build",
+   "room": "bedroom",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": true,
+   "consumed_basis": [
+    "transitivo: pecas do guarda-roupa dentro das caixas do brain do quarto"
+   ],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.shared.wardrobe.build_wardrobe"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": [
+    "tools.rooms.shared.wardrobe.build_wardrobe"
+   ]
+  },
+  {
+   "id": "bedroom.wardrobe.gate",
+   "room": "bedroom",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "consumed_basis": [],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.bedroom.validation.wardrobe_gate.wardrobe_gate"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": []
+  },
+  {
+   "id": "bathroom.layout.boxes",
+   "room": "bathroom",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": true,
+   "consumed_basis": [
+    "caixas -> LAYOUT_BOXES -> place_layout_skp.rb"
+   ],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.bathroom.layout.build_boxes"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": [
+    "tools.rooms.bathroom.layout.build_boxes"
+   ]
+  },
+  {
+   "id": "bathroom.wet-room.guard",
+   "room": "bathroom",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": false,
+   "consumed_basis": [],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.bathroom.validation.unexpected_wet_room_kinds"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": [
+    "tools.rooms.bathroom.validation.unexpected_wet_room_kinds"
+   ]
+  },
+  {
+   "id": "service.layout.boxes",
+   "room": "service",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [],
+   "AVAILABLE": true,
+   "INVOKED": true,
+   "CONSUMED": true,
+   "consumed_basis": [
+    "caixas -> LAYOUT_BOXES -> place_layout_skp.rb"
+   ],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.rooms.service.layout.build_boxes"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": [
+    "tools.rooms.service.layout.build_boxes"
+   ]
+  },
+  {
+   "id": "circulation.gate",
+   "room": "circulation",
+   "catalog_validation": "L1_PASS",
+   "module_executed_other_entry": [
+    "tools/validation/circulation_gate.py"
+   ],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "consumed_basis": [],
+   "REFLECTED_IN_MODEL": "NOT_EVALUATED",
+   "VALIDATED": "NOT_EVALUATED",
+   "symbols_python": [
+    "tools.validation.circulation_gate.gate"
+   ],
+   "symbols_ruby": [],
+   "invoked_python": []
+  }
+ ],
+ "specialists": [
+  {
+   "room": "balcony",
+   "state": "NO_INDEPENDENT_BRAIN_COMPOSITE_SERVICE",
+   "execution_authorized": false,
+   "capability_ids": [],
+   "recipe_ids": [],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "note": "o furnish do apartamento despacha por room_type (tools.rooms.dispatch), sem specialists.plan()"
+  },
+  {
+   "room": "bathroom",
+   "state": "LEGACY_PROVIDER_PRESENT",
+   "execution_authorized": false,
+   "capability_ids": [
+    "bathroom.layout.boxes",
+    "bathroom.wet-room.guard"
+   ],
+   "recipe_ids": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.sink-and-wet-channel-cutouts"
+   ],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "note": "o furnish do apartamento despacha por room_type (tools.rooms.dispatch), sem specialists.plan()"
+  },
+  {
+   "room": "bedroom",
+   "state": "LEGACY_PROVIDER_PRESENT",
+   "execution_authorized": false,
+   "capability_ids": [
+    "bedroom.layout.boxes",
+    "bedroom.bed.build",
+    "bedroom.wardrobe.build",
+    "bedroom.wardrobe.gate"
+   ],
+   "recipe_ids": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.reusable-components"
+   ],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "note": "o furnish do apartamento despacha por room_type (tools.rooms.dispatch), sem specialists.plan()"
+  },
+  {
+   "room": "circulation",
+   "state": "VALIDATION_ONLY",
+   "execution_authorized": false,
+   "capability_ids": [
+    "circulation.gate"
+   ],
+   "recipe_ids": [],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "note": "o furnish do apartamento despacha por room_type (tools.rooms.dispatch), sem specialists.plan()"
+  },
+  {
+   "room": "closet",
+   "state": "NO_INDEPENDENT_BRAIN_USE_BEDROOM_JOINERY",
+   "execution_authorized": false,
+   "capability_ids": [],
+   "recipe_ids": [
+    "cabinet.drawer-box-and-hardware",
+    "cabinet.reusable-components"
+   ],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "note": "o furnish do apartamento despacha por room_type (tools.rooms.dispatch), sem specialists.plan()"
+  },
+  {
+   "room": "home_office",
+   "state": "NO_INDEPENDENT_BRAIN_USE_BEDROOM_DESIGNER",
+   "execution_authorized": false,
+   "capability_ids": [],
+   "recipe_ids": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.reusable-components"
+   ],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "note": "o furnish do apartamento despacha por room_type (tools.rooms.dispatch), sem specialists.plan()"
+  },
+  {
+   "room": "kitchen",
+   "state": "LEGACY_PROVIDER_PRESENT",
+   "execution_authorized": false,
+   "capability_ids": [
+    "kitchen.layout.galley",
+    "kitchen.sink-anchor-guard",
+    "kitchen.ergonomics.audit",
+    "kitchen.cabinet.plain-fronts",
+    "shared.cabinet.parametric",
+    "kitchen.cabinet.shaker-door",
+    "shared.cabinet.front.shaker"
+   ],
+   "recipe_ids": [
+    "cabinet.countertop-separate-and-bevel",
+    "cabinet.drawer-box-and-hardware",
+    "cabinet.front-gaps-and-profiles",
+    "cabinet.recessed-shaker-and-louvers",
+    "cabinet.reusable-components",
+    "cabinet.sink-and-wet-channel-cutouts"
+   ],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "note": "o furnish do apartamento despacha por room_type (tools.rooms.dispatch), sem specialists.plan()"
+  },
+  {
+   "room": "living",
+   "state": "LEGACY_PROVIDER_PRESENT",
+   "execution_authorized": false,
+   "capability_ids": [
+    "living.layout.boxes",
+    "living.sofa.class",
+    "living.sofa.gate"
+   ],
+   "recipe_ids": [
+    "cabinet.materials-and-texture-direction",
+    "cabinet.reusable-components"
+   ],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "note": "o furnish do apartamento despacha por room_type (tools.rooms.dispatch), sem specialists.plan()"
+  },
+  {
+   "room": "service",
+   "state": "COMPOSITE_SERVICE_AND_TERRACE",
+   "execution_authorized": false,
+   "capability_ids": [
+    "service.layout.boxes"
+   ],
+   "recipe_ids": [
+    "cabinet.drawer-box-and-hardware",
+    "cabinet.reusable-components"
+   ],
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false,
+   "note": "o furnish do apartamento despacha por room_type (tools.rooms.dispatch), sem specialists.plan()"
+  }
+ ],
+ "recipes": [
+  {
+   "catalog": "environment_recipes",
+   "id": "room.living.media-wall",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "room.living.organic-sofa",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "room.bedroom.bed-and-headboard",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "room.kitchen.cabinet-assemblies",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "room.bathroom.vanity-and-shower",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "room.laundry.casework-and-appliances",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "room.balcony.pergola-and-planter",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "room.office.desk-and-storage",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "room.closet.wardrobe-sliding-doors",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "room.circulation.hall-and-doors",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "environment_recipes",
+   "id": "cross.room.material-and-instance-rules",
+   "proof_state": null,
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "video_recipes",
+   "id": "cabinet.detail-by-purpose",
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "video_recipes",
+   "id": "cabinet.reusable-components",
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "video_recipes",
+   "id": "cabinet.front-gaps-and-profiles",
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "video_recipes",
+   "id": "cabinet.countertop-separate-and-bevel",
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "video_recipes",
+   "id": "cabinet.sink-and-wet-channel-cutouts",
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "video_recipes",
+   "id": "cabinet.drawer-box-and-hardware",
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "video_recipes",
+   "id": "cabinet.materials-and-texture-direction",
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  {
+   "catalog": "video_recipes",
+   "id": "cabinet.recessed-shaker-and-louvers",
+   "proof_state": "KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP",
+   "AVAILABLE": true,
+   "INVOKED": false,
+   "CONSUMED": false
+  }
+ ],
+ "watched_modules": [
+  {
+   "component": "specialists.plan (perfil+allowlist+binding)",
+   "path": "tools/rooms/specialists.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "specialist fragments",
+   "path": "tools/rooms/specialist_fragments.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "capability catalog",
+   "path": "tools/rooms/capability_catalog.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "knowledge loader (tools/sketchup/knowledge.py)",
+   "path": "tools/sketchup/knowledge.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "F1C kitchen functional_interfaces",
+   "path": "tools/rooms/kitchen/functional_interfaces.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "F1B/F1C functional_clearance",
+   "path": "tools/validation/functional_clearance.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "core.functional_constraints (provenance A-E)",
+   "path": "core/functional_constraints.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "F2 solver: problem",
+   "path": "tools/rooms/shared/spatial_solver/problem.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "F2 solver: engine",
+   "path": "tools/rooms/shared/spatial_solver/engine.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "F2 solver: candidates",
+   "path": "tools/rooms/shared/spatial_solver/candidates.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "F2 solver: solver",
+   "path": "tools/rooms/shared/spatial_solver/solver.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "F2 solver: ranking",
+   "path": "tools/rooms/shared/spatial_solver/ranking.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "F2 solver: proposal",
+   "path": "tools/rooms/shared/spatial_solver/proposal.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "furniture_overlap_gate",
+   "path": "tools/validation/furniture_overlap_gate.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "room_collisions (parede/giro de porta)",
+   "path": "tools/validation/room_collisions.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "circulation_gate",
+   "path": "tools/validation/circulation_gate.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": true
+  },
+  {
+   "component": "shared cabinet (parametrico/Shaker)",
+   "path": "tools/rooms/shared/cabinet/",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": false
+  },
+  {
+   "component": "core.spatial_semantics",
+   "path": "core/spatial_semantics.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": true
+  },
+  {
+   "component": "layout_decisions (decisoes aprovadas)",
+   "path": "tools/rooms/bedroom/layout_decisions.py",
+   "exists": true,
+   "EXECUTED_IN_GENERATION": true
+  }
+ ]
+}
