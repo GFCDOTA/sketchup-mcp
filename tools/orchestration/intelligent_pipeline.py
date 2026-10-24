@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import glob
 import hashlib
 import io
 import json
@@ -320,8 +321,11 @@ def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str,
     idx = bg.group_index(gres)
     frame = frame_for_consensus(consensus_path)
     contract = verify_against_built(bg.expected_walls_pt(consensus), frame, bg.built_walls(idx), consensus.get("walls"))
-    swings = bg.door_swings_m(consensus, frame) if contract["status"] == "OK" else None
-    env_reports = {rid: bg.validate_room(idx, rid, name, door_swings=swings) for rid, name in rooms.items()}
+    doors = bg.door_kinematics_m(consensus, frame) if contract["status"] == "OK" else None
+    env_reports = {rid: bg.validate_room(idx, rid, name, doors=doors) for rid, name in rooms.items()}
+    # evidencia BRUTA preservada: o JSON exato que o validador leu, com SHA-256 (auditoria posterior)
+    raw_geo = Path(glob.glob(str(out_dir / "geometry" / "*result*.json"))[0])
+    raw_evidence = {"inspect_geometry": str(raw_geo), "sha256": _sha(raw_geo), "bytes": raw_geo.stat().st_size}
     env_status = {rid: bg.status(r) for rid, r in env_reports.items()}
     env_ok = contract["status"] == "OK" and all(s == "PASS" for s in env_status.values())
     if unsafe_skip_scale_check or contract["status"] != "OK" or "BLOCKED" in env_status.values():
@@ -364,7 +368,9 @@ def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str,
         status = "DIAGNOSTIC_NOT_VALID"
     legacy = inside_built_shell(res["nodes"], boxes, rooms)          # so comparacao: o cheque antigo NAO decide nada
     return {"status": status, "valid": valid, "geometric_validity": geometric, "functional_validity": functional_validity,
-            "functional": func_reports, "visual": "PENDING_HUMAN",
+            "functional": func_reports, "visual": "PENDING_HUMAN", "raw_evidence": raw_evidence,
+            "validator": {"built_geometry": "v2 (area/contato/profundidade direcional + movimento de porta)",
+                          "eps_depth_m": bg.EPS_DEPTH},
             "coordinate_contract": chain, "frame_verification": contract,
             "environment": env_reports, "environment_status": env_status, "proposal_conformance": conform,
             "legacy_bbox_check_not_decisive": {"problems": legacy, "would_pass": not legacy},

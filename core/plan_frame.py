@@ -33,7 +33,8 @@ WALL_COVER_MIN = 0.99
 WALL_EXCESS_MAX = 0.01
 WALL_HAUSDORFF_MAX_M = 0.01
 WALL_DIM_TOL_M = 0.01
-# Abertura morfologica (2 mm) aplicada IGUAL ao esperado e ao construido antes de contorno/dimensao: remove lascas com menos de
+# Abertura morfologica (2 mm) aplicada IGUAL ao esperado e ao construido SO antes de contorno (Hausdorff) e dimensao
+# (cobertura e excesso usam a geometria bruta; contencao/colisao/porta/funcional nunca passam por aqui): remove lascas com menos de
 # 4 mm de largura que o corredor de uma parede corta de elementos vizinhos (planta_74: lasca de 3 mm2 gerava desvio de 5 cm em
 # 9 paredes com area 100% coincidente). Um erro real que importa (>= 1 cm numa parede de 14 cm) tem 1 cm de largura e sobrevive.
 SLIVER_OPEN_M = 0.002
@@ -135,6 +136,7 @@ def per_wall(walls: list[dict], expected_m, built, frame: PlanFrame, corridor_pa
         exp, got = polygonal(expected_m.intersection(corr)), polygonal(built.intersection(corr))
         exp_o = polygonal(exp.buffer(-SLIVER_OPEN_M, join_style=2).buffer(SLIVER_OPEN_M, join_style=2))
         got_o = polygonal(got.buffer(-SLIVER_OPEN_M, join_style=2).buffer(SLIVER_OPEN_M, join_style=2))
+        rem_e, rem_g = polygonal(exp.difference(exp_o)), polygonal(got.difference(got_o))
         if exp.is_empty:
             continue                                  # parede inteira dentro de vao (nada extrudado): nada a conferir
         cover = exp.intersection(got).area / exp.area
@@ -145,7 +147,13 @@ def per_wall(walls: list[dict], expected_m, built, frame: PlanFrame, corridor_pa
               and dl <= WALL_DIM_TOL_M and dt <= WALL_DIM_TOL_M)
         out.append({"wall": w.get("id"), "ok": ok, "cover": round(cover, 4), "excess": round(excess, 4),
                     "hausdorff_m": round(haus, 4) if math.isfinite(haus) else None,
-                    "d_length_m": round(dl, 4), "d_thickness_m": round(dt, 4)})
+                    "d_length_m": round(dl, 4), "d_thickness_m": round(dt, 4),
+                    # o que a normalizacao TIROU (so destas metricas de contorno/dimensao; cobertura e excesso usam o bruto)
+                    "normalization": {"op": "opening", "radius_m": SLIVER_OPEN_M, "join": "mitre",
+                                      "removed_expected_m2": round(rem_e.area, 8), "removed_built_m2": round(rem_g.area, 8),
+                                      "removed_max_extent_m": round(max((max(g.bounds[2] - g.bounds[0], g.bounds[3] - g.bounds[1])
+                                                                         for g in getattr(rem_g, "geoms", [rem_g]) if not g.is_empty),
+                                                                        default=0.0), 5)}})
     return out
 
 

@@ -194,26 +194,69 @@ def in_default_scale_process(case: str, out: Path) -> dict:
 
 
 EXPECT = {
-    # valido: geometria PASS (contrato, paredes por parede, extracao, piso/parede/porta/objetos) E funcional PASS
+    # valido: geometria PASS (contrato, paredes por parede, extracao, piso/parede/porta/objetos por profundidade) E funcional PASS
     "A_fixture_valid": lambda c: (c["status"] == "BUILT" and c["build"]["valid"]
                                   and c["build"]["geometric_validity"] == "PASS"
                                   and c["build"]["functional_validity"] == "PASS"
-                                  and not c["build"]["frame_verification"]["walls_failed"]),
+                                  and not c["build"]["frame_verification"]["walls_failed"]
+                                  and c["build"]["raw_evidence"]["sha256"]),
     # negativo: dentro do bbox, fora do poligono — o cheque antigo passaria; o novo reprova
     "B_fixture_notch": lambda c: (not c["build"]["valid"] and c["build"]["geometric_validity"] == "FAIL"
                                   and c["build"]["environment"]["r_syn"]["checks"]["CONTAINMENT"] == "FAIL"
                                   and c["build"]["legacy_bbox_check_not_decisive"]["would_pass"]
                                   and c["build"]["functional_validity"] == "NOT_EXECUTED"),
-    # negativo: escala divergente — bloqueia antes; forcado, proposta=construido e mesmo assim as paredes recusam
+    # negativo: escala divergente — o CONTRATO bloqueia antes de construir; forcado, proposta=construido e mesmo assim o
+    # construido x ambiente reprova (o movel sai do comodo). A verificacao de referencial confere o SHELL (que esta certo).
     "C_scale_mismatch": lambda c: (c["guarded"]["status"] == "BLOCKED_SCALE_MISMATCH" and not c["forced"]["valid"]
                                    and c["forced"]["proposal_conformance"]
                                    and c["forced"]["geometric_validity"] == "BLOCKED"
-                                   and c["forced"]["frame_verification"]["status"] == "BLOCKED_FRAME_MISMATCH"),
-    # real: referencial confere com as paredes construidas; funcional NAO aprovado (proposta INFEASIBLE)
+                                   and c["forced"]["environment"]["r_syn"]["checks"]["CONTAINMENT"] == "FAIL"),
+    # real: referencial confere com as paredes construidas; nada e aprovado (proposta INFEASIBLE + achados reais)
     "D_real_r006": lambda c: (not c["build"]["valid"]
                               and c["build"]["frame_verification"]["status"] == "OK"
+                              and c["build"]["geometric_validity"] in ("FAIL", "BLOCKED")
                               and c["build"]["functional_validity"] in ("FAIL", "NOT_EXECUTED")),
 }
+
+
+def overlay(case_dir: Path, rooms: dict[str, str], title: str) -> str | None:
+    """Desenha a partir da GEOMETRIA BRUTA extraida (mesmo JSON que o validador leu): pisos, paredes, partes dos moveis e os
+    achados. Serve para conferir relatorio x geometria x render do SketchUp."""
+    import glob as _g
+
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    from tools.validation import built_geometry as bg
+    files = _g.glob(str(case_dir / "geometry" / "*result*.json"))
+    if not files:
+        return None
+    idx = bg.group_index(json.loads(Path(files[0]).read_text("utf-8")))
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    def draw(g, **kw):
+        for q in getattr(g, "geoms", [g]):
+            if hasattr(q, "exterior"):
+                xs, ys = q.exterior.xy
+                ax.fill(xs, ys, **kw)
+    w = bg.built_walls(idx)
+    if w is not None:
+        draw(w, fc="#424242", ec="none")
+    for rid, name in rooms.items():
+        f = bg.room_floor(idx, rid)
+        if f is not None:
+            draw(f, fc="#fff8e1", ec="#795548", lw=1.2)
+        for m, g in bg.module_groups(idx, name).items():
+            for fp, _z0, _z1, _p in bg.parts(g):
+                if fp is not None and fp.area > 0:
+                    draw(fp, fc="#1565c0", alpha=0.35, ec="#0d47a1", lw=0.4)
+    ax.set_aspect("equal")
+    ax.set_title(title, fontsize=10)
+    out = case_dir / "raw_geometry_overlay.png"
+    fig.savefig(out, dpi=90)
+    plt.close(fig)
+    return str(out)
 
 
 def main(out: Path) -> int:
@@ -226,6 +269,18 @@ def main(out: Path) -> int:
     summary["cases"].append(case_scale_mismatch(out))
     summary["cases"].append(case_real_r006(out))
     summary["protected_unchanged"] = before == {p: sha(ROOT / p) for p in PROTECTED}
+    import glob as _g
+    summary["raw_geometry_sha256"] = {str(Path(f).relative_to(out)): sha(Path(f))
+                                      for f in sorted(_g.glob(str(out / "**" / "geometry" / "*result*.json"), recursive=True))}
+    from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS as _pc
+    real_rooms = {r["id"]: str(r.get("name") or r["id"]) for r in json.loads(_pc.read_text("utf-8"))["rooms"]}
+    summary["overlays"] = {c: overlay(out / c, rooms, c) for c, rooms in (
+        ("A_fixture_valid", {"r_syn": "SINTETICO"}), ("B_fixture_notch", {"r_syn": "SINTETICO"}),
+        ("C_forced", {"r_syn": "SINTETICO"}), ("D_real_r006", real_rooms))}
+    cmp = subprocess.run([sys.executable, str(Path(__file__).with_name("compare_validators.py")), str(out),
+                          str(out / "validator_comparison.json")], cwd=ROOT, capture_output=True, text=True, timeout=1800)
+    summary["validator_comparison"] = {"returncode": cmp.returncode, "tail": cmp.stdout[-4000:],
+                                       "file": str(out / "validator_comparison.json")}
     summary["expectations"] = {}
     for c in summary["cases"]:
         try:

@@ -8,6 +8,8 @@
 #     Face estritamente vertical projeta em segmento (area nula): o volume dela e delimitado pelas faces que a fecham;
 #   - `bbox_world_m`: o bounding box de mundo que o PROPRIO SketchUp calcula para o grupo — o validador Python confere que a
 #     pegada extraida cobre esse bbox (extracao incompleta = BLOCKED, nunca PASS);
+#   - `parts`: o mesmo, separado por PARTE (cada container com faces proprias, caminho com persistent_id) e com a faixa de
+#     Z da parte inteira (faces verticais incluidas) — altura por solido, nao por grupo de topo;
 #   - contagens: faces visitadas, verticais, nao verticais, entidades ocultas puladas.
 # Limites (documentados no validador): entidade oculta e ignorada; superficie curva vem facetada (como o SketchUp a guarda);
 # objeto feito SO de faces verticais sem tampa teria pegada nula (detectado pela cobertura do bbox).
@@ -28,7 +30,13 @@ module SkmcpGeometry
     n.length > 0 ? (n.z / n.length) : 0.0
   end
 
-  def self.collect(ents, tr, acc)
+  # Parte = container (grupo/componente) que tem faces PROPRIAS: o solido fisico que o builder criou (caixa, tampo, porta).
+  # Faixa de Z por parte (nao por grupo de topo): pecas empilhadas (sabonete SOBRE a bancada) nao sao interpenetracao.
+  def self.part_for(acc, path)
+    acc[:parts][path] ||= { 'path' => path, 'zmin' => nil, 'zmax' => nil, 'faces' => [] }
+  end
+
+  def self.collect(ents, tr, acc, path = '')
     ents.each do |e|
       case e
       when Sketchup::Face
@@ -37,21 +45,27 @@ module SkmcpGeometry
         zs = outer.map { |p| p[2] }
         acc[:zmin] = [acc[:zmin], zs.min].compact.min
         acc[:zmax] = [acc[:zmax], zs.max].compact.max
+        part = part_for(acc, path)
+        part['zmin'] = [part['zmin'], zs.min].compact.min
+        part['zmax'] = [part['zmax'], zs.max].compact.max
         if normal_z(e, tr).abs < VERTICAL_NZ
           acc[:n_vertical] += 1
           next
         end
         holes = e.loops.reject(&:outer?).map { |l| pts_m(l, tr).map { |p| [p[0].round(5), p[1].round(5)] } }
-        acc[:faces] << { 'zmin' => zs.min.round(5), 'zmax' => zs.max.round(5),
-                         'inclined' => (zs.max - zs.min) > 1.0e-4,
-                         'outer' => outer.map { |p| [p[0].round(5), p[1].round(5)] }, 'holes' => holes }
+        face = { 'zmin' => zs.min.round(5), 'zmax' => zs.max.round(5),
+                 'inclined' => (zs.max - zs.min) > 1.0e-4,
+                 'outer' => outer.map { |p| [p[0].round(5), p[1].round(5)] }, 'holes' => holes }
+        acc[:faces] << face
+        part['faces'] << face
       when Sketchup::Group, Sketchup::ComponentInstance
         if e.hidden?
           acc[:hidden_skipped] += 1
           next
         end
         acc[:nested] += 1
-        collect(e.definition.entities, tr * e.transformation, acc)
+        nm = e.name.to_s.empty? ? e.definition.name : e.name
+        collect(e.definition.entities, tr * e.transformation, acc, "#{path}/#{nm}##{e.persistent_id}")
       end
     end
   end
@@ -62,7 +76,7 @@ SkmcpRuntime.run('inspect_geometry') do |_params, model|
   groups = []
   model.entities.each do |e|
     next unless e.is_a?(Sketchup::Group) || e.is_a?(Sketchup::ComponentInstance)
-    acc = { faces: [], zmin: nil, zmax: nil, n_faces: 0, n_vertical: 0, hidden_skipped: 0, nested: 0 }
+    acc = { faces: [], parts: {}, zmin: nil, zmax: nil, n_faces: 0, n_vertical: 0, hidden_skipped: 0, nested: 0 }
     SkmcpGeometry.collect(e.definition.entities, e.transformation, acc)
     name = e.name.to_s.empty? ? e.definition.name : e.name
     groups << { 'name' => name, 'hidden' => e.hidden?, 'zmin_m' => acc[:zmin], 'zmax_m' => acc[:zmax],
@@ -70,7 +84,8 @@ SkmcpRuntime.run('inspect_geometry') do |_params, model|
                 'counts' => { 'faces' => acc[:n_faces], 'vertical' => acc[:n_vertical],
                               'projected' => acc[:faces].size, 'nested' => acc[:nested],
                               'hidden_skipped' => acc[:hidden_skipped] },
-                'projected_faces' => acc[:faces] }
+                'projected_faces' => acc[:faces],
+                'parts' => acc[:parts].values.map { |pt| pt.merge('zmin' => pt['zmin']&.round(5), 'zmax' => pt['zmax']&.round(5)) } }
   end
   units = (model.options['UnitsOptions']['LengthUnit'] rescue nil)
   { 'title' => model.title, 'path' => model.path, 'length_unit_code' => units, 'unit' => 'm',
