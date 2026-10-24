@@ -1,0 +1,2002 @@
+{
+ "date": "2026-10-24",
+ "since": "2026-10-23",
+ "commit": "a4e8da3",
+ "merged": [
+  {
+   "mergeCommit": {
+    "oid": "73fb249f1c79929d8f628ae31cdb9f13c70cb363"
+   },
+   "number": 376,
+   "title": "perf(layout): busca de posição com STRtree e podas exatas — snapshot 2,9 s → 2,1 s (5,3 s no início), saída idêntica",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/376"
+  },
+  {
+   "mergeCommit": {
+    "oid": "60f78877037231d201a3094815519bfb8fa23983"
+   },
+   "number": 377,
+   "title": "perf(living): refino da mesa de jantar pela âncora com mais folga — 95 → 37 chamadas do gate, mesma posição (aguarda aprovação)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/377"
+  },
+  {
+   "mergeCommit": {
+    "oid": "45e50eaf8175faf20b06aa41ac9a919f440189c1"
+   },
+   "number": 378,
+   "title": "perf(gate): GateSession — checagem do gate 5,4 → 2,7 ms na busca da sala, mesmo veredito",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/378"
+  },
+  {
+   "mergeCommit": {
+    "oid": "32a682760552b74c5ce40e7a2d5e2d2a112f2d58"
+   },
+   "number": 379,
+   "title": "docs: register FP-054 spatial core reliability program",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/379"
+  },
+  {
+   "mergeCommit": {
+    "oid": "88c4e4c73acb0119845467e014b0d62acb7ad23c"
+   },
+   "number": 383,
+   "title": "FP-054 F0: baseline, inventory and diagnosis (no functional change)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/383"
+  },
+  {
+   "mergeCommit": {
+    "oid": "f221fea7c1585de720a6f0a0a0bb3364493ac537"
+   },
+   "number": 384,
+   "title": "FP-054 F1-01: circulation_gate never PASSes what it did not measure (#380)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/384"
+  },
+  {
+   "mergeCommit": {
+    "oid": "898c0e095fcbe0b0bc4170e3b79fbb2dbf160c38"
+   },
+   "number": 385,
+   "title": "FP-054 F1-02: dining chairs/tables by declared role, not name prefix (#382)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/385"
+  },
+  {
+   "mergeCommit": {
+    "oid": "6916d3db3e38be156f504e3abb84a23de1a3b491"
+   },
+   "number": 386,
+   "title": "FP-054 F1-03: mandatory layout preflight before su_furnish materializes (R-04)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/386"
+  },
+  {
+   "mergeCommit": {
+    "oid": "cae70b19e1eed1de366069df8c0f9e35fea7c5c1"
+   },
+   "number": 387,
+   "title": "FP-054 F1-04: property-based/metamorphic tests for circulation_gate",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/387"
+  },
+  {
+   "mergeCommit": {
+    "oid": "479ab4ee9cf2faad9b8ce7beb3f8fe043094c5ab"
+   },
+   "number": 388,
+   "title": "docs(fp054): handoff F0 + F1-01..04",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/388"
+  },
+  {
+   "mergeCommit": {
+    "oid": "11090f96944656346d5dc5d525b466907f9a856a"
+   },
+   "number": 389,
+   "title": "Suite 01: desk chair out, lower nightstand 1 in (#381) + wall check in preflight",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/389"
+  },
+  {
+   "mergeCommit": {
+    "oid": "fe6d7351d1cef9909cfb1b9680fed214a050c812"
+   },
+   "number": 390,
+   "title": "docs(fp054): Suite 01 resolved state",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/390"
+  },
+  {
+   "mergeCommit": {
+    "oid": "a8acc6c793e4e4d3d335c3dd27bbc78163908f86"
+   },
+   "number": 391,
+   "title": "feat: integrate Context7 into agent engineering workflow",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/391"
+  },
+  {
+   "mergeCommit": {
+    "oid": "629bfe651d4ddd11f5654b21853031b4120ed1b5"
+   },
+   "number": 392,
+   "title": "FP-054 F1-05: dining search checks door swings for chairs too (R-06)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/392"
+  },
+  {
+   "mergeCommit": {
+    "oid": "7dfd5067bfa3827abbe7ae800aa5772b1cfe04f0"
+   },
+   "number": 393,
+   "title": "chore: make uv.lock the reproducible dependency source of truth",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/393"
+  },
+  {
+   "mergeCommit": {
+    "oid": "6f10420f316b8e6faa4eaf94649294917b998267"
+   },
+   "number": 394,
+   "title": "docs: harden Context7 source authority and provenance",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/394"
+  },
+  {
+   "mergeCommit": {
+    "oid": "a2f627c9d0fe33e6a826cc3ee569ac23fceea76a"
+   },
+   "number": 395,
+   "title": "FP-054 F1B: functional clearance and reachability per piece (report-only)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/395"
+  },
+  {
+   "mergeCommit": {
+    "oid": "db579f0ffd1038de0cb4127ed2de0f76e647ddaa"
+   },
+   "number": 396,
+   "title": "FP-054 F1C: semantic functional interfaces, source provenance & visual evidence",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/396"
+  },
+  {
+   "mergeCommit": {
+    "oid": "a2a018cfe7df81b41af55aed8e96b80c38a3ba98"
+   },
+   "number": 397,
+   "title": "FP-054 F2A: solver contracts, explicit units and room frames",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/397"
+  },
+  {
+   "mergeCommit": {
+    "oid": "d4185db353e27a9e394614ff57ec5e34ec2e921f"
+   },
+   "number": 398,
+   "title": "FP-054 F2B: shared geometry + hard-constraint engine (8 known findings reproduced)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/398"
+  },
+  {
+   "mergeCommit": {
+    "oid": "3664f5b6fcd6fcfb471f54feed180d39179152ea"
+   },
+   "number": 399,
+   "title": "feat: FP-054 F2C candidate generation and solver states",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/399"
+  },
+  {
+   "mergeCommit": {
+    "oid": "a8cde1449409d9c1bc0316bed8a67ce171de4c8e"
+   },
+   "number": 400,
+   "title": "feat: FP-054 F2D lexicographic ranking with explanations",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/400"
+  },
+  {
+   "mergeCommit": {
+    "oid": "aebbdfc7c90e48381e756eb1d942ed3a797c699c"
+   },
+   "number": 401,
+   "title": "feat: FP-054 F2E read-only proposals with before/after evidence",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/401"
+  },
+  {
+   "mergeCommit": {
+    "oid": "ab934fa63977fc6eedccc820a80d8f4bd5afde26"
+   },
+   "number": 402,
+   "title": "docs: FP-055 spec and P0 forensic baseline of the generation pipeline",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/402"
+  },
+  {
+   "mergeCommit": {
+    "oid": "c29ed83f99938b4a5f3da72eb2e9cdbf8cd3dbc8"
+   },
+   "number": 403,
+   "title": "feat: FP-055 P1 runtime identity check (code, process, Ruby bridge)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/403"
+  },
+  {
+   "mergeCommit": {
+    "oid": "9c45860645f57db45ece52662d3cdb80d3e83010"
+   },
+   "number": 404,
+   "title": "feat: FP-055 P2/P3 pipeline contracts and intelligent orchestrator (dry run)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/404"
+  },
+  {
+   "mergeCommit": {
+    "oid": "952b853b50546f8ee75497d189535962039766d1"
+   },
+   "number": 405,
+   "title": "feat: FP-055 P4 built-model validation against the real environment",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/405"
+  },
+  {
+   "mergeCommit": {
+    "oid": "2d756a155370f113f63324e362d7c23effeb33bc"
+   },
+   "number": 406,
+   "title": "docs: FP-056 P0 root causes of the planta_74 defects in the generator",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/406"
+  },
+  {
+   "mergeCommit": {
+    "oid": "3b2de6fd5b6150726edc842b6f012b31c70236cc"
+   },
+   "number": 407,
+   "title": "fix: FP-056 P1 service planner works in the plant's metres and keeps circulation",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/407"
+  },
+  {
+   "mergeCommit": {
+    "oid": "2e3a9f25b9ac08078ca128b51dce6eb5a3f97ff2"
+   },
+   "number": 408,
+   "title": "feat: FP-056 P2 usable placement region, program completeness gate, evidence byte integrity",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/408"
+  },
+  {
+   "mergeCommit": {
+    "oid": "95f1372b8a7eaa0bfb005bea0db574d185d7d2d2"
+   },
+   "number": 481,
+   "title": "feat: backlog gate (Done só com prova e evidência) + auditoria inicial",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/481"
+  },
+  {
+   "mergeCommit": {
+    "oid": "936c2577729045a3e78b5d3c37b4a06ab3b4f790"
+   },
+   "number": 482,
+   "title": "feat: FP-056 P4a support check (apoio físico declarado, medido na proposta)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/482"
+  },
+  {
+   "mergeCommit": {
+    "oid": "911d7453964dcffebaa025e7a0740f42cbb5470a"
+   },
+   "number": 483,
+   "title": "fix: backlog gate - Epic pai aberto não bloqueia filho Done",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/483"
+  },
+  {
+   "mergeCommit": {
+    "oid": "716c8fd5fd46aaaced30a79185c9b37a0bf6c9e3"
+   },
+   "number": 485,
+   "title": "fix: FP-056 P3a barreiras limitam o espaço utilizável (#434)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/485"
+  },
+  {
+   "mergeCommit": {
+    "oid": "27677fc4f80199ea6cb697d5da6b1a024d33f2a9"
+   },
+   "number": 487,
+   "title": "feat: FP-056 P4b apoio por módulo (FLOOR e WALL_MOUNTED) com baseline medido",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/487"
+  },
+  {
+   "mergeCommit": {
+    "oid": "7a1ecd044f6057ba3d8f9c7a84395961f8fd622e"
+   },
+   "number": 489,
+   "title": "fix: FP-055 caminho legado — saída segura, pré-voo obrigatório, guard de banheiro bloqueante (#423 #424 #425 #427)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/489"
+  },
+  {
+   "mergeCommit": {
+    "oid": "f685c842a78bed5b4749b6a88683ad39b819a99f"
+   },
+   "number": 492,
+   "title": "feat: FP-055 P7 gate de consumo (integração nominal não volta a passar)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/492"
+  },
+  {
+   "mergeCommit": {
+    "oid": "2f5afba8a04c6f0faf47c0313af2c7189016228a"
+   },
+   "number": 493,
+   "title": "docs: FP-056 P6 geração completa da planta_74 no SketchUp real × baseline (#439)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/493"
+  },
+  {
+   "mergeCommit": {
+    "oid": "8c0607873df8cd8a9ad3747e7f6f7a5d494a6626"
+   },
+   "number": 494,
+   "title": "docs: FP-055/FP-056 estado das fases ligado ao backlog",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/494"
+  },
+  {
+   "mergeCommit": {
+    "oid": "3b418bc9dc7be9904c212434cb9e0dc9a2d926c8"
+   },
+   "number": 498,
+   "title": "feat: FP-055 #428 gate de anatomia do guarda-roupa no fluxo (registra veredito)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/498"
+  }
+ ],
+ "open_prs": [
+  {
+   "number": 499,
+   "title": "fix: planejador da A.S. trata a barreira construída como obstáculo duro (fenda do cell)",
+   "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/499"
+  }
+ ],
+ "blocked": {
+  "technical": [],
+  "dependency": [
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoFow",
+      "name": "fase:P3",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLBw",
+      "name": "prio:P1",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNkA",
+      "name": "tipo:bug",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 435,
+    "state": "OPEN",
+    "title": "FP-056 P3 — porta com folga inferior construída × tapete (R5: h_o003 abre 49°, h_o004 abre 16°)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoHAw",
+      "name": "fase:P5",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLPw",
+      "name": "prio:P2",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoN-Q",
+      "name": "tipo:story",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 437,
+    "state": "OPEN",
+    "title": "FP-056 P5 — contrato de vizinhança por especialista (R3: cama×painel, backsplash×cuba, papeleira, tapete×vaso)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoK0w",
+      "name": "prio:P0",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 441,
+    "state": "OPEN",
+    "title": "DECISÃO K-1 — Cozinha: bancada 0,63 m × faixa da porta (5,6 cm na parede)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoK0w",
+      "name": "prio:P0",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 443,
+    "state": "OPEN",
+    "title": "DECISÃO S2-1 — Suíte 02: 7,33 m² utilizáveis, programa atual não cabe"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoK0w",
+      "name": "prio:P0",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 444,
+    "state": "OPEN",
+    "title": "DECISÃO S1-1 — Suíte 01: circulação reprova na região utilizável"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoK0w",
+      "name": "prio:P0",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 445,
+    "state": "OPEN",
+    "title": "DECISÃO B-1 — Banhos 01/02: louça afastada da parede invade giro da porta (66°, 2°)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoBvA",
+      "name": "fase:K1",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLPw",
+      "name": "prio:P2",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNSg",
+      "name": "spec:construction_core_microphases",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoN-Q",
+      "name": "tipo:story",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 465,
+    "state": "OPEN",
+    "title": "Core de construção K1 — Tampo da cozinha como peça própria (balanço, espessura, bevel real)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoB6g",
+      "name": "fase:K2",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLPw",
+      "name": "prio:P2",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNSg",
+      "name": "spec:construction_core_microphases",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoN-Q",
+      "name": "tipo:story",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 466,
+    "state": "OPEN",
+    "title": "Core de construção K2 — Gaveta: só a caixa"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoCDw",
+      "name": "fase:K3",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLPw",
+      "name": "prio:P2",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNSg",
+      "name": "spec:construction_core_microphases",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoN-Q",
+      "name": "tipo:story",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 467,
+    "state": "OPEN",
+    "title": "Core de construção K3 — Gabinete completo (carcaça + frente + prateleira + gaveta)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoCRQ",
+      "name": "fase:K4",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLPw",
+      "name": "prio:P2",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNSg",
+      "name": "spec:construction_core_microphases",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoN-Q",
+      "name": "tipo:story",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 468,
+    "state": "OPEN",
+    "title": "Core de construção K4 — Recorte de cuba no tampo"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoDRw",
+      "name": "fase:M2",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLPw",
+      "name": "prio:P2",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNSg",
+      "name": "spec:construction_core_microphases",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoN-Q",
+      "name": "tipo:story",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 472,
+    "state": "OPEN",
+    "title": "Core de construção B2 — Portas do guarda-roupa reusam frente lisa/Shaker"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoGjg",
+      "name": "fase:P4",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLBw",
+      "name": "prio:P1",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNkA",
+      "name": "tipo:bug",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNYA",
+      "name": "bloqueio:dependency",
+      "description": "depende de trabalho tecnico anterior",
+      "color": "fbca04"
+     }
+    ],
+    "number": 488,
+    "state": "OPEN",
+    "title": "A.S.: churrasqueira, coifa e prateleira de serviço sem parede de apoio (75 / 75 / 35 cm)"
+   }
+  ],
+  "evidence": [
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoK0w",
+      "name": "prio:P0",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNsQ",
+      "name": "bloqueio:evidence",
+      "description": "falta validacao ou prova",
+      "color": "1d76db"
+     }
+    ],
+    "number": 446,
+    "state": "OPEN",
+    "title": "DECISÃO R6 — Banhos e Lavabo INFEASIBLE no grau de liberdade atual (vão do box, parede/louça do vaso)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoK0w",
+      "name": "prio:P0",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNsQ",
+      "name": "bloqueio:evidence",
+      "description": "falta validacao ou prova",
+      "color": "1d76db"
+     }
+    ],
+    "number": 447,
+    "state": "OPEN",
+    "title": "DECISÃO D-007 — vão de mobiliar = laje (antes de qualquer mudança que toque a Suíte 02/B1)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoClw",
+      "name": "fase:K5",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLjw",
+      "name": "prio:P3",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNSg",
+      "name": "spec:construction_core_microphases",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoN-Q",
+      "name": "tipo:story",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNsQ",
+      "name": "bloqueio:evidence",
+      "description": "falta validacao ou prova",
+      "color": "1d76db"
+     }
+    ],
+    "number": 469,
+    "state": "OPEN",
+    "title": "Core de construção K5 — Envelope de giro da porta e puxador"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoC1w",
+      "name": "fase:K6",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLjw",
+      "name": "prio:P3",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoL4Q",
+      "name": "prova:NOT_TESTED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNSg",
+      "name": "spec:construction_core_microphases",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoN-Q",
+      "name": "tipo:story",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuNsQ",
+      "name": "bloqueio:evidence",
+      "description": "falta validacao ou prova",
+      "color": "1d76db"
+     }
+    ],
+    "number": 470,
+    "state": "OPEN",
+    "title": "Core de construção K6 — Rodapé (sóculo) recuado como peça"
+   }
+  ],
+  "human-decision": [
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoK0w",
+      "name": "prio:P0",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 442,
+    "state": "OPEN",
+    "title": "DECISÃO AS-1 — A.S./terraço social: churrasqueira 1,00 m × bancada gourmet + cuba; tanque e secadora"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLBw",
+      "name": "prio:P1",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 448,
+    "state": "OPEN",
+    "title": "DECISÃO — veredito L3 da porta Shaker (artifacts/review/fp046/l3_package/)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLBw",
+      "name": "prio:P1",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 449,
+    "state": "OPEN",
+    "title": "DECISÃO — revisão dos trechos de vídeo (tampo 07:09–08:53; caixa de gaveta) e alvo kitchen_base_001"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLBw",
+      "name": "prio:P1",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 450,
+    "state": "OPEN",
+    "title": "DECISÃO — ficha técnica da cuba e ok hidráulico (K4)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLBw",
+      "name": "prio:P1",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 451,
+    "state": "OPEN",
+    "title": "DECISÃO FP-043 D-001/D-003/D-004 — referência `quadrado`, `furnish_plan`, `trace_view`"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_wA",
+      "name": "fase:Decisão",
+      "description": "",
+      "color": "fbca04"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLBw",
+      "name": "prio:P1",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 452,
+    "state": "OPEN",
+    "title": "REVISÃO VISUAL — nenhuma capacidade tem visual APPROVED (0 cômodos em L3)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoFow",
+      "name": "fase:P3",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoK0w",
+      "name": "prio:P0",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNkA",
+      "name": "tipo:bug",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 484,
+    "state": "OPEN",
+    "title": "FP-056 RC-E — traços sem fonte (sb000–sb007) recortam laje e cell de todos os cômodos sem serem construídos"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoFow",
+      "name": "fase:P3",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLBw",
+      "name": "prio:P1",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 486,
+    "state": "OPEN",
+    "title": "DECISÃO R5 — porta × tapete: Suíte 01 abre 49° e Suíte 02 abre 16° (folga inferior da folha ou tapete)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoHAw",
+      "name": "fase:P5",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLBw",
+      "name": "prio:P1",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNJw",
+      "name": "spec:FP-056",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 495,
+    "state": "OPEN",
+    "title": "DECISÃO R3 — 9 interpenetrações entre peças vizinhas (cama×painel, backsplash, enxoval dos banhos)"
+   },
+   {
+    "labels": [
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_TA",
+      "name": "aprovação-humana-pendente",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_Bn_hQ",
+      "name": "blocked",
+      "description": "",
+      "color": "b60205"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoHWg",
+      "name": "fase:P6",
+      "description": "",
+      "color": "c5def5"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLPw",
+      "name": "prio:P2",
+      "description": "",
+      "color": "d93f0b"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoLxg",
+      "name": "prova:BLOCKED",
+      "description": "",
+      "color": "0e8a16"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoNAw",
+      "name": "spec:FP-055",
+      "description": "",
+      "color": "1d76db"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_BoORQ",
+      "name": "tipo:task",
+      "description": "",
+      "color": "5319e7"
+     },
+     {
+      "id": "LA_kwDOSPaCac8AAAAC_DuOGA",
+      "name": "bloqueio:human-decision",
+      "description": "exige decisao do proprietario",
+      "color": "b60205"
+     }
+    ],
+    "number": 497,
+    "state": "OPEN",
+    "title": "DECISÃO — regra ≥ 2 portas reprova o guarda-roupa de 0,8 m (1 porta) da Suíte 02"
+   }
+  ],
+  "sem causa": []
+ },
+ "capabilities": {
+  "base": {
+   "schema_version": "consumption_baseline.v1",
+   "capabilities": {
+    "bathroom.layout.boxes": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "bathroom.wet-room.guard": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "bedroom.bed.build": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "bedroom.layout.boxes": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "bedroom.wardrobe.build": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "bedroom.wardrobe.gate": {
+     "INVOKED": true,
+     "CONSUMED": false
+    },
+    "circulation.gate": {
+     "INVOKED": false,
+     "CONSUMED": false
+    },
+    "kitchen.cabinet.plain-fronts": {
+     "INVOKED": false,
+     "CONSUMED": false
+    },
+    "kitchen.cabinet.shaker-door": {
+     "INVOKED": false,
+     "CONSUMED": false
+    },
+    "kitchen.ergonomics.audit": {
+     "INVOKED": false,
+     "CONSUMED": false
+    },
+    "kitchen.layout.galley": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "kitchen.sink-anchor-guard": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "living.layout.boxes": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "living.sofa.class": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "living.sofa.gate": {
+     "INVOKED": false,
+     "CONSUMED": false
+    },
+    "service.layout.boxes": {
+     "INVOKED": true,
+     "CONSUMED": true
+    },
+    "shared.cabinet.front.shaker": {
+     "INVOKED": false,
+     "CONSUMED": false
+    },
+    "shared.cabinet.parametric": {
+     "INVOKED": false,
+     "CONSUMED": false
+    }
+   },
+   "watched_executed": {
+    "specialists.plan (perfil+allowlist+binding)": false,
+    "specialist fragments": false,
+    "capability catalog": false,
+    "knowledge loader (tools/sketchup/knowledge.py)": false,
+    "F1C kitchen functional_interfaces": false,
+    "F1B/F1C functional_clearance": false,
+    "core.functional_constraints (provenance A-E)": false,
+    "F2 solver: problem": false,
+    "F2 solver: engine": false,
+    "F2 solver: candidates": false,
+    "F2 solver: solver": false,
+    "F2 solver: ranking": false,
+    "F2 solver: proposal": false,
+    "furniture_overlap_gate": false,
+    "room_collisions (parede/giro de porta)": false,
+    "circulation_gate": true,
+    "shared cabinet (parametrico/Shaker)": false,
+    "core.spatial_semantics": true,
+    "layout_decisions (decisoes aprovadas)": true
+   },
+   "specialists_invoked": 0,
+   "specialists_total": 9,
+   "recipes_consumed": 0,
+   "recipes_total": 19
+  },
+  "catalog": {
+   "kitchen.layout.galley": [
+    "IMPLEMENTED",
+    "L2_PASS"
+   ],
+   "kitchen.sink-anchor-guard": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "kitchen.ergonomics.audit": [
+    "IMPLEMENTED",
+    "UNTESTED"
+   ],
+   "shared.cabinet.parametric": [
+    "IMPLEMENTED",
+    "L2_PASS"
+   ],
+   "kitchen.cabinet.plain-fronts": [
+    "IMPLEMENTED",
+    "L2_PASS"
+   ],
+   "kitchen.cabinet.shaker-door": [
+    "IMPLEMENTED",
+    "L2_PASS"
+   ],
+   "shared.cabinet.front.shaker": [
+    "IMPLEMENTED",
+    "L2_PASS"
+   ],
+   "living.layout.boxes": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "living.sofa.class": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "living.sofa.gate": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "bedroom.layout.boxes": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "bedroom.bed.build": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "bedroom.wardrobe.build": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "bedroom.wardrobe.gate": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "bathroom.layout.boxes": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "bathroom.wet-room.guard": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "service.layout.boxes": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ],
+   "circulation.gate": [
+    "IMPLEMENTED",
+    "L1_PASS"
+   ]
+  }
+ },
+ "proofs": [
+  {
+   "path": "artifacts/review/fp043/p6b_cabinet_l2/summary.json",
+   "commit": "cdb9dde5",
+   "dirty": null,
+   "cases_ok": 13,
+   "cases": 13,
+   "pids": [],
+   "failed": []
+  },
+  {
+   "path": "artifacts/review/fp046/p3_shaker_l2/summary.json",
+   "commit": "2fa85a48",
+   "dirty": false,
+   "cases_ok": 10,
+   "cases": 10,
+   "pids": [
+    10616,
+    35344,
+    35636,
+    11768,
+    35380,
+    15992,
+    34760,
+    16596,
+    7488,
+    10996,
+    4304,
+    11184,
+    35208,
+    21352,
+    30320,
+    34796,
+    16860,
+    35020,
+    29344,
+    28332,
+    34944,
+    34052,
+    6340,
+    35556,
+    33968,
+    35608,
+    30864,
+    34572,
+    23488
+   ],
+   "failed": []
+  },
+  {
+   "path": "artifacts/review/fp046/p4_kitchen_shaker_l2/summary.json",
+   "commit": "34d5cf6a",
+   "dirty": false,
+   "cases_ok": 8,
+   "cases": 8,
+   "pids": [
+    31480,
+    37536,
+    35008,
+    23792
+   ],
+   "failed": []
+  },
+  {
+   "path": "artifacts/review/fp054/f1_circulation_l2/summary.json",
+   "commit": "4ad1f33b",
+   "dirty": false,
+   "cases_ok": 15,
+   "cases": 15,
+   "pids": [
+    30784,
+    21112,
+    16568,
+    19228,
+    29752,
+    31516,
+    32092
+   ],
+   "failed": []
+  },
+  {
+   "path": "artifacts/review/fp054/suite01_l2/summary.json",
+   "commit": "91aad4bc",
+   "dirty": false,
+   "cases_ok": 10,
+   "cases": 10,
+   "pids": [
+    34092,
+    31660
+   ],
+   "failed": []
+  },
+  {
+   "path": "artifacts/review/fp056/p6/summary.json",
+   "commit": "a0be0516",
+   "dirty": false,
+   "cases_ok": 10,
+   "cases": 11,
+   "pids": [
+    7612,
+    12804,
+    35864
+   ],
+   "failed": [
+    "no_program_loss_without_a_recorded_decision"
+   ]
+  }
+ ],
+ "geometry": {
+  "verdict": "KNOWN",
+  "reasons": [],
+  "new": [],
+  "twin_borderline_ignored": [
+   "r004|CONTAINMENT|backsplash"
+  ],
+  "worse": [],
+  "resolved": [
+   "r001|CONTAINMENT|Armario de servico",
+   "r001|CONTAINMENT|Condensadora",
+   "r001|CONTAINMENT|Jardineira",
+   "r001|CONTAINMENT|Maquina de lavar"
+  ],
+  "vanished_with_piece": [
+   "r001|CONTAINMENT|Bancada gourmet"
+  ],
+  "missing_program": [
+   "r001|PROGRAM|Bancada gourmet",
+   "r001|PROGRAM|Banqueta"
+  ],
+  "known_program_gaps": {
+   "r001|PROGRAM|Bancada gourmet": {
+    "issue": 442,
+    "reason": "A.S.: omitida pela circulacao; decisao AS-1 pendente (depende da decisao sobre tracos sem fonte, #484)"
+   },
+   "r001|PROGRAM|Banqueta": {
+    "issue": 442,
+    "reason": "A.S.: omitida junto com a bancada gourmet; decisao AS-1 pendente"
+   }
+  },
+  "persisting_baseline_defects": 29,
+  "preflight": "PASS",
+  "boxes": 390,
+  "geometric_approved": false,
+  "functional_approved": false,
+  "basis": "gemeo em caixas (L1); a prova no SketchUp real fica em artifacts/review/fp056/p6/"
+ }
+}

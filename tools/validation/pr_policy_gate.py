@@ -1,0 +1,84 @@
+"""pr_policy_gate.py — politica de PR do Quality Guardian: vinculo com a Issue, prova SketchUp, testes e fechamento so com evidencia.
+
+Regras (codigo estavel; o motivo e publicado no PR e o merge fica bloqueado enquanto o check reprova):
+
+- PR_NO_ISSUE_LINK         corpo sem `Refs #N` para Issue existente (ou `Issue: N/A — <motivo>`).
+- PR_CLOSING_KEYWORD       `Closes|Fixes|Resolves #N`: o GitHub fecharia a Issue no merge, sem evidencia. Use `Refs #N`; quem
+                           fecha e o comentario `**Evidência`, conferido pelo `backlog_gate`.
+- PR_REFS_HUMAN_BLOCKED    `Refs` a Issue de decisao humana pendente SEM o corpo declarar que nao aplica a decisao
+                           (`Decisão: não aplicada`). Mudanca visual/de escopo nao entra sem autorizacao.
+- PR_NO_SKP_PROOF_DECLARATION  corpo sem `SKP-proof:`.
+- PR_SKP_AFFECTING_WITHOUT_PROOF  caminho que afeta o `.skp` (constituicao #8) tocado e prova ausente: precisa de
+                           `.skp` em `artifacts/review/**/final/` no diff; `SKP-proof: N/A` nao vale para esses caminhos.
+- PR_CODE_WITHOUT_TESTS    `tools/**`, `core/**` ou `interior/**` (.py/.rb) alterados sem tocar `tests/**` e sem `Tests: N/A — <motivo>`.
+- PR_APPROVAL_WITHOUT_PROOF  o corpo declara aparencia/funcional "aprovada" sem `PENDING_HUMAN` ou evidencia: aparencia e do Felipe.
+
+Uso:  python -m tools.validation.pr_policy_gate --pr <N>      (le corpo e arquivos com `gh`; exit 1 se reprovar)
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+
+from tools.validation.backlog_gate import REPO, Finding, _gh
+
+SKP_AFFECTING = (
+    re.compile(r"^tools/sketchup/shell/build_plan_shell_skp\.(py|rb)$"),
+    re.compile(r"^tools/sketchup/furnish/place_layout_.*\.(py|rb)$"),
+    re.compile(r"^tools/quadrado/render_view\.(py|rb)$"),
+    re.compile(r"^tools/sketchup/runner_safety\.py$"),
+    re.compile(r"^fixtures/[^/]+/.*\.json$"),
+    re.compile(r"^artifacts/[^/]+/[^/]+\.skp$"),
+    re.compile(r"^tools/(build|render)_[^/]*\.(py|rb)$"),
+)
+CODE = re.compile(r"^(tools|core|interior)/.*\.(py|rb)$")
+_CLOSING = re.compile(r"\b(close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)", re.IGNORECASE)
+_REFS = re.compile(r"\b(?:refs?|relates to|issue)\s*:?\s*#(\d+)", re.IGNORECASE)
+_APPROVED = re.compile(r"(visual|apar[eê]ncia|funcional)\w*\s+(?:est[aá]\s+)?(aprovad[ao]|approved)", re.IGNORECASE)
+
+
+def check(body: str, files: list[str], issues: dict[int, dict]) -> list[Finding]:
+    found: list[Finding] = []
+    body = body or ""
+    for _kw, n in _CLOSING.findall(body):
+        found.append(Finding(int(n), "PR_CLOSING_KEYWORD", f"use 'Refs #{n}': a Issue so fecha com comentario de evidencia"))
+    refs = sorted({int(n) for n in _REFS.findall(body)})
+    na = re.search(r"Issue:\s*N/A\s*[—-]\s*\S+", body, re.IGNORECASE)
+    if not na and not any(n in issues for n in refs):
+        found.append(Finding(0, "PR_NO_ISSUE_LINK", "corpo sem 'Refs #N' para uma Issue existente (ou 'Issue: N/A — motivo')"))
+    for n in refs:
+        lab = {x["name"] for x in issues.get(n, {}).get("labels", [])}
+        if "bloqueio:human-decision" in lab and issues[n].get("state") == "OPEN" and not re.search(r"decis[ãa]o:\s*n[ãa]o aplicada", body, re.I):
+            found.append(Finding(n, "PR_REFS_HUMAN_BLOCKED", f"#{n} e decisao humana pendente; declare 'Decisão: não aplicada'"))
+    if not re.search(r"SKP-proof\s*:", body, re.IGNORECASE):
+        found.append(Finding(0, "PR_NO_SKP_PROOF_DECLARATION", "corpo sem 'SKP-proof: ...'"))
+    touched = [f for f in files if any(p.match(f) for p in SKP_AFFECTING)]
+    has_skp = any(re.match(r"^artifacts/review/.+/final/.+\.skp$", f) for f in files)
+    if touched and not has_skp:
+        found.append(Finding(0, "PR_SKP_AFFECTING_WITHOUT_PROOF", f"afeta o .skp ({touched[:3]}) sem .skp em artifacts/review/**/final/"))
+    if any(CODE.match(f) for f in files) and not any(f.startswith("tests/") for f in files) \
+            and not re.search(r"Tests:\s*N/A\s*[—-]\s*\S+", body, re.IGNORECASE):
+        found.append(Finding(0, "PR_CODE_WITHOUT_TESTS", "codigo alterado sem teste (ou 'Tests: N/A — motivo')"))
+    if _APPROVED.search(body) and "PENDING_HUMAN" not in body:
+        found.append(Finding(0, "PR_APPROVAL_WITHOUT_PROOF", "declara aparencia/funcional aprovada; aparencia e do Felipe (PENDING_HUMAN)"))
+    return found
+
+
+def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--pr", type=int, required=True)
+    args = ap.parse_args(argv)
+    pr = json.loads(_gh("pr", "view", str(args.pr), "--repo", REPO, "--json", "body,files"))
+    files = [f["path"] for f in pr["files"]]
+    raw = json.loads(_gh("issue", "list", "--repo", REPO, "--state", "all", "--limit", "1000", "--json", "number,state,labels"))
+    findings = check(pr["body"], files, {i["number"]: i for i in raw})
+    for f in findings:
+        print(f)
+    print(f"pr_policy_gate: {len(findings)} divergencia(s) no PR #{args.pr}")
+    return 1 if findings else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

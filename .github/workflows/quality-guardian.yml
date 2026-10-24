@@ -1,0 +1,105 @@
+name: quality-guardian
+
+# Quality Guardian: governanca que reprova o que nao tem prova. Sem OpenAI e sem servico pago de IA — so scripts do repo.
+#  qg: backlog, issues and specs     Issues x Project (se houver token), criterios de aceite, bloqueios, SPECs sem referencia morta
+#  qg: PR policy                     PR com Refs #N (sem Closes), SKP-proof, testes, nenhuma aparencia "aprovada" sem prova
+#  qg: geometry, program, integration regressao geometrica (gemeo L1), completude do programa, pre-voo, catalogo e gate de consumo
+# Teste verde NAO e aprovacao geometrica/funcional: o veredito do gemeo sai KNOWN enquanto houver defeito ou perda registrados.
+# Prova SketchUp real nao roda no CI (sem SketchUp): fica em artifacts/review/** e e exigida pela politica de PR (.skp em final/).
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+  schedule:
+    - cron: "41 9 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: quality-guardian-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+env:
+  GH_TOKEN: ${{ github.token }}
+  MPLBACKEND: Agg
+
+jobs:
+  backlog:
+    name: "qg: backlog, issues and specs"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: backlog gate (com Project se BACKLOG_PROJECT_TOKEN existir)
+        env:
+          PROJECT_TOKEN: ${{ secrets.BACKLOG_PROJECT_TOKEN }}
+        run: |
+          set -o pipefail
+          if [ -n "$PROJECT_TOKEN" ]; then
+            GH_TOKEN="$PROJECT_TOKEN" python -m tools.validation.backlog_gate | tee gate.txt
+          else
+            echo "::notice::BACKLOG_PROJECT_TOKEN ausente: gate sem Project"
+            python -m tools.validation.backlog_gate --no-project | tee gate.txt
+          fi
+      - name: issue integrity (aceite, bloqueios, SPEC labels)
+        run: python -m tools.validation.issue_integrity_gate | tee -a gate.txt
+      - name: spec integrity (SPECs FP-055/FP-056)
+        run: python -m tools.validation.spec_integrity_gate | tee -a gate.txt
+      - name: publicar o motivo no PR quando reprovar
+        if: failure() && github.event_name == 'pull_request'
+        run: |
+          { echo "### qg: backlog, issues and specs — REPROVADO"; echo; echo '```'; tail -n 60 gate.txt; echo '```'; } > comment.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md || true
+
+  pr-policy:
+    name: "qg: PR policy"
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: politica de PR
+        run: python -m tools.validation.pr_policy_gate --pr "${{ github.event.pull_request.number }}" | tee gate.txt
+      - name: publicar o motivo no PR quando reprovar
+        if: failure()
+        run: |
+          { echo "### qg: PR policy — REPROVADO"; echo; echo '```'; cat gate.txt; echo '```'; } > comment.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md || true
+
+  geometry:
+    name: "qg: geometry, program and integration"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked --extra dev
+      - name: regressao geometrica + completude do programa + pre-voo (gemeo L1)
+        env:
+          PT_TO_M: "0.0259"
+        run: uv run --no-sync python -m tools.validation.quality_geometry_gate | tee gate.txt
+      - name: integracao de especialistas, solver e builders (gate de consumo)
+        env:
+          PT_TO_M: "0.0259"
+        run: uv run --no-sync python -m tools.validation.consumption_baseline | tee -a gate.txt
+      - name: integridade do catalogo de capacidades (L2 so com evidencia)
+        run: uv run --no-sync python -m tools.rooms.capability_catalog | tee -a gate.txt
+      - name: publicar o motivo no PR quando reprovar
+        if: failure() && github.event_name == 'pull_request'
+        run: |
+          { echo "### qg: geometry, program and integration — REPROVADO"; echo; echo '```'; tail -n 80 gate.txt; echo '```'; } > comment.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md || true

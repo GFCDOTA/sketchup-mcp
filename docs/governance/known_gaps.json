@@ -1,0 +1,17 @@
+{
+  "program": {
+    "r001|PROGRAM|Bancada gourmet": {
+      "issue": 442,
+      "reason": "A.S.: omitida pela circulacao; decisao AS-1 pendente (depende da decisao sobre tracos sem fonte, #484)"
+    },
+    "r001|PROGRAM|Banqueta": {
+      "issue": 442,
+      "reason": "A.S.: omitida junto com a bancada gourmet; decisao AS-1 pendente"
+    }
+  },
+  "twin_borderline": {
+    "r004|CONTAINMENT|backsplash": {
+      "reason": "gemeo mede 0,56 mm (limiar 0,5 mm); o construido mediu 0,52 mm na parede e o P6 real nao o acusou como novo (tests/test_fp056_p1_box_twin.py BORDERLINE)"
+    }
+  }
+}
