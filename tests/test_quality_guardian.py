@@ -180,3 +180,14 @@ def test_geometry_gate_tracks_registered_door_sweeps_and_flags_stale_or_unregist
     stale = {**base, "door_sweep": {**base["door_sweep"], "h_o999|rug": {"issue": 1, "reason": "x"}}}
     monkeypatch.setattr(known_gaps, "load", lambda *a, **k: stale)
     assert any("door_sweep registrado que nao existe mais" in r for r in gg.evaluate()["reasons"])
+
+
+def test_external_and_environment_blocks_need_their_own_sections_and_no_human_flag():
+    base = "## Critérios de aceite\n- [ ] x"
+    ext = iss(["blocked", "bloqueio:external"], body=base + "\n## Requisito externo\nPAT")
+    assert codes({1: ext}) == set()
+    assert "BLOCK_EXTERNAL_NO_REQUIREMENT" in codes({1: iss(["blocked", "bloqueio:external"], body=base)})
+    env = iss(["blocked", "bloqueio:environment"], body=base + "\n## Recuperação\nreiniciar")
+    assert codes({1: env}) == set()
+    assert "BLOCK_EXTERNAL_NO_REQUIREMENT" in codes({1: iss(["blocked", "bloqueio:environment"], body=base)})
+    assert "BLOCK_HUMAN_FLAG_MISMATCH" not in codes({1: ext})            # externo nao e decisao do proprietario
