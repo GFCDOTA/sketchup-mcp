@@ -114,6 +114,18 @@ Evidência bruta (SHA-256) e cálculo: `artifacts/review/fp055/p4/`.
 | P6 | geração nova completa da planta_74 + defeitos corrigidos × remanescentes contra o baseline | — |
 Depois: FP-055 P5–P9 (conhecimento, cômodos restantes, gates de CI, geração limpa integrada, reconciliação).
 
+### Estado em 2026-10-24 (backlog: GitHub Project #1; cada linha vira Done só com a evidência na Issue)
+| Fase | Estado | Evidência / Issue |
+|---|---|---|
+| P1 | feita | `docs/reports/fp056/p1/` |
+| P2 | infraestrutura feita; adoção pelos planejadores **bloqueada** pela decisão sobre os traços sem fonte (#484) e refazer a medição | #431, #433; `docs/reports/fp056/p2/` |
+| P3a barreiras | feita | #434; `docs/reports/fp056/p3/` |
+| P3b porta × tapete | **bloqueada**: decisão R5 (folga inferior da folha × tapete) | #435, #486 |
+| P4a/P4b apoio | parcial: `ON_SURFACE`, `FLOOR`, `WALL_MOUNTED` medidos; CEILING/SUSPENDED e 26 módulos sem modo | #436, #491; `docs/reports/fp056/p4/` |
+| P5 vizinhança | não iniciada; ver defeitos R3 do baseline | #437 |
+| P6 geração completa | **medição feita** (34 → 29 defeitos, 0 novos); fecha só sem perda de programa e sem os 29 | #439; `artifacts/review/fp056/p6/` |
+Decisões do Felipe pendentes: K-1, AS-1, S2-1, S1-1, B-1, R6, D-007, RC-E (#484), R5 (#486).
+
 ## Gate de não regressão (vigente desde a FP-055 P4)
 O registro acima é o **baseline de defeitos**. Uma proposta ou geração que crie um defeito novo, ou piore um existente
 (profundidade maior que o registrado + resolução), é bloqueada. Defeito que some é registrado como resolvido. O baseline
