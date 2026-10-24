@@ -110,8 +110,8 @@ def main() -> int:
                     "sketchup_version": res.get("sketchup_version"), "visual": "PENDING_HUMAN"})
     summary["canonical_after"] = {p: sha(ROOT / p) for p in CANONICAL}
     case("canonicals_byte_identical", summary["canonical_before"] == summary["canonical_after"])
-    running = subprocess.run(["tasklist", "/FI", "IMAGENAME eq SketchUp.exe", "/FO", "CSV", "/NH"], capture_output=True,
-                             text=True).stdout
+    running = subprocess.run(["tasklist", "/FI", "IMAGENAME eq SketchUp.exe", "/FO", "CSV", "/NH"],
+                             capture_output=True).stdout.decode("latin-1")
     case("all_my_pids_closed", not [p for p in summary["pids"] if f'"{p}"' in running] and bool(closed), pids=summary["pids"])
     return finish(summary, 0)
 
