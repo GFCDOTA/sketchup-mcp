@@ -3,7 +3,7 @@
 ```yaml
 id: FP-055
 versao: 1.0.0
-status: EM_EXECUCAO        # P0 entregue nesta PR
+status: EM_EXECUCAO        # P0-P4 entregues; P4 = infraestrutura de validacao do construido
 prioridade: P0_CRITICAL
 projeto_piloto: planta_74
 dependencias: [FP-042, FP-043, FP-054, PR-394, PR-396]
@@ -68,6 +68,18 @@ Os 8 defeitos (baseline em `docs/reports/fp055/p0/baseline_manifest.json`) ficam
 mexendo em limiar ou tirando validação. A F2 já mostrou que, no grau de liberdade declarado, os três banheiros são INFEASIBLE:
 integrar não os conserta. A saída real é uma decisão do Felipe (vão do box no builder, parede ou louça do vaso). Até lá, o
 resultado honesto é `INFEASIBLE` com o motivo.
+
+## Risco arquitetural prioritário — R-ARCH-01 (FP-043 P3a-03 / D-007)
+A validação sobre a geometria construída (P4) confirmou na planta real o defeito conhecido da FP-043. O espaço de mobiliar
+dos planejadores é a laje construtiva, que entra `FLOOR_UNDER_FRAC = 0,4 × espessura` sob a parede
+(`tools/sketchup/shell/build_plan_shell_skp.py:664`). Resultado: móveis dentro da parede (11 ocorrências R1), além de
+peças sobre área sem laje (R2b) e atravessando barreira de varanda (R2a). Registro completo, por causa-raiz e por cômodo:
+`artifacts/review/fp055/p4/`. Tratamento:
+- correção **na origem**, pela FP-056 (`docs/specs/FP-056_usable_space_support_barriers.md`), começando pela separação
+  `ConstructedFloorGeometry` × `UsablePlacementRegion`. É prioritária sobre P5/P6;
+- o validador não ganha exceção, e nenhum limiar muda para esconder ocorrência;
+- vigente desde já: gate de não regressão contra `artifacts/review/fp055/p4/defect_baseline.json` (defeito novo ou pior
+  reprova).
 
 ## Fora do escopo
 Reescrever o projeto; mudar dimensões estruturais; inventar dado ausente do PDF; promover blog a norma; aplicar mudança no `.skp`

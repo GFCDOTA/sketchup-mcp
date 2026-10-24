@@ -6461,6 +6461,138 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp055/p4/run_p4.py",
+      "blob_sha": "5e59ebacd22cc32454e614c94862315e60d29e54",
+      "blob_size": 18120,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/compare_validators.py",
+      "blob_sha": "a00ad78d0151981b1f10a28e620b9ce7ac923bf5",
+      "blob_size": 4135,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/README.md",
+      "blob_sha": "cb4db2db630b4f190caf1f5987d148816f691212",
+      "blob_size": 9922,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/SHA256SUMS",
+      "blob_sha": "b3c4ad80aa2ee351c24fa2e35598682a551ff1a1",
+      "blob_size": 1707,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/defect_baseline.json",
+      "blob_sha": "5073aa9b4200533a6ea33ce46e1b01623b06e506",
+      "blob_size": 13691,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/defect_register_original.json",
+      "blob_sha": "391c9f2c75563ab527359ff21380fec7c8eef803",
+      "blob_size": 12258,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/investigate_defects.py",
+      "blob_sha": "5c5453553e1857a7f5b2d8a872a3735a120e27d4",
+      "blob_size": 4092,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/summary.json",
+      "blob_sha": "97a7521f1cdebf649c06392106c175a8bba4362b",
+      "blob_size": 46931,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/validator_comparison.json",
+      "blob_sha": "dff64d5f7078d0d9138ed6fef8719391f28ff0ad",
+      "blob_size": 17625,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/raw/A_fixture_valid_inspect_geometry.json",
+      "blob_sha": "d15188421dd4d9dd8309ee20b986abbf159a516a",
+      "blob_size": 15527,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/raw/B_fixture_notch_inspect_geometry.json",
+      "blob_sha": "298b35bdd4f9cda7e8705e6c561613de8ef61d72",
+      "blob_size": 14383,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/raw/C_forced_inspect_geometry.json",
+      "blob_sha": "c1d592e4ff4569cc890c500ce8b995642065de8f",
+      "blob_size": 15467,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/raw/D_real_r006_inspect_geometry.json",
+      "blob_sha": "4ff681e4e133dc1435a7d2f296833de5afd3b9ff",
+      "blob_size": 1303885,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/raw/baseline_original_inspect_geometry.json",
+      "blob_sha": "f9d158d4a603b900a1bcfb2cf608dd8fa29d3f61",
+      "blob_size": 1303867,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/A_fixture_valid_overlay_raw.png",
+      "blob_sha": "a59e17e0fbd4034982be69f54fbae3e0ec9faefa",
+      "blob_size": 12810,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/A_fixture_valid_sketchup_top.png",
+      "blob_sha": "f21166565c7d077abd28765c7254d65b61692e71",
+      "blob_size": 16978,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/B_fixture_notch_overlay_raw.png",
+      "blob_sha": "97fd1468e1254630d77b3c2c1a6a072f2aff9cd5",
+      "blob_size": 13830,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/B_fixture_notch_sketchup_top.png",
+      "blob_sha": "d2fc59ba26e469e428713618e3eede1ca7674b11",
+      "blob_size": 14465,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/C_forced_overlay_raw.png",
+      "blob_sha": "cac2e22853ff1361ad2a4762ab32ef4dbeecc728",
+      "blob_size": 13429,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/C_forced_sketchup_top.png",
+      "blob_sha": "0111f13162540fadd6f4e45aecf2c049da2de0ac",
+      "blob_size": 15379,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/D_real_r006_overlay_raw.png",
+      "blob_sha": "9f2b1815d47bd67aa65fdc0d2ec234ee1319f744",
+      "blob_size": 30646,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/D_real_r006_sketchup_top.png",
+      "blob_sha": "ffd1c5827da805cf2fef04d5d938371279650d87",
+      "blob_size": 87526,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/variant_sweep/planta_74/contact_sheet.png",
       "blob_sha": "c94419969de5f28d753e87572218c7a817100e24",
       "blob_size": 205290,

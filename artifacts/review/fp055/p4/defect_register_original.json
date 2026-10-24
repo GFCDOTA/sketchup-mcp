@@ -1,0 +1,700 @@
+[
+ {
+  "room": "r000 SUITE 01",
+  "check": "CONTAINMENT",
+  "module": "Guarda-roupa",
+  "part": "corpo#53185",
+  "z_m": [
+   0.08,
+   2.2
+  ],
+  "depth_m": 0.0078,
+  "at_m": [
+   8.721,
+   17.236
+  ],
+  "nearest_wall": "m016",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 0.0862,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r000 SUITE 01",
+  "check": "CONTAINMENT",
+  "module": "rug",
+  "part": "tapete#51642",
+  "z_m": [
+   0.0,
+   0.02
+  ],
+  "depth_m": 0.056,
+  "at_m": [
+   11.58,
+   13.492
+  ],
+  "nearest_wall": "m005",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 0.0446,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r000 SUITE 01",
+  "check": "WALL",
+  "module": "rug",
+  "part": "tapete#51642",
+  "z_m": [
+   0.0,
+   0.02
+  ],
+  "depth_m": 0.056,
+  "at_m": [
+   11.584,
+   13.49
+  ],
+  "nearest_wall": "m005",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 0.0419,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r000 SUITE 01",
+  "check": "DOOR",
+  "modules": null,
+  "door": "h_o003",
+  "depth_m": null,
+  "area_m2": null,
+  "parts": null,
+  "max_open_deg": 49.0,
+  "blocked_by": "rug",
+  "leaf_z_m": [
+   0.0,
+   2.1
+  ],
+  "z_overlap_m": null
+ },
+ {
+  "room": "r000 SUITE 01",
+  "check": "OBJECTS",
+  "modules": [
+   "Cama",
+   "Painel cabeceira"
+  ],
+  "door": null,
+  "depth_m": 0.03002,
+  "area_m2": 0.00603603,
+  "parts": [
+   "/cabeceira#51816",
+   "/ks_bronze#52789"
+  ],
+  "max_open_deg": null,
+  "blocked_by": null,
+  "leaf_z_m": null,
+  "z_overlap_m": 0.0201
+ },
+ {
+  "room": "r001 A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+  "check": "CONTAINMENT",
+  "module": "Armario de servico",
+  "part": "armario_servico#53717",
+  "z_m": [
+   0.0,
+   2.1
+  ],
+  "depth_m": 0.0331,
+  "at_m": [
+   1.694,
+   12.15
+  ],
+  "nearest_wall": "m012",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 0.3501,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r001 A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+  "check": "CONTAINMENT",
+  "module": "Bancada gourmet",
+  "part": "bancada_gourmet#53892",
+  "z_m": [
+   0.0,
+   0.95
+  ],
+  "depth_m": 0.2032,
+  "at_m": [
+   4.546,
+   10.377
+  ],
+  "nearest_wall": "m001",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 1.8792,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r001 A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+  "check": "CONTAINMENT",
+  "module": "Condensadora",
+  "part": "condensadora#53995",
+  "z_m": [
+   0.12,
+   0.82
+  ],
+  "depth_m": 0.0287,
+  "at_m": [
+   6.506,
+   10.442
+  ],
+  "nearest_wall": "m002",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 1.3963,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r001 A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+  "check": "CONTAINMENT",
+  "module": "Jardineira",
+  "part": "jardineira#53960",
+  "z_m": [
+   0.0,
+   0.45
+  ],
+  "depth_m": 0.1561,
+  "at_m": [
+   5.819,
+   10.612
+  ],
+  "nearest_wall": "m002",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 1.2393,
+  "where": [
+   "sobre a laje SOB a parede (D-007)"
+  ]
+ },
+ {
+  "room": "r001 A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+  "check": "CONTAINMENT",
+  "module": "Maquina de lavar",
+  "part": "maq_lavar#53682",
+  "z_m": [
+   0.0,
+   0.86
+  ],
+  "depth_m": 0.2115,
+  "at_m": [
+   1.542,
+   12.607
+  ],
+  "nearest_wall": "m012",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 0.198,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r002 SALA DE JANTAR | SALA DE ESTAR",
+  "check": "CONTAINMENT",
+  "module": "Painel TV",
+  "part": "painel_tv#55111",
+  "z_m": [
+   0.0,
+   2.4
+  ],
+  "depth_m": 0.0091,
+  "at_m": [
+   5.901,
+   13.331
+  ],
+  "nearest_wall": "m004",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 0.0856,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r003 SUITE 02",
+  "check": "CONTAINMENT",
+  "module": "Painel cabeceira",
+  "part": "ks_painel_base#56701",
+  "z_m": [
+   0.0,
+   1.6
+  ],
+  "depth_m": 0.0152,
+  "at_m": [
+   6.154,
+   13.522
+  ],
+  "nearest_wall": "m014",
+  "wall_thickness_m": 0.1399,
+  "dist_to_wall_axis_m": 0.0825,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r003 SUITE 02",
+  "check": "CONTAINMENT",
+  "module": "rug",
+  "part": "tapete#56249",
+  "z_m": [
+   0.0,
+   0.02
+  ],
+  "depth_m": 0.0559,
+  "at_m": [
+   8.593,
+   13.303
+  ],
+  "nearest_wall": "m016",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 0.0419,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r003 SUITE 02",
+  "check": "WALL",
+  "module": "rug",
+  "part": "tapete#56249",
+  "z_m": [
+   0.0,
+   0.02
+  ],
+  "depth_m": 0.0559,
+  "at_m": [
+   8.593,
+   13.303
+  ],
+  "nearest_wall": "m016",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 0.0419,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r003 SUITE 02",
+  "check": "DOOR",
+  "modules": null,
+  "door": "h_o004",
+  "depth_m": null,
+  "area_m2": null,
+  "parts": null,
+  "max_open_deg": 16.0,
+  "blocked_by": "rug",
+  "leaf_z_m": [
+   0.0,
+   2.1
+  ],
+  "z_overlap_m": null
+ },
+ {
+  "room": "r003 SUITE 02",
+  "check": "OBJECTS",
+  "modules": [
+   "Cama",
+   "Painel cabeceira"
+  ],
+  "door": null,
+  "depth_m": 0.02992,
+  "area_m2": 0.006,
+  "parts": [
+   "/cabeceira#56407",
+   "/ks_bronze#57309"
+  ],
+  "max_open_deg": null,
+  "blocked_by": null,
+  "leaf_z_m": null,
+  "z_overlap_m": 0.0201
+ },
+ {
+  "room": "r004 COZINHA",
+  "check": "CONTAINMENT",
+  "module": "base_cabinet_01",
+  "part": "kc_soculo#58060",
+  "z_m": [
+   0.0,
+   0.09
+  ],
+  "depth_m": 0.0046,
+  "at_m": [
+   1.799,
+   15.097
+  ],
+  "nearest_wall": "m006",
+  "wall_thickness_m": 0.1399,
+  "dist_to_wall_axis_m": 0.0676,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r004 COZINHA",
+  "check": "CONTAINMENT",
+  "module": "countertop",
+  "part": "kc_tampo#58514",
+  "z_m": [
+   0.87,
+   0.9
+  ],
+  "depth_m": 0.0046,
+  "at_m": [
+   1.859,
+   15.097
+  ],
+  "nearest_wall": "m006",
+  "wall_thickness_m": 0.1399,
+  "dist_to_wall_axis_m": 0.0676,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r004 COZINHA",
+  "check": "WALL",
+  "module": "backsplash",
+  "part": "kc_backsplash#58549",
+  "z_m": [
+   0.9,
+   1.4
+  ],
+  "depth_m": 0.0005,
+  "at_m": [
+   1.564,
+   15.099
+  ],
+  "nearest_wall": "m006",
+  "wall_thickness_m": 0.1399,
+  "dist_to_wall_axis_m": 0.0696,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r004 COZINHA",
+  "check": "WALL",
+  "module": "base_cabinet_01",
+  "part": "kc_corpo#58092",
+  "z_m": [
+   0.09,
+   0.87
+  ],
+  "depth_m": 0.0046,
+  "at_m": [
+   1.844,
+   15.097
+  ],
+  "nearest_wall": "m006",
+  "wall_thickness_m": 0.1399,
+  "dist_to_wall_axis_m": 0.0676,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r004 COZINHA",
+  "check": "WALL",
+  "module": "countertop",
+  "part": "kc_tampo#58514",
+  "z_m": [
+   0.87,
+   0.9
+  ],
+  "depth_m": 0.0046,
+  "at_m": [
+   1.859,
+   15.097
+  ],
+  "nearest_wall": "m006",
+  "wall_thickness_m": 0.1399,
+  "dist_to_wall_axis_m": 0.0676,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r004 COZINHA",
+  "check": "OBJECTS",
+  "modules": [
+   "backsplash",
+   "cooktop_module"
+  ],
+  "door": null,
+  "depth_m": 0.04623,
+  "area_m2": 0.02014782,
+  "parts": [
+   "/kc_backsplash#58582",
+   "/kc_vidro#58879"
+  ],
+  "max_open_deg": null,
+  "blocked_by": null,
+  "leaf_z_m": null,
+  "z_overlap_m": 0.0051
+ },
+ {
+  "room": "r004 COZINHA",
+  "check": "OBJECTS",
+  "modules": [
+   "backsplash",
+   "sink_module"
+  ],
+  "door": null,
+  "depth_m": 0.04621,
+  "area_m2": 0.01756524,
+  "parts": [
+   "/kc_backsplash#58582",
+   "/kc_cuba#58649"
+  ],
+  "max_open_deg": null,
+  "blocked_by": null,
+  "leaf_z_m": null,
+  "z_overlap_m": 0.0016
+ },
+ {
+  "room": "r005 BANHO 01",
+  "check": "CONTAINMENT",
+  "module": "Bancada",
+  "part": "bancada_banho#60732",
+  "z_m": [
+   0.78,
+   0.88
+  ],
+  "depth_m": 0.0193,
+  "at_m": [
+   14.186,
+   15.577
+  ],
+  "nearest_wall": "m019",
+  "wall_thickness_m": 0.1399,
+  "dist_to_wall_axis_m": 0.0805,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r005 BANHO 01",
+  "check": "CONTAINMENT",
+  "module": "Box",
+  "part": "kb_perfil#62048",
+  "z_m": [
+   0.014,
+   2.44
+  ],
+  "depth_m": 0.062,
+  "at_m": [
+   12.778,
+   14.367
+  ],
+  "nearest_wall": "m018",
+  "wall_thickness_m": 0.1399,
+  "dist_to_wall_axis_m": 0.0189,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r005 BANHO 01",
+  "check": "WALL",
+  "module": "Box",
+  "part": "kb_trilho#62015",
+  "z_m": [
+   2.44,
+   2.462
+  ],
+  "depth_m": 0.0508,
+  "at_m": [
+   12.803,
+   14.337
+  ],
+  "nearest_wall": "m018",
+  "wall_thickness_m": 0.1399,
+  "dist_to_wall_axis_m": 0.0445,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r005 BANHO 01",
+  "check": "OBJECTS",
+  "modules": [
+   "Bancada",
+   "Enxoval"
+  ],
+  "door": null,
+  "depth_m": 0.0887,
+  "area_m2": 0.00885226,
+  "parts": [
+   "/gabinete#60634",
+   "/kb_papeleira#63160"
+  ],
+  "max_open_deg": null,
+  "blocked_by": null,
+  "leaf_z_m": null,
+  "z_overlap_m": 0.0599
+ },
+ {
+  "room": "r005 BANHO 01",
+  "check": "OBJECTS",
+  "modules": [
+   "Enxoval",
+   "Espelho"
+  ],
+  "door": null,
+  "depth_m": 0.03104,
+  "area_m2": 0.000522,
+  "parts": [
+   "/kb_gancho#63226",
+   "/espelho#60994"
+  ],
+  "max_open_deg": null,
+  "blocked_by": null,
+  "leaf_z_m": null,
+  "z_overlap_m": 0.0399
+ },
+ {
+  "room": "r005 BANHO 01",
+  "check": "OBJECTS",
+  "modules": [
+   "Enxoval",
+   "Vaso"
+  ],
+  "door": null,
+  "depth_m": 0.16383,
+  "area_m2": 0.04285728,
+  "parts": [
+   "/kb_tapete#63291",
+   "/vaso#61397"
+  ],
+  "max_open_deg": null,
+  "blocked_by": null,
+  "leaf_z_m": null,
+  "z_overlap_m": 0.0071
+ },
+ {
+  "room": "r006 BANHO 02",
+  "check": "CONTAINMENT",
+  "module": "Bancada",
+  "part": "bancada_banho#63459",
+  "z_m": [
+   0.78,
+   0.88
+  ],
+  "depth_m": 0.0191,
+  "at_m": [
+   9.912,
+   14.711
+  ],
+  "nearest_wall": "m017",
+  "wall_thickness_m": 0.1398,
+  "dist_to_wall_axis_m": 0.0806,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r006 BANHO 02",
+  "check": "CONTAINMENT",
+  "module": "Box",
+  "part": "kb_piso_box#64905",
+  "z_m": [
+   0.012,
+   0.016
+  ],
+  "depth_m": 0.0224,
+  "at_m": [
+   9.501,
+   12.628
+  ],
+  "nearest_wall": "m003",
+  "wall_thickness_m": 0.143,
+  "dist_to_wall_axis_m": 0.0867,
+  "where": [
+   "FORA do envelope construido (nem comodo nem parede)"
+  ]
+ },
+ {
+  "room": "r006 BANHO 02",
+  "check": "WALL",
+  "module": "Box",
+  "part": "kb_perfil#64775",
+  "z_m": [
+   0.014,
+   2.44
+  ],
+  "depth_m": 0.0171,
+  "at_m": [
+   8.735,
+   12.605
+  ],
+  "nearest_wall": "m003",
+  "wall_thickness_m": 0.143,
+  "dist_to_wall_axis_m": 0.063,
+  "where": [
+   "sobre a laje SOB a parede (D-007)",
+   "dentro da massa de parede construida"
+  ]
+ },
+ {
+  "room": "r006 BANHO 02",
+  "check": "OBJECTS",
+  "modules": [
+   "Bancada",
+   "Enxoval"
+  ],
+  "door": null,
+  "depth_m": 0.09392,
+  "area_m2": 0.00937122,
+  "parts": [
+   "/gabinete#63361",
+   "/kb_papeleira#65887"
+  ],
+  "max_open_deg": null,
+  "blocked_by": null,
+  "leaf_z_m": null,
+  "z_overlap_m": 0.0599
+ },
+ {
+  "room": "r006 BANHO 02",
+  "check": "OBJECTS",
+  "modules": [
+   "Enxoval",
+   "Espelho"
+  ],
+  "door": null,
+  "depth_m": 0.03092,
+  "area_m2": 0.00052299,
+  "parts": [
+   "/kb_gancho#65986",
+   "/espelho#63721"
+  ],
+  "max_open_deg": null,
+  "blocked_by": null,
+  "leaf_z_m": null,
+  "z_overlap_m": 0.0399
+ }
+]

@@ -4816,6 +4816,54 @@
       "blob_sha": "d7259e4a689be983c1c7e883b4c128e8c6f3b8a7",
       "blob_size": 118552,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/A_fixture_valid_overlay_raw.png",
+      "blob_sha": "a59e17e0fbd4034982be69f54fbae3e0ec9faefa",
+      "blob_size": 12810,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/A_fixture_valid_sketchup_top.png",
+      "blob_sha": "f21166565c7d077abd28765c7254d65b61692e71",
+      "blob_size": 16978,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/B_fixture_notch_overlay_raw.png",
+      "blob_sha": "97fd1468e1254630d77b3c2c1a6a072f2aff9cd5",
+      "blob_size": 13830,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/B_fixture_notch_sketchup_top.png",
+      "blob_sha": "d2fc59ba26e469e428713618e3eede1ca7674b11",
+      "blob_size": 14465,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/C_forced_overlay_raw.png",
+      "blob_sha": "cac2e22853ff1361ad2a4762ab32ef4dbeecc728",
+      "blob_size": 13429,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/C_forced_sketchup_top.png",
+      "blob_sha": "0111f13162540fadd6f4e45aecf2c049da2de0ac",
+      "blob_size": 15379,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/D_real_r006_overlay_raw.png",
+      "blob_sha": "9f2b1815d47bd67aa65fdc0d2ec234ee1319f744",
+      "blob_size": 30646,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p4/images/D_real_r006_sketchup_top.png",
+      "blob_sha": "ffd1c5827da805cf2fef04d5d938371279650d87",
+      "blob_size": 87526,
+      "owner_group": "artifacts"
     }
   ]
 }

@@ -106,3 +106,23 @@ def test_run_fails_closed_on_runtime_and_source_revision():
     bad_src = ip.run(_req(source_document="fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"),
                      runtime_check=lambda p: {"status": "OK", "reasons": []})
     assert bad_src["status"] == "BLOCKED_SOURCE_REVISION" and bad_src["valid"] is False
+
+
+def test_only_the_jobs_own_pid_is_collected_never_inspection_persistent_ids():
+    # achado real da P4: a varredura recursiva pegava persistent_id dos nos da inspecao e tentava fechar esses numeros
+    res = {"pid": 4242, "result": {"nodes": [{"name": "A · x", "pid": 49758}, {"name": "B · y", "pid": 23652}]},
+           "build": {"pid": 777}}
+    assert ip._pids(res) == {4242, 777}
+    assert ip._pids({"pid": True}) == set() and ip._pids({}) == set()
+
+
+def test_furniture_outside_the_built_floor_is_caught_even_when_proposal_matches_build():
+    # achado real da P4: shell em outra escala; proposta x construido batia (0 mm) e a mobilia estava fora do comodo
+    vaso = {"room": "R", "module": "Vaso", "z0_in": 0.0, "h_in": 16, "corners": [[100, 100], [125, 100], [125, 114], [100, 114]]}
+    espelho = {"room": "R", "module": "Espelho", "z0_in": 60.0, "h_in": 30, "corners": [[0, 0], [1, 0], [1, 1], [0, 1]]}
+    floor_ok = {"name": "Floor_Group_r", "bbox_world_m": {"min": [2.0, 2.0, 0.0], "max": [4.0, 4.0, 0.0]}}
+    assert ip.inside_built_shell([floor_ok], [vaso, espelho], {"r": "R"}) == []        # espelho alto nao conta no piso
+    floor_far = {"name": "Floor_Group_r", "bbox_world_m": {"min": [3.5, 3.5, 0.0], "max": [6.9, 6.9, 0.0]}}
+    probs = ip.inside_built_shell([floor_far], [vaso], {"r": "R"})
+    assert probs and probs[0]["group"] == "R · Vaso"
+    assert "ausente" in ip.inside_built_shell([], [vaso], {"r": "R"})[0]["problem"]

@@ -1165,6 +1165,8 @@ def run(consensus_path: Path, out_skp: Path, *, sketchup_exe: Path,
             return {
                 "ok": True,
                 "skipped": False,
+                # PID do SketchUp que ESTE build subiu (None se ja foi encerrado): quem chama fecha so este
+                "pid": None if terminate_allowed or not isinstance(_pid, int) else _pid,
                 "skp_path": str(out_skp),
                 "png_iso": str(out_png_iso),
                 "png_top": str(out_png_top),
