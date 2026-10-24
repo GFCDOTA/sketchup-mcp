@@ -1,0 +1,30 @@
+{
+ "status": "FAIL",
+ "new": [],
+ "worse": [],
+ "resolved": [
+  "r001|CONTAINMENT|Armario de servico",
+  "r001|CONTAINMENT|Condensadora",
+  "r001|CONTAINMENT|Jardineira",
+  "r001|CONTAINMENT|Maquina de lavar"
+ ],
+ "vanished_with_piece": [
+  "r001|CONTAINMENT|Bancada gourmet"
+ ],
+ "missing_program": [
+  "r001|PROGRAM|Bancada gourmet",
+  "r001|PROGRAM|Banqueta"
+ ],
+ "accepted_omissions": [],
+ "compared_rooms": [
+  "r000",
+  "r001",
+  "r002",
+  "r003",
+  "r004",
+  "r005",
+  "r006",
+  "r007"
+ ],
+ "worse_tol_m": 0.0001
+}

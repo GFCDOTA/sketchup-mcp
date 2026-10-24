@@ -1,0 +1,170 @@
+{
+ "commit": "a0be0516a656e12f99ea5473ccf275247613e598",
+ "dirty": false,
+ "canonical_before": {
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "69dbbf0394b5197321e511d5518cf6bb0ae6772879a6edfb285d4be36f3fe2be"
+ },
+ "pids": [
+  7612,
+  12804,
+  35864
+ ],
+ "cases": [
+  {
+   "case": "preflight_allows_materialization",
+   "ok": true,
+   "status": "PASS",
+   "blocking": []
+  },
+  {
+   "case": "clean_commit",
+   "ok": true,
+   "commit": "a0be0516a656e12f99ea5473ccf275247613e598"
+  },
+  {
+   "case": "scale_contract_ok",
+   "ok": true,
+   "chain": {
+    "status": "OK",
+    "shell": {
+     "pt_to_m": 0.0259,
+     "origin_pt": [
+      0.0,
+      0.0
+     ],
+     "flip_y": false,
+     "source": "core.scale.expected_pt_to_m(E:\\Claude\\worktrees\\fp056-p3\\fixtures\\planta_74\\consensus_with_human_walls_and_soft_barriers.json)",
+     "pt_to_in": 1.0196850393700787
+    },
+    "process": {
+     "pt_to_m": 0.0259,
+     "origin_pt": [
+      0.0,
+      0.0
+     ],
+     "flip_y": false,
+     "source": "core.scale.PT_TO_M (processo)",
+     "pt_to_in": 1.0196850393700787
+    },
+    "transforms": [
+     {
+      "from": "consensus",
+      "to": "plano",
+      "op": "x pt_to_m (0.02590000 m/pt)",
+      "origin": "PDF (0,0)"
+     },
+     {
+      "from": "plano",
+      "to": "caixas solver/builder",
+      "op": "/ 0.0254 (m -> in)",
+      "origin": "PDF (0,0)"
+     },
+     {
+      "from": "caixas",
+      "to": "mundo SketchUp",
+      "op": "identidade (polegadas)",
+      "origin": "PDF (0,0)"
+     },
+     {
+      "from": "mundo SketchUp",
+      "to": "inspecao",
+      "op": "x 0.0254 (in -> m)",
+      "origin": "PDF (0,0)"
+     }
+    ],
+    "reason": null
+   }
+  },
+  {
+   "case": "furnish_ok_and_skp_saved",
+   "ok": true,
+   "status": "OK"
+  },
+  {
+   "case": "reopened_and_geometry_extracted",
+   "ok": true,
+   "inspect": "OK",
+   "geometry": "OK",
+   "sketchup_version": "26.0.429"
+  },
+  {
+   "case": "every_planned_module_is_a_group_within_5mm",
+   "ok": true,
+   "planned": 61,
+   "built": 61,
+   "omitted": [],
+   "diverging": []
+  },
+  {
+   "case": "built_walls_match_consensus",
+   "ok": true,
+   "frame": "OK"
+  },
+  {
+   "case": "no_new_or_worse_defect_vs_fp055_p4_baseline",
+   "ok": true,
+   "new": [],
+   "worse": []
+  },
+  {
+   "case": "no_program_loss_without_a_recorded_decision",
+   "ok": false,
+   "missing_program": [
+    "r001|PROGRAM|Bancada gourmet",
+    "r001|PROGRAM|Banqueta"
+   ]
+  },
+  {
+   "case": "canonicals_byte_identical",
+   "ok": true
+  },
+  {
+   "case": "all_my_pids_closed",
+   "ok": true,
+   "pids": [
+    7612,
+    12804,
+    35864
+   ]
+  }
+ ],
+ "environment_status": {
+  "r000": "FAIL",
+  "r001": "PASS",
+  "r002": "FAIL",
+  "r003": "FAIL",
+  "r004": "FAIL",
+  "r005": "FAIL",
+  "r006": "FAIL",
+  "r007": "PASS"
+ },
+ "regression_status": "FAIL",
+ "resolved": [
+  "r001|CONTAINMENT|Armario de servico",
+  "r001|CONTAINMENT|Condensadora",
+  "r001|CONTAINMENT|Jardineira",
+  "r001|CONTAINMENT|Maquina de lavar"
+ ],
+ "vanished_with_piece": [
+  "r001|CONTAINMENT|Bancada gourmet"
+ ],
+ "raw_geometry_sha256": "ed7ac0ce77d3b2e6ee420aeb9ba11b613ae01e4472f67d57a3d3dd058aad750b",
+ "skp": "E:\\Claude\\worktrees\\fp056-p3\\runs\\fp056\\p6b\\build\\planta_74_furnished.skp",
+ "skp_sha256": "1fbb4266f0ee5250bff6f68a3c125953d15f93b56df94f6796e52ae883e9c793",
+ "renders": {
+  "skp": "E:\\Claude\\worktrees\\fp056-p3\\runs\\fp056\\p6b\\build\\planta_74_furnished.skp",
+  "before": "E:\\Claude\\worktrees\\fp056-p3\\runs\\fp056\\p6b\\build\\planta_74_furnished_before_top.png",
+  "top": "E:\\Claude\\worktrees\\fp056-p3\\runs\\fp056\\p6b\\build\\planta_74_furnished_after_top.png",
+  "iso": "E:\\Claude\\worktrees\\fp056-p3\\runs\\fp056\\p6b\\build\\planta_74_furnished_after_iso.png",
+  "log": "E:\\Claude\\worktrees\\fp056-p3\\runs\\fp056\\p6b\\build\\planta_74_furnished_log.txt"
+ },
+ "sketchup_version": "26.0.429",
+ "visual": "PENDING_HUMAN",
+ "canonical_after": {
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397",
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "69dbbf0394b5197321e511d5518cf6bb0ae6772879a6edfb285d4be36f3fe2be"
+ }
+}
