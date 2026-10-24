@@ -11,6 +11,8 @@ Regras (codigo estavel; o motivo e publicado no PR e o merge fica bloqueado enqu
 - PR_SKP_AFFECTING_WITHOUT_PROOF  caminho que afeta o `.skp` (constituicao #8) tocado e prova ausente: precisa de
                            `.skp` em `artifacts/review/**/final/` no diff; `SKP-proof: N/A` nao vale para esses caminhos.
 - PR_CODE_WITHOUT_TESTS    `tools/**`, `core/**` ou `interior/**` (.py/.rb) alterados sem tocar `tests/**` e sem `Tests: N/A — <motivo>`.
+- PR_CRITICAL_WITHOUT_REVIEW_LABEL  o PR toca `critical_paths` (docs/governance/review_policy.json) e uma Issue citada nao tem a label
+                           `gpt-review-required`: a revisao independente seria dispensada por omissao (FP-057 §9).
 - PR_APPROVAL_WITHOUT_PROOF  o corpo declara aparencia/funcional "aprovada" sem `PENDING_HUMAN` ou evidencia: aparencia e do Felipe.
 
 Uso:  python -m tools.validation.pr_policy_gate --pr <N>      (le corpo e arquivos com `gh`; exit 1 se reprovar)
@@ -39,7 +41,7 @@ _REFS = re.compile(r"\b(?:refs?|relates to|issue)\s*:?\s*#(\d+)", re.IGNORECASE)
 _APPROVED = re.compile(r"(visual|apar[eê]ncia|funcional)\w*\s+(?:est[aá]\s+)?(aprovad[ao]|approved)", re.IGNORECASE)
 
 
-def check(body: str, files: list[str], issues: dict[int, dict]) -> list[Finding]:
+def check(body: str, files: list[str], issues: dict[int, dict], critical_paths: list[str] | tuple[str, ...] = ()) -> list[Finding]:
     found: list[Finding] = []
     body = body or ""
     for _kw, n in _CLOSING.findall(body):
@@ -61,6 +63,12 @@ def check(body: str, files: list[str], issues: dict[int, dict]) -> list[Finding]
     if any(CODE.match(f) for f in files) and not any(f.startswith("tests/") for f in files) \
             and not re.search(r"Tests:\s*N/A\s*[—-]\s*\S+", body, re.IGNORECASE):
         found.append(Finding(0, "PR_CODE_WITHOUT_TESTS", "codigo alterado sem teste (ou 'Tests: N/A — motivo')"))
+    crit = [f for f in files if any(f == c or (c.endswith("/") and f.startswith(c)) for c in critical_paths)]
+    if crit:
+        for n in refs:
+            lab = {x["name"] for x in issues.get(n, {}).get("labels", [])}
+            if n in issues and "gpt-review-required" not in lab:
+                found.append(Finding(n, "PR_CRITICAL_WITHOUT_REVIEW_LABEL", f"toca caminho critico ({crit[:2]}): #{n} precisa da label gpt-review-required"))
     if _APPROVED.search(body) and "PENDING_HUMAN" not in body:
         found.append(Finding(0, "PR_APPROVAL_WITHOUT_PROOF", "declara aparencia/funcional aprovada; aparencia e do Felipe (PENDING_HUMAN)"))
     return found
@@ -73,7 +81,10 @@ def main(argv: list[str]) -> int:
     pr = json.loads(_gh("pr", "view", str(args.pr), "--repo", REPO, "--json", "body,files"))
     files = [f["path"] for f in pr["files"]]
     raw = json.loads(_gh("issue", "list", "--repo", REPO, "--state", "all", "--limit", "1000", "--json", "number,state,labels"))
-    findings = check(pr["body"], files, {i["number"]: i for i in raw})
+    from tools.validation.backlog_gate import ROOT
+    pol_path = ROOT / "docs/governance/review_policy.json"
+    crit = json.loads(pol_path.read_text(encoding="utf-8")).get("critical_paths", []) if pol_path.exists() else []
+    findings = check(pr["body"], files, {i["number"]: i for i in raw}, crit)
     for f in findings:
         print(f)
     print(f"pr_policy_gate: {len(findings)} divergencia(s) no PR #{args.pr}")

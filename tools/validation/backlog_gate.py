@@ -14,8 +14,9 @@ Regras (cada uma devolve um `Finding` com codigo estavel):
 - DEPENDENCY_UNKNOWN       dependencia aponta para Issue inexistente.
 - NOT_IN_PROJECT           Issue aberta fora do Project.
 - DONE_WITHOUT_GPT_REVIEW  Issue fechada depois de `effective_from` (docs/governance/review_policy.json) que exige revisao
-                           independente (label `prio:P0` ou `gpt-review-required`) sem comentario `GPT-REVIEW: APPROVED`;
-                           ate la ela fica em *GPT Review*, nao em Done.
+                           independente (label `prio:P0` ou `gpt-review-required`) sem aprovacao VERIFICADA
+                           (`review_verification`: revisor autorizado e distinto do executor, PR, SHA igual ao HEAD, data, evidencia;
+                           o texto `GPT-REVIEW: APPROVED` sozinho NAO vale); ate la ela fica em *GPT Review*, nao em Done.
 
 Nada vale por inferencia: o commit relacionado nao fecha item, o comentario de evidencia sim.
 Excecao legitima so em `docs/governance/backlog_exceptions.json` (`{"<n>": {"<CODIGO>": "motivo"}}`).
@@ -76,7 +77,7 @@ def _needs_gpt_review(iss: dict, policy: dict | None) -> bool:
 
 
 def check(issues: dict[int, dict], items: dict[int, dict] | None, exceptions: dict | None = None,
-          review_policy: dict | None = None) -> list[Finding]:
+          review_policy: dict | None = None, pr_lookup=None, now=None) -> list[Finding]:
     """`issues`: numero -> {state, stateReason, labels, comments}. `items`: numero -> campos do Project (None = sem Project)."""
     found: list[Finding] = []
     for n, iss in sorted(issues.items()):
@@ -111,11 +112,13 @@ def check(issues: dict[int, dict], items: dict[int, dict] | None, exceptions: di
                         found.append(Finding(n, "DEPENDENCY_UNKNOWN", f"#{d}"))
                     elif dep["state"] == "OPEN" and not any(lab["name"] == "tipo:epic" for lab in dep["labels"]):
                         found.append(Finding(n, "DEPENDENCY_OPEN", f"Done com #{d} aberta"))
-        marker = (review_policy or {}).get("marker", "GPT-REVIEW: APPROVED")
         needs_review = _needs_gpt_review(iss, review_policy) or (
             status == "Done" and _needs_gpt_review({**iss, "state": "CLOSED"}, review_policy))
-        if needs_review and not any(marker in c.get("body", "") for c in iss.get("comments", [])):
-            found.append(Finding(n, "DONE_WITHOUT_GPT_REVIEW", f"politica exige '{marker}' antes de Done"))
+        if needs_review:
+            from tools.validation.review_verification import has_valid_approval
+            ok, why = has_valid_approval({**iss, "number": n}, review_policy or {}, pr_lookup or (lambda _n: None), now)
+            if not ok:
+                found.append(Finding(n, "DONE_WITHOUT_GPT_REVIEW", "revisao independente nao verificada: " + "; ".join(why)))
         if done and not _has_evidence(iss):
             found.append(Finding(n, "DONE_WITHOUT_EVIDENCE", "sem comentario '**Evidencia' com commit/teste"))
         if proof not in _NOT_PROVEN and not _has_evidence(iss):
@@ -141,12 +144,29 @@ def load(use_project: bool) -> tuple[dict, dict | None]:
     return issues, {r["content"]["number"]: r for r in rows if r.get("content", {}).get("number")}
 
 
+def _pr_lookup():
+    """Fatos do PR para verificar revisoes (HEAD, data do ultimo commit, Issues citadas). None se `gh` falhar: fail-closed."""
+    cache: dict[int, dict | None] = {}
+
+    def lookup(n: int):
+        if n not in cache:
+            try:
+                d = json.loads(_gh("pr", "view", str(n), "--repo", REPO, "--json", "headRefOid,commits,body"))
+                refs = [int(x) for x in re.findall(r"(?<![A-Za-z])(?:refs?|relates to)\s*:?\s*#(\d+)", d.get("body") or "", re.I)]
+                cache[n] = {"exists": True, "headRefOid": d["headRefOid"], "headDate": (d["commits"][-1]["committedDate"] if d["commits"] else ""),
+                            "refs": refs}
+            except (RuntimeError, ValueError, KeyError, IndexError):
+                cache[n] = None
+        return cache[n]
+    return lookup
+
+
 def main(argv: list[str]) -> int:
     issues, items = load("--no-project" not in argv)
     exceptions = json.loads(EXCEPTIONS.read_text(encoding="utf-8")) if EXCEPTIONS.exists() else {}
     pol_path = ROOT / "docs/governance/review_policy.json"
     policy = json.loads(pol_path.read_text(encoding="utf-8")) if pol_path.exists() else None
-    findings = check(issues, items, exceptions, policy)
+    findings = check(issues, items, exceptions, policy, _pr_lookup())
     for f in findings:
         print(f)
     print(f"backlog_gate: {len(findings)} divergencia(s) em {len(issues)} Issue(s)")

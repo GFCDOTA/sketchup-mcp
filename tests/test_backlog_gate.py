@@ -93,7 +93,18 @@ def test_open_parent_epic_does_not_block_a_done_child():
     assert codes({1: i, 2: epic}, {1: item("Done", "UNIT_PASS", deps="#2"), 2: item()}) == set()
 
 
-POLICY = {"effective_from": "2026-10-25T00:00:00Z", "labels": ["prio:P0", "gpt-review-required"], "marker": "GPT-REVIEW: APPROVED"}
+POLICY = {"effective_from": "2026-10-25T00:00:00Z", "labels": ["prio:P0", "gpt-review-required"],
+          "reviewers": ["revisor-gpt"], "executor_logins": ["fmodesto30"]}
+HEAD = "a" * 40
+
+
+def lookup(n):
+    return {"exists": True, "headRefOid": HEAD, "headDate": "2026-10-26", "refs": [1]} if n == 5 else None
+
+
+def review_comment(author="revisor-gpt", sha=HEAD[:12], verdict="APPROVED"):
+    body = "\n".join([f"GPT-REVIEW: {verdict}", "PR: #5", f"SHA: {sha}", f"Reviewer: {author}", "Date: 2026-10-27", "Evidence: li o diff e rodei os testes"])
+    return {"body": body, "author": {"login": author}, "createdAt": "2026-10-27T10:00:00Z"}
 
 
 def closed_issue(labels, closed_at, comments=()):
@@ -102,20 +113,27 @@ def closed_issue(labels, closed_at, comments=()):
     return i
 
 
-def test_independent_review_is_required_for_p0_closed_after_the_policy_date():
+def gate(issues, items, policy=POLICY, pr_lookup=lookup):
+    import datetime as dt
+
     from tools.validation.backlog_gate import check as chk
+    return {f.code for f in chk(issues, items, None, policy, pr_lookup, dt.datetime(2026, 11, 1, tzinfo=dt.timezone.utc))}
+
+
+def test_independent_review_is_required_for_p0_closed_after_the_policy_date_and_a_bare_marker_is_not_enough():
     late = {1: closed_issue(["prio:P0", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z")}
-    got = {f.code for f in chk(late, {1: item("Done", "UNIT_PASS")}, None, POLICY)}
-    assert "DONE_WITHOUT_GPT_REVIEW" in got
-    ok = {1: closed_issue(["prio:P0", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z", [{"body": "GPT-REVIEW: APPROVED — sem ressalvas"}])}
-    assert "DONE_WITHOUT_GPT_REVIEW" not in {f.code for f in chk(ok, {1: item("Done", "UNIT_PASS")}, None, POLICY)}
+    assert "DONE_WITHOUT_GPT_REVIEW" in gate(late, {1: item("Done", "UNIT_PASS")})
+    forged = {1: closed_issue(["prio:P0", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z",
+                              [{"body": "GPT-REVIEW: APPROVED — sem ressalvas", "author": {"login": "fmodesto30"}}])}
+    assert "DONE_WITHOUT_GPT_REVIEW" in gate(forged, {1: item("Done", "UNIT_PASS")})
+    ok = {1: closed_issue(["prio:P0", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z", [review_comment()])}
+    assert "DONE_WITHOUT_GPT_REVIEW" not in gate(ok, {1: item("Done", "UNIT_PASS")})
 
 
 def test_closures_before_the_policy_date_and_non_p0_are_exempt():
-    from tools.validation.backlog_gate import check as chk
     early = {1: closed_issue(["prio:P0", "prova:UNIT_PASS"], "2026-10-24T10:00:00Z")}
-    assert "DONE_WITHOUT_GPT_REVIEW" not in {f.code for f in chk(early, {1: item("Done", "UNIT_PASS")}, None, POLICY)}
+    assert "DONE_WITHOUT_GPT_REVIEW" not in gate(early, {1: item("Done", "UNIT_PASS")})
     p1 = {1: closed_issue(["prio:P1", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z")}
-    assert "DONE_WITHOUT_GPT_REVIEW" not in {f.code for f in chk(p1, {1: item("Done", "UNIT_PASS")}, None, POLICY)}
+    assert "DONE_WITHOUT_GPT_REVIEW" not in gate(p1, {1: item("Done", "UNIT_PASS")})
     flagged = {1: closed_issue(["prio:P1", "gpt-review-required", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z")}
-    assert "DONE_WITHOUT_GPT_REVIEW" in {f.code for f in chk(flagged, {1: item("Done", "UNIT_PASS")}, None, POLICY)}
+    assert "DONE_WITHOUT_GPT_REVIEW" in gate(flagged, {1: item("Done", "UNIT_PASS")})

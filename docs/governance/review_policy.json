@@ -1,6 +1,16 @@
 {
   "effective_from": "2026-10-25T00:00:00Z",
   "labels": ["prio:P0", "gpt-review-required"],
-  "marker": "GPT-REVIEW: APPROVED",
-  "note": "Issue com prio:P0 ou label gpt-review-required, fechada apos effective_from, so vai a Done com um comentario contendo o marcador (revisao independente do ChatGPT conectado ao GitHub, sem API paga). Ate la fica em GPT Review. Fechamentos anteriores a effective_from ficam isentos."
+  "reviewers": [],
+  "executor_logins": ["fmodesto30"],
+  "critical_paths": [
+    "core/pipeline_contracts.py", "core/plan_frame.py", "core/constraint_result.py", "core/functional_constraints.py",
+    "core/spatial_semantics.py", "tools/rooms/shared/spatial_solver/", "tools/orchestration/intelligent_pipeline.py",
+    "tools/validation/penetration.py", "tools/validation/built_geometry.py", "tools/validation/box_geometry.py",
+    "tools/validation/circulation_gate.py", "tools/validation/room_collisions.py", "tools/validation/layout_preflight.py",
+    "tools/validation/quality_geometry_gate.py", "tools/validation/backlog_gate.py", "tools/validation/issue_integrity_gate.py",
+    "tools/validation/pr_policy_gate.py", "tools/validation/review_verification.py", "tools/rooms/capability_catalog.v1.json",
+    "docs/governance/review_policy.json", "docs/governance/known_gaps.json", ".github/workflows/"
+  ],
+  "note": "Issue com prio:P0 ou label gpt-review-required, fechada apos effective_from, so vai a Done com aprovacao VERIFICADA (tools/validation/review_verification.py: bloco GPT-REVIEW com PR, SHA = HEAD do PR, Reviewer autorizado e distinto do executor, Date, Evidence). `reviewers` esta vazio de proposito: com uma unica conta do GitHub para executor e revisor a independencia nao e verificavel; o proprietario configura identidades distintas (issue de decisao) e so entao a aprovacao pode ser aceita. Ate la a Issue fica em GPT Review. PR que toca `critical_paths` exige a label gpt-review-required nas Issues citadas."
 }
