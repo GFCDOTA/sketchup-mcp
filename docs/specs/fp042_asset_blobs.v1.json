@@ -2268,6 +2268,12 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7/stroke_outlines.png",
+      "blob_sha": "3f78febfcffa571ddcde6a80b960be18269d4b7b",
+      "blob_size": 46425,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
       "blob_size": 335219,

@@ -1,0 +1,418 @@
+{
+ "atual": {
+  "label": "atual",
+  "n_boxes": 390,
+  "cell_m2": {
+   "r000": 15.9,
+   "r001": 15.4,
+   "r002": 14.7,
+   "r003": 8.0,
+   "r004": 5.3,
+   "r005": 3.2,
+   "r006": 2.9,
+   "r007": 1.9
+  },
+  "modules": {
+   "SUITE 01": [
+    "Cama",
+    "Criado-mudo 1",
+    "Criado-mudo 2",
+    "Escrivaninha",
+    "Guarda-roupa",
+    "Painel cabeceira",
+    "rug"
+   ],
+   "A.S. | TERRACO SOCIAL | TERRACO TECNICO": [
+    "Armario de servico",
+    "Churrasqueira",
+    "Coifa",
+    "Condensadora",
+    "Jardineira",
+    "Maquina de lavar",
+    "Prateleira servico",
+    "Tanque",
+    "Varal de teto"
+   ],
+   "SALA DE JANTAR | SALA DE ESTAR": [
+    "Cadeira jantar",
+    "Mesa de jantar",
+    "Painel TV",
+    "Pendente",
+    "Rack TV",
+    "Sofa",
+    "TV",
+    "Tapete"
+   ],
+   "SUITE 02": [
+    "Cama",
+    "Criado-mudo 1",
+    "Criado-mudo 2",
+    "Guarda-roupa",
+    "Painel cabeceira",
+    "rug"
+   ],
+   "COZINHA": [
+    "backsplash",
+    "base_cabinet_01",
+    "cooktop_module",
+    "countertop",
+    "decor_board",
+    "decor_vaso",
+    "fridge",
+    "hood",
+    "sink_module",
+    "upper_cabinet_01",
+    "upper_cabinet_02"
+   ],
+   "BANHO 01": [
+    "Bancada",
+    "Box",
+    "Enxoval",
+    "Espelho",
+    "Pele",
+    "PeleTeto",
+    "Vaso"
+   ],
+   "BANHO 02": [
+    "Bancada",
+    "Box",
+    "Enxoval",
+    "Espelho",
+    "Pele",
+    "PeleTeto",
+    "Vaso"
+   ],
+   "LAVABO": [
+    "Bancada",
+    "Enxoval",
+    "Espelho",
+    "Pele",
+    "PeleTeto",
+    "Vaso"
+   ]
+  },
+  "preflight": "PASS",
+  "preflight_blocking": [],
+  "defects": {
+   "r000|CONTAINMENT|Guarda-roupa": 0.0078,
+   "r000|CONTAINMENT|rug": 0.056,
+   "r000|WALL|rug": 0.056,
+   "r000|DOOR|h_o003": 41.0,
+   "r000|OBJECTS|Cama+Painel cabeceira": 0.03,
+   "r002|CONTAINMENT|Painel TV": 0.0091,
+   "r003|CONTAINMENT|Painel cabeceira": 0.0152,
+   "r003|CONTAINMENT|rug": 0.056,
+   "r003|WALL|rug": 0.056,
+   "r003|DOOR|h_o004": 74.0,
+   "r003|OBJECTS|Cama+Painel cabeceira": 0.03,
+   "r004|CONTAINMENT|backsplash": 0.0006,
+   "r004|CONTAINMENT|base_cabinet_01": 0.0046,
+   "r004|CONTAINMENT|countertop": 0.0046,
+   "r004|WALL|backsplash": 0.0006,
+   "r004|WALL|base_cabinet_01": 0.0047,
+   "r004|WALL|countertop": 0.0046,
+   "r004|OBJECTS|backsplash+cooktop_module": 0.0462,
+   "r004|OBJECTS|backsplash+sink_module": 0.0462,
+   "r005|CONTAINMENT|Bancada": 0.0193,
+   "r005|CONTAINMENT|Box": 0.062,
+   "r005|WALL|Box": 0.0509,
+   "r005|OBJECTS|Bancada+Enxoval": 0.0887,
+   "r005|OBJECTS|Enxoval+Espelho": 0.031,
+   "r005|OBJECTS|Enxoval+Vaso": 0.1638,
+   "r006|CONTAINMENT|Bancada": 0.0191,
+   "r006|CONTAINMENT|Box": 0.0224,
+   "r006|WALL|Box": 0.0171,
+   "r006|OBJECTS|Bancada+Enxoval": 0.094,
+   "r006|OBJECTS|Enxoval+Espelho": 0.031
+  }
+ },
+ "alt_b": {
+  "label": "sem_tracos_sem_fonte",
+  "n_boxes": 376,
+  "cell_m2": {
+   "r000": 16.9,
+   "r001": 17.4,
+   "r002": 15.7,
+   "r003": 8.5,
+   "r004": 5.5,
+   "r005": 3.8,
+   "r006": 3.5,
+   "r007": 2.6
+  },
+  "modules": {
+   "SUITE 01": [
+    "Cama",
+    "Criado-mudo 1",
+    "Criado-mudo 2",
+    "Escrivaninha",
+    "Guarda-roupa",
+    "Painel cabeceira",
+    "rug"
+   ],
+   "A.S. | TERRACO SOCIAL | TERRACO TECNICO": [
+    "Armario de servico",
+    "Churrasqueira",
+    "Coifa",
+    "Condensadora",
+    "Jardineira",
+    "Maquina de lavar",
+    "Prateleira servico",
+    "Tanque",
+    "Varal de teto"
+   ],
+   "SALA DE JANTAR | SALA DE ESTAR": [
+    "Cadeira jantar",
+    "Mesa de jantar",
+    "Painel TV",
+    "Pendente",
+    "Rack TV",
+    "Sofa",
+    "TV",
+    "Tapete"
+   ],
+   "SUITE 02": [
+    "Cama",
+    "Criado-mudo 1",
+    "Criado-mudo 2",
+    "Guarda-roupa",
+    "Painel cabeceira",
+    "rug"
+   ],
+   "COZINHA": [
+    "backsplash",
+    "base_cabinet_01",
+    "cooktop_module",
+    "countertop",
+    "decor_board",
+    "decor_vaso",
+    "fridge",
+    "hood",
+    "sink_module",
+    "upper_cabinet_01",
+    "upper_cabinet_02"
+   ],
+   "BANHO 01": [
+    "Bancada",
+    "Box",
+    "Enxoval",
+    "Espelho",
+    "Pele",
+    "PeleTeto",
+    "Vaso"
+   ],
+   "BANHO 02": [
+    "Bancada",
+    "Ducha",
+    "Enxoval",
+    "Espelho",
+    "Pele",
+    "PeleTeto",
+    "Vaso"
+   ],
+   "LAVABO": [
+    "Bancada",
+    "Enxoval",
+    "Espelho",
+    "Pele",
+    "PeleTeto",
+    "Vaso"
+   ]
+  },
+  "preflight": "FAIL",
+  "preflight_blocking": [
+   [
+    "r000",
+    "circulation",
+    "FAIL"
+   ],
+   [
+    "r001",
+    "room_collisions",
+    "FAIL"
+   ],
+   [
+    "r002",
+    "room_collisions",
+    "FAIL"
+   ],
+   [
+    "r006",
+    "room_collisions",
+    "FAIL"
+   ],
+   [
+    "r007",
+    "room_collisions",
+    "FAIL"
+   ]
+  ],
+  "defects": {
+   "r000|CONTAINMENT|rug": 0.0791,
+   "r000|WALL|rug": 0.0792,
+   "r000|DOOR|h_o003": 41.0,
+   "r000|OBJECTS|Cama+Painel cabeceira": 0.03,
+   "r001|CONTAINMENT|Armario de servico": 0.0558,
+   "r001|CONTAINMENT|Maquina de lavar": 0.0558,
+   "r001|CONTAINMENT|Tanque": 0.0558,
+   "r001|WALL|Armario de servico": 0.0558,
+   "r001|WALL|Maquina de lavar": 0.0558,
+   "r001|WALL|Tanque": 0.0558,
+   "r002|CONTAINMENT|Painel TV": 2.18,
+   "r002|CONTAINMENT|Rack TV": 1.8885,
+   "r002|CONTAINMENT|Sofa": 0.8926,
+   "r002|CONTAINMENT|TV": 1.8784,
+   "r002|CONTAINMENT|Tapete": 0.6365,
+   "r002|WALL|Sofa": 0.36,
+   "r003|CONTAINMENT|rug": 0.056,
+   "r003|WALL|rug": 0.056,
+   "r003|DOOR|h_o004": 74.0,
+   "r003|OBJECTS|Cama+Painel cabeceira": 0.03,
+   "r004|CONTAINMENT|backsplash": 0.0458,
+   "r004|CONTAINMENT|base_cabinet_01": 0.0498,
+   "r004|CONTAINMENT|countertop": 0.0498,
+   "r004|CONTAINMENT|fridge": 0.0128,
+   "r004|WALL|backsplash": 0.0458,
+   "r004|WALL|base_cabinet_01": 0.0499,
+   "r004|WALL|countertop": 0.0499,
+   "r004|WALL|fridge": 0.0148,
+   "r004|OBJECTS|backsplash+cooktop_module": 0.046,
+   "r004|OBJECTS|backsplash+sink_module": 0.046,
+   "r005|CONTAINMENT|Box": 0.062,
+   "r005|CONTAINMENT|Enxoval": 0.056,
+   "r005|WALL|Box": 0.051,
+   "r005|WALL|Enxoval": 0.056,
+   "r005|OBJECTS|Bancada+Enxoval": 0.0887,
+   "r005|OBJECTS|Enxoval+Espelho": 0.031,
+   "r005|OBJECTS|Enxoval+Vaso": 0.2728,
+   "r006|CONTAINMENT|Bancada": 0.0059,
+   "r006|WALL|Bancada": 0.0059,
+   "r006|DOOR|h_o006": 88.0,
+   "r006|OBJECTS|Bancada+Enxoval": 0.0297,
+   "r007|DOOR|h_o001": 87.0
+  }
+ },
+ "delta": {
+  "cell_m2": {
+   "r000": 1.0,
+   "r001": 2.0,
+   "r002": 1.0,
+   "r003": 0.5,
+   "r004": 0.2,
+   "r005": 0.6,
+   "r006": 0.6,
+   "r007": 0.7
+  },
+  "modules_gained": {
+   "SALA DE JANTAR | SALA DE ESTAR": [],
+   "BANHO 02": [
+    "Ducha"
+   ],
+   "LAVABO": [],
+   "SUITE 01": [],
+   "COZINHA": [],
+   "A.S. | TERRACO SOCIAL | TERRACO TECNICO": [],
+   "SUITE 02": [],
+   "BANHO 01": []
+  },
+  "modules_lost": {
+   "SALA DE JANTAR | SALA DE ESTAR": [],
+   "BANHO 02": [
+    "Box"
+   ],
+   "LAVABO": [],
+   "SUITE 01": [],
+   "COZINHA": [],
+   "A.S. | TERRACO SOCIAL | TERRACO TECNICO": [],
+   "SUITE 02": [],
+   "BANHO 01": []
+  },
+  "defects_new": [
+   "r001|CONTAINMENT|Armario de servico",
+   "r001|CONTAINMENT|Maquina de lavar",
+   "r001|CONTAINMENT|Tanque",
+   "r001|WALL|Armario de servico",
+   "r001|WALL|Maquina de lavar",
+   "r001|WALL|Tanque",
+   "r002|CONTAINMENT|Rack TV",
+   "r002|CONTAINMENT|Sofa",
+   "r002|CONTAINMENT|TV",
+   "r002|CONTAINMENT|Tapete",
+   "r002|WALL|Sofa",
+   "r004|CONTAINMENT|fridge",
+   "r004|WALL|fridge",
+   "r005|CONTAINMENT|Enxoval",
+   "r005|WALL|Enxoval",
+   "r006|DOOR|h_o006",
+   "r006|WALL|Bancada",
+   "r007|DOOR|h_o001"
+  ],
+  "defects_gone": [
+   "r000|CONTAINMENT|Guarda-roupa",
+   "r003|CONTAINMENT|Painel cabeceira",
+   "r005|CONTAINMENT|Bancada",
+   "r006|CONTAINMENT|Box",
+   "r006|OBJECTS|Enxoval+Espelho",
+   "r006|WALL|Box"
+  ],
+  "defects_worse": [
+   "r000|CONTAINMENT|rug",
+   "r000|WALL|rug",
+   "r002|CONTAINMENT|Painel TV",
+   "r004|CONTAINMENT|backsplash",
+   "r004|CONTAINMENT|base_cabinet_01",
+   "r004|CONTAINMENT|countertop",
+   "r004|WALL|backsplash",
+   "r004|WALL|base_cabinet_01",
+   "r004|WALL|countertop",
+   "r005|OBJECTS|Enxoval+Vaso"
+  ]
+ },
+ "solver_f2": {
+  "r005": {
+   "atual": {
+    "status": "INFEASIBLE",
+    "hard_violations": [
+     "{'code': 'FUNCTIONAL_SHOWER_ENTRY_WIDTH', 'object_id': 'r005:Box', 'detail': 'vao livre 0."
+    ]
+   },
+   "alt_b": {
+    "status": "INFEASIBLE",
+    "hard_violations": [
+     "{'code': 'FUNCTIONAL_SHOWER_ENTRY_WIDTH', 'object_id': 'r005:Box', 'detail': 'vao livre 0."
+    ]
+   }
+  },
+  "r006": {
+   "atual": {
+    "status": "INFEASIBLE",
+    "hard_violations": [
+     "{'code': 'FUNCTIONAL_SHOWER_ENTRY_WIDTH', 'object_id': 'r006:Box', 'detail': 'vao livre 0.",
+     "{'code': 'FUNCTIONAL_SHOWER_REACH_PATH', 'object_id': 'r006:Box', 'detail': 'MEASURED_PATH",
+     "{'code': 'FUNCTIONAL_TOILET_FRONT_CLEARANCE', 'object_id': 'r006:Vaso', 'detail': 'MEASURE"
+    ]
+   },
+   "alt_b": {
+    "status": "INFEASIBLE",
+    "hard_violations": [
+     "{'code': 'FUNCTIONAL_LAVATORY_REACH_PATH', 'object_id': 'r006:Bancada', 'detail': 'MEASURE",
+     "{'code': 'FUNCTIONAL_TOILET_FRONT_CLEARANCE', 'object_id': 'r006:Vaso', 'detail': 'MEASURE"
+    ]
+   }
+  },
+  "r007": {
+   "atual": {
+    "status": "INFEASIBLE",
+    "hard_violations": [
+     "{'code': 'FUNCTIONAL_TOILET_FRONT_CLEARANCE', 'object_id': 'r007:Vaso', 'detail': 'MEASURE"
+    ]
+   },
+   "alt_b": {
+    "status": "INFEASIBLE",
+    "hard_violations": [
+     "{'code': 'FUNCTIONAL_LAVATORY_REACH_PATH', 'object_id': 'r007:Bancada', 'detail': 'MEASURE",
+     "{'code': 'FUNCTIONAL_TOILET_FRONT_CLEARANCE', 'object_id': 'r007:Vaso', 'detail': 'MEASURE"
+    ]
+   }
+  }
+ }
+}
