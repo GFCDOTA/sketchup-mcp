@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-# linha de base vigente: capturada depois da decisao da Suite 01 (#381); a de artifacts/review/fp044/baseline/ fica como
-# retrato historico (difere so no hash da SUITE 01)
-BASELINE = Path(__file__).resolve().parents[1] / "artifacts/review/fp054/suite01_decision/fp044_baseline.json"
+# linha de base vigente: capturada depois da correcao FP-056 P1 (unidade da A.S. + circulacao; so a A.S. mudou). As anteriores
+# (artifacts/review/fp044/baseline/ e fp054/suite01_decision/) ficam como retrato historico.
+BASELINE = Path(__file__).resolve().parents[1] / "artifacts/review/fp056/p1/fp044_baseline.json"
 
 pytestmark = pytest.mark.planta74_scale      # collect_boxes da planta_74 exige PT_TO_M=0.0259 (processo proprio)
 
