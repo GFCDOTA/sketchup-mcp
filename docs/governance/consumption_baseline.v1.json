@@ -1,0 +1,102 @@
+{
+ "schema_version": "consumption_baseline.v1",
+ "capabilities": {
+  "bathroom.layout.boxes": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "bathroom.wet-room.guard": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "bedroom.bed.build": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "bedroom.layout.boxes": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "bedroom.wardrobe.build": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "bedroom.wardrobe.gate": {
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  "circulation.gate": {
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  "kitchen.cabinet.plain-fronts": {
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  "kitchen.cabinet.shaker-door": {
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  "kitchen.ergonomics.audit": {
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  "kitchen.layout.galley": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "kitchen.sink-anchor-guard": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "living.layout.boxes": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "living.sofa.class": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "living.sofa.gate": {
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  "service.layout.boxes": {
+   "INVOKED": true,
+   "CONSUMED": true
+  },
+  "shared.cabinet.front.shaker": {
+   "INVOKED": false,
+   "CONSUMED": false
+  },
+  "shared.cabinet.parametric": {
+   "INVOKED": false,
+   "CONSUMED": false
+  }
+ },
+ "watched_executed": {
+  "specialists.plan (perfil+allowlist+binding)": false,
+  "specialist fragments": false,
+  "capability catalog": false,
+  "knowledge loader (tools/sketchup/knowledge.py)": false,
+  "F1C kitchen functional_interfaces": false,
+  "F1B/F1C functional_clearance": false,
+  "core.functional_constraints (provenance A-E)": false,
+  "F2 solver: problem": false,
+  "F2 solver: engine": false,
+  "F2 solver: candidates": false,
+  "F2 solver: solver": false,
+  "F2 solver: ranking": false,
+  "F2 solver: proposal": false,
+  "furniture_overlap_gate": false,
+  "room_collisions (parede/giro de porta)": false,
+  "circulation_gate": true,
+  "shared cabinet (parametrico/Shaker)": false,
+  "core.spatial_semantics": true,
+  "layout_decisions (decisoes aprovadas)": true
+ },
+ "specialists_invoked": 0,
+ "specialists_total": 9,
+ "recipes_consumed": 0,
+ "recipes_total": 19
+}
