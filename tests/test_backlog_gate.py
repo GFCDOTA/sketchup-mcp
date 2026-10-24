@@ -91,3 +91,31 @@ def test_open_parent_epic_does_not_block_a_done_child():
     i = issue("CLOSED", ["prova:UNIT_PASS"], [EVID])
     epic = issue(labels=["tipo:epic"])
     assert codes({1: i, 2: epic}, {1: item("Done", "UNIT_PASS", deps="#2"), 2: item()}) == set()
+
+
+POLICY = {"effective_from": "2026-10-25T00:00:00Z", "labels": ["prio:P0", "gpt-review-required"], "marker": "GPT-REVIEW: APPROVED"}
+
+
+def closed_issue(labels, closed_at, comments=()):
+    i = issue("CLOSED", labels, [EVID, *comments])
+    i["closedAt"] = closed_at
+    return i
+
+
+def test_independent_review_is_required_for_p0_closed_after_the_policy_date():
+    from tools.validation.backlog_gate import check as chk
+    late = {1: closed_issue(["prio:P0", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z")}
+    got = {f.code for f in chk(late, {1: item("Done", "UNIT_PASS")}, None, POLICY)}
+    assert "DONE_WITHOUT_GPT_REVIEW" in got
+    ok = {1: closed_issue(["prio:P0", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z", [{"body": "GPT-REVIEW: APPROVED — sem ressalvas"}])}
+    assert "DONE_WITHOUT_GPT_REVIEW" not in {f.code for f in chk(ok, {1: item("Done", "UNIT_PASS")}, None, POLICY)}
+
+
+def test_closures_before_the_policy_date_and_non_p0_are_exempt():
+    from tools.validation.backlog_gate import check as chk
+    early = {1: closed_issue(["prio:P0", "prova:UNIT_PASS"], "2026-10-24T10:00:00Z")}
+    assert "DONE_WITHOUT_GPT_REVIEW" not in {f.code for f in chk(early, {1: item("Done", "UNIT_PASS")}, None, POLICY)}
+    p1 = {1: closed_issue(["prio:P1", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z")}
+    assert "DONE_WITHOUT_GPT_REVIEW" not in {f.code for f in chk(p1, {1: item("Done", "UNIT_PASS")}, None, POLICY)}
+    flagged = {1: closed_issue(["prio:P1", "gpt-review-required", "prova:UNIT_PASS"], "2026-10-26T10:00:00Z")}
+    assert "DONE_WITHOUT_GPT_REVIEW" in {f.code for f in chk(flagged, {1: item("Done", "UNIT_PASS")}, None, POLICY)}

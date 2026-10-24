@@ -1,0 +1,36 @@
+name: audit-report
+
+# Relatorio de auditoria periodico para revisao independente (ChatGPT conectado ao GitHub; sem API paga).
+# Gera docs/reports/audit/audit_<data>.md/.json como artefato; a versao versionada no repo entra por PR (tools.validation.audit_report).
+
+on:
+  schedule:
+    - cron: "23 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PT_TO_M: "0.0259"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked --extra dev
+      - name: gerar relatorio
+        run: uv run --no-sync python -m tools.validation.audit_report --out "docs/reports/audit/audit_$(date -u +%F).md" --with-geometry
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: docs/reports/audit/

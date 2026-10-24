@@ -1,0 +1,6 @@
+{
+  "effective_from": "2026-10-25T00:00:00Z",
+  "labels": ["prio:P0", "gpt-review-required"],
+  "marker": "GPT-REVIEW: APPROVED",
+  "note": "Issue com prio:P0 ou label gpt-review-required, fechada apos effective_from, so vai a Done com um comentario contendo o marcador (revisao independente do ChatGPT conectado ao GitHub, sem API paga). Ate la fica em GPT Review. Fechamentos anteriores a effective_from ficam isentos."
+}
