@@ -6,7 +6,7 @@ import datetime as dt
 from tools.validation import backlog_reconcile as br
 
 NOW = dt.datetime(2026, 11, 1, tzinfo=dt.timezone.utc)
-POLICY = {"labels": ["gpt-review-required"], "reviewers": [], "executor_logins": ["fmodesto30"]}
+POLICY = {"effective_from": "2026-10-25T00:00:00Z", "labels": ["gpt-review-required"], "reviewers": [], "executor_logins": ["fmodesto30"]}
 EVID = {"body": "**Evidência** commit abcdef0; pytest passed", "createdAt": "2026-10-26T10:00:00Z"}
 ACCEPT = "## Critérios de aceite\n- [ ] faz a coisa\n"
 
@@ -73,6 +73,7 @@ def test_done_card_on_open_issue_or_without_evidence_is_an_anomaly_and_open_one_
 
 def test_closed_issue_that_requires_independent_review_stays_in_gpt_review_without_a_verified_approval():
     i = issue(1, ["gpt-review-required"], state="CLOSED", comments=[EVID])
+    i["closedAt"] = "2026-10-26T10:00:00Z"
     assert moves(run([i], [card(1, "In Progress")])) == {1: ("In Progress", "GPT Review")}
     assert moves(run([i], [card(1, "GPT Review")])) == {}                       # ja esta no lugar certo; nunca vira Done
 
@@ -113,3 +114,9 @@ def test_automation_state_is_partial_without_token_and_deferred_on_low_quota():
     assert br.automation_state(True, 100) == "DEFERRED"
     assert br.automation_state(True, 5000) == "COMPLETE"
     assert br.automation_state(True, None) == "UNKNOWN"
+
+
+def test_closure_before_the_policy_date_is_not_pulled_back_to_gpt_review():
+    i = issue(1, ["gpt-review-required"], state="CLOSED", comments=[EVID])
+    i["closedAt"] = "2026-10-20T10:00:00Z"
+    assert moves(run([i], [card(1, "Done")])) == {}

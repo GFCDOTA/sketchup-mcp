@@ -65,6 +65,12 @@ def _requires_review(labels: set[str], policy: dict) -> bool:
     return bool(labels & set(policy.get("labels", ("gpt-review-required",))))
 
 
+def _closed_needs_review(issue: dict, policy: dict) -> bool:
+    """Mesma regra do `backlog_gate` (so fechamentos apos `effective_from`): o reconcile nunca contradiz o gate."""
+    from tools.validation.backlog_gate import _needs_gpt_review
+    return _needs_gpt_review(issue, {**policy, "labels": policy.get("labels", ())})
+
+
 def plan(issues: list[dict], cards: list[dict], prs: list[dict], policy: dict, pr_lookup=None, claims: dict | None = None,
          now: dt.datetime | None = None) -> tuple[list[Move], list[Anomaly]]:
     """(movimentos, anomalias). `cards`: itens do Project [{"number", "status"}] — duplicatas aparecem como anomalia. Puro."""
@@ -99,7 +105,7 @@ def plan(issues: list[dict], cards: list[dict], prs: list[dict], policy: dict, p
                 else:
                     anomalies.append(Anomaly("CLOSED_WITHOUT_EVIDENCE", n, "fechada sem evidencia: nao vai para Done"))
                 continue
-            if _requires_review(names, policy):
+            if _closed_needs_review(issue, policy):
                 ok, reasons = has_valid_approval({**issue, "number": n}, policy, pr_lookup or (lambda _n: None), now)
                 if ok:
                     target, why = "Done", "fechada, com evidencia e aprovacao independente verificada"
@@ -170,7 +176,7 @@ def main(argv: list[str]) -> int:
     from tools.validation.backlog_gate import OWNER, PROJECT, REPO, ROOT, _gh, _pr_lookup
     do_apply = "--apply" in argv
     issues = json.loads(_gh("issue", "list", "--repo", REPO, "--state", "all", "--limit", "1000",
-                            "--json", "number,title,state,stateReason,labels,body,comments"))
+                            "--json", "number,title,state,stateReason,closedAt,labels,body,comments"))
     prs_raw = json.loads(_gh("pr", "list", "--repo", REPO, "--state", "open", "--json", "number,body,isDraft,statusCheckRollup"))
     prs = [{**p, "checks": ("pass" if p.get("statusCheckRollup") and all(c.get("conclusion") in ("SUCCESS", "SKIPPED", "NEUTRAL")
                                                                          and c.get("status") == "COMPLETED" for c in p["statusCheckRollup"]) else "pending")}

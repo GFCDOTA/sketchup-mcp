@@ -71,7 +71,11 @@ def locked(path: Path | None = None, wait_s: float = 5.0):
             os.close(fd)
             break
         except FileExistsError:
-            if time.time() - p.stat().st_mtime > 60:
+            try:
+                age = time.time() - p.stat().st_mtime
+            except FileNotFoundError:
+                continue                                             # o dono soltou a trava entre o open e o stat: tenta de novo
+            if age > 60:
                 p.unlink(missing_ok=True)
                 continue
             if time.time() > deadline:
