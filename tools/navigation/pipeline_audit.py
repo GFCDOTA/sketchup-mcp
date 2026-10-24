@@ -38,6 +38,7 @@ _CONSUMED_RULES = {
     "tools.rooms.bedroom.furnishing.bedroom_designer_boxes": "caixas -> LAYOUT_BOXES -> place_layout_skp.rb",
     "tools.rooms.service.layout.build_boxes": "caixas -> LAYOUT_BOXES -> place_layout_skp.rb",
     "tools.rooms.kitchen.validation.require_kitchen_anchor": "aborta o build se a pia migrar (gate bloqueante)",
+    "tools.rooms.bedroom.validation.wardrobe_gate.wardrobe_gate": "so LOGA/registra em out[component_anatomy] (nao bloqueia): a regra >=2 portas reprova o guarda-roupa de 0,8 m da Suite 02 (FP-055 #428)",
     "tools.rooms.bathroom.validation.unexpected_wet_room_kinds": "bloqueia: WetRoomViolation aborta a geracao (FP-055 #427)",
     "tools.rooms.kitchen.anchor_rules.validate": "via require_kitchen_anchor: aborta o build se a pia migrar",
     # chamados DENTRO de um brain consumido; as pecas que devolvem sao parte das caixas do brain (consumo transitivo)
