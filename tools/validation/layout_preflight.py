@@ -5,7 +5,8 @@ antes do SketchUp. Este pre-voo roda, para cada comodo que recebeu movel:
 
   - `circulation_gate.gate` (corredor entre portais + cadeiras), com o contrato tipado da F1-01;
   - a sobreposicao movel-sobre-movel do comodo (`furniture_overlap_gate.pairwise_overlap`, mesmo nucleo do gate MCP);
-  - movel dentro de parede, sobre guarda-corpo/peitoril (FP-056 #434) e no giro de porta (`room_collisions.audit`, o mesmo da regressao FP-047) — acrescentado depois que
+  - movel dentro de parede, sobre guarda-corpo/peitoril (FP-056 #434), no giro de porta e na VARREDURA REAL da folha (#500;
+    o que ja esta em `docs/governance/known_gaps.json: door_sweep` e baseline conhecido, nao reprova de novo) (`room_collisions.audit`, o mesmo da regressao FP-047) — acrescentado depois que
     uma variante da Suite 01 (#381) punha o criado-mudo 1,8 dm2 dentro da parede e passava;
 
 e agrega por `core.constraint_result.combine`. Quem materializa so segue com PASS ou NOT_APPLICABLE. Gate que quebra (excecao)
@@ -46,8 +47,13 @@ def _collisions(audit: dict, room_name: str, n_boxes: int) -> tuple[str, dict]:
     walls = [f"{x['module']}/{x['label']} {x['area_cm2']} cm2" for x in data.get("wall_penetration", [])]
     swings = [f"{x['door']}:{x['module']}/{x['label']} {x['area_cm2']} cm2" for x in data.get("door_swing_hits", [])]
     barriers = [f"{x['barrier']}:{x['module']}/{x['label']} {x['area_cm2']} cm2" for x in data.get("barrier_penetration", [])]
-    if walls or swings or barriers:
-        return "FAIL", {"wall_penetration": walls, "door_swing_hits": swings, "barrier_penetration": barriers}
+    from tools.validation import known_gaps
+    known = set(known_gaps.load().get("door_sweep", {}))
+    sweeps = [x for x in data.get("door_sweep_hits", []) if f"{x['door']}|{x['module']}" not in known]
+    sweep_txt = [f"{x['door']}:{x['module']}/{x['label']} {x['area_cm2']} cm2" for x in sweeps]
+    if walls or swings or barriers or sweep_txt:
+        return "FAIL", {"wall_penetration": walls, "door_swing_hits": swings, "barrier_penetration": barriers,
+                        "door_sweep_hits": sweep_txt}
     return "PASS", {}
 
 

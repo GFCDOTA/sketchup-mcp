@@ -77,6 +77,40 @@ def door_swings_pt(con: dict) -> dict[str, Polygon]:
     return out
 
 
+def door_sweeps_pt(con: dict, leaf_thickness_m: float = 0.04, step_deg: int = 1) -> dict[str, Polygon]:
+    """Varredura REAL da folha de cada porta interior (uniao da folha, com espessura, de 0 a 90 graus), em pontos. Mesma
+    geometria do movimento que o validador do construido mede (`penetration.door_open_angle`): o quarto de circulo de
+    `door_swings_pt` e menor (0,398 contra 0,427 m2 na h_o003) porque ignora a espessura e o canto da folha."""
+    from shapely.geometry import LineString
+
+    from core.scale import PT_TO_M
+    walls = {w["id"]: w for w in con["walls"]}
+    half = leaf_thickness_m / 2.0 / PT_TO_M
+    out: dict[str, Polygon] = {}
+    for o in con.get("openings", []):
+        if o.get("kind") != "door" and o.get("kind_v5") not in DOOR_KINDS:
+            continue
+        w = walls[o["wall_id"]]
+        horiz = abs(w["start"][1] - w["end"][1]) < 1e-6
+        cx, cy = o["center"]
+        hw = float(o["opening_width_pts"]) / 2
+        t = float(w.get("thickness", 5.4)) / 2
+        sgn = 1 if o.get("swing_side") == "pos" else -1
+        along, cross = (cx, cy) if horiz else (cy, cx)
+        h_al = along - hw if o.get("hinge_side") == "left" else along + hw
+        u = 1 if o.get("hinge_side") == "left" else -1
+        h_cr = cross + sgn * t
+        r = 2 * hw
+        leaves = []
+        for deg in range(0, 91, step_deg):
+            a = math.radians(deg)
+            tip = (h_al + u * r * math.cos(a), h_cr + sgn * r * math.sin(a))
+            pts = [(h_al, h_cr), tip]
+            leaves.append(LineString([(x, y) if horiz else (y, x) for x, y in pts]).buffer(half, cap_style=2))
+        out[o["id"]] = unary_union(leaves)
+    return out
+
+
 def box_footprint_pt(box: dict, pt_to_in: float) -> Polygon | None:
     """Pegada (pontos) de uma caixa dos brains (cantos em polegadas)."""
     if not box.get("corners"):
