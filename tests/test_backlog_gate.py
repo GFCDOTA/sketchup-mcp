@@ -85,3 +85,9 @@ def test_documented_exception_silences_only_that_code():
 def test_without_project_closed_issue_still_needs_evidence():
     assert "DONE_WITHOUT_EVIDENCE" in codes({1: issue("CLOSED")}, None)
     assert codes({1: issue("CLOSED", comments=[EVID])}, None) == set()
+
+
+def test_open_parent_epic_does_not_block_a_done_child():
+    i = issue("CLOSED", ["prova:UNIT_PASS"], [EVID])
+    epic = issue(labels=["tipo:epic"])
+    assert codes({1: i, 2: epic}, {1: item("Done", "UNIT_PASS", deps="#2"), 2: item()}) == set()
