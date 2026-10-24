@@ -165,3 +165,18 @@ def test_real_repo_proofs_are_listed_with_their_failures():
     rows = ar.proofs()
     p6 = [r for r in rows if r["path"] == "artifacts/review/fp056/p6/summary.json"]
     assert p6 and p6[0]["cases"] == 11 and p6[0]["failed"] == ["no_program_loss_without_a_recorded_decision"]
+
+
+@pytest.mark.planta74_scale
+def test_geometry_gate_tracks_registered_door_sweeps_and_flags_stale_or_unregistered_ones(monkeypatch):
+    from tools.validation import known_gaps
+    from tools.validation import quality_geometry_gate as gg
+    base = known_gaps.load()
+    assert gg.evaluate()["known_door_sweep"] == ["h_o003|rug", "h_o004|rug"]
+    unreg = {**base, "door_sweep": {"h_o003|rug": base["door_sweep"]["h_o003|rug"]}}
+    monkeypatch.setattr(known_gaps, "load", lambda *a, **k: unreg)
+    res = gg.evaluate()
+    assert res["verdict"] == "FAIL" and any("varredura real da folha sem registro" in r for r in res["reasons"])
+    stale = {**base, "door_sweep": {**base["door_sweep"], "h_o999|rug": {"issue": 1, "reason": "x"}}}
+    monkeypatch.setattr(known_gaps, "load", lambda *a, **k: stale)
+    assert any("door_sweep registrado que nao existe mais" in r for r in gg.evaluate()["reasons"])

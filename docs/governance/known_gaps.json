@@ -13,5 +13,15 @@
     "r004|CONTAINMENT|backsplash": {
       "reason": "gemeo mede 0,56 mm (limiar 0,5 mm); o construido mediu 0,52 mm na parede e o P6 real nao o acusou como novo (tests/test_fp056_p1_box_twin.py BORDERLINE)"
     }
+  },
+  "door_sweep": {
+    "h_o003|rug": {
+      "issue": 486,
+      "reason": "Suite 01: tapete de 2 cm na varredura real da folha (sem folga inferior construida); abre 49 graus; decisao R5 pendente"
+    },
+    "h_o004|rug": {
+      "issue": 486,
+      "reason": "Suite 02: idem; abre 16 graus; decisao R5 pendente"
+    }
   }
 }

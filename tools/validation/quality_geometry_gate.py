@@ -22,7 +22,6 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-KNOWN_GAPS = ROOT / "docs/governance/known_gaps.json"
 
 
 def evaluate() -> dict:
@@ -40,7 +39,8 @@ def evaluate() -> dict:
     base = json.loads((ROOT / "artifacts/review/fp055/p4/defect_baseline.json").read_text("utf-8"))["defects"]
     program = json.loads((ROOT / "artifacts/review/fp056/p2/program_baseline.json").read_text("utf-8"))["program"]
     reg = db.regression(reports, base, program)
-    known = json.loads(KNOWN_GAPS.read_text("utf-8")) if KNOWN_GAPS.exists() else {"program": {}}
+    from tools.validation import known_gaps
+    known = {"program": {}, **known_gaps.load()}
     registered = set(known.get("program", {}))
     unregistered = sorted(set(reg["missing_program"]) - registered)
     stale = sorted(registered - set(reg["missing_program"]))             # registro de lacuna que ja nao existe: limpar
@@ -55,13 +55,20 @@ def evaluate() -> dict:
         reasons.append(f"perda de programa sem registro: {unregistered}")
     if stale:
         reasons.append(f"lacuna registrada que nao existe mais (remover de known_gaps.json): {stale}")
+    from tools.validation import room_collisions
+    sweep_now = {f"{d['door']}|{d['module']}" for r in room_collisions.audit(con, boxes).values() for d in r["door_sweep_hits"]}
+    sweep_registered = set(known.get("door_sweep", {}))
+    if sweep_now - sweep_registered:
+        reasons.append(f"peca na varredura real da folha sem registro: {sorted(sweep_now - sweep_registered)}")
+    if sweep_registered - sweep_now:
+        reasons.append(f"door_sweep registrado que nao existe mais (remover de known_gaps.json): {sorted(sweep_registered - sweep_now)}")
     persisting = len(reg.get("compared_rooms", [])) and sum(1 for b in base) - len(reg["resolved"]) - len(reg.get("vanished_with_piece", []))
-    known_pending = bool(reg["missing_program"]) or persisting > 0
+    known_pending = bool(reg["missing_program"]) or persisting > 0 or bool(sweep_now)
     verdict = "FAIL" if reasons else ("KNOWN" if known_pending else "PASS")
     return {"verdict": verdict, "reasons": reasons, "new": new, "twin_borderline_ignored": [d["key"] for d in reg["new"] if d["key"] in borderline], "worse": reg["worse"], "resolved": reg["resolved"],
             "vanished_with_piece": reg.get("vanished_with_piece", []), "missing_program": reg["missing_program"],
             "known_program_gaps": {k: known["program"][k] for k in sorted(registered & set(reg["missing_program"]))},
-            "persisting_baseline_defects": persisting, "preflight": pre["status"], "boxes": len(boxes),
+            "persisting_baseline_defects": persisting, "known_door_sweep": sorted(sweep_now), "preflight": pre["status"], "boxes": len(boxes),
             "geometric_approved": verdict == "PASS", "functional_approved": verdict == "PASS",
             "basis": "gemeo em caixas (L1); a prova no SketchUp real fica em artifacts/review/fp056/p6/"}
 
