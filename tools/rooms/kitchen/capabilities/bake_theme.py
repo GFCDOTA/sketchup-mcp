@@ -1,6 +1,6 @@
 """bake_theme_skp.py — gera um .skp da planta com a cozinha BAKEADA num tema (cor+textura).
 Copia o furnished base, abre no SketchUp headless, roda recolor_kitchen_theme.rb, salva o
-.skp tematizado em artifacts/planta_74/furnished/. NAO toca o base (cozinha clara aprovada).
+.skp tematizado em runs/bake_theme/ (ou BAKE_OUT_DIR; artifacts/ so com BAKE_ALLOW_OFFICIAL_WRITE=1). NAO toca o base (cozinha clara aprovada).
 Uso: KITCHEN_THEME=black_wood_gold .venv/Scripts/python.exe .claude/scratch/bake_theme_skp.py
 """
 import hashlib
@@ -18,8 +18,13 @@ BASE = ROOT / "artifacts/planta_74/furnished/planta_74_furnished.skp"
 SCRATCH = ROOT / ".claude/scratch"
 
 def main() -> None:
+    from tools.sketchup.output_policy import resolve_output_dir
     theme = os.environ.get("KITCHEN_THEME", "black_wood_gold")
-    out = ROOT / f"artifacts/planta_74/furnished/planta_74_furnished_{theme}.skp"
+    # FP-055 P1 (#423): saida padrao em runs/; a pasta oficial so com BAKE_ALLOW_OFFICIAL_WRITE=1 (+ gates e aprovacao humana)
+    out_dir = resolve_output_dir(ROOT, os.environ.get("BAKE_OUT_DIR"), ROOT / "runs/bake_theme",
+                                 allow_official_write=os.environ.get("BAKE_ALLOW_OFFICIAL_WRITE") == "1")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = out_dir / f"planta_74_furnished_{theme}.skp"
     copy = SCRATCH / "bake_copy.skp"
     log = SCRATCH / "bake_log.txt"
     for p in (copy, log):

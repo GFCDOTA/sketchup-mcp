@@ -29,14 +29,14 @@ def test_every_supported_room_routes_to_its_own_provider(isolated):
     kinds = (BEDROOM, LIVING, BATHROOM, SERVICE)
     monkeypatch.setattr(f, "classify_rooms", lambda _: _rooms(*kinds))
     for kind in kinds:
-        providers[kind].return_value = ([{"kind": "part", "rgb": [50, 50, 50]}],
-                                         {"result": "OK"})
+        part = "vaso" if kind == BATHROOM else "part"     # banheiro so aceita louca (guard bloqueante, FP-055 #427)
+        providers[kind].return_value = ([{"kind": part, "rgb": [50, 50, 50]}], {"result": "OK"})
     boxes, summary = f.collect_boxes({"rooms": []})
     assert len(boxes) == len(kinds)
     assert [row[2] for row in summary] == list(kinds)
     assert all(row[3:] == ("OK", 1) for row in summary)
     assert [b["room"] for b in boxes] == ["room_0", "room_1", "room_2", "room_3"]
-    assert all(b["module"] == "part" for b in boxes)
+    assert [b["module"] for b in boxes] == ["part", "part", "vaso", "part"]
     for idx, kind in enumerate(kinds):
         providers[kind].assert_called_once_with({"rooms": []}, "r%03d" % idx)
 

@@ -1,14 +1,15 @@
 """furnish_apartment.py — mobilia a planta INTEIRA num UNICO .skp: classifica
 cada comodo (tools.room_type), roda o brain certo por tipo, junta TODOS os boxes
 e materializa um so planta_74_furnished.skp (+ renders) no shell real. REUSA
-tools/sketchup/furnish/place_layout_skp.rb (generico). Pasta fixa artifacts/planta_74/furnished/.
+tools/sketchup/furnish/place_layout_skp.rb (generico). Perfil LEGACY_DIAGNOSTIC (FP-055 D-002): saida padrao em
+runs/furnish_apartment/legacy/; a pasta oficial artifacts/planta_74/furnished/ so com --allow-official-write.
 
 Hoje mobilia: BEDROOM (bedroom_layout). Arquitetura cresce: e so registrar mais
 brains em BRAINS (KITCHEN, BATHROOM, LIVING). Felipe 2026-06-05. Placeholders,
 NAO 3D Warehouse.
 
 Sem --dry-run, abre uma instância própria do SketchUp; não encerra janelas humanas.
-Uso: python tools/furnish_apartment.py [--dry-run]
+Uso: python tools/furnish_apartment.py [--dry-run] [--out-dir DIR] [--allow-official-write]
 """
 import argparse
 import json
@@ -44,7 +45,8 @@ SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS
 CONSENSUS = PLANTA_74_CONSENSUS
 BASE_SKP = Path(os.environ.get("FURNISH_BASE_SKP") or str(ROOT / "artifacts/planta_74/planta_74.skp"))  # shell override p/ escala: @0.0259 usa o shell rebuildado (base default 0.0352 intacta)
-OUT_DIR = ROOT / "artifacts/planta_74/furnished"   # pasta UNICA fixa
+OFFICIAL_OUT_DIR = ROOT / "artifacts/planta_74/furnished"   # canonico: so com --allow-official-write (+ gates + aprovacao)
+DEFAULT_OUT_DIR = ROOT / "runs/furnish_apartment/legacy"    # padrao seguro (scratch, fora do git)
 RB = ROOT / "tools/sketchup/furnish/place_layout_skp.rb"
 PLANT = "planta_74"   # pipeline planta_74-only (mesmo escopo do resto do modulo)
 
@@ -78,11 +80,23 @@ BRAINS = build_brain_registry(
 )
 
 
+class WetRoomViolation(RuntimeError):
+    """Banheiro recebeu kind fora da louca (regressao de roteamento): fail closed (FP-055 #427)."""
+
+
 def collect_boxes(con):
     """Junta os boxes de TODOS os comodos com brain disponivel. Devolve
-    (boxes, summary[(id,name,type,result,n_boxes)])."""
+    (boxes, summary[(id,name,type,result,n_boxes)]). As interfaces funcionais F1C que os brains declaram em
+    `out["functional_interfaces"]` NAO fazem parte deste retorno legado: use `collect_boxes_ex` (FP-055 #425)."""
+    boxes, summary, _interfaces = collect_boxes_ex(con)
+    return boxes, summary
+
+
+def collect_boxes_ex(con):
+    """Como `collect_boxes`, mais as interfaces funcionais por comodo: (boxes, summary, {room_id: [interface]}).
+    Campo declarado pelo brain nunca e descartado em silencio: sai aqui e quem nao o consome fica visivel no chamador."""
     rooms = classify_rooms(con)
-    all_boxes, summary = [], []
+    all_boxes, summary, interfaces = [], [], {}
     for r in rooms:
         brain = get_brain(BRAINS, r["room_type"])
         if brain is None:
@@ -98,12 +112,12 @@ def collect_boxes(con):
             b["room"] = str(r.get("name") or r["id"])
             b.setdefault("module", str(b.get("kind", "movel")))
         # GUARD anti-regressao (wet room): banheiro so aceita kinds de LOUCA. Se um movel de
-        # quarto/sala vazar pra ca, LOGA (nao aborta) -> pega regressao futura de roteamento.
+        # quarto/sala vazar pra ca, ABORTA (fail closed, FP-055 #427) -> regressao de roteamento nao passa.
         if r["room_type"] == BATHROOM:
             from tools.rooms.bathroom.validation import unexpected_wet_room_kinds
             estranhos = unexpected_wet_room_kinds(boxes)
             if estranhos:
-                print(f"[furnish-apt] WARN wet-room {r['name']!r}: kind(s) fora da louca -> {estranhos}")
+                raise WetRoomViolation(f"wet-room {r['name']!r}: kind(s) fora da louca -> {estranhos}")
         # TRADE-OFF VISIVEL: peca que o brain teve que encolher/descartar por
         # circulacao vira linha no relatorio, nao some. Sem isto o apê "parecia
         # completo" enquanto quarto ficava sem guarda-roupa em silêncio.
@@ -111,6 +125,8 @@ def collect_boxes(con):
             print(f"[furnish-apt] TRADE-OFF {r['name']!r}: {why}")
         for kind, why in (out.get("dropped") or []):
             print(f"[furnish-apt] TRADE-OFF {r['name']!r}: {kind} -> {why}")
+        if out.get("functional_interfaces"):
+            interfaces[str(r["id"])] = list(out["functional_interfaces"])
         n = len(boxes) if boxes else 0
         all_boxes += boxes or []
         summary.append((r["id"], r["name"], r["room_type"], out.get("result"), n))
@@ -131,7 +147,7 @@ def collect_boxes(con):
     # Ver core/spatial_semantics.py.
     from core.spatial_semantics import annotate_all
     annotate_all(all_boxes)
-    return all_boxes, summary
+    return all_boxes, summary, interfaces
 
 
 def _emit_furnished_gallery_item(iso_png, *, skp, style, plant=PLANT,
@@ -163,10 +179,19 @@ def _emit_furnished_gallery_item(iso_png, *, skp, style, plant=PLANT,
                              renderer="sketchup")
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
-    args = ap.parse_args()
+    ap.add_argument("--out-dir", default=None, help=f"padrao: {DEFAULT_OUT_DIR}")
+    ap.add_argument("--allow-official-write", action="store_true",
+                    help="permite gravar em artifacts/ (exige gates verdes e aprovacao humana)")
+    args = ap.parse_args(argv)
+    from tools.sketchup.output_policy import OfficialWriteBlocked, resolve_output_dir
+    try:
+        out_dir = resolve_output_dir(ROOT, args.out_dir, DEFAULT_OUT_DIR, allow_official_write=args.allow_official_write)
+    except OfficialWriteBlocked as exc:
+        print(f"[furnish-apt] BLOQUEADO: {exc}")
+        sys.exit(2)
     con = json.loads(CONSENSUS.read_text("utf-8"))
     boxes, summary = collect_boxes(con)
     n_rooms = sum(1 for s in summary if s[4])
@@ -176,12 +201,21 @@ def main():
     if args.dry_run or not boxes:
         return
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    skp_out = OUT_DIR / "planta_74_furnished.skp"
-    before = OUT_DIR / "planta_74_furnished_before_top.png"
-    after_top = OUT_DIR / "planta_74_furnished_after_top.png"
-    after_iso = OUT_DIR / "planta_74_furnished_after_iso.png"
-    log_path = OUT_DIR / "planta_74_furnished_log.txt"
+    # FP-055 P3 (#424): o mesmo pre-voo obrigatorio do su_furnish (circulacao, sobreposicao, parede/barreira/giro de porta).
+    from tools.validation import layout_preflight
+    pre = layout_preflight.preflight(con, boxes, summary)
+    if not layout_preflight.allows_materialization(pre):
+        print(f"[furnish-apt] PRE-VOO {pre['status']}: nao materializa.")
+        for row in pre["blocking"]:
+            print(f"  {row['room_id']} {row['gate']} {row['status']} {row['reasons']}")
+        sys.exit(1)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    skp_out = out_dir / "planta_74_furnished.skp"
+    before = out_dir / "planta_74_furnished_before_top.png"
+    after_top = out_dir / "planta_74_furnished_after_top.png"
+    after_iso = out_dir / "planta_74_furnished_after_iso.png"
+    log_path = out_dir / "planta_74_furnished_log.txt"
     # Nunca encerrar instâncias humanas; saídas scratch antigas podem estar em uso
     time.sleep(1)
     for p in (skp_out, before, after_top, after_iso, log_path):
@@ -263,7 +297,7 @@ def main():
     except Exception as e:  # noqa: BLE001 — galeria nunca bloqueia a cozinha/apê
         print(f"[furnish-apt] item de galeria pulado (nao-fatal): {e}")
 
-    print(f"\n[furnish-apt] -> {OUT_DIR}/")
+    print(f"\n[furnish-apt] -> {out_dir}/")
     print(f"  SKP:   {skp_out.name}")
     print(f"  AFTER: {after_top.name} / {after_iso.name}")
 
