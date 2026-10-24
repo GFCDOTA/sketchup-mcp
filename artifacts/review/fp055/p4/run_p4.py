@@ -73,6 +73,21 @@ def fixture_case(out: Path, ledger_cls) -> dict:
             "ledger": ledger.to_dict()}
 
 
+def fixture_in_own_process(out: Path) -> dict:
+    """A fixture roda noutro processo SEM `PT_TO_M`: o shell builder usa a escala padrao para consensus fora de
+    fixtures/<planta>/, e as caixas da fixture precisam nascer na MESMA escala (core.scale congela no 1o import).
+    Achado da 1a execucao: shell a 0,0352 e caixas a 0,0259 = mobilia fora do comodo com "conformidade" verde."""
+    import os
+    env = {k: v for k, v in os.environ.items() if k != "PT_TO_M"}
+    res_path = out / "fixture_case.json"
+    res_path.unlink(missing_ok=True)
+    r = subprocess.run([sys.executable, str(Path(__file__).resolve()), "--fixture-case", str(out)], cwd=ROOT, env=env,
+                       capture_output=True, text=True, timeout=1200)
+    if not res_path.exists():
+        return {"case": "fixture", "status": "FIXTURE_PROCESS_FAILED", "tail": (r.stdout + r.stderr)[-1500:]}
+    return json.loads(res_path.read_text("utf-8"))
+
+
 def real_case(out: Path) -> dict:
     from core.pipeline_contracts import GenerationRequest
     from tools.orchestration import intelligent_pipeline as ip
@@ -98,12 +113,11 @@ def real_case(out: Path) -> dict:
 
 
 def main(out: Path) -> int:
-    from core.pipeline_contracts import CapabilityLedger
     out = out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     before = {p: sha(ROOT / p) for p in PROTECTED}
     summary = {"commit": git("rev-parse", "HEAD"), "dirty": bool(git("status", "--porcelain")), "cases": []}
-    summary["cases"].append(fixture_case(out, CapabilityLedger))
+    summary["cases"].append(fixture_in_own_process(out))
     summary["cases"].append(real_case(out))
     summary["protected_unchanged"] = before == {p: sha(ROOT / p) for p in PROTECTED}
     ok_fixture = summary["cases"][0]["status"] == "BUILT"
@@ -115,4 +129,11 @@ def main(out: Path) -> int:
 
 
 if __name__ == "__main__":
+    if sys.argv[1] == "--fixture-case":
+        from core.pipeline_contracts import CapabilityLedger
+        from core.scale import PT_TO_M
+        o = Path(sys.argv[2]).resolve()
+        res = {**fixture_case(o, CapabilityLedger), "pt_to_m": PT_TO_M}
+        (o / "fixture_case.json").write_text(json.dumps(res, indent=1, ensure_ascii=False, default=str), "utf-8")
+        sys.exit(0)
     sys.exit(main(Path(sys.argv[1])))

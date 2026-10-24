@@ -226,6 +226,33 @@ def conformance(nodes: list[dict], boxes: list[dict], rooms: list[str], tol_m: f
     return requested, built, omitted, div
 
 
+SHELL_TOL_M = 0.02                 # folga da pegada contra o piso construido (encosto na parede, arredondamento)
+
+
+def inside_built_shell(nodes: list[dict], boxes: list[dict], room_ids: dict[str, str], tol_m: float = SHELL_TOL_M):
+    """Cada modulo construido, no plano, dentro do PISO CONSTRUIDO do comodo (`Floor_Group_<rid>` no modelo reaberto).
+    Pega o que proposta x construido nao pega: shell noutro referencial/escala (achado da P4: shell sintetico a 0,0352 com
+    caixas a 0,0259 — tudo "conforme" e a mobilia fora do comodo)."""
+    by_name = {n["name"]: n for n in nodes if n.get("bbox_world_m")}
+    problems = []
+    for rid, room in room_ids.items():
+        floor = by_name.get(f"Floor_Group_{rid}")
+        if floor is None:
+            problems.append({"room": rid, "problem": "piso construido ausente: nao da para verificar (BLOCKED)"})
+            continue
+        fmin, fmax = floor["bbox_world_m"]["min"], floor["bbox_world_m"]["max"]
+        for mod in sorted({b.get("module") for b in boxes if b.get("room") == room and b.get("corners")}):
+            low = [b for b in boxes if b.get("room") == room and b.get("module") == mod and b.get("corners")
+                   and float(b.get("z0_in") or 0) < 1.2 / IN2M]
+            if not low:                                  # so pecas altas (espelho, prateleira): nao ocupam o piso
+                continue
+            pmin, pmax = module_bbox_m(low)
+            out = max(fmin[0] - pmin[0], fmin[1] - pmin[1], pmax[0] - fmax[0], pmax[1] - fmax[1])
+            if out > tol_m:
+                problems.append({"room": rid, "group": f"{room} · {mod}", "outside_floor_m": round(out, 4)})
+    return problems
+
+
 def _pids(job_result: dict) -> set[int]:
     """PID do SketchUp que o JOB subiu: so a chave de topo `pid` (e `build.pid` do shell). Nunca varrer o resultado
     recursivamente — os nos da inspecao tem `pid` = persistent_id do SketchUp, que pode coincidir com um PID real."""
@@ -263,7 +290,8 @@ def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str,
     req, built, omitted, div = conformance(res["nodes"], boxes, rooms)
     from core.pipeline_contracts import BuildResult
     br = BuildResult(tuple(req), tuple(built), omitted, tuple(div), str(res.get("sketchup_version") or "UNKNOWN"))
-    conform = not omitted and not div
+    shell_problems = inside_built_shell(res["nodes"], boxes, {r: room_names[r] for r in proposals})
+    conform = not omitted and not div and not shell_problems
     for rid, p in proposals.items():
         if conform and ledger.state("f2.spatial_solver") == "CONSUMED":
             ledger.reflect("f2.spatial_solver", f"{rid}: {p.proposal_id} reaberto no SketchUp, {len(built)} grupos <= "
@@ -271,7 +299,9 @@ def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str,
             if p.buildable_as_valid:
                 ledger.validate("f2.spatial_solver", f"{rid}: proposta FEASIBLE + construido conforme")
     valid = conform and not bad
-    return {"status": "BUILT" if valid else ("DIAGNOSTIC_NOT_VALID" if conform else "BUILT_NONCONFORMING"),
+    status = ("BUILT" if valid else "DIAGNOSTIC_NOT_VALID" if conform
+              else "BUILT_OUTSIDE_SHELL" if shell_problems else "BUILT_NONCONFORMING")
+    return {"status": status, "shell_problems": shell_problems,
             "valid": valid, "skp": str(skp), "skp_sha256": _sha(skp), "renders": placed.get("files"),
             "build_result": br.__dict__, "sketchup_version": br.sketchup_version, "pids_opened": sorted(opened),
             "pids_closed": closed}
