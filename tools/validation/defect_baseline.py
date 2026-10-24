@@ -23,6 +23,19 @@ from tools.validation.penetration import RES_M
 WORSE_TOL_M = 2 * RES_M
 
 
+def weakened(old: list[dict], new: list[dict]) -> list[str]:
+    """Mudancas do registro que ACEITARIAM defeito: chave nova ou medida maior que a registrada (+ tolerancia). Remover/reduzir e correcao."""
+    prev = {d["key"]: d for d in old}
+    out: list[str] = []
+    for d in new:
+        o = prev.get(d["key"])
+        if o is None:
+            out.append(f"{d['key']}: defeito novo no registro")
+        elif d["measure"] > o["measure"] + WORSE_TOL_M:
+            out.append(f"{d['key']}: medida {o['measure']} -> {d['measure']} (pior)")
+    return out
+
+
 def key(room_id: str, f: dict) -> str:
     who = f.get("door") or "+".join(f.get("modules") or []) or f.get("module") or "?"
     return f"{room_id}|{f['check']}|{who}"

@@ -13,6 +13,8 @@ Regras (codigo estavel; o motivo e publicado no PR e o merge fica bloqueado enqu
 - PR_CODE_WITHOUT_TESTS    `tools/**`, `core/**` ou `interior/**` (.py/.rb) alterados sem tocar `tests/**` e sem `Tests: N/A — <motivo>`.
 - PR_CRITICAL_WITHOUT_REVIEW_LABEL  o PR toca `critical_paths` (docs/governance/review_policy.json) e uma Issue citada nao tem a label
                            `gpt-review-required`: a revisao independente seria dispensada por omissao (FP-057 §9).
+- PR_BASELINE_WEAKENED     o PR altera `artifacts/review/fp055/p4/defect_baseline.json` e o novo registro ACEITA defeito (chave nova ou medida
+                           pior que a da base): o baseline so muda por correcao comprovada (FP-056), nunca para passar o gate.
 - PR_APPROVAL_WITHOUT_PROOF  o corpo declara aparencia/funcional "aprovada" sem `PENDING_HUMAN` ou evidencia: aparencia e do Felipe.
 
 Uso:  python -m tools.validation.pr_policy_gate --pr <N>      (le corpo e arquivos com `gh`; exit 1 se reprovar)
@@ -41,8 +43,17 @@ _REFS = re.compile(r"\b(?:refs?|relates to|issue)\s*:?\s*#(\d+)", re.IGNORECASE)
 _APPROVED = re.compile(r"(visual|apar[eê]ncia|funcional)\w*\s+(?:est[aá]\s+)?(aprovad[ao]|approved)", re.IGNORECASE)
 
 
-def check(body: str, files: list[str], issues: dict[int, dict], critical_paths: list[str] | tuple[str, ...] = ()) -> list[Finding]:
+BASELINE_PATH = "artifacts/review/fp055/p4/defect_baseline.json"
+
+
+def check(body: str, files: list[str], issues: dict[int, dict], critical_paths: list[str] | tuple[str, ...] = (),
+          baseline: tuple[list[dict], list[dict]] | None = None) -> list[Finding]:
+    """`baseline`: (defeitos na base, defeitos no PR) quando o PR altera o registro; None = nao alterado ou nao verificavel."""
     found: list[Finding] = []
+    if BASELINE_PATH in files and baseline is not None:
+        from tools.validation import defect_baseline as db
+        for why in db.weakened(*baseline):
+            found.append(Finding(0, "PR_BASELINE_WEAKENED", why))
     body = body or ""
     for _kw, n in _CLOSING.findall(body):
         found.append(Finding(int(n), "PR_CLOSING_KEYWORD", f"use 'Refs #{n}': a Issue so fecha com comentario de evidencia"))
@@ -84,7 +95,13 @@ def main(argv: list[str]) -> int:
     from tools.validation.backlog_gate import ROOT
     pol_path = ROOT / "docs/governance/review_policy.json"
     crit = json.loads(pol_path.read_text(encoding="utf-8")).get("critical_paths", []) if pol_path.exists() else []
-    findings = check(pr["body"], files, {i["number"]: i for i in raw}, crit)
+    baseline = None
+    if BASELINE_PATH in files:
+        base = json.loads(_gh("pr", "view", str(args.pr), "--repo", REPO, "--json", "baseRefName"))["baseRefName"]
+        old = json.loads(_gh("api", "-H", "Accept: application/vnd.github.raw", f"repos/{REPO}/contents/{BASELINE_PATH}?ref={base}"))["defects"]
+        new = json.loads((ROOT / BASELINE_PATH).read_text(encoding="utf-8"))["defects"]
+        baseline = (old, new)
+    findings = check(pr["body"], files, {i["number"]: i for i in raw}, crit, baseline)
     for f in findings:
         print(f)
     print(f"pr_policy_gate: {len(findings)} divergencia(s) no PR #{args.pr}")
