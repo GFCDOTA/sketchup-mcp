@@ -35,7 +35,7 @@ def test_baseline_gaps_are_detected_not_assumed(audit):
     trace, caps, watched = audit
     by = {c["id"]: c for c in caps}
     assert not by["shared.cabinet.parametric"]["INVOKED"]              # L2_PASS fora da geracao do apartamento
-    assert not by["bathroom.wet-room.guard"]["CONSUMED"]               # so loga
+    assert by["bathroom.wet-room.guard"]["CONSUMED"]                   # FP-055 #427: o guard agora bloqueia a geracao
     w = {m["component"]: m["EXECUTED_IN_GENERATION"] for m in watched}
     assert not w["F2 solver: engine"] and not w["specialists.plan (perfil+allowlist+binding)"]
     # F1C do banheiro: chamado, e mesmo assim nao consumido (descartado por collect_boxes)
