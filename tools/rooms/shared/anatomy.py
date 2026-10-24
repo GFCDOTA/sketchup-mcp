@@ -185,6 +185,34 @@ class BedSpec:
                                      # arquitetonica + ledge) | upholstered (bolster
                                      # proud emoldurado) | contained (flush, box)
     skirt: bool = False              # saia do box tradicional (esconde a base)
+    # Proporcoes de CLASSE (antes literais no builder); origem em BED_MEASURE_ORIGINS.
+    plinth_shade: float = 0.7  # plinto: fator de escurecimento do estrado
+    rail_shade: float = 0.82  # rail/shadow line: fator de escurecimento
+    leg_inset: float = 0.05  # recuo dos pes (base legs) em relacao ao canto
+    leg_rail_max: float = 0.06  # altura maxima do rail (legs)
+    leg_rail_frac: float = 0.45  # fracao do vao sob o deck usada pelo rail (legs)
+    box_shadow_h: float = 0.06  # altura da faixa de sombra do box
+    box_shadow_inset: float = 0.02  # recuo da faixa de sombra do box
+    box_shadow_shade: float = 0.55  # fator de escurecimento da faixa de sombra
+    skirt_shade: float = 0.92  # fator de escurecimento da saia
+    skirt_overhang: float = 0.01  # quanto a saia passa do box por lado
+    skirt_t: float = 0.02  # espessura dos paineis da saia
+    skirt_back_cut: float = 0.05  # quanto a saia lateral para antes da cabeceira
+    plinth_rail_max: float = 0.05  # altura maxima do rail (plinto)
+    plinth_rail_frac: float = 0.4  # fracao da altura do plinto ocupada pelo rail
+    ledge_over: float = 0.02  # quanto o ledge da cabeceira panel passa por lado
+    ledge_depth: float = 0.1  # profundidade do ledge da cabeceira panel
+    ledge_h: float = 0.04  # altura do ledge da cabeceira panel
+    ledge_shade: float = 0.85  # fator de escurecimento do ledge
+    bolster_inset: float = 0.07  # recuo lateral/superior do bolster da cabeceira upholstered
+    bolster_proud: float = 0.05  # quanto o bolster avanca
+    bolster_above_mattress: float = 0.04  # altura do bolster acima do colchao
+    bolster_tint: float = 1.06  # fator de clareamento do bolster
+    mattress_edge: float = 0.02  # recuo do colchao em relacao ao estrado
+    pillow_gap: float = 0.08  # vao entre travesseiros
+    pillow_back_gap: float = 0.06  # folga do travesseiro ate a cabeceira
+    blanket_side_inset: float = 0.04  # recuo lateral da manta
+    blanket_foot_offset: float = 0.1  # distancia da manta ao pe da cama
     estrado_rgb: tuple = (74, 56, 42)      # madeira escura
     mattress_rgb: tuple = (205, 196, 178)  # linho/creme (roupa de cama)
     pillow_rgb: tuple = (224, 218, 205)     # fronha clara
@@ -207,6 +235,11 @@ class BedSpec:
         d["bbox_m"] = self.bbox_m()
         d["required_parts"] = list(BED_REQUIRED_PARTS)
         return d
+
+
+# Origem de cada proporcao de classe acima: valor declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+BED_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "plinth_shade", "rail_shade", "leg_inset", "leg_rail_max", "leg_rail_frac", "box_shadow_h", "box_shadow_inset", "box_shadow_shade", "skirt_shade", "skirt_overhang", "skirt_t", "skirt_back_cut", "plinth_rail_max", "plinth_rail_frac", "ledge_over", "ledge_depth", "ledge_h", "ledge_shade", "bolster_inset", "bolster_proud", "bolster_above_mattress", "bolster_tint", "mattress_edge", "pillow_gap", "pillow_back_gap", "blanket_side_inset", "blanket_foot_offset")}
 
 
 def bed_spec(size="king", **overrides):

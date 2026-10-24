@@ -34,8 +34,8 @@
     },
     "tools/rooms/shared/bed.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 54,
-      "distinct": 16,
+      "embedded_float_literals": 0,
+      "distinct": 0,
       "module_float_constants": 0
     },
     "tools/rooms/shared/nightstand.py": {
@@ -93,5 +93,5 @@
       "module_float_constants": 100
     }
   },
-  "total_gen1": 440
+  "total_gen1": 386
 }
