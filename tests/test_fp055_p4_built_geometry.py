@@ -150,3 +150,22 @@ def test_incomplete_extraction_is_blocked_never_pass():
     g["bbox_world_m"] = {"min": [0.2, 0.2, 0], "max": [1.4, 0.6, 0.4]}         # SketchUp ve 0,6 m a mais (so face vertical)
     rep = bg.validate_room(_model(g), "r1", "COMODO", door_swings={})
     assert rep["checks"]["EXTRACTION"] == "BLOCKED" and bg.status(rep) == "BLOCKED"
+
+
+def test_wall_joint_intersections_with_lines_and_points_keep_only_the_area():
+    from shapely.geometry import GeometryCollection, LineString, Point
+    g = GeometryCollection([box(0, 0, 1, 1), LineString([(2, 2), (3, 3)]), Point(5, 5)])
+    assert abs(pf.polygonal(g).area - 1.0) < 1e-12 and pf.polygonal(None).is_empty
+
+
+def test_sliver_opening_does_not_hide_a_one_centimetre_wall_offset():
+    from shapely.affinity import translate
+    walls = [{"id": "w", "start": [100, 102.7], "end": [400, 102.7], "thickness": 5.4}]
+    exp_pt = box(100, 100, 400, 105.4)
+    fr = pf.PlanFrame(0.0259)
+    sliver = pf.to_world_m(box(100, 107.5, 400, 107.55), fr)                  # lasca de ~1 mm encostada (vizinho)
+    ok = pf.verify_against_built(exp_pt, fr, pf.to_world_m(exp_pt, fr).union(sliver), walls)
+    assert ok["status"] == "OK", ok["per_wall"]
+    off = pf.to_world_m(translate(exp_pt, yoff=0.01 / 0.0259), fr)          # parede inteira deslocada 1 cm
+    bad = pf.verify_against_built(exp_pt, fr, off, walls)
+    assert bad["status"] == "BLOCKED_FRAME_MISMATCH" and bad["walls_failed"] == ["w"]

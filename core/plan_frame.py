@@ -33,6 +33,10 @@ WALL_COVER_MIN = 0.99
 WALL_EXCESS_MAX = 0.01
 WALL_HAUSDORFF_MAX_M = 0.01
 WALL_DIM_TOL_M = 0.01
+# Abertura morfologica (2 mm) aplicada IGUAL ao esperado e ao construido antes de contorno/dimensao: remove lascas com menos de
+# 4 mm de largura que o corredor de uma parede corta de elementos vizinhos (planta_74: lasca de 3 mm2 gerava desvio de 5 cm em
+# 9 paredes com area 100% coincidente). Um erro real que importa (>= 1 cm numa parede de 14 cm) tem 1 cm de largura e sobrevive.
+SLIVER_OPEN_M = 0.002
 
 
 @dataclass(frozen=True)
@@ -101,6 +105,18 @@ def _extent(geom, u):
     return max(proj) - min(proj) if math.isfinite(max(proj)) else 0.0
 
 
+def polygonal(g):
+    """So a parte de AREA de uma geometria (interseccoes em juntas de parede devolvem GeometryCollection com linhas/pontos)."""
+    from shapely.geometry import MultiPolygon, Polygon
+    from shapely.ops import unary_union
+    if g is None or g.is_empty:
+        return Polygon()
+    if isinstance(g, (Polygon, MultiPolygon)):
+        return g
+    parts = [x for x in getattr(g, "geoms", []) if isinstance(x, (Polygon, MultiPolygon)) and not x.is_empty]
+    return unary_union(parts) if parts else Polygon()
+
+
 def per_wall(walls: list[dict], expected_m, built, frame: PlanFrame, corridor_pad_m: float = 0.05) -> list[dict]:
     """Uma linha por parede do consensus: o que se esperava e o que foi construido DENTRO do corredor dessa parede."""
     import math
@@ -116,13 +132,15 @@ def per_wall(walls: list[dict], expected_m, built, frame: PlanFrame, corridor_pa
         n = (-u[1], u[0])
         t = float(w.get("thickness") or 0) * frame.pt_to_m
         corr = LineString([a, b]).buffer(t / 2 + corridor_pad_m, cap_style=2, join_style=2)
-        exp, got = expected_m.intersection(corr), built.intersection(corr)
+        exp, got = polygonal(expected_m.intersection(corr)), polygonal(built.intersection(corr))
+        exp_o = polygonal(exp.buffer(-SLIVER_OPEN_M, join_style=2).buffer(SLIVER_OPEN_M, join_style=2))
+        got_o = polygonal(got.buffer(-SLIVER_OPEN_M, join_style=2).buffer(SLIVER_OPEN_M, join_style=2))
         if exp.is_empty:
             continue                                  # parede inteira dentro de vao (nada extrudado): nada a conferir
         cover = exp.intersection(got).area / exp.area
         excess = got.difference(exp).area / exp.area
-        haus = exp.boundary.hausdorff_distance(got.boundary) if not got.is_empty else float("inf")
-        dl, dt = abs(_extent(exp, u) - _extent(got, u)), abs(_extent(exp, n) - _extent(got, n))
+        haus = exp_o.boundary.hausdorff_distance(got_o.boundary) if not got_o.is_empty else float("inf")
+        dl, dt = abs(_extent(exp_o, u) - _extent(got_o, u)), abs(_extent(exp_o, n) - _extent(got_o, n))
         ok = (cover >= WALL_COVER_MIN and excess <= WALL_EXCESS_MAX and haus <= WALL_HAUSDORFF_MAX_M
               and dl <= WALL_DIM_TOL_M and dt <= WALL_DIM_TOL_M)
         out.append({"wall": w.get("id"), "ok": ok, "cover": round(cover, 4), "excess": round(excess, 4),
