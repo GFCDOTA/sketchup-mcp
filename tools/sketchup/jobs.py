@@ -72,6 +72,8 @@ def status(su: SketchUp | None = None) -> dict[str, Any]:
     out = su.status()
     out["ruby_jobs"] = sorted(p.stem for p in RUBY_DIR.glob("*.rb") if not p.stem.startswith("skmcp_"))
     out["default_mode"] = resolve_mode()
+    from tools.sketchup.runtime_identity import check
+    out["runtime_identity"] = check("INTELLIGENT_BUILD")      # FP-055 P1: diz se ESTE servidor pode gerar no perfil inteligente
     out["proof_state"] = PROOF_STATE
     out["status"] = "OK"
     return out
@@ -330,7 +332,10 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
         env.update(texture_env(style, (REPO / "assets/textures/procedural").resolve()))
     run = run_script(su, script=REPO / "tools" / "sketchup" / "furnish" / "place_layout_skp.rb", done_marker=files["log"],
                      skp_in=base_copy, env_extra=env, timeout_s=timeout_s, mode=mode)
+    from tools.sketchup.runtime_identity import check as runtime_check
     out: dict[str, Any] = {**run, "boxes": len(boxes), "base_skp": str(base), "preflight": pre,
+                           # FP-055 P1: este caminho e o perfil LEGACY_DIAGNOSTIC — registra qual codigo gerou, nunca valida
+                           "profile": "LEGACY_DIAGNOSTIC", "runtime_identity": runtime_check("LEGACY_DIAGNOSTIC"),
                            "rooms": [{"room_id": r[0], "name": r[1], "type": r[2], "result": r[3], "boxes": r[4]}
                                      for r in summary]}
     if run["status"] != "DONE":
