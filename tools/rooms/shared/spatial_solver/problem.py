@@ -26,11 +26,14 @@ def _ring(geom):
     return tuple((round(x, 4), round(y, 4)) for x, y in list(g.exterior.coords)[:-1])
 
 
-def build_problem(con: dict, boxes: list[dict], room_id: str, room_type: str, interfaces: dict) -> SolverProblem:
+def build_problem(con: dict, boxes: list[dict], room_id: str, room_type: str, interfaces: dict,
+                  policy=None) -> SolverProblem:
+    """`policy`: politica do especialista (modulo/objeto com ANCHOR_AND_DOF e POLICY_VERSION). Padrao: a do tipo de comodo.
+    O orquestrador FP-055 passa a do SpecialistPlan, para a decisao do especialista ser rastreavel ate a proposta."""
     from tools.validation import circulation_gate as cg
     from tools.validation.functional_clearance import M2IN, _room_context
     cell, portals, _dropped, room_boxes = _room_context(con, boxes, room_id)
-    policy = room_policy(room_type)
+    policy = policy if policy is not None else room_policy(room_type)
     modules = {m: t for t, spec in OBJECT_TYPES.items() for rt, m in spec["modules"] if rt == room_type}
     objects = []
     for module, otype in sorted(modules.items()):
