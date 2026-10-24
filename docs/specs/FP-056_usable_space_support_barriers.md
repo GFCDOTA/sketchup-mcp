@@ -96,7 +96,11 @@ Evidência bruta (SHA-256) e cálculo: `artifacts/review/fp055/p4/`.
   atribuía esses casos à barreira de varanda e à falta de laje.
 - **RC-C:** composição sem contrato de vizinhança. Sintomas: R3.
 - **RC-D:** porta construída sem folga inferior × tapete. Sintomas: R5.
-- Sem causa provada: 4 ocorrências R2 de 0,8 a 1,9 cm, junto a parede.
+- **RC-E (P3a, 2026-10-24):** os traços `sb000`–`sb007` do consensus não têm fonte e **não são construídos** pelo shell
+  (Hard Rule 1), mas `compute_room_floors` os usa para fechar o envelope e recortar a laje e o `cell` de todos os cômodos
+  (−0,26 a −1,97 m² por cômodo). Isso invalida a leitura do experimento da P2 (a região utilizável subtraía esses traços).
+  **Decisão do Felipe pendente** (Issue de decisão no backlog); nada foi alterado. Detalhe: `docs/reports/fp056/p3/README.md`.
+- Sem causa provada: 4 ocorrências R2 de 0,8 a 1,9 cm, junto a parede (hipótese a testar contra RC-E).
 
 ## Fases (cada uma: teste vermelho a partir do defeito → correção no gerador → prova → PR com CI verde)
 | Fase | Entrega | Fecha |
@@ -104,7 +108,7 @@ Evidência bruta (SHA-256) e cálculo: `artifacts/review/fp055/p4/`.
 | P0 | causa-raiz + testes `xfail(strict)` (esta PR) | — |
 | P1 | RC-B: unidade da A.S. | os 6 da A.S. (a medir) |
 | P2 | contrato 1: `UsablePlacementRegion` no `spatial_model` (laje − massa de parede − barreiras), planejadores e solver passam a usá-la; gate de proposta antes do SketchUp; impacto nas decisões aprovadas declarado antes; L2 da cozinha revogado e refeito (R-18) | R1, xfail D-007 |
-| P3 | contrato 3: barreiras como limite; porta com folga inferior construída × tapete (decisão de projeto registrada se precisar do Felipe) | R5 |
+| P3 | contrato 3: barreiras como limite (**P3a feita**: `barrier_penetration` no pré-voo e zona da A.S. sem a massa das barreiras construídas, #434); porta com folga inferior construída × tapete (P3b, #435; decisão de projeto registrada se precisar do Felipe) | R5 |
 | P4 | contrato 2: modo de apoio declarado por peça e validado no construído | bandeja e outros flutuantes |
 | P5 | RC-C: contratos de vizinhança por especialista | R3 |
 | P6 | geração nova completa da planta_74 + defeitos corrigidos × remanescentes contra o baseline | — |
