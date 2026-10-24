@@ -1,0 +1,16 @@
+{
+ "claimed": true,
+ "resume_after_restart": true,
+ "recovery": {
+  "checks_fail": "EDITING",
+  "checks_pending": "CI_PENDING",
+  "checks_pass": "MERGING",
+  "merged": "BOARD_SYNC"
+ },
+ "once_second_time_blocked": true,
+ "board_no_done_for_not_planned": true,
+ "duplicate_card_reported": true,
+ "pending_review_does_not_block_others": true,
+ "ok": true,
+ "issue": 529
+}
