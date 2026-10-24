@@ -1,11 +1,17 @@
 """Validacao sobre a GEOMETRIA CONSTRUIDA (FP-055 P4): construido x ambiente real, nao construido x pedido.
 
-Entrada: o resultado do job `inspect_geometry.rb` (faces horizontais de cada grupo de topo, em metros, mundo do SketchUp).
+Entrada: o resultado do job `inspect_geometry.rb` — toda face NAO vertical (horizontal ou inclinada) de cada grupo de topo,
+projetada no plano, com a faixa de Z, em metros no mundo do SketchUp, percorrendo grupos/componentes aninhados.
 Tudo que este modulo afirma vem do modelo reaberto:
   - piso do comodo  = uniao das faces de `Floor_Group_<rid>` (poligono efetivo; concavo e multipoligono preservados);
   - massa de parede = faces horizontais de `PlanShell_Group` acima do piso (topo das paredes, ja com os vaos recortados);
   - folha de porta  = `DoorLeaf_Group_<id>`;
-  - pegada do movel = uniao das faces horizontais do grupo "<COMODO> · <modulo>" abaixo de 1,2 m.
+  - pegada do movel = uniao das projecoes das faces do grupo "<COMODO> · <modulo>" que comecam abaixo de 1,2 m (saliencias
+    e beirais entram pela face de baixo; faces inclinadas pela projecao).
+EXTRACTION (antes de tudo): a pegada extraida precisa cobrir o bounding box que o PROPRIO SketchUp calcula para o grupo
+(diferenca <= 1 cm por lado). Se nao cobre, a extracao perdeu ocupacao fisica: BLOCKED, nunca PASS.
+Limites: entidade oculta e ignorada (contada); superficie curva vem facetada; peca so com faces verticais sem tampa teria
+pegada nula — cai na EXTRACTION.
 Cheques por comodo planejado (cada um PASS / FAIL / BLOCKED — nunca PASS por falta de dado):
   CONTAINMENT  pegada dentro do POLIGONO do piso (nao do bounding box);
   WALL         pegada x massa de parede construida;
@@ -21,6 +27,7 @@ from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
 FLOOR_LEVEL_M = 1.2
+EXTRACTION_TOL_M = 0.01       # pegada extraida x bbox do SketchUp: diferenca maxima por lado
 AREA_TOL_M2 = 0.0026          # 4 in2 — o mesmo limiar de interpenetracao do solver
 EDGE_TOL_M = 0.01             # pegada pode encostar no contorno do piso com 1 cm de arredondamento
 FINISH_MODULES = ("Pele", "PeleTeto")
@@ -39,10 +46,21 @@ def group_index(geom_result: dict) -> dict[str, dict]:
 
 
 def footprint(group: dict, *, zmax_m: float | None = FLOOR_LEVEL_M, zmin_m: float | None = None):
-    polys = [_poly(f) for f in group.get("horizontal_faces", [])
-             if (zmax_m is None or f["z"] <= zmax_m) and (zmin_m is None or f["z"] >= zmin_m)]
+    """Uniao das projecoes das faces nao verticais. `zmax_m`: so faces que COMECAM abaixo (ocupam ate aquela altura);
+    `zmin_m`: so faces inteiramente acima (topo das paredes)."""
+    polys = [_poly(f) for f in group.get("projected_faces", [])
+             if (zmax_m is None or f["zmin"] <= zmax_m) and (zmin_m is None or f["zmin"] >= zmin_m)]
     polys = [p for p in polys if p is not None]
     return unary_union(polys) if polys else None
+
+
+def extraction_gap_m(group: dict) -> float | None:
+    """Maior diferenca por lado entre a pegada extraida (todas as faces) e o bbox de mundo do SketchUp. None = sem dado."""
+    fp, bb = footprint(group, zmax_m=None), group.get("bbox_world_m")
+    if fp is None or fp.is_empty or not bb:
+        return None
+    x0, y0, x1, y1 = fp.bounds
+    return round(max(abs(x0 - bb["min"][0]), abs(y0 - bb["min"][1]), abs(bb["max"][0] - x1), abs(bb["max"][1] - y1)), 4)
 
 
 def room_floor(idx: dict, room_id: str):
@@ -78,6 +96,15 @@ def validate_room(idx: dict, room_id: str, room_name: str, *, door_swings=None, 
         out["checks"] = {k: "BLOCKED" for k in ("CONTAINMENT", "WALL", "DOOR_SWING", "OBJECTS")}
         out["findings"].append({"check": "ALL", "reason": f"nenhum grupo '{room_name} · <modulo>' no modelo"})
         return out
+    gaps = {m: extraction_gap_m(g) for m, g in mods.items()}
+    incomplete = {m: v for m, v in gaps.items() if v is None or v > EXTRACTION_TOL_M}
+    out["extraction_gap_m"] = gaps
+    if incomplete:
+        out["checks"] = {k: "BLOCKED" for k in ("EXTRACTION", "CONTAINMENT", "WALL", "DOOR_SWING", "OBJECTS")}
+        out["findings"].append({"check": "EXTRACTION", "reason": "pegada extraida nao cobre o bbox do SketchUp",
+                                "modules": incomplete})
+        return out
+    out["checks"]["EXTRACTION"] = "PASS"
     out["floor_area_m2"] = round(floor.area, 4)
     out["floor_parts"] = len(getattr(floor, "geoms", [floor]))
     fps = {}

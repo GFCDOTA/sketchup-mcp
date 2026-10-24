@@ -21,7 +21,18 @@ from dataclasses import asdict, dataclass
 
 M_PER_IN = 0.0254
 SCALE_TOL = 1e-6
+# Limiares da verificacao do referencial contra o construido. O shell builder extruda EXATAMENTE o poligono de parede
+# esperado; a unica diferenca legitima e o arredondamento da exportacao (0,1 mm no Ruby). Um erro de escala de 1,36x numa
+# parede de 3 m desloca ~0,8 m. Por isso:
+#   - WALL_IOU_MIN (global, 0,95) e so um filtro grosseiro: IoU global pode ficar alto com UMA parede errada numa planta
+#     grande (parede de 0,5 m2 em 20 m2 mexe ~2%) — nao decide sozinho;
+#   - por parede (decisivo): cobertura >= 0,99, excesso <= 1%, desvio maximo do contorno (Hausdorff) <= 1 cm e
+#     comprimento/espessura com diferenca <= 1 cm (100x o arredondamento, ~1/80 do menor erro de escala que importa).
 WALL_IOU_MIN = 0.95
+WALL_COVER_MIN = 0.99
+WALL_EXCESS_MAX = 0.01
+WALL_HAUSDORFF_MAX_M = 0.01
+WALL_DIM_TOL_M = 0.01
 
 
 @dataclass(frozen=True)
@@ -78,9 +89,51 @@ def to_world_m(geom_pt, frame: PlanFrame):
     return transform(lambda x, y, z=None: frame.pt_to_world_m((x, y)), geom_pt)
 
 
-def verify_against_built(expected_walls_pt, frame: PlanFrame, built_walls) -> dict:
-    """IoU entre a massa de parede ESPERADA (o poligono que o shell builder extruda, em pt, levado ao plano pelo contrato) e a
-    massa de parede CONSTRUIDA lida do modelo reaberto. Sem uma das duas: BLOCKED (nunca OK por falta de dado)."""
+def _extent(geom, u):
+    import math
+    pts = []
+    for g in getattr(geom, "geoms", [geom]):
+        if hasattr(g, "exterior"):
+            pts += list(g.exterior.coords)
+    if not pts:
+        return 0.0
+    proj = [x * u[0] + y * u[1] for x, y in pts]
+    return max(proj) - min(proj) if math.isfinite(max(proj)) else 0.0
+
+
+def per_wall(walls: list[dict], expected_m, built, frame: PlanFrame, corridor_pad_m: float = 0.05) -> list[dict]:
+    """Uma linha por parede do consensus: o que se esperava e o que foi construido DENTRO do corredor dessa parede."""
+    import math
+
+    from shapely.geometry import LineString
+    out = []
+    for w in walls:
+        a, b = frame.pt_to_world_m(w["start"]), frame.pt_to_world_m(w["end"])
+        L = math.dist(a, b)
+        if L <= 1e-9:
+            continue
+        u = ((b[0] - a[0]) / L, (b[1] - a[1]) / L)
+        n = (-u[1], u[0])
+        t = float(w.get("thickness") or 0) * frame.pt_to_m
+        corr = LineString([a, b]).buffer(t / 2 + corridor_pad_m, cap_style=2, join_style=2)
+        exp, got = expected_m.intersection(corr), built.intersection(corr)
+        if exp.is_empty:
+            continue                                  # parede inteira dentro de vao (nada extrudado): nada a conferir
+        cover = exp.intersection(got).area / exp.area
+        excess = got.difference(exp).area / exp.area
+        haus = exp.boundary.hausdorff_distance(got.boundary) if not got.is_empty else float("inf")
+        dl, dt = abs(_extent(exp, u) - _extent(got, u)), abs(_extent(exp, n) - _extent(got, n))
+        ok = (cover >= WALL_COVER_MIN and excess <= WALL_EXCESS_MAX and haus <= WALL_HAUSDORFF_MAX_M
+              and dl <= WALL_DIM_TOL_M and dt <= WALL_DIM_TOL_M)
+        out.append({"wall": w.get("id"), "ok": ok, "cover": round(cover, 4), "excess": round(excess, 4),
+                    "hausdorff_m": round(haus, 4) if math.isfinite(haus) else None,
+                    "d_length_m": round(dl, 4), "d_thickness_m": round(dt, 4)})
+    return out
+
+
+def verify_against_built(expected_walls_pt, frame: PlanFrame, built_walls, walls: list[dict] | None = None) -> dict:
+    """Referencial x realidade. Global (IoU, so filtro) + POR PAREDE (decisivo): uma boa sobreposicao global nao esconde uma
+    parede errada. Sem parede esperada/construida ou sem a lista de paredes: BLOCKED (nunca OK por falta de dado)."""
     if built_walls is None or built_walls.is_empty:
         return {"status": "BLOCKED", "reason": "massa de parede construida ausente no modelo reaberto"}
     if expected_walls_pt is None or expected_walls_pt.is_empty:
@@ -88,5 +141,16 @@ def verify_against_built(expected_walls_pt, frame: PlanFrame, built_walls) -> di
     exp = to_world_m(expected_walls_pt, frame)
     inter, union = exp.intersection(built_walls).area, exp.union(built_walls).area
     iou = inter / union if union else 0.0
-    return {"status": "OK" if iou >= WALL_IOU_MIN else "BLOCKED_FRAME_MISMATCH", "wall_iou": round(iou, 4),
-            "min_iou": WALL_IOU_MIN, "expected_area_m2": round(exp.area, 4), "built_area_m2": round(built_walls.area, 4)}
+    out = {"wall_iou": round(iou, 4), "min_iou": WALL_IOU_MIN, "expected_area_m2": round(exp.area, 4),
+           "built_area_m2": round(built_walls.area, 4),
+           "thresholds": {"cover_min": WALL_COVER_MIN, "excess_max": WALL_EXCESS_MAX,
+                          "hausdorff_max_m": WALL_HAUSDORFF_MAX_M, "dim_tol_m": WALL_DIM_TOL_M}}
+    if walls is None:
+        return {**out, "status": "BLOCKED", "reason": "lista de paredes ausente: verificacao por parede nao executada"}
+    rows = per_wall(walls, exp, built_walls, frame)
+    bad = [r for r in rows if not r["ok"]]
+    out["walls_checked"], out["walls_failed"], out["per_wall"] = len(rows), [r["wall"] for r in bad], rows
+    if not rows:
+        return {**out, "status": "BLOCKED", "reason": "nenhuma parede conferida"}
+    out["status"] = "OK" if iou >= WALL_IOU_MIN and not bad else "BLOCKED_FRAME_MISMATCH"
+    return out

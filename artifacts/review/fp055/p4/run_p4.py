@@ -103,8 +103,10 @@ def case_fixture_valid(out: Path) -> dict:
     boxes, ifaces = _toilet_scene(con)
     led = CapabilityLedger()
     plan = ip.plan_room(con, boxes, ifaces, "r_syn", "BATHROOM", "SINTETICO", BATH, led)
+    from tools.rooms.shared.spatial_solver.engine import evaluate_layout
+    func = {"r_syn": lambda bx: evaluate_layout(con, bx, "r_syn", "BATHROOM", plan["interfaces"], "SINTETICO")}
     built = ip.build(boxes, {"r_syn": plan["proposal"]}, {"r_syn": "SINTETICO"}, (cdir / "shell" / "model.skp").resolve(),
-                     cdir, led, consensus=con, consensus_path=cpath)
+                     cdir, led, consensus=con, consensus_path=cpath, functional=func)
     return {"case": "A_fixture_valid", "status": built["status"], "proposal": plan["proposal"].to_dict(), "build": built,
             "ledger": led.to_dict()}
 
@@ -169,9 +171,12 @@ def case_real_r006(out: Path) -> dict:
     con = json.loads(CONSENSUS.read_text("utf-8"))
     with contextlib.redirect_stdout(io.StringIO()):
         boxes, _ = collect_boxes(con)
+    from tools.rooms.shared.spatial_solver.engine import evaluate_layout
+    ifs = m["_interfaces"]["r006"]
+    func = {"r006": lambda bx: evaluate_layout(con, bx, "r006", "BATHROOM", ifs, "BANHO 02")}
     built = ip.build(boxes, {"r006": prop}, {"r006": "BANHO 02"}, ROOT / "artifacts/planta_74/planta_74.skp",
                      out / "D_real_r006", m["_ledger"], consensus=con, consensus_path=PLANTA_74_CONSENSUS,
-                     diagnostic=not prop.buildable_as_valid)
+                     diagnostic=not prop.buildable_as_valid, functional=func)
     ip.write({**m, "build": built, "ledger": m["_ledger"].to_dict()}, out / "D_real_r006")
     return {"case": "D_real_r006", "status": built["status"], "proposal": prop.to_dict(), "build": built,
             "runtime": m["runtime"]["status"]}
@@ -189,15 +194,25 @@ def in_default_scale_process(case: str, out: Path) -> dict:
 
 
 EXPECT = {
-    "A_fixture_valid": lambda c: c["status"] == "BUILT" and c["build"]["valid"],
-    "B_fixture_notch": lambda c: (not c["build"]["valid"]
+    # valido: geometria PASS (contrato, paredes por parede, extracao, piso/parede/porta/objetos) E funcional PASS
+    "A_fixture_valid": lambda c: (c["status"] == "BUILT" and c["build"]["valid"]
+                                  and c["build"]["geometric_validity"] == "PASS"
+                                  and c["build"]["functional_validity"] == "PASS"
+                                  and not c["build"]["frame_verification"]["walls_failed"]),
+    # negativo: dentro do bbox, fora do poligono — o cheque antigo passaria; o novo reprova
+    "B_fixture_notch": lambda c: (not c["build"]["valid"] and c["build"]["geometric_validity"] == "FAIL"
                                   and c["build"]["environment"]["r_syn"]["checks"]["CONTAINMENT"] == "FAIL"
-                                  and c["build"]["legacy_bbox_check_not_decisive"]["would_pass"]),
+                                  and c["build"]["legacy_bbox_check_not_decisive"]["would_pass"]
+                                  and c["build"]["functional_validity"] == "NOT_EXECUTED"),
+    # negativo: escala divergente — bloqueia antes; forcado, proposta=construido e mesmo assim as paredes recusam
     "C_scale_mismatch": lambda c: (c["guarded"]["status"] == "BLOCKED_SCALE_MISMATCH" and not c["forced"]["valid"]
                                    and c["forced"]["proposal_conformance"]
+                                   and c["forced"]["geometric_validity"] == "BLOCKED"
                                    and c["forced"]["frame_verification"]["status"] == "BLOCKED_FRAME_MISMATCH"),
-    "D_real_r006": lambda c: (c["status"] in ("DIAGNOSTIC_NOT_VALID", "BUILT_FAILS_ENVIRONMENT", "BUILT")
-                              and c["build"].get("frame_verification", {}).get("status") == "OK"),
+    # real: referencial confere com as paredes construidas; funcional NAO aprovado (proposta INFEASIBLE)
+    "D_real_r006": lambda c: (not c["build"]["valid"]
+                              and c["build"]["frame_verification"]["status"] == "OK"
+                              and c["build"]["functional_validity"] in ("FAIL", "NOT_EXECUTED")),
 }
 
 
