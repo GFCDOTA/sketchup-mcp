@@ -226,17 +226,13 @@ def conformance(nodes: list[dict], boxes: list[dict], rooms: list[str], tol_m: f
     return requested, built, omitted, div
 
 
-def _pids(obj) -> set[int]:
-    out: set[int] = set()
-    if isinstance(obj, dict):
-        for k, v in obj.items():
-            if k == "pid" and isinstance(v, int):
-                out.add(v)
-            else:
-                out |= _pids(v)
-    elif isinstance(obj, list):
-        for v in obj:
-            out |= _pids(v)
+def _pids(job_result: dict) -> set[int]:
+    """PID do SketchUp que o JOB subiu: so a chave de topo `pid` (e `build.pid` do shell). Nunca varrer o resultado
+    recursivamente — os nos da inspecao tem `pid` = persistent_id do SketchUp, que pode coincidir com um PID real."""
+    out = set()
+    for v in (job_result.get("pid"), (job_result.get("build") or {}).get("pid")):
+        if isinstance(v, int) and not isinstance(v, bool):
+            out.add(v)
     return out
 
 

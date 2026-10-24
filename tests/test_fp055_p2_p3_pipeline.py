@@ -106,3 +106,11 @@ def test_run_fails_closed_on_runtime_and_source_revision():
     bad_src = ip.run(_req(source_document="fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"),
                      runtime_check=lambda p: {"status": "OK", "reasons": []})
     assert bad_src["status"] == "BLOCKED_SOURCE_REVISION" and bad_src["valid"] is False
+
+
+def test_only_the_jobs_own_pid_is_collected_never_inspection_persistent_ids():
+    # achado real da P4: a varredura recursiva pegava persistent_id dos nos da inspecao e tentava fechar esses numeros
+    res = {"pid": 4242, "result": {"nodes": [{"name": "A · x", "pid": 49758}, {"name": "B · y", "pid": 23652}]},
+           "build": {"pid": 777}}
+    assert ip._pids(res) == {4242, 777}
+    assert ip._pids({"pid": True}) == set() and ip._pids({}) == set()
