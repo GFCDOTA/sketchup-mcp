@@ -132,9 +132,12 @@ def evaluate_layout(con, boxes, room_id, room_type, interfaces, room_name=None) 
     # peca registrada e so no nivel FAIL do gate. Fora do comodo: centro da pegada fora da celula (invasao parcial de parede
     # e do gate de parede abaixo).
     from tools.validation.circulation_gate import _footprint
-    from tools.validation.furniture_overlap_gate import FRAC_FAIL, _module_geom, iter_overlap_pairs
-    for a, b, inter, frac in iter_overlap_pairs(_module_geom(room_boxes)):
-        if (a in modules or b in modules) and frac >= FRAC_FAIL:
+    from tools.validation.furniture_overlap_gate import _module_geom, iter_overlap_pairs
+    # limiar estrito para as pecas do solver: qualquer interpenetracao 3D acima de COLLISION_TOL_IN2 (o nivel FAIL do gate
+    # deixava passar o vaso deslizado entrando no gabinete do Banho 02: 0,067 m2, 29% da menor pegada)
+    strict = COLLISION_TOL_IN2 / (M2IN * M2IN)
+    for a, b, inter, frac in iter_overlap_pairs(_module_geom(room_boxes), area_min_m2=strict, frac_min=0.0):
+        if a in modules or b in modules:
             mine, other = (a, b) if a in modules else (b, a)
             out.append(Violation("COLLISION", f"{room_id}:{mine}", f"sobreposicao com {other} ({frac:.0%} da menor)",
                                  round(inter, 4), 0.0, "m2", other))

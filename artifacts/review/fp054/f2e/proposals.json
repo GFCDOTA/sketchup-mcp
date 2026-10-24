@@ -1,0 +1,483 @@
+[
+ {
+  "room_id": "r004",
+  "kind": "NO_CHANGE_NEEDED",
+  "status": "FEASIBLE",
+  "applied": false,
+  "candidates_total": 1,
+  "original_rank": 1,
+  "best": {
+   "rank": 1,
+   "candidate_id": "ORIGINAL",
+   "moves": [],
+   "displacement_m": 0.0,
+   "mirrors": 0,
+   "feasible": true,
+   "hard_violations": [],
+   "metrics": {
+    "hard_violations": 0,
+    "min_margin_m": 0.188,
+    "sum_margin_m": 0.631,
+    "measured_rules": 2
+   },
+   "key": {
+    "feasible": false,
+    "hard_violations": 0,
+    "below_target": 0,
+    "min_margin_m": -0.188,
+    "sum_margin_m": -0.631,
+    "moved": 0,
+    "displacement_m": 0.0,
+    "turns": 0,
+    "candidate_id": "ORIGINAL"
+   },
+   "explanation": "viavel; primeira da ordem"
+  },
+  "original": {
+   "hard_violations": [],
+   "metrics": {
+    "hard_violations": 0,
+    "min_margin_m": 0.188,
+    "sum_margin_m": 0.631,
+    "measured_rules": 2
+   }
+  },
+  "delta": [],
+  "decisions_to_unblock": [],
+  "notes": [
+   "espaco declarado: 1 candidatos; avaliados 1"
+  ],
+  "versions": {
+   "algorithm": "fp054-f2.v1",
+   "policy": "kitchen.solver_policy.v1"
+  }
+ },
+ {
+  "room_id": "r005",
+  "kind": "CLOSEST_INFEASIBLE",
+  "status": "INFEASIBLE",
+  "applied": false,
+  "candidates_total": 6724,
+  "original_rank": 292,
+  "best": {
+   "rank": 1,
+   "candidate_id": "r005:Vaso:-0.16",
+   "moves": [
+    {
+     "object_id": "r005:Vaso",
+     "slide_m": -0.16,
+     "mirrored": false,
+     "rotation_deg": 0
+    }
+   ],
+   "displacement_m": 0.16,
+   "mirrors": 0,
+   "feasible": false,
+   "hard_violations": [
+    {
+     "code": "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+     "object_id": "r005:Box",
+     "detail": "vao livre 0.327 m de 0.411 m declarados",
+     "measured": 0.327,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "WALL",
+     "constraint": "shower.entry_width"
+    }
+   ],
+   "metrics": {
+    "hard_violations": 1,
+    "min_margin_m": -0.273,
+    "sum_margin_m": 1.917,
+    "measured_rules": 7
+   },
+   "key": {
+    "feasible": true,
+    "hard_violations": 1,
+    "below_target": 0,
+    "min_margin_m": 0.273,
+    "sum_margin_m": -1.917,
+    "moved": 1,
+    "displacement_m": 0.16,
+    "turns": 0,
+    "candidate_id": "r005:Vaso:-0.16"
+   },
+   "explanation": "INVIAVEL (1 violacao(oes) rigida(s): FUNCTIONAL_SHOWER_ENTRY_WIDTH); primeira da ordem"
+  },
+  "original": {
+   "hard_violations": [
+    {
+     "code": "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+     "object_id": "r005:Box",
+     "detail": "vao livre 0.327 m de 0.411 m declarados",
+     "measured": 0.327,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "WALL",
+     "constraint": "shower.entry_width"
+    }
+   ],
+   "metrics": {
+    "hard_violations": 1,
+    "min_margin_m": -0.273,
+    "sum_margin_m": 1.771,
+    "measured_rules": 7
+   }
+  },
+  "delta": [
+   {
+    "object_id": "Bancada",
+    "constraint": "lavatory.reach_path",
+    "before_m": 0.941,
+    "after_m": 1.087,
+    "before": "PREFERRED",
+    "after": "PREFERRED"
+   }
+  ],
+  "decisions_to_unblock": [
+   "vao do box vem do modelo da porta no builder: parametro do vao (decisao)"
+  ],
+  "notes": [
+   "espaco declarado: 6724 candidatos; avaliados 6724",
+   "INFEASIBLE vale para os graus de liberdade e a discretizacao declarados, nao para qualquer layout"
+  ],
+  "versions": {
+   "algorithm": "fp054-f2.v1",
+   "policy": "bathroom.solver_policy.v1"
+  }
+ },
+ {
+  "room_id": "r006",
+  "kind": "CLOSEST_INFEASIBLE",
+  "status": "INFEASIBLE",
+  "applied": false,
+  "candidates_total": 6724,
+  "original_rank": 2027,
+  "best": {
+   "rank": 1,
+   "candidate_id": "r006:Bancada:+0.10|r006:Box:+0.00R270|r006:Vaso:+0.20",
+   "moves": [
+    {
+     "object_id": "r006:Bancada",
+     "slide_m": 0.1,
+     "mirrored": false,
+     "rotation_deg": 0
+    },
+    {
+     "object_id": "r006:Box",
+     "slide_m": 0.0,
+     "mirrored": false,
+     "rotation_deg": 270
+    },
+    {
+     "object_id": "r006:Vaso",
+     "slide_m": 0.2,
+     "mirrored": false,
+     "rotation_deg": 0
+    }
+   ],
+   "displacement_m": 0.3,
+   "mirrors": 0,
+   "feasible": false,
+   "hard_violations": [
+    {
+     "code": "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+     "object_id": "r006:Box",
+     "detail": "vao livre 0.310 m de 0.310 m declarados",
+     "measured": 0.31,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "DECLARED_ENTRY",
+     "constraint": "shower.entry_width"
+    },
+    {
+     "code": "FUNCTIONAL_SHOWER_REACH_PATH",
+     "object_id": "r006:Box",
+     "detail": "MEASURED_PATH_WIDTH; gargalo em [354.19, 562.73]",
+     "measured": 0.499,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "BOTTLENECK",
+     "constraint": "shower.reach_path"
+    },
+    {
+     "code": "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+     "object_id": "r006:Vaso",
+     "detail": "MEASURED_FRONT_DEPTH",
+     "measured": 0.523,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "WALL",
+     "constraint": "toilet.front_clearance"
+    }
+   ],
+   "metrics": {
+    "hard_violations": 3,
+    "min_margin_m": -0.29,
+    "sum_margin_m": -0.019,
+    "measured_rules": 7
+   },
+   "key": {
+    "feasible": true,
+    "hard_violations": 3,
+    "below_target": 0,
+    "min_margin_m": 0.29,
+    "sum_margin_m": 0.019,
+    "moved": 3,
+    "displacement_m": 0.3,
+    "turns": 1,
+    "candidate_id": "r006:Bancada:+0.10|r006:Box:+0.00R270|r006:Vaso:+0.20"
+   },
+   "explanation": "INVIAVEL (3 violacao(oes) rigida(s): FUNCTIONAL_SHOWER_ENTRY_WIDTH, FUNCTIONAL_SHOWER_REACH_PATH, FUNCTIONAL_TOILET_FRONT_CLEARANCE); primeira da ordem"
+  },
+  "original": {
+   "hard_violations": [
+    {
+     "code": "FUNCTIONAL_SHOWER_ENTRY_FRONT_CLEARANCE",
+     "object_id": "r006:Box",
+     "detail": "INTERFACE_OBSTRUCTED",
+     "measured": 0.0,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "WALL",
+     "constraint": "shower.entry_front_clearance"
+    },
+    {
+     "code": "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+     "object_id": "r006:Box",
+     "detail": "vao livre 0.000 m de 0.310 m declarados",
+     "measured": 0.0,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "WALL",
+     "constraint": "shower.entry_width"
+    },
+    {
+     "code": "FUNCTIONAL_SHOWER_REACH_PATH",
+     "object_id": "r006:Box",
+     "detail": "INTERFACE_OBSTRUCTED",
+     "measured": 0.0,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "INTERFACE_OBSTRUCTED",
+     "constraint": "shower.reach_path"
+    },
+    {
+     "code": "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+     "object_id": "r006:Vaso",
+     "detail": "MEASURED_FRONT_DEPTH",
+     "measured": 0.523,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "WALL",
+     "constraint": "toilet.front_clearance"
+    }
+   ],
+   "metrics": {
+    "hard_violations": 4,
+    "min_margin_m": -0.6,
+    "sum_margin_m": -1.35,
+    "measured_rules": 7
+   }
+  },
+  "delta": [
+   {
+    "object_id": "Bancada",
+    "constraint": "lavatory.front_clearance",
+    "before_m": 0.714,
+    "after_m": 0.726,
+    "before": "VALID",
+    "after": "VALID"
+   },
+   {
+    "object_id": "Bancada",
+    "constraint": "lavatory.reach_path",
+    "before_m": 0.86,
+    "after_m": 0.668,
+    "before": "PREFERRED",
+    "after": "VALID"
+   },
+   {
+    "object_id": "Box",
+    "constraint": "shower.entry_front_clearance",
+    "before_m": 0.0,
+    "after_m": 0.702,
+    "before": "INVALID",
+    "after": "VALID"
+   },
+   {
+    "object_id": "Box",
+    "constraint": "shower.entry_width",
+    "before_m": 0.0,
+    "after_m": 0.31,
+    "before": "INVALID",
+    "after": "INVALID"
+   },
+   {
+    "object_id": "Box",
+    "constraint": "shower.reach_path",
+    "before_m": 0.0,
+    "after_m": 0.499,
+    "before": "INVALID",
+    "after": "INVALID"
+   }
+  ],
+  "decisions_to_unblock": [
+   "passagem ate o box estreita: depende do vao/posicao do box (decisao)",
+   "profundidade do comodo limita a frente do vaso: outra parede ou louca mais curta (decisao)",
+   "vao do box vem do modelo da porta no builder: parametro do vao (decisao)"
+  ],
+  "notes": [
+   "espaco declarado: 6724 candidatos; avaliados 6724",
+   "INFEASIBLE vale para os graus de liberdade e a discretizacao declarados, nao para qualquer layout"
+  ],
+  "versions": {
+   "algorithm": "fp054-f2.v1",
+   "policy": "bathroom.solver_policy.v1"
+  }
+ },
+ {
+  "room_id": "r007",
+  "kind": "CLOSEST_INFEASIBLE",
+  "status": "INFEASIBLE",
+  "applied": false,
+  "candidates_total": 1681,
+  "original_rank": 684,
+  "best": {
+   "rank": 1,
+   "candidate_id": "r007:Bancada:-0.38|r007:Vaso:+0.36",
+   "moves": [
+    {
+     "object_id": "r007:Bancada",
+     "slide_m": -0.38,
+     "mirrored": false,
+     "rotation_deg": 0
+    },
+    {
+     "object_id": "r007:Vaso",
+     "slide_m": 0.36,
+     "mirrored": false,
+     "rotation_deg": 0
+    }
+   ],
+   "displacement_m": 0.74,
+   "mirrors": 0,
+   "feasible": false,
+   "hard_violations": [
+    {
+     "code": "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+     "object_id": "r007:Vaso",
+     "detail": "MEASURED_FRONT_DEPTH",
+     "measured": 0.515,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "WALL",
+     "constraint": "toilet.front_clearance"
+    }
+   ],
+   "metrics": {
+    "hard_violations": 1,
+    "min_margin_m": -0.085,
+    "sum_margin_m": 0.678,
+    "measured_rules": 4
+   },
+   "key": {
+    "feasible": true,
+    "hard_violations": 1,
+    "below_target": 0,
+    "min_margin_m": 0.085,
+    "sum_margin_m": -0.678,
+    "moved": 2,
+    "displacement_m": 0.74,
+    "turns": 0,
+    "candidate_id": "r007:Bancada:-0.38|r007:Vaso:+0.36"
+   },
+   "explanation": "INVIAVEL (1 violacao(oes) rigida(s): FUNCTIONAL_TOILET_FRONT_CLEARANCE); primeira da ordem"
+  },
+  "original": {
+   "hard_violations": [
+    {
+     "code": "FUNCTIONAL_LAVATORY_FRONT_CLEARANCE",
+     "object_id": "r007:Bancada",
+     "detail": "MEASURED_FRONT_DEPTH",
+     "measured": 0.044,
+     "threshold": 0.55,
+     "unit": "m",
+     "culprit": "Vaso",
+     "constraint": "lavatory.front_clearance"
+    },
+    {
+     "code": "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+     "object_id": "r007:Vaso",
+     "detail": "MEASURED_FRONT_DEPTH",
+     "measured": 0.032,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "Bancada",
+     "constraint": "toilet.front_clearance"
+    },
+    {
+     "code": "FUNCTIONAL_TOILET_REACH_PATH",
+     "object_id": "r007:Vaso",
+     "detail": "PATH_DISCONNECTED; gargalo em [299.16, 667.55]",
+     "measured": 0.0,
+     "threshold": 0.6,
+     "unit": "m",
+     "culprit": "PATH_DISCONNECTED",
+     "constraint": "toilet.reach_path"
+    }
+   ],
+   "metrics": {
+    "hard_violations": 3,
+    "min_margin_m": -0.6,
+    "sum_margin_m": -1.484,
+    "measured_rules": 4
+   }
+  },
+  "delta": [
+   {
+    "object_id": "Bancada",
+    "constraint": "lavatory.front_clearance",
+    "before_m": 0.044,
+    "after_m": 0.706,
+    "before": "INVALID",
+    "after": "VALID"
+   },
+   {
+    "object_id": "Bancada",
+    "constraint": "lavatory.reach_path",
+    "before_m": 0.79,
+    "after_m": 1.139,
+    "before": "VALID",
+    "after": "PREFERRED"
+   },
+   {
+    "object_id": "Vaso",
+    "constraint": "toilet.front_clearance",
+    "before_m": 0.032,
+    "after_m": 0.515,
+    "before": "INVALID",
+    "after": "INVALID"
+   },
+   {
+    "object_id": "Vaso",
+    "constraint": "toilet.reach_path",
+    "before_m": 0.0,
+    "after_m": 0.668,
+    "before": "INVALID",
+    "after": "VALID"
+   }
+  ],
+  "decisions_to_unblock": [
+   "profundidade do comodo limita a frente do vaso: outra parede ou louca mais curta (decisao)"
+  ],
+  "notes": [
+   "espaco declarado: 1681 candidatos; avaliados 1681",
+   "INFEASIBLE vale para os graus de liberdade e a discretizacao declarados, nao para qualquer layout"
+  ],
+  "versions": {
+   "algorithm": "fp054-f2.v1",
+   "policy": "bathroom.solver_policy.v1"
+  }
+ }
+]
