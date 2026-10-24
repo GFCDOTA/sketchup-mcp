@@ -88,3 +88,40 @@ def test_bake_theme_refuses_the_official_folder_without_the_flag(monkeypatch):
     monkeypatch.setattr(bake_theme, "launch_owned", lambda *a, **k: pytest.fail("SketchUp lancado"))
     with pytest.raises(OfficialWriteBlocked):
         bake_theme.main()
+
+
+# --- FP-055 #490: nenhum escritor NOVO de pasta oficial passa em silencio ---------------------------------------------------
+# Escritores conhecidos que ainda definem a saida em artifacts/, com o motivo (so PNG de revisao/render, nunca .skp canonico):
+_OFFICIAL_OUTPUT_ALLOWLIST = {
+    "tools/rendering/material_review.py": "PNG de revisao de material (nao grava .skp)",
+    "tools/rendering/batch_theme_render.py": "le kitchen_angles (entrada), nao grava .skp",
+    "tools/rooms/kitchen/capabilities/vray.py": "render V-Ray em kitchen_angles (PNG)",
+    "tools/orchestration/furnish_apartment.py": "OFFICIAL_OUT_DIR so com --allow-official-write",
+}
+
+
+def test_no_tool_defines_an_official_output_dir_without_going_through_the_policy():
+    import ast
+
+    names = {"OUT_DIR", "OUTPUT_DIR", "OUT"}
+    offenders = []
+    for path in sorted((ROOT / "tools").rglob("*.py")):
+        rel = path.relative_to(ROOT).as_posix()
+        if rel in _OFFICIAL_OUTPUT_ALLOWLIST:
+            continue
+        tree = ast.parse(path.read_text("utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id in names for t in node.targets):
+                if any(isinstance(c, ast.Constant) and isinstance(c.value, str) and c.value.startswith(("artifacts/", "fixtures/"))
+                       and not c.value.startswith("artifacts/review")          # evidencia datada: pasta propria para isso
+                       for c in ast.walk(node.value)):
+                    offenders.append(f"{rel}:{node.lineno}")
+    assert not offenders, f"escritor de pasta oficial fora da politica de saida: {offenders}"
+
+
+def test_bedroom_designer_refuses_the_official_folder_without_the_flag(monkeypatch):
+    from tools.rooms.bedroom import designer
+    monkeypatch.setattr("sys.argv", ["designer", "--synthetic", "--out-dir", "artifacts/planta_74/furnished"])
+    with pytest.raises(SystemExit) as exc:
+        designer.main()
+    assert "BLOQUEADO" in str(exc.value)

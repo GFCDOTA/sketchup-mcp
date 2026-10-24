@@ -27,9 +27,12 @@ SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
 BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
-# PASTA CANONICA fixa do mobiliado (NAO scratch): committed + servida + GitHub.
-# Felipe 2026-06-05: parar de espalhar .skp em runs/ — UMA pasta so, sempre.
-OUT_DIR = ROOT / "artifacts/planta_74/furnished"
+# FP-055 #490: a pasta canonica artifacts/planta_74/furnished/ (protegida) so recebe .skp com ALLOW_OFFICIAL_WRITE=1 (+ gates e
+# aprovacao humana); o padrao e runs/place_bedroom/. `BEDROOM_OUT_DIR` escolhe outra pasta.
+from tools.sketchup.output_policy import resolve_output_dir  # noqa: E402
+
+OUT_DIR = resolve_output_dir(ROOT, os.environ.get("BEDROOM_OUT_DIR"), ROOT / "runs/place_bedroom",
+                             allow_official_write=os.environ.get("ALLOW_OFFICIAL_WRITE") == "1")
 RB = ROOT / "tools/sketchup/furnish/place_layout_skp.rb"   # generico, reutilizado (nao alterado)
 
 # altura de extrusao (m) + cor RGB (= cores do diagrama 2D) por tipo de movel

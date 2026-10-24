@@ -794,7 +794,8 @@ def main():
     ap.add_argument("--synthetic", action="store_true", help="quarto king sintetico limpo")
     ap.add_argument("--skp", action="store_true", help="gera SKP placeholder (so comodo real)")
     ap.add_argument("--full", action="store_true", help="modo cheio (banco/poltrona/mesa); default = minimalista")
-    ap.add_argument("--out-dir", default="artifacts/planta_74/furnished")
+    ap.add_argument("--out-dir", default="runs/bedroom_designer", help="padrao seguro; artifacts/ exige --allow-official-write")
+    ap.add_argument("--allow-official-write", action="store_true", help="permite gravar em artifacts/ (gates verdes + aprovacao humana)")
     args = ap.parse_args()
     if args.synthetic:
         con = rect_bedroom("SUITE MASTER KING", w_m=4.6, d_m=5.0)
@@ -817,7 +818,12 @@ def main():
         print("  clearances:", win.get("clearances_m"), "| breakdown:", win.get("breakdown"))
     else:
         print("  ", out.get("reason"))
-    od = Path(args.out_dir)
+    from tools.sketchup.output_policy import OfficialWriteBlocked, resolve_output_dir
+    try:
+        od = resolve_output_dir(Path(__file__).resolve().parents[3], args.out_dir, Path(__file__).resolve().parents[3] / "runs/bedroom_designer",
+                                allow_official_write=args.allow_official_write)
+    except OfficialWriteBlocked as exc:
+        raise SystemExit(f"BLOQUEADO: {exc}") from exc
     od.mkdir(parents=True, exist_ok=True)
     if out["result"] == "OK":
         plot(sm, out, od / f"bedroom_designer_{tag}.png", tag)
