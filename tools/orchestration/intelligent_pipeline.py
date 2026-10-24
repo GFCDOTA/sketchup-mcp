@@ -264,47 +264,81 @@ def _pids(job_result: dict) -> set[int]:
 
 
 def build(all_boxes, proposals: dict[str, LayoutProposal], room_names: dict[str, str], base_skp: Path, out_dir: Path,
-          ledger: CapabilityLedger, *, diagnostic: bool = False, su=None) -> dict[str, Any]:
-    """Constroi a proposta no SketchUp real (copia em `out_dir`), reabre em outro processo, confere e fecha os PIDs que abriu.
-    Proposta nao viavel so e construida com `diagnostic=True` — e o resultado sai rotulado DIAGNOSTIC_NOT_VALID."""
+          ledger: CapabilityLedger, *, consensus: dict, consensus_path, diagnostic: bool = False,
+          unsafe_skip_scale_check: bool = False, su=None) -> dict[str, Any]:
+    """Constroi a proposta no SketchUp real (copia em `out_dir`), reabre em outro processo e valida DUAS coisas:
+      1. proposta x construido (grupos "<comodo> · <modulo>" no bbox de mundo, 5 mm) — prova que o builder obedeceu;
+      2. construido x ambiente real (`tools.validation.built_geometry` sobre as faces do modelo reaberto: poligono do piso,
+         massa de parede, varredura de porta, outros objetos) — prova que o resultado esta certo no apartamento.
+    So (1) nunca vale PASS (falso PASS da P4). Antes de construir, o contrato de escala (`core.plan_frame.check_chain`) precisa
+    estar OK; depois, o referencial e conferido contra as paredes construidas (IoU). Qualquer verificacao que nao rode = BLOCKED.
+    `unsafe_skip_scale_check` existe SO para a prova reproduzir o erro antigo; o resultado sai marcado e nunca valido.
+    Proposta nao viavel so e construida com `diagnostic=True` e sai DIAGNOSTIC_NOT_VALID. Fecha so os PIDs que abriu."""
+    from core.plan_frame import check_chain, frame_for_consensus, verify_against_built
     from tools.sketchup import jobs
+    from tools.validation import built_geometry as bg
     bad = sorted(rid for rid, p in proposals.items() if not p.buildable_as_valid)
     if bad and not diagnostic:
         return {"status": "BLOCKED_NOT_FEASIBLE", "rooms": bad, "valid": False}
+    chain = check_chain(consensus_path)
+    if chain["status"] != "OK" and not unsafe_skip_scale_check:
+        return {"status": chain["status"], "coordinate_contract": chain, "valid": False}
     boxes = compose_boxes(all_boxes, proposals, room_names)
     opened: set[int] = set()
     try:
         placed = jobs.place_boxes(boxes, base=base_skp, d=out_dir / "build", mode="interactive", su=su)
         opened |= _pids(placed)
         if placed.get("status") != "OK":
-            return {"status": "BUILD_FAILED", "placed": placed, "valid": False}
+            return {"status": "BUILD_FAILED", "placed": placed, "valid": False, "coordinate_contract": chain}
         skp = Path(placed["files"]["skp"])
         insp = jobs.inspect_model(str(skp), max_depth=1, out_dir=str(out_dir / "inspect"), mode="interactive", su=su)
         opened |= _pids(insp)
-        res = insp.get("result") or {}
-        if not res.get("ok"):
-            return {"status": "INSPECT_FAILED", "inspect": insp, "valid": False}
+        geo = jobs.inspect_geometry(str(skp), out_dir=str(out_dir / "geometry"), mode="interactive", su=su)
+        opened |= _pids(geo)
+        res, gres = insp.get("result") or {}, geo.get("result") or {}
+        if not res.get("ok") or not gres.get("ok"):
+            return {"status": "BLOCKED_INSPECTION_FAILED", "inspect": insp, "geometry": geo, "valid": False,
+                    "coordinate_contract": chain}
     finally:
         closed = [jobs.close(pid=p, force=True, confirm=True, su=su) for p in sorted(opened)]
-    rooms = [room_names[r] for r in proposals]
-    req, built, omitted, div = conformance(res["nodes"], boxes, rooms)
+    rooms = {r: room_names[r] for r in proposals}
+    # (1) proposta x construido
+    req, built, omitted, div = conformance(res["nodes"], boxes, list(rooms.values()))
     from core.pipeline_contracts import BuildResult
     br = BuildResult(tuple(req), tuple(built), omitted, tuple(div), str(res.get("sketchup_version") or "UNKNOWN"))
-    shell_problems = inside_built_shell(res["nodes"], boxes, {r: room_names[r] for r in proposals})
-    conform = not omitted and not div and not shell_problems
-    for rid, p in proposals.items():
-        if conform and ledger.state("f2.spatial_solver") == "CONSUMED":
-            ledger.reflect("f2.spatial_solver", f"{rid}: {p.proposal_id} reaberto no SketchUp, {len(built)} grupos <= "
-                                                f"{CONFORMANCE_TOL_M * 1000:.0f} mm")
-            if p.buildable_as_valid:
-                ledger.validate("f2.spatial_solver", f"{rid}: proposta FEASIBLE + construido conforme")
-    valid = conform and not bad
-    status = ("BUILT" if valid else "DIAGNOSTIC_NOT_VALID" if conform
-              else "BUILT_OUTSIDE_SHELL" if shell_problems else "BUILT_NONCONFORMING")
-    return {"status": status, "shell_problems": shell_problems,
-            "valid": valid, "skp": str(skp), "skp_sha256": _sha(skp), "renders": placed.get("files"),
-            "build_result": br.__dict__, "sketchup_version": br.sketchup_version, "pids_opened": sorted(opened),
-            "pids_closed": closed}
+    conform = not omitted and not div
+    # (2) construido x ambiente real
+    idx = bg.group_index(gres)
+    frame = frame_for_consensus(consensus_path)
+    contract = verify_against_built(bg.expected_walls_pt(consensus), frame, bg.built_walls(idx))
+    swings = bg.door_swings_m(consensus, frame) if contract["status"] == "OK" else None
+    env_reports = {rid: bg.validate_room(idx, rid, name, door_swings=swings) for rid, name in rooms.items()}
+    env_status = {rid: bg.status(r) for rid, r in env_reports.items()}
+    env_ok = contract["status"] == "OK" and all(s == "PASS" for s in env_status.values())
+    if conform and ledger.state("f2.spatial_solver") == "CONSUMED":
+        ledger.reflect("f2.spatial_solver", f"{sorted(rooms)}: reaberto no SketchUp, {len(built)} grupos <= "
+                                            f"{CONFORMANCE_TOL_M * 1000:.0f} mm da proposta")
+        if env_ok and not bad:
+            ledger.validate("f2.spatial_solver", f"{sorted(rooms)}: construido x ambiente real PASS (piso, parede, porta, "
+                                                 "objetos) e contrato de referencial OK")
+    valid = conform and env_ok and not bad and not unsafe_skip_scale_check
+    if valid:
+        status = "BUILT"
+    elif contract["status"] != "OK" or "BLOCKED" in env_status.values():
+        status = "BLOCKED_ENVIRONMENT_UNVERIFIED"
+    elif not conform:
+        status = "BUILT_NONCONFORMING"
+    elif not env_ok:
+        status = "BUILT_FAILS_ENVIRONMENT"
+    else:
+        status = "DIAGNOSTIC_NOT_VALID"
+    legacy = inside_built_shell(res["nodes"], boxes, rooms)          # so comparacao: o cheque antigo NAO decide nada
+    return {"status": status, "valid": valid, "coordinate_contract": chain, "frame_verification": contract,
+            "environment": env_reports, "environment_status": env_status, "proposal_conformance": conform,
+            "legacy_bbox_check_not_decisive": {"problems": legacy, "would_pass": not legacy},
+            "unsafe_skip_scale_check": unsafe_skip_scale_check, "skp": str(skp), "skp_sha256": _sha(skp),
+            "renders": placed.get("files"), "build_result": br.__dict__, "sketchup_version": br.sketchup_version,
+            "pids_opened": sorted(opened), "pids_closed": closed}
 
 
 def write(manifest: dict, out_dir: Path) -> Path:

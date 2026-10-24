@@ -84,6 +84,22 @@ def open_model(skp_path: str, su: SketchUp | None = None) -> dict[str, Any]:
     return err or _su(su).open(p)
 
 
+def inspect_geometry(skp_path: str, *, out_dir: str | None = None, mode: str | None = None, timeout_s: int = 240,
+                     su: SketchUp | None = None) -> dict[str, Any]:
+    """Faces horizontais (mundo, m) de cada grupo de topo do modelo — a geometria CONSTRUIDA que o validador
+    `tools.validation.built_geometry` usa (FP-055 P4). So leitura; o SketchUp abre uma copia."""
+    p, err = _skp_in(skp_path)
+    if err:
+        return err
+    d, err = _out_dir(out_dir, "inspect_geometry")
+    if err:
+        return err
+    copy = _working_copy(p, d / f"_geometry_{p.name}")
+    res = run_job(_su(su), "inspect_geometry", out_dir=d, skp_in=copy, timeout_s=timeout_s, mode=mode, params={})
+    res["input_skp"] = str(p)
+    return res
+
+
 def close(*, pid: int | None = None, all_instances: bool = False, force: bool = False,
           confirm: bool = False, su: SketchUp | None = None) -> dict[str, Any]:
     return _su(su).close(pid=pid, all_instances=all_instances, force=force, confirm=confirm)
