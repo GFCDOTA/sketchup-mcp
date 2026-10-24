@@ -52,8 +52,8 @@
     },
     "tools/rooms/shared/armchair_builder.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 19,
-      "distinct": 10,
+      "embedded_float_literals": 0,
+      "distinct": 0,
       "module_float_constants": 0
     },
     "tools/rooms/shared/decor_builders.py": {
@@ -93,5 +93,5 @@
       "module_float_constants": 100
     }
   },
-  "total_gen1": 459
+  "total_gen1": 440
 }
