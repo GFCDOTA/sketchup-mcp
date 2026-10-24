@@ -43,7 +43,7 @@ from shapely import STRtree                                    # noqa: E402
 from shapely.geometry import Point, Polygon, box as _shp_box   # noqa: E402
 from shapely.ops import unary_union                            # noqa: E402
 
-from core.scale import PT_TO_IN                                # noqa: E402
+from core.scale import PT_TO_IN, PT_TO_M                       # noqa: E402
 from tools.spatial_model import build_spatial_model            # noqa: E402
 from tools.rooms.shared.geometry import _oriented_box         # noqa: E402
 
@@ -60,9 +60,12 @@ M2IN = 39.3700787402
 AS = "A.S."
 SOCIAL = "TERRACO SOCIAL"
 TECNICO = "TERRACO TECNICO"
-_AS_MAX_X_M = 3.26
-_TEC_MIN_X_M = 5.95
-_AS_MIN_Y_M = 11.30
+# FP-056 RC-B: estes limites foram lidos com o cell convertido por engano como polegadas (x IN2M); reescalados pelo mesmo
+# fator ficam EXATAMENTE no mesmo lugar em relacao ao poligono (o zoneamento validado pelos seeds nao muda).
+_LEGACY_FRAME = PT_TO_M / IN2M
+_AS_MAX_X_M = 3.26 * _LEGACY_FRAME
+_TEC_MIN_X_M = 5.95 * _LEGACY_FRAME
+_AS_MIN_Y_M = 11.30 * _LEGACY_FRAME
 
 # ordem dos merged_seeds == ordem dos label_ids == ordem do nome do comodo
 _SEED_ORDER = (AS, SOCIAL, TECNICO)
@@ -86,9 +89,10 @@ _DOOR_TOL_M2 = 0.02      # area tolerada de invasao da zona de circulacao
 
 # ---------------------------------------------------------------------------
 def _cell_m(sm):
-    """Poligono util do comodo em METROS (o spatial_model entrega em inches)."""
+    """Poligono util do comodo em METROS. O spatial_model entrega o cell em PONTOS do PDF (compute_room_floors): x PT_TO_M.
+    (FP-056 RC-B: antes convertia como polegadas, x 0,0254, e a A.S. saia 1,9% menor, puxada para a origem.)"""
     cell = sm["_geom"]["cell"]
-    return Polygon([(x * IN2M, y * IN2M) for x, y in cell.exterior.coords])
+    return Polygon([(x * PT_TO_M, y * PT_TO_M) for x, y in cell.exterior.coords])
 
 
 def _circ_m(sm):
@@ -96,7 +100,7 @@ def _circ_m(sm):
     circ = sm["_geom"].get("circ") or []
     if not circ:
         return None
-    polys = [Polygon([(x * IN2M, y * IN2M) for x, y in g.exterior.coords])
+    polys = [Polygon([(x * PT_TO_M, y * PT_TO_M) for x, y in g.exterior.coords])
              for g in circ if not g.is_empty]
     return unary_union(polys) if polys else None
 
@@ -384,6 +388,16 @@ def build_boxes(con, room_id):
 
     boxes, placed, dropped, decisions = [], [], [], []
     by_kind = {}
+    # FP-056 P1: a peca de PISO so entra se nao derrubar o gate de circulacao do comodo (o mesmo que o furnish/preflight
+    # aplicam). Antes do RC-B o erro de escala empurrava pecas para fora do comodo e a passagem secundaria "passava".
+    from tools.validation.circulation_gate import GateSession
+    gate = GateSession(con, [], room_id)
+
+    def _breaks_circulation(candidate):
+        if candidate["z0_in"] / M2IN >= 1.20:            # acima da cabeca nao bloqueia passagem
+            return False
+        ok_before = gate.check(list(boxes), decide_only=True)["result"] == "PASS"
+        return ok_before and gate.check(list(boxes) + [candidate], decide_only=True)["result"] != "PASS"
 
     def _emit(kind, module, rect, center, facing, z0, h, rgb, w, d):
         cx_in, cy_in = center[0] * M2IN, center[1] * M2IN
@@ -413,14 +427,21 @@ def build_boxes(con, room_id):
         # furniture_overlap_gate): varal a 2.02m passa por cima da lavadora.
         z0, z1 = spec["z0"], spec["z0"] + spec["h"]
         obst = [p for p, (a, b) in placed if a < z1 and z0 < b]
-        got, used_w = None, None
+        got, used_w, why_not = None, None, "nao coube com folga em nenhuma largura"
         for w in spec["widths"]:
-            got = _slide(zone, spec["side"], spec["prefer"], w, spec["d"], obst, circ)
-            if got is not None:
-                used_w = w
-                break
+            cand = _slide(zone, spec["side"], spec["prefer"], w, spec["d"], obst, circ)
+            if cand is None:
+                continue
+            c = cand[1]
+            probe = _oriented_box(spec["kind"], (c[0] * M2IN, c[1] * M2IN), _FACING[spec["side"]], w, spec["d"],
+                                  spec["z0"], spec["h"], spec["rgb"], module=spec["module"])
+            if _breaks_circulation(probe):
+                why_not = "nenhuma largura preserva a circulacao do comodo (circulation_gate)"
+                continue
+            got, used_w = cand, w
+            break
         if got is None:
-            dropped.append((spec["kind"], "nao coube com folga em nenhuma largura"))
+            dropped.append((spec["kind"], why_not))
             continue
         rect, center = got
         _emit(spec["kind"], spec["module"], rect, center, _FACING[spec["side"]],
@@ -436,12 +457,20 @@ def build_boxes(con, room_id):
     floor = [(p, 0.55 if (b - a) >= 0.60 else 0.30) for p, (a, b) in placed if a < 1.20]
     for kind, module, rect, center, facing, z0, h, rgb, w, d in _stools(
             zones[SOCIAL], by_kind.get("bancada_gourmet"), floor, circ):
+        if _breaks_circulation(_oriented_box(kind, (center[0] * M2IN, center[1] * M2IN), facing, w, d, z0, h, rgb,
+                                             module=module)):
+            dropped.append((kind, "banqueta omitida: derrubaria a circulacao do comodo (circulation_gate)"))
+            continue
         _emit(kind, module, rect, center, facing, z0, h, rgb, w, d)
         placed.append((rect, (z0, z0 + h)))
         floor.append((rect, 0.45))
         decisions.append({"kind": kind, "zona": SOCIAL,
                           "motivo": "assento da bancada gourmet (substitui mesa em terraco compacto)"})
     tset, tnote = _table_set(zones[SOCIAL], floor, circ)
+    probes = [_oriented_box(k, (c[0] * M2IN, c[1] * M2IN), f, w, d, z0, h, rgb, module=m)
+              for k, m, _r, c, f, z0, h, rgb, w, d in tset]
+    if tset and gate.check(list(boxes), decide_only=True)["result"] == "PASS" and             gate.check(list(boxes) + probes, decide_only=True)["result"] != "PASS":
+        tset, tnote = [], "mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)"
     for kind, module, rect, center, facing, z0, h, rgb, w, d in tset:
         _emit(kind, module, rect, center, facing, z0, h, rgb, w, d)
         placed.append((rect, (z0, z0 + h)))

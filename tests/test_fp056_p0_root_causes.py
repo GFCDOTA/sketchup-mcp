@@ -18,9 +18,6 @@ def _con():
 
 
 @pytest.mark.planta74_scale
-@pytest.mark.xfail(strict=True, reason="FP-056 RC-B: tools/rooms/service/layout.py _cell_m/_circ_m tratam o cell (pontos do PDF) "
-                                       "como polegadas (x0,0254 em vez de x PT_TO_M): a zona da A.S. sai 1,9% menor, puxada "
-                                       "para a origem — pecas saem 3 a 29 cm do comodo (maquina, varal, bancada gourmet)")
 def test_service_planner_cell_is_in_the_plants_metres():
     from core.scale import PT_TO_M
     from tools.rooms.service.layout import _cell_m

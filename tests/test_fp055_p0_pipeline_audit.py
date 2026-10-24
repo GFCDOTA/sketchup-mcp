@@ -16,7 +16,7 @@ def audit():
 def test_generation_trace_covers_every_room_and_is_deterministic(audit):
     trace, _caps, _w = audit
     assert {r["id"] for r in trace["rooms"]} == {f"r00{i}" for i in range(8)}
-    assert trace["n_boxes"] == 394
+    assert trace["n_boxes"] == 390                       # FP-056 P1: A.S. sem bancada gourmet/cuba/mesa (circulacao)
     again = pa.trace_generation()          # mesmo processo: imports e caches ja feitos -> chamadas sao subconjunto
     assert again["rooms"] == trace["rooms"] and set(again["calls"]) <= set(trace["calls"])
 

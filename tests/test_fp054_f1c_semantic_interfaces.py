@@ -189,4 +189,4 @@ def test_exporting_interfaces_does_not_change_any_box():
     from tools.validation.room_regression_diff import capture
     with contextlib.redirect_stdout(io.StringIO()):
         s = capture()
-    assert s["snapshot_sha256"].startswith("5426c0087bdfcdc6") and s["part_count"] == 394
+    assert s["snapshot_sha256"].startswith("a4fa928927d11a0f") and s["part_count"] == 390   # FP-056 P1 (so a A.S. mudou)

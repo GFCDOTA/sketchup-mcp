@@ -246,7 +246,7 @@ def test_real_planta74_snapshot_is_deterministic_and_matches_registry_rooms():
     from core.domain.room_registry import rooms_for_project
 
     a, b = rd.capture(), rd.capture()
-    assert a == b and a["part_count"] == 394 and a["pt_to_m"] == 0.0259   # 402 - 8 pecas da cadeira da escrivaninha (#381)
+    assert a == b and a["part_count"] == 390 and a["pt_to_m"] == 0.0259   # 402 - 8 (cadeira, #381) - 4 (A.S.: bancada gourmet, cuba e mesa omitidas pela circulacao, FP-056 P1)
     assert set(a["rooms"]) == {r.display_name for r in rooms_for_project("planta_74")}      # CA-24: nenhum comodo sem correspondencia
     assert a["ambiguous_groups"] > 0 and len(a["source_digests"]) == 5
     assert rd.diff(a, b) == []
