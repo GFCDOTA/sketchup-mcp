@@ -143,7 +143,16 @@ def bedroom_designer_boxes(con, room_id):
     if wd_item is not None:
         wfx, wfy = _wd_facing(wd_item)
         ww_m, wd_m, wcen = _wd_dims(wd_item["box"], (wfx, wfy))
-        wparts, _ = build_wardrobe(wardrobe_spec(width=round(ww_m, 3), depth=round(max(wd_m, 0.45), 3)))
+        wspec = wardrobe_spec(width=round(ww_m, 3), depth=round(max(wd_m, 0.45), 3))
+        wparts, _ = build_wardrobe(wspec)
+        # FP-055 #428: o gate de anatomia roda no fluxo e o veredito fica registrado em `out` (e no log), sem bloquear: a regra
+        # ">= 2 portas" reprova o guarda-roupa de 0,8 m da Suite 02 (1 porta, legitimo). Bloquear ou ajustar a regra por largura
+        # e decisao registrada no backlog, nao um limiar mexido aqui para passar.
+        from tools.rooms.bedroom.validation.wardrobe_gate import wardrobe_gate
+        _anat = wardrobe_gate(wspec, wparts)
+        out.setdefault("component_anatomy", []).append({"component": "guarda-roupa", "width_m": wspec.width, **_anat})
+        if _anat["result"] != "PASS":
+            print(f"[furnish-apt] ANATOMIA guarda-roupa {_anat['result']}: {_anat['corrections']}")
         wboxes = place_wardrobe_boxes(wparts, wcen, (wfx, wfy))
         # HANDLELESS até o TETO (diretriz suítes): mata a barra de puxador; recolor
         # por papel (carcaça escura x porta por suíte); maleiro 2.20->2.69 com junta

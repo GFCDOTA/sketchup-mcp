@@ -22,7 +22,7 @@
    "CONSUMED": true
   },
   "bedroom.wardrobe.gate": {
-   "INVOKED": false,
+   "INVOKED": true,
    "CONSUMED": false
   },
   "circulation.gate": {
