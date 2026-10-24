@@ -85,6 +85,7 @@ RGB = {
 
 _CLEAR_M = 0.04          # folga anti-encosto entre pecas (nao e' circulacao)
 _DOOR_TOL_M2 = 0.02      # area tolerada de invasao da zona de circulacao
+_HARD_TOL_M2 = 1e-5      # 0,1 cm2: contato com a barreira construida nao e penetracao
 
 
 # ---------------------------------------------------------------------------
@@ -179,7 +180,7 @@ def _flush_rect(zone, side, along_c, w_m, d_m):
     return rect, (c.x, c.y)
 
 
-def _slide(zone, side, prefer, w_m, d_m, placed, circ, step=0.05, span=4.0):
+def _slide(zone, side, prefer, w_m, d_m, placed, circ, step=0.05, span=4.0, hard=()):
     """Desliza a peca ao longo da parede procurando a vaga LIVRE mais perto de
     `prefer`. Livre = dentro da zona, sem tocar peca ja aceita (folga _CLEAR_M)
     e sem invadir circulacao/giro de porta."""
@@ -195,6 +196,10 @@ def _slide(zone, side, prefer, w_m, d_m, placed, circ, step=0.05, span=4.0):
             if circ is not None and rect.intersection(circ).area > _DOOR_TOL_M2:
                 continue
             if any(rect.intersection(p.buffer(_CLEAR_M)).area > 0.005 for p in placed):
+                continue
+            # `hard` = barreira construida: encostar pode, atravessar nao. A fenda dela no cell (3,8 cm) some sob a tolerancia de
+            # 2 cm do `contains` acima, entao o teste e direto (achado da verificacao da decisao AS-1)
+            if any(rect.intersection(h).area > _HARD_TOL_M2 for h in hard):
                 continue
             return rect, center
     return None
@@ -386,9 +391,9 @@ def build_boxes(con, room_id):
     from shapely.affinity import scale as _scale
 
     from tools.rooms.shared.clearance import soft_barrier_masses_pt
-    masses = [m for _id, m, _h in soft_barrier_masses_pt(con)]
-    if masses:
-        cell = cell.difference(_scale(unary_union(masses), PT_TO_M, PT_TO_M, origin=(0, 0)))
+    barriers_m = [(_scale(m, PT_TO_M, PT_TO_M, origin=(0, 0)), top) for _id, m, top in soft_barrier_masses_pt(con)]
+    if barriers_m:
+        cell = cell.difference(unary_union([m for m, _top in barriers_m]))
         if cell.geom_type != "Polygon":
             cell = max(cell.geoms, key=lambda g: g.area)
     circ = _circ_m(sm)
@@ -440,7 +445,8 @@ def build_boxes(con, room_id):
         obst = [p for p, (a, b) in placed if a < z1 and z0 < b]
         got, used_w, why_not = None, None, "nao coube com folga em nenhuma largura"
         for w in spec["widths"]:
-            cand = _slide(zone, spec["side"], spec["prefer"], w, spec["d"], obst, circ)
+            cand = _slide(zone, spec["side"], spec["prefer"], w, spec["d"], obst, circ,
+                          hard=[m for m, top in barriers_m if top is None or z0 < top])
             if cand is None:
                 continue
             c = cand[1]
