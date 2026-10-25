@@ -46,9 +46,9 @@
     },
     "tools/rooms/shared/sofa.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 44,
-      "distinct": 17,
-      "module_float_constants": 0
+      "embedded_float_literals": 0,
+      "distinct": 0,
+      "module_float_constants": 5
     },
     "tools/rooms/shared/armchair_builder.py": {
       "generation": "gen1_class_builder",
@@ -93,5 +93,5 @@
       "module_float_constants": 100
     }
   },
-  "total_gen1": 386
+  "total_gen1": 342
 }

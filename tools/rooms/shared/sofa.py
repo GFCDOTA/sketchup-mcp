@@ -15,6 +15,14 @@ from tools.rooms.shared.parts import PT_TO_IN, parts_to_boxes  # noqa: E402,F401
 from tools.rooms.shared.parts import darker as _darker, part as _p  # noqa: E402  (primitivas genericas)
 from tools.rooms.shared.parts import place_parts as place_sofa_boxes  # noqa: E402,F401  (reexport: nome antigo)
 
+# Constantes NUMERICAS/MATEMATICAS (nao sao medida de movel): tolerancia, quarto de volta, segmentos de arco, pico da parabola.
+_EPS = 1e-4                  # tolerancia geometrica (m)
+_MIN_CORE_M = 0.01           # espessura minima do miolo da almofada apos o chanfro (m)
+_QUARTER_TURN_DEG = 90.0
+_ARC_SEGMENTS = 5
+_CROWN_DIV = 6.0               # divisor dos pontos do coroamento (5 pontos interiores)
+_PARABOLA_PEAK = 4.0         # 4*t*(1-t) vale 1 em t=0,5
+
 
 def _seat_row(kind, prefix, x0, x1, y0, y1, z0, z1, n, gap, rgb, bevel=0.0):
     """n almofadas SEPARADAS (com vinco) em X[x0,x1]. bevel>0: topo INSET (chanfro) ->
@@ -22,7 +30,7 @@ def _seat_row(kind, prefix, x0, x1, y0, y1, z0, z1, n, gap, rgb, bevel=0.0):
     Corpo (z0..z1-b) + tampo inset b em x/y (z1-b..z1), MESMO kind -> bbox e gate intactos."""
     out = []
     w = (x1 - x0 - gap * (n - 1)) / n
-    b = max(0.0, min(bevel, w / 2 - 0.01, (y1 - y0) / 2 - 0.01, (z1 - z0) / 2))
+    b = max(0.0, min(bevel, w / 2 - _MIN_CORE_M, (y1 - y0) / 2 - _MIN_CORE_M, (z1 - z0) / 2))
     for i in range(n):
         sx = x0 + i * (w + gap)
         if b > 0:
@@ -34,21 +42,21 @@ def _seat_row(kind, prefix, x0, x1, y0, y1, z0, z1, n, gap, rgb, bevel=0.0):
     return out
 
 
-def _rounded_arm_profile(x0, x1, z0, z1, r, nseg=5):
+def _rounded_arm_profile(x0, x1, z0, z1, r, nseg=_ARC_SEGMENTS):
     """Secao (x,z) CCW de um braco com roundover REAL nos 2 cantos superiores:
     retangulo com arcos de raio r (nseg segmentos cada) — FP-SOFA-PREMIUM
     alt_001 (spec 6.2: bevel de geometria, nao soften cosmetico)."""
     import math
-    r = max(0.0, min(r, (x1 - x0) / 2 - 1e-4, (z1 - z0) / 2 - 1e-4))
+    r = max(0.0, min(r, (x1 - x0) / 2 - _EPS, (z1 - z0) / 2 - _EPS))
     if r <= 0:
         return [(x0, z0), (x1, z0), (x1, z1), (x0, z1)]
     cz = z1 - r
     pts = [(x0, z0), (x1, z0), (x1, cz)]
     for i in range(1, nseg + 1):        # canto sup DIREITO: centro (x1-r, cz), 0->90
-        a = math.radians(90.0 * i / nseg)
+        a = math.radians(_QUARTER_TURN_DEG * i / nseg)
         pts.append((x1 - r + r * math.cos(a), cz + r * math.sin(a)))
     for i in range(1, nseg + 1):        # canto sup ESQUERDO: centro (x0+r, cz), 90->180
-        a = math.radians(90.0 + 90.0 * i / nseg)
+        a = math.radians(_QUARTER_TURN_DEG + _QUARTER_TURN_DEG * i / nseg)
         pts.append((x0 + r + r * math.cos(a), cz + r * math.sin(a)))
     return pts
 
@@ -72,13 +80,13 @@ def build_sofa(spec: SofaSpec):
     bh = H
     gap, n = spec.cushion_gap, spec.seats
     fab, feet = tuple(spec.fabric_rgb), tuple(spec.feet_rgb)
-    base_rgb = _darker(fab, 0.62)        # estrutura/madeira da base: bem mais escura (contraste)
+    base_rgb = _darker(fab, spec.base_shade)        # estrutura/madeira da base: bem mais escura (contraste)
     cush_rgb = fab                       # tecido linho (assentos)
-    back_rgb = _darker(fab, 0.88)        # encosto levemente mais escuro (sombra/profundidade)
+    back_rgb = _darker(fab, spec.back_shade)        # encosto levemente mais escuro (sombra/profundidade)
     Dtot = D if spec.variant == "straight" else max(D, spec.chaise_depth)
     cw = spec.chaise_width
     base_top = sh - ct
-    back_z0 = sh - 0.03
+    back_z0 = sh - spec.back_pivot_offset
     main_y0 = Dtot - D           # frente do corpo principal (recuado se chaise + fundo)
     seat_back = Dtot - bt        # face frontal do encosto
     seat_front = seat_back - sd
@@ -115,24 +123,24 @@ def build_sofa(spec: SofaSpec):
         vh = min(spec.plinth_visible_h, fh)
         parts.append(_p("plinth", "foot", ins, main_y0 + ins, W - ins,
                         Dtot - ins, 0.0, vh, feet))
-        if fh - vh > 1e-4:
-            ins2 = max(ins * 2, 0.12)
+        if fh - vh > _EPS:
+            ins2 = max(ins * 2, spec.riser_inset_min)
             parts.append(_p("plinth_riser", "foot", ins2, main_y0 + ins2,
-                            W - ins2, Dtot - ins2, vh, fh, _darker(feet, 0.6)))
+                            W - ins2, Dtot - ins2, vh, fh, _darker(feet, spec.riser_shade)))
         if chaise_x:
             cxl, cxr = chaise_seat_x
             parts.append(_p("plinth_chaise", "foot", cxl + ins, ins, cxr - ins,
                             main_y0 + ins, 0.0, vh, feet))
     else:
         fz = (0.0, fh)
-        foot = 0.08
-        corners = [(0.04, main_y0 + 0.04), (W - 0.04 - foot, main_y0 + 0.04),
-                   (0.04, Dtot - 0.04 - foot), (W - 0.04 - foot, Dtot - 0.04 - foot)]
+        foot, fi = spec.foot_side, spec.foot_inset
+        corners = [(fi, main_y0 + fi), (W - fi - foot, main_y0 + fi),
+                   (fi, Dtot - fi - foot), (W - fi - foot, Dtot - fi - foot)]
         if chaise_x:   # 2 pes extra na ponta funda da chaise — SOB o deck projetado
             # (chaise_seat_x, nao a borda externa: com a frente aberta o pe na faixa
             # da antiga muralha ficava orfao no ar — gramatica cycle002)
             cxl, cxr = chaise_seat_x
-            corners += [(cxl + 0.04, 0.04), (cxr - 0.04 - foot, 0.04)]
+            corners += [(cxl + fi, fi), (cxr - fi - foot, fi)]
         for i, (fx, fy) in enumerate(corners):
             parts.append(_p(f"foot_{i + 1}", "foot", fx, fy, fx + foot, fy + foot, fz[0], fz[1], feet))
 
@@ -141,7 +149,7 @@ def build_sofa(spec: SofaSpec):
     # recuada (compensa massa de braco chunky — anti-bunker); arm_cap = tampo fino
     # levemente proud (linguagem formal). relief/cap = 0/False -> braco classico.
     relief, cap, taper = spec.arm_relief, spec.arm_cap, spec.arm_taper
-    cap_t, cap_over, shoe_in = 0.04, 0.015, 0.03
+    cap_t, cap_over, shoe_in = spec.arm_cap_t, spec.arm_cap_over, spec.shoe_inset
     for side, (x0a, x1a), (ya0, ya1) in (("left", (0.0, aw), left_arm_y),
                                          ("right", (W - aw, W), right_arm_y)):
         if getattr(spec, "arm_profile", "box") == "rounded":
@@ -162,7 +170,7 @@ def build_sofa(spec: SofaSpec):
         if taper > 0:
             # cycle003 (juiz: "nao basta sapata"): topo do braco AFINA — terco
             # superior inset na face EXTERNA + frente (braco deixa de ser parede)
-            zt = body_z0 + (body_z1 - body_z0) * 0.62
+            zt = body_z0 + (body_z1 - body_z0) * spec.taper_split
             parts.append(_p(f"arm_{side}", "arm", x0a, ya0, x1a, ya1, body_z0, zt, fab))
             tx0 = x0a + (taper if side == "left" else 0.0)
             tx1 = x1a - (taper if side == "right" else 0.0)
@@ -180,12 +188,12 @@ def build_sofa(spec: SofaSpec):
         # FP-SOFA-PREMIUM alt_005 (REVISE do GPT: 55mm, nao 35): travessa
         # frontal recuada vs a FRENTE DAS ALMOFADAS + raio real no topo-frontal.
         import math as _math
-        rr = getattr(spec, "rail_edge_radius", 0.02)
+        rr = spec.rail_edge_radius
         cush_front = (Dtot - bt) - sd - spec.seat_overhang
-        ry0 = cush_front + getattr(spec, "rail_recess_from_cushion", 0.055)
+        ry0 = cush_front + spec.rail_recess_from_cushion
         prof = [(ry0, fh), (Dtot, fh), (Dtot, base_top), (ry0 + rr, base_top)]
-        for j in range(1, 6):                    # canto topo-frontal: 90->180
-            a = _math.radians(90.0 + 90.0 * j / 5.0)
+        for j in range(1, _ARC_SEGMENTS + 1):    # canto topo-frontal: 90->180
+            a = _math.radians(_QUARTER_TURN_DEG + _QUARTER_TURN_DEG * j / _ARC_SEGMENTS)
             prof.append((ry0 + rr + rr * _math.cos(a), base_top - rr + rr * _math.sin(a)))
         p = _p("base_main", "base", main_seat_x[0], ry0, main_seat_x[1], Dtot,
                fh, base_top, base_rgb)
@@ -212,17 +220,17 @@ def build_sofa(spec: SofaSpec):
         # FP-SOFA-PREMIUM alt_004: cada assento = UMA almofada (perfil (y,z)
         # extrudado em X) com coroamento de 15mm (pico no centro) e raio real
         # na aresta FRONTAL-superior — elimina o tampo inset separado.
-        crown = getattr(spec, "seat_crown", 0.015)
-        r = getattr(spec, "seat_edge_radius", 0.025)
+        crown = spec.seat_crown
+        r = spec.seat_edge_radius
         yF, yB, z1 = seat_front - over, seat_back, sh
         prof = [(yF, base_top), (yB, base_top), (yB, z1)]
         span = yB - (yF + r)
         for j in range(1, 6):                    # coroamento: parabola yB -> yF+r
-            t = j / 6.0
-            prof.append((yB - span * t, z1 + crown * 4.0 * t * (1.0 - t)))
+            t = j / _CROWN_DIV
+            prof.append((yB - span * t, z1 + crown * _PARABOLA_PEAK * t * (1.0 - t)))
         import math as _math
-        for j in range(0, 6):                    # aresta frontal: arco 90->180
-            a = _math.radians(90.0 + 90.0 * j / 5.0)
+        for j in range(0, _ARC_SEGMENTS + 1):    # aresta frontal: arco 90->180
+            a = _math.radians(_QUARTER_TURN_DEG + _QUARTER_TURN_DEG * j / _ARC_SEGMENTS)
             prof.append((yF + r + r * _math.cos(a), z1 - r + r * _math.sin(a)))
         wmod = (main_seat_x[1] - main_seat_x[0] - gap * (n - 1)) / n
         for i in range(n):
@@ -238,7 +246,7 @@ def build_sofa(spec: SofaSpec):
         # GRAMATICA de chaise integrada (cycle002): o vinco da chaise ALINHA com a
         # linha do assento do corpo (seat_front) — o deck le como UMA superficie
         # continua em L, nao "2 almofadas com split arbitrario no meio"
-        cyl = [(0.0 - over, seat_front), (seat_front + 0.03, seat_back)]
+        cyl = [(0.0 - over, seat_front), (seat_front + spec.chaise_seat_overlap, seat_back)]
         for j, (y0, y1) in enumerate(cyl):
             parts.append(_p(f"seat_chaise_{j + 1}", "seat_cushion", chaise_seat_x[0], y0,
                             chaise_seat_x[1], y1, base_top, sh, cush_rgb))
@@ -250,7 +258,7 @@ def build_sofa(spec: SofaSpec):
         # 10deg vem BAKED nos pontos do perfil (nada de bloco superior separado).
         import math as _math
         kr = _math.tan(_math.radians(spec.backrest_rake or 0.0))
-        r = getattr(spec, "back_edge_radius", 0.025)
+        r = spec.back_edge_radius
         wmod = (main_seat_x[1] - main_seat_x[0] - gap * (n - 1)) / n
         prof0 = _rounded_arm_profile(seat_back, Dtot, back_z0, bh, r)  # (y,z)
         prof = [(y + kr * (z - back_z0), z) for (y, z) in prof0]
