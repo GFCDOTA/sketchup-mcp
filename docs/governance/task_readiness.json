@@ -110,17 +110,10 @@
     },
     "457": {
       "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Dos 10 launchers do PR #296, render_room.ps1 e furnish_plan.py tinham raiz morta (E:\\Claude\\sketchup-mcp[-mobiliar]) e foram corrigidos; render_room.ps1 ja passou no smoke real (2026-10-25). Falta rodar o smoke dos demais launchers CLI (place_bedroom_skp, place_layout_skp, furnish_plan, render_banho_vray, kitchen vray, bake_theme) com a janela humana aberta e medir saida normal e de erro/timeout; o MCP atual ja esta fresco (runtime_identity OK) mas fica velho a cada fast-forward de develop: reiniciar o servidor e tarefa do app/usuario.",
-      "offline": false,
-      "needs_sketchup": true,
-      "completion_blockers": [
-        {
-          "cause": "EVIDENCE",
-          "ref": "docs/specs/FP-043_remaining_execution_P3_P8.md",
-          "detail": "P3b-01 exige o smoke dos launchers do PR #296 e a medicao de saida normal e de erro/timeout; sem isso a Issue nao conclui"
-        }
-      ]
+      "state": "BLOCKED",
+      "cause": "EVIDENCE",
+      "ref": "docs/specs/FP-043_remaining_execution_P3_P8.md",
+      "detail": "smoke dos launchers CLI do PR #296 feito com janela humana aberta (place_bedroom, place_layout, bake_theme, render_banho_vray, render_room, furnish_apartment --dry-run): janela intacta, nenhum SketchUp residual, canonicos com o mesmo SHA-256; defeitos achados e corrigidos (raizes mortas, sala/tema inexistente). Nao exercitados: kitchen/capabilities/vray.py (grava em artifacts/planta_74/furnished/kitchen_angles por desenho: rodar exigiria escrever em pasta canonica) e furnish_plan.py (precisa de .skp do 3D Warehouse que nao existe em runs/planta_74/_furniture); medicao de saida em timeout e o cliente Claude Code/Node via spawn proprio dependem de acao humana/ambiente"
     }
   }
 }
