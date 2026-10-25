@@ -89,11 +89,10 @@
     },
     "462": {
       "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Proximo builder Gen1 no Spec com origem declarada: tools/rooms/living/dining_table_class.py (95 literais; separar geometria do builder de limiares de gate e fixtures de sabotagem antes de mover), com hashes golden capturados ANTES (padrao dos PRs 542-545, 562, 565, 570, 571). Nao tocar sofa_class (derive_living_sofa tem prova L2: R-18) nem armchair_class (so limiares/fixtures). Baseline Gen1 hoje 232.",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": []
+      "state": "BLOCKED",
+      "cause": "EVIDENCE",
+      "ref": "docs/specs/construction_core_microphases.md",
+      "detail": "builders Gen1 com geometria fora de prova L2 concluidos (decor, rack, mesa de centro, mesa de jantar; baseline 491 -> 193); restam sofa_class (derive_living_sofa tem prova L2: mudar o fecho exige refazer o L2 em commit limpo, R-18, e veredito visual do Felipe) e armchair_class (so limiares de gate, tolerancias e fixtures de autoteste, nao geometria)"
     },
     "473": {
       "audited_at": "2026-10-25",

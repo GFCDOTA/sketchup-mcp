@@ -76,8 +76,8 @@
     },
     "tools/rooms/living/dining_table_class.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 95,
-      "distinct": 39,
+      "embedded_float_literals": 56,
+      "distinct": 28,
       "module_float_constants": 40
     },
     "tools/rooms/living/armchair_class.py": {
@@ -93,5 +93,5 @@
       "module_float_constants": 100
     }
   },
-  "total_gen1": 232
+  "total_gen1": 193
 }
