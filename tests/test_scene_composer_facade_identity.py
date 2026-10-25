@@ -10,7 +10,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 
-# SHA-256 de compose_scene(intent) gerados ANTES da movimentacao (develop@a9c5b2c): a cena nao pode mudar.
+# SHA-256 de compose_scene(intent) gerados ANTES da movimentacao (develop@2e9aea9): a cena nao pode mudar.
 GOLDEN = {
     "living_room_black_wood_gold_boutique.json": "057942447216556fcf16ce1a06e914b86cb69045738487f504b4ec2e1e3cc488",
     "living_room_modern_warm_minimal.json": "789592284d36676bcd36bd3c0ca8f98235631b6d48eabfd9ea058dc532c96a83",

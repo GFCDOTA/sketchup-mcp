@@ -64,8 +64,8 @@
     },
     "tools/rooms/living/rack_class.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 83,
-      "distinct": 33,
+      "embedded_float_literals": 31,
+      "distinct": 19,
       "module_float_constants": 38
     },
     "tools/rooms/living/coffee_table_class.py": {
@@ -93,5 +93,5 @@
       "module_float_constants": 100
     }
   },
-  "total_gen1": 300
+  "total_gen1": 248
 }
