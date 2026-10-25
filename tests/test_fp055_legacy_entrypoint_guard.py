@@ -40,7 +40,7 @@ def test_legacy_entrypoint_runs_the_mandatory_preflight_and_never_launches_sketc
     from tools.orchestration import furnish_apartment as fa
     from tools.validation import layout_preflight
     monkeypatch.setattr(fa, "collect_boxes", lambda con: ([{"room": "X"}], [("r0", "X", "service", "OK", 1)]))
-    monkeypatch.setattr(layout_preflight, "preflight", lambda con, boxes, rooms: {
+    monkeypatch.setattr(layout_preflight, "preflight", lambda con, boxes, rooms, twin=None: {
         "status": "FAIL", "rooms": [], "blocking": [{"room_id": "r0", "gate": "room_collisions", "status": "FAIL",
                                                       "reasons": {"barrier_penetration": ["h_sb001:Jardineira"]}}]})
     monkeypatch.setattr(fa.subprocess, "Popen", lambda *a, **k: pytest.fail("SketchUp lancado apesar do pre-voo FAIL"))
