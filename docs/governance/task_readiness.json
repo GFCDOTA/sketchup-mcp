@@ -109,6 +109,20 @@
       "cause": "EVIDENCE",
       "ref": "docs/specs/construction_core_microphases.md",
       "detail": "micro-prova L1 PROPOSED feita (PR 556); entrega do armario de lavanderia no apartamento exige reference_target aprovado (DoD 2.5), inexistente"
+    },
+    "457": {
+      "audited_at": "2026-10-25",
+      "state": "READY",
+      "next_step": "Smoke dos launchers legados alterados no PR #296 (dez entradas .cmd/PowerShell) com uma janela humana aberta e um job do MCP, provando que so o PID do job e encerrado; e repetir o cliente real com Claude Code/Node. Os 8 su_* e o isolamento via MCP ja estao provados (comentario em #457, 2026-10-25).",
+      "offline": false,
+      "needs_sketchup": true,
+      "completion_blockers": [
+        {
+          "cause": "EVIDENCE",
+          "ref": "docs/specs/FP-043_remaining_execution_P3_P8.md",
+          "detail": "P3b-01 exige o smoke dos launchers do PR #296 e a medicao de saida normal e de erro/timeout; sem isso a Issue nao conclui"
+        }
+      ]
     }
   }
 }
