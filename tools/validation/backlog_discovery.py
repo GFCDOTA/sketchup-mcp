@@ -132,6 +132,9 @@ def evaluate(g: dg.Graph, prs: list[dict] | None = None, claims: dict[int, dict]
         ready = (readiness or {}).get(n)
         if ready and ready.get("state") == "BLOCKED":
             reasons.append(f"{ready['cause']}: {ready['detail']} ({ready['ref']})")
+        if readiness is not None and not reasons and not (ready and ready.get("state") == "READY"):
+            # elegivel sem proximo passo auditado = promessa que o executor nao cumpre (FP-057): exige entrada READY no registro
+            reasons.append("NO_NEXT_STEP: elegivel sem proximo passo executavel auditado em docs/governance/task_readiness.json")
         eligible = not reasons
         if eligible and node.status == "In Progress":
             action = "resume"
