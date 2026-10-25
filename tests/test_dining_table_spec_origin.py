@@ -16,22 +16,22 @@ from tools.rooms.living.dining_table_class import (
     derive_dining_spec,
 )
 
-# SHA-256 de (pecas, meta, cadeiras proxy, ancoras) gerados ANTES da refatoracao (develop@9bf62e9): a aparencia nao pode mudar.
+# SHA-256 de (pecas, meta, cadeiras proxy, ancoras) (floats a 9 casas) gerados ANTES da refatoracao (develop@9bf62e9): a aparencia nao pode mudar.
 GOLDEN = {
-    "rect_family@4p": "67008493105fd71fc1bc55d55eb14ad5c11616d6eaf9af8efe8800c4e7a3091d",
-    "rect_family@6p": "26ac4d6430784d5b4c456064da5dcfc619cd6f2f6d771a98ff6c3bf55584f7ea",
-    "rect_family@8p": "f980cfee5e1ebd261696caf10019df714eb8c2bcdc47306f16dd434106ee66ed",
-    "round_compact@2p": "b3b86360cbb7f2ed8cd909a8310f561e055d547bc9c4c27b4889283c7d17ad04",
-    "round_compact@4p": "4598523d2c87d3a9c4a63e89ad78524f2a28c9e4ad0bc3910af608082e100dc9",
-    "round_compact@6p": "9e4d5f8d55e33fea1c59604bbdbf6c9f498ce44e053888e5f40f2cf22f712157",
-    "oval_soft@4p": "532e28452009be79e64e9ea79e8f3ed878025170e0b77027b3c8e0d7530b375d",
-    "oval_soft@6p": "6a6345ae336da0f5ce14daabdce04950289cef941dd4f150d9bdd4e60bd318cf",
-    "oval_soft@8p": "634bf45251a1bfa0ec18f09bb14da1f612794b3643b361e2e9c77e5fa7a84962",
-    "rect_noheads": "78cfc77cb83f1d3c60a8d82b4a250029eadb701bd66468f5471fc3468b2e94aa",
-    "rect_wide": "4cd853f365b1950f42022e37adcc0b444b1c9f107580df8adef32a0e5906cf14",
-    "oval_clearance": "52d4df1799840d5d5eb679dfe06d201cb948dbbede9d7793a7d3d69419b46784",
-    "round_plate": "1783a231f3a91432d6a71f263035069a4c727c078be97a4efeab5044bdfd0eba",
-    "oval_8": "c5a4a950201a9fb3c2f54efff09e049fcb984fb325c2619686d4de4523ef0c6f",
+    "rect_family@4p": "f049e7c411104316ce6b32bbb049d435e1fc31b8c64e554af0a6c219e1e453ad",
+    "rect_family@6p": "fad250b2106a6f28c81f1e684baf3847e0ed61024124eab69644623d894353a1",
+    "rect_family@8p": "818411afa6403891c38b8cef17517c91b1e120d313a58dc8b6b8ff2fca39cda1",
+    "round_compact@2p": "1b60e9f64e25da6055a902a92e44b609907eef4d47f1853b2e1b0977380df6b5",
+    "round_compact@4p": "9532f2cddc40f9eeda010ed5fc9d1c57aa8095f9aa3f0a1ed71713dc5c7bc6b3",
+    "round_compact@6p": "eb8638943d72cc5ada3e0c942f7514ff7017b9c9d391060fa12f326de109c888",
+    "oval_soft@4p": "79191f175561f722d44ebe65507418b8274ef2ca0c25129cb5c5c1fa539f3ea2",
+    "oval_soft@6p": "6eab152514e9c296559782bd4a5279e343de1654460377c4f5e5d4bd7ee7ac93",
+    "oval_soft@8p": "dccbb745e3ab257d110bdeac4fb56d19718528dbbf421467cc8b3abfde2c1f79",
+    "rect_noheads": "9bead4b462c692af112c444e93ce41745df6fee063743589e2b05a1ec5da562b",
+    "rect_wide": "d3ce96fdc9d43097818e73b4fd56f2776374f84edf4b46aca6ff6522745295cd",
+    "oval_clearance": "36f41f8bb935613fad8acb7f17d7ac133ba71358214925e33a6c5b23057a2341",
+    "round_plate": "a4d4078785ef96627ef6e27616dc9482f433300c4bd3931190635723c04274c8",
+    "oval_8": "77f60b44894146841f3f216f407d9794fc40de45453061012c7bff973696a952",
 }
 EXTRA = {
     "rect_noheads": ("rect_family", 6, dict(heads=False)),
@@ -42,10 +42,21 @@ EXTRA = {
 }
 
 
+def _norm(o):
+    """Floats a 9 casas: a mesa redonda usa sin/cos e o ultimo bit de libm difere entre Windows e Linux (CI); 1e-9 m e muito abaixo de qualquer medida."""
+    if isinstance(o, float):
+        return round(o, 9)
+    if isinstance(o, (list, tuple)):
+        return [_norm(x) for x in o]
+    if isinstance(o, dict):
+        return {k: _norm(v) for k, v in o.items()}
+    return o
+
+
 def _hash(spec):
     parts, meta = dt.build_dining_table(spec)
-    return hashlib.sha256(json.dumps([parts, meta, dt._chair_proxy_parts(spec), dt._seat_anchors(spec)], sort_keys=True,
-                                     default=str).encode()).hexdigest()
+    payload = _norm([parts, meta, dt._chair_proxy_parts(spec), dt._seat_anchors(spec)])
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
 
 
 @pytest.mark.parametrize("name,arch,seats", MATRIX)
