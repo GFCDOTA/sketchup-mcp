@@ -34,7 +34,7 @@ e os provedores de `renderers/` (26–151).
 ## Destino sugerido por peça (NÃO aplicado; cada um é um PR próprio com ownership + suíte)
 | Peça | Dono natural | Observação |
 |---|---|---|
-| `semantics/wall_affordance.py` | `tools/rooms/living/planning/` | consumida só por sala (planner, furnishing, sofa_placement_gate) e por `room_graph` |
+| `semantics/wall_affordance.py` | `tools/rooms/shared/` (dono já declarado: `shared_spatial_semantics` em `tools/rooms/p3_ownership.py`) | **correção 2026-10-25:** não é só da sala — além do planner, do furnishing e do `sofa_placement_gate` da sala, é usada por `planners/placement_brain.py`, que serve o quarto (`bedroom/validation/bed_placement_gate.py`). Mover para `living/` criaria dependência quarto→sala (proibida pelo gate de ownership) |
 | `planners/placement_brain.py` | `tools/rooms/bedroom/` (planning) | único consumidor de produção: `bedroom/validation/bed_placement_gate.py`; teste `tests/test_bed_placement_gate.py` |
 | `composer/scene_composer.py` | `tools/rooms/shared/` (trilha Intent-to-Scene) | consumido por `tools/validation/scene_spatial_gate.py`, `bathroom/capabilities/estudio_banheiro_scene.py` e testes: é transversal, não é de sala |
 | `renderers/*` | `tools/rendering/` | consumidos por `tools/rendering/*` e `living/capabilities/sofa_class_matrix.py` |
