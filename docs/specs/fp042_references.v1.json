@@ -7607,6 +7607,18 @@
       "owner_group": "fixtures"
     },
     {
+      "path": "fixtures/synthetic_cabinets/proposed_laundry_cabinet.json",
+      "blob_sha": "a57036610ed2140d4bd3135e99178022090dcac3",
+      "blob_size": 1397,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/proposed_nightstand.json",
+      "blob_sha": "e9cfd06ef45ff445e7fec98790cf5c7b28937c23",
+      "blob_size": 1208,
+      "owner_group": "fixtures"
+    },
+    {
       "path": "fixtures/synthetic_cabinets/valid_a_base_600.json",
       "blob_sha": "02443b5b2977594a85ba068d2cd4ddd3f3848af0",
       "blob_size": 1269,
