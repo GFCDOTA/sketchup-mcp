@@ -103,7 +103,7 @@ def build_wall_art(spec: WallArtSpec):
     grande atras de face proud). Plano do quadro = XZ; frente = -Y."""
     spec.validate()
     W, H, Dp, ft = spec.width, spec.height, spec.depth, spec.frame_t
-    cd = Dp * 0.55   # tela recuada dentro da moldura
+    cd = Dp * spec.canvas_recess   # tela recuada dentro da moldura
     parts = [
         _p("frame_l", "frame", 0.0, 0.0, ft, Dp, 0.0, H, spec.frame_rgb),
         _p("frame_r", "frame", W - ft, 0.0, W, Dp, 0.0, H, spec.frame_rgb),
@@ -112,11 +112,11 @@ def build_wall_art(spec: WallArtSpec):
     ]
     # colunas (x0,x1,[faixas (z0,z1,rgb)]): campo quente baixo-esq + barra vertical escura
     cols = [
-        (ft, W * 0.12, []),
-        (W * 0.12, W * 0.55, [(H * 0.18, H * 0.62, spec.accent_rgb)]),
-        (W * 0.55, W * 0.62, []),
-        (W * 0.62, W * 0.70, [(H * 0.12, H * 0.88, spec.accent2_rgb)]),
-        (W * 0.70, W - ft, []),
+        (ft, W * spec.col_x1, []),
+        (W * spec.col_x1, W * spec.col_x2, [(H * spec.field_z0, H * spec.field_z1, spec.accent_rgb)]),
+        (W * spec.col_x2, W * spec.col_x3, []),
+        (W * spec.col_x3, W * spec.col_x4, [(H * spec.bar_z0, H * spec.bar_z1, spec.accent2_rgb)]),
+        (W * spec.col_x4, W - ft, []),
     ]
     i = 0
     for x0, x1, bands in cols:
@@ -127,7 +127,7 @@ def build_wall_art(spec: WallArtSpec):
                 parts.append(_p(f"canvas_{i}", "canvas", x0, cd, x1, Dp, zcur, z0, spec.canvas_rgb))
             if rgb is not None and z1 > z0:
                 i += 1
-                parts.append(_p(f"accent_{i}", "art_accent", x0, cd - 0.005, x1, Dp, z0, z1, rgb))
+                parts.append(_p(f"accent_{i}", "art_accent", x0, cd - spec.accent_proud, x1, Dp, z0, z1, rgb))
             zcur = max(zcur, z1)
     return parts, _meta("wall_art", parts)
 
@@ -178,8 +178,7 @@ def build_plant(spec: PlantSpec):
     fol = spec.foliage_w
     c = fol / 2.0
     tt = spec.trunk_t / 2.0
-    fz = ph + (H - ph)            # topo da copa = H
-    trunk_top = ph + (H - ph) * 0.28
+    trunk_top = ph + (H - ph) * spec.trunk_frac
 
     def _vol(label, kind, z0, z1, w0, w1, dx, dy, rgb):
         cx, cy = c + dx, c + dy
@@ -190,18 +189,16 @@ def build_plant(spec: PlantSpec):
 
     # vaso = tronco-de-piramide invertido (base estreita, boca larga = vaso real)
     parts = [
-        _vol("pot", "pot", 0.0, ph, pw * 0.74, pw, 0.0, 0.0, spec.pot_rgb),
+        _vol("pot", "pot", 0.0, ph, pw * spec.pot_taper, pw, 0.0, 0.0, spec.pot_rgb),
         _p("trunk", "trunk", c - tt, c - tt, c + tt, c + tt, ph, trunk_top, spec.trunk_rgb),
     ]
     g = spec.foliage_rgb
-    shades = [tuple(int(v * 0.9) for v in g), g, tuple(min(255, int(v * 1.12)) for v in g),
-              tuple(int(v * 0.82) for v in g)]
+    shades = [tuple(int(v * spec.shade_dark) for v in g), g, tuple(min(255, int(v * spec.shade_light)) for v in g),
+              tuple(int(v * spec.shade_deep) for v in g)]
     # copa: bojo no meio (afina embaixo e no topo) -> teardrop organico, com offsets leves
-    layers = [   # (z0, z1, w0, w1, dx, dy)
-        (trunk_top - 0.05, ph + (H - ph) * 0.55, fol * 0.60, fol, 0.0, 0.0),
-        (ph + (H - ph) * 0.45, ph + (H - ph) * 0.74, fol, fol * 0.80, -0.04, 0.03),
-        (ph + (H - ph) * 0.66, ph + (H - ph) * 0.90, fol * 0.80, fol * 0.45, 0.04, -0.02),
-        (ph + (H - ph) * 0.84, fz, fol * 0.45, fol * 0.16, -0.02, 0.01),
+    layers = [   # (z0, z1, w0, w1, dx, dy) em metros, a partir das fracoes do spec
+        (trunk_top - spec.trunk_skirt if z0f is None else ph + (H - ph) * z0f, ph + (H - ph) * z1f, fol * w0f, fol * w1f, dx, dy)
+        for z0f, z1f, w0f, w1f, dx, dy in spec.foliage_layers
     ]
     for i, (z0, z1, w0, w1, dx, dy) in enumerate(layers):
         parts.append(_vol(f"foliage_{i + 1}", "foliage", z0, z1, w0, w1, dx, dy, shades[i]))
@@ -219,7 +216,7 @@ def build_accent_seat(spec: AccentSeatSpec):
                           ("bl", (ins, D - ins - lt)), ("br", (W - ins - lt, D - ins - lt))):
         parts.append(_p(f"leg_{tag}", "leg", x0, y0, x0 + lt, y0 + lt, 0.0, lh, spec.leg_rgb))
     parts.append(_p("seat", "seat", 0.0, 0.0, W, D, lh, sh, spec.seat_rgb))
-    back_rgb = tuple(int(v * 0.94) for v in spec.seat_rgb)   # encosto um tom abaixo
+    back_rgb = tuple(int(v * spec.back_shade) for v in spec.seat_rgb)   # encosto um tom abaixo
     parts.append(_p("back", "back", 0.0, D - bt, W, D, sh, H, back_rgb))
     return parts, _meta("accent_seat", parts)
 
@@ -235,9 +232,9 @@ def build_shelf(spec: ShelfSpec):
         z1 = bd + i * spec.gap + t
         z0 = z1 - t
         parts.append(_p(f"plank_{i + 1}", "shelf_plank", 0.0, 0.0, W, D, z0, z1, spec.plank_rgb))
-        for tag, bx in (("l", 0.06), ("r", W - 0.06 - bt)):
+        for tag, bx in (("l", spec.bracket_inset), ("r", W - spec.bracket_inset - bt)):
             parts.append(_p(f"bracket_{i + 1}{tag}", "shelf_bracket",
-                            bx, D - 0.14, bx + bt, D, z0 - bd, z0, spec.bracket_rgb))
+                            bx, D - spec.bracket_reach, bx + bt, D, z0 - bd, z0, spec.bracket_rgb))
     return parts, _meta("shelf", parts)
 
 
