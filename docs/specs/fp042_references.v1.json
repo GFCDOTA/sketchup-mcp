@@ -6743,6 +6743,24 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/README.md",
+      "blob_sha": "c79867080df195fe3fc413647f97133aaeb1f894",
+      "blob_size": 3059,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/door_opening_alternatives.json",
+      "blob_sha": "4c9eeca4485f2cc86be618771fba8cb9865c2de3",
+      "blob_size": 1349,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/probe_door_opening.py",
+      "blob_sha": "4993b328e77b5a7e7d2c975d3eab682c5a5a3788",
+      "blob_size": 1913,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/variant_sweep/planta_74/contact_sheet.png",
       "blob_sha": "c94419969de5f28d753e87572218c7a817100e24",
       "blob_size": 205290,
