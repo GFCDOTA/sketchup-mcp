@@ -46,8 +46,17 @@ def _spec_exists(label: str, specs: set[str]) -> bool:
     return any(s.startswith(key) for s in specs)
 
 
-def check(issues: dict[int, dict], specs: set[str], exceptions: dict | None = None) -> list[Finding]:
+def check(issues: dict[int, dict], specs: set[str], exceptions: dict | None = None,
+          readiness: dict[int, dict] | None = None) -> list[Finding]:
     found: list[Finding] = []
+    if readiness:
+        from tools.validation import task_readiness
+        for code, n, detail in task_readiness.validate(readiness, issues):
+            found.append(Finding(n, code, detail))
+        for n, e in sorted(readiness.items()):
+            iss = issues.get(n)
+            if iss and iss.get("state") == "OPEN" and e.get("state") == "READY" and "blocked" in _names(iss):
+                found.append(Finding(n, "READINESS_READY_BUT_BLOCKED", "entrada READY para Issue com label blocked"))
     for n, iss in sorted(issues.items()):
         names, body, open_ = _names(iss), iss.get("body") or "", iss.get("state") == "OPEN"
         causes = sorted(x.split(":", 1)[1] for x in names if x.startswith("bloqueio:"))
@@ -94,7 +103,8 @@ def main() -> int:
     exc_path = ROOT / "docs/governance/backlog_exceptions.json"
     exceptions = json.loads(exc_path.read_text(encoding="utf-8")) if exc_path.exists() else {}
     specs = {p.name for p in (ROOT / "docs/specs").glob("*.md")}
-    findings = check(load(), specs, exceptions)
+    from tools.validation import task_readiness
+    findings = check(load(), specs, exceptions, task_readiness.load())
     for f in findings:
         print(f)
     print(f"issue_integrity_gate: {len(findings)} divergencia(s)")

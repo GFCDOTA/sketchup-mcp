@@ -20,16 +20,17 @@ from tools.validation import execution_state as es
 
 
 def decide(issues: list[dict], prs: list[dict], state: dict, statuses: dict[int, str] | None = None,
-           only_issue: int | None = None, agent: str = "claude") -> tuple[bd.Verdict | None, list[bd.Verdict]]:
+           only_issue: int | None = None, agent: str = "claude",
+           readiness: dict[int, dict] | None = None) -> tuple[bd.Verdict | None, list[bd.Verdict]]:
     """Proxima tarefa elegivel (ou a pedida, se elegivel) considerando os claims ATIVOS de OUTRAS execucoes. Puro.
     Se ESTA execucao ja tem uma tarefa reivindicada e nao concluida, ela vem primeiro (`action=resume`; use `plan_recovery`)."""
     g = dg.build(issues, statuses)
     claims = es.active_claims(state)
     others = {n: {"agent": c["agent"], "components": c["components"]} for n, c in claims.items() if c["agent"] != agent}
-    verdicts = bd.evaluate(g, prs, others)
+    verdicts = bd.evaluate(g, prs, others, readiness)
     own = [n for n, c in sorted(claims.items()) if c["agent"] == agent and c["state"] != "DONE"]
     if own and only_issue is None:
-        mine = next((v for v in bd.evaluate(g, [], others) if v.node.number == own[0]), None)
+        mine = next((v for v in bd.evaluate(g, [], others, readiness) if v.node.number == own[0]), None)
         if mine is not None:
             mine.eligible, mine.reasons, mine.action = True, [], "resume"
             return mine, verdicts
@@ -86,7 +87,7 @@ def main(argv: list[str]) -> int:
                          "issue_closed": any(i["number"] == int(n) and i["state"] == "CLOSED" for i in issues), "board_synced": False}
                 print(f"#{n} ({c['state']}, lease {c['lease_expires']}): {es.plan_recovery(c, facts)}")
             return 0
-        task, verdicts = decide(issues, prs, st, statuses, a.issue)
+        task, verdicts = decide(issues, prs, st, statuses, a.issue, a.agent, bd.load_readiness())
         checkpoint_after(st, verdicts, prs)
         if a.cmd == "claim":
             if task is None:
