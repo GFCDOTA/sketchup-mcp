@@ -57,7 +57,7 @@
     "463": {
       "audited_at": "2026-10-25",
       "state": "READY",
-      "next_step": "Mover interior/planners/placement_brain.py para tools/rooms/bedroom/planning/ mantendo fachada com a mesma identidade de simbolo (unico consumidor de producao: bedroom/validation/bed_placement_gate.py); ownership e suite verdes.",
+      "next_step": "Mover o nucleo compartilhado de colocacao (room_graph, wall_affordance, placement_brain) de interior/ para tools/rooms/shared/placement/ mantendo fachadas de identidade; consumidores de producao (sala e quarto) apontam para o dono novo; ownership e suite verdes. Proximo apos este: scene_composer e renderers.",
       "offline": true,
       "needs_sketchup": false,
       "completion_blockers": []
