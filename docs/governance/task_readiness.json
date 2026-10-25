@@ -63,11 +63,10 @@
     },
     "463": {
       "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Proxima peca de interior/: composer/scene_composer.py (765 linhas, transversal) para tools/rooms/shared/ mantendo fachada de mesma identidade; consumidores: tools/validation/scene_spatial_gate.py, bathroom/capabilities/estudio_banheiro_scene.py e testes (tests/test_intent_to_scene.py, tests/test_living_sofa_is_approved_premium.py). Renderers (PR 566) e placement core (PR 553) ja movidos.",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": []
+      "state": "BLOCKED",
+      "cause": "HUMAN_DECISION",
+      "ref": "#463",
+      "detail": "escopo com logica movido (placement PR 553, renderers PR 566, scene_composer PR 569); o que sobra em interior/ sao fachadas e dados, e remove-las nao tem ganho de produto (Constituicao #5): aguarda concordancia do Felipe para fechar a Issue"
     },
     "460": {
       "audited_at": "2026-10-25",
@@ -91,7 +90,7 @@
     "462": {
       "audited_at": "2026-10-25",
       "state": "READY",
-      "next_step": "Proximo builder Gen1 no Spec com origem declarada: tools/rooms/living/sofa_class.py (20 literais) ou armchair_class.py (23), com hashes golden capturados ANTES (padrao dos PRs 542-545, 562, 565); depois rack (83), mesa de centro (79) e mesa de jantar (95). Um builder por PR; baseline Gen1 hoje 300.",
+      "next_step": "Proximo builder Gen1 no Spec com origem declarada: tools/rooms/living/dining_table_class.py (95 literais; separar geometria do builder de limiares de gate e fixtures de sabotagem antes de mover), com hashes golden capturados ANTES (padrao dos PRs 542-545, 562, 565, 570, 571). Nao tocar sofa_class (derive_living_sofa tem prova L2: R-18) nem armchair_class (so limiares/fixtures). Baseline Gen1 hoje 232.",
       "offline": true,
       "needs_sketchup": false,
       "completion_blockers": []
