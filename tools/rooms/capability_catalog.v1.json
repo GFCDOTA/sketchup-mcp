@@ -1300,6 +1300,10 @@
           {
             "lang": "python",
             "ref": "tools.validation.circulation_gate.gate"
+          },
+          {
+            "lang": "python",
+            "ref": "tools.validation.circulation_gate.GateSession"
           }
         ]
       },
@@ -1317,7 +1321,8 @@
         "state": "NOT_REVIEWED"
       },
       "tools": [
-        "python:tools.validation.circulation_gate.gate"
+        "python:tools.validation.circulation_gate.gate",
+        "python:tools.validation.circulation_gate.GateSession"
       ],
       "parameters": [],
       "preconditions": [],

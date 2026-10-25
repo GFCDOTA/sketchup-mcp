@@ -22,7 +22,8 @@
     "circulation.gate"
   ],
   "tool_allowlist": [
-    "python:tools.validation.circulation_gate.gate"
+    "python:tools.validation.circulation_gate.gate",
+    "python:tools.validation.circulation_gate.GateSession"
   ],
   "constraints": [
     "Nao criar, mover ou apagar parede, porta ou janela.",
