@@ -276,3 +276,36 @@ def test_copia_que_nao_da_para_apagar_ganha_marcador(tmp_path, monkeypatch):
     res = {"status": "SU_EXITED", "reason": "x", "pid": 7}
     cs._discard_unedited(out, res)
     assert res["unedited_copy_removed"] is False and Path(res["unedited_copy_marker"]).exists()
+
+
+# ------------------------------------------------------------------ R3 / T0.2 (#460): scratch da inspecao nunca ao lado de .skp protegido
+def _ok_job(cmd, env, handle):
+    Path(env["SKMCP_RESULT"]).write_text(json.dumps({"ok": True, "cabinets": [], "non_cabinet": {"count": 1, "fingerprint": "f"}}), "utf-8")
+
+
+@pytest.mark.parametrize("sub", ["artifacts/planta/mobiliado.skp", "fixtures/planta/base.skp"])
+def test_inspecionar_skp_protegido_nao_deixa_lixo_ao_lado_dele(repo_falso, sub):
+    base = repo_falso / sub
+    base.parent.mkdir(parents=True)
+    base.write_bytes(b"SKP-CANONICO")
+    su, _ = fake_su(_ok_job)
+    res = cs.inspect(base, mode="interactive", su=su)
+    assert res["status"] == "OK"
+    protected = repo_falso / sub.split("/")[0]
+    assert sorted(p.name for p in protected.rglob("*") if p.is_file()) == [base.name]          # nada novo ao lado do canonico
+    assert base.read_bytes() == b"SKP-CANONICO"
+    assert Path(res["out_dir"]).resolve().is_relative_to((repo_falso / "runs").resolve())
+
+
+def test_inspecionar_skp_em_scratch_continua_usando_a_pasta_ao_lado(tmp_path):
+    skp = tmp_path / "x.skp"
+    skp.write_bytes(b"SKP")
+    su, _ = fake_su(_ok_job)
+    res = cs.inspect(skp, mode="interactive", su=su)
+    assert res["status"] == "OK" and Path(res["out_dir"]).parent == tmp_path
+
+
+def test_cabinet_and_shaker_inspect_share_the_same_scratch_policy():
+    from tools.rooms.shared.cabinet import scratch
+    from tools.rooms.shared.cabinet.shaker import sketchup as ss
+    assert ss.scratch_dir is scratch.scratch_dir and cs.scratch_dir is scratch.scratch_dir

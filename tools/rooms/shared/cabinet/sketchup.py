@@ -19,6 +19,7 @@ from tools.sketchup.batch import run_job
 from tools.sketchup.process import SketchUp
 
 from .plan import CAPABILITY_ID, require_valid
+from .scratch import scratch_dir
 
 RUBY_DIR = Path(__file__).resolve().parent / "ruby"
 BUILD_JOB, INSPECT_JOB = RUBY_DIR / "cabinet_build.rb", RUBY_DIR / "cabinet_inspect.rb"
@@ -85,7 +86,7 @@ def inspect(skp: str | Path, *, mode: str | None = None, timeout_s: int = 180, s
     src = paths.resolve(skp)
     if src.suffix.lower() != ".skp" or not src.exists():
         return {"status": "ERROR", "reason": f"nao e um .skp existente: {src}"}
-    job_dir = src.parent / f"_{src.stem}_inspect"
+    job_dir = scratch_dir(src, "cabinet_inspect", adjacent_suffix="inspect")     # nunca ao lado de .skp protegido (R3 / T0.2)
     job_dir.mkdir(parents=True, exist_ok=True)
     copy = job_dir / f"_copy_{src.name}"
     shutil.copy2(src, copy)

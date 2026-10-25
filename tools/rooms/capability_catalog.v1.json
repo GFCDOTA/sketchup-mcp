@@ -210,7 +210,7 @@
         ]
       },
       "validation": {
-        "state": "L2_PASS",
+        "state": "L1_PASS",
         "fixtures": [
           "fixtures/synthetic_cabinets/valid_a_base_600.json",
           "fixtures/synthetic_cabinets/valid_b_tall_900.json",
@@ -220,30 +220,7 @@
           "tests/test_cabinet_plan.py",
           "tests/test_cabinet_sketchup_driver.py"
         ],
-        "evidence": [
-          {
-            "ref": "artifacts/review/fp043/p7_kitchen_cabinet/README.md",
-            "sketchup_version": "26.0.429",
-            "commit": "8317dce",
-            "scope": "micro-fixtures sinteticos (3 dimensoes, poses 0/90/30, reexecucao, make_unique, edicao local), modelo base do template, SketchUp 26.0.429; NAO inclui cozinha real, ferragem, gaveta nem veio",
-            "symbol_digests": {
-              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "80b8bd953b0516ad10443be865d73e21b4d15c87b138cddbcdb82c75431063cf",
-              "python:tools.rooms.shared.cabinet.plan.require_valid": "a641fbdb69d48374c799154304bf31036cc654600ee18de2b85fcb071b86bd39",
-              "python:tools.rooms.shared.cabinet.sketchup.materialize": "4b30b9ec268b3dd4fd65aeae72a025f13b3275280634decefd8c543e135aac49",
-              "python:tools.rooms.shared.cabinet.sketchup.inspect": "833ce948f9de37e6352529149126881ee2178a6cf3a723e522c99eb081e40eeb",
-              "python:tools.rooms.shared.cabinet.sketchup.verify": "d7d3dc62dbb699890468614a89e09088fc3a1a23c70d32d2445ccdded23903dd",
-              "ruby:tools/rooms/shared/cabinet/ruby/cabinet_build.rb": "faad1fe33e175ac0026a16eaa765f91b657116d72d6d7603da50af07273f24b9",
-              "ruby:tools/rooms/shared/cabinet/ruby/cabinet_inspect.rb": "51bb6da37730081ac8274f533fc2c8923c1018526fbf21163291724c08052bce"
-            },
-            "closure_digests": {
-              "python:tools.rooms.shared.cabinet.plan.plan_cabinet": "f14513b1221c6a7a8b0168afb6112fc8d18c066b4f37edd141954ddfffb7e507",
-              "python:tools.rooms.shared.cabinet.plan.require_valid": "755e6190191efec157d22da029db1bd741624313c6046dc06a84057736ad3b34",
-              "python:tools.rooms.shared.cabinet.sketchup.materialize": "e5c9316c8f485922695d26b38023316f543e1701c009ebaf31c6f3c5ed15595c",
-              "python:tools.rooms.shared.cabinet.sketchup.inspect": "6ac9dce2ceeb5e48e4d3fafcfd2ac97539bd4b0839702bcd1daa50f16a7b7f99",
-              "python:tools.rooms.shared.cabinet.sketchup.verify": "43bfd51e0b74d827d29e47ea44ce818bd439b1932bec7f7fb5f88f0ceed00279"
-            }
-          }
-        ]
+        "evidence": []
       },
       "visual": {
         "state": "NOT_REVIEWED"
@@ -803,7 +780,7 @@
         ]
       },
       "validation": {
-        "state": "L2_PASS",
+        "state": "L1_PASS",
         "fixtures": [
           "fixtures/synthetic_cabinets/valid_a_base_600.json",
           "fixtures/synthetic_cabinets/fp046_shaker_valid_a.json"
@@ -812,30 +789,7 @@
           "tests/test_fp046_shaker_plan.py",
           "tests/test_fp046_shaker_sketchup.py"
         ],
-        "evidence": [
-          {
-            "ref": "artifacts/review/fp046/promotion_l2/README.md",
-            "sketchup_version": "26.0.429",
-            "commit": "7820f74",
-            "scope": "matriz sintetica (pai valid_a_base_600): 1 porta a 0/90/30 graus, 2 portas no mesmo gabinete, reexecucao idempotente, make_unique local, propagate explicito, material local, 2 negativos no Ruby real; SketchUp 26.0.429; NAO e cozinha real nem veredito visual",
-            "symbol_digests": {
-              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "e9e99a4199eac697b951030d8e325c72e81dd55800d64808ea39e95d4b5f15d4",
-              "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker": "ed31e190eec9ef1c19838078e88c78da88a44a2fad89036cae80a0fcdcbc5733",
-              "python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker": "21c5b199c1197780bcdc030d7b416f1821a5f5f3c9f1bfa3744d940790be3ec0",
-              "python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker": "9d69a5e56945906d5585129d2a060465ec8e43562740cf4db54cbb9f19b9beaf",
-              "python:tools.rooms.shared.cabinet.shaker.sketchup.verify_shaker": "1335419e985e77d63a41e2e1dc76b1f2dc42fc96e2caa3053597df68514b4f86",
-              "ruby:tools/rooms/shared/cabinet/ruby/shaker_build.rb": "e9bf32574646ba26bc7b9c1793038601e55112dee6a6aaffbec31f10a9a80117",
-              "ruby:tools/rooms/shared/cabinet/ruby/shaker_inspect.rb": "1bbb3fc32cd7eb110fb8a1e8f4179fb4562b4e925134f0958608043cbd77ba68"
-            },
-            "closure_digests": {
-              "python:tools.rooms.shared.cabinet.shaker.plan.plan_shaker_door": "c005937b797a31880f4a991ca9d7748cae9c57dce4017b9f71726fe24777eb38",
-              "python:tools.rooms.shared.cabinet.shaker.plan.require_valid_shaker": "9adac39ed1e69c2cf5233713d254d3eea879c7be4a7ebf2130b0cbd9f1ca89c5",
-              "python:tools.rooms.shared.cabinet.shaker.sketchup.materialize_shaker": "8bc1a6214d73b810a193a03a4ce5be956f5df4d698b4346d761b4519b95ef3a3",
-              "python:tools.rooms.shared.cabinet.shaker.sketchup.inspect_shaker": "18c1d10608c205d551a3203a8ac9c4d728fd91d8d55dc45bf98f4985a78b46c7",
-              "python:tools.rooms.shared.cabinet.shaker.sketchup.verify_shaker": "00b1bb73681cf20b8eb8269946ce6e54b5a4a64d76a9ad8149344f758b59d507"
-            }
-          }
-        ]
+        "evidence": []
       },
       "visual": {
         "state": "NOT_REVIEWED"
