@@ -17,9 +17,9 @@ def test_percentile_and_summary_follow_linear_interpolation():
     assert sb.percentile([7.0], 95) == 7.0
 
 
-def test_peak_memory_is_a_positive_number_or_none_never_an_exception():
+def test_peak_memory_is_measured_on_the_supported_platforms():
     v = sb.peak_rss_mb()
-    assert v is None or v > 1.0
+    assert v is not None and v > 1.0                                  # Windows (psapi) e POSIX (ru_maxrss) sao suportados
 
 
 def test_benchmark_scope_is_explicit_and_declares_what_it_does_not_measure(tmp_path):

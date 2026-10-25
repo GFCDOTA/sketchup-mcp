@@ -45,8 +45,11 @@ def peak_rss_mb() -> float | None:
                             ("PeakPagefileUsage", ctypes.c_size_t)]
             c = Counters()
             c.cb = ctypes.sizeof(c)
-            h = ctypes.windll.kernel32.GetCurrentProcess()
-            if not ctypes.windll.psapi.GetProcessMemoryInfo(h, ctypes.byref(c), c.cb):
+            kernel32, psapi = ctypes.WinDLL("kernel32"), ctypes.WinDLL("psapi")
+            kernel32.GetCurrentProcess.restype = wintypes.HANDLE                 # HANDLE de 64 bits: sem restype o ctypes trunca
+            psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+            psapi.GetProcessMemoryInfo.restype = wintypes.BOOL
+            if not psapi.GetProcessMemoryInfo(kernel32.GetCurrentProcess(), ctypes.byref(c), c.cb):
                 return None
             return round(c.PeakWorkingSetSize / 1024 / 1024, 1)
         import resource
