@@ -83,6 +83,19 @@ class SofaSpec:
                                      # recuada vs a frente das almofadas + raio no topo
     rail_recess_from_cushion: float = 0.055  # recuo (m) da face frontal (REVISE GPT)
     rail_edge_radius: float = 0.02   # raio (m) da aresta superior-frontal
+    # Proporcoes de CLASSE (antes literais no builder); origem em SOFA_MEASURE_ORIGINS.
+    base_shade: float = 0.62         # fator de escurecimento da base/estrutura (contraste)
+    back_shade: float = 0.88         # fator de escurecimento do encosto (sombra/profundidade)
+    back_pivot_offset: float = 0.03  # o encosto gira numa cota abaixo do assento (tambem usada no bbox)
+    foot_side: float = 0.08          # lado da secao quadrada do pe de canto
+    foot_inset: float = 0.04         # recuo dos pes de canto
+    arm_cap_t: float = 0.04          # espessura do tampo proud do braco
+    arm_cap_over: float = 0.015      # quanto o tampo passa do braco
+    shoe_inset: float = 0.03         # recuo da sapata do braco (arm_relief)
+    riser_inset_min: float = 0.12    # recuo minimo do riser oculto do plinto
+    riser_shade: float = 0.6         # fator de escurecimento do riser
+    taper_split: float = 0.62        # fracao da altura do braco onde o taper comeca
+    chaise_seat_overlap: float = 0.03  # sobreposicao do 2o assento da chaise
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"
@@ -98,7 +111,7 @@ class SofaSpec:
         com rake dava WARN falso de bbox no gate — furo de classe, FASE 0)."""
         import math
         d = self.depth if self.variant == "straight" else max(self.depth, self.chaise_depth)
-        back_z0 = self.seat_height - 0.03          # mesmo anchor do builder
+        back_z0 = self.seat_height - self.back_pivot_offset   # mesmo anchor do builder
         rake_over = (self.height - back_z0) * math.tan(math.radians(self.backrest_rake))
         return (round(self.width, 3), round(d + max(0.0, rake_over), 3),
                 round(self.height, 3))
@@ -115,6 +128,12 @@ def sofa_spec(variant="straight", seats=3, **overrides):
     for k, v in overrides.items():
         setattr(s, k, v)
     return s.validate()
+
+
+# Origem de cada proporcao de classe do sofa: valor declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+SOFA_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "base_shade", "back_shade", "back_pivot_offset", "foot_side", "foot_inset", "arm_cap_t", "arm_cap_over", "shoe_inset",
+    "riser_inset_min", "riser_shade", "taper_split", "chaise_seat_overlap")}
 
 
 # JSON-schema (documental) do sofa — vira base do FurnitureAnatomySpec geral (msg 2).
