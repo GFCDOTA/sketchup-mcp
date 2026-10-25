@@ -1,0 +1,201 @@
+{
+ "commit": "53d4711f99ae7faef8636334782056ca10439e2c",
+ "dirty": false,
+ "base_template": "E:\\Claude\\worktrees\\fp057-w2\\runs\\template_base.skp",
+ "base_template_sha256": "621daa5733d8ac9d6397a97cf3469e410f1159385ffda35b429af593cb2c02f8",
+ "cases": [
+  {
+   "case": "s1_one_door_r0",
+   "kind": "build_parent+shaker+reopen",
+   "request_id": "shaker-r0",
+   "signature": "f34a41dd6460c91d7d0fb1fb2d27984e35c1d8ef4b9b1439736cba3d3506dfa5",
+   "ok": true,
+   "max_corner_error_m": 0.0,
+   "checks": 53,
+   "failed": [],
+   "rotation_deg": 0,
+   "pid_build": 33336
+  },
+  {
+   "case": "s1_one_door_r90",
+   "kind": "build_parent+shaker+reopen",
+   "request_id": "shaker-r90",
+   "signature": "71c1821489a012fd2d2fa74a9abada01c6ec692cbd358d08010656df12538759",
+   "ok": true,
+   "max_corner_error_m": 0.0,
+   "checks": 53,
+   "failed": [],
+   "rotation_deg": 90,
+   "pid_build": 2796
+  },
+  {
+   "case": "s1_one_door_r30",
+   "kind": "build_parent+shaker+reopen",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 4.616050692080683e-07,
+   "checks": 53,
+   "failed": [],
+   "rotation_deg": 30,
+   "pid_build": 34456
+  },
+  {
+   "case": "s2_two_doors_r30",
+   "kind": "two_doors_same_cabinet",
+   "request_id": "shaker-left",
+   "signature": "e01091c003964e462e4b5f1d94f36d273e95466a926823bd0a88e8ad8d6f95b1",
+   "ok": true,
+   "max_corner_error_m": 4.767536599994284e-07,
+   "checks": 54,
+   "failed": [],
+   "right_ok": true,
+   "right_checks": 50
+  },
+  {
+   "case": "s3_idempotent_rebuild",
+   "kind": "rebuild",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 4.616050692080683e-07,
+   "checks": 51,
+   "failed": []
+  },
+  {
+   "case": "s4_make_unique_local",
+   "kind": "make_unique+local_update",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 4.616050692080683e-07,
+   "checks": 52,
+   "failed": [],
+   "edit_report": [
+    {
+     "op": "edit_definition",
+     "part": "shaker-r30/stile_left",
+     "propagate": false,
+     "definition_instances_before": 2,
+     "definition": "ShakerDef_shaker-r30_def:stile_left:60.000x18.000x714.000#1",
+     "definition_instances_after": 1
+    }
+   ]
+  },
+  {
+   "case": "s5_edit_propagate",
+   "kind": "definition_edit_propagates_when_explicit",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 4.616050692080683e-07,
+   "checks": 50,
+   "failed": [],
+   "edit_report": [
+    {
+     "op": "edit_definition",
+     "part": "shaker-r30/rail_top",
+     "propagate": true,
+     "definition_instances_before": 2,
+     "definition": "ShakerDef_shaker-r30_def:rail_top:474.000x18.000x60.000",
+     "definition_instances_after": 2
+    }
+   ]
+  },
+  {
+   "case": "s6_set_material_panel",
+   "kind": "local_material_update",
+   "request_id": "shaker-r30",
+   "signature": "30dc73bbb2d1f1164b615c0673777f4e69204cea0977267c10e3554a5fb73f4a",
+   "ok": true,
+   "max_corner_error_m": 0.0,
+   "checks": 1,
+   "failed": []
+  },
+  {
+   "case": "s7_ruby_refuses_stale_parent",
+   "kind": "negative_parent_missing_in_model",
+   "request_id": "shaker-neg",
+   "signature": "c3ced65dd329a0b3788fe152fe38c6d3681746784ad988f4886e4934798dbae5",
+   "ok": true,
+   "max_corner_error_m": null,
+   "checks": 1,
+   "failed": []
+  },
+  {
+   "case": "s8_ruby_refuses_changed_parent_signature",
+   "kind": "negative_parent_signature_changed",
+   "request_id": "shaker-neg-c",
+   "signature": "4a34cca2281b8d1c96d26dd320d167195702a80701aba7143f4c18ef9cfc0644",
+   "ok": true,
+   "max_corner_error_m": null,
+   "checks": 1,
+   "failed": []
+  },
+  {
+   "case": "n1_inspect_protected_skp_leaves_no_trash",
+   "kind": "negative_scratch_policy",
+   "request_id": "shaker-neg-c",
+   "signature": "4a34cca2281b8d1c96d26dd320d167195702a80701aba7143f4c18ef9cfc0644",
+   "ok": true,
+   "max_corner_error_m": null,
+   "checks": 3,
+   "failed": []
+  }
+ ],
+ "pids": [
+  5720,
+  35744,
+  33336,
+  14952,
+  22844,
+  35484,
+  2796,
+  36596,
+  34652,
+  10796,
+  34456,
+  3164,
+  32576,
+  33636,
+  35600,
+  24372,
+  32680,
+  29136,
+  19976,
+  30824,
+  9160,
+  34488,
+  25496,
+  9844,
+  33188,
+  34268,
+  16556,
+  6360,
+  21768,
+  34948
+ ],
+ "outputs_sha256": {
+  "s1_one_door_r0/parent.skp": "5aa6ed9190bf0865e31f9664aa75ee58605cb5d406f1bbb1d32ec4dc5d0b38b2",
+  "s1_one_door_r0/shaker.skp": "2ee37a73daccedd571153bb20ee528653a4c181b2371ccc25ad851a9a04d2fe2",
+  "s1_one_door_r90/parent.skp": "e3dedabf34ec500f737a3ef2962ee9141d99558221ca055b16a5e3ed2eef19a5",
+  "s1_one_door_r90/shaker.skp": "79c7eb42d260686d158bc7620f93e58ed24c928636efb6fd259352f7832700e9",
+  "s1_one_door_r30/parent.skp": "2ca853090a4433b5ea6f4cb2373dc3230bb671b3553a62d69ac44ad2ce3eaf88",
+  "s1_one_door_r30/shaker.skp": "f236ba6d67a8f4766397d55c8a9329876a1452cbd6533cfc79f7caad374c47b1",
+  "s2_two_doors_r30/parent.skp": "1b68c632cdee248d77adda3f0bc214e1d8815937b07257408f5b500af4c8df69",
+  "s2_two_doors_r30/left.skp": "88adba8b0ff303879b073b140e16014d9eb62af987c86ccb6115213ce69ddf41",
+  "s2_two_doors_r30/right.skp": "d7926622b94b1cd5f391cb617fbed6824ae6dcc0046a2339c59b552e3b91d811",
+  "s3_idempotent_rebuild/shaker_again.skp": "06a5417da0906f844e3585e2e78978a10efe7ed893da7476754ad4546b2a59cb",
+  "s4_make_unique_local/edit.skp": "40f913a20bb2b07643dc23ef3d07cedc6368260f41c8d34cf8155ebea4e1cc7b",
+  "s5_edit_propagate/edit.skp": "122e3074922d76ade868431282ea157c1dc71ec69bded3d27c3da9dbc1706ae7",
+  "s6_set_material_panel/edit.skp": "b945ce9e16ab45a48601eac0fc190346b790d756060110ff020af243af6ce6bc",
+  "s7_ruby_refuses_stale_parent/parent.skp": "04ffd818d137c06fa348a9197fd97b4a43bfc02b98a6d5ffb6def050d899bc27",
+  "s8_ruby_refuses_changed_parent_signature/parent.skp": "30d575a997d887fab4f90b2be63782821666e60e6e487340ba52fc8150cd8c29"
+ },
+ "sketchup_version": "26.0.429",
+ "grain": {
+  "state": "NOT_SUPPORTED",
+  "note": "sem textura/UV: o veio fica como atributo, nao aplicado"
+ },
+ "scope_note": "SINTETICO: pai valid_a_base_600; nenhuma cozinha real, ferragem, gaveta ou veredito visual (L3 PENDING_HUMAN)"
+}
