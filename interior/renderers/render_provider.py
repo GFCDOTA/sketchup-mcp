@@ -1,70 +1,23 @@
-"""render_provider.py — Interior RenderProvider abstraction (Fase 4). Interface comum
-p/ renderizar um layout/movel num .skp + PNGs, SEM acoplar o codigo a um renderizador
-especifico. Hoje so o SketchUpBasicProvider e funcional; Enscape/V-Ray sao stubs
-documentados (Fase 5 spike decide se/como automatizar).
+"""Fachada FP-042/R6: implementacao unica em `tools.rendering.providers.render_provider`.
 
-Contrato: RenderRequest (boxes/skp + camera/render_type + saidas) -> RenderResult
-(status success/fail/skipped + paths + timing + base_intact + log). Determinismo do
-artefato canonico: a base .skp NUNCA e mutada (build numa COPIA; hash conferido)."""
+Preserva `import interior.renderers.render_provider`, `python -m interior.renderers.render_provider` e `python interior/renderers/render_provider.py`; nada de logica aqui.
+Consumidor da fachada: compatibilidade de caminho antigo. Remover quando nenhum restar.
+"""
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-# tipos de render suportados (camera preset)
-RENDER_TYPES = ("top", "iso", "front", "closeup", "perspective")
+_TARGET = "tools.rendering.providers.render_provider"
+if __name__ == "__main__":
+    import runpy
 
+    runpy.run_module(_TARGET, run_name="__main__", alter_sys=True)
+else:
+    import importlib
 
-@dataclass
-class RenderRequest:
-    """Pedido de render. `boxes` = layout (lista de boxes do place_layout/build_furniture);
-    se None, usa um .skp ja pronto em `in_skp`. `renderer` escolhe o .rb: 'layout' (shell
-    da planta, place_layout_skp.rb) ou 'furniture' (movel standalone, build_furniture_skp.rb)."""
-    boxes: list | None
-    out_skp: str                       # onde salvar o .skp gerado
-    renders: dict = field(default_factory=dict)   # render_type -> output PNG path
-    renderer: str = "layout"           # 'layout' | 'furniture'
-    zoom_group: bool = False           # enquadrar so o grupo de moveis (LAYOUT_ZOOM_GROUP)
-    base_skp: str | None = None        # shell a copiar (nunca mutado); default = planta_74 base
-    in_skp: str | None = None          # .skp pronto (quando boxes=None) — futuro
-    label: str = "render"
-    # exposicao V-Ray (corrige interior subexposto do export default exterior)
-    iso: int = 200
-    fnum: float = 4.0
-    shutter: int = 100
-    sky: float = 1.2
-
-
-@dataclass
-class RenderResult:
-    status: str                        # success | fail | skipped
-    provider: str
-    skp: str | None = None
-    renders: dict = field(default_factory=dict)   # render_type -> path (existente)
-    timing_s: float = 0.0
-    base_intact: bool = True
-    log: str = ""
-    error: str = ""
-
-    def ok(self):
-        return self.status == "success"
-
-
-class RenderProvider(ABC):
-    """Interface de renderizador. Implementacoes: SketchUpBasic (funcional), Enscape/V-Ray (stubs)."""
-
-    name: str = "abstract"
-
-    @abstractmethod
-    def available(self) -> bool:
-        """O renderizador esta instalado/automatizavel neste ambiente?"""
-
-    @abstractmethod
-    def render(self, req: RenderRequest) -> RenderResult:
-        """Materializa o .skp + PNGs. NUNCA muta a base (build numa copia, confere hash)."""
-
-    def skipped(self, req: RenderRequest, why: str) -> RenderResult:
-        return RenderResult(status="skipped", provider=self.name, error=why)
+    sys.modules[__name__] = importlib.import_module(_TARGET)

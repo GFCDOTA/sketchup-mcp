@@ -1,26 +1,23 @@
-"""enscape_preview_provider.py — STUB documentado (Fase 4). Enscape e candidato a PREVIEW
-visual rapido (layout/escala/composicao/iluminacao basica — "parece um quarto real?"),
-NAO acabamento premium (isso e V-Ray, Fase 8).
+"""Fachada FP-042/R6: implementacao unica em `tools.rendering.providers.enscape_preview_provider`.
 
-NAO IMPLEMENTADO: a viabilidade de automacao depende da SPIKE da Fase 5. Perguntas abertas
-(a spike responde honestamente, sem inventar API):
-  - Enscape tem CLI / Ruby command confiavel p/ renderizar SEM UI?
-  - da p/ escolher camera/preset e salvar PNG automaticamente (batch)?
-  - onde ficam os outputs? quais limitacoes (licenca, foco de janela, GPU)?
-Recomendacao provavel ate a spike: PREVIEW manual OU adapter via Ruby se houver comando.
+Preserva `import interior.renderers.enscape_preview_provider`, `python -m interior.renderers.enscape_preview_provider` e `python interior/renderers/enscape_preview_provider.py`; nada de logica aqui.
+Consumidor da fachada: compatibilidade de caminho antigo. Remover quando nenhum restar.
 """
 from __future__ import annotations
 
-from interior.renderers.render_provider import RenderProvider, RenderRequest, RenderResult
+import sys
+from pathlib import Path
 
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-class EnscapePreviewProvider(RenderProvider):
-    name = "enscape_preview"
+_TARGET = "tools.rendering.providers.enscape_preview_provider"
+if __name__ == "__main__":
+    import runpy
 
-    def available(self) -> bool:
-        return False   # ate a spike da Fase 5 provar automacao
+    runpy.run_module(_TARGET, run_name="__main__", alter_sys=True)
+else:
+    import importlib
 
-    def render(self, req: RenderRequest) -> RenderResult:
-        raise NotImplementedError(
-            "EnscapePreviewProvider e stub — automacao depende da spike da Fase 5 "
-            "(docs/spikes/render_and_asset_providers.md). Nao inventar API.")
+    sys.modules[__name__] = importlib.import_module(_TARGET)

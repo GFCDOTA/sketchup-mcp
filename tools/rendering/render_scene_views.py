@@ -133,8 +133,8 @@ def _render_su(scene, parts, out_dir):
     if _su_running():
         return {"status": "skipped", "reason": "SketchUp em uso (no-disrupt) — feche o SU e rode de novo"}
     try:
-        from interior.renderers.render_provider import RenderRequest
-        from interior.renderers.sketchup_basic_provider import SketchUpBasicProvider
+        from tools.rendering.providers.render_provider import RenderRequest
+        from tools.rendering.providers.sketchup_basic_provider import SketchUpBasicProvider
     except Exception as e:  # noqa: BLE001
         return {"status": "skipped", "reason": f"provider indisponivel: {e}"}
     prov = SketchUpBasicProvider()

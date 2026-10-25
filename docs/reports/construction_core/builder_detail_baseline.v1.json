@@ -58,8 +58,8 @@
     },
     "tools/rooms/shared/decor_builders.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 42,
-      "distinct": 26,
+      "embedded_float_literals": 0,
+      "distinct": 0,
       "module_float_constants": 0
     },
     "tools/rooms/living/rack_class.py": {
@@ -93,5 +93,5 @@
       "module_float_constants": 100
     }
   },
-  "total_gen1": 342
+  "total_gen1": 300
 }
