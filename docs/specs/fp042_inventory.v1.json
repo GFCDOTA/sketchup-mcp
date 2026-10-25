@@ -8730,6 +8730,20 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
+      "path": "artifacts/review/fp054/f3_benchmark/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_2026-10-25.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
       "path": "artifacts/review/fp055/p4/run_p4.py",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -15034,6 +15048,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_fp054_f3_solver_benchmark.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_fp055_gates_in_flow.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -20381,6 +20404,15 @@
     },
     {
       "path": "tools/validation/soft_barrier_source_audit.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/validation/solver_benchmark.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
