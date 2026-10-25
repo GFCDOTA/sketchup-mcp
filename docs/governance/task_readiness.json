@@ -49,13 +49,6 @@
       "ref": "#524",
       "detail": "medicao completa e sem executar mais nada seguro: candidatos (PR 560), obstaculos (PR 567) e geometria adversarial (esta PR; pior caso ~3,3x o tempo limpo a 1000 obstaculos, linear, RSS 52-60 MB). O que falta - otimizar/extrair modulos de tools/rooms/shared/spatial_solver/ (caminho critico: exige revisao independente) e ADR antes de OR-Tools/scipy - nao tem meta definida pelos dados (sem budget); outra maquina e contagem fora de plan_room seguem como medicoes opcionais"
     },
-    "463": {
-      "audited_at": "2026-10-25",
-      "state": "BLOCKED",
-      "cause": "HUMAN_DECISION",
-      "ref": "#463",
-      "detail": "escopo com logica movido (placement PR 553, renderers PR 566, scene_composer PR 569); o que sobra em interior/ sao fachadas e dados, e remove-las nao tem ganho de produto (Constituicao #5): aguarda concordancia do Felipe para fechar a Issue"
-    },
     "460": {
       "audited_at": "2026-10-25",
       "state": "READY",
@@ -74,13 +67,6 @@
           "detail": "refazer o L2 exige SketchUp real em commit limpo (l2_matrix.py, sem MCP) numa sessao com SketchUp aberto"
         }
       ]
-    },
-    "462": {
-      "audited_at": "2026-10-25",
-      "state": "BLOCKED",
-      "cause": "EVIDENCE",
-      "ref": "docs/specs/construction_core_microphases.md",
-      "detail": "builders Gen1 com geometria fora de prova L2 concluidos (decor, rack, mesa de centro, mesa de jantar; baseline 491 -> 193); restam sofa_class (derive_living_sofa tem prova L2: mudar o fecho exige refazer o L2 em commit limpo, R-18, e veredito visual do Felipe) e armchair_class (so limiares de gate, tolerancias e fixtures de autoteste, nao geometria)"
     },
     "473": {
       "audited_at": "2026-10-25",
