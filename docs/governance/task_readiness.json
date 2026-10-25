@@ -113,7 +113,7 @@
     "457": {
       "audited_at": "2026-10-25",
       "state": "READY",
-      "next_step": "Smoke dos launchers legados alterados no PR #296 (dez entradas .cmd/PowerShell) com uma janela humana aberta e um job do MCP, provando que so o PID do job e encerrado; e repetir o cliente real com Claude Code/Node. Os 8 su_* e o isolamento via MCP ja estao provados (comentario em #457, 2026-10-25).",
+      "next_step": "Dos 10 launchers do PR #296, render_room.ps1 e furnish_plan.py tinham raiz morta (E:\\Claude\\sketchup-mcp[-mobiliar]) e foram corrigidos; render_room.ps1 ja passou no smoke real (2026-10-25). Falta rodar o smoke dos demais launchers CLI (place_bedroom_skp, place_layout_skp, furnish_plan, render_banho_vray, kitchen vray, bake_theme) com a janela humana aberta e medir saida normal e de erro/timeout; o MCP atual ja esta fresco (runtime_identity OK) mas fica velho a cada fast-forward de develop: reiniciar o servidor e tarefa do app/usuario.",
       "offline": false,
       "needs_sketchup": true,
       "completion_blockers": [
