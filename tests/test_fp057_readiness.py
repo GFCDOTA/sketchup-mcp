@@ -10,7 +10,7 @@ from tools.validation import task_readiness as tr
 
 ROOT = Path(__file__).resolve().parents[1]
 ACC = "## Critérios de aceite\n- [ ] x\n"
-AUDITED = (429, 416, 436, 453, 457, 463, 460, 462, 473, 476)       # 501 fechou com evidencia (PRs 547/559): sai do registro
+AUDITED = (429, 416, 436, 453, 457, 460, 473, 476)       # 501, 462 e 463 fecharam com evidencia: saem do registro
 
 
 def issue(n, labels=(), kind="task", state="OPEN"):
