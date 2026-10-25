@@ -18,7 +18,7 @@ from pathlib import Path
 from shapely.geometry import Polygon
 from shapely.ops import polylabel
 
-ROOT = Path(r"E:\Claude\sketchup-mcp")
+ROOT = Path(__file__).resolve().parents[1]   # raiz do repo (a antiga E:\Claude\sketchup-mcp nao existe mais)
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
 CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
