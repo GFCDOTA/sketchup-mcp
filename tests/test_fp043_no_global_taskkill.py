@@ -22,8 +22,8 @@ MIGRATED_PY = (
     "tools/rooms/bathroom/capabilities/render_banho_vray.py",
     "tools/rooms/kitchen/capabilities/vray.py",
     "tools/rooms/kitchen/capabilities/bake_theme.py",
-    "interior/renderers/sketchup_basic_provider.py",
-    "interior/renderers/vray_final_provider.py",
+    "tools/rendering/providers/sketchup_basic_provider.py",
+    "tools/rendering/providers/vray_final_provider.py",
 )
 
 

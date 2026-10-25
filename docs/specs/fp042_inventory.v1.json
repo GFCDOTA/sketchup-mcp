@@ -13270,46 +13270,46 @@
     {
       "path": "interior/renderers/__init__.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/enscape_preview_provider.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/render_provider.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/sketchup_basic_provider.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/vray_final_provider.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
@@ -20629,6 +20629,60 @@
     },
     {
       "path": "tests/test_decor_spec_origin.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tools/rendering/providers/__init__.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/rendering/providers/enscape_preview_provider.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/rendering/providers/render_provider.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/rendering/providers/sketchup_basic_provider.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/rendering/providers/vray_final_provider.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tests/test_renderers_facade_identity.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",

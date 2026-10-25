@@ -79,8 +79,8 @@ def build_matrix(out_dir):
 def build_matrix_skp(out_skp, cols=3, pitch_x=4.0, pitch_y=3.2):
     """SKP REAL da matriz: as 9 variantes derivadas, em grade no chao (showroom).
     Reusa o provider SU (no-disrupt: pula se SketchUp aberto)."""
-    from interior.renderers.render_provider import RenderRequest
-    from interior.renderers.sketchup_basic_provider import SketchUpBasicProvider
+    from tools.rendering.providers.render_provider import RenderRequest
+    from tools.rendering.providers.sketchup_basic_provider import SketchUpBasicProvider
     from tools.rooms.shared.parts import parts_to_boxes
     boxes = []
     for i, (name, kw) in enumerate(MATRIX):
