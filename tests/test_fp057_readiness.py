@@ -45,15 +45,19 @@ def test_without_a_registry_entry_behaviour_is_unchanged():
     assert verdicts([1, 2], None)[1].eligible and verdicts([1, 2], {})[2].next_step is None
 
 
-def test_real_registry_covers_the_ten_audited_issues_with_concrete_steps():
+def test_real_registry_covers_the_ten_audited_issues_and_every_entry_is_actionable_or_traced():
     reg = tr.load()
     assert set(AUDITED) <= set(reg)
     for n in AUDITED:
         e = reg[n]
-        assert e["state"] == "READY" and len(e["next_step"]) > 40 and isinstance(e["offline"], bool) and isinstance(e["needs_sketchup"], bool)
-        assert not (e["offline"] and e["needs_sketchup"])
+        if e["state"] == "READY":
+            assert len(e["next_step"]) > 40 and isinstance(e["offline"], bool) and isinstance(e["needs_sketchup"], bool)
+            assert not (e["offline"] and e["needs_sketchup"])
+        else:
+            assert e["state"] == "BLOCKED" and e["cause"] in tr.CAUSES and e["ref"] and e["detail"]
     v = verdicts(AUDITED, reg)
-    assert all(v[n].eligible and v[n].next_step for n in AUDITED)
+    assert all(v[n].eligible and v[n].next_step for n in AUDITED if reg[n]["state"] == "READY")
+    assert all(not v[n].eligible and reg[n]["cause"] in v[n].reasons[0] for n in AUDITED if reg[n]["state"] == "BLOCKED")
 
 
 def test_catalog_and_workflow_adjacent_issues_declare_review_as_completion_blocker():
@@ -61,7 +65,7 @@ def test_catalog_and_workflow_adjacent_issues_declare_review_as_completion_block
     for n in (429, 460, 453):
         assert any(b["cause"] == "REVIEW" and b["ref"] == "#524" for b in reg[n]["completion_blockers"]), n
     assert any(b["cause"] == "ENVIRONMENT" for b in reg[460]["completion_blockers"])      # L2 exige SketchUp real
-    assert any(b["cause"] == "EVIDENCE" for b in reg[473]["completion_blockers"])         # sem reference_target aprovado
+    assert reg[473]["cause"] == "EVIDENCE" and reg[476]["cause"] == "EVIDENCE"                # sem reference_target aprovado
 
 
 def test_every_file_ref_in_the_real_registry_exists_and_issue_refs_are_well_formed():

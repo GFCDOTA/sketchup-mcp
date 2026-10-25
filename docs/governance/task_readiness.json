@@ -9,29 +9,38 @@
       "offline": true,
       "needs_sketchup": false,
       "completion_blockers": [
-        {"cause": "REVIEW", "ref": "#524", "detail": "tools/rooms/capability_catalog.v1.json e caminho critico: o merge exige revisao independente e reviewers esta vazio"}
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "tools/rooms/capability_catalog.v1.json e caminho critico: o merge exige revisao independente e reviewers esta vazio"
+        }
       ]
     },
     "416": {
       "audited_at": "2026-10-25",
       "state": "READY",
-      "next_step": "Micro-prova L1 (PROPOSED) de tecnica compartilhada em 2 componentes: plan_cabinet de shared.cabinet.parametric com medidas de criado-mudo (origin=derived do NightstandSpec) ao lado do uso da cozinha, sem entrega ao apartamento.",
       "offline": true,
       "needs_sketchup": false,
+      "next_step": "Ligar recipe_resolution ao plan_room: registrar no ledger e na proposta a cadeia receita -> capacidade -> operacao -> prova de cada recipe do especialista (RESOLVED_*/BLOCKED_*), com teste de contrato; sem executar operacao nem tocar simbolo L2.",
       "completion_blockers": [
-        {"cause": "EVIDENCE", "ref": "artifacts/reference_lab/targets/planta_74/r004/kitchen_base_001.target.v1.json", "detail": "entrega em movel real exige reference_target aprovado; so existe o da cozinha, em DRAFT_BLOCKED"},
-        {"cause": "REVIEW", "ref": "#524", "detail": "ligar recipe_resolution ao plan_room mexe em tools/orchestration/intelligent_pipeline.py (caminho critico)"}
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "tools/orchestration/intelligent_pipeline.py e caminho critico: o merge exige revisao independente"
+        },
+        {
+          "cause": "EVIDENCE",
+          "ref": "docs/specs/construction_core_microphases.md",
+          "detail": "usar a tecnica em movel REAL do apartamento exige reference_target aprovado (DoD 2.5); a micro-prova PROPOSED ja existe (PR 556)"
+        }
       ]
     },
     "436": {
       "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Avaliar CEILING e SUSPENDED_INTENTIONAL no gemeo: Pendente toca o teto (2,70 m), PeleTeto fica a 0,14 m e Varal de teto a 0,62 m; registrar como achados medidos no snapshot de tests/test_fp056_p4_support_check.py.",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": [
-        {"cause": "HUMAN_DECISION", "ref": "docs/reports/fp056/p4/p4b.md", "detail": "26 modulos sem modo declarado (Criado-mudo suspenso a 0,30 m, Condensadora, Box/Bancada compostos) e a correcao da bandeja do Lavabo mudam aparencia ou o baseline: decisao do proprietario"}
-      ]
+      "state": "BLOCKED",
+      "cause": "HUMAN_DECISION",
+      "ref": "docs/reports/fp056/p4/p4c.md",
+      "detail": "CEILING/SUSPENDED medidos (PR 555); restam 26 modulos sem modo declarado, a bandeja do Lavabo e a pele de teto a 14 cm (forro rebaixado intencional?): mudam aparencia ou o baseline, decisao do proprietario"
     },
     "453": {
       "audited_at": "2026-10-25",
@@ -40,8 +49,16 @@
       "offline": true,
       "needs_sketchup": false,
       "completion_blockers": [
-        {"cause": "REVIEW", "ref": "#524", "detail": "qualquer mudanca em tools/rooms/shared/spatial_solver/ (otimizacao, extracao de modulos) e caminho critico"},
-        {"cause": "EVIDENCE", "ref": "docs/specs/FP-054-F3_modularization_dsa.md", "detail": "ADR obrigatorio antes de adotar OR-Tools/scipy; metas so a partir de baseline medido"}
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "qualquer mudanca em tools/rooms/shared/spatial_solver/ (otimizacao, extracao de modulos) e caminho critico"
+        },
+        {
+          "cause": "EVIDENCE",
+          "ref": "docs/specs/FP-054-F3_modularization_dsa.md",
+          "detail": "ADR obrigatorio antes de adotar OR-Tools/scipy; metas so a partir de baseline medido"
+        }
       ]
     },
     "501": {
@@ -51,13 +68,17 @@
       "offline": true,
       "needs_sketchup": false,
       "completion_blockers": [
-        {"cause": "HUMAN_DECISION", "ref": "#446", "detail": "a escolha da alternativa e do proprietario; esta Issue so entrega as alternativas medidas"}
+        {
+          "cause": "HUMAN_DECISION",
+          "ref": "#446",
+          "detail": "a escolha da alternativa e do proprietario; esta Issue so entrega as alternativas medidas"
+        }
       ]
     },
     "463": {
       "audited_at": "2026-10-25",
       "state": "READY",
-      "next_step": "Mover o nucleo compartilhado de colocacao (room_graph, wall_affordance, placement_brain) de interior/ para tools/rooms/shared/placement/ mantendo fachadas de identidade; consumidores de producao (sala e quarto) apontam para o dono novo; ownership e suite verdes. Proximo apos este: scene_composer e renderers.",
+      "next_step": "Proxima peca de interior/: mover interior/renderers/ para tools/rendering/ (consumidores: tools/rendering/render_scene_*.py e living/capabilities/sofa_class_matrix.py) mantendo fachadas de identidade; depois scene_composer (transversal). Placement core ja movido (PR 553).",
       "offline": true,
       "needs_sketchup": false,
       "completion_blockers": []
@@ -69,8 +90,16 @@
       "offline": true,
       "needs_sketchup": false,
       "completion_blockers": [
-        {"cause": "REVIEW", "ref": "#524", "detail": "cabinet.sketchup.inspect e simbolo L2: o PR revoga a evidencia no capability_catalog.v1.json (caminho critico)"},
-        {"cause": "ENVIRONMENT", "ref": "artifacts/review/fp043/p6b_cabinet_l2/README.md", "detail": "refazer o L2 exige SketchUp real em commit limpo (l2_matrix.py, sem MCP) numa sessao com SketchUp aberto"}
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "cabinet.sketchup.inspect e simbolo L2: o PR revoga a evidencia no capability_catalog.v1.json (caminho critico)"
+        },
+        {
+          "cause": "ENVIRONMENT",
+          "ref": "artifacts/review/fp043/p6b_cabinet_l2/README.md",
+          "detail": "refazer o L2 exige SketchUp real em commit limpo (l2_matrix.py, sem MCP) numa sessao com SketchUp aberto"
+        }
       ]
     },
     "462": {
@@ -83,23 +112,17 @@
     },
     "473": {
       "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Micro-prova L1 (PROPOSED) do criado-mudo como gabinete parametrico pequeno: mesma capacidade e versao de shared.cabinet.parametric usadas em dois comodos, sem substituir o criado-mudo da planta.",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": [
-        {"cause": "EVIDENCE", "ref": "docs/specs/construction_core_microphases.md", "detail": "DoD 2.5: peca entregue em movel real exige reference_target aprovado; nao ha alvo do criado-mudo (entrega fica em PROPOSED)"}
-      ]
+      "state": "BLOCKED",
+      "cause": "EVIDENCE",
+      "ref": "docs/specs/construction_core_microphases.md",
+      "detail": "micro-prova L1 PROPOSED feita (PR 556); entrega do criado-mudo no apartamento exige reference_target aprovado (DoD 2.5), inexistente"
     },
     "476": {
       "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Micro-prova L1 (PROPOSED) do armario de lavanderia reusando a carcaca shared.cabinet e frente lisa/Shaker, sem alterar a Area de Servico.",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": [
-        {"cause": "EVIDENCE", "ref": "docs/specs/construction_core_microphases.md", "detail": "DoD 2.5: sem reference_target aprovado do armario de lavanderia a entrega no apartamento nao e permitida"}
-      ]
+      "state": "BLOCKED",
+      "cause": "EVIDENCE",
+      "ref": "docs/specs/construction_core_microphases.md",
+      "detail": "micro-prova L1 PROPOSED feita (PR 556); entrega do armario de lavanderia no apartamento exige reference_target aprovado (DoD 2.5), inexistente"
     }
   }
 }
