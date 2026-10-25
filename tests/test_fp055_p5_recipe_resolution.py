@@ -38,3 +38,28 @@ def test_the_three_concepts_come_from_different_stores_and_resolution_never_auth
 def test_shared_techniques_count_is_measured_not_assumed():
     shared = rr.shared_techniques()
     assert all(len(rooms) >= 2 for rooms in shared.values())
+
+
+# ------------------------------------------------------------------ ligacao ao orquestrador (plan_room): a receita nao e mais so "selecionada"
+def _plan_room_bathroom():
+    from core.pipeline_contracts import CapabilityLedger
+    from tests.test_fp054_f2c_candidates import ROOM, _scene
+    from tools.orchestration import intelligent_pipeline as ip
+    con, boxes, ifaces = _scene()
+    led = CapabilityLedger()
+    return ip.plan_room(con, boxes, ifaces, "r_syn", "BATHROOM", ROOM, "tools.rooms.bathroom.layout.build_boxes", led), led
+
+
+def test_plan_room_carries_the_recipe_resolution_and_records_it_in_the_ledger_trail():
+    out, led = _plan_room_bathroom()
+    res = out["recipe_resolution"]
+    assert {r["recipe_id"] for r in res} == {"cabinet.materials-and-texture-direction", "cabinet.sink-and-wet-channel-cutouts"}
+    assert {r["state"] for r in res} == {"UNBOUND"}                      # banheiro: nenhuma receita tem binding hoje - fica visivel
+    trail = led.to_dict()["recipe.cabinet.sink-and-wet-channel-cutouts"]["trail"]
+    assert "UNBOUND" in next(e["evidence"] for e in trail if e["state"] == "SELECTED")
+
+
+def test_recipe_resolution_never_executes_anything_nor_promotes_a_recipe_to_consumed():
+    out, led = _plan_room_bathroom()
+    assert led.state("recipe.cabinet.sink-and-wet-channel-cutouts") == "SELECTED"          # resolver nao e consumir
+    assert all(r.get("capability") is None or r["state"].startswith("RESOLVED") for r in out["recipe_resolution"])
