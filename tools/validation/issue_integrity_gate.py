@@ -52,6 +52,9 @@ def check(issues: dict[int, dict], specs: set[str], exceptions: dict | None = No
     if readiness:
         from tools.validation import task_readiness
         for code, n, detail in task_readiness.validate(readiness, issues):
+            if code == "READINESS_STALE":      # Issue fechada: AVISO (nao reprova): fechar uma Issue nao pode quebrar o CI de PRs alheios
+                print(f"aviso: #{n} READINESS_STALE: {detail}")
+                continue
             found.append(Finding(n, code, detail))
         for n, e in sorted(readiness.items()):
             iss = issues.get(n)

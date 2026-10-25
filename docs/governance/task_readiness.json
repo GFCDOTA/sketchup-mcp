@@ -45,7 +45,7 @@
     "453": {
       "audited_at": "2026-10-25",
       "state": "READY",
-      "next_step": "Benchmark de referencia do solver F2 e dos gates quentes (p50/p95 e pico de memoria; 1/10/100 candidatos, 10/100/1000 obstaculos) registrado com hardware e SHA, sem alterar o solver.",
+      "next_step": "Proxima fatia da F3: dimensao obstaculos (10/100/1000) em cenas sinteticas e contagem de intersection/buffer/unary_union nos gates quentes, estendendo solver_benchmark. A linha de base por candidatos ja existe (PR 560).",
       "offline": true,
       "needs_sketchup": false,
       "completion_blockers": [
@@ -61,20 +61,6 @@
         }
       ]
     },
-    "501": {
-      "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Rodar o F2 em BANHO 01 e BANHO 02 com abertura livre do box de 0,60 e 0,70 m (porta de abrir/pivotante, sem folha de correr) e registrar a errata da analise de R6 (a abertura com porta de correr nunca passa de frente/2).",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": [
-        {
-          "cause": "HUMAN_DECISION",
-          "ref": "#446",
-          "detail": "a escolha da alternativa e do proprietario; esta Issue so entrega as alternativas medidas"
-        }
-      ]
-    },
     "463": {
       "audited_at": "2026-10-25",
       "state": "READY",
@@ -86,7 +72,7 @@
     "460": {
       "audited_at": "2026-10-25",
       "state": "READY",
-      "next_step": "Teste vermelho: cabinet.sketchup.inspect grava _<stem>_inspect ao lado do .skp (inclusive protegido); extrair scratch_dir(src, rotulo) comum com o Shaker e fazer o teste passar.",
+      "next_step": "PR 558 aberto com a mudanca, o L2 refeito (cabinet 14/14, Shaker 11/11) e a evidencia restaurada; resta a revisao independente.",
       "offline": true,
       "needs_sketchup": false,
       "completion_blockers": [

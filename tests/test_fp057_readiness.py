@@ -11,7 +11,7 @@ from tools.validation import task_readiness as tr
 
 ROOT = Path(__file__).resolve().parents[1]
 ACC = "## Critérios de aceite\n- [ ] x\n"
-AUDITED = (429, 416, 436, 453, 501, 463, 460, 462, 473, 476)
+AUDITED = (429, 416, 436, 453, 463, 460, 462, 473, 476)       # 501 fechou com evidencia (PRs 547/559): sai do registro
 
 
 def issue(n, labels=(), kind="task", state="OPEN"):
@@ -45,7 +45,7 @@ def test_without_a_registry_entry_behaviour_is_unchanged():
     assert verdicts([1, 2], None)[1].eligible and verdicts([1, 2], {})[2].next_step is None
 
 
-def test_real_registry_covers_the_ten_audited_issues_and_every_entry_is_actionable_or_traced():
+def test_real_registry_covers_the_audited_issues_and_every_entry_is_actionable_or_traced():
     reg = tr.load()
     assert set(AUDITED) <= set(reg)
     for n in AUDITED:
@@ -97,10 +97,11 @@ def test_validate_rejects_untraceable_or_stale_entries():
     assert codes({1: entry(completion_blockers=[{"cause": "REVIEW", "ref": "#524", "detail": "ok"}])}, open_) == set()
 
 
-def test_integrity_gate_flags_ready_entry_on_a_blocked_issue_and_stale_entries():
+def test_integrity_gate_flags_ready_entry_on_a_blocked_issue_but_a_stale_entry_is_only_a_warning(capsys):
     issues = {1: issue(1, ["blocked", "bloqueio:technical"]), 2: issue(2, state="CLOSED")}
-    got = {f.code for f in ig.check(issues, set(), None, {1: entry(), 2: entry()})}
-    assert {"READINESS_READY_BUT_BLOCKED", "READINESS_STALE"} <= got
+    got = {(f.code, f.issue) for f in ig.check(issues, set(), None, {1: entry(), 2: entry()})}
+    assert got == {("READINESS_READY_BUT_BLOCKED", 1)}                       # fechar uma Issue nao quebra o CI dos outros PRs
+    assert "aviso: #2 READINESS_STALE" in capsys.readouterr().out
 
 
 def test_summary_counts_ready_blocked_pending_review_and_environment_separately():
