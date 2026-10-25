@@ -97,6 +97,57 @@ def test_single_case_runs_on_the_real_lavabo_and_reports_candidates_and_status()
     json.dumps(res)
 
 
+TPL = {"room": "R", "module": "M", "kind": "k", "corners": [[0, 0]], "h_in": 99.0}
+
+
+@pytest.mark.parametrize("kind", sb.ADVERSARIAL_MODES)
+def test_adversarial_boxes_are_deterministic_have_the_requested_count_and_leave_the_template_alone(kind):
+    a, b = sb.adversarial_boxes(TPL, _cell(), 50, kind), sb.adversarial_boxes(TPL, _cell(), 50, kind)
+    assert a == b and len(a) == 50 and sb.adversarial_boxes(TPL, _cell(), 0, kind) == []
+    assert all(x["room"] == "SYNTH" and x["kind"] == "synth_adversarial" and len(x["corners"]) == 4 for x in a)
+    assert TPL == {"room": "R", "module": "M", "kind": "k", "corners": [[0, 0]], "h_in": 99.0}
+
+
+@pytest.mark.parametrize("n", [10, 40])        # o benchmark usa n >= 10; com 2 barras por orientacao sobram so as das bordas
+def test_long_bars_span_the_whole_neighborhood_and_cross_the_cell(n):
+    from shapely.geometry import Polygon
+    cell = _cell()
+    zone = cell.buffer(39.37)
+    minx, miny, maxx, maxy = zone.bounds
+    bars = sb.adversarial_boxes(TPL, cell, n, "long")
+    assert all(Polygon(b["corners"]).intersects(zone) for b in bars)
+    spans = [(b["x1"] - b["x0"], b["y1"] - b["y0"]) for b in bars]
+    assert all(round(max(w, h), 6) in (round(maxx - minx, 6), round(maxy - miny, 6)) and min(w, h) == 1.0 for w, h in spans)
+    assert sum(1 for b in bars if Polygon(b["corners"]).intersects(cell)) >= n // 4          # mesmo com poucas barras: cruzam o comodo, nao so a borda
+
+
+def test_stacked_boxes_overlap_each_other_inside_the_cell():
+    from shapely.geometry import Polygon
+    cell = _cell()
+    boxes = sb.adversarial_boxes(TPL, cell, 9, "stacked")
+    polys = [Polygon(b["corners"]) for b in boxes]
+    assert all(cell.contains(q) for q in polys)
+    assert all(polys[0].intersects(q) and polys[0].intersection(q).area > 0.5 * polys[0].area for q in polys[1:])
+
+
+def test_rotated_boxes_are_squares_turned_45_degrees_inside_the_cell():
+    import math
+
+    from shapely.geometry import Polygon
+    cell = _cell()
+    boxes = sb.adversarial_boxes(TPL, cell, 20, "rotated")
+    for b in boxes:
+        q = Polygon(b["corners"])
+        assert round(q.area, 6) == 36.0 and cell.buffer(1e-9).contains(q.centroid)
+        (x0, y0), (x1, y1) = b["corners"][0], b["corners"][1]
+        assert round(abs(math.degrees(math.atan2(y1 - y0, x1 - x0))), 6) == 45.0
+
+
+def test_unknown_adversarial_kind_is_refused():
+    with pytest.raises(ValueError):
+        sb.adversarial_boxes(TPL, _cell(), 5, "aleatorio")
+
+
 @pytest.mark.planta74_scale
 def test_obstacle_case_on_the_real_lavabo_adds_boxes_reports_calls_and_never_touches_the_plant():
     base = sb.run_case("r007", 10, repeats=1, count_calls=True)
@@ -104,4 +155,13 @@ def test_obstacle_case_on_the_real_lavabo_adds_boxes_reports_calls_and_never_tou
     assert res["boxes_real"] == base["boxes_real"] == res["boxes_total"] - 100
     assert res["obstacle_mode"] == "near" and set(res["shapely_calls"]) >= {"buffer", "intersection", "unary_union"}
     assert res["candidates_total"] == base["candidates_total"]               # o problema do solver nao muda; so as caixas
+    json.dumps(res)
+
+
+@pytest.mark.planta74_scale
+def test_adversarial_case_on_the_real_lavabo_runs_and_counts_more_intersections_than_the_clean_scene():
+    base = sb.run_case("r007", 10, repeats=1, count_calls=True)
+    res = sb.run_case("r007", 10, repeats=1, obstacles=100, mode="long", count_calls=True)
+    assert res["obstacle_mode"] == "long" and res["boxes_total"] == base["boxes_total"] + 100
+    assert res["shapely_calls"]["intersection"] > base["shapely_calls"]["intersection"]
     json.dumps(res)

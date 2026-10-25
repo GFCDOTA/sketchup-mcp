@@ -8439,6 +8439,18 @@
       "blob_sha": "da0a461d19900457508d68415c343b28a9c27fc2",
       "blob_size": 11598,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/README_adversarial_2026-10-25.md",
+      "blob_sha": "a976ab86b862d201263be0a5bad6c29bc7e3ce97",
+      "blob_size": 3893,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_adversarial_2026-10-25.json",
+      "blob_sha": "1004b749b53e832baefe7a64658fb70f6af02e17",
+      "blob_size": 14886,
+      "owner_group": "artifacts"
     }
   ]
 }
