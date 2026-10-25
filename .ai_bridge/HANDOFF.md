@@ -1,5 +1,8 @@
 # Handoff — sketchup-mcp
 
+> **2026-10-25 — checkpoint mais recente:** [`docs/handoffs/2026-10-25_fp057_checkpoint.md`](../docs/handoffs/2026-10-25_fp057_checkpoint.md)
+> (contagem real do backlog, PRs abertos com SHA/gate/comando de merge, retomada).
+
 > **2026-10-24 — LEIA PRIMEIRO:** orquestração autônoma do backlog (FP-057) e Quality Guardian em
 > [`docs/handoffs/2026-10-24_fp057_autonomous_orchestration_handoff.md`](../docs/handoffs/2026-10-24_fp057_autonomous_orchestration_handoff.md).
 > **Atenção (#533):** os checks `qg:*` passavam em falso até o PR 534 (pipefail) ser mergeado; PRs 534/535/539 aguardam revisão independente (#524).
