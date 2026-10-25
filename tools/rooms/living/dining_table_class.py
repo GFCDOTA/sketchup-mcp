@@ -61,6 +61,13 @@ RELATIONS = {
 }
 
 
+# Origem de cada proporcao de classe: valor declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+DINING_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "dark_shade", "apron_t", "hub_r_frac", "hub_t", "plate_shade", "oval_apron_inset_x", "oval_apron_y0", "oval_apron_y1",
+    "oval_leg_inset_x", "oval_leg_taper", "oval_span_w_frac", "chair_seat_t", "chair_back_offset", "chair_back_t",
+    "chair_pad_offset", "chair_pad_extra_w", "chair_pad_d", "chair_pad_z0", "chair_pad_z1", "ring_t", "ring_z0", "ring_z1")}
+
+
 @dataclass
 class DiningTableSpec:
     """X=comprimento, Y=largura (lados longos em y=0/y=W), Z=altura.
@@ -88,6 +95,29 @@ class DiningTableSpec:
     clearance_use: float = CLEAR_USE
     top_rgb: tuple = (118, 92, 68)
     base_rgb: tuple = (96, 76, 58)
+    # Proporcoes de CLASSE (antes literais no builder e nos satelites); origem em DINING_MEASURE_ORIGINS.
+    dark_shade: float = 0.7          # fator de tom da saia/hub
+    apron_t: float = 0.03            # rect: espessura de cada tira da saia
+    hub_r_frac: float = 0.12         # round: raio do hub sob o tampo (fracao do diametro)
+    hub_t: float = 0.035             # round: espessura do hub (e fim da coluna)
+    plate_shade: float = 0.85        # round: fator de tom do prato da base
+    oval_apron_inset_x: float = 0.02  # oval: recuo da saia em X (a partir do fim do trecho reto)
+    oval_apron_y0: float = 0.05      # oval: saia, comeco em Y
+    oval_apron_y1: float = 0.08      # oval: saia, fim em Y
+    oval_leg_inset_x: float = 0.02   # oval: recuo das pernas em X
+    oval_leg_taper: float = 0.18     # oval: afinamento da perna conica (fracao da secao)
+    oval_span_w_frac: float = 0.20   # oval: a curva participa do lugar lateral (fracao de W)
+    chair_seat_t: float = 0.03       # satelite: espessura do assento proxy
+    chair_back_offset: float = 0.03  # satelite: afastamento do encosto proxy
+    chair_back_t: float = 0.05       # satelite: espessura do encosto proxy
+    chair_pad_offset: float = 0.375  # satelite: centro do pad de uso, a partir da borda
+    chair_pad_extra_w: float = 0.10  # satelite: pad mais largo que a cadeira
+    chair_pad_d: float = 0.75        # satelite: profundidade do pad de uso
+    chair_pad_z0: float = 0.002      # satelite: pad, base
+    chair_pad_z1: float = 0.010      # satelite: pad, topo
+    ring_t: float = 0.03             # satelite: largura da faixa do anel de circulacao
+    ring_z0: float = 0.004           # satelite: anel, base
+    ring_z1: float = 0.014           # satelite: anel, topo
 
     def n_side(self):
         """lugares por lado longo (rect/oval)."""
@@ -180,7 +210,7 @@ def build_dining_table(spec: DiningTableSpec):
     spec.validate()
     L, W, h, tt = spec.length, spec.width, spec.height, spec.top_thickness
     top, base = tuple(spec.top_rgb), tuple(spec.base_rgb)
-    dark = _darker(base, 0.7)
+    dark = _darker(base, spec.dark_shade)
     parts = []
     z_top0 = h - tt
 
@@ -188,10 +218,11 @@ def build_dining_table(spec: DiningTableSpec):
         parts.append(_p("top", "top", 0.0, 0.0, L, W, z_top0, h, top))
         az0 = z_top0 - spec.apron_h
         r = spec.apron_inset          # tampo sobressai => le tampo + estrutura, nao bloco
-        parts.append(_p("apron_f", "base", r, r, L - r, r + 0.03, az0, z_top0, dark))
-        parts.append(_p("apron_b", "base", r, W - r - 0.03, L - r, W - r, az0, z_top0, dark))
-        parts.append(_p("apron_l", "base", r, r, r + 0.03, W - r, az0, z_top0, dark))
-        parts.append(_p("apron_r", "base", L - r - 0.03, r, L - r, W - r, az0, z_top0, dark))
+        at = spec.apron_t
+        parts.append(_p("apron_f", "base", r, r, L - r, r + at, az0, z_top0, dark))
+        parts.append(_p("apron_b", "base", r, W - r - at, L - r, W - r, az0, z_top0, dark))
+        parts.append(_p("apron_l", "base", r, r, r + at, W - r, az0, z_top0, dark))
+        parts.append(_p("apron_r", "base", L - r - at, r, L - r, W - r, az0, z_top0, dark))
         sec, ins = spec.leg_section, spec.leg_inset
         for tag, (fx, fy) in (("fl", (ins, ins)), ("fr", (L - ins - sec, ins)),
                               ("bl", (ins, W - ins - sec)),
@@ -206,14 +237,14 @@ def build_dining_table(spec: DiningTableSpec):
         # tampo: DISCO redondo por bandas (le circulo, nao octogono facetado)
         parts += _disc_bands("top", "top", cx, cy, R, z_top0, h, top, nb)
         # hub fino e redondo sob o tampo (liga tampo -> coluna, sem bloco quadrado)
-        parts += _disc_bands("hub", "base", cx, cy, 0.12 * D,
-                             z_top0 - 0.035, z_top0, dark, 8)
+        parts += _disc_bands("hub", "base", cx, cy, spec.hub_r_frac * D,
+                             z_top0 - spec.hub_t, z_top0, dark, 8)
         # coluna do pedestal: FINA e redonda (libera a zona dos pes)
         parts += _disc_bands("column", "foot", cx, cy, spec.col_r,
-                             spec.plate_h, z_top0 - 0.035, base, 8)
+                             spec.plate_h, z_top0 - spec.hub_t, base, 8)
         # prato da base: redondo, MENOR e BAIXO (canela/cadeira passam)
         parts += _disc_bands("foot", "foot", cx, cy, spec.plate_r,
-                             0.0, spec.plate_h, _darker(base, 0.85), 10)
+                             0.0, spec.plate_h, _darker(base, spec.plate_shade), 10)
 
     else:  # oval (racetrack): centro reto + 2 pontas CURVAS (semielipse)
         ed = spec.end_depth
@@ -224,18 +255,20 @@ def build_dining_table(spec: DiningTableSpec):
         parts += _oval_end_bands("top_w", x0s, 0.0, cy, W, z_top0, h, top, nb)
         parts += _oval_end_bands("top_e", x1s, L, cy, W, z_top0, h, top, nb)
         az0 = z_top0 - spec.apron_h
-        parts.append(_p("apron_f", "base", x0s + 0.02, 0.05, x1s - 0.02, 0.08,
+        ai, ay0, ay1 = spec.oval_apron_inset_x, spec.oval_apron_y0, spec.oval_apron_y1
+        parts.append(_p("apron_f", "base", x0s + ai, ay0, x1s - ai, ay1,
                         az0, z_top0, dark))
-        parts.append(_p("apron_b", "base", x0s + 0.02, W - 0.08, x1s - 0.02,
-                        W - 0.05, az0, z_top0, dark))
+        parts.append(_p("apron_b", "base", x0s + ai, W - ay1, x1s - ai,
+                        W - ay0, az0, z_top0, dark))
         sec, ins = spec.leg_section, spec.leg_inset
-        for tag, (fx, fy) in (("fl", (x0s + 0.02, ins)),
-                              ("fr", (x1s - 0.02 - sec, ins)),
-                              ("bl", (x0s + 0.02, W - ins - sec)),
-                              ("br", (x1s - 0.02 - sec, W - ins - sec))):
+        li = spec.oval_leg_inset_x
+        for tag, (fx, fy) in (("fl", (x0s + li, ins)),
+                              ("fr", (x1s - li - sec, ins)),
+                              ("bl", (x0s + li, W - ins - sec)),
+                              ("br", (x1s - li - sec, W - ins - sec))):
             p = _p(f"leg_{tag}", "foot", fx, fy, fx + sec, fy + sec,
                    0.0, z_top0, base)
-            sh = sec * 0.18  # conica leve: pe presente (oval longa nao pode fragil)
+            sh = sec * spec.oval_leg_taper  # conica leve: pe presente (oval longa nao pode fragil)
             p["verts8"] = [
                 (fx + sh, fy + sh, 0.0), (fx + sec - sh, fy + sh, 0.0),
                 (fx + sec - sh, fy + sec - sh, 0.0), (fx + sh, fy + sec - sh, 0.0),
@@ -265,7 +298,7 @@ def _seat_anchors(spec: DiningTableSpec):
     n_side = spec.n_side()
     if spec.shape == "oval":
         # a curva participa do lugar lateral: espalha sobre S + 0.20*W
-        span = (L - 2 * spec.end_depth) + 0.20 * W
+        span = (L - 2 * spec.end_depth) + spec.oval_span_w_frac * W
     else:
         span = n_side * spec.place_w
     x0 = (L - span) / 2.0
@@ -290,22 +323,23 @@ def _chair_proxy_parts(spec: DiningTableSpec):
     for i, (ex, ey, nx, ny) in enumerate(_seat_anchors(spec), 1):
         a = math.atan2(ny, nx)
         scx, scy = ex + nx * (cd / 2 - tuck), ey + ny * (cd / 2 - tuck)
-        bcx, bcy = ex + nx * (cd - tuck + 0.03), ey + ny * (cd - tuck + 0.03)
-        pcx, pcy = ex + nx * 0.375, ey + ny * 0.375
+        bo = cd - tuck + spec.chair_back_offset
+        bcx, bcy = ex + nx * bo, ey + ny * bo
+        pcx, pcy = ex + nx * spec.chair_pad_offset, ey + ny * spec.chair_pad_offset
         parts.append(_rot_box(f"chair_{i}_seat", "chair", scx, scy, cw, cd,
-                              sh - 0.03, sh, a, g))
-        parts.append(_rot_box(f"chair_{i}_back", "chair", bcx, bcy, cw, 0.05,
+                              sh - spec.chair_seat_t, sh, a, g))
+        parts.append(_rot_box(f"chair_{i}_back", "chair", bcx, bcy, cw, spec.chair_back_t,
                               sh, bh, a, g))
         parts.append(_rot_box(f"chair_{i}_env", "guide", pcx, pcy,
-                              cw + 0.10, 0.75, 0.002, 0.010, a, pad_rgb))
+                              cw + spec.chair_pad_extra_w, spec.chair_pad_d, spec.chair_pad_z0, spec.chair_pad_z1, a, pad_rgb))
     # anel de circulacao (area minima de uso humano) no bbox + clearance
-    cu, t, zb = spec.clearance_use, 0.03, 0.014
+    cu, t, zb = spec.clearance_use, spec.ring_t, spec.ring_z1
     x0, y0 = -cu, -cu
     x1, y1 = spec.length + cu, spec.width + cu
-    parts.append(_p("use_ring_s", "guide", x0, y0, x1, y0 + t, 0.004, zb, ring_rgb))
-    parts.append(_p("use_ring_n", "guide", x0, y1 - t, x1, y1, 0.004, zb, ring_rgb))
-    parts.append(_p("use_ring_w", "guide", x0, y0, x0 + t, y1, 0.004, zb, ring_rgb))
-    parts.append(_p("use_ring_e", "guide", x1 - t, y0, x1, y1, 0.004, zb, ring_rgb))
+    parts.append(_p("use_ring_s", "guide", x0, y0, x1, y0 + t, spec.ring_z0, zb, ring_rgb))
+    parts.append(_p("use_ring_n", "guide", x0, y1 - t, x1, y1, spec.ring_z0, zb, ring_rgb))
+    parts.append(_p("use_ring_w", "guide", x0, y0, x0 + t, y1, spec.ring_z0, zb, ring_rgb))
+    parts.append(_p("use_ring_e", "guide", x1 - t, y0, x1, y1, spec.ring_z0, zb, ring_rgb))
     return parts
 
 
