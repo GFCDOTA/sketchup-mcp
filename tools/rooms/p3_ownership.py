@@ -8,7 +8,7 @@ OWNER_TABLE = {
   "interior/__init__.py": "interior_public_package",
   "interior/class_specs/__init__.py": "shared_furniture_class_spec",
   "interior/composer/__init__.py": "cross_room_scene_composition",
-  "interior/composer/scene_composer.py": "cross_room_scene_composition",
+  "interior/composer/scene_composer.py": "scene_composition_legacy_facade",
   "interior/planners/__init__.py": "planner_engine_package",
   "interior/planners/living_room_planner.py": "living_planner_legacy_facade",
   "interior/planners/placement_brain.py": "placement_engine_legacy_facade",
