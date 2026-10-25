@@ -6539,6 +6539,18 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp054/f3_benchmark/README.md",
+      "blob_sha": "c0c017fc3d95c5aa23a3f8998d9899a9eb3cf7e4",
+      "blob_size": 2486,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_2026-10-25.json",
+      "blob_sha": "4c0bfdd69c5498b255099057239b6594bcb4cea7",
+      "blob_size": 2997,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp055/p4/run_p4.py",
       "blob_sha": "5e59ebacd22cc32454e614c94862315e60d29e54",
       "blob_size": 18120,
