@@ -44,22 +44,10 @@
     },
     "453": {
       "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Proxima fatia da F3: geometria ADVERSARIAL no solver_benchmark (obstaculos longos e encostados em muitos candidatos; caixas rotacionadas) e contagem de intersection/buffer/unary_union tambem nos gates fora de plan_room, medindo em outra maquina se houver. Linha de base por candidatos (PR 560) e dimensao obstaculos (PR 567, README_obstacles_2026-10-25) ja existem; nenhuma meta ou budget antes de mais dados.",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": [
-        {
-          "cause": "REVIEW",
-          "ref": "#524",
-          "detail": "qualquer mudanca em tools/rooms/shared/spatial_solver/ (otimizacao, extracao de modulos) e caminho critico"
-        },
-        {
-          "cause": "EVIDENCE",
-          "ref": "docs/specs/FP-054-F3_modularization_dsa.md",
-          "detail": "ADR obrigatorio antes de adotar OR-Tools/scipy; metas so a partir de baseline medido"
-        }
-      ]
+      "state": "BLOCKED",
+      "cause": "REVIEW",
+      "ref": "#524",
+      "detail": "medicao completa e sem executar mais nada seguro: candidatos (PR 560), obstaculos (PR 567) e geometria adversarial (esta PR; pior caso ~3,3x o tempo limpo a 1000 obstaculos, linear, RSS 52-60 MB). O que falta - otimizar/extrair modulos de tools/rooms/shared/spatial_solver/ (caminho critico: exige revisao independente) e ADR antes de OR-Tools/scipy - nao tem meta definida pelos dados (sem budget); outra maquina e contagem fora de plan_room seguem como medicoes opcionais"
     },
     "463": {
       "audited_at": "2026-10-25",

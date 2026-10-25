@@ -1,0 +1,750 @@
+{
+ "schema_version": "solver_benchmark_adversarial.v1",
+ "commit": "6998121b27793a8c579b55adffd0c13bc822c34f",
+ "dirty": false,
+ "consensus_sha256": "69dbbf0394b5197321e511d5518cf6bb0ae6772879a6edfb285d4be36f3fe2be",
+ "hardware": {
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "cpu_count": 16,
+  "python": "3.12.13"
+ },
+ "repeats": 3,
+ "cases": [
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.0143,
+    "p50_s": 1.0573,
+    "p95_s": 1.2145,
+    "max_s": 1.232
+   },
+   "peak_rss_mb": 54.7,
+   "obstacles": 10,
+   "obstacle_mode": "long",
+   "boxes_real": 390,
+   "boxes_total": 400,
+   "shapely_calls": {
+    "buffer": 11341,
+    "difference": 93,
+    "distance": 1410,
+    "intersection": 11024,
+    "intersects": 643,
+    "unary_union": 355
+   }
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.0077,
+    "p50_s": 1.0813,
+    "p95_s": 1.3764,
+    "max_s": 1.4091
+   },
+   "peak_rss_mb": 59.6,
+   "obstacles": 10,
+   "obstacle_mode": "stacked",
+   "boxes_real": 390,
+   "boxes_total": 400,
+   "shapely_calls": {
+    "buffer": 11401,
+    "difference": 93,
+    "distance": 1410,
+    "intersection": 11504,
+    "intersects": 643,
+    "unary_union": 355
+   }
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.0125,
+    "p50_s": 1.0271,
+    "p95_s": 1.2156,
+    "max_s": 1.2366
+   },
+   "peak_rss_mb": 54.7,
+   "obstacles": 10,
+   "obstacle_mode": "rotated",
+   "boxes_real": 390,
+   "boxes_total": 400,
+   "shapely_calls": {
+    "buffer": 11401,
+    "difference": 93,
+    "distance": 1410,
+    "intersection": 11504,
+    "intersects": 643,
+    "unary_union": 355
+   }
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.2815,
+    "p50_s": 1.313,
+    "p95_s": 1.4588,
+    "max_s": 1.475
+   },
+   "peak_rss_mb": 57.1,
+   "obstacles": 100,
+   "obstacle_mode": "long",
+   "boxes_real": 390,
+   "boxes_total": 490,
+   "shapely_calls": {
+    "buffer": 11781,
+    "difference": 93,
+    "distance": 1410,
+    "intersection": 17424,
+    "intersects": 733,
+    "unary_union": 355
+   }
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.2597,
+    "p50_s": 1.265,
+    "p95_s": 1.4118,
+    "max_s": 1.4281
+   },
+   "peak_rss_mb": 56.9,
+   "obstacles": 100,
+   "obstacle_mode": "stacked",
+   "boxes_real": 390,
+   "boxes_total": 490,
+   "shapely_calls": {
+    "buffer": 12301,
+    "difference": 93,
+    "distance": 1410,
+    "intersection": 21584,
+    "intersects": 733,
+    "unary_union": 355
+   }
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.2933,
+    "p50_s": 1.2971,
+    "p95_s": 1.5123,
+    "max_s": 1.5362
+   },
+   "peak_rss_mb": 56.8,
+   "obstacles": 100,
+   "obstacle_mode": "rotated",
+   "boxes_real": 390,
+   "boxes_total": 490,
+   "shapely_calls": {
+    "buffer": 12301,
+    "difference": 93,
+    "distance": 1410,
+    "intersection": 21584,
+    "intersects": 733,
+    "unary_union": 355
+   }
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 3.4141,
+    "p50_s": 3.4975,
+    "p95_s": 3.6079,
+    "max_s": 3.6201
+   },
+   "peak_rss_mb": 58.2,
+   "obstacles": 1000,
+   "obstacle_mode": "long",
+   "boxes_real": 390,
+   "boxes_total": 1390,
+   "shapely_calls": {
+    "buffer": 16261,
+    "difference": 93,
+    "distance": 1410,
+    "intersection": 82064,
+    "intersects": 1633,
+    "unary_union": 355
+   }
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 3.2479,
+    "p50_s": 3.2595,
+    "p95_s": 3.4647,
+    "max_s": 3.4875
+   },
+   "peak_rss_mb": 58.7,
+   "obstacles": 1000,
+   "obstacle_mode": "stacked",
+   "boxes_real": 390,
+   "boxes_total": 1390,
+   "shapely_calls": {
+    "buffer": 21301,
+    "difference": 93,
+    "distance": 1410,
+    "intersection": 122384,
+    "intersects": 1633,
+    "unary_union": 355
+   }
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 3.3075,
+    "p50_s": 3.3732,
+    "p95_s": 3.8073,
+    "max_s": 3.8555
+   },
+   "peak_rss_mb": 58.1,
+   "obstacles": 1000,
+   "obstacle_mode": "rotated",
+   "boxes_real": 390,
+   "boxes_total": 1390,
+   "shapely_calls": {
+    "buffer": 21301,
+    "difference": 93,
+    "distance": 1410,
+    "intersection": 122384,
+    "intersects": 1633,
+    "unary_union": 355
+   }
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.0123,
+    "p50_s": 1.0169,
+    "p95_s": 1.2128,
+    "max_s": 1.2346
+   },
+   "peak_rss_mb": 56.8,
+   "obstacles": 10,
+   "obstacle_mode": "long",
+   "boxes_real": 390,
+   "boxes_total": 400,
+   "shapely_calls": {
+    "buffer": 11604,
+    "difference": 112,
+    "distance": 1426,
+    "intersection": 10580,
+    "intersects": 615,
+    "unary_union": 353
+   }
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.0085,
+    "p50_s": 1.0554,
+    "p95_s": 1.1566,
+    "max_s": 1.1678
+   },
+   "peak_rss_mb": 56.7,
+   "obstacles": 10,
+   "obstacle_mode": "stacked",
+   "boxes_real": 390,
+   "boxes_total": 400,
+   "shapely_calls": {
+    "buffer": 11664,
+    "difference": 112,
+    "distance": 1426,
+    "intersection": 11060,
+    "intersects": 615,
+    "unary_union": 353
+   }
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 0.9962,
+    "p50_s": 1.0092,
+    "p95_s": 1.1755,
+    "max_s": 1.1939
+   },
+   "peak_rss_mb": 56.4,
+   "obstacles": 10,
+   "obstacle_mode": "rotated",
+   "boxes_real": 390,
+   "boxes_total": 400,
+   "shapely_calls": {
+    "buffer": 11664,
+    "difference": 112,
+    "distance": 1426,
+    "intersection": 11060,
+    "intersects": 615,
+    "unary_union": 353
+   }
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.3133,
+    "p50_s": 1.3233,
+    "p95_s": 1.4116,
+    "max_s": 1.4215
+   },
+   "peak_rss_mb": 56.8,
+   "obstacles": 100,
+   "obstacle_mode": "long",
+   "boxes_real": 390,
+   "boxes_total": 490,
+   "shapely_calls": {
+    "buffer": 12044,
+    "difference": 112,
+    "distance": 1426,
+    "intersection": 16980,
+    "intersects": 705,
+    "unary_union": 353
+   }
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.1462,
+    "p50_s": 1.2212,
+    "p95_s": 1.3878,
+    "max_s": 1.4063
+   },
+   "peak_rss_mb": 56.6,
+   "obstacles": 100,
+   "obstacle_mode": "stacked",
+   "boxes_real": 390,
+   "boxes_total": 490,
+   "shapely_calls": {
+    "buffer": 12564,
+    "difference": 112,
+    "distance": 1426,
+    "intersection": 21140,
+    "intersects": 705,
+    "unary_union": 353
+   }
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 1.1035,
+    "p50_s": 1.1407,
+    "p95_s": 1.2771,
+    "max_s": 1.2922
+   },
+   "peak_rss_mb": 56.7,
+   "obstacles": 100,
+   "obstacle_mode": "rotated",
+   "boxes_real": 390,
+   "boxes_total": 490,
+   "shapely_calls": {
+    "buffer": 12564,
+    "difference": 112,
+    "distance": 1426,
+    "intersection": 21140,
+    "intersects": 705,
+    "unary_union": 353
+   }
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 3.5522,
+    "p50_s": 3.5759,
+    "p95_s": 3.7784,
+    "max_s": 3.8009
+   },
+   "peak_rss_mb": 58.4,
+   "obstacles": 1000,
+   "obstacle_mode": "long",
+   "boxes_real": 390,
+   "boxes_total": 1390,
+   "shapely_calls": {
+    "buffer": 16384,
+    "difference": 112,
+    "distance": 1426,
+    "intersection": 80500,
+    "intersects": 1605,
+    "unary_union": 353
+   }
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 2.6051,
+    "p50_s": 2.7149,
+    "p95_s": 2.8407,
+    "max_s": 2.8547
+   },
+   "peak_rss_mb": 58.6,
+   "obstacles": 1000,
+   "obstacle_mode": "stacked",
+   "boxes_real": 390,
+   "boxes_total": 1390,
+   "shapely_calls": {
+    "buffer": 21564,
+    "difference": 112,
+    "distance": 1426,
+    "intersection": 121940,
+    "intersects": 1605,
+    "unary_union": 353
+   }
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 2.9461,
+    "p50_s": 2.9526,
+    "p95_s": 3.1379,
+    "max_s": 3.1585
+   },
+   "peak_rss_mb": 58.3,
+   "obstacles": 1000,
+   "obstacle_mode": "rotated",
+   "boxes_real": 390,
+   "boxes_total": 1390,
+   "shapely_calls": {
+    "buffer": 21564,
+    "difference": 112,
+    "distance": 1426,
+    "intersection": 121940,
+    "intersects": 1605,
+    "unary_union": 353
+   }
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 0.7022,
+    "p50_s": 0.7296,
+    "p95_s": 0.82,
+    "max_s": 0.8301
+   },
+   "peak_rss_mb": 52.0,
+   "obstacles": 10,
+   "obstacle_mode": "long",
+   "boxes_real": 390,
+   "boxes_total": 400,
+   "shapely_calls": {
+    "buffer": 11052,
+    "difference": 93,
+    "distance": 1130,
+    "intersection": 6942,
+    "intersects": 499,
+    "unary_union": 301
+   }
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 0.6987,
+    "p50_s": 0.7401,
+    "p95_s": 0.8663,
+    "max_s": 0.8804
+   },
+   "peak_rss_mb": 52.1,
+   "obstacles": 10,
+   "obstacle_mode": "stacked",
+   "boxes_real": 390,
+   "boxes_total": 400,
+   "shapely_calls": {
+    "buffer": 11132,
+    "difference": 93,
+    "distance": 1130,
+    "intersection": 7582,
+    "intersects": 499,
+    "unary_union": 301
+   }
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 0.7132,
+    "p50_s": 0.7353,
+    "p95_s": 0.8244,
+    "max_s": 0.8342
+   },
+   "peak_rss_mb": 52.4,
+   "obstacles": 10,
+   "obstacle_mode": "rotated",
+   "boxes_real": 390,
+   "boxes_total": 400,
+   "shapely_calls": {
+    "buffer": 11132,
+    "difference": 93,
+    "distance": 1130,
+    "intersection": 7582,
+    "intersects": 499,
+    "unary_union": 301
+   }
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 0.8985,
+    "p50_s": 0.9439,
+    "p95_s": 1.0382,
+    "max_s": 1.0487
+   },
+   "peak_rss_mb": 51.9,
+   "obstacles": 100,
+   "obstacle_mode": "long",
+   "boxes_real": 390,
+   "boxes_total": 490,
+   "shapely_calls": {
+    "buffer": 11452,
+    "difference": 93,
+    "distance": 1130,
+    "intersection": 13022,
+    "intersects": 589,
+    "unary_union": 301
+   }
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 0.8547,
+    "p50_s": 1.0036,
+    "p95_s": 1.059,
+    "max_s": 1.0651
+   },
+   "peak_rss_mb": 52.1,
+   "obstacles": 100,
+   "obstacle_mode": "stacked",
+   "boxes_real": 390,
+   "boxes_total": 490,
+   "shapely_calls": {
+    "buffer": 12032,
+    "difference": 93,
+    "distance": 1130,
+    "intersection": 17662,
+    "intersects": 589,
+    "unary_union": 301
+   }
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 0.8905,
+    "p50_s": 0.9398,
+    "p95_s": 1.1237,
+    "max_s": 1.1442
+   },
+   "peak_rss_mb": 52.3,
+   "obstacles": 100,
+   "obstacle_mode": "rotated",
+   "boxes_real": 390,
+   "boxes_total": 490,
+   "shapely_calls": {
+    "buffer": 12032,
+    "difference": 93,
+    "distance": 1130,
+    "intersection": 17662,
+    "intersects": 589,
+    "unary_union": 301
+   }
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 2.6579,
+    "p50_s": 2.6727,
+    "p95_s": 2.8795,
+    "max_s": 2.9024
+   },
+   "peak_rss_mb": 53.9,
+   "obstacles": 1000,
+   "obstacle_mode": "long",
+   "boxes_real": 390,
+   "boxes_total": 1390,
+   "shapely_calls": {
+    "buffer": 15232,
+    "difference": 93,
+    "distance": 1130,
+    "intersection": 72062,
+    "intersects": 1489,
+    "unary_union": 301
+   }
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 2.4814,
+    "p50_s": 2.5391,
+    "p95_s": 2.6748,
+    "max_s": 2.6899
+   },
+   "peak_rss_mb": 54.4,
+   "obstacles": 1000,
+   "obstacle_mode": "stacked",
+   "boxes_real": 390,
+   "boxes_total": 1390,
+   "shapely_calls": {
+    "buffer": 21032,
+    "difference": 93,
+    "distance": 1130,
+    "intersection": 118462,
+    "intersects": 1489,
+    "unary_union": 301
+   }
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 3,
+    "min_s": 2.7765,
+    "p50_s": 2.7885,
+    "p95_s": 2.9648,
+    "max_s": 2.9844
+   },
+   "peak_rss_mb": 54.5,
+   "obstacles": 1000,
+   "obstacle_mode": "rotated",
+   "boxes_real": 390,
+   "boxes_total": 1390,
+   "shapely_calls": {
+    "buffer": 21032,
+    "difference": 93,
+    "distance": 1130,
+    "intersection": 118462,
+    "intersects": 1489,
+    "unary_union": 301
+   }
+  }
+ ],
+ "not_measured": [
+  "outra maquina",
+  "contagem em gates fora do solver (so plan_room e contado)",
+  "obstaculos adversariais acima de 1000"
+ ],
+ "budget": "nenhum: so a linha de base; budget de regressao por capability sai destes dados (FP-054 F3)"
+}
