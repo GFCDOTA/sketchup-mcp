@@ -24,6 +24,7 @@ from tools.rooms.living.planning.layout_candidates import (EXTRA_TEMPLATES, M, T
 ROOT = Path(__file__).resolve().parents[3]   # repo root (era E:\Claude\sketchup-mcp, morto pos-consolidacao 2026-06-09)
 SKETCHUP_EXE = r"C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
 from core.scale import PT_TO_IN  # noqa: E402  (fonte unica de escala; nao redefinir)
+from tools.sketchup.launcher_guards import require_known_room  # noqa: E402
 CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json"
 BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
 OUT_DIR = ROOT / "runs/planta_74"
@@ -115,6 +116,7 @@ def main():
                     help="monta os boxes e imprime, sem lancar o SketchUp")
     args = ap.parse_args()
     con = json.loads(CONSENSUS.read_text("utf-8"))
+    require_known_room(con, args.room, "place")
     boxes, out = build_boxes(con, args.room, args.template)
     if boxes is None:
         print(f"[place] {out['result']}: {out.get('reason')} — nada a materializar")

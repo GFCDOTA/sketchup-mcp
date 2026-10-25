@@ -6,8 +6,10 @@ Uso: KITCHEN_THEME=black_wood_gold .venv/Scripts/python.exe .claude/scratch/bake
 import hashlib
 import os
 import shutil
+import sys
 import time
 from pathlib import Path
+from tools.sketchup.launcher_guards import verify_bake_log
 from tools.sketchup.legacy_process import launch_owned, close_owned
 
 ROOT = Path(__file__).resolve().parents[4]   # raiz do repo (o original usava parents[2] = apps/, caminho morto)
@@ -50,9 +52,17 @@ def main() -> None:
     close_owned(pid)
     time.sleep(1)
     intact = hashlib.sha256(BASE.read_bytes()).hexdigest() == base_hash
-    print(log.read_text("utf-8", "ignore") if log.exists() else "(no log)")
+    log_text = log.read_text("utf-8", "ignore") if log.exists() else "(no log)"
+    print(log_text)
     print(f"base_intact={intact}  OUT_exists={out.exists()}  size={out.stat().st_size if out.exists() else 0}")
     print(out)
+    ok, reason = verify_bake_log(log_text)
+    if not ok:                                   # fail closed: nada de .skp "tematizado" que nao mudou nada (smoke 2026-10-25)
+        for stale in (out, out.with_suffix(".skb")):
+            if stale.exists():
+                stale.unlink()
+        print(f"[bake_theme] REFUSED: {reason} — saida removida")
+        sys.exit(2)
 
 
 if __name__ == "__main__":
