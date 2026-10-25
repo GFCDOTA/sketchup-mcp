@@ -70,8 +70,8 @@
     },
     "tools/rooms/living/coffee_table_class.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 79,
-      "distinct": 21,
+      "embedded_float_literals": 63,
+      "distinct": 17,
       "module_float_constants": 43
     },
     "tools/rooms/living/dining_table_class.py": {
@@ -93,5 +93,5 @@
       "module_float_constants": 100
     }
   },
-  "total_gen1": 248
+  "total_gen1": 232
 }
