@@ -4,6 +4,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import pathlib
 
 import pytest
 
@@ -112,17 +113,47 @@ def test_wall_mounted_module_must_touch_the_wall_and_the_gap_is_measured():
 
 
 @pytest.mark.planta74_scale
-def test_undeclared_and_unmeasured_modes_are_reported_never_judged():
+def test_undeclared_modules_are_reported_never_judged():
     from tools.validation.support_check import check_modules
     con = _con()
-    rep = check_modules([mbox("Modulo novo", 0.5, 0.9, 1, 1), mbox("Pendente", 1.8, 2.7, 2, 2)], con)
-    assert rep["findings"] == [] and rep["evaluated"] == 0
-    assert rep["undeclared"] == ["R · Modulo novo"] and rep["not_evaluated"] == ["R · Pendente: SUSPENDED_INTENTIONAL"]
+    rep = check_modules([mbox("Modulo novo", 0.5, 0.9, 1, 1)], con)
+    assert rep["findings"] == [] and rep["evaluated"] == 0 and rep["not_evaluated"] == []
+    assert rep["undeclared"] == ["R · Modulo novo"]
+
+
+@pytest.mark.planta74_scale
+def test_ceiling_module_must_reach_the_ceiling_and_the_gap_is_measured():
+    from tools.validation.support_check import CEILING_Z_M, check_modules
+    con = _con()
+    ok = check_modules([mbox("PeleTeto", 2.64, CEILING_Z_M, 1, 1)], con)
+    assert ok["findings"] == [] and ok["evaluated"] == 1
+    bad = check_modules([mbox("Varal de teto", 2.02, 2.08, 1, 1)], con)
+    assert [(f["code"], f["gap_m"]) for f in bad["findings"]] == [("NOT_AT_CEILING", 0.62)]
+
+
+@pytest.mark.planta74_scale
+def test_suspended_module_is_valid_only_if_some_part_reaches_the_ceiling():
+    from tools.validation.support_check import check_modules
+    con = _con()
+    hung = [mbox("Pendente", 1.85, 2.10, 2, 2), {**mbox("Pendente", 2.10, 2.70, 2, 2, half=0.01), "kind": "pend_cabo"}]
+    assert check_modules(hung, con)["findings"] == []
+    floating = check_modules([mbox("Pendente", 1.85, 2.10, 2, 2)], con)
+    assert [f["code"] for f in floating["findings"]] == ["NOT_CONNECTED"] and floating["findings"][0]["gap_m"] == 0.6
+
+
+def test_ceiling_height_constant_is_the_one_the_shell_builder_uses():
+    import re
+
+    from tools.validation.support_check import CEILING_Z_M
+    rb = (pathlib.Path(__file__).resolve().parents[1] / "tools/sketchup/shell/build_plan_shell_skp.rb").read_text(encoding="utf-8")
+    assert float(re.search(r"WALL_HEIGHT_M\s*=\s*([0-9.]+)", rb).group(1)) == CEILING_Z_M
 
 
 # Retrato medido em 2026-10-24 (develop@911d745): modulos fixados na parede que NAO a tocam. Defeito conhecido (FP-056 P4):
 # nao corrigido aqui (muda posicao/aparencia; A.S. depende da decisao AS-1). Nao pode piorar nem ganhar item novo.
-KNOWN_MODULES = {("A.S. | TERRACO SOCIAL | TERRACO TECNICO", "Coifa"): 0.7533, ("A.S. | TERRACO SOCIAL | TERRACO TECNICO", "Prateleira servico"): 0.3465,
+KNOWN_MODULES = {("A.S. | TERRACO SOCIAL | TERRACO TECNICO", "Varal de teto"): 0.62, ("BANHO 01", "PeleTeto"): 0.1399,
+                 ("BANHO 02", "PeleTeto"): 0.1399, ("LAVABO", "PeleTeto"): 0.1399,
+                 ("A.S. | TERRACO SOCIAL | TERRACO TECNICO", "Coifa"): 0.7533, ("A.S. | TERRACO SOCIAL | TERRACO TECNICO", "Prateleira servico"): 0.3465,
                  ("COZINHA", "hood"): 0.0632, ("COZINHA", "upper_cabinet_02"): 0.0172, ("SALA DE JANTAR | SALA DE ESTAR", "Painel TV"): 0.0111,
                  ("SUITE 01", "Painel cabeceira"): 0.005, ("SUITE 02", "Painel cabeceira"): 0.005}
 
