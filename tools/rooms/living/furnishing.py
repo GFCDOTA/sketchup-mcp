@@ -73,7 +73,7 @@ def living_room_boxes(con, room_id):
     # COMPACTO (Felipe: "diminuir o rack; tava tomando o corredor"): largura modesta
     # (~ largura do sofa, teto 1.20m) e raso (0.35), flush na parede — apê pequeno
     # pede movel compacto que nao rouba circulacao.
-    from interior.semantics.wall_affordance import wall_affordance
+    from tools.rooms.shared.placement.wall_affordance import wall_affordance
     _aff = wall_affordance(con, room_id)
     _rack_wall_len = next((w["length_m"] for w in _aff["walls"]
                            if w["wall_id"] == p["tv_rack"]["wall_id"]), 1.80)

@@ -13185,10 +13185,10 @@
     {
       "path": "interior/planners/placement_brain.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "cross_room_placement_engine",
+      "runtime_owner": "placement_engine_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
@@ -13293,19 +13293,19 @@
     {
       "path": "interior/semantics/room_graph.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "shared_spatial_semantics",
+      "runtime_owner": "spatial_semantics_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/semantics/wall_affordance.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "shared_spatial_semantics",
+      "runtime_owner": "spatial_semantics_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
@@ -19329,6 +19329,42 @@
     },
     {
       "path": "tools/rooms/shared/parts.py",
+      "domain": "shared",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/placement/__init__.py",
+      "domain": "shared",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/placement/placement_brain.py",
+      "domain": "shared",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/placement/room_graph.py",
+      "domain": "shared",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/placement/wall_affordance.py",
       "domain": "shared",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
