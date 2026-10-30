@@ -6,6 +6,7 @@ from pathlib import Path
 
 from tools.validation import backlog_discovery as bd
 from tools.validation import dependency_graph as dg
+from tools.validation import issue_integrity_gate as ig
 from tools.validation import task_readiness as tr
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -111,6 +112,13 @@ def test_validate_rejects_untraceable_or_stale_entries():
     assert "READINESS_BAD_REF" in codes({1: nofile}, open_)
     assert "READINESS_NO_DATE" in codes({1: entry(audited_at="")}, open_)
     assert codes({1: entry(completion_blockers=[{"cause": "REVIEW", "ref": "#524", "detail": "ok"}])}, open_) == set()
+
+
+def test_integrity_gate_flags_ready_entry_on_a_blocked_issue_but_a_stale_entry_is_only_a_warning(capsys):
+    issues = {1: issue(1, ["blocked", "bloqueio:technical"]), 2: issue(2, state="CLOSED")}
+    got = {(f.code, f.issue) for f in ig.check(issues, set(), None, {1: entry(), 2: entry()})}
+    assert got == {("READINESS_READY_BUT_BLOCKED", 1)}                       # fechar uma Issue nao quebra o CI dos outros PRs
+    assert "aviso: #2 READINESS_STALE" in capsys.readouterr().out
 
 
 def test_summary_counts_ready_blocked_pending_review_and_environment_separately():
