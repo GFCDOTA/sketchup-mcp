@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 from shapely.geometry import Point, Polygon            # noqa: E402
-from interior.planners.placement_brain import FurniturePlacementBrain  # noqa: E402
+from tools.rooms.shared.placement.placement_brain import FurniturePlacementBrain  # noqa: E402
 from tools.rooms.bedroom.layout import M, _door_zones, _wall_setup  # noqa: E402
 from tools.spatial_model import PT_TO_M                  # noqa: E402
 

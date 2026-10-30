@@ -10,7 +10,9 @@ O limiar e o mesmo do validador do construido (`penetration.EPS_DEPTH`) — nenh
 
 Nivel MODULO (P4b): `MODULE_SUPPORT` declara o modo de cada modulo (grupo do .skp). FLOOR: o ponto mais baixo do modulo
 a no maximo EPS_DEPTH do piso. WALL_MOUNTED: a pegada do modulo toca a massa de parede (distancia <= EPS_DEPTH) — a folga
-real aparece como `NOT_IN_CONTACT`. CEILING e SUSPENDED_INTENTIONAL: declarados, `NOT_EVALUATED` (falta medir forro/fixacao).
+real aparece como `NOT_IN_CONTACT`. CEILING: o topo do modulo encosta no teto (`CEILING_Z_M`, a altura do shell: `WALL_HEIGHT_M` do build_plan_shell_skp.rb) a
+no maximo EPS_DEPTH; senao `NOT_AT_CEILING` com a folga medida. SUSPENDED_INTENTIONAL: o modulo so e valido se alguma peca
+dele (cabo/haste) chega ao teto: sem esse caminho ate o teto, `NOT_CONNECTED` (suspenso sem fixacao modelada).
 Modulo sem declaracao vai para `undeclared` (BLOCKED na spec): nunca deduzido por proximidade.
 
 Uso:  PT_TO_M=0.0259 python -m tools.validation.support_check   (relatorio da planta_74)
@@ -28,6 +30,7 @@ from shapely.ops import unary_union
 from tools.validation.penetration import EPS_DEPTH
 
 IN2M = 0.0254
+CEILING_Z_M = 2.70    # altura do shell (laje de teto): `WALL_HEIGHT_M` de tools/sketchup/shell/build_plan_shell_skp.rb (contrato testado)
 # kind -> (modo, modulo do suporte). A declaracao e da peca: quem cria o kind declara em que ele se apoia.
 DECLARED: dict[str, tuple[str, tuple[str, ...]]] = {
     "kb_bandeja": ("ON_SURFACE", ("Bancada",)),
@@ -62,10 +65,16 @@ def check_modules(boxes: list[dict], con: dict) -> dict:
         if mode is None:
             undeclared.append(f"{room} · {name}")
             continue
-        if mode in ("CEILING", "SUSPENDED_INTENTIONAL"):
-            not_eval.append(f"{room} · {name}: {mode}")
-            continue
         evaluated += 1
+        if mode in ("CEILING", "SUSPENDED_INTENTIONAL"):
+            top = max(_z(b)[1] for b in parts)
+            gap = CEILING_Z_M - top
+            if gap > EPS_DEPTH:
+                code = "NOT_AT_CEILING" if mode == "CEILING" else "NOT_CONNECTED"
+                what = "topo" if mode == "CEILING" else "ponto mais alto (cabo/haste)"
+                findings.append({"check": "SUPPORT", "module": name, "room": room, "code": code, "gap_m": round(gap, 4),
+                                 "detail": f"{what} a {gap * 100:.1f} cm do teto ({CEILING_Z_M:.2f} m)"})
+            continue
         if mode == "FLOOR":
             gap = min(_z(b)[0] for b in parts)
             if gap > EPS_DEPTH:

@@ -16,6 +16,11 @@ on:
     - cron: "41 9 * * *"
   workflow_dispatch:
 
+# shell: bash explicito = `bash --noprofile --norc -eo pipefail`: sem isso `gate | tee` devolve o status do tee (0) e o gate nunca reprova o job (#533)
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: quality-guardian-${{ github.ref }}
   cancel-in-progress: true
