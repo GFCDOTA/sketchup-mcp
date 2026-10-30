@@ -55,6 +55,15 @@ RELATIONS = {
 }
 
 
+# Origem de cada proporcao de classe: valor declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+RACK_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "leg_inset_x", "leg_inset_y", "leg_taper", "toe_t", "toe_h", "top_t", "dark_shade", "wall_overhang", "wall_y0", "wall_y1",
+    "wall_rise", "wall_rgb", "shadow_inset", "shadow_y0", "shadow_y1", "shadow_drop", "shadow_top", "shadow_shade", "cleat_x0",
+    "cleat_x1", "cleat_depth", "cleat_drop", "cleat_shade", "mod_margin", "mod_x0", "mod_gap", "face_margin", "drawer_proud",
+    "niche_depth", "niche_margin", "tv_y_frac", "tv_depth", "tv_frame_t", "tv_rgb", "eye_z0", "eye_z1", "eye_overhang", "eye_inset",
+    "eye_rgb")}
+
+
 @dataclass
 class RackSpec:
     """X=comprimento (parede da TV), Y=profundidade (frente=-Y), Z=altura."""
@@ -77,6 +86,46 @@ class RackSpec:
     body_rgb: tuple = (118, 92, 68)
     front_rgb: tuple = (134, 108, 82)
     feet_rgb: tuple = (48, 40, 32)
+    # Proporcoes de CLASSE (antes literais em build_rack/_tv_proxy_parts); origem em RACK_MEASURE_ORIGINS.
+    leg_inset_x: float = 0.06      # recuo dos pes em X (a partir de cada ponta)
+    leg_inset_y: float = 0.05      # recuo dos pes em Y (frente e fundo)
+    leg_taper: float = 0.35        # o pe afunila: a base recua secao * leg_taper de cada lado em relacao ao topo
+    toe_t: float = 0.02            # espessura da saia de base (toe-recess)
+    toe_h: float = 0.06            # altura da saia de base (o corpo sobe a partir dela)
+    top_t: float = 0.03            # espessura do tampo
+    dark_shade: float = 0.45       # fator de tom do recesso escuro (nicho/saia)
+    wall_overhang: float = 0.25    # placa de fundo (flutuante): saliencia alem de cada ponta
+    wall_y0: float = 0.02          # placa de fundo: inicio atras do corpo
+    wall_y1: float = 0.04          # placa de fundo: fim atras do corpo
+    wall_rise: float = 0.95        # placa de fundo: sobe acima do topo do corpo
+    wall_rgb: tuple = (228, 221, 208)
+    shadow_inset: float = 0.05     # shadow gap: recuo em X
+    shadow_y0: float = 0.04        # shadow gap: inicio em Y
+    shadow_y1: float = 0.02        # shadow gap: recuo do fundo
+    shadow_drop: float = 0.025     # shadow gap: desce abaixo do corpo
+    shadow_top: float = 0.005      # shadow gap: topo abaixo do corpo
+    shadow_shade: float = 0.3      # shadow gap: fator de tom
+    cleat_x0: float = 0.30         # suporte recuado: inicio (fracao de L)
+    cleat_x1: float = 0.70         # suporte recuado: fim (fracao de L)
+    cleat_depth: float = 0.10      # suporte recuado: profundidade
+    cleat_drop: float = 0.10       # suporte recuado: altura abaixo do corpo
+    cleat_shade: float = 0.35      # suporte recuado: fator de tom
+    mod_margin: float = 0.04       # fachada: folga total em X (largura dos modulos = (L - margem)/n)
+    mod_x0: float = 0.02           # fachada: inicio em X
+    mod_gap: float = 0.008         # fachada: folga entre modulos (vinco)
+    face_margin: float = 0.03      # fachada: margem vertical (acima do piso do corpo e abaixo do tampo)
+    drawer_proud: float = 0.012    # gaveta: quanto a frente sai
+    niche_depth: float = 0.06      # nicho: profundidade do recesso
+    niche_margin: float = 0.01     # nicho: margem vertical extra
+    tv_y_frac: float = 0.55        # proxy da TV: posicao em Y (fracao da profundidade)
+    tv_depth: float = 0.03         # proxy da TV: espessura
+    tv_frame_t: float = 0.025      # proxy da TV: barra da moldura
+    tv_rgb: tuple = (70, 72, 76)
+    eye_z0: float = 1.095          # linha de visao alvo (olho sentado): base
+    eye_z1: float = 1.115          # linha de visao alvo: topo
+    eye_overhang: float = 0.30     # linha de visao: sobra alem de cada ponta
+    eye_inset: float = 0.005       # linha de visao: recuo em Y dentro da TV
+    eye_rgb: tuple = (170, 60, 50)
 
     def base_z(self):
         return {"legs": self.leg_height, "floating": self.gap_floor,
@@ -109,16 +158,17 @@ def build_rack(spec: RackSpec):
     L, D, bh = spec.length, spec.depth, spec.body_h
     z0 = spec.base_z()
     body, front, feet = tuple(spec.body_rgb), tuple(spec.front_rgb), tuple(spec.feet_rgb)
-    dark = _darker(body, 0.45)
+    dark = _darker(body, spec.dark_shade)
     parts = []
 
     if spec.support == "legs":
         sec, lh = spec.leg_section, spec.leg_height
-        for tag, (fx, fy) in (("fl", (0.06, 0.05)), ("fr", (L - 0.06 - sec, 0.05)),
-                              ("bl", (0.06, D - 0.05 - sec)),
-                              ("br", (L - 0.06 - sec, D - 0.05 - sec))):
+        ix, iy = spec.leg_inset_x, spec.leg_inset_y
+        for tag, (fx, fy) in (("fl", (ix, iy)), ("fr", (L - ix - sec, iy)),
+                              ("bl", (ix, D - iy - sec)),
+                              ("br", (L - ix - sec, D - iy - sec))):
             p = _p(f"leg_{tag}", "foot", fx, fy, fx + sec, fy + sec, 0.0, lh, feet)
-            sh = sec * 0.35
+            sh = sec * spec.leg_taper
             p["verts8"] = [
                 (fx + sh, fy + sh, 0.0), (fx + sec - sh, fy + sh, 0.0),
                 (fx + sec - sh, fy + sec - sh, 0.0), (fx + sh, fy + sec - sh, 0.0),
@@ -126,23 +176,23 @@ def build_rack(spec: RackSpec):
                 (fx + sec, fy + sec, lh), (fx, fy + sec, lh)]
             parts.append(p)
     elif spec.support == "base":
-        parts.append(_p("toe_base", "base", spec.toe_recess, spec.toe_recess + 0.02,
+        parts.append(_p("toe_base", "base", spec.toe_recess, spec.toe_recess + spec.toe_t,
                         L - spec.toe_recess, D - spec.toe_recess,
-                        0.0, 0.06, dark))
-        z0 = 0.06
+                        0.0, spec.toe_h, dark))
+        z0 = spec.toe_h
     # floating (cycle002): a flutuacao precisa de CONTEXTO — placa de fundo
     # (parede proxy), SHADOW GAP forte sob o corpo e suporte recuado escuro
     if spec.support == "floating":
         if spec.wall_back:
-            parts.append(_p("wall_back", "base", -0.25, D + 0.02, L + 0.25,
-                            D + 0.04, 0.0, z0 + bh + 0.95, (228, 221, 208)))
-        parts.append(_p("shadow_gap", "base", 0.05, 0.04, L - 0.05, D - 0.02,
-                        z0 - 0.025, z0 - 0.005, _darker(body, 0.3)))
-        parts.append(_p("cleat", "base", L * 0.30, D - 0.10, L * 0.70, D,
-                        z0 - 0.10, z0, _darker(body, 0.35)))
+            parts.append(_p("wall_back", "base", -spec.wall_overhang, D + spec.wall_y0, L + spec.wall_overhang,
+                            D + spec.wall_y1, 0.0, z0 + bh + spec.wall_rise, tuple(spec.wall_rgb)))
+        parts.append(_p("shadow_gap", "base", spec.shadow_inset, spec.shadow_y0, L - spec.shadow_inset, D - spec.shadow_y1,
+                        z0 - spec.shadow_drop, z0 - spec.shadow_top, _darker(body, spec.shadow_shade)))
+        parts.append(_p("cleat", "base", L * spec.cleat_x0, D - spec.cleat_depth, L * spec.cleat_x1, D,
+                        z0 - spec.cleat_drop, z0, _darker(body, spec.cleat_shade)))
 
     # corpo (casca) + tampo proud
-    top_t = 0.03
+    top_t = spec.top_t
     parts.append(_p("body", "base", 0.0, 0.0, L, D, z0, z0 + bh - top_t, body))
     parts.append(_p("top", "top", -spec.top_proud, -spec.top_proud,
                     L + spec.top_proud, D, z0 + bh - top_t, z0 + bh, front))
@@ -160,17 +210,17 @@ def build_rack(spec: RackSpec):
             order.append("drawer" if (i % 2 == 0 and order.count("drawer") < spec.n_drawers)
                          or order.count("niche") >= spec.n_niches else "niche")
     n_mod = len(order)
-    mod_w = (L - 0.04) / n_mod
-    fz0, fz1 = z0 + 0.03, z0 + bh - top_t - 0.03
+    mod_w = (L - spec.mod_margin) / n_mod
+    fz0, fz1 = z0 + spec.face_margin, z0 + bh - top_t - spec.face_margin
     for i, kind in enumerate(order):
-        mx0 = 0.02 + i * mod_w + 0.008
-        mx1 = 0.02 + (i + 1) * mod_w - 0.008
+        mx0 = spec.mod_x0 + i * mod_w + spec.mod_gap
+        mx1 = spec.mod_x0 + (i + 1) * mod_w - spec.mod_gap
         if kind == "drawer":
-            parts.append(_p(f"drawer_{i + 1}", "front", mx0, -0.012, mx1, 0.0,
+            parts.append(_p(f"drawer_{i + 1}", "front", mx0, -spec.drawer_proud, mx1, 0.0,
                             fz0, fz1, front))
         else:
-            parts.append(_p(f"niche_{i + 1}", "niche", mx0, 0.0, mx1, 0.06,
-                            fz0 + 0.01, fz1 - 0.01, dark))
+            parts.append(_p(f"niche_{i + 1}", "niche", mx0, 0.0, mx1, spec.niche_depth,
+                            fz0 + spec.niche_margin, fz1 - spec.niche_margin, dark))
 
     meta = {"type": "rack", "support": spec.support, "n_parts": len(parts),
             "bbox_m": spec.bbox_m(), "front_axis": "-Y",
@@ -333,17 +383,17 @@ def _tv_proxy_parts(spec: RackSpec, tv="65"):
     L = spec.length
     x0 = (L - tw) / 2.0
     zb = spec.total_height()
-    y0, y1 = spec.depth * 0.55, spec.depth * 0.55 + 0.03
-    g = (70, 72, 76)
-    t = 0.025
+    y0, y1 = spec.depth * spec.tv_y_frac, spec.depth * spec.tv_y_frac + spec.tv_depth
+    g = tuple(spec.tv_rgb)
+    t = spec.tv_frame_t
     parts = [
         _p("tv_b", "guide", x0, y0, x0 + tw, y1, zb, zb + t, g),
         _p("tv_t", "guide", x0, y0, x0 + tw, y1, zb + th - t, zb + th, g),
         _p("tv_l", "guide", x0, y0, x0 + t, y1, zb, zb + th, g),
         _p("tv_r", "guide", x0 + tw - t, y0, x0 + tw, y1, zb, zb + th, g),
         # linha de visao alvo (olho sentado ~1.10): atravessa alem do rack
-        _p("eye_line", "guide", -0.30, y0 + 0.005, L + 0.30, y1 - 0.005,
-           1.095, 1.115, (170, 60, 50)),
+        _p("eye_line", "guide", -spec.eye_overhang, y0 + spec.eye_inset, L + spec.eye_overhang, y1 - spec.eye_inset,
+           spec.eye_z0, spec.eye_z1, tuple(spec.eye_rgb)),
     ]
     return parts
 

@@ -65,8 +65,8 @@ def _ensure_closed_skp(d, force=False):
     if closed.exists() and not force:
         return {"status": "cached", "skp": str(closed)}
     parts = json.loads((d / "scene_parts.json").read_text("utf-8"))
-    from interior.renderers.render_provider import RenderRequest
-    from interior.renderers.sketchup_basic_provider import SketchUpBasicProvider
+    from tools.rendering.providers.render_provider import RenderRequest
+    from tools.rendering.providers.sketchup_basic_provider import SketchUpBasicProvider
     from tools.rendering.render_scene_views import scene_boxes
     prov = SketchUpBasicProvider()
     if not prov.available():

@@ -29,6 +29,7 @@ CONSENSUS = ROOT / "fixtures/planta_74/consensus_with_human_walls_and_soft_barri
 BASE_SKP = ROOT / "artifacts/planta_74/planta_74.skp"
 # FP-055 #490: a pasta canonica artifacts/planta_74/furnished/ (protegida) so recebe .skp com ALLOW_OFFICIAL_WRITE=1 (+ gates e
 # aprovacao humana); o padrao e runs/place_bedroom/. `BEDROOM_OUT_DIR` escolhe outra pasta.
+from tools.sketchup.launcher_guards import require_known_room  # noqa: E402
 from tools.sketchup.output_policy import resolve_output_dir  # noqa: E402
 
 OUT_DIR = resolve_output_dir(ROOT, os.environ.get("BEDROOM_OUT_DIR"), ROOT / "runs/place_bedroom",
@@ -76,6 +77,7 @@ def main():
                     help="monta os boxes e imprime, sem lancar o SketchUp")
     args = ap.parse_args()
     con = json.loads(CONSENSUS.read_text("utf-8"))
+    require_known_room(con, args.room, "bedroom-place")
     boxes, out = build_boxes(con, args.room)
     if boxes is None:
         print(f"[bedroom-place] {out['result']}: {out.get('reason')} — nada a materializar")

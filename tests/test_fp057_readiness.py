@@ -11,7 +11,7 @@ from tools.validation import task_readiness as tr
 
 ROOT = Path(__file__).resolve().parents[1]
 ACC = "## Critérios de aceite\n- [ ] x\n"
-AUDITED = (429, 416, 436, 453, 463, 460, 462, 473, 476)       # 501 fechou com evidencia (PRs 547/559): sai do registro
+AUDITED = (429, 416, 436, 453, 457, 460, 473, 476)       # 501, 462 e 463 fecharam com evidencia: saem do registro
 
 
 def issue(n, labels=(), kind="task", state="OPEN"):
@@ -41,8 +41,23 @@ def test_blocked_entry_makes_the_issue_ineligible_with_cause_ref_and_detail():
     assert not v.eligible and "HUMAN_DECISION: decide o dono (#446)" in v.reasons[0]
 
 
-def test_without_a_registry_entry_behaviour_is_unchanged():
-    assert verdicts([1, 2], None)[1].eligible and verdicts([1, 2], {})[2].next_step is None
+def test_without_a_registry_at_all_behaviour_is_unchanged():
+    assert verdicts([1, 2], None)[1].eligible and verdicts([1, 2], None)[2].next_step is None
+
+
+def test_eligible_issue_without_an_audited_next_step_is_not_eligible_when_a_registry_is_in_use():
+    # defeito observado em 2026-10-25: #430 e #457 saiam ELEGIVEL sem nenhum proximo passo (o executor concluia "nada a fazer")
+    v = verdicts([1, 2], {1: entry()})
+    assert v[1].eligible and v[1].next_step == "faz"
+    assert not v[2].eligible and v[2].reasons[0].startswith("NO_NEXT_STEP") and v[2].next_step is None
+    assert bd.classify(v[2]) == "BLOCKED"
+
+
+def test_every_eligible_verdict_carries_a_concrete_next_step_whenever_the_registry_is_loaded():
+    reg = tr.load()
+    nums = sorted({*reg, 900, 901, 902})
+    for v in verdicts(nums, reg).values():
+        assert not v.eligible or (v.next_step and isinstance(v.offline, bool) and isinstance(v.needs_sketchup, bool))
 
 
 def test_real_registry_covers_the_audited_issues_and_every_entry_is_actionable_or_traced():
@@ -63,7 +78,9 @@ def test_real_registry_covers_the_audited_issues_and_every_entry_is_actionable_o
 def test_catalog_and_workflow_adjacent_issues_declare_review_as_completion_blocker():
     reg = tr.load()
     for n in (429, 460, 453):
-        assert any(b["cause"] == "REVIEW" and b["ref"] == "#524" for b in reg[n]["completion_blockers"]), n
+        # READY: o bloqueio de conclusao e declarado em completion_blockers; BLOCKED: e a propria causa (a #453 acabou a medicao segura)
+        blockers = reg[n]["completion_blockers"] if reg[n]["state"] == "READY" else [{"cause": reg[n]["cause"], "ref": reg[n]["ref"]}]
+        assert any(b["cause"] == "REVIEW" and b["ref"] == "#524" for b in blockers), n
     assert any(b["cause"] == "ENVIRONMENT" for b in reg[460]["completion_blockers"])      # L2 exige SketchUp real
     assert reg[473]["cause"] == "EVIDENCE" and reg[476]["cause"] == "EVIDENCE"                # sem reference_target aprovado
 

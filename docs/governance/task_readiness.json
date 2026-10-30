@@ -44,30 +44,10 @@
     },
     "453": {
       "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Proxima fatia da F3: dimensao obstaculos (10/100/1000) em cenas sinteticas e contagem de intersection/buffer/unary_union nos gates quentes, estendendo solver_benchmark. A linha de base por candidatos ja existe (PR 560).",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": [
-        {
-          "cause": "REVIEW",
-          "ref": "#524",
-          "detail": "qualquer mudanca em tools/rooms/shared/spatial_solver/ (otimizacao, extracao de modulos) e caminho critico"
-        },
-        {
-          "cause": "EVIDENCE",
-          "ref": "docs/specs/FP-054-F3_modularization_dsa.md",
-          "detail": "ADR obrigatorio antes de adotar OR-Tools/scipy; metas so a partir de baseline medido"
-        }
-      ]
-    },
-    "463": {
-      "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Proxima peca de interior/: mover interior/renderers/ para tools/rendering/ (consumidores: tools/rendering/render_scene_*.py e living/capabilities/sofa_class_matrix.py) mantendo fachadas de identidade; depois scene_composer (transversal). Placement core ja movido (PR 553).",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": []
+      "state": "BLOCKED",
+      "cause": "REVIEW",
+      "ref": "#524",
+      "detail": "medicao completa e sem executar mais nada seguro: candidatos (PR 560), obstaculos (PR 567) e geometria adversarial (esta PR; pior caso ~3,3x o tempo limpo a 1000 obstaculos, linear, RSS 52-60 MB). O que falta - otimizar/extrair modulos de tools/rooms/shared/spatial_solver/ (caminho critico: exige revisao independente) e ADR antes de OR-Tools/scipy - nao tem meta definida pelos dados (sem budget); outra maquina e contagem fora de plan_room seguem como medicoes opcionais"
     },
     "460": {
       "audited_at": "2026-10-25",
@@ -88,14 +68,6 @@
         }
       ]
     },
-    "462": {
-      "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Proximo builder Gen1 no Spec com origem declarada (sofa: 44 literais, 8 ramos de estilo) com matriz golden byte a byte; um builder por PR.",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": []
-    },
     "473": {
       "audited_at": "2026-10-25",
       "state": "BLOCKED",
@@ -109,6 +81,13 @@
       "cause": "EVIDENCE",
       "ref": "docs/specs/construction_core_microphases.md",
       "detail": "micro-prova L1 PROPOSED feita (PR 556); entrega do armario de lavanderia no apartamento exige reference_target aprovado (DoD 2.5), inexistente"
+    },
+    "457": {
+      "audited_at": "2026-10-25",
+      "state": "BLOCKED",
+      "cause": "EVIDENCE",
+      "ref": "docs/specs/FP-043_remaining_execution_P3_P8.md",
+      "detail": "smoke dos launchers CLI do PR #296 feito com janela humana aberta (place_bedroom, place_layout, bake_theme, render_banho_vray, render_room, furnish_apartment --dry-run): janela intacta, nenhum SketchUp residual, canonicos com o mesmo SHA-256; defeitos achados e corrigidos (raizes mortas, sala/tema inexistente). Nao exercitados: kitchen/capabilities/vray.py (grava em artifacts/planta_74/furnished/kitchen_angles por desenho: rodar exigiria escrever em pasta canonica) e furnish_plan.py (precisa de .skp do 3D Warehouse que nao existe em runs/planta_74/_furniture); medicao de saida em timeout e o cliente Claude Code/Node via spawn proprio dependem de acao humana/ambiente"
     }
   }
 }

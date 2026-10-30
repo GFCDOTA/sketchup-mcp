@@ -8427,6 +8427,30 @@
       "blob_sha": "98a5bd0e302db1337d9d716a179dda4e9cf61377",
       "blob_size": 30054,
       "owner_group": "other_canonical_reference"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/README_obstacles_2026-10-25.md",
+      "blob_sha": "2201291627eec1dc4a5650d0f9c95c9b61884d00",
+      "blob_size": 3313,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_obstacles_2026-10-25.json",
+      "blob_sha": "da0a461d19900457508d68415c343b28a9c27fc2",
+      "blob_size": 11598,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/README_adversarial_2026-10-25.md",
+      "blob_sha": "a976ab86b862d201263be0a5bad6c29bc7e3ce97",
+      "blob_size": 3893,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_adversarial_2026-10-25.json",
+      "blob_sha": "1004b749b53e832baefe7a64658fb70f6af02e17",
+      "blob_size": 14886,
+      "owner_group": "artifacts"
     }
   ]
 }
