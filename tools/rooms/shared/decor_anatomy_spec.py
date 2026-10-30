@@ -45,6 +45,13 @@ DECOR_PLAUSIBLE_BBOX_M = {
 }
 
 
+# Origem de cada proporcao de classe acima: valor declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+DECOR_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "canvas_recess", "accent_proud", "col_x1", "col_x2", "col_x3", "col_x4", "field_z0", "field_z1", "bar_z0", "bar_z1",
+    "pot_taper", "trunk_frac", "trunk_skirt", "shade_dark", "shade_light", "shade_deep", "foliage_layers",
+    "back_shade", "bracket_inset", "bracket_reach")}
+
+
 def _base_dict(s, kind):
     d = asdict(s)
     d["bbox_m"] = s.bbox_m()
@@ -166,6 +173,17 @@ class WallArtSpec:
     frame_rgb: tuple = (38, 38, 40)
     accent_rgb: tuple = (128, 92, 64)     # burnt_umber
     accent2_rgb: tuple = (84, 80, 76)     # cinza quente escuro
+    # Proporcoes de CLASSE (antes literais no builder); origem em DECOR_MEASURE_ORIGINS. Fracoes de W/H/depth.
+    canvas_recess: float = 0.55           # a tela fica recuada: y0 = depth * fracao
+    accent_proud: float = 0.005           # a faixa de acento sobressai da tela
+    col_x1: float = 0.12                  # fim da 1a coluna (fracao de W)
+    col_x2: float = 0.55                  # fim do campo quente
+    col_x3: float = 0.62                  # fim do respiro entre campo e barra
+    col_x4: float = 0.70                  # fim da barra vertical escura
+    field_z0: float = 0.18                # faixa quente (fracao de H)
+    field_z1: float = 0.62
+    bar_z0: float = 0.12                  # barra escura (fracao de H)
+    bar_z1: float = 0.88
 
     def validate(self):
         assert self.width > 4 * self.frame_t and self.height > 4 * self.frame_t
@@ -228,6 +246,16 @@ class PlantSpec:
     foliage_rgb: tuple = (97, 117, 73)   # soft_olive_green
     pot_rgb: tuple = (45, 43, 41)        # matte_black_pot
     trunk_rgb: tuple = (74, 56, 42)      # dark_walnut
+    # Proporcoes de CLASSE (antes literais no builder); origem em DECOR_MEASURE_ORIGINS.
+    pot_taper: float = 0.74               # base do vaso = fracao da boca
+    trunk_frac: float = 0.28              # topo do tronco (fracao da altura acima do vaso)
+    trunk_skirt: float = 0.05             # a 1a camada da copa desce abaixo do topo do tronco
+    shade_dark: float = 0.9               # fatores de tom das 4 camadas da copa
+    shade_light: float = 1.12
+    shade_deep: float = 0.82
+    # camadas da copa: (z0_frac, z1_frac, w0_frac, w1_frac, dx, dy); z0_frac None = topo do tronco - trunk_skirt
+    foliage_layers: tuple = ((None, 0.55, 0.60, 1.0, 0.0, 0.0), (0.45, 0.74, 1.0, 0.80, -0.04, 0.03),
+                             (0.66, 0.90, 0.80, 0.45, 0.04, -0.02), (0.84, 1.0, 0.45, 0.16, -0.02, 0.01))
 
     def validate(self):
         assert self.height > self.pot_h + 0.4
@@ -256,6 +284,7 @@ class AccentSeatSpec:
     back_t: float = 0.16
     seat_rgb: tuple = (196, 180, 158)   # warm_taupe_boucle
     leg_rgb: tuple = (20, 18, 16)       # near_black_wood
+    back_shade: float = 0.94            # o encosto um tom abaixo do assento (fator; origem em DECOR_MEASURE_ORIGINS)
 
     def validate(self):
         assert self.height > self.seat_h > self.leg_h
@@ -283,6 +312,8 @@ class ShelfSpec:
     bracket_drop: float = 0.10   # quanto a mão-francesa desce abaixo da tabua
     plank_rgb: tuple = (96, 70, 48)    # madeira escura
     bracket_rgb: tuple = (30, 30, 33)  # metal preto fosco
+    bracket_inset: float = 0.06        # recuo da mao-francesa em relacao as pontas (origem em DECOR_MEASURE_ORIGINS)
+    bracket_reach: float = 0.14        # quanto a mao-francesa entra na parede (profundidade)
 
     def validate(self):
         assert self.n_planks >= 1

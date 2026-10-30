@@ -1,0 +1,156 @@
+{
+ "schema_version": "solver_benchmark.v1",
+ "commit": "ac177f52f0dc06e96f988cb18df97d41a8c2f87e",
+ "dirty": false,
+ "consensus_sha256": "69dbbf0394b5197321e511d5518cf6bb0ae6772879a6edfb285d4be36f3fe2be",
+ "hardware": {
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "cpu_count": 16,
+  "python": "3.12.13"
+ },
+ "repeats": 5,
+ "cases": [
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 1,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 5,
+    "min_s": 0.147,
+    "p50_s": 0.1515,
+    "p95_s": 0.2459,
+    "max_s": 0.2667
+   },
+   "peak_rss_mb": 53.1
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 5,
+    "min_s": 0.9119,
+    "p50_s": 0.9162,
+    "p95_s": 1.0909,
+    "max_s": 1.1304
+   },
+   "peak_rss_mb": 56.9
+  },
+  {
+   "room": "r005",
+   "name": "BANHO 01",
+   "max_candidates": 100,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 5,
+    "min_s": 9.4222,
+    "p50_s": 9.4967,
+    "p95_s": 9.9333,
+    "max_s": 10.0179
+   },
+   "peak_rss_mb": 70.2
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 1,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 5,
+    "min_s": 0.1445,
+    "p50_s": 0.1581,
+    "p95_s": 0.2415,
+    "max_s": 0.2621
+   },
+   "peak_rss_mb": 55.9
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 10,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 5,
+    "min_s": 0.9678,
+    "p50_s": 0.9906,
+    "p95_s": 1.0849,
+    "max_s": 1.1083
+   },
+   "peak_rss_mb": 57.9
+  },
+  {
+   "room": "r006",
+   "name": "BANHO 02",
+   "max_candidates": 100,
+   "candidates_total": 6724,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 5,
+    "min_s": 8.4328,
+    "p50_s": 8.6875,
+    "p95_s": 9.5469,
+    "max_s": 9.7603
+   },
+   "peak_rss_mb": 69.1
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 1,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 5,
+    "min_s": 0.0998,
+    "p50_s": 0.1067,
+    "p95_s": 0.181,
+    "max_s": 0.1992
+   },
+   "peak_rss_mb": 52.2
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 10,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 5,
+    "min_s": 0.8048,
+    "p50_s": 0.8076,
+    "p95_s": 0.8744,
+    "max_s": 0.8866
+   },
+   "peak_rss_mb": 52.3
+  },
+  {
+   "room": "r007",
+   "name": "LAVABO",
+   "max_candidates": 100,
+   "candidates_total": 1681,
+   "status": "UNKNOWN",
+   "time": {
+    "n": 5,
+    "min_s": 7.2176,
+    "p50_s": 7.5115,
+    "p95_s": 7.989,
+    "max_s": 8.0823
+   },
+   "peak_rss_mb": 58.5
+  }
+ ],
+ "not_measured": [
+  "obstaculos 10/100/1000 (cenas sinteticas)",
+  "geometria adversarial",
+  "contagem de intersection/buffer/unary_union"
+ ],
+ "budget": "nenhum: so a linha de base; budget de regressao por capability sai destes dados (FP-054 F3)"
+}

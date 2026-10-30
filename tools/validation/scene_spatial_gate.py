@@ -530,7 +530,7 @@ if __name__ == "__main__":
         sys.exit(0 if r["result"] == "PASS" else (2 if r["result"] == "WARN" else 1))
 
     # modo fixture: compoe a cena canonica + prova as sabotagens
-    from interior.composer.scene_composer import compose_scene
+    from tools.orchestration.scene_composer import compose_scene
     intent = json.loads((ROOT / "fixtures/scene_intents/living_room_modern_warm_minimal.json")
                         .read_text("utf-8"))
     scene = compose_scene(intent)

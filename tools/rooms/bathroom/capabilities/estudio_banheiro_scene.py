@@ -23,7 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
-from interior.composer.scene_composer import build_room_shell, write_scene  # noqa: E402
+from tools.orchestration.scene_composer import build_room_shell, write_scene  # noqa: E402
 
 W, D, H = 1.65, 2.45, 2.50
 

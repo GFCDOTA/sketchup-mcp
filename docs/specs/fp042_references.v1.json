@@ -6539,6 +6539,18 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp054/f3_benchmark/README.md",
+      "blob_sha": "c0c017fc3d95c5aa23a3f8998d9899a9eb3cf7e4",
+      "blob_size": 2486,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_2026-10-25.json",
+      "blob_sha": "4c0bfdd69c5498b255099057239b6594bcb4cea7",
+      "blob_size": 2997,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp055/p4/run_p4.py",
       "blob_sha": "5e59ebacd22cc32454e614c94862315e60d29e54",
       "blob_size": 18120,
@@ -6770,6 +6782,24 @@
       "path": "artifacts/review/fp056/p8_r6_alternatives/probe_whatif.py",
       "blob_sha": "5c2705eaca07f77850b6488a36a05d433265a0ea",
       "blob_size": 2130,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/README.md",
+      "blob_sha": "c79867080df195fe3fc413647f97133aaeb1f894",
+      "blob_size": 3059,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/door_opening_alternatives.json",
+      "blob_sha": "4c9eeca4485f2cc86be618771fba8cb9865c2de3",
+      "blob_size": 1349,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/probe_door_opening.py",
+      "blob_sha": "4993b328e77b5a7e7d2c975d3eab682c5a5a3788",
+      "blob_size": 1913,
       "owner_group": "artifacts"
     },
     {
@@ -8427,6 +8457,30 @@
       "blob_sha": "98a5bd0e302db1337d9d716a179dda4e9cf61377",
       "blob_size": 30054,
       "owner_group": "other_canonical_reference"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/README_obstacles_2026-10-25.md",
+      "blob_sha": "2201291627eec1dc4a5650d0f9c95c9b61884d00",
+      "blob_size": 3313,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_obstacles_2026-10-25.json",
+      "blob_sha": "da0a461d19900457508d68415c343b28a9c27fc2",
+      "blob_size": 11598,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/README_adversarial_2026-10-25.md",
+      "blob_sha": "a976ab86b862d201263be0a5bad6c29bc7e3ce97",
+      "blob_size": 3893,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_adversarial_2026-10-25.json",
+      "blob_sha": "1004b749b53e832baefe7a64658fb70f6af02e17",
+      "blob_size": 14886,
+      "owner_group": "artifacts"
     }
   ]
 }

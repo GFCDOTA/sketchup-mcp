@@ -20,7 +20,7 @@ def text(policy=None, runner=False, token=False):
 def test_report_counts_blockers_reviews_and_open_prs_from_facts():
     t = text()
     assert "AUTONOMOUS ENGINEERING STATUS — 2026-10-24" in t
-    assert "bloqueadas: 1" in t and "external=1" in t
+    assert "BLOCKED: 1" in t and "IN_PROGRESS: 1" in t and "external=1" in t
     assert "GPT Review): #3" in t and "PRs abertos: #9" in t
 
 
