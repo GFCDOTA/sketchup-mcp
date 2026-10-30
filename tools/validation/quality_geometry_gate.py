@@ -29,11 +29,12 @@ def evaluate() -> dict:
     from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS
     from tools.validation import box_geometry as bx
     from tools.validation import defect_baseline as db
+    from tools.validation import layout_preflight
     from tools.validation.layout_preflight import allows_materialization, preflight
     con = json.loads(PLANTA_74_CONSENSUS.read_text("utf-8"))
     with contextlib.redirect_stdout(io.StringIO()):
         boxes, summary = collect_boxes(con)
-    pre = preflight(con, boxes, summary)
+    pre = preflight(con, boxes, summary, layout_preflight.planta74_twin(PLANTA_74_CONSENSUS))
     rooms = {r["id"]: str(r.get("name") or r["id"]) for r in con["rooms"]}
     reports = bx.validate_boxes(con, boxes, PLANTA_74_CONSENSUS, rooms)
     base = json.loads((ROOT / "artifacts/review/fp055/p4/defect_baseline.json").read_text("utf-8"))["defects"]

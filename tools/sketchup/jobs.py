@@ -315,7 +315,7 @@ def furnish(*, consensus_path: str | None = None, base_skp: str | None = None,
     # pré-voo OBRIGATÓRIO (FP-054 F1-03): layout que reprova circulação/sobreposição não chega ao SketchUp
     from tools.validation import layout_preflight
 
-    pre = layout_preflight.preflight(con, boxes, summary)
+    pre = layout_preflight.preflight(con, boxes, summary, layout_preflight.planta74_twin(con_p))
     if not layout_preflight.allows_materialization(pre):
         where = ", ".join(f"{b['room_id']}:{b['gate']}={b['status']}" for b in pre["blocking"])
         return {"status": "BLOCKED_LAYOUT_GATE", "reason": f"layout reprovado antes do SketchUp ({where})",
