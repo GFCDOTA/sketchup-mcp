@@ -48,3 +48,23 @@ def test_invalid_brain_fails_closed():
     providers["kitchen"] = None
     with pytest.raises(TypeError, match="ROOM_BRAIN_MUST_BE_CALLABLE"):
         build_brain_registry(**providers)
+
+
+def test_every_real_brain_conforms_to_the_roombrain_port_signature():
+    """A porta tipada (`RoomBrain`) so vale se os 5 brains reais aceitam `(con, room_id)` e devolvem `(caixas, resultado)`."""
+    import inspect
+
+    from tools.orchestration.furnish_apartment import BRAINS
+    assert tuple(BRAINS) == SUPPORTED_BRAINS
+    for room_type, brain in BRAINS.items():
+        params = [p for p in inspect.signature(brain).parameters.values()
+                  if p.default is inspect.Parameter.empty and p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)]
+        assert len(params) == 2, f"{room_type}: esperava (con, room_id), obtive {[p.name for p in params]}"
+
+
+def test_the_roombrain_port_is_exported_and_registry_is_typed_with_it():
+    import typing
+
+    from tools.rooms import dispatch
+    assert hasattr(dispatch, "RoomBrain")
+    assert "RoomBrain" in str(typing.get_type_hints(dispatch.build_brain_registry)["return"])

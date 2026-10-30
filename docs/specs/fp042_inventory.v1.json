@@ -8730,6 +8730,20 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
+      "path": "artifacts/review/fp054/f3_benchmark/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_2026-10-25.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
       "path": "artifacts/review/fp055/p4/run_p4.py",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -8920,6 +8934,69 @@
     },
     {
       "path": "artifacts/review/fp056/p2/fp055_p4_SHA256SUMS.git",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/opening_alternatives.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/baseline_measured.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/whatif_thresholds.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/probe_baseline.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/probe_whatif.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/door_opening_alternatives.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/probe_door_opening.py",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",
@@ -10895,6 +10972,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "docs/governance/task_readiness.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "docs/handoffs/.gitkeep",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
@@ -10950,6 +11036,24 @@
     },
     {
       "path": "docs/handoffs/2026-10-22_general_app_handoff.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/handoffs/2026-10-24_fp057_autonomous_orchestration_handoff.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/handoffs/2026-10-25_fp057_checkpoint.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -11093,6 +11197,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "docs/reports/FP-043_final_validation_reconciliation_2026-10-24.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "docs/reports/audit/audit_2026-10-24.json",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
@@ -11130,6 +11243,15 @@
     },
     {
       "path": "docs/reports/construction_core/geometry_hot_paths.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/reports/construction_core/r6_interior_consumers_2026-10-25.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -11750,6 +11872,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "docs/reports/fp056/p4/p4c.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "docs/reports/fp057/p0/README.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
@@ -11778,6 +11909,15 @@
     },
     {
       "path": "docs/reports/fp057/status/2026-10-24.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/reports/fp057/status/2026-10-24_end_of_session.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -12625,6 +12765,20 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
+      "path": "fixtures/synthetic_cabinets/proposed_laundry_cabinet.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/proposed_nightstand.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
       "path": "fixtures/synthetic_cabinets/valid_a_base_600.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -13080,10 +13234,10 @@
     {
       "path": "interior/composer/scene_composer.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "cross_room_scene_composition",
+      "runtime_owner": "scene_composition_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
@@ -13107,55 +13261,55 @@
     {
       "path": "interior/planners/placement_brain.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "cross_room_placement_engine",
+      "runtime_owner": "placement_engine_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/__init__.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/enscape_preview_provider.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/render_provider.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/sketchup_basic_provider.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/renderers/vray_final_provider.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "renderer_provider_engine",
+      "runtime_owner": "renderer_provider_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
@@ -13215,19 +13369,19 @@
     {
       "path": "interior/semantics/room_graph.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "shared_spatial_semantics",
+      "runtime_owner": "spatial_semantics_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
       "path": "interior/semantics/wall_affordance.py",
       "domain": "interior_engine",
-      "disposition": "retain_path_with_explicit_runtime_owner",
+      "disposition": "legacy_compatibility_shim",
       "phase": "P3",
       "status": "VERIFIED_RUNTIME_PATH_OWNER_ROLE",
-      "runtime_owner": "shared_spatial_semantics",
+      "runtime_owner": "spatial_semantics_legacy_facade",
       "ownership_evidence": "FP042_P3_EXPLICIT_PATH_AND_ROLE_NOT_L2"
     },
     {
@@ -14057,6 +14211,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_armchair_spec_origin.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_ask_gpt_gate.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -14157,6 +14320,15 @@
     },
     {
       "path": "tests/test_bed_placement_gate.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_bed_spec_origin.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -14894,6 +15066,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_fp054_f3_solver_benchmark.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_fp055_gates_in_flow.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -14904,6 +15085,15 @@
     },
     {
       "path": "tests/test_fp055_legacy_entrypoint_guard.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_fp055_p5_recipe_resolution.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -15003,6 +15193,15 @@
     },
     {
       "path": "tests/test_fp057_p7_status.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_fp057_readiness.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -15309,6 +15508,15 @@
     },
     {
       "path": "tests/test_negative_dogfood.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_nightstand_spec_origin.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -15767,6 +15975,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_shared_cabinet_two_components.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_shared_geometry_regression.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -15885,6 +16102,15 @@
     },
     {
       "path": "tests/test_sofa_class.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_sofa_spec_origin.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -16074,6 +16300,15 @@
     },
     {
       "path": "tests/test_wall_stub_canonicalization.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_wardrobe_spec_origin.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -16308,6 +16543,15 @@
     },
     {
       "path": "tests/test_fp056_p2_usable_region.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_workflow_pipefail_contract.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -18836,6 +19080,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tools/rooms/recipe_resolution.py",
+      "domain": "room_module_existing",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "room_module_governance",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
       "path": "tools/rooms/reference_provenance.py",
       "domain": "tooling_ci",
       "disposition": "retain_infrastructure",
@@ -19197,6 +19450,42 @@
     },
     {
       "path": "tools/rooms/shared/parts.py",
+      "domain": "shared",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/placement/__init__.py",
+      "domain": "shared",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/placement/placement_brain.py",
+      "domain": "shared",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/placement/room_graph.py",
+      "domain": "shared",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/placement/wall_affordance.py",
       "domain": "shared",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
@@ -20168,6 +20457,15 @@
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
+      "path": "tools/validation/solver_benchmark.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
       "path": "tools/validation/spec_integrity_gate.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
@@ -20187,6 +20485,15 @@
     },
     {
       "path": "tools/validation/support_check.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/validation/task_readiness.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
@@ -20328,6 +20635,169 @@
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "document_owner": "agent_tooling_configuration",
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_decor_spec_origin.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tools/rendering/providers/__init__.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/rendering/providers/enscape_preview_provider.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/rendering/providers/render_provider.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/rendering/providers/sketchup_basic_provider.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/rendering/providers/vray_final_provider.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tests/test_renderers_facade_identity.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/README_obstacles_2026-10-25.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_obstacles_2026-10-25.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "tests/test_launchers_no_dead_root_paths.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tools/orchestration/scene_composer.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tests/test_scene_composer_facade_identity.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_rack_spec_origin.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_coffee_table_spec_origin.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_dining_table_spec_origin.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tools/sketchup/launcher_guards.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tests/test_launcher_guards.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/README_adversarial_2026-10-25.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_adversarial_2026-10-25.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     }
   ]
 }

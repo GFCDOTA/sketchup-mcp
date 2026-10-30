@@ -28,56 +28,56 @@
     },
     "tools/rooms/shared/wardrobe.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 10,
-      "distinct": 4,
-      "module_float_constants": 1
+      "embedded_float_literals": 0,
+      "distinct": 0,
+      "module_float_constants": 0
     },
     "tools/rooms/shared/bed.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 54,
-      "distinct": 16,
+      "embedded_float_literals": 0,
+      "distinct": 0,
       "module_float_constants": 0
     },
     "tools/rooms/shared/nightstand.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 22,
-      "distinct": 5,
+      "embedded_float_literals": 0,
+      "distinct": 0,
       "module_float_constants": 0
     },
     "tools/rooms/shared/sofa.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 44,
-      "distinct": 17,
-      "module_float_constants": 0
+      "embedded_float_literals": 0,
+      "distinct": 0,
+      "module_float_constants": 5
     },
     "tools/rooms/shared/armchair_builder.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 19,
-      "distinct": 10,
+      "embedded_float_literals": 0,
+      "distinct": 0,
       "module_float_constants": 0
     },
     "tools/rooms/shared/decor_builders.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 42,
-      "distinct": 26,
+      "embedded_float_literals": 0,
+      "distinct": 0,
       "module_float_constants": 0
     },
     "tools/rooms/living/rack_class.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 83,
-      "distinct": 33,
+      "embedded_float_literals": 31,
+      "distinct": 19,
       "module_float_constants": 38
     },
     "tools/rooms/living/coffee_table_class.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 79,
-      "distinct": 21,
+      "embedded_float_literals": 63,
+      "distinct": 17,
       "module_float_constants": 43
     },
     "tools/rooms/living/dining_table_class.py": {
       "generation": "gen1_class_builder",
-      "embedded_float_literals": 95,
-      "distinct": 39,
+      "embedded_float_literals": 56,
+      "distinct": 28,
       "module_float_constants": 40
     },
     "tools/rooms/living/armchair_class.py": {
@@ -93,5 +93,5 @@
       "module_float_constants": 100
     }
   },
-  "total_gen1": 491
+  "total_gen1": 193
 }
