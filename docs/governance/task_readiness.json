@@ -1,0 +1,93 @@
+{
+  "schema_version": "task_readiness.v1",
+  "note": "Auditoria por Issue (FP-057): o proximo passo executavel AGORA e o que impede CONCLUIR. READY = ha passo concreto (offline = sem SketchUp). BLOCKED = nenhum passo executavel. Cada ref e uma Issue existente ou um arquivo do repo (validado por issue_integrity_gate). Causas: HUMAN_DECISION, ENVIRONMENT, EVIDENCE, DEPENDENCY, EXTERNAL, REVIEW. REVIEW = o merge exige revisao independente (review_policy.json: critical_paths; #524).",
+  "tasks": {
+    "429": {
+      "audited_at": "2026-10-25",
+      "state": "READY",
+      "next_step": "Registrar tools.validation.circulation_gate.GateSession como simbolo da capacidade circulation.gate (L1_PASS, sem evidencia L2: nada a revogar), regenerar specialist.v1.json, specialist.md e manifest.v1.json da area circulation e atualizar o retrato de consumo.",
+      "offline": true,
+      "needs_sketchup": false,
+      "completion_blockers": [
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "tools/rooms/capability_catalog.v1.json e caminho critico: o merge exige revisao independente e reviewers esta vazio"
+        }
+      ]
+    },
+    "416": {
+      "audited_at": "2026-10-25",
+      "state": "READY",
+      "offline": true,
+      "needs_sketchup": false,
+      "next_step": "Ligar recipe_resolution ao plan_room: registrar no ledger e na proposta a cadeia receita -> capacidade -> operacao -> prova de cada recipe do especialista (RESOLVED_*/BLOCKED_*), com teste de contrato; sem executar operacao nem tocar simbolo L2.",
+      "completion_blockers": [
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "tools/orchestration/intelligent_pipeline.py e caminho critico: o merge exige revisao independente"
+        },
+        {
+          "cause": "EVIDENCE",
+          "ref": "docs/specs/construction_core_microphases.md",
+          "detail": "usar a tecnica em movel REAL do apartamento exige reference_target aprovado (DoD 2.5); a micro-prova PROPOSED ja existe (PR 556)"
+        }
+      ]
+    },
+    "436": {
+      "audited_at": "2026-10-25",
+      "state": "BLOCKED",
+      "cause": "HUMAN_DECISION",
+      "ref": "docs/reports/fp056/p4/p4c.md",
+      "detail": "CEILING/SUSPENDED medidos (PR 555); restam 26 modulos sem modo declarado, a bandeja do Lavabo e a pele de teto a 14 cm (forro rebaixado intencional?): mudam aparencia ou o baseline, decisao do proprietario"
+    },
+    "453": {
+      "audited_at": "2026-10-25",
+      "state": "BLOCKED",
+      "cause": "REVIEW",
+      "ref": "#524",
+      "detail": "medicao completa e sem executar mais nada seguro: candidatos (PR 560), obstaculos (PR 567) e geometria adversarial (esta PR; pior caso ~3,3x o tempo limpo a 1000 obstaculos, linear, RSS 52-60 MB). O que falta - otimizar/extrair modulos de tools/rooms/shared/spatial_solver/ (caminho critico: exige revisao independente) e ADR antes de OR-Tools/scipy - nao tem meta definida pelos dados (sem budget); outra maquina e contagem fora de plan_room seguem como medicoes opcionais"
+    },
+    "460": {
+      "audited_at": "2026-10-25",
+      "state": "READY",
+      "next_step": "PR 558 aberto com a mudanca, o L2 refeito (cabinet 14/14, Shaker 11/11) e a evidencia restaurada; resta a revisao independente.",
+      "offline": true,
+      "needs_sketchup": false,
+      "completion_blockers": [
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "cabinet.sketchup.inspect e simbolo L2: o PR revoga a evidencia no capability_catalog.v1.json (caminho critico)"
+        },
+        {
+          "cause": "ENVIRONMENT",
+          "ref": "artifacts/review/fp043/p6b_cabinet_l2/README.md",
+          "detail": "refazer o L2 exige SketchUp real em commit limpo (l2_matrix.py, sem MCP) numa sessao com SketchUp aberto"
+        }
+      ]
+    },
+    "473": {
+      "audited_at": "2026-10-25",
+      "state": "BLOCKED",
+      "cause": "EVIDENCE",
+      "ref": "docs/specs/construction_core_microphases.md",
+      "detail": "micro-prova L1 PROPOSED feita (PR 556); entrega do criado-mudo no apartamento exige reference_target aprovado (DoD 2.5), inexistente"
+    },
+    "476": {
+      "audited_at": "2026-10-25",
+      "state": "BLOCKED",
+      "cause": "EVIDENCE",
+      "ref": "docs/specs/construction_core_microphases.md",
+      "detail": "micro-prova L1 PROPOSED feita (PR 556); entrega do armario de lavanderia no apartamento exige reference_target aprovado (DoD 2.5), inexistente"
+    },
+    "457": {
+      "audited_at": "2026-10-25",
+      "state": "BLOCKED",
+      "cause": "EVIDENCE",
+      "ref": "docs/specs/FP-043_remaining_execution_P3_P8.md",
+      "detail": "smoke dos launchers CLI do PR #296 feito com janela humana aberta (place_bedroom, place_layout, bake_theme, render_banho_vray, render_room, furnish_apartment --dry-run): janela intacta, nenhum SketchUp residual, canonicos com o mesmo SHA-256; defeitos achados e corrigidos (raizes mortas, sala/tema inexistente). Nao exercitados: kitchen/capabilities/vray.py (grava em artifacts/planta_74/furnished/kitchen_angles por desenho: rodar exigiria escrever em pasta canonica) e furnish_plan.py (precisa de .skp do 3D Warehouse que nao existe em runs/planta_74/_furniture); medicao de saida em timeout e o cliente Claude Code/Node via spawn proprio dependem de acao humana/ambiente"
+    }
+  }
+}
