@@ -84,9 +84,17 @@ def plan_room(con, boxes, ifaces, room_id, room_type, room_name, builder_symbol,
     except (ContractError, KeyError, ValueError) as exc:
         return {"room_id": room_id, "status": "BLOCKED", "reason": f"especialista: {exc}"}
     ledger.invoke(spec_name, f"perfil {sp.room} ({sp.profile_state}) + {sp.policy_version}")
+    # FP-055 P5 (#416): a receita deixa de ser so "selecionada": e resolvida ate capacidade/operacao/prova (somente leitura; nada e executado
+    # e nenhum simbolo L2 e tocado). Receita sem capacidade fica visivel como BLOCKED_CAPABILITY_MISSING/UNBOUND, nunca como sucesso.
+    from tools.rooms import recipe_resolution
+    resolution = recipe_resolution.resolve_room(sp.room)["constructive_recipes"]
+    by_recipe: dict[str, list[dict]] = {}
+    for r in resolution:
+        by_recipe.setdefault(r["recipe_id"], []).append(r)
     for rid in sp.recipe_ids:
         ledger.available(f"recipe.{rid}")
-        ledger.select(f"recipe.{rid}", f"recipe_ids do especialista {sp.room}")
+        why = "; ".join(x["state"] + (f" -> {x['capability']['id']}" if x["capability"] else "") for x in by_recipe.get(rid, [])) or "UNBOUND"
+        ledger.select(f"recipe.{rid}", f"recipe_ids do especialista {sp.room}: {why}")
     cell, portals, _d, _rb = _room_context(con, boxes, room_id)
     ctx = RoomContext(room_id, room_name, room_type, tuple(tuple(map(lambda v: round(v, 4), c)) for c in cell.exterior.coords),
                       tuple((round(p.x, 4), round(p.y, 4)) for p in portals))
@@ -109,7 +117,7 @@ def plan_room(con, boxes, ifaces, room_id, room_type, room_name, builder_symbol,
         prop = LayoutProposal(f"{room_id}:{res.status}", room_id, res.status, "-", (), tuple(res.issues), {}, None,
                               res.total_candidates, "; ".join(res.notes) or res.status, res.algorithm_version,
                               res.policy_version or sp.policy_version)
-        return {"room_id": room_id, "status": res.status, "context": ctx, "specialist": sp, "proposal": prop}
+        return {"room_id": room_id, "status": res.status, "context": ctx, "specialist": sp, "proposal": prop, "recipe_resolution": resolution}
     ranked = rank(res.results)
     best = ranked[0]
     local = sv.neighborhood(con, boxes, room_id)
@@ -125,6 +133,7 @@ def plan_room(con, boxes, ifaces, room_id, room_type, room_name, builder_symbol,
     ledger.consume("f2.spatial_solver", f"{room_id}: proposta {prop.proposal_id} ({status}) da ordem lexicografica")
     return {"room_id": room_id, "status": status, "context": ctx, "specialist": sp, "proposal": prop,
             "interfaces": ifaces_after,                  # interfaces MOVIDAS com o candidato (avaliacao funcional do construido)
+            "recipe_resolution": resolution,
             "original_rank": next(x.rank for x in ranked if x.result.candidate.candidate_id == "ORIGINAL")}
 
 
@@ -168,6 +177,7 @@ def run(request: GenerationRequest, *, runtime_check=None, max_candidates=None) 
         rec = {"room_id": rid, "name": name, "type": rtype, "status": out["status"], "reason": out.get("reason"),
                "original_rank": out.get("original_rank"),
                "specialist": out["specialist"].__dict__ if out.get("specialist") else None,
+               "recipe_resolution": out.get("recipe_resolution"),
                "proposal": prop.to_dict() if prop else None}
         if prop:
             manifest["validations"].append(ValidationReport(
