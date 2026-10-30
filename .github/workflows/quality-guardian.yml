@@ -103,6 +103,14 @@ jobs:
         run: uv run --no-sync python -m tools.validation.consumption_baseline | tee -a gate.txt
       - name: integridade do catalogo de capacidades (L2 so com evidencia)
         run: uv run --no-sync python -m tools.rooms.capability_catalog | tee -a gate.txt
+      - name: publicar o relatorio de nao consumidos e da geometria como artefato
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-guardian-geometry-consumption-report
+          path: gate.txt
+          if-no-files-found: warn
+          retention-days: 30
       - name: publicar o motivo no PR quando reprovar
         if: failure() && github.event_name == 'pull_request'
         run: |
