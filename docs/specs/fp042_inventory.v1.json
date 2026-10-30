@@ -8919,6 +8919,41 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
+      "path": "artifacts/review/fp055/r3_scratch_l2/l2_cabinet.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp055/r3_scratch_l2/l2_shaker.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp055/r3_scratch_l2/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp055/r3_scratch_l2/cabinet_summary.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp055/r3_scratch_l2/shaker_summary.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
       "path": "artifacts/review/fp056/p1/fp044_baseline.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
@@ -19280,6 +19315,15 @@
     {
       "path": "tools/rooms/shared/cabinet/ruby/shaker_inspect.rb",
       "domain": "room_kitchen",
+      "disposition": "retain_architecture_boundary_with_explicit_owner",
+      "phase": "P2",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "architecture_owner": "shared_room_primitives",
+      "ownership_evidence": "FP042_P1_P2_PATH_ROLES_AND_AST_GATES_NO_SEMANTIC_REWRITE"
+    },
+    {
+      "path": "tools/rooms/shared/cabinet/scratch.py",
+      "domain": "room_module_existing",
       "disposition": "retain_architecture_boundary_with_explicit_owner",
       "phase": "P2",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",

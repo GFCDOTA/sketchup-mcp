@@ -1,0 +1,220 @@
+{
+ "commit": "53d4711f99ae7faef8636334782056ca10439e2c",
+ "dirty": false,
+ "base_skp": "E:\\Claude\\worktrees\\fp057-w2\\runs\\template_base.skp",
+ "base_sha256": "621daa5733d8ac9d6397a97cf3469e410f1159385ffda35b429af593cb2c02f8",
+ "cases": [
+  {
+   "case": "m1_valid_a_base_600_r0",
+   "kind": "materialize+reopen",
+   "request_id": "valida-r0",
+   "signature": "7e90b4ac59a8dfa7675ced219d27961636585c98e79a58ddf40914e6fe88ea83",
+   "ok": true,
+   "max_corner_error_m": 3.469446951953614e-18,
+   "checks": 42,
+   "failed": [],
+   "fixture": "valid_a_base_600",
+   "rotation_deg": 0,
+   "pid_build": 18032
+  },
+  {
+   "case": "m1_valid_a_base_600_r90",
+   "kind": "materialize+reopen",
+   "request_id": "valida-r90",
+   "signature": "aa91aaf431363ce38aa90d190df5e61a05d8ed3053de7ff29445a0d2c089f3de",
+   "ok": true,
+   "max_corner_error_m": 2.220717083251841e-16,
+   "checks": 42,
+   "failed": [],
+   "fixture": "valid_a_base_600",
+   "rotation_deg": 90,
+   "pid_build": 8496
+  },
+  {
+   "case": "m1_valid_a_base_600_r30",
+   "kind": "materialize+reopen",
+   "request_id": "valida-r30",
+   "signature": "a9fe0ab270afab14b9518c2637f83045e100fa9a7131178599d75bf0f14704ab",
+   "ok": true,
+   "max_corner_error_m": 5.372090346018581e-07,
+   "checks": 42,
+   "failed": [],
+   "fixture": "valid_a_base_600",
+   "rotation_deg": 30,
+   "pid_build": 15440
+  },
+  {
+   "case": "m1_valid_b_tall_900_r90",
+   "kind": "materialize+reopen",
+   "request_id": "validb-r90",
+   "signature": "e9efa9178cfac4b34c0c7d7ab767e381cd1a3eba4ba3156218a92d8d31d12539",
+   "ok": true,
+   "max_corner_error_m": 4.972820174300706e-16,
+   "checks": 53,
+   "failed": [],
+   "fixture": "valid_b_tall_900",
+   "rotation_deg": 90,
+   "pid_build": 32284
+  },
+  {
+   "case": "m1_valid_b_tall_900_r30",
+   "kind": "materialize+reopen",
+   "request_id": "validb-r30",
+   "signature": "d7f0e27ce418a25c706a045014ac441499c862669bfd6ddbd68e268a2f3ef436",
+   "ok": true,
+   "max_corner_error_m": 5.966354211612855e-07,
+   "checks": 53,
+   "failed": [],
+   "fixture": "valid_b_tall_900",
+   "rotation_deg": 30,
+   "pid_build": 7544
+  },
+  {
+   "case": "m1_holdout_c_r30",
+   "kind": "materialize+reopen",
+   "request_id": "holdoutc-r30",
+   "signature": "c97f658562951aae5e6c0757bf3748ea8a378be5bf930f036e046fbef140caca",
+   "ok": true,
+   "max_corner_error_m": 4.839123191993294e-07,
+   "checks": 42,
+   "failed": [],
+   "fixture": "holdout_c",
+   "rotation_deg": 30,
+   "pid_build": 34760
+  },
+  {
+   "case": "m1_holdout_c_r0",
+   "kind": "materialize+reopen",
+   "request_id": "holdoutc-r0",
+   "signature": "9d51760dd03fb1b43f1b9e5ffe151f71726b609479b3ae5ac7a9b5698fc61ffd",
+   "ok": true,
+   "max_corner_error_m": 3.1401849173675503e-16,
+   "checks": 42,
+   "failed": [],
+   "fixture": "holdout_c",
+   "rotation_deg": 0,
+   "pid_build": 27000
+  },
+  {
+   "case": "m2_idempotent_rebuild",
+   "kind": "rebuild",
+   "request_id": "valida-r0",
+   "signature": "7e90b4ac59a8dfa7675ced219d27961636585c98e79a58ddf40914e6fe88ea83",
+   "ok": true,
+   "max_corner_error_m": 3.469446951953614e-18,
+   "checks": 43,
+   "failed": []
+  },
+  {
+   "case": "m3_repeat_x",
+   "kind": "repetition",
+   "request_id": "rep-x",
+   "signature": "60c7abb7afbc099e892d73b944558cdc257a86b1ccc10db33d67bd6e0c600417",
+   "ok": true,
+   "max_corner_error_m": 5.087681048627601e-16,
+   "checks": 52,
+   "failed": []
+  },
+  {
+   "case": "m3_repeat_y",
+   "kind": "repetition",
+   "request_id": "rep-y",
+   "signature": "f28eb646814be45e21d9d115157e861639cd01b1cddf471dd75a2c00551da5c4",
+   "ok": true,
+   "max_corner_error_m": 4.577566798522237e-16,
+   "checks": 52,
+   "failed": []
+  },
+  {
+   "case": "m3_edit_local",
+   "kind": "make_unique+local_update",
+   "request_id": "rep-x",
+   "signature": "60c7abb7afbc099e892d73b944558cdc257a86b1ccc10db33d67bd6e0c600417",
+   "ok": true,
+   "max_corner_error_m": 5.087681048627601e-16,
+   "checks": 55,
+   "failed": [],
+   "edit_report": [
+    {
+     "op": "edit_definition",
+     "part": "rep-x/side_left",
+     "propagate": false,
+     "definition_instances_before": 2,
+     "definition": "CabinetDef_rep-x_def:side_left:18.000x330.000x2100.000#1",
+     "definition_instances_after": 1
+    }
+   ]
+  },
+  {
+   "case": "m3_edit_propagate",
+   "kind": "definition_edit_propagates_when_explicit",
+   "request_id": "rep-x",
+   "signature": "60c7abb7afbc099e892d73b944558cdc257a86b1ccc10db33d67bd6e0c600417",
+   "ok": true,
+   "max_corner_error_m": 5.087681048627601e-16,
+   "checks": 55,
+   "failed": [],
+   "edit_report": [
+    {
+     "op": "edit_definition",
+     "part": "rep-x/front_1",
+     "propagate": true,
+     "definition_instances_before": 2,
+     "definition": "CabinetDef_rep-x_def:front:446.250x18.000x2095.000",
+     "definition_instances_after": 2
+    }
+   ]
+  },
+  {
+   "case": "m3_set_material",
+   "kind": "local_material_update",
+   "request_id": "rep-x",
+   "signature": "60c7abb7afbc099e892d73b944558cdc257a86b1ccc10db33d67bd6e0c600417",
+   "ok": true,
+   "max_corner_error_m": 0.0,
+   "checks": 1,
+   "failed": []
+  },
+  {
+   "case": "n1_inspect_protected_skp_leaves_no_trash",
+   "kind": "negative_scratch_policy",
+   "ok": true,
+   "checks": 3,
+   "failed": []
+  }
+ ],
+ "pids": [
+  36132,
+  18032,
+  36156,
+  8496,
+  32008,
+  15440,
+  29296,
+  32284,
+  7296,
+  7544,
+  32796,
+  34760,
+  31680,
+  27000,
+  35988,
+  36172,
+  7820,
+  35020,
+  27360,
+  30716,
+  32436,
+  33448,
+  36544,
+  36000,
+  33108,
+  18044,
+  21284
+ ],
+ "sketchup_version": "26.0.429",
+ "grain": {
+  "state": "NOT_SUPPORTED",
+  "note": "sem textura/UV no SketchUp scratch: o veio fica como atributo, nao aplicado"
+ }
+}
