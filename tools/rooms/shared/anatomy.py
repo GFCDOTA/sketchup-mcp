@@ -83,6 +83,19 @@ class SofaSpec:
                                      # recuada vs a frente das almofadas + raio no topo
     rail_recess_from_cushion: float = 0.055  # recuo (m) da face frontal (REVISE GPT)
     rail_edge_radius: float = 0.02   # raio (m) da aresta superior-frontal
+    # Proporcoes de CLASSE (antes literais no builder); origem em SOFA_MEASURE_ORIGINS.
+    base_shade: float = 0.62         # fator de escurecimento da base/estrutura (contraste)
+    back_shade: float = 0.88         # fator de escurecimento do encosto (sombra/profundidade)
+    back_pivot_offset: float = 0.03  # o encosto gira numa cota abaixo do assento (tambem usada no bbox)
+    foot_side: float = 0.08          # lado da secao quadrada do pe de canto
+    foot_inset: float = 0.04         # recuo dos pes de canto
+    arm_cap_t: float = 0.04          # espessura do tampo proud do braco
+    arm_cap_over: float = 0.015      # quanto o tampo passa do braco
+    shoe_inset: float = 0.03         # recuo da sapata do braco (arm_relief)
+    riser_inset_min: float = 0.12    # recuo minimo do riser oculto do plinto
+    riser_shade: float = 0.6         # fator de escurecimento do riser
+    taper_split: float = 0.62        # fracao da altura do braco onde o taper comeca
+    chaise_seat_overlap: float = 0.03  # sobreposicao do 2o assento da chaise
 
     def validate(self):
         assert self.variant in VARIANTS, f"variant invalido: {self.variant}"
@@ -98,7 +111,7 @@ class SofaSpec:
         com rake dava WARN falso de bbox no gate — furo de classe, FASE 0)."""
         import math
         d = self.depth if self.variant == "straight" else max(self.depth, self.chaise_depth)
-        back_z0 = self.seat_height - 0.03          # mesmo anchor do builder
+        back_z0 = self.seat_height - self.back_pivot_offset   # mesmo anchor do builder
         rake_over = (self.height - back_z0) * math.tan(math.radians(self.backrest_rake))
         return (round(self.width, 3), round(d + max(0.0, rake_over), 3),
                 round(self.height, 3))
@@ -115,6 +128,12 @@ def sofa_spec(variant="straight", seats=3, **overrides):
     for k, v in overrides.items():
         setattr(s, k, v)
     return s.validate()
+
+
+# Origem de cada proporcao de classe do sofa: valor declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+SOFA_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "base_shade", "back_shade", "back_pivot_offset", "foot_side", "foot_inset", "arm_cap_t", "arm_cap_over", "shoe_inset",
+    "riser_inset_min", "riser_shade", "taper_split", "chaise_seat_overlap")}
 
 
 # JSON-schema (documental) do sofa — vira base do FurnitureAnatomySpec geral (msg 2).
@@ -185,6 +204,34 @@ class BedSpec:
                                      # arquitetonica + ledge) | upholstered (bolster
                                      # proud emoldurado) | contained (flush, box)
     skirt: bool = False              # saia do box tradicional (esconde a base)
+    # Proporcoes de CLASSE (antes literais no builder); origem em BED_MEASURE_ORIGINS.
+    plinth_shade: float = 0.7  # plinto: fator de escurecimento do estrado
+    rail_shade: float = 0.82  # rail/shadow line: fator de escurecimento
+    leg_inset: float = 0.05  # recuo dos pes (base legs) em relacao ao canto
+    leg_rail_max: float = 0.06  # altura maxima do rail (legs)
+    leg_rail_frac: float = 0.45  # fracao do vao sob o deck usada pelo rail (legs)
+    box_shadow_h: float = 0.06  # altura da faixa de sombra do box
+    box_shadow_inset: float = 0.02  # recuo da faixa de sombra do box
+    box_shadow_shade: float = 0.55  # fator de escurecimento da faixa de sombra
+    skirt_shade: float = 0.92  # fator de escurecimento da saia
+    skirt_overhang: float = 0.01  # quanto a saia passa do box por lado
+    skirt_t: float = 0.02  # espessura dos paineis da saia
+    skirt_back_cut: float = 0.05  # quanto a saia lateral para antes da cabeceira
+    plinth_rail_max: float = 0.05  # altura maxima do rail (plinto)
+    plinth_rail_frac: float = 0.4  # fracao da altura do plinto ocupada pelo rail
+    ledge_over: float = 0.02  # quanto o ledge da cabeceira panel passa por lado
+    ledge_depth: float = 0.1  # profundidade do ledge da cabeceira panel
+    ledge_h: float = 0.04  # altura do ledge da cabeceira panel
+    ledge_shade: float = 0.85  # fator de escurecimento do ledge
+    bolster_inset: float = 0.07  # recuo lateral/superior do bolster da cabeceira upholstered
+    bolster_proud: float = 0.05  # quanto o bolster avanca
+    bolster_above_mattress: float = 0.04  # altura do bolster acima do colchao
+    bolster_tint: float = 1.06  # fator de clareamento do bolster
+    mattress_edge: float = 0.02  # recuo do colchao em relacao ao estrado
+    pillow_gap: float = 0.08  # vao entre travesseiros
+    pillow_back_gap: float = 0.06  # folga do travesseiro ate a cabeceira
+    blanket_side_inset: float = 0.04  # recuo lateral da manta
+    blanket_foot_offset: float = 0.1  # distancia da manta ao pe da cama
     estrado_rgb: tuple = (74, 56, 42)      # madeira escura
     mattress_rgb: tuple = (205, 196, 178)  # linho/creme (roupa de cama)
     pillow_rgb: tuple = (224, 218, 205)     # fronha clara
@@ -207,6 +254,11 @@ class BedSpec:
         d["bbox_m"] = self.bbox_m()
         d["required_parts"] = list(BED_REQUIRED_PARTS)
         return d
+
+
+# Origem de cada proporcao de classe acima: valor declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+BED_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "plinth_shade", "rail_shade", "leg_inset", "leg_rail_max", "leg_rail_frac", "box_shadow_h", "box_shadow_inset", "box_shadow_shade", "skirt_shade", "skirt_overhang", "skirt_t", "skirt_back_cut", "plinth_rail_max", "plinth_rail_frac", "ledge_over", "ledge_depth", "ledge_h", "ledge_shade", "bolster_inset", "bolster_proud", "bolster_above_mattress", "bolster_tint", "mattress_edge", "pillow_gap", "pillow_back_gap", "blanket_side_inset", "blanket_foot_offset")}
 
 
 def bed_spec(size="king", **overrides):
@@ -233,6 +285,15 @@ class WardrobeSpec:
     door_t: float = 0.03         # espessura da porta (proud da frente)
     door_gap: float = 0.02       # fresta entre portas (divisao vertical)
     handle_h: float = 0.40       # altura util do puxador
+    # Proporcoes de CLASSE do guarda-roupa (antes literais no builder); origem em WARDROBE_MEASURE_ORIGINS.
+    plinth_setback: float = 0.04    # recuo do rodape em relacao ao corpo (cada lado e a frente/fundo)
+    door_margin: float = 0.03       # margem lateral do conjunto de portas
+    door_bottom_offset: float = 0.02  # folga da porta acima do rodape
+    door_top_offset: float = 0.03   # folga da porta abaixo do topo
+    handle_w: float = 0.03          # largura do puxador (barra vertical)
+    handle_proud: float = 0.04      # quanto o puxador avanca alem da espessura da porta
+    handle_inset_far: float = 0.06  # recuo da borda externa da porta (porta do lado esquerdo do centro)
+    handle_inset_near: float = 0.03  # recuo da borda externa da porta (porta do lado direito do centro)
     body_rgb: tuple = (96, 74, 54)      # corpo madeira escura
     door_rgb: tuple = (132, 106, 78)    # portas madeira/laca mais clara (le como painel)
     handle_rgb: tuple = (44, 44, 48)    # puxador metal escuro
@@ -257,6 +318,13 @@ class WardrobeSpec:
         return d
 
 
+# Origem de cada proporcao acima: valor de classe declarado no codigo (nao vem do PDF nem de pedido). Sem este mapa, uma medida
+# embutida parece decisao de projeto; com ele o gate de origem ve que e default declarado e pode ser sobrescrito pelo pedido.
+WARDROBE_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "plinth_setback", "door_margin", "door_bottom_offset", "door_top_offset", "handle_w", "handle_proud",
+    "handle_inset_far", "handle_inset_near")}
+
+
 def wardrobe_spec(width=1.80, depth=0.58, height=2.20, **overrides):
     s = WardrobeSpec(width=width, depth=depth, height=height)
     for k, v in overrides.items():
@@ -279,6 +347,15 @@ class NightstandSpec:
     foot_h: float = 0.08
     top_t: float = 0.03          # espessura do tampo
     drawer_t: float = 0.02       # frente da gaveta (proud)
+    # Proporcoes de CLASSE do criado-mudo (antes literais no builder); origem em NIGHTSTAND_MEASURE_ORIGINS.
+    foot_size: float = 0.05           # lado da secao quadrada do pe
+    edge_inset: float = 0.02          # recuo dos pes e do corpo em relacao ao tampo
+    drawer_bottom_gap: float = 0.04   # folga da gaveta acima dos pes
+    drawer_top_gap: float = 0.03      # folga da gaveta abaixo do tampo
+    drawer_side_inset: float = 0.05   # recuo lateral da frente da gaveta
+    knob_half_w: float = 0.03         # meia largura do puxador
+    knob_proud: float = 0.04          # quanto o puxador avanca alem da frente da gaveta
+    knob_half_h: float = 0.015        # meia altura do puxador
     body_rgb: tuple = (120, 95, 68)     # corpo madeira
     top_rgb: tuple = (82, 64, 48)       # tampo mais escuro (contraste)
     drawer_rgb: tuple = (142, 116, 86)  # frente de gaveta mais clara
@@ -298,6 +375,12 @@ class NightstandSpec:
         d["bbox_m"] = self.bbox_m()
         d["required_parts"] = list(NIGHTSTAND_REQUIRED_PARTS)
         return d
+
+
+# Origem de cada proporcao acima: valor de classe declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+NIGHTSTAND_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "foot_size", "edge_inset", "drawer_bottom_gap", "drawer_top_gap", "drawer_side_inset", "knob_half_w", "knob_proud",
+    "knob_half_h")}
 
 
 def nightstand_spec(width=0.45, depth=0.40, height=0.55, **overrides):

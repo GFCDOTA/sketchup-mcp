@@ -77,6 +77,12 @@ def sofa_satellite_gate(spec, sofa_width, sofa_seat_height):
 
 
 # ------------------------------------------------------------------ spec
+# Origem de cada proporcao de classe: valor declarado no codigo (nao vem do PDF nem de pedido); pode ser sobrescrito.
+COFFEE_MEASURE_ORIGINS = {name: "default_declared" for name in (
+    "slab_shadow_inset", "slab_shadow_y", "slab_inset_y", "slab_shadow_shade", "slab_panel_shade",
+    "shelf_t", "shelf_inset_x", "shelf_inset_y", "shelf_shade")}
+
+
 @dataclass
 class CoffeeTableClassSpec:
     """Mesa de centro da CLASSE (v2, autocontida). Metros; X=length (eixo do
@@ -97,13 +103,23 @@ class CoffeeTableClassSpec:
     slab_reveal: float = 0.05      # low_slab: sombra/recuo no rodape do painel
     top_rgb: tuple = (206, 193, 171)
     leg_rgb: tuple = (38, 38, 40)
+    # Proporcoes de CLASSE (antes literais em build_coffee_table_v2); origem em COFFEE_MEASURE_ORIGINS.
+    slab_shadow_inset: float = 0.04   # low_slab: a sombra do rodape recua alem do painel em X
+    slab_shadow_y: float = 0.03       # low_slab: a sombra do rodape recua alem do painel em Y
+    slab_inset_y: float = 0.7         # low_slab: recuo do painel em Y (fracao de leg_inset)
+    slab_shadow_shade: float = 0.5    # low_slab: fator de tom da sombra
+    slab_panel_shade: float = 0.8     # low_slab: fator de tom do painel
+    shelf_t: float = 0.03             # two_tier: espessura da prateleira
+    shelf_inset_x: float = 0.02       # two_tier: recuo extra da prateleira em X
+    shelf_inset_y: float = 0.8        # two_tier: recuo da prateleira em Y (fracao de leg_inset)
+    shelf_shade: float = 0.9          # two_tier: fator de tom da prateleira
 
     def validate(self):
         assert self.style in ("low_slab", "two_tier", "organic")
         assert self.height > self.top_t
         assert self.length > self.width
         if self.shelf:
-            shelf_top = self.shelf_gap_floor + 0.03
+            shelf_top = self.shelf_gap_floor + self.shelf_t
             assert (self.height - self.top_t) - shelf_top >= 0.18, \
                 "vao prateleira->tampo < 0.18 (entupido)"
             assert self.shelf_gap_floor >= 0.06, "prateleira colada no chao"
@@ -148,11 +164,11 @@ def build_coffee_table_v2(spec: CoffeeTableClassSpec):
         # base painel recuado COM REVEAL no rodape (cycle002: sombra inferior —
         # "desenhada, nao bloco extrudado"; mesma familia da regra da cama)
         rv = spec.slab_reveal
-        parts.append(_p("base_shadow", "leg", ins + 0.04, ins * 0.7 + 0.03,
-                        L - ins - 0.04, W - ins * 0.7 - 0.03, 0.0, rv,
-                        _darker(top, 0.5)))
-        parts.append(_p("base_panel", "leg", ins, ins * 0.7, L - ins, W - ins * 0.7,
-                        rv, z_top0, _darker(top, 0.8)))
+        parts.append(_p("base_shadow", "leg", ins + spec.slab_shadow_inset, ins * spec.slab_inset_y + spec.slab_shadow_y,
+                        L - ins - spec.slab_shadow_inset, W - ins * spec.slab_inset_y - spec.slab_shadow_y, 0.0, rv,
+                        _darker(top, spec.slab_shadow_shade)))
+        parts.append(_p("base_panel", "leg", ins, ins * spec.slab_inset_y, L - ins, W - ins * spec.slab_inset_y,
+                        rv, z_top0, _darker(top, spec.slab_panel_shade)))
     else:
         lt = spec.leg_t
         for tag, (x0, y0) in (("fl", (ins, ins)), ("fr", (L - ins - lt, ins)),
@@ -169,8 +185,8 @@ def build_coffee_table_v2(spec: CoffeeTableClassSpec):
             parts.append(p)
         if spec.shelf:
             sz0 = spec.shelf_gap_floor
-            parts.append(_p("shelf", "top", ins + 0.02, ins * 0.8, L - ins - 0.02,
-                            W - ins * 0.8, sz0, sz0 + 0.03, _darker(top, 0.9)))
+            parts.append(_p("shelf", "top", ins + spec.shelf_inset_x, ins * spec.shelf_inset_y, L - ins - spec.shelf_inset_x,
+                            W - ins * spec.shelf_inset_y, sz0, sz0 + spec.shelf_t, _darker(top, spec.shelf_shade)))
     meta = {"type": "coffee_table_v2", "style": spec.style, "n_parts": len(parts),
             "bbox_m": spec.bbox_m(), "front_axis": "-Y",
             "kinds": sorted({p["kind"] for p in parts})}

@@ -69,7 +69,7 @@ descartado em silêncio (o descarte de `out["functional_interfaces"]` é o caso-
 | P0–P3 | feitas | `docs/reports/fp055/p0..p3/` |
 | P4 | validação do construído feita; vertical Banho 02 real a reconciliar | #421, #422 |
 | Caminho legado | endurecido: saída segura, pré-voo obrigatório, guard de banheiro bloqueante, interfaces expostas | #423, #424, #425, #427; #490 (demais escritores) |
-| P5 receitas → operação | não iniciada | #416 |
+| P5 receitas → operação | parcial: resolução receita→capacidade→operação→símbolo→prova (`tools/rooms/recipe_resolution.py`, somente leitura); falta técnica compartilhada em 2 componentes (medida hoje: nenhuma) e ligar ao `plan_room` | #416 |
 | P6 expansão por cômodo | não iniciada | #417 |
 | P7 gates | parcial: gate de consumo e relatório de não consumidos; falta qualificação SU como pré-condição e mutação do orquestrador integrado | #418, #479; `docs/reports/fp055/p7/` |
 | P8/P9 | dependem de P5–P7 e da FP-056 P6 | #419, #420 |

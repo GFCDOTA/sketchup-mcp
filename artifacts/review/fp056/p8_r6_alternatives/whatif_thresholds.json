@@ -1,0 +1,46 @@
+{
+ "r007": {
+  "name": "LAVABO",
+  "what_if_reference_minimum_m": {
+   "toilet.front_clearance": 0.5
+  },
+  "status": "FEASIBLE",
+  "candidates": 1681,
+  "seconds": 127,
+  "hard_violations": [],
+  "moves": [
+   "r007:Bancada",
+   "r007:Vaso"
+  ]
+ },
+ "r005": {
+  "name": "BANHO 01",
+  "what_if_reference_minimum_m": {
+   "shower.entry_width": 0.3
+  },
+  "status": "FEASIBLE",
+  "candidates": 6724,
+  "seconds": 630,
+  "hard_violations": [],
+  "moves": [
+   "r005:Vaso"
+  ]
+ },
+ "r006": {
+  "name": "BANHO 02",
+  "what_if_reference_minimum_m": {
+   "shower.entry_width": 0.3,
+   "shower.reach_path": 0.49,
+   "toilet.front_clearance": 0.51
+  },
+  "status": "FEASIBLE",
+  "candidates": 6724,
+  "seconds": 612,
+  "hard_violations": [],
+  "moves": [
+   "r006:Bancada",
+   "r006:Box",
+   "r006:Vaso"
+  ]
+ }
+}

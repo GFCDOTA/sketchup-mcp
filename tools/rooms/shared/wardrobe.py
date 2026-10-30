@@ -13,9 +13,6 @@ from tools.rooms.shared.parts import PT_TO_IN, parts_to_boxes  # noqa: F401
 from tools.rooms.shared.parts import part as _p
 from tools.rooms.shared.parts import place_parts as place_wardrobe_boxes  # noqa: F401  (generico)
 
-MARGIN = 0.03   # margem lateral do conjunto de portas
-
-
 def build_wardrobe(spec: WardrobeSpec):
     """Devolve (parts, meta). parts = pecas (caixas em m, com z0/z1)."""
     spec.validate()
@@ -26,26 +23,27 @@ def build_wardrobe(spec: WardrobeSpec):
     door = tuple(spec.door_rgb)
     handle = tuple(spec.handle_rgb)
     plinth = tuple(spec.plinth_rgb)
+    setback, margin = spec.plinth_setback, spec.door_margin
     parts = []
 
     # --- rodape recuado (base) + corpo (atras das portas) ---
-    parts.append(_p("rodape", "rodape", 0.04, 0.04, W - 0.04, D - 0.04, 0.0, ph, plinth))
+    parts.append(_p("rodape", "rodape", setback, setback, W - setback, D - setback, 0.0, ph, plinth))
     parts.append(_p("corpo", "corpo", 0.0, dt, W, D, ph, H, body))
 
     # --- N portas na FRENTE (Y[0,dt]) com frestas (divisoes verticais) ---
-    inner = W - 2 * MARGIN
+    inner = W - 2 * margin
     door_w = (inner - gap * (n - 1)) / n
-    z0d, z1d = ph + 0.02, H - 0.03
+    z0d, z1d = ph + spec.door_bottom_offset, H - spec.door_top_offset
     hz0 = (z0d + z1d) / 2 - spec.handle_h / 2
     hz1 = hz0 + spec.handle_h
     for i in range(n):
-        dx0 = MARGIN + i * (door_w + gap)
+        dx0 = margin + i * (door_w + gap)
         dx1 = dx0 + door_w
         parts.append(_p(f"porta_{i + 1}", "porta", dx0, 0.0, dx1, dt, z0d, z1d, door))
         # puxador: barra vertical fina na aresta da porta voltada p/ o centro (onde abre)
         cxi = (dx0 + dx1) / 2
-        hx = (dx1 - 0.06) if cxi < W / 2 else (dx0 + 0.03)
-        parts.append(_p(f"puxador_{i + 1}", "puxador", hx, 0.0, hx + 0.03, dt + 0.04, hz0, hz1, handle))
+        hx = (dx1 - spec.handle_inset_far) if cxi < W / 2 else (dx0 + spec.handle_inset_near)
+        parts.append(_p(f"puxador_{i + 1}", "puxador", hx, 0.0, hx + spec.handle_w, dt + spec.handle_proud, hz0, hz1, handle))
 
     meta = {"n_parts": len(parts), "n_doors": n, "bbox_m": spec.bbox_m(),
             "front_axis": "-Y", "kinds": sorted({p["kind"] for p in parts})}

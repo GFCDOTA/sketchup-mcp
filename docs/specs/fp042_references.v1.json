@@ -6539,6 +6539,18 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp054/f3_benchmark/README.md",
+      "blob_sha": "c0c017fc3d95c5aa23a3f8998d9899a9eb3cf7e4",
+      "blob_size": 2486,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_2026-10-25.json",
+      "blob_sha": "4c0bfdd69c5498b255099057239b6594bcb4cea7",
+      "blob_size": 2997,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp055/p4/run_p4.py",
       "blob_sha": "5e59ebacd22cc32454e614c94862315e60d29e54",
       "blob_size": 18120,
@@ -6671,6 +6683,24 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp055/p7/qualification_2026-10-24/README.md",
+      "blob_sha": "1e73b8350eab5b55548462d6806fd51fe644583c",
+      "blob_size": 2325,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p7/qualification_2026-10-24/summary.json",
+      "blob_sha": "7ed32644d15e77cd46ce7427b6dbd04fbb97681b",
+      "blob_size": 4619,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp055/p7/qualification_2026-10-24/regression.json",
+      "blob_sha": "9382ebd8ad32ab0ce7483a742001aef6bb403984",
+      "blob_size": 521,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp056/p1/fp044_baseline.json",
       "blob_sha": "67f01f178285760a22b2f48cb7a540b6c21129d3",
       "blob_size": 2160,
@@ -6686,6 +6716,60 @@
       "path": "artifacts/review/fp056/p2/fp055_p4_SHA256SUMS.git",
       "blob_sha": "932954c471ffd0c680a0edafdae394fbe431fa74",
       "blob_size": 2149,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/README.md",
+      "blob_sha": "872625781233775d43fa8c7e8b95a71e51e69706",
+      "blob_size": 3987,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/opening_alternatives.json",
+      "blob_sha": "a69c5583e9f503b6be54de661c61755897df79d3",
+      "blob_size": 1757,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/baseline_measured.json",
+      "blob_sha": "0f3c2a8343a7905a55d04e27f05a25fbab4ee697",
+      "blob_size": 2234,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/whatif_thresholds.json",
+      "blob_sha": "e6e83aa20831894fc0b183ab0af02affa739474c",
+      "blob_size": 803,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/probe_baseline.py",
+      "blob_sha": "3c4638488c6b9bb38b9e79634ecd6aaed5c3cb70",
+      "blob_size": 1489,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p8_r6_alternatives/probe_whatif.py",
+      "blob_sha": "5c2705eaca07f77850b6488a36a05d433265a0ea",
+      "blob_size": 2130,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/README.md",
+      "blob_sha": "c79867080df195fe3fc413647f97133aaeb1f894",
+      "blob_size": 3059,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/door_opening_alternatives.json",
+      "blob_sha": "4c9eeca4485f2cc86be618771fba8cb9865c2de3",
+      "blob_size": 1349,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p9_r6_errata_2026-10-25/probe_door_opening.py",
+      "blob_sha": "4993b328e77b5a7e7d2c975d3eab682c5a5a3788",
+      "blob_size": 1913,
       "owner_group": "artifacts"
     },
     {
@@ -7553,6 +7637,18 @@
       "owner_group": "fixtures"
     },
     {
+      "path": "fixtures/synthetic_cabinets/proposed_laundry_cabinet.json",
+      "blob_sha": "a57036610ed2140d4bd3135e99178022090dcac3",
+      "blob_size": 1397,
+      "owner_group": "fixtures"
+    },
+    {
+      "path": "fixtures/synthetic_cabinets/proposed_nightstand.json",
+      "blob_sha": "e9cfd06ef45ff445e7fec98790cf5c7b28937c23",
+      "blob_size": 1208,
+      "owner_group": "fixtures"
+    },
+    {
       "path": "fixtures/synthetic_cabinets/valid_a_base_600.json",
       "blob_sha": "02443b5b2977594a85ba068d2cd4ddd3f3848af0",
       "blob_size": 1269,
@@ -8331,6 +8427,30 @@
       "blob_sha": "98a5bd0e302db1337d9d716a179dda4e9cf61377",
       "blob_size": 30054,
       "owner_group": "other_canonical_reference"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/README_obstacles_2026-10-25.md",
+      "blob_sha": "2201291627eec1dc4a5650d0f9c95c9b61884d00",
+      "blob_size": 3313,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_obstacles_2026-10-25.json",
+      "blob_sha": "da0a461d19900457508d68415c343b28a9c27fc2",
+      "blob_size": 11598,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/README_adversarial_2026-10-25.md",
+      "blob_sha": "a976ab86b862d201263be0a5bad6c29bc7e3ce97",
+      "blob_size": 3893,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp054/f3_benchmark/solver_benchmark_adversarial_2026-10-25.json",
+      "blob_sha": "1004b749b53e832baefe7a64658fb70f6af02e17",
+      "blob_size": 14886,
+      "owner_group": "artifacts"
     }
   ]
 }

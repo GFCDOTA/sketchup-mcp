@@ -10,13 +10,17 @@ param(
 )
 $ErrorActionPreference="Stop"
 $su="C:\Program Files\SketchUp\SketchUp 2026\SketchUp\SketchUp.exe"
-$rb="E:\Claude\sketchup-mcp-mobiliar\tools\vray_export.rb"
-$base="E:\Claude\sketchup-mcp-mobiliar\artifacts\planta_74\furnished\planta_74_furnished.skp"
-$scratch="E:\Claude\sketchup-mcp-mobiliar\.claude\scratch"
-$fdir="E:\Claude\sketchup-mcp-mobiliar\artifacts\planta_74\furnished"
-$py='E:\Claude\sketchup-mcp\.venv\Scripts\python.exe'
+# Tudo resolvido a partir do proprio script (a raiz antiga E:\Claude\sketchup-mcp[-mobiliar] nao existe mais).
+# A base canonica so e LIDA (copia + hash antes/depois); scratch e o PNG vao para runs\ (ignorado pelo git), nunca para artifacts\.
+$repo=(Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$rb="$repo\tools\sketchup\vray\vray_export.rb"
+$base="$repo\artifacts\planta_74\furnished\planta_74_furnished.skp"
+$scratch="$repo\runs\render_room\scratch"
+$fdir="$repo\runs\render_room"
+$py="$repo\.venv\Scripts\python.exe"
+New-Item -ItemType Directory -Force $scratch,$fdir | Out-Null
 $vray="C:\Program Files\Chaos\V-Ray\V-Ray for SketchUp\extension\vray\bin\vray.exe"
-$tex="E:\Claude\sketchup-mcp-mobiliar\assets\textures\procedural"
+$tex="$repo\assets\textures\procedural"
 
 $baseHash=(Get-FileHash $base -Algorithm SHA256).Hash
 $copy="$scratch\vray_room_copy.skp"; Copy-Item $base $copy -Force
@@ -31,13 +35,15 @@ while((Get-Date) -lt $deadline){ if(Test-Path $log){ Start-Sleep 2; break }; Sta
 # Apenas a instância $p criada neste script; nunca encerrar todas as janelas humanas.
 if ($p -and -not $p.HasExited) { $p.CloseMainWindow() | Out-Null }
 Start-Sleep 1
+# O export modifica a COPIA (nao a base): o SketchUp pergunta se salva e fica aberto. Se nao saiu, encerra so o PID proprio.
+if ($p -and -not $p.WaitForExit(5000)) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }
 if(-not (Test-Path $vrs)){ "EXPORT FAIL"; if(Test-Path $log){ Get-Content $log }; exit 1 }
 Copy-Item $vrs "$scratch\room_raw.vrscene" -Force   # raw pristine (so camera) p/ tune rapido sem SU
 "vrscene: $((Get-Item $vrs).Length)b"; Get-Content $log | Select-Object -First 6
 
 $tweakArgs = @($vrs,"--iso",$Iso,"--fnum",$Fnum,"--shutter",$Shutter,"--sky",$Sky,"--width",$Width,"--height",$Height,"--materials")
 if($Fill -ne ""){ $tweakArgs += @("--fill",$Fill) }
-& $py E:\Claude\sketchup-mcp-mobiliar\tools\tweak_vrscene.py @tweakArgs | Out-Null
+& $py "$repo\tools\rendering\tweak_vrscene.py" @tweakArgs | Out-Null
 $img="$fdir\$Out"; Remove-Item $img -ErrorAction SilentlyContinue
 (Start-Process -FilePath $vray -ArgumentList "-sceneFile=`"$vrs`"","-imgFile=`"$img`"","-display=0","-autoClose=1" -PassThru -NoNewWindow).WaitForExit(200000) | Out-Null
 
@@ -48,7 +54,7 @@ if(-not (Test-Path $img)){ "RENDER FAIL"; exit 3 }
 
 # STEP GPT_REVIEW gate: muda aparencia -> prepara o review (clipboard + prompt + PENDING no ledger)
 if($ReviewId -ne ""){
-  Push-Location E:\Claude\sketchup-mcp-mobiliar
+  Push-Location $repo
   & $py tools\oracle\gpt_review.py prepare --id $ReviewId --image $img --context $ReviewCtx
   Pop-Location
 }

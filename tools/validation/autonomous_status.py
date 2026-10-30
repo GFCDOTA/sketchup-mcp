@@ -19,9 +19,9 @@ from tools.validation import execution_state as es
 
 
 def render(issues: list[dict], prs: list[dict], statuses: dict[int, str] | None, state: dict, policy: dict, runner: bool,
-           token: bool, today: str) -> str:
+           token: bool, today: str, readiness: dict[int, dict] | None = None) -> str:
     g = dg.build(issues, statuses)
-    ver = bd.evaluate(g, prs, {})
+    ver = bd.evaluate(g, prs, {}, readiness)
     elig = [v for v in ver if v.eligible]
     open_n = [v.node for v in ver]
     causes = Counter(n.cause or "sem-causa" for n in open_n if n.blocked)
@@ -31,10 +31,11 @@ def render(issues: list[dict], prs: list[dict], statuses: dict[int, str] | None,
     L += ["## Execução", f"- tarefa ativa: {state.get('current_issue') or 'nenhuma'} (branch {state.get('current_branch') or '-'})",
           f"- claims ativos: {', '.join('#%d(%s)' % (n, c['state']) for n, c in sorted(claims.items())) or 'nenhum'}",
           f"- PRs abertos: {', '.join('#%d' % p['number'] for p in sorted(prs, key=lambda p: p['number'])) or 'nenhum'}", ""]
-    L += ["## Backlog", f"- Issues abertas: {len(open_n)} · elegíveis: {len(elig)} · bloqueadas: {sum(causes.values())}",
+    counts = bd.summarize(ver)
+    L += ["## Backlog", f"- Issues abertas: {len(open_n)} · " + " · ".join(f"{k}: {len(v)}" for k, v in counts.items()),
           "- bloqueios por causa: " + (", ".join(f"{k}={v}" for k, v in sorted(causes.items())) or "nenhum"),
           "- aguardando revisão independente (GPT Review): " + (", ".join("#%d" % n for n in review) or "nenhuma"), ""]
-    L += ["## Próximas elegíveis (ordem do scheduler)"] + [f"{i}. #{v.node.number} {v.node.title[:90]}" for i, v in enumerate(elig[:5], 1)] + [""]
+    L += ["## Próximas elegíveis (ordem do scheduler)"] + [f"{i}. #{v.node.number} {v.node.title[:90]}" + (f" — próximo passo ({'offline' if v.offline else 'SketchUp'}): {v.next_step[:140]}" if v.next_step else "") for i, v in enumerate(elig[:5], 1)] + [""]
     reviewers = policy.get("reviewers", [])
     L += ["## Limites da automação (declarados)",
           f"- runner autônomo 24/7: {'configurado' if runner else 'NÃO configurado — a execução só ocorre durante uma sessão ativa'}",
@@ -51,7 +52,7 @@ def main(argv: list[str]) -> int:
     policy = json.loads(pol.read_text(encoding="utf-8")) if pol.exists() else {}
     today = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     text = render(issues, prs, statuses, es.load(es.state_path()), policy, runner=bool(os.environ.get("AUTONOMOUS_RUNNER")),
-                  token=bool(os.environ.get("BACKLOG_PROJECT_TOKEN")), today=today)
+                  token=bool(os.environ.get("BACKLOG_PROJECT_TOKEN")), today=today, readiness=bd.load_readiness())
     if "--write" in argv:
         out = ROOT / argv[argv.index("--write") + 1]
         out.parent.mkdir(parents=True, exist_ok=True)

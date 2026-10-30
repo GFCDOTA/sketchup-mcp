@@ -36,14 +36,27 @@ class Verdict:
     action: str = "implement"            # implement | resume | unblock
     rank: int = 8
     blocks: int = 0
+    next_step: str | None = None                 # da auditoria (task_readiness): proximo passo executavel agora
+    offline: bool | None = None
+    needs_sketchup: bool | None = None
+    completion_blockers: list = field(default_factory=list)   # o que impede CONCLUIR: [{cause, ref, detail}]
 
     @property
     def key(self) -> tuple:
-        return (self.rank, -self.blocks, PRIO.get(self.node.prio, 9), self.node.number)
+        # dentro do rank, o que pode ser CONCLUIDO de ponta a ponta (sem impedimento de conclusao) vem antes do que so comeca
+        return (self.rank, bool(self.completion_blockers), -self.blocks, PRIO.get(self.node.prio, 9), self.node.number)
 
     def __str__(self) -> str:
         head = f"#{self.node.number} [{'ELEGIVEL ' + self.action if self.eligible else 'inelegivel'}] {self.node.title[:70]}"
-        return head + ("" if self.eligible else "  <- " + "; ".join(self.reasons))
+        if not self.eligible:
+            return head + "  <- " + "; ".join(self.reasons)
+        tail = ""
+        if self.next_step:
+            kind = "offline" if self.offline else "SketchUp" if self.needs_sketchup else "?"
+            tail += f"\n      proximo passo ({kind}): {self.next_step}"
+        for b in self.completion_blockers:
+            tail += f"\n      para concluir: {b['cause']} {b['ref']} - {b['detail']}"
+        return head + tail
 
 
 def category(node: dg.Node, blocks: int) -> int:
@@ -67,7 +80,8 @@ def category(node: dg.Node, blocks: int) -> int:
     return 8
 
 
-def evaluate(g: dg.Graph, prs: list[dict] | None = None, claims: dict[int, dict] | None = None) -> list[Verdict]:
+def evaluate(g: dg.Graph, prs: list[dict] | None = None, claims: dict[int, dict] | None = None,
+             readiness: dict[int, dict] | None = None) -> list[Verdict]:
     """Um `Verdict` por Issue aberta, ordenado pela prioridade (elegiveis primeiro). `claims`: {issue: {"components": [...]}}."""
     active_pr: dict[int, int] = {}
     for pr in prs or []:
@@ -115,15 +129,54 @@ def evaluate(g: dg.Graph, prs: list[dict] | None = None, claims: dict[int, dict]
             reasons.append("HUMAN_DECISION: aprovacao humana pendente")
         if re.match(r"\s*DECIS[ÃA]O\b", node.title, re.I) and not any(r.startswith("HUMAN") for r in reasons):
             reasons.append("HUMAN_DECISION: item de decisao")
+        ready = (readiness or {}).get(n)
+        if ready and ready.get("state") == "BLOCKED":
+            reasons.append(f"{ready['cause']}: {ready['detail']} ({ready['ref']})")
+        if readiness is not None and not reasons and not (ready and ready.get("state") == "READY"):
+            # elegivel sem proximo passo auditado = promessa que o executor nao cumpre (FP-057): exige entrada READY no registro
+            reasons.append("NO_NEXT_STEP: elegivel sem proximo passo executavel auditado em docs/governance/task_readiness.json")
         eligible = not reasons
         if eligible and node.status == "In Progress":
             action = "resume"
         v = Verdict(node, eligible, reasons, action, rank=category(node, len(g.dependents(n))), blocks=len(g.dependents(n)))
         if eligible and dg.component(node) in claimed_components:
             v.eligible, v.reasons = False, [f"COMPONENT_CONFLICT: {dg.component(node)} em uso por outra reivindicacao"]
+        if ready and ready.get("state") == "READY" and v.eligible:
+            v.next_step, v.offline, v.needs_sketchup = ready["next_step"], ready["offline"], ready["needs_sketchup"]
+            v.completion_blockers = list(ready.get("completion_blockers", []))
         out.append(v)
     out.sort(key=lambda v: (not v.eligible, v.key))
     return out
+
+
+def classify(v: Verdict) -> str:
+    # READY / BLOCKED / PENDING_REVIEW / ENVIRONMENT / IN_PROGRESS (PR ou claim ativo) / EPIC - a contagem honesta do backlog aberto
+    if v.node.kind == "epic":
+        return "EPIC"
+    if v.eligible:
+        return "READY"
+    text = " ".join(v.reasons)
+    if "PENDING_REVIEW" in text or v.node.status == "GPT Review":
+        return "PENDING_REVIEW"
+    if v.node.cause == "environment" or text.startswith("ENVIRONMENT") or "; ENVIRONMENT" in text:
+        return "ENVIRONMENT"
+    if "ACTIVE_PR" in text:
+        return "PENDING_REVIEW" if "gpt-review-required" in v.node.labels else "IN_PROGRESS"
+    if text.startswith("CLAIMED"):
+        return "IN_PROGRESS"
+    return "BLOCKED"
+
+
+def summarize(verdicts: list[Verdict]) -> dict[str, list[int]]:
+    out: dict[str, list[int]] = {k: [] for k in ("READY", "BLOCKED", "PENDING_REVIEW", "ENVIRONMENT", "IN_PROGRESS", "EPIC")}
+    for v in verdicts:
+        out[classify(v)].append(v.node.number)
+    return out
+
+
+def load_readiness() -> dict[int, dict]:
+    from tools.validation import task_readiness
+    return task_readiness.load()
 
 
 def next_task(verdicts: list[Verdict]) -> Verdict | None:
@@ -133,7 +186,8 @@ def next_task(verdicts: list[Verdict]) -> Verdict | None:
 def render(verdicts: list[Verdict], limit_ineligible: int = 40) -> str:
     el = [v for v in verdicts if v.eligible]
     inel = [v for v in verdicts if not v.eligible]
-    lines = [f"Elegiveis: {len(el)} · inelegiveis: {len(inel)}", ""]
+    counts = summarize(verdicts)
+    lines = [f"Elegiveis: {len(el)} · inelegiveis: {len(inel)}", "Contagem: " + " · ".join(f"{k}={len(v)}" for k, v in counts.items()), ""]
     lines += [f"{i + 1}. {v}" for i, v in enumerate(el)]
     lines += ["", "Inelegiveis (razao registrada):"] + [f"- {v}" for v in inel[:limit_ineligible]]
     return "\n".join(lines)
@@ -157,7 +211,7 @@ def load(statuses: bool = False) -> tuple[list[dict], dict[int, str] | None, lis
 def main(argv: list[str]) -> int:
     issues, st, prs = load(statuses="--project" in argv)
     g = dg.build(issues, st)
-    verdicts = evaluate(g, prs)
+    verdicts = evaluate(g, prs, readiness=load_readiness())
     print(render(verdicts))
     findings = dg.analyze(g)
     for f in findings:

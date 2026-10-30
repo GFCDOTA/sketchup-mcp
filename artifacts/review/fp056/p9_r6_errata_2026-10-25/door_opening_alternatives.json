@@ -1,0 +1,78 @@
+{
+ "r005:abertura 0,60": {
+  "room": "r005",
+  "alt": "abertura 0,60",
+  "status": "INFEASIBLE",
+  "candidates": 6724,
+  "seconds": 752,
+  "violations": [
+   [
+    "FUNCTIONAL_SHOWER_ENTRY_WIDTH",
+    "vao livre 0.516 m de 0.600 m declarados",
+    0.516
+   ]
+  ],
+  "moves": [
+   "r005:Vaso"
+  ]
+ },
+ "r005:abertura 0,70": {
+  "room": "r005",
+  "alt": "abertura 0,70",
+  "status": "FEASIBLE",
+  "candidates": 6724,
+  "seconds": 722,
+  "violations": [],
+  "moves": [
+   "r005:Vaso"
+  ]
+ },
+ "r006:abertura 0,60": {
+  "room": "r006",
+  "alt": "abertura 0,60",
+  "status": "INFEASIBLE",
+  "candidates": 6724,
+  "seconds": 641,
+  "violations": [
+   [
+    "FUNCTIONAL_SHOWER_REACH_PATH",
+    "MEASURED_PATH_WIDTH; gargalo em [354.19, 562.73]",
+    0.499
+   ],
+   [
+    "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+    "MEASURED_FRONT_DEPTH",
+    0.523
+   ]
+  ],
+  "moves": [
+   "r006:Bancada",
+   "r006:Box",
+   "r006:Vaso"
+  ]
+ },
+ "r006:abertura 0,70": {
+  "room": "r006",
+  "alt": "abertura 0,70",
+  "status": "INFEASIBLE",
+  "candidates": 6724,
+  "seconds": 780,
+  "violations": [
+   [
+    "FUNCTIONAL_SHOWER_REACH_PATH",
+    "MEASURED_PATH_WIDTH; gargalo em [354.19, 562.73]",
+    0.499
+   ],
+   [
+    "FUNCTIONAL_TOILET_FRONT_CLEARANCE",
+    "MEASURED_FRONT_DEPTH",
+    0.523
+   ]
+  ],
+  "moves": [
+   "r006:Bancada",
+   "r006:Box",
+   "r006:Vaso"
+  ]
+ }
+}
