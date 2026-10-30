@@ -25,6 +25,7 @@ Recipes (so conhecimento, `KNOWLEDGE_ONLY_UNTESTED_IN_SKETCHUP`): `cross.room.ma
 ## Ferramentas permitidas
 
 - `python:tools.validation.circulation_gate.gate`
+- `python:tools.validation.circulation_gate.GateSession`
 
 Qualquer outra ferramenta e recusada (`TOOL_NOT_ALLOWLISTED`).
 
