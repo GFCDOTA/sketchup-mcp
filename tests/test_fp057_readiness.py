@@ -81,7 +81,8 @@ def test_catalog_and_workflow_adjacent_issues_declare_review_as_completion_block
         # READY: o bloqueio de conclusao e declarado em completion_blockers; BLOCKED: e a propria causa (a #453 acabou a medicao segura)
         blockers = reg[n]["completion_blockers"] if reg[n]["state"] == "READY" else [{"cause": reg[n]["cause"], "ref": reg[n]["ref"]}]
         assert any(b["cause"] == "REVIEW" and b["ref"] == "#524" for b in blockers), n
-    assert any(b["cause"] == "ENVIRONMENT" for b in reg[460]["completion_blockers"])      # L2 exige SketchUp real
+    # L2 do gabinete/Shaker refeito no SketchUp real (PR 558: cabinet 14/14, Shaker 11/11): o ENVIRONMENT da #460 acabou; resta so a revisao
+    assert reg[460]["state"] == "BLOCKED" and reg[460]["cause"] == "REVIEW"
     assert reg[473]["cause"] == "EVIDENCE" and reg[476]["cause"] == "EVIDENCE"                # sem reference_target aprovado
 
 
