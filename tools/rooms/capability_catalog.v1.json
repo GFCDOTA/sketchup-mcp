@@ -1544,7 +1544,7 @@
         "calha",
         "canal umido"
       ],
-      "gap": "recorte de cuba e canal umido no tampo do gabinete da pia (microfase W1): sem builder nem fixture; depende do tampo (K1) e do recorte da cozinha (K4: ficha da cuba e ok hidraulico, #450)"
+      "gap": "recorte de cuba/canal umido no gabinete da pia (W1): sem builder nem fixture; depende de K1 e K4 (#450)"
     },
     {
       "id": "bind.bathroom.vanity-materials",
@@ -1564,7 +1564,7 @@
         "grain",
         "texture"
       ],
-      "gap": "material por face, escala de textura e orientacao do veio (gabinete da pia, microfase W1): sem capacidade; o shared.cabinet.parametric registra o veio sem aplicar (sem textura/UV) e a rota da recipe e MATERIAL_PLACEMENT_PARTIAL_ONLY"
+      "gap": "material por face e veio/escala de textura no gabinete da pia (W1): sem capacidade (veio NOT_SUPPORTED)"
     },
     {
       "id": "bind.service.layout",
