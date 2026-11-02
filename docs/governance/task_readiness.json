@@ -14,12 +14,12 @@
       "state": "READY",
       "offline": true,
       "needs_sketchup": false,
-      "next_step": "As 2 receitas do especialista do banho (tools/rooms/bathroom/specialist.v1.json, recipe_ids) saem UNBOUND no plan_room (PR 557, merge 709e11c): classificar cada uma (regra funcional / receita construtiva / referencia estetica - criterio 1) e, se construtiva, declarar o binding do comodo (capacidade existente ou lacuna BLOCKED_CAPABILITY_MISSING), com teste; sem executar operacao nem tocar simbolo L2.",
+      "next_step": "Banheiro feito (commit 84fb45a: lacunas declaradas, plan() recusa recorte/veio). O mesmo falso PASS segue em bedroom, living e service: 'veio/textura' no guarda-roupa ou no rack e 'gaveta/ferragem' na lavanderia saem PLAN_READY_NOT_EXECUTED pelo binding de layout. Declarar como lacunas (capability_id null, motivo B1/B3/L1/S1) as receitas UNBOUND desses comodos e de closet/home_office, com termos especificos, fragmento dono e o mesmo teste do plan(); sem tocar simbolo L2.",
       "completion_blockers": [
         {
           "cause": "REVIEW",
           "ref": "#524",
-          "detail": "tools/orchestration/intelligent_pipeline.py e caminho critico: PR 557 mergeado a pedido do proprietario em 2026-10-30 sem revisao independente verificavel (reviewers vazio)"
+          "detail": "tools/rooms/capability_catalog.v1.json e caminho critico: os PRs 557 e o das lacunas do banheiro exigem revisao independente verificavel; reviewers vazio"
         },
         {
           "cause": "EVIDENCE",
