@@ -4211,6 +4211,24 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_r3_remaining/README.md",
+      "blob_sha": "ce37764077ba49f8cf1a51b41300b5fdad8e774d",
+      "blob_size": 3787,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/measure_r3_remaining.py",
+      "blob_sha": "dee51ca1693ecdbd91ab5bf423b9ea3b11342a4f",
+      "blob_size": 8514,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/r3_remaining_alternatives.json",
+      "blob_sha": "ff90e37aa367d141deec29409844c2f4d41097d8",
+      "blob_size": 7509,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
       "blob_size": 335219,

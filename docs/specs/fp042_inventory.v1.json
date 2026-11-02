@@ -6014,6 +6014,27 @@
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     },
     {
+      "path": "artifacts/review/fp056/p7_r3_remaining/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/measure_r3_remaining.py",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/r3_remaining_alternatives.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
