@@ -3,30 +3,23 @@
   "note": "Auditoria por Issue (FP-057): o proximo passo executavel AGORA e o que impede CONCLUIR. READY = ha passo concreto (offline = sem SketchUp). BLOCKED = nenhum passo executavel. Cada ref e uma Issue existente ou um arquivo do repo (validado por issue_integrity_gate). Causas: HUMAN_DECISION, ENVIRONMENT, EVIDENCE, DEPENDENCY, EXTERNAL, REVIEW. REVIEW = o merge exige revisao independente (review_policy.json: critical_paths; #524).",
   "tasks": {
     "429": {
-      "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "Registrar tools.validation.circulation_gate.GateSession como simbolo da capacidade circulation.gate (L1_PASS, sem evidencia L2: nada a revogar), regenerar specialist.v1.json, specialist.md e manifest.v1.json da area circulation e atualizar o retrato de consumo.",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": [
-        {
-          "cause": "REVIEW",
-          "ref": "#524",
-          "detail": "tools/rooms/capability_catalog.v1.json e caminho critico: o merge exige revisao independente e reviewers esta vazio"
-        }
-      ]
+      "audited_at": "2026-11-02",
+      "state": "BLOCKED",
+      "cause": "REVIEW",
+      "ref": "#524",
+      "detail": "Os 2 criterios cumpridos pelo PR 554 (merge 9364f54): o catalogo lista GateSession e o gate de consumo mede circulation.gate INVOKED=true. Nenhum passo tecnico resta; mergeado a pedido do proprietario em 2026-10-30 sem revisao independente verificavel (reviewers vazio): fica em GPT Review ate a aprovacao verificada."
     },
     "416": {
-      "audited_at": "2026-10-25",
+      "audited_at": "2026-11-02",
       "state": "READY",
       "offline": true,
       "needs_sketchup": false,
-      "next_step": "Ligar recipe_resolution ao plan_room: registrar no ledger e na proposta a cadeia receita -> capacidade -> operacao -> prova de cada recipe do especialista (RESOLVED_*/BLOCKED_*), com teste de contrato; sem executar operacao nem tocar simbolo L2.",
+      "next_step": "As 2 receitas do especialista do banho (tools/rooms/bathroom/specialist.v1.json, recipe_ids) saem UNBOUND no plan_room (PR 557, merge 709e11c): classificar cada uma (regra funcional / receita construtiva / referencia estetica - criterio 1) e, se construtiva, declarar o binding do comodo (capacidade existente ou lacuna BLOCKED_CAPABILITY_MISSING), com teste; sem executar operacao nem tocar simbolo L2.",
       "completion_blockers": [
         {
           "cause": "REVIEW",
           "ref": "#524",
-          "detail": "tools/orchestration/intelligent_pipeline.py e caminho critico: o merge exige revisao independente"
+          "detail": "tools/orchestration/intelligent_pipeline.py e caminho critico: PR 557 mergeado a pedido do proprietario em 2026-10-30 sem revisao independente verificavel (reviewers vazio)"
         },
         {
           "cause": "EVIDENCE",
@@ -50,23 +43,11 @@
       "detail": "medicao completa e sem executar mais nada seguro: candidatos (PR 560), obstaculos (PR 567) e geometria adversarial (esta PR; pior caso ~3,3x o tempo limpo a 1000 obstaculos, linear, RSS 52-60 MB). O que falta - otimizar/extrair modulos de tools/rooms/shared/spatial_solver/ (caminho critico: exige revisao independente) e ADR antes de OR-Tools/scipy - nao tem meta definida pelos dados (sem budget); outra maquina e contagem fora de plan_room seguem como medicoes opcionais"
     },
     "460": {
-      "audited_at": "2026-10-25",
-      "state": "READY",
-      "next_step": "PR 558 aberto com a mudanca, o L2 refeito (cabinet 14/14, Shaker 11/11) e a evidencia restaurada; resta a revisao independente.",
-      "offline": true,
-      "needs_sketchup": false,
-      "completion_blockers": [
-        {
-          "cause": "REVIEW",
-          "ref": "#524",
-          "detail": "cabinet.sketchup.inspect e simbolo L2: o PR revoga a evidencia no capability_catalog.v1.json (caminho critico)"
-        },
-        {
-          "cause": "ENVIRONMENT",
-          "ref": "artifacts/review/fp043/p6b_cabinet_l2/README.md",
-          "detail": "refazer o L2 exige SketchUp real em commit limpo (l2_matrix.py, sem MCP) numa sessao com SketchUp aberto"
-        }
-      ]
+      "audited_at": "2026-11-02",
+      "state": "BLOCKED",
+      "cause": "REVIEW",
+      "ref": "#524",
+      "detail": "Os 2 criterios cumpridos pelo PR 558 (merge 5056a2b): teste vermelho com caminho protegido e L2 refeito no SketchUp 26.0.429 (cabinet 14/14, Shaker 11/11; artifacts/review/fp055/r3_scratch_l2/). Nenhum passo tecnico resta; mergeado a pedido do proprietario em 2026-10-30 sem revisao independente verificavel (reviewers vazio): fica em GPT Review ate a aprovacao verificada."
     },
     "473": {
       "audited_at": "2026-10-25",
@@ -88,6 +69,55 @@
       "cause": "EVIDENCE",
       "ref": "docs/specs/FP-043_remaining_execution_P3_P8.md",
       "detail": "smoke dos launchers CLI do PR #296 feito com janela humana aberta (place_bedroom, place_layout, bake_theme, render_banho_vray, render_room, furnish_apartment --dry-run): janela intacta, nenhum SketchUp residual, canonicos com o mesmo SHA-256; defeitos achados e corrigidos (raizes mortas, sala/tema inexistente). Nao exercitados: kitchen/capabilities/vray.py (grava em artifacts/planta_74/furnished/kitchen_angles por desenho: rodar exigiria escrever em pasta canonica) e furnish_plan.py (precisa de .skp do 3D Warehouse que nao existe em runs/planta_74/_furniture); medicao de saida em timeout e o cliente Claude Code/Node via spawn proprio dependem de acao humana/ambiente"
+    },
+    "533": {
+      "audited_at": "2026-11-02",
+      "state": "READY",
+      "offline": true,
+      "needs_sketchup": false,
+      "next_step": "Criterio 2: provar em execucao real do CI que um gate qg: reprovado derruba o job - PR de teste sem `Refs #N` deve deixar `qg: PR policy` vermelho; citar o run na Issue e fechar o PR sem merge. Criterios 1 e 3 cumpridos (PR 534, merge 983f204).",
+      "completion_blockers": [
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "criterio 4: revisao independente do PR 534 (.github/workflows/, caminho critico; mergeado pelo proprietario em 2026-10-30) e retroativa do PR 531; reviewers vazio"
+        }
+      ]
+    },
+    "551": {
+      "audited_at": "2026-11-02",
+      "state": "BLOCKED",
+      "cause": "REVIEW",
+      "ref": "#524",
+      "detail": "Os 3 criterios cumpridos pelos PRs 563, 564 e 552 (merge 459bc30; issue_integrity_gate.py e caminho critico). Nenhum passo tecnico resta; PR 552 mergeado a pedido do proprietario em 2026-10-30 sem revisao independente verificavel (reviewers vazio): fica em GPT Review ate a aprovacao verificada."
+    },
+    "502": {
+      "audited_at": "2026-11-02",
+      "state": "READY",
+      "offline": true,
+      "needs_sketchup": false,
+      "next_step": "Com o pre-voo que ja ve interpenetracao entre modulos (PR 535, merge f3801fa) e o gemeo, medir sem aplicar: a cozinha (backsplash x vidro do cooktop/cuba, 4,6 cm; declarar o custo L2/R-18), o tapete do Banho 01 (encolher/recortar) e a papeleira do Banho 02 (outra estrategia); registrar em artifacts/review/fp056/p7/ junto das medidas dos banhos e resumir na #495.",
+      "completion_blockers": [
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "PR 535 (layout_preflight.py e quality_geometry_gate.py, caminhos criticos) mergeado a pedido do proprietario em 2026-10-30 sem revisao independente verificavel (reviewers vazio)"
+        }
+      ]
+    },
+    "418": {
+      "audited_at": "2026-11-02",
+      "state": "READY",
+      "offline": true,
+      "needs_sketchup": false,
+      "next_step": "Criterio 1: mutacao no orquestrador integrado (tools/orchestration/intelligent_pipeline.py, perfil INTELLIGENT_DRY_RUN): descartar functional_interfaces de uma proposta ou rodar com identidade de runtime divergente (P1) tem de reprovar; as mutacoes unitarias do gate de consumo ja existem (PR 492). Criterios 2 e 3 cumpridos (PRs 492/539 e #479).",
+      "completion_blockers": [
+        {
+          "cause": "REVIEW",
+          "ref": "#524",
+          "detail": "PR 539 (.github/workflows/) mergeado a pedido do proprietario em 2026-10-30 sem revisao independente verificavel (reviewers vazio); a mutacao toca intelligent_pipeline.py (caminho critico)"
+        }
+      ]
     }
   }
 }
