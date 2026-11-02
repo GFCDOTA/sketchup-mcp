@@ -53,6 +53,7 @@ capacidade só existe com símbolo + teste (+ prova L2 para `L2_PASS`). Ver `.cl
 - **Papel:** planeja e constrói · estado do perfil `LEGACY_PROVIDER_PRESENT`
 - **Escopo:** Banheiros e lavabo: louca e acessorios; sem marcenaria. Planeja em caixas/pecas sobre o shell.
 - **Capacidades:** `bathroom.layout.boxes` (L1_PASS); `bathroom.wet-room.guard` (L1_PASS)
+- **Lacunas:** `bind.bathroom.sink-cutout` — recorte de cuba/canal umido no gabinete da pia (W1): sem builder nem fixture; depende de K1 e K4 (#450); `bind.bathroom.vanity-materials` — material por face e veio/escala de textura no gabinete da pia (W1): sem capacidade (veio NOT_SUPPORTED)
 - **Fragmentos do especialista:** `layout`, `vanity`, `wet_room`
 - **Arquivos (14):**
   - raiz do módulo: `__init__.py`, `layout.py`, `solver_policy.py`, `specialist.md`, `specialist.v1.json`, `validation.py`
