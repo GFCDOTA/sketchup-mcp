@@ -1529,6 +1529,44 @@
       "gap": null
     },
     {
+      "id": "bind.bathroom.sink-cutout",
+      "room": "bathroom",
+      "recipe_ids": [
+        "cabinet.sink-and-wet-channel-cutouts"
+      ],
+      "source_ids": [
+        "yt-kitchen-joinery-2024"
+      ],
+      "capability_id": null,
+      "terms": [
+        "recorte",
+        "cutout",
+        "calha",
+        "canal umido"
+      ],
+      "gap": "recorte de cuba e canal umido no tampo do gabinete da pia (microfase W1): sem builder nem fixture; depende do tampo (K1) e do recorte da cozinha (K4: ficha da cuba e ok hidraulico, #450)"
+    },
+    {
+      "id": "bind.bathroom.vanity-materials",
+      "room": "bathroom",
+      "recipe_ids": [
+        "cabinet.materials-and-texture-direction"
+      ],
+      "source_ids": [
+        "yt-cabinet-tips-2021",
+        "yt-cabinet-styles-2024",
+        "yt-kitchen-joinery-2024"
+      ],
+      "capability_id": null,
+      "terms": [
+        "veio",
+        "textura",
+        "grain",
+        "texture"
+      ],
+      "gap": "material por face, escala de textura e orientacao do veio (gabinete da pia, microfase W1): sem capacidade; o shared.cabinet.parametric registra o veio sem aplicar (sem textura/UV) e a rota da recipe e MATERIAL_PLACEMENT_PARTIAL_ONLY"
+    },
+    {
       "id": "bind.service.layout",
       "room": "service",
       "recipe_ids": [

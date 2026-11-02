@@ -54,12 +54,50 @@ def test_plan_room_carries_the_recipe_resolution_and_records_it_in_the_ledger_tr
     out, led = _plan_room_bathroom()
     res = out["recipe_resolution"]
     assert {r["recipe_id"] for r in res} == {"cabinet.materials-and-texture-direction", "cabinet.sink-and-wet-channel-cutouts"}
-    assert {r["state"] for r in res} == {"UNBOUND"}                      # banheiro: nenhuma receita tem binding hoje - fica visivel
+    assert {r["state"] for r in res} == {"BLOCKED_CAPABILITY_MISSING"}   # banheiro: lacunas DECLARADAS (W1), nunca sucesso nem UNBOUND
     trail = led.to_dict()["recipe.cabinet.sink-and-wet-channel-cutouts"]["trail"]
-    assert "UNBOUND" in next(e["evidence"] for e in trail if e["state"] == "SELECTED")
+    assert "BLOCKED_CAPABILITY_MISSING" in next(e["evidence"] for e in trail if e["state"] == "SELECTED")
 
 
 def test_recipe_resolution_never_executes_anything_nor_promotes_a_recipe_to_consumed():
     out, led = _plan_room_bathroom()
     assert led.state("recipe.cabinet.sink-and-wet-channel-cutouts") == "SELECTED"          # resolver nao e consumir
     assert all(r.get("capability") is None or r["state"].startswith("RESOLVED") for r in out["recipe_resolution"])
+
+
+# ------------------------------------------------------------------ banheiro: receitas do gabinete da pia (W1) sao lacunas DECLARADAS (#416)
+_BATH_GAPS = {"cabinet.sink-and-wet-channel-cutouts": "bind.bathroom.sink-cutout",
+              "cabinet.materials-and-texture-direction": "bind.bathroom.vanity-materials"}
+
+
+def test_bathroom_vanity_recipes_are_declared_gaps_with_the_reason_never_unbound():
+    res = {r["recipe_id"]: r for r in rr.resolve_room("bathroom")["constructive_recipes"]}
+    assert set(res) == set(_BATH_GAPS)
+    for rid, bid in _BATH_GAPS.items():
+        r = res[rid]
+        assert r["state"] == "BLOCKED_CAPABILITY_MISSING" and r["capability"] is None and r["bindings"] == [bid]
+        assert "W1" in r["reason"]                                    # o motivo aponta a microfase que falta (gabinete da pia)
+
+
+def test_bathroom_gaps_do_not_borrow_a_shared_capability_to_fake_a_two_component_technique():
+    # ligar o banheiro ao shared.cabinet sem consumidor real faria a P5 "passar" no papel: integracao nominal (FP-055)
+    from tools.rooms import capability_catalog as cc
+    cat = cc.load_catalog(rr.ROOT / "tools/rooms/capability_catalog.v1.json")
+    assert {b["id"]: b["capability_id"] for b in cat["bindings"] if b["id"] in _BATH_GAPS.values()} == dict.fromkeys(_BATH_GAPS.values())
+    assert not any("bathroom" in rooms for rooms in rr.shared_techniques().values())
+
+
+def test_bathroom_cutout_or_grain_request_is_refused_with_the_gap_not_planned_by_the_layout_binding():
+    # antes: "banheiro"/"cuba" casavam so o layout e o plano saia PLAN_READY para uma tecnica sem capacidade (falso PASS)
+    from tools.rooms import specialists as sp
+    for text, bid in (("recorte da cuba no gabinete do banheiro", "bind.bathroom.sink-cutout"),
+                      ("orientacao do veio da textura no gabinete do banheiro", "bind.bathroom.vanity-materials")):
+        out = sp.plan({"text": text, "room": "bathroom"})
+        assert (out["state"], out.get("binding")) == ("BLOCKED_CAPABILITY_MISSING", bid), text
+        assert out["knowledge_only"] is True and out["execution_authorized"] is False
+
+
+def test_bathroom_layout_request_with_a_sink_still_routes_to_the_layout_binding():
+    from tools.rooms import specialists as sp
+    out = sp.plan({"text": "layout do banheiro com cuba e box", "room": "bathroom"})
+    assert out["binding"] == "bind.bathroom.layout" and out["state"] != "BLOCKED_CAPABILITY_MISSING"
