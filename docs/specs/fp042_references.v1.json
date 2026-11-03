@@ -4218,14 +4218,32 @@
     },
     {
       "path": "artifacts/review/fp056/p7_d007_slab/README.md",
-      "blob_sha": "9e64ff5c6db34986c31347389e1d8d1ef43dd792",
-      "blob_size": 9110,
+      "blob_sha": "dd5114366f43c3d87e4ce8c200b1904353909312",
+      "blob_size": 10940,
       "owner_group": "artifacts"
     },
     {
       "path": "artifacts/review/fp056/p7_d007_slab/d007_alternatives.json",
       "blob_sha": "2ccbd7c1b2518a71520881233c3d9471aad4dcb6",
       "blob_size": 156731,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_d007_slab/render_d007_boards.py",
+      "blob_sha": "4f0b3b9c24027ec6dbfbe078da11248494ca4c54",
+      "blob_size": 11042,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_d007_slab/board_d007_apartment.png",
+      "blob_sha": "5ca2a1a1fd6ffdcc353b79ccb0207d7440eda2da",
+      "blob_size": 421055,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_d007_slab/board_d007_zoom_kitchen_suite02.png",
+      "blob_sha": "3ff48b5b37daeed8a339e64087870b992980fabf",
+      "blob_size": 580810,
       "owner_group": "artifacts"
     },
     {

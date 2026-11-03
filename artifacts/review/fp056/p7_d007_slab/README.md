@@ -99,6 +99,40 @@ Leitura:
 - Os números de (a) + #484(b) diferem dos da P7 (18 novos / 10 piores / 5 cômodos) porque o develop andou desde então
   (P7 em commit anterior).
 
+## Como validar olhando
+Pranchas geradas por `render_d007_boards.py`. Ele usa as mesmas mutações (`Variant`) e as mesmas funções da medição, e lê os
+títulos de `d007_alternatives.json`. Reprodução:
+`PT_TO_M=0.0259 PYTHONPATH=. PYTHONIOENCODING=utf-8 python artifacts/review/fp056/p7_d007_slab/render_d007_boards.py`
+
+- **`board_d007_apartment.png`**: a planta inteira vista de cima, com o PDF por baixo e uma coluna por alternativa (a), (b), (c).
+- **`board_d007_zoom_kitchen_suite02.png`**: zoom da cozinha (linha 1) e da Suíte 02 (linha 2) nas três alternativas.
+
+Legenda:
+| Na prancha | Significa |
+|---|---|
+| verde | laje/`cell` que o planejador recebe |
+| contorno cinza | móveis (caixas) |
+| contorno vermelho | móvel reprovado por parede ou por sair da laje (inclui os R1) |
+| vermelho cheio | o pedaço do móvel fora do piso efetivo, engrossado para os milímetros aparecerem |
+| magenta | móvel dentro de outro |
+| hachura preta com "VAZIO" | o planejador não pôs nada no cômodo |
+| contorno laranja com "ABORTA AQUI" | a geração real para ali |
+| rodapé "PERDIDO (n)" | módulos do programa original que sumiram |
+
+O que conferir:
+1. **(a), a atual.** Os R1 são filetes vermelhos colados nas paredes:
+   - cozinha, na parede oeste;
+   - tapetes das suítes;
+   - Box do Banho 01.
+
+   Nenhum cômodo vazio, e o rodapé diz "nada perdido".
+2. **(b) e (c).** A Suíte 02 aparece hachurada e vazia, e a cozinha tem a faixa "ABORTA AQUI".
+   - Em (b) a cozinha também fica vazia.
+   - Em (c) a cozinha é montada, mas a bancada invade a faixa da porta e a geração para.
+   - Nas duas, o sofá e o tapete da Sala vão parar dentro da área da Suíte 02, em vermelho cheio: o gêmeo mede o sofá
+     1,72 m fora do piso da Sala.
+3. **Rodapé de (b) e (c).** Mostra os 25 e os 14 módulos perdidos.
+
 ## O que NÃO é
 - Não aplica nem recomenda aplicar nada: a decisão é do Felipe na #447.
 - Não é L2: o SketchUp não foi aberto, e a laje de (b) não foi construída.

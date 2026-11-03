@@ -2274,6 +2274,18 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_d007_slab/board_d007_apartment.png",
+      "blob_sha": "5ca2a1a1fd6ffdcc353b79ccb0207d7440eda2da",
+      "blob_size": 421055,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_d007_slab/board_d007_zoom_kitchen_suite02.png",
+      "blob_sha": "3ff48b5b37daeed8a339e64087870b992980fabf",
+      "blob_size": 580810,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
       "blob_size": 335219,
