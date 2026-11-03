@@ -4211,6 +4211,24 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_446_box_swing/README.md",
+      "blob_sha": "01ad591d32e46b102ca627d34a4c55a375c75f0e",
+      "blob_size": 2734,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/box_swing_r005_opening070_summary.json",
+      "blob_sha": "73007b59fd69f962225c46bb4ce19e530de74248",
+      "blob_size": 12462,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/measure_box_swing.py",
+      "blob_sha": "c3f8576f45d95a60b0c65c46e36bbc1e99f82ca6",
+      "blob_size": 29806,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
       "blob_size": 335219,
