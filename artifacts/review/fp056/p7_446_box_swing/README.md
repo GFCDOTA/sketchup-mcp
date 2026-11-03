@@ -36,3 +36,23 @@ Evidência para a decisão #446. Fecha a ressalva aberta da recomendação do PR
 
 **Leitura:** do ponto de vista de louça, porta e parede, o box de abrir cabe. Escolhê-lo exige, junto, reposicionar o tapete
 e o toalheiro, ou definir uma folga inferior da folha. Essa é uma decisão de projeto.
+
+## Como validar olhando
+Duas pranchas, cada uma com o BANHO 01 visto de cima sobre o PDF da planta e 4 quadros (folha A de 0,70 m e folha B de
+0,6165 m, cada uma com a dobradiça do lado da parede e do lado do vidro fixo):
+
+- `box_swing_r005_best.png`: a MELHOR proposta do solver (Vaso deslizado −0,16 m).
+- `box_swing_r005_original.png`: o layout ORIGINAL do builder (também FEASIBLE com 0,70 m).
+
+O que olhar em cada quadro:
+1. **Amarelo** é a área que a folha do box varre ao abrir 90° para fora; **vermelho** é onde ela bate.
+2. O **título** diz até quantos graus a folha abre e no que ela bate. A segunda linha diz o mesmo sem o tapete e o toalheiro.
+3. O vaso (branco), a bancada (bege) e o giro da porta do cômodo (verde hachurado) **não** ficam vermelhos em nenhum quadro.
+   A caixa de texto embaixo dá a folga até o vaso e até a bancada.
+4. Nos quadros A (0,70 m), a folha fechada já começa dentro da parede e do revestimento de pedra (vermelho junto à parede).
+   Nos quadros B, a parede fica livre e o vermelho é o tapete (laranja) e, com a dobradiça do lado da parede, o
+   toalheiro (roxo).
+
+Gerar de novo (lê o JSON de `runs/` feito por `measure_box_swing.py`; não refaz o solver):
+`PT_TO_M=0.0259 PYTHONPATH=. python artifacts/review/fp056/p7_446_box_swing/render_box_swing.py`.
+Veredito visual: `PENDING_HUMAN`.

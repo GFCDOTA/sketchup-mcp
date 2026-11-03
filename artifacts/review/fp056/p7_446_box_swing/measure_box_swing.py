@@ -36,8 +36,9 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[4]          # artifacts/review/fp056/p7_446_box_swing -> raiz do repo
+OUT_DIR = ROOT / "runs" / "fp056_r6_box_swing"      # saidas pesadas ficam em runs/ (scratch), como diz o README
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 OUT_JSON = OUT_DIR / "box_swing_r005_opening070.json"
 SOLVE_CACHE = OUT_DIR / "solve_cache_r005_opening070.json"
 ROOM_ID = "r005"
