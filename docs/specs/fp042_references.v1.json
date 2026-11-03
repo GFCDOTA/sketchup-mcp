@@ -4211,6 +4211,12 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_d007_slab/measure_d007.py",
+      "blob_sha": "1dc97f8bbc279f791bfe266a351ca1c847f32e58",
+      "blob_size": 11924,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
       "blob_size": 335219,
