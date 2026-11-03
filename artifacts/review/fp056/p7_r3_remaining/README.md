@@ -44,3 +44,10 @@ atual vê isso.
 Com a cama 3,1 cm (suítes, já medida em `p7/`), **todos** os 9 pares de R3 têm pelo menos uma alternativa que resolve sem defeito
 novo/pior e com pré-voo PASS no gêmeo. Escolhas pendentes do proprietário: cozinha (a) ou (c) — ambas com custo L2/R-18;
 Banho 01 tapete (a) ou (b); Banho 02 papeleira (b) ou (c).
+
+## Como validar olhando (pranchas)
+`board_r004.png` (cozinha), `board_r005.png` (Banho 01) e `board_r006.png` (Banho 02), geradas por `render_r3_boards.py` com as
+mesmas mutações e caixas da medição. Em cada prancha: planta vista de cima com o PDF por baixo, uma coluna por alternativa,
+as duas peças do par em azul/laranja e a **sobreposição em planta em vermelho**. Coluna sem vermelho = par resolvido em planta;
+alternativa que só muda a altura vem marcada (o vermelho em planta continua, a separação é vertical). Gêmeo em caixas (L1),
+nada aplicado; aparência `PENDING_HUMAN`.
