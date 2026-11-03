@@ -63,4 +63,6 @@ e não escolhe a alternativa da AS-1 (decisão do Felipe). V4 é translação de
 PT_TO_M=0.0259 PYTHONPATH=. python artifacts/review/fp056/p7_as1_real_wall/probe_as1_real_wall.py   # ~6 min, grava o JSON
 PT_TO_M=0.0259 PYTHONPATH=. python artifacts/review/fp056/p7_as1_real_wall/plot_as1_real_wall.py    # as1_real_wall_plan.png
 ```
-`as1_real_wall_plan.png`: vista de topo do atual, da variante 0,85 m do p7 e das faces reais testadas com as zonas de circulação.
+`as1_real_wall_plan.png`: prancha com o PDF da planta por baixo (mesmas coordenadas do consensus), cada peça rotulada e o conflito
+em vermelho com a medida. Colunas: atual · 0,85 m do p7 (coifa 75,33 → 77,82 cm) · melhor tentativa em `m013` (0,85 m; o planejador
+a descarta: `CORRIDOR_BLOCKED`, passagem até o tanque 23,4 cm) · prateleira corrigida na parede oeste (`m012`).
