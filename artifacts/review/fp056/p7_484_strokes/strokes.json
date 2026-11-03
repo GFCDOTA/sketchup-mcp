@@ -1,0 +1,1225 @@
+{
+ "schema": "fp056_484_strokes.v1",
+ "issue": 484,
+ "pt_to_m": 0.0259,
+ "coordinates": "pt nativos do PDF (origem embaixo a esquerda, y para cima) = coordenadas do consensus; m = pt x PT_TO_M",
+ "pdf_library": "pypdfium2 4.30.0",
+ "render_scale": 6.0,
+ "protected_sha256_before_after": {
+  "consensus": "adeace53cdb3dba1b7ca8d5bb78a5d6d70d1adb17a903ee6b8082f188d750aa2",
+  "pdf": "81722670c0281ee4caff473b2037d42ac3b41ef248abc57b49eeecebd795067a"
+ },
+ "slab_lost_per_room_m2_all_strokes": {
+  "SUITE 01": 0.994,
+  "A.S. | TERRACO SOCIAL | TERRACO TECNICO": 1.967,
+  "SALA DE JANTAR | SALA DE ESTAR": 0.942,
+  "SUITE 02": 0.49,
+  "COZINHA": 0.257,
+  "BANHO 01": 0.624,
+  "BANHO 02": 0.637,
+  "LAVABO": 0.721
+ },
+ "slab_lost_total_m2": 6.632,
+ "slab_lost_inside_closed_contours_m2": 2.113,
+ "slab_lost_as_band_along_walls_m2": 4.519,
+ "stroke_pairs": [
+  [
+   "sb000",
+   "sb001"
+  ],
+  [
+   "sb002",
+   "sb003"
+  ],
+  [
+   "sb004"
+  ],
+  [
+   "sb005",
+   "sb006"
+  ],
+  [
+   "sb007"
+  ]
+ ],
+ "strokes": [
+  {
+   "id": "sb000",
+   "n_vertices": 30,
+   "closed": false,
+   "bbox_pt": [
+    166.79,
+    515.67,
+    553.52,
+    683.3
+   ],
+   "bbox_m": [
+    4.32,
+    13.36,
+    14.34,
+    17.7
+   ],
+   "size_m": [
+    10.02,
+    4.34
+   ],
+   "length_m": 34.12,
+   "strip_area_m2": 4.779,
+   "share_of_length_within_1_wall_thickness_of_a_wall": 0.94,
+   "walls_within_1_thickness": [
+    "m005",
+    "m008",
+    "m009",
+    "m010",
+    "m015",
+    "m016",
+    "m019"
+   ],
+   "openings_near": [
+    "h_o000",
+    "h_o001",
+    "h_o002",
+    "h_o003",
+    "h_o007"
+   ],
+   "pdf_source_objects": [
+    {
+     "bbox_pt": [
+      167.13,
+      516.01,
+      554.02,
+      683.56
+     ],
+     "n_segments": 27,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    },
+    {
+     "bbox_pt": [
+      166.29,
+      515.17,
+      554.02,
+      683.8
+     ],
+     "n_segments": 30,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    }
+   ],
+   "hausdorff_to_other_strokes_pt": {
+    "sb001": 14.5
+   },
+   "slab_gain_if_only_this_one_removed_m2": {
+    "SUITE 01": 0.058,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.037,
+    "BANHO 01": 0.363,
+    "LAVABO": 0.332
+   },
+   "pair": [
+    "sb000",
+    "sb001"
+   ],
+   "slab_gain_if_pair_removed_m2": {
+    "SUITE 01": 0.691,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.386,
+    "BANHO 01": 0.624,
+    "LAVABO": 0.721
+   },
+   "closed_contours": [
+    "C01",
+    "C02"
+   ],
+   "ring_area_outside_consensus_walls_m2": null,
+   "proposed_classification": {
+    "class": "alvenaria (contorno) + shaft/prumada",
+    "confidence": "media",
+    "reason": "contorno do bloco de paredes Lavabo/Suite 01/Banho 01 que, alem da parede, fecha C01 e C02"
+   }
+  },
+  {
+   "id": "sb001",
+   "n_vertices": 27,
+   "closed": true,
+   "bbox_pt": [
+    167.63,
+    516.51,
+    553.52,
+    683.06
+   ],
+   "bbox_m": [
+    4.34,
+    13.38,
+    14.34,
+    17.69
+   ],
+   "size_m": [
+    9.99,
+    4.31
+   ],
+   "length_m": 38.67,
+   "strip_area_m2": 5.408,
+   "share_of_length_within_1_wall_thickness_of_a_wall": 1.0,
+   "walls_within_1_thickness": [
+    "m005",
+    "m008",
+    "m009",
+    "m010",
+    "m015",
+    "m016",
+    "m019"
+   ],
+   "openings_near": [
+    "h_o000",
+    "h_o001",
+    "h_o002",
+    "h_o003",
+    "h_o007"
+   ],
+   "pdf_source_objects": [
+    {
+     "bbox_pt": [
+      167.13,
+      516.01,
+      554.02,
+      683.56
+     ],
+     "n_segments": 27,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    },
+    {
+     "bbox_pt": [
+      166.29,
+      515.17,
+      554.02,
+      683.8
+     ],
+     "n_segments": 30,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    }
+   ],
+   "hausdorff_to_other_strokes_pt": {
+    "sb000": 14.5
+   },
+   "slab_gain_if_only_this_one_removed_m2": {},
+   "pair": [
+    "sb000",
+    "sb001"
+   ],
+   "slab_gain_if_pair_removed_m2": {
+    "SUITE 01": 0.691,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.386,
+    "BANHO 01": 0.624,
+    "LAVABO": 0.721
+   },
+   "closed_contours": [
+    "C01",
+    "C02"
+   ],
+   "ring_area_outside_consensus_walls_m2": 0.0,
+   "proposed_classification": {
+    "class": "alvenaria",
+    "confidence": "alta",
+    "reason": "traco fino vetorial do PDF (so contorno, sem preenchimento) que segue a face da massa de parede; 0% da sua area fechada fica fora das paredes do consensus (par de sb000)"
+   }
+  },
+  {
+   "id": "sb002",
+   "n_vertices": 25,
+   "closed": false,
+   "bbox_pt": [
+    49.2,
+    401.08,
+    133.08,
+    700.57
+   ],
+   "bbox_m": [
+    1.27,
+    10.39,
+    3.45,
+    18.14
+   ],
+   "size_m": [
+    2.17,
+    7.76
+   ],
+   "length_m": 15.51,
+   "strip_area_m2": 2.165,
+   "share_of_length_within_1_wall_thickness_of_a_wall": 0.8,
+   "walls_within_1_thickness": [
+    "m001",
+    "m006",
+    "m010",
+    "m011",
+    "m012",
+    "m020"
+   ],
+   "openings_near": [
+    "h_o000",
+    "h_o005"
+   ],
+   "pdf_source_objects": [
+    {
+     "bbox_pt": [
+      48.7,
+      401.42,
+      132.74,
+      701.07
+     ],
+     "n_segments": 13,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    },
+    {
+     "bbox_pt": [
+      48.7,
+      400.58,
+      133.58,
+      701.07
+     ],
+     "n_segments": 25,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    }
+   ],
+   "hausdorff_to_other_strokes_pt": {},
+   "slab_gain_if_only_this_one_removed_m2": {
+    "A.S. | TERRACO SOCIAL | TERRACO TECNICO": 1.135,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.005,
+    "COZINHA": 0.089
+   },
+   "pair": [
+    "sb002",
+    "sb003"
+   ],
+   "slab_gain_if_pair_removed_m2": {
+    "A.S. | TERRACO SOCIAL | TERRACO TECNICO": 1.565,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.223,
+    "COZINHA": 0.257
+   },
+   "closed_contours": [
+    "C03",
+    "C04",
+    "C05"
+   ],
+   "ring_area_outside_consensus_walls_m2": null,
+   "proposed_classification": {
+    "class": "alvenaria (contorno) + shaft/prumada",
+    "confidence": "media",
+    "reason": "contorno interno do bloco oeste (Cozinha/A.S.) que, alem da parede, fecha C03, C04 e C05"
+   }
+  },
+  {
+   "id": "sb003",
+   "n_vertices": 13,
+   "closed": true,
+   "bbox_pt": [
+    49.2,
+    401.92,
+    132.24,
+    700.57
+   ],
+   "bbox_m": [
+    1.27,
+    10.41,
+    3.42,
+    18.14
+   ],
+   "size_m": [
+    2.15,
+    7.74
+   ],
+   "length_m": 23.18,
+   "strip_area_m2": 3.242,
+   "share_of_length_within_1_wall_thickness_of_a_wall": 1.0,
+   "walls_within_1_thickness": [
+    "m001",
+    "m006",
+    "m010",
+    "m011",
+    "m012",
+    "m020"
+   ],
+   "openings_near": [
+    "h_o000"
+   ],
+   "pdf_source_objects": [
+    {
+     "bbox_pt": [
+      48.7,
+      401.42,
+      132.74,
+      701.07
+     ],
+     "n_segments": 13,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    },
+    {
+     "bbox_pt": [
+      48.7,
+      400.58,
+      133.58,
+      701.07
+     ],
+     "n_segments": 25,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    }
+   ],
+   "hausdorff_to_other_strokes_pt": {},
+   "slab_gain_if_only_this_one_removed_m2": {},
+   "pair": [
+    "sb002",
+    "sb003"
+   ],
+   "slab_gain_if_pair_removed_m2": {
+    "A.S. | TERRACO SOCIAL | TERRACO TECNICO": 1.565,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.223,
+    "COZINHA": 0.257
+   },
+   "closed_contours": [
+    "C03",
+    "C04",
+    "C05"
+   ],
+   "ring_area_outside_consensus_walls_m2": 0.0,
+   "proposed_classification": {
+    "class": "alvenaria",
+    "confidence": "alta",
+    "reason": "traco fino vetorial do PDF (so contorno, sem preenchimento) que segue a face da massa de parede; 0% da sua area fechada fica fora das paredes do consensus (par de sb002)"
+   }
+  },
+  {
+   "id": "sb004",
+   "n_vertices": 4,
+   "closed": false,
+   "bbox_pt": [
+    49.2,
+    399.16,
+    263.5,
+    453.52
+   ],
+   "bbox_m": [
+    1.27,
+    10.34,
+    6.82,
+    11.75
+   ],
+   "size_m": [
+    5.55,
+    1.41
+   ],
+   "length_m": 7.01,
+   "strip_area_m2": 0.981,
+   "share_of_length_within_1_wall_thickness_of_a_wall": 0.25,
+   "walls_within_1_thickness": [
+    "m001",
+    "m002",
+    "m012"
+   ],
+   "openings_near": [],
+   "pdf_source_objects": [
+    {
+     "bbox_pt": [
+      48.7,
+      398.66,
+      264.0,
+      454.02
+     ],
+     "n_segments": 4,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    }
+   ],
+   "hausdorff_to_other_strokes_pt": {},
+   "slab_gain_if_only_this_one_removed_m2": {
+    "A.S. | TERRACO SOCIAL | TERRACO TECNICO": 0.016
+   },
+   "pair": [
+    "sb004"
+   ],
+   "slab_gain_if_pair_removed_m2": null,
+   "closed_contours": [],
+   "ring_area_outside_consensus_walls_m2": null,
+   "proposed_classification": {
+    "class": "mureta",
+    "confidence": "media",
+    "reason": "linha externa do peitoril H=1,10M do terraco (ja declarado com fonte como h_sb000); 4 vertices, nao fecha nada; efeito na laje 0,016 m2"
+   }
+  },
+  {
+   "id": "sb005",
+   "n_vertices": 17,
+   "closed": true,
+   "bbox_pt": [
+    212.99,
+    453.52,
+    298.06,
+    590.06
+   ],
+   "bbox_m": [
+    5.52,
+    11.75,
+    7.72,
+    15.28
+   ],
+   "size_m": [
+    2.2,
+    3.54
+   ],
+   "length_m": 13.14,
+   "strip_area_m2": 1.838,
+   "share_of_length_within_1_wall_thickness_of_a_wall": 0.97,
+   "walls_within_1_thickness": [
+    "m002",
+    "m004",
+    "m007",
+    "m014"
+   ],
+   "openings_near": [
+    "h_o004",
+    "h_o010",
+    "h_o011"
+   ],
+   "pdf_source_objects": [
+    {
+     "bbox_pt": [
+      213.69,
+      453.86,
+      297.72,
+      590.32
+     ],
+     "n_segments": 13,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    },
+    {
+     "bbox_pt": [
+      212.49,
+      453.02,
+      298.56,
+      590.56
+     ],
+     "n_segments": 17,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    }
+   ],
+   "hausdorff_to_other_strokes_pt": {
+    "sb006": 8.5
+   },
+   "slab_gain_if_only_this_one_removed_m2": {
+    "A.S. | TERRACO SOCIAL | TERRACO TECNICO": 0.094,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.03,
+    "SUITE 02": 0.078
+   },
+   "pair": [
+    "sb005",
+    "sb006"
+   ],
+   "slab_gain_if_pair_removed_m2": {
+    "A.S. | TERRACO SOCIAL | TERRACO TECNICO": 0.393,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.317,
+    "SUITE 02": 0.475
+   },
+   "closed_contours": [
+    "C06",
+    "C07"
+   ],
+   "ring_area_outside_consensus_walls_m2": 0.21,
+   "proposed_classification": {
+    "class": "alvenaria (contorno) + desconhecido",
+    "confidence": "media",
+    "reason": "contorno do bloco Suite 02 oeste/norte que, alem da parede, fecha C06 e C07"
+   }
+  },
+  {
+   "id": "sb006",
+   "n_vertices": 13,
+   "closed": true,
+   "bbox_pt": [
+    214.19,
+    454.36,
+    297.22,
+    589.82
+   ],
+   "bbox_m": [
+    5.55,
+    11.77,
+    7.7,
+    15.28
+   ],
+   "size_m": [
+    2.15,
+    3.51
+   ],
+   "length_m": 12.93,
+   "strip_area_m2": 1.808,
+   "share_of_length_within_1_wall_thickness_of_a_wall": 1.0,
+   "walls_within_1_thickness": [
+    "m002",
+    "m004",
+    "m007",
+    "m014"
+   ],
+   "openings_near": [
+    "h_o004",
+    "h_o010",
+    "h_o011"
+   ],
+   "pdf_source_objects": [
+    {
+     "bbox_pt": [
+      213.69,
+      453.86,
+      297.72,
+      590.32
+     ],
+     "n_segments": 13,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    },
+    {
+     "bbox_pt": [
+      212.49,
+      453.02,
+      298.56,
+      590.56
+     ],
+     "n_segments": 17,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    }
+   ],
+   "hausdorff_to_other_strokes_pt": {
+    "sb005": 8.5
+   },
+   "slab_gain_if_only_this_one_removed_m2": {},
+   "pair": [
+    "sb005",
+    "sb006"
+   ],
+   "slab_gain_if_pair_removed_m2": {
+    "A.S. | TERRACO SOCIAL | TERRACO TECNICO": 0.393,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.317,
+    "SUITE 02": 0.475
+   },
+   "closed_contours": [
+    "C06",
+    "C07"
+   ],
+   "ring_area_outside_consensus_walls_m2": 0.0,
+   "proposed_classification": {
+    "class": "alvenaria",
+    "confidence": "alta",
+    "reason": "traco fino vetorial do PDF (so contorno, sem preenchimento) que segue a face da massa de parede; 0% da sua area fechada fica fora das paredes do consensus (par de sb005)"
+   }
+  },
+  {
+   "id": "sb007",
+   "n_vertices": 25,
+   "closed": true,
+   "bbox_pt": [
+    327.94,
+    480.75,
+    405.21,
+    592.58
+   ],
+   "bbox_m": [
+    8.49,
+    12.45,
+    10.49,
+    15.35
+   ],
+   "size_m": [
+    2.0,
+    2.9
+   ],
+   "length_m": 10.78,
+   "strip_area_m2": 1.507,
+   "share_of_length_within_1_wall_thickness_of_a_wall": 0.91,
+   "walls_within_1_thickness": [
+    "m003",
+    "m005",
+    "m007",
+    "m016",
+    "m017"
+   ],
+   "openings_near": [
+    "h_o003",
+    "h_o004",
+    "h_o006",
+    "h_o008",
+    "h_o009"
+   ],
+   "pdf_source_objects": [
+    {
+     "bbox_pt": [
+      328.28,
+      480.97,
+      404.51,
+      592.24
+     ],
+     "n_segments": 21,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    },
+    {
+     "bbox_pt": [
+      327.44,
+      480.25,
+      405.71,
+      593.08
+     ],
+     "n_segments": 25,
+     "fill_mode": 0,
+     "stroked": true,
+     "stroke_color_rgba": [
+      0,
+      0,
+      0,
+      255
+     ],
+     "stroke_width_pt": 0.0
+    }
+   ],
+   "hausdorff_to_other_strokes_pt": {},
+   "slab_gain_if_only_this_one_removed_m2": {
+    "SUITE 01": 0.303,
+    "SALA DE JANTAR | SALA DE ESTAR": 0.016,
+    "SUITE 02": 0.016,
+    "BANHO 02": 0.637
+   },
+   "pair": [
+    "sb007"
+   ],
+   "slab_gain_if_pair_removed_m2": null,
+   "closed_contours": [
+    "C08",
+    "C09"
+   ],
+   "ring_area_outside_consensus_walls_m2": 0.403,
+   "proposed_classification": {
+    "class": "alvenaria (contorno) + shaft/prumada",
+    "confidence": "media",
+    "reason": "contorno do bloco Banho 02 leste (sem par) que, alem da parede, fecha C08 e C09"
+   }
+  }
+ ],
+ "closed_contours": [
+  {
+   "id": "C01",
+   "kind": "contorno_fechado",
+   "room": "LAVABO",
+   "room_id": "r007",
+   "touching_strokes": [
+    "sb000",
+    "sb001"
+   ],
+   "bbox_pt": [
+    320.74,
+    630.62,
+    330.7,
+    677.66
+   ],
+   "bbox_m": [
+    8.31,
+    16.33,
+    8.57,
+    17.55
+   ],
+   "size_m": [
+    0.26,
+    1.22
+   ],
+   "area_m2": 0.314,
+   "slab_missing_inside_m2": 0.314,
+   "walls_within_1_thickness": [
+    "m009",
+    "m010",
+    "m016"
+   ],
+   "openings_near": [],
+   "pdf_inside": {
+    "inclined_segments": 21,
+    "x_mark_corner_to_corner": false,
+    "max_parallel_inclined_segments": 17,
+    "filled_colors_rgba": [],
+    "text": ""
+   },
+   "proposed_classification": {
+    "class": "shaft/prumada",
+    "confidence": "media",
+    "reason": "retangulo fechado por hachura diagonal (padrao da legenda DRYWALL OU PLACA CIMENTICIA) com X interno, colado na face da parede; area molhada (Lavabo, atras do vaso)"
+   }
+  },
+  {
+   "id": "C02",
+   "kind": "contorno_fechado",
+   "room": "BANHO 01",
+   "room_id": "r005",
+   "touching_strokes": [
+    "sb000",
+    "sb001"
+   ],
+   "bbox_pt": [
+    533.6,
+    521.91,
+    548.12,
+    557.07
+   ],
+   "bbox_m": [
+    13.82,
+    13.52,
+    14.2,
+    14.43
+   ],
+   "size_m": [
+    0.38,
+    0.91
+   ],
+   "area_m2": 0.342,
+   "slab_missing_inside_m2": 0.342,
+   "walls_within_1_thickness": [
+    "m005",
+    "m019"
+   ],
+   "openings_near": [],
+   "pdf_inside": {
+    "inclined_segments": 19,
+    "x_mark_corner_to_corner": false,
+    "max_parallel_inclined_segments": 16,
+    "filled_colors_rgba": [],
+    "text": ""
+   },
+   "proposed_classification": {
+    "class": "shaft/prumada",
+    "confidence": "media",
+    "reason": "retangulo fechado por hachura diagonal (padrao da legenda DRYWALL OU PLACA CIMENTICIA) com X interno, colado na face da parede; area molhada (Banho 01, junto ao box)"
+   }
+  },
+  {
+   "id": "C03",
+   "kind": "contorno_fechado",
+   "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "room_id": "r001",
+   "touching_strokes": [
+    "sb002",
+    "sb003"
+   ],
+   "bbox_pt": [
+    54.6,
+    542.43,
+    67.44,
+    577.59
+   ],
+   "bbox_m": [
+    1.41,
+    14.05,
+    1.75,
+    14.96
+   ],
+   "size_m": [
+    0.33,
+    0.91
+   ],
+   "area_m2": 0.303,
+   "slab_missing_inside_m2": 0.303,
+   "walls_within_1_thickness": [
+    "m006",
+    "m012"
+   ],
+   "openings_near": [],
+   "pdf_inside": {
+    "inclined_segments": 19,
+    "x_mark_corner_to_corner": false,
+    "max_parallel_inclined_segments": 16,
+    "filled_colors_rgba": [],
+    "text": ""
+   },
+   "proposed_classification": {
+    "class": "shaft/prumada",
+    "confidence": "media",
+    "reason": "retangulo fechado por hachura diagonal (padrao da legenda DRYWALL OU PLACA CIMENTICIA) com X interno, colado na face da parede; A.S., ao lado do simbolo de maquina/tanque"
+   }
+  },
+  {
+   "id": "C04",
+   "kind": "contorno_fechado",
+   "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "room_id": "r001",
+   "touching_strokes": [
+    "sb002",
+    "sb003"
+   ],
+   "bbox_pt": [
+    54.6,
+    460.96,
+    65.52,
+    488.07
+   ],
+   "bbox_m": [
+    1.41,
+    11.94,
+    1.7,
+    12.64
+   ],
+   "size_m": [
+    0.28,
+    0.7
+   ],
+   "area_m2": 0.199,
+   "slab_missing_inside_m2": 0.199,
+   "walls_within_1_thickness": [
+    "m012"
+   ],
+   "openings_near": [],
+   "pdf_inside": {
+    "inclined_segments": 15,
+    "x_mark_corner_to_corner": false,
+    "max_parallel_inclined_segments": 13,
+    "filled_colors_rgba": [],
+    "text": ""
+   },
+   "proposed_classification": {
+    "class": "shaft/prumada",
+    "confidence": "media",
+    "reason": "retangulo fechado por hachura diagonal (padrao da legenda DRYWALL OU PLACA CIMENTICIA) com X interno, colado na face da parede; A.S./terraco, ao lado do simbolo da churrasqueira (duto de coifa/churrasqueira e plausivel, nao escrito no PDF)"
+   }
+  },
+  {
+   "id": "C05",
+   "kind": "contorno_fechado",
+   "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "room_id": "r001",
+   "touching_strokes": [
+    "sb002",
+    "sb003"
+   ],
+   "bbox_pt": [
+    54.6,
+    407.32,
+    82.56,
+    435.28
+   ],
+   "bbox_m": [
+    1.41,
+    10.55,
+    2.14,
+    11.27
+   ],
+   "size_m": [
+    0.72,
+    0.72
+   ],
+   "area_m2": 0.524,
+   "slab_missing_inside_m2": 0.524,
+   "walls_within_1_thickness": [
+    "m001",
+    "m012"
+   ],
+   "openings_near": [],
+   "pdf_inside": {
+    "inclined_segments": 14,
+    "x_mark_corner_to_corner": false,
+    "max_parallel_inclined_segments": 11,
+    "filled_colors_rgba": [
+     [
+      164,
+      164,
+      164,
+      255
+     ]
+    ],
+    "text": ""
+   },
+   "proposed_classification": {
+    "class": "shaft/prumada",
+    "confidence": "media",
+    "reason": "0,72 x 0,72 m com X interno; moldura com preenchimento cinza 164 = PAREDE NAO ESTRUTURAL na legenda; canto do terraco social"
+   }
+  },
+  {
+   "id": "C06",
+   "kind": "contorno_fechado",
+   "room": "A.S. | TERRACO SOCIAL | TERRACO TECNICO",
+   "room_id": "r001",
+   "touching_strokes": [
+    "sb005",
+    "sb006"
+   ],
+   "bbox_pt": [
+    220.79,
+    500.19,
+    231.71,
+    508.71
+   ],
+   "bbox_m": [
+    5.72,
+    12.95,
+    6.0,
+    13.18
+   ],
+   "size_m": [
+    0.28,
+    0.22
+   ],
+   "area_m2": 0.062,
+   "slab_missing_inside_m2": 0.062,
+   "walls_within_1_thickness": [
+    "m004",
+    "m014"
+   ],
+   "openings_near": [],
+   "pdf_inside": {
+    "inclined_segments": 6,
+    "x_mark_corner_to_corner": false,
+    "max_parallel_inclined_segments": 5,
+    "filled_colors_rgba": [],
+    "text": ""
+   },
+   "proposed_classification": {
+    "class": "desconhecido",
+    "confidence": "baixa",
+    "reason": "0,28 x 0,22 m, mesmo grafismo (hachura + X), mas pequeno demais para afirmar shaft; pilar e improvavel (notas do PDF: sistema em alvenaria estrutural), nao descartado"
+   }
+  },
+  {
+   "id": "C07",
+   "kind": "contorno_fechado",
+   "room": "SUITE 02",
+   "room_id": "r003",
+   "touching_strokes": [
+    "sb005",
+    "sb006"
+   ],
+   "bbox_pt": [
+    237.11,
+    459.76,
+    246.95,
+    466.12
+   ],
+   "bbox_m": [
+    6.14,
+    11.91,
+    6.4,
+    12.07
+   ],
+   "size_m": [
+    0.25,
+    0.16
+   ],
+   "area_m2": 0.042,
+   "slab_missing_inside_m2": 0.042,
+   "walls_within_1_thickness": [
+    "m002",
+    "m014"
+   ],
+   "openings_near": [],
+   "pdf_inside": {
+    "inclined_segments": 6,
+    "x_mark_corner_to_corner": false,
+    "max_parallel_inclined_segments": 5,
+    "filled_colors_rgba": [],
+    "text": ""
+   },
+   "proposed_classification": {
+    "class": "desconhecido",
+    "confidence": "baixa",
+    "reason": "0,25 x 0,16 m, hachura + X; mesmo caso do C06"
+   }
+  },
+  {
+   "id": "C08",
+   "kind": "contorno_fechado",
+   "room": "SUITE 01",
+   "room_id": "r000",
+   "touching_strokes": [
+    "sb007"
+   ],
+   "bbox_pt": [
+    388.53,
+    521.91,
+    394.89,
+    528.27
+   ],
+   "bbox_m": [
+    10.06,
+    13.52,
+    10.23,
+    13.68
+   ],
+   "size_m": [
+    0.16,
+    0.16
+   ],
+   "area_m2": 0.027,
+   "slab_missing_inside_m2": 0.027,
+   "walls_within_1_thickness": [
+    "m005",
+    "m017"
+   ],
+   "openings_near": [],
+   "pdf_inside": {
+    "inclined_segments": 5,
+    "x_mark_corner_to_corner": false,
+    "max_parallel_inclined_segments": 4,
+    "filled_colors_rgba": [],
+    "text": ""
+   },
+   "proposed_classification": {
+    "class": "desconhecido",
+    "confidence": "baixa",
+    "reason": "0,16 x 0,16 m, hachura + X; mesmo caso do C06"
+   }
+  },
+  {
+   "id": "C09",
+   "kind": "contorno_fechado",
+   "room": "BANHO 02",
+   "room_id": "r006",
+   "touching_strokes": [
+    "sb007"
+   ],
+   "bbox_pt": [
+    370.41,
+    486.99,
+    383.13,
+    523.59
+   ],
+   "bbox_m": [
+    9.59,
+    12.61,
+    9.92,
+    13.56
+   ],
+   "size_m": [
+    0.33,
+    0.95
+   ],
+   "area_m2": 0.299,
+   "slab_missing_inside_m2": 0.299,
+   "walls_within_1_thickness": [
+    "m003",
+    "m005",
+    "m017"
+   ],
+   "openings_near": [
+    "h_o009"
+   ],
+   "pdf_inside": {
+    "inclined_segments": 17,
+    "x_mark_corner_to_corner": false,
+    "max_parallel_inclined_segments": 15,
+    "filled_colors_rgba": [],
+    "text": ""
+   },
+   "proposed_classification": {
+    "class": "shaft/prumada",
+    "confidence": "media",
+    "reason": "retangulo fechado por hachura diagonal (padrao da legenda DRYWALL OU PLACA CIMENTICIA) com X interno, colado na face da parede; area molhada (Banho 02, junto ao box)"
+   }
+  }
+ ],
+ "proposed_by": "agent (Claude), a partir do recorte do PDF e da geometria; NAO e fato, decisao do Felipe na #484"
+}
