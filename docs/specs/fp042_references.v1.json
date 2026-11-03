@@ -4217,6 +4217,18 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_d007_slab/README.md",
+      "blob_sha": "9e64ff5c6db34986c31347389e1d8d1ef43dd792",
+      "blob_size": 9110,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_d007_slab/d007_alternatives.json",
+      "blob_sha": "2ccbd7c1b2518a71520881233c3d9471aad4dcb6",
+      "blob_size": 156731,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
       "blob_size": 335219,
