@@ -19,7 +19,6 @@ from __future__ import annotations
 import ctypes
 import hashlib
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -27,7 +26,8 @@ ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 OUT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT / "runs" / "fp056" / "p7_484_strokes"
 CONSENSUS = ROOT / "fixtures" / "planta_74" / "consensus_with_human_walls_and_soft_barriers.json"
-PT_TO_M = float(os.environ.get("PT_TO_M", "0"))
+from core.scale import PT_TO_M, assert_pt_to_m_for_source  # noqa: E402  (fonte unica de escala)
+
 UNSOURCED = [f"sb00{i}" for i in range(8)]
 RENDER_SCALE = 6.0
 # pares de tracos: os dois contornos vetoriais do mesmo bloco do PDF (um so de parede, outro com os anexos)
@@ -129,8 +129,7 @@ def diagonal_segments(obj):
 
 
 def main() -> int:
-    if not PT_TO_M:
-        raise SystemExit("PT_TO_M ausente (planta_74: 0.0259)")
+    assert_pt_to_m_for_source("planta_74.pdf")   # escala verificada da planta_74 (0.0259) ou erro alto
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
