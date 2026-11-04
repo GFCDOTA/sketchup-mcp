@@ -83,7 +83,7 @@ def test_hard_killed_executor_leaves_a_recoverable_running_item_that_is_not_stol
     wait_for(env / "m1")
     disk = eb.load()["queue"][0]
     assert disk["state"] == "RUNNING" and disk["owner"]                       # claim duravel ANTES do filho
-    p.kill()                                                                  # crash duro (TerminateProcess): sem finally, sem release
+    ex.kill_tree(p)                                                           # crash duro da ARVORE (shim do venv + python real): sem finally, sem release
     p.communicate(timeout=30)
     assert eb.load()["queue"][0]["state"] == "RUNNING"                        # nada limpou: e o que um crash real deixa
     # reinicio logo em seguida: lease ainda valido => NAO rouba o item
@@ -105,7 +105,7 @@ def test_two_real_os_processes_never_run_the_same_item(env):
         second = run_to_end("ok", env / "b", live + dt.timedelta(seconds=5))
         assert second["action"] == "IDLE" and not (env / "b").exists()        # 2o processo nao executa o item do 1o
     finally:
-        first.kill()
+        ex.kill_tree(first)
         first.communicate(timeout=30)
 
 
@@ -120,3 +120,70 @@ def test_restart_after_the_child_already_published_never_reruns_the_old_review(e
                        capture_output=True, text=True, timeout=60)
     assert p.returncode == 0, p.stderr
     assert json.loads(p.stdout.strip().splitlines()[-1])["action"] == "SUPERSEDED" and not (env / "x").exists()
+
+
+# ------------------------------------- uma unica instancia por fila + sem orfaos (achado do Stop-ScheduledTask real, 2026-11-04)
+def dead_pid() -> int:
+    p = subprocess.Popen([sys.executable, "-c", "pass"])
+    p.wait()
+    return p.pid
+
+
+def test_pid_alive_distinguishes_a_live_process_from_a_finished_one():
+    import os
+    assert ex.pid_alive(os.getpid()) and not ex.pid_alive(dead_pid())
+
+
+def test_instance_lock_is_exclusive_across_real_processes_and_released_by_the_os_on_a_hard_kill(tmp_path):
+    lock_path = tmp_path / "inst.lock"
+    code = ("import sys,time; from pathlib import Path; from tools.orchestration.event_executor import InstanceLock; "
+            "l=InstanceLock(Path(sys.argv[1])); ok=l.acquire(); Path(sys.argv[2]).write_text(str(ok)); time.sleep(120)")
+    holder = subprocess.Popen([sys.executable, "-c", code, str(lock_path), str(tmp_path / "ok")], cwd=ROOT)
+    try:
+        wait_for(tmp_path / "ok")
+        assert (tmp_path / "ok").read_text() == "True"
+        mine = ex.InstanceLock(lock_path)
+        assert mine.acquire() is False and ex.pid_alive(int(mine.holder()))    # 2a instancia nao consome a fila e sabe quem e o dono
+    finally:
+        ex.kill_tree(holder)
+        holder.wait(30)
+    again = ex.InstanceLock(lock_path)
+    assert again.acquire() is True                                            # o SO soltou o lock com o processo morto: sem pidfile velho
+    again.release()
+
+
+def test_main_refuses_to_start_a_second_executor_and_never_polls(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: "fmodesto30")
+    monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: pytest.fail("a 2a instancia nao pode consumir a fila"))
+    first = ex.InstanceLock(ex.instance_lock_path())
+    assert first.acquire()
+    try:
+        assert ex.main(["run", "--once"]) == 4
+    finally:
+        first.release()
+    assert "outra instancia" in capsys.readouterr().out
+
+
+def test_main_exits_when_the_launcher_pid_is_gone_and_heartbeat_cancels_the_child(monkeypatch, capsys):
+    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: "fmodesto30")
+    monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: pytest.fail("sem launcher vivo nao roda ciclo"))
+    gone = dead_pid()
+    assert ex.main(["run", "--watch-pid", str(gone)]) == 5
+    assert "encerrou" in capsys.readouterr().out
+    assert ex.sleep_watching(30, gone) is False and ex.sleep_watching(0.1, None) is True
+
+
+def test_launcher_death_cancels_a_running_child_instead_of_leaving_an_orphan(monkeypatch):
+    import threading
+    monkeypatch.setattr(ex, "WATCH_PID", dead_pid())
+    cancel = threading.Event()
+    hb = ex.Heartbeat("k", "owner", 0.05)
+    hb.cancel = cancel
+    hb.start()
+    assert cancel.wait(5) is True                                              # tarefa/launcher encerrado => o filho e derrubado
+    hb.stop()
+
+
+def test_launcher_passes_its_own_pid_so_the_executor_never_outlives_it():
+    ps1 = (ROOT / "tools/orchestration/run_event_bridge.ps1").read_text(encoding="ascii")
+    assert ps1.count('"--watch-pid", $PID') == 2                               # dry-run e -Execute

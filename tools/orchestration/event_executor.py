@@ -53,6 +53,7 @@ HEARTBEAT_S = 60
 BRANCH_OK = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,100}$")
 SECRET = re.compile(r"(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,})")
 CRED_HINTS = ("not logged in", "/login", "invalid api key", "authentication", "oauth token", "unauthorized")
+WATCH_PID: int | None = None                                           # pid do launcher: se morrer, o executor encerra (sem orfaos)
 Runner = Callable[..., tuple]            # (argv, cwd, env, stdin, timeout, cancel: threading.Event) -> (rc, out, err, timed_out)
 
 PROMPT = """Voce e o EXECUTOR do repositorio {repo}. Tarefa automatica (bridge #589), PR #{pr}, Issue #{issue}.
@@ -132,6 +133,83 @@ def child_env(base: dict | None = None) -> dict:
     return env
 
 
+def pid_alive(pid: int) -> bool:
+    """O processo `pid` existe? Windows: OpenProcess+WaitForSingleObject (os.kill(pid, 0) TERMINARIA o processo no Windows)."""
+    if os.name == "nt":
+        import ctypes
+        k32 = ctypes.windll.kernel32
+        h = k32.OpenProcess(0x00100000, False, int(pid))                     # SYNCHRONIZE
+        if not h:
+            return False
+        try:
+            return k32.WaitForSingleObject(h, 0) == 0x102                    # WAIT_TIMEOUT => ainda vivo
+        finally:
+            k32.CloseHandle(h)
+    try:
+        os.kill(int(pid), 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+class InstanceLock:
+    """Uma unica instancia do executor por fila: lock EXCLUSIVO do SO num arquivo, mantido pela vida do processo. O SO o solta se o
+    processo morrer (nao ha pidfile velho nem reuso de PID). Uma 2a instancia (ex.: orfa de um Stop-ScheduledTask + novo Start, ou um
+    `run --once` manual) nao consome a fila: `acquire()` devolve False."""
+
+    def __init__(self, path: Path):
+        self.path, self._fd = path, None
+
+    def acquire(self) -> bool:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        fd = os.open(self.path, os.O_CREAT | os.O_RDWR)
+        try:
+            if os.name == "nt":
+                import msvcrt
+                os.lseek(fd, 0, os.SEEK_SET)
+                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            os.close(fd)
+            return False
+        os.lseek(fd, 16, os.SEEK_SET)
+        os.write(fd, f"{os.getpid()}\n".encode("ascii"))
+        self._fd = fd
+        return True
+
+    def holder(self) -> str:
+        try:                                                                  # le so a partir do byte 16 (o byte 0 esta travado no Windows)
+            fd = os.open(self.path, os.O_RDONLY)
+            try:
+                os.lseek(fd, 16, os.SEEK_SET)
+                return os.read(fd, 32).decode("ascii", "replace").strip() or "?"
+            finally:
+                os.close(fd)
+        except OSError:
+            return "?"
+
+    def release(self) -> None:
+        if self._fd is not None:
+            os.close(self._fd)
+            self._fd = None
+
+
+def sleep_watching(seconds: float, pid: int | None, step: float = 2.0) -> bool:
+    """Dorme `seconds` em fatias; False se o processo `pid` (launcher) morreu no intervalo."""
+    end = time.monotonic() + seconds
+    while True:
+        if pid is not None and not pid_alive(pid):
+            return False
+        left = end - time.monotonic()
+        if left <= 0:
+            return True
+        time.sleep(min(step, left))
+
+
 def kill_tree(p: subprocess.Popen) -> None:
     """Derruba a arvore do PROPRIO processo filho (taskkill /T no PID dele; nunca por nome de imagem)."""
     if os.name == "nt":
@@ -176,6 +254,10 @@ def repo_root() -> Path:
 def worktree_path(pr: int) -> Path:
     root = Path(os.environ.get("BRIDGE_WORKTREE_ROOT") or repo_root().parent.parent / "worktrees")
     return root / f"bridge-pr{pr}"
+
+
+def instance_lock_path() -> Path:
+    return eb.bridge_path().with_name("event_executor.instance.lock")
 
 
 def disabled_flag() -> Path:
@@ -293,6 +375,9 @@ class Heartbeat(threading.Thread):
     def run(self) -> None:
         while not self.stop_evt.wait(self.interval):
             try:
+                if WATCH_PID is not None and not pid_alive(WATCH_PID):          # launcher/tarefa encerrado: nao deixa o filho orfao
+                    self.cancel.set()
+                    return
                 with es.locked(eb.bridge_path()):
                     b = eb.load()
                     it = _owned(b, self.key, self.owner)
@@ -530,6 +615,7 @@ def main(argv: list[str] | None = None) -> int:
     rp.add_argument("--interval", type=int, default=120)
     rp.add_argument("--repo", default=eb.REPO)
     rp.add_argument("--execute", action="store_true", help="executa o Claude; sem isto e dry-run")
+    rp.add_argument("--watch-pid", type=int, default=None, help="encerra se este PID (o launcher) morrer")
     sub.add_parser("status")
     a = ap.parse_args(argv)
     if a.cmd == "status":
@@ -548,13 +634,27 @@ def main(argv: list[str] | None = None) -> int:
     except (PermissionError, RuntimeError) as exc:
         print(json.dumps({"at": es.now_iso(), "fatal": str(exc)[:300]}), flush=True)
         return 3
+    global WATCH_PID
+    WATCH_PID = a.watch_pid
+    lock = InstanceLock(instance_lock_path())
+    if not lock.acquire():
+        print(json.dumps({"at": es.now_iso(), "fatal": f"outra instancia do executor ja consome a fila (pid {lock.holder()}): nao inicia"}), flush=True)
+        return 4
     claude_bin = resolve_claude()
-    while True:
-        res = run_cycle(eb.gh_json, policy, a.repo, a.execute, claude_bin=claude_bin)
-        print(json.dumps({"at": es.now_iso(), "execute": a.execute, **res}, ensure_ascii=False), flush=True)
-        if a.once:
-            return 0
-        time.sleep(max(a.interval, eb.load()["backoff_s"]))
+    try:
+        while True:
+            if WATCH_PID is not None and not pid_alive(WATCH_PID):
+                print(json.dumps({"at": es.now_iso(), "fatal": f"processo pai {WATCH_PID} encerrou: saindo"}), flush=True)
+                return 5
+            res = run_cycle(eb.gh_json, policy, a.repo, a.execute, claude_bin=claude_bin)
+            print(json.dumps({"at": es.now_iso(), "execute": a.execute, **res}, ensure_ascii=False), flush=True)
+            if a.once:
+                return 0
+            if not sleep_watching(max(a.interval, eb.load()["backoff_s"]), WATCH_PID):
+                print(json.dumps({"at": es.now_iso(), "fatal": f"processo pai {WATCH_PID} encerrou: saindo"}), flush=True)
+                return 5
+    finally:
+        lock.release()
 
 
 if __name__ == "__main__":
