@@ -96,7 +96,7 @@
       "state": "READY",
       "offline": true,
       "needs_sketchup": false,
-      "next_step": "Com o pre-voo que ja ve interpenetracao entre modulos (PR 535, merge f3801fa) e o gemeo, medir sem aplicar: a cozinha (backsplash x vidro do cooktop/cuba, 4,6 cm; declarar o custo L2/R-18), o tapete do Banho 01 (encolher/recortar) e a papeleira do Banho 02 (outra estrategia); registrar em artifacts/review/fp056/p7/ junto das medidas dos banhos e resumir na #495.",
+      "next_step": "Criterio 3: resumir na #495 (comentario com o SHA do merge) as medidas de artifacts/review/fp056/p7_r3_remaining/: os 9 pares de R3 tem alternativa que resolve sem defeito novo/pior e pre-voo PASS; cozinha (a)/(c) com custo L2/R-18 em kitchen.layout.galley. Criterios 1 (este registro) e 2 (PR 535) cumpridos.",
       "completion_blockers": [
         {
           "cause": "REVIEW",
