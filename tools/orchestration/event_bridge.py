@@ -8,13 +8,14 @@ O GitHub e a fonte de verdade e a fila. Este processo roda no Windows do proprie
 
 FASE 1 = INGESTAO + ENFILEIRAMENTO. NAO executa nada: nem Claude, nem shell, nem git. O texto de reviews e comentarios nunca e
 interpretado como comando; so entra na fila a referencia (id, URL, PR, SHA, Issue). Quem decide/reivindica a tarefa continua
-sendo `task_scheduler`; o checkpoint/`once` e o de `execution_state`. Este modulo nao e um segundo scheduler.
+sendo `task_scheduler`; trava, relogio e diretorio de estado vem de `execution_state`; dedupe+fila+cursor ficam em UM arquivo proprio (gravacao
+atomica unica: nada de dois arquivos que possam divergir). Este modulo nao e um segundo scheduler.
 
 Evento aceito (fail-closed), todos os fatos vindos da API, nunca do texto:
 - `review`: `user.login` do evento esta em `review_policy.reviewers` e NAO em `executor_logins`; `state == CHANGES_REQUESTED`;
   `commit_id` e o HEAD ATUAL do PR (senao STALE: revisao de SHA antigo nao aciona); o PR e do repo configurado e cita uma Issue.
 - `comment`: mesmo critério de autor, em Issue/PR, com a linha de marcador `EXECUTOR-TASK: #N` (N = Issue alvo). Sem marcador = ignorado.
-Idempotencia: chave `event_id:pr:head_sha` registrada com `execution_state.once`; o mesmo evento nunca enfileira duas vezes,
+Idempotencia: chave `event_id:pr:head_sha` guardada no MESMO arquivo da fila (uma unica gravacao atomica, sem dois estados); o mesmo evento nunca enfileira duas vezes,
 inclusive apos reinicio (cursor e fila persistidos em `runs/governance/event_bridge.json`).
 Executor offline (PC desligado/sem sessao): nada e consumido; ao voltar, o proximo ciclo le as revisoes ainda validas (reviews sao
 listados do PR aberto, nao por cursor) e os comentarios desde o cursor, entao nada se perde. Credencial indisponivel: o launcher
@@ -45,7 +46,7 @@ Gh = Callable[[str], object]
 
 
 def default_bridge_state() -> dict:
-    return {"schema_version": SCHEMA_VERSION, "cursor_comments": None, "queue": [], "diagnostics": [], "backoff_s": 0,
+    return {"schema_version": SCHEMA_VERSION, "cursor_comments": None, "queue": [], "seen": [], "diagnostics": [], "backoff_s": 0,
             "last_poll": None, "mode": "dry-run"}
 
 
@@ -129,15 +130,16 @@ def task_key(event: dict, head_sha: str | None) -> str:
     return f"{event['event_id']}:{event.get('pr') or event.get('thread')}:{head_sha or '-'}"
 
 
-def ingest(event: dict, pr: dict | None, policy: dict, bstate: dict, estate: dict, now: dt.datetime | None = None,
+def ingest(event: dict, pr: dict | None, policy: dict, bstate: dict, now: dt.datetime | None = None,
            repo: str = REPO) -> tuple[str, str]:
     """Decide e, se ACCEPT e primeira vez, enfileira. Devolve (decisao, motivo). So referencias entram na fila, nunca o texto."""
     verdict, why = classify(event, pr, policy, repo)
     if verdict != "ACCEPT":
         return verdict, why
     key = task_key(event, (pr or {}).get("head_sha"))
-    if not es.once(estate, "bridge:" + key):
+    if key in bstate["seen"] or any(t["key"] == key for t in bstate["queue"]):
         return "DUPLICATE", "evento ja enfileirado (idempotencia event_id+PR+SHA)"
+    bstate["seen"].append(key)                                          # dedupe e fila no MESMO arquivo: uma gravacao so
     issue = event["target_issue"] or sorted(pr["refs"])[0]
     bstate["queue"].append({"key": key, "kind": event["kind"], "event_id": event["event_id"], "pr": event.get("pr"),
                             "issue": issue, "head_sha": (pr or {}).get("head_sha"), "author": event["author"],
@@ -170,7 +172,7 @@ def pr_facts(pr_raw: dict) -> dict:
             "refs": sorted({int(n) for n in REFS.findall(pr_raw.get("body") or "")})}
 
 
-def poll_once(gh: Gh, policy: dict, bstate: dict, estate: dict, repo: str = REPO, now: dt.datetime | None = None) -> dict:
+def poll_once(gh: Gh, policy: dict, bstate: dict, repo: str = REPO, now: dt.datetime | None = None) -> dict:
     """Um ciclo de polling (dry-run: so enfileira). Erro de API => backoff + diagnostico, sem perder estado. Devolve contagens."""
     counts = {"ACCEPT": 0, "DUPLICATE": 0, "STALE": 0, "IGNORE": 0, "ERROR": 0}
     try:
@@ -178,7 +180,7 @@ def poll_once(gh: Gh, policy: dict, bstate: dict, estate: dict, repo: str = REPO
         for raw_pr in prs:
             facts = pr_facts(raw_pr)
             for raw in gh(f"repos/{repo}/pulls/{raw_pr['number']}/reviews?per_page=100"):
-                verdict, why = ingest(normalize_review(raw, facts, repo), facts, policy, bstate, estate, now, repo)
+                verdict, why = ingest(normalize_review(raw, facts, repo), facts, policy, bstate, now, repo)
                 counts[verdict] += 1
                 if verdict in ("STALE", "IGNORE") and (raw.get("state") or "").upper() == "CHANGES_REQUESTED":
                     diagnose(bstate, f"review {raw.get('id')} PR #{facts['number']} {verdict}: {why}", now)
@@ -191,7 +193,7 @@ def poll_once(gh: Gh, policy: dict, bstate: dict, estate: dict, repo: str = REPO
             return counts
         for raw in gh(f"repos/{repo}/issues/comments?per_page=100" + (f"&since={since}" if since else "")):
             ev = normalize_comment(raw, repo)
-            verdict, why = ingest(ev, {"head_sha": "", "refs": []}, policy, bstate, estate, now, repo)
+            verdict, why = ingest(ev, {"head_sha": "", "refs": []}, policy, bstate, now, repo)
             counts[verdict] += 1
             if ev["submitted_at"] and (newest is None or ev["submitted_at"] > newest):
                 newest = ev["submitted_at"]
@@ -205,16 +207,22 @@ def poll_once(gh: Gh, policy: dict, bstate: dict, estate: dict, repo: str = REPO
     return counts
 
 
-def run_cycle(gh: Gh, policy: dict, bpath: Path | None = None, epath: Path | None = None, repo: str = REPO,
-              now: dt.datetime | None = None) -> dict:
-    """Um ciclo com persistencia sob trava: carrega, enfileira, grava os DOIS estados atomicamente."""
-    with es.locked(epath):
-        estate = es.load(epath)
+def run_cycle(gh: Gh, policy: dict, bpath: Path | None = None, repo: str = REPO, now: dt.datetime | None = None) -> dict:
+    """Um ciclo sob trava: carrega, enfileira e grava UM unico arquivo (fila + chaves vistas + cursor) com `os.replace`.
+    Crash antes do replace = nada mudou (o proximo ciclo reenfileira uma vez); crash depois = tudo gravado. Sem estado em dois lugares."""
+    with es.locked(bpath or bridge_path()):
         bstate = load(bpath)
-        counts = poll_once(gh, policy, bstate, estate, repo, now)
-        es.save(estate, epath)
+        counts = poll_once(gh, policy, bstate, repo, now)
         save(bstate, bpath)
     return counts
+
+
+def check_identity(gh: Gh, policy: dict) -> str:
+    """Fail-closed: o `gh` em uso tem de ser o EXECUTOR (`executor_logins`) e nunca um revisor. Devolve o login ou levanta."""
+    login = (gh("user") or {}).get("login", "")
+    if login.lower() not in [x.lower() for x in policy.get("executor_logins", [])] or             login.lower() in [x.lower() for x in policy.get("reviewers", [])]:
+        raise PermissionError(f"gh autenticado como {login!r}: o bridge so roda como executor {policy.get('executor_logins')}")
+    return login
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -232,6 +240,11 @@ def main(argv: list[str] | None = None) -> int:
                           "diagnostics": b["diagnostics"][-5:]}, indent=1, ensure_ascii=False))
         return 0
     policy = load_policy()
+    try:
+        check_identity(gh_json, policy)
+    except (PermissionError, RuntimeError) as exc:
+        print(json.dumps({"at": es.now_iso(), "fatal": str(exc)[:300]}), flush=True)
+        return 3
     while True:
         counts = run_cycle(gh_json, policy, repo=a.repo)
         print(json.dumps({"at": es.now_iso(), "dry_run": True, **counts}), flush=True)
