@@ -13,7 +13,8 @@ class Settings:
     y: int | None = None
     opacity: float = 0.88
     local_interval_s: int = 3          # coleta local (processos/logs)
-    github_interval_s: int = 60        # TTL do cache do GitHub
+    github_interval_s: int = 60        # TTL do cache do GitHub (PR/checks)
+    backlog_interval_s: int = 300      # TTL do cache do Project #1 (mais caro)
     notifications: bool = False
     minimized: bool = False
 
@@ -27,6 +28,7 @@ def clamp(s: Settings) -> Settings:
     s.opacity = min(1.0, max(0.3, float(s.opacity)))
     s.local_interval_s = min(30, max(2, int(s.local_interval_s)))
     s.github_interval_s = min(600, max(15, int(s.github_interval_s)))
+    s.backlog_interval_s = min(3600, max(60, int(s.backlog_interval_s)))
     return s
 
 

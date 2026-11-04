@@ -30,4 +30,15 @@ Sem botao de execucao, sem iniciar Claude, sem `taskkill`, sem commit/push/branc
 
 ## Arquitetura
 `models.py` (estado) · `collectors.py` (leitura, I/O injetavel) · `controls.py` (operacoes) · `settings.py` · `window.py` (Qt) · `app.py`.
-Coleta em thread propria; a UI so recebe `Snapshot` por sinal. Backlog (Ready/In Progress/...) = `Indisponivel` ate haver coletor confiavel.
+Coleta em thread propria; a UI so recebe `Snapshot` por sinal. Backlog = Project #1 real via UMA consulta GraphQL enxuta (campo Status, paginada; cache 5 min). Falha mostra o erro tecnico (escopo `read:project`, rate limit...) e mantem a ultima leitura boa marcada como desatualizada.
+
+## Estados (evolucao)
+- **Modo:** `DRY_RUN — execucao automatica desligada` (ambar) / `EXECUTE` (vermelho); linha "apenas monitorando" x "TRABALHANDO" (fila RUNNING).
+- **Claude:** executando = descendente do executor. Processos vivos fora dele: sessoes interativas (Claude Code) e auxiliares do app Desktop sao contados a parte; historico so em disco nunca entra.
+- **Codex:** `Nao integrado` (instalado) / `Analise manual` (processo vivo fora do orquestrador) / `Vinculado`/`Revisando PR (vinculado)` (filho do executor) /
+  `Falhou`/`Ocioso` (ultimo parecer) lendo `runs/governance/codex/last_review.json` (contrato para a futura integracao; ausente = nao integrado).
+  O revisor automatico NAO e declarado operacional antes do E2E Claude<->Codex.
+- **Lock:** PID do InstanceLock correlacionado com a cadeia real do executor (vivo/da cadeia, fora da cadeia, inexistente).
+- **Historico:** eventos consecutivos identicos agrupados (`xN`, faixa de horario); erros em vermelho, novos em azul; duplo clique abre o log original.
+- **Botoes:** cada um reporta o resultado REAL na linha de status (✓/✗); parar/reiniciar rodam fora da UI, recusam com kill switch, execucao ativa, `-Execute`
+  ou executor que nao encerrou (nunca inicia 2a instancia).

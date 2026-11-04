@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import time
 import webbrowser
 from dataclasses import dataclass
 from pathlib import Path
@@ -48,35 +49,62 @@ def task_has_execute(run: Callable[[str], tuple[int, str]] = run_ps) -> bool | N
     return "-execute" in out.lower()
 
 
-def stop_listener(procs_fn=col.list_processes, run: Callable[[str], tuple[int, str]] = run_ps, confirmed: bool = False) -> Result:
+def _wait_gone(procs_fn, wait_s: float, sleep) -> bool:
+    """True se nenhum executor segue vivo (prova que o InstanceLock foi solto antes de qualquer novo start)."""
+    waited = 0.0
+    while True:
+        procs = procs_fn()
+        if procs is not None and not col.executor_roots(procs):
+            return True
+        if waited >= wait_s:
+            return False
+        sleep(1.0)
+        waited += 1.0
+
+
+def stop_listener(procs_fn=col.list_processes, run: Callable[[str], tuple[int, str]] = run_ps, confirmed: bool = False,
+                  wait_s: float = 15.0, sleep=time.sleep) -> Result:
     if not confirmed:
         return Result(False, "confirmacao necessaria para parar o listener")
     why = active_execution(procs_fn())
     if why:
         return Result(False, f"parada recusada: {why}")
     rc, out = run(f"Stop-ScheduledTask -TaskName '{col.TASK_NAME}' -ErrorAction Stop")
-    return Result(rc == 0, "tarefa parada" if rc == 0 else f"Stop-ScheduledTask falhou: {out[:200]}")
+    if rc != 0:
+        return Result(False, f"Stop-ScheduledTask falhou: {out[:200]}")
+    if not _wait_gone(procs_fn, wait_s, sleep):
+        return Result(False, f"tarefa parada, mas o executor ainda esta vivo apos {wait_s:.0f}s (nao reinicie; veja o diagnostico)")
+    return Result(True, "listener parado (executor encerrado e lock liberado)")
 
 
-def restart_listener_dry_run(procs_fn=col.list_processes, run: Callable[[str], tuple[int, str]] = run_ps, confirmed: bool = False) -> Result:
+def restart_listener_dry_run(procs_fn=col.list_processes, run: Callable[[str], tuple[int, str]] = run_ps, confirmed: bool = False,
+                             gov: Path | None = None, wait_s: float = 15.0, sleep=time.sleep) -> Result:
+    """Nunca burla o kill switch, a politica (-Execute) nem o InstanceLock: so inicia se o executor antigo SUMIU."""
     if not confirmed:
         return Result(False, "confirmacao necessaria para reiniciar o listener")
+    g = gov or col.default_gov_dir()
+    if (g / "EXECUTOR_DISABLED").exists():
+        return Result(False, "reinicio recusado: kill switch (EXECUTOR_DISABLED) ativo; remova-o manualmente se for intencional")
     ex = task_has_execute(run)
     if ex is None:
         return Result(False, "reinicio recusado: nao foi possivel ler a acao da tarefa (nao provo que e DRY_RUN)")
     if ex:
         return Result(False, "reinicio recusado: a tarefa tem -Execute; a barra so reinicia em DRY_RUN")
-    stopped = stop_listener(procs_fn, run, confirmed=True)
-    if not stopped.ok and "recusada" in stopped.message:
-        return stopped
+    procs = procs_fn()
+    if procs is not None and col.executor_roots(procs):
+        stopped = stop_listener(procs_fn, run, confirmed=True, wait_s=wait_s, sleep=sleep)
+        if not stopped.ok:
+            return stopped
+    elif procs is None:
+        return Result(False, "reinicio recusado: tabela de processos indisponivel (nao provo que o lock esta livre)")
     rc, out = run(f"Start-ScheduledTask -TaskName '{col.TASK_NAME}' -ErrorAction Stop")
     return Result(rc == 0, "tarefa reiniciada em DRY_RUN" if rc == 0 else f"Start-ScheduledTask falhou: {out[:200]}")
 
 
-def open_url(url: str | None, opener: Callable[[str], object] = webbrowser.open) -> Result:
+def open_url(url: str | None, opener: Callable[[str], object] | None = None) -> Result:
     if not url or not url.startswith("https://github.com/"):
         return Result(False, "URL indisponivel ou fora de github.com")
-    opener(url)
+    (opener or webbrowser.open)(url)                                           # resolvido na chamada (testavel)
     return Result(True, url)
 
 
@@ -89,14 +117,7 @@ def open_path(path: Path, opener: Callable[[str], object] | None = None) -> Resu
 
 def latest_log(gov: Path) -> Path | None:
     """Log mais util: o ultimo log de execucao do executor, senao o log de ciclos do bridge."""
-    try:
-        runs = sorted((gov / "executor").glob("*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
-    except OSError:
-        runs = []
-    if runs:
-        return runs[0]
-    cyc = gov / "event_bridge.log"
-    return cyc if cyc.exists() else None
+    return col._latest_log(gov)  # noqa: SLF001
 
 
 def diagnostic_text(snap: Snapshot) -> str:
