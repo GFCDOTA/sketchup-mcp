@@ -4253,6 +4253,36 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_as1_real_wall/README.md",
+      "blob_sha": "456f1fa63f81fcce775d0bb6f5b4bed783500c90",
+      "blob_size": 7019,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_as1_real_wall/as1_real_wall_alternatives.json",
+      "blob_sha": "a0ef6395c3dca8221fac2931e9b8a1d2499a6f82",
+      "blob_size": 351570,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_as1_real_wall/as1_real_wall_plan.png",
+      "blob_sha": "30cf7a7320110611c60e15e318fe84148ec963ad",
+      "blob_size": 353698,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_as1_real_wall/plot_as1_real_wall.py",
+      "blob_sha": "e5a664db1a12d9e330161ae82db596afbd2e8bd6",
+      "blob_size": 10497,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_as1_real_wall/probe_as1_real_wall.py",
+      "blob_sha": "c80a1a6ff95def05621c5b1610fb85f9bdf40446",
+      "blob_size": 20254,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/furniture/armchair_class/armchair_class_matrix.png",
       "blob_sha": "efc3bc79e242f472dfdf37f1a90c16ddbff41128",
       "blob_size": 335219,
