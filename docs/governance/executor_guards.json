@@ -1,0 +1,18 @@
+{
+  "_comment": "Protecoes do executor local (FP-057/P8, Issue #589). Os tetos sao PROPOSTAS iniciais, a confirmar pelo Tech Lead. critical_paths da review_policy.json tambem valem; aqui so os EXTRAS. Esta lista so deve crescer sem revisao especial.",
+  "label": "executor-ok",
+  "limits": {
+    "max_files": 8,
+    "max_lines": 300
+  },
+  "extra_critical_paths": [
+    ".github/workflows/",
+    "docs/governance/",
+    "tools/validation/",
+    "tools/orchestration/",
+    "tools/validation/execution_state.py",
+    "tools/validation/task_scheduler.py",
+    "tools/validation/review_verification.py",
+    "tools/validation/protection_check.py"
+  ]
+}
