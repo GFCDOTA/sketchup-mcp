@@ -57,7 +57,8 @@ jobs:
       - name: issue integrity (aceite, bloqueios, SPEC labels)
         run: python -m tools.validation.issue_integrity_gate | tee -a gate.txt
       - name: spec integrity (SPECs FP-055/FP-056)
-        run: python -c "import sys; print('INTENTIONAL-RED-533: gate reprovado de proposito'); sys.exit(1)" | tee -a gate.txt
+        run: |
+          python -c "import sys; print('INTENTIONAL-RED-533 gate reprovado de proposito'); sys.exit(1)" | tee -a gate.txt
       - name: publicar o motivo no PR quando reprovar
         if: failure() && github.event_name == 'pull_request'
         run: |
