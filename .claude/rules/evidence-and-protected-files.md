@@ -15,3 +15,8 @@ paths:
   do `git add` precisa do sha refeito). PNG/binário também em `fp042_asset_blobs.v1.json`.
 - `.skp` de evidência só em `artifacts/review/<plant>/<branch_or_pr>/final/` (Constitution #8); intermediários ficam em `runs/`.
 - Veredito visual em evidência é sempre `PENDING_HUMAN` até o Felipe responder no chat.
+- **Decisão espacial humana só fica pronta com prova que um humano valida olhando** (pedido do Felipe, 2026-11-02).
+  Conflito geométrico pede três coisas: medição, **prancha com o PDF por baixo** (uma coluna por alternativa, com baseline,
+  conflito em vermelho e a métrica no título) e as peças rotuladas. JSON e número sozinhos não bastam. Aparência, material
+  ou layout final exigem ainda SketchUp/render em cópia, e o veredito continua `PENDING_HUMAN`. Padrão de referência: as pranchas do
+  PR #578 (R3 de cozinha e banhos).
