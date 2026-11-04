@@ -39,8 +39,9 @@ def bstate(*items):
 
 class FakeGh:
     def __init__(self, head=HEAD, state="open", fork=False, ref="feat/589-x", login="fmodesto30", review_user="fmmodesto",
-                 review_state="CHANGES_REQUESTED", review_commit=HEAD, body="Refs #589"):
+                 review_state="CHANGES_REQUESTED", review_commit=HEAD, body="Refs #589", labels=("executor-ok",)):
         self.head, self.state, self.fork, self.ref, self.login, self.body = head, state, fork, ref, login, body
+        self.labels = list(labels)
         self.rev = {"id": 9, "user": {"login": review_user}, "state": review_state, "commit_id": review_commit,
                     "html_url": "https://x", "submitted_at": "t"}
 
@@ -48,7 +49,8 @@ class FakeGh:
         if path == "user":
             return {"login": self.login}
         if path == f"repos/{REPO}/pulls/7":
-            return {"number": 7, "body": self.body, "state": self.state, "head": {"sha": self.head, "ref": self.ref,
+            return {"number": 7, "body": self.body, "state": self.state, "labels": [{"name": n} for n in self.labels],
+                    "head": {"sha": self.head, "ref": self.ref,
                                                   "repo": {"full_name": "outro/fork" if self.fork else REPO}}}
         if path == f"repos/{REPO}/pulls/7/reviews/9":
             return self.rev
@@ -556,3 +558,39 @@ def test_isolation_probe_plants_hostile_settings_in_both_files(tmp_path):
     for name in ("settings.json", "settings.local.json"):
         blob = json.loads((tmp_path / ".claude" / name).read_text(encoding="utf-8"))
         assert "Bash(rm:*)" in blob["permissions"]["allow"] and blob["hooks"]["PreToolUse"]
+
+
+# ------------------------------------------------------------------------- label de autorizacao + revalidacao (review #598)
+def test_pr_without_the_executor_ok_label_is_refused_and_never_runs_claude():
+    gh = FakeGh(labels=("bug",))
+    r = Runner(gh)
+    b = bstate(item())
+    res = go(gh, b, r)
+    assert res["action"] == "REFUSED" and "executor-ok" in res["reason"] and r.calls == []
+
+
+def test_launch_hands_the_delivery_a_revalidation_that_rereads_github(monkeypatch):
+    gh = FakeGh()
+    captured = {}
+
+    def fake_deliver(wt, branch, base, py, it, **kw):
+        captured["revalidate"] = kw["revalidate"]
+        return ("NOOP", "")
+    monkeypatch.setattr(ex, "deliver", fake_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    assert captured["revalidate"]() == (True, "ok")
+    gh.head = NEWHEAD                                                          # alguem publicou depois do inicio
+    ok, why = captured["revalidate"]()
+    assert not ok and "HEAD mudou" in why
+    gh.head, gh.labels = HEAD, []                                              # label removida depois do inicio
+    assert not captured["revalidate"]()[0]
+
+
+def test_a_stale_delivery_fails_the_item_with_the_reason_and_comments(monkeypatch):
+    gh = FakeGh()
+    comments = []
+    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("STALE", "HEAD remoto mudou"))
+    monkeypatch.setattr(ex, "comment_pr", lambda pr, repo, body: comments.append(body))
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))
+    assert res["action"] == "FAILED" and "STALE" in res["reason"] and comments and "NAO publicada" in comments[0]

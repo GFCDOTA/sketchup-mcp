@@ -41,6 +41,10 @@ from typing import Callable
 
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import execution_guards as guards
+from tools.orchestration.executor_delivery import (  # noqa: F401  (run_checks reexportado)
+    deliver,
+    run_checks,
+)
 from tools.validation import execution_state as es
 
 AGENT = "claude-executor"
@@ -423,6 +427,8 @@ def preflight(item: dict, gh: eb.Gh, policy: dict, repo: str) -> tuple[str, str,
         facts = eb.pr_facts(pr)                                              # corpo ATUAL do PR, nao o que foi enfileirado
         if int(item["issue"]) not in facts["refs"]:
             return "REFUSED", f"PR #{item['pr']} nao cita mais 'Refs #{item['issue']}' (refs atuais: {facts['refs']}): fora de escopo", pr
+        if not guards.label_ok(pr.get("labels"), guards.load_config()):
+            return "REFUSED", f"PR #{item['pr']} sem a label de autorizacao `{guards.load_config().label}`: o executor so age em PR autorizado", pr
         rid = item["event_id"].split(":")[1]
         rev = gh(f"repos/{repo}/pulls/{item['pr']}/reviews/{rid}")
         ev = eb.normalize_review(rev, {"number": item["pr"]}, repo)
@@ -460,56 +466,6 @@ def write_log(key: str, stdout: str, stderr: str, meta: dict) -> str:
     return str(p)
 
 
-def run_checks(py: str, wt: Path, files: list) -> tuple[bool, str]:
-    """ruff nos .py tocados e pytest nos test_*.py tocados (venv canonico). (ok, ultimo trecho da saida)."""
-    pys = [f for f in files if f.endswith(".py")]
-    tests = [f for f in pys if f.startswith("tests/") and Path(f).name.startswith("test_")]
-    for argv in ([py, "-m", "ruff", "check", *pys] if pys else None, [py, "-m", "pytest", "-q", *tests] if tests else None):
-        if not argv:
-            continue
-        r = subprocess.run(argv, cwd=wt, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=900)
-        if r.returncode != 0:
-            return False, f"{' '.join(argv[2:4])} rc={r.returncode}: {(r.stdout + r.stderr).strip()[-400:]}"
-    return True, ""
-
-
-def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run=git, check=run_checks,
-            cfg: "guards.Config | None" = None) -> tuple[str, str]:
-    """Entrega feita PELO EXECUTOR, nao pelo LLM (R4): mede o diff contra o HEAD revisado com `execution_guards`, roda ruff/pytest,
-    commita o que sobrou na worktree e faz push so para a branch do PR. ('NOOP'|'PUSHED'|'BLOCKED_GUARDS'|'FAILED_CHECKS'|'ERROR', msg)."""
-    rc, out = run(["add", "-A"], wt)
-    if rc != 0:
-        return "ERROR", f"git add falhou: {out[:200]}"
-    rc, raw = run(["rev-parse", "HEAD"], wt)
-    head = raw.strip()
-    if rc != 0:
-        return "ERROR", f"rev-parse falhou: {raw[:200]}"
-    proc = subprocess.run(["git", *guards.NUMSTAT_ARGS[:1], "--cached", *guards.NUMSTAT_ARGS[1:], base], cwd=wt, capture_output=True)
-    if proc.returncode != 0:
-        return "ERROR", "git diff --numstat falhou"
-    # indice vs base cobre commits do LLM + edicoes pendentes (o indice ja inclui o que foi commitado)
-    numstat = proc.stdout.decode("utf-8", "replace")
-    if not numstat:
-        return "NOOP", "nenhuma alteracao em relacao ao HEAD revisado"
-    verdict = guards.evaluate_diff(numstat, cfg or guards.load_config())
-    if not verdict.ok:
-        return "BLOCKED_GUARDS", "; ".join(verdict.reasons())[:400]
-    files = [path for _a, _r, path in guards.parse_numstat(numstat)]
-    ok, why = check(py, wt, files)
-    if not ok:
-        return "FAILED_CHECKS", why
-    rc, staged = run(["diff", "--cached", "--quiet"], wt)
-    if rc != 0:                                                              # ha o que commitar
-        msg = f"fix: atende review {item['event_id'].split(':')[1]} do PR #{item['pr']} (executor, Refs #{item['issue']})"
-        rc, out = run(["commit", "-m", msg], wt)
-        if rc != 0:
-            return "ERROR", f"git commit falhou: {out[:200]}"
-    rc, out = run(["push", "origin", f"HEAD:{branch}"], wt)
-    if rc != 0:
-        return "ERROR", f"git push falhou: {out[:200]}"
-    return "PUSHED", f"{len(files)} arquivo(s), {verdict.lines} linha(s); HEAD {head[:8]} -> publicado em {branch}"
-
-
 def comment_pr(pr: int, repo: str, body: str) -> None:
     """Best-effort: comentario do executor no PR (autor nao e revisor, nao dispara o bridge)."""
     try:
@@ -521,8 +477,14 @@ def comment_pr(pr: int, repo: str, body: str) -> None:
 PARKED = {"SUPERSEDED": "SUPERSEDED", "REFUSED": "REFUSED", "UNSUPPORTED": "PARKED_UNSUPPORTED"}
 
 
+def _revalidate(item: dict, gh: eb.Gh, policy: dict, repo: str) -> tuple[bool, str]:
+    """Autorizacao REVALIDADA no GitHub (mesmo preflight do inicio): PR aberto, HEAD == SHA revisado, review valido, label, identidade."""
+    verdict, why, _pr = preflight(item, gh, policy, repo)
+    return verdict == "OK", (why or "ok")
+
+
 def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runner, claude_bin: str, wt_prep, t: dt.datetime,
-            python: str | None, cancel: threading.Event) -> dict:
+            python: str | None, cancel: threading.Event, policy: dict | None = None) -> dict:
     key, branch = item["key"], pr["head"]["ref"]
     ok, msg, wt = wt_prep(item["pr"], branch, item["head_sha"], repo_root())
     if not ok:
@@ -572,7 +534,8 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
     delivery = ("SKIPPED", "")
     if rc == 0 and not timed_out and not cancel.is_set():
         try:
-            delivery = deliver(wt, branch, item["head_sha"], python or venv_python(), item)
+            delivery = deliver(wt, branch, item["head_sha"], python or venv_python(), item,
+                               revalidate=lambda: _revalidate(item, gh, policy or {}, repo))
         except (OSError, ValueError, subprocess.SubprocessError) as exc:
             delivery = ("ERROR", f"{type(exc).__name__}: {exc}"[:300])
         write_log(key, f"delivery: {delivery}", "", {"delivery": delivery[0], "at": es.now_iso(t)})
@@ -589,9 +552,9 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
         if delivery[0] == "PUSHED":
             comment_pr(item["pr"], repo, f"Executor local: correcao publicada pelo executor no HEAD {new_head} ({delivery[1]}). Pedido de nova revisao.")
         return {"action": "DONE", "item": key, "new_head": new_head, "delivery": delivery[0]}
-    if delivery[0] in ("BLOCKED_GUARDS", "FAILED_CHECKS", "ERROR"):
+    if delivery[0] in ("BLOCKED_GUARDS", "FAILED_CHECKS", "ERROR", "STALE"):
         comment_pr(item["pr"], repo, f"Executor local: entrega NAO publicada ({delivery[0]}): {delivery[1]}. Edicoes preservadas na worktree.")
-    reason = (f"entrega {delivery[0]}: {delivery[1]}" if delivery[0] in ("BLOCKED_GUARDS", "FAILED_CHECKS", "ERROR")
+    reason = (f"entrega {delivery[0]}: {delivery[1]}" if delivery[0] in ("BLOCKED_GUARDS", "FAILED_CHECKS", "ERROR", "STALE")
               else "timeout" if timed_out else "lease perdido/nao renovado: filho derrubado (fail-closed)" if cancel.is_set() and rc == -2
               else f"claude saiu com codigo {rc}" if rc != 0 else "terminou sem commit novo no PR")
 
@@ -621,7 +584,7 @@ def _handle_claimed(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, 
         update_owned(key, owner, back, release=True, now=t)
         return {"action": "DRY_RUN", "item": key, "reason": "dry-run: nao executa", "pr": item["pr"], "branch": branch,
                 "command": build_command(claude_bin, worktree_path(item["pr"]), branch, python)[:6]}
-    return _launch(item, owner, pr, gh, repo, runner, claude_bin, wt_prep, t, python, cancel)
+    return _launch(item, owner, pr, gh, repo, runner, claude_bin, wt_prep, t, python, cancel, policy)
 
 
 def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False, runner: Runner = default_runner,
