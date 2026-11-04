@@ -37,8 +37,8 @@ def bstate(*items):
 
 class FakeGh:
     def __init__(self, head=HEAD, state="open", fork=False, ref="feat/589-x", login="fmodesto30", review_user="fmmodesto",
-                 review_state="CHANGES_REQUESTED", review_commit=HEAD):
-        self.head, self.state, self.fork, self.ref, self.login = head, state, fork, ref, login
+                 review_state="CHANGES_REQUESTED", review_commit=HEAD, body="Refs #589"):
+        self.head, self.state, self.fork, self.ref, self.login, self.body = head, state, fork, ref, login, body
         self.rev = {"id": 9, "user": {"login": review_user}, "state": review_state, "commit_id": review_commit,
                     "html_url": "https://x", "submitted_at": "t"}
 
@@ -46,7 +46,7 @@ class FakeGh:
         if path == "user":
             return {"login": self.login}
         if path == f"repos/{REPO}/pulls/7":
-            return {"state": self.state, "head": {"sha": self.head, "ref": self.ref,
+            return {"number": 7, "body": self.body, "state": self.state, "head": {"sha": self.head, "ref": self.ref,
                                                   "repo": {"full_name": "outro/fork" if self.fork else REPO}}}
         if path == f"repos/{REPO}/pulls/7/reviews/9":
             return self.rev
@@ -72,8 +72,13 @@ def wt_ok(pr, branch, sha, root):
     return True, "", Path("wt") / f"bridge-pr{pr}"
 
 
-def go(gh, b, runner=None, execute=True, wt=wt_ok, now=NOW, claude_bin="claude"):
-    return ex.process_one(gh, POLICY, b, REPO, execute, runner or Runner(gh), claude_bin, wt, now)
+def go(gh, b, runner=None, execute=True, wt=wt_ok, now=NOW, claude_bin="claude", **kw):
+    """O estado vive no DISCO (como em producao): semeia `b`, roda um item e devolve `b` atualizado in-place."""
+    eb.save(b)
+    res = ex.process_one(gh, POLICY, REPO, execute, runner or Runner(gh), claude_bin, wt, now, **kw)
+    b.clear()
+    b.update(eb.load())
+    return res
 
 
 # ------------------------------------------------------------------------------------------------- fluxo feliz
@@ -184,13 +189,13 @@ def test_claude_cli_not_installed_is_blocked_cli_with_a_message():
 def test_failed_runs_are_retried_with_a_cap_of_three_attempts(kw, reason):
     gh = FakeGh()
     b = bstate(item())
-    t = b["queue"][0]
     clock = NOW
     for n in range(1, ex.MAX_ATTEMPTS + 1):
         res = go(gh, b, Runner(gh, **kw), now=clock)
-        assert res["action"] == "FAILED" and reason in res["reason"] and t["attempts"] == n
+        assert res["action"] == "FAILED" and reason in res["reason"] and b["queue"][0]["attempts"] == n
         clock += dt.timedelta(days=1)
         b["runs"] = []                                                       # isola do teto diario
+        eb.save(b)
     assert go(gh, b, Runner(gh, **kw), now=clock)["action"] == "IDLE"        # 3 tentativas: para (anti-laco)
 
 
@@ -310,3 +315,147 @@ def test_run_cycle_polls_then_executes_end_to_end_with_fakes(tmp_path):
     assert res["poll"]["ACCEPT"] == 1 and res["action"] == "DONE" and len(r.calls) == 1
     res2 = ex.run_cycle(api, POLICY, REPO, True, Runner(gh), "claude", wt_ok, NOW)    # reinicio: nada novo, nada duplicado
     assert res2["poll"]["ACCEPT"] == 0 and res2["action"] == "IDLE"
+
+
+# ------------------------------------------------- exclusao mutua: claim/lease duravel, SEM segurar a trava durante o Claude
+def test_the_state_lock_is_not_held_while_claude_runs_and_a_second_process_never_runs_the_same_item(tmp_path):
+    """O lockfile de es.locked e quebrado apos 60 s; segurar 45 min o tornaria inutil. Aqui o runner bloqueia: a trava tem de
+    estar LIVRE, o item RUNNING com dono+lease no disco, e um segundo processo nao pode executar o mesmo item."""
+    import threading
+    gh = FakeGh()
+    eb.save(bstate(item()))
+    started, release = threading.Event(), threading.Event()
+    first = Runner(gh)
+    inside = {}
+
+    def blocking(argv, cwd, env, stdin, timeout):
+        started.set()
+        assert release.wait(10)
+        return first(argv, cwd, env, stdin, timeout)
+
+    out = {}
+    th = threading.Thread(target=lambda: out.update(ex.process_one(gh, POLICY, REPO, True, blocking, "claude", wt_ok, NOW)))
+    th.start()
+    assert started.wait(10)
+    try:
+        assert not (tmp_path / "bridge.lock").exists()                       # trava livre durante o trabalho longo
+        disk = eb.load()["queue"][0]
+        inside.update(state=disk["state"], owner=disk.get("owner"), lease=disk.get("lease_expires"))
+        second = Runner(gh)
+        # segundo "processo" (outra chamada independente, estado so no disco), inclusive com o relogio adiante mas dentro do lease
+        res2 = ex.process_one(gh, POLICY, REPO, True, second, "claude", wt_ok, NOW + dt.timedelta(seconds=30))
+        assert res2["action"] == "IDLE" and second.calls == []
+    finally:
+        release.set()
+        th.join(15)
+    assert inside["state"] == "RUNNING" and inside["owner"] and inside["lease"] > ex.es.now_iso(NOW)
+    assert out["action"] == "DONE" and len(first.calls) == 1
+    final = eb.load()["queue"][0]
+    assert final["state"] == "DONE_AWAITING_REREVIEW" and "owner" not in final and "lease_expires" not in final
+
+
+def test_heartbeat_renews_the_lease_while_the_child_runs(monkeypatch):
+    import threading
+    gh = FakeGh()
+    eb.save(bstate(item()))
+    started, release = threading.Event(), threading.Event()
+    seen = {}
+
+    def slow(argv, cwd, env, stdin, timeout):
+        seen["before"] = eb.load()["queue"][0]["lease_expires"]
+        started.set()
+        release.wait(10)
+        seen["after"] = eb.load()["queue"][0]["lease_expires"]
+        gh.head = NEWHEAD
+        return 0, "", "", False
+
+    th = threading.Thread(target=lambda: ex.process_one(gh, POLICY, REPO, True, slow, "claude", wt_ok, NOW, None, 0.05))
+    th.start()
+    assert started.wait(10)
+    import time
+    time.sleep(0.4)
+    release.set()
+    th.join(15)
+    assert seen["after"] > seen["before"]                                    # renovado pelo relogio real (NOW fixo e antigo)
+
+
+def test_a_process_that_lost_its_lease_never_overwrites_the_new_owner_state():
+    gh = FakeGh()
+    eb.save(bstate(item()))
+
+    def runner(argv, cwd, env, stdin, timeout):                              # outro processo assume o item no meio da execucao
+        b = eb.load()
+        b["queue"][0].update(state="RUNNING", owner="outro-dono")
+        eb.save(b)
+        gh.head = NEWHEAD
+        return 0, "", "", False
+
+    ex.process_one(gh, POLICY, REPO, True, runner, "claude", wt_ok, NOW)
+    t = eb.load()["queue"][0]
+    assert t["state"] == "RUNNING" and t["owner"] == "outro-dono"            # nada sobrescrito
+    assert any("lease perdido" in d["message"] for d in eb.load()["diagnostics"])
+
+
+def test_restart_with_a_valid_lease_does_not_steal_the_item_but_an_expired_one_is_recovered_once():
+    gh = FakeGh()
+    live = item(state="RUNNING", owner="vivo", lease_expires=ex.es.now_iso(NOW + dt.timedelta(minutes=4)))
+    b = bstate(live)
+    r = Runner(gh)
+    assert go(gh, b, r, now=NOW + dt.timedelta(minutes=1))["action"] == "IDLE" and r.calls == []
+    assert go(gh, b, r, now=NOW + dt.timedelta(minutes=10))["action"] == "DONE" and len(r.calls) == 1     # dono morto: lease venceu
+    assert b["queue"][0].get("owner") is None
+
+
+def test_unexpected_executor_error_never_leaves_an_orphan_running_item():
+    gh = FakeGh()
+    b = bstate(item())
+
+    def bad_wt(pr, branch, sha, root):
+        raise ZeroDivisionError("boom")
+    res = go(gh, b, Runner(gh), wt=bad_wt)
+    t = b["queue"][0]
+    assert res["action"] == "FAILED" and t["state"] == "FAILED" and "owner" not in t and t["attempts"] == 1
+
+
+# ------------------------------------------------------------------------------------ escopo: Refs reais e eventos comment
+def test_pr_that_no_longer_references_the_issue_is_refused_even_if_the_queue_says_otherwise():
+    gh = FakeGh(body="agora sem referencia a Issue")
+    r = Runner(gh)
+    b = bstate(item())
+    res = go(gh, b, r)
+    assert r.calls == [] and b["queue"][0]["state"] == "REFUSED" and "fora de escopo" in res["reason"]
+    gh2 = FakeGh(body="Refs #590")                                           # troca de Issue tambem sai do escopo
+    b2 = bstate(item())
+    assert go(gh2, b2, Runner(gh2))["action"] == "REFUSED"
+
+
+def test_a_comment_event_is_parked_with_a_diagnostic_and_never_treated_as_a_review():
+    gh = FakeGh()
+    r = Runner(gh)
+    c = item(key="comment:5:3:-", kind="comment", event_id="comment:5", pr=None, head_sha="", author="fmmodesto")
+    b = bstate(c)
+    res = go(gh, b, r)
+    t = b["queue"][0]
+    assert res["action"] == "UNSUPPORTED" and r.calls == [] and t["state"] == "PARKED_UNSUPPORTED"
+    assert "nao e uma revisao" in t["last_error"]
+    assert go(gh, b, Runner(gh))["action"] == "IDLE"                         # estacionado nao e reprocessado
+
+
+# -------------------------------------------------------------------------------------- portabilidade (venv / allowlist)
+def test_venv_python_is_derived_not_hardcoded_and_can_be_overridden(monkeypatch):
+    monkeypatch.delenv("BRIDGE_PYTHON", raising=False)
+    py = ex.venv_python()
+    assert py.endswith((".venv/Scripts/python.exe", ".venv/bin/python")) and "\\" not in py
+    assert py.startswith(ex.repo_root().as_posix())
+    monkeypatch.setenv("BRIDGE_PYTHON", "D:\\outra\\maquina\\py.exe")
+    assert ex.venv_python() == "D:/outra/maquina/py.exe"
+    assert "D:/outra/maquina/py.exe -m pytest" in " ".join(ex.build_command("claude", Path("wt"), "b"))
+    src = Path(ex.__file__).read_text(encoding="utf-8")
+    assert "E:/Claude" not in src and "E:\\Claude" not in src
+
+
+def test_execution_is_never_the_default_in_main_and_the_launcher():
+    import inspect
+    assert "--execute" in inspect.getsource(ex.main) and 'action="store_true"' in inspect.getsource(ex.main)
+    ps1 = (ex.repo_root() / "tools/orchestration/run_event_bridge.ps1").read_text(encoding="utf-8")
+    assert "[switch]$Execute" in ps1 and "if ($Execute)" in ps1
