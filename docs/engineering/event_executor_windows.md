@@ -70,3 +70,18 @@ Só depois do #591 mergeado (ou com o checkout do #591) e **sem** declarar suces
 
 Critérios de falha a registrar como tal: qualquer push para outra branch, merge, alteração fora do escopo do review, ou item
 reexecutado.
+
+## Estabilização do listener (2026-11-04, medido no Windows real)
+
+- **Log UTF-8:** `Tee-Object` do PS 5.1 gravava UTF-16 misturado com UTF-8. O launcher agora usa `event_bridge_log.ps1`
+  (`Initialize-BridgeLog`/`Write-BridgeLog`): UTF-8 sem BOM, LF; log legado (byte NUL) é **preservado** como
+  `event_bridge.log.legacy-utf16-<data>`; acima de 5 MB roda para `event_bridge.log.1`. Testes rodam o PowerShell 5.1 real.
+- **Achado — órfãos e duas instâncias:** `Stop-ScheduledTask` matou só o `powershell.exe` do launcher; o `python.exe` (shim do venv +
+  python real) **continuou vivo** e o `Start-ScheduledTask` seguinte criou uma 2ª cadeia → 2 executores consumindo a mesma fila.
+  (A cadeia normal tem 3 processos: `powershell` → `python` do venv (shim) → `python` real; os dois `python.exe` são pai/filho, não 2 executores.)
+- **Correção:** (1) `InstanceLock`: lock exclusivo do SO (`msvcrt`/`fcntl`) mantido pela vida do processo — a 2ª instância sai com código **4**
+  sem consumir a fila; o SO solta o lock se o processo morrer (sem pidfile velho). (2) `--watch-pid`: o launcher passa o próprio `$PID`; se ele
+  morrer o executor sai (código 5) e, se houver filho Claude rodando, o heartbeat o derruba. Medido: com o launcher morto à força a cadeia some
+  em < 8 s; um 2º launcher com o 1º vivo sai com 4; reinício normal sobe 1 cadeia.
+- **Limite:** as 3 provas acima usaram o launcher desta branch num checkout de teste; o listener do Agendador só passa a ter o comportamento
+  depois do merge e do reinício da tarefa.
