@@ -27,6 +27,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Barra flutuante de agentes (tools/orchestration/agent_bar, FP-058). Opcional: o CI nao instala; logica testavel sem Qt.
+agent-bar = [
+  "PySide6-Essentials>=6.7,<7.0",
+]
 dev = [
   "pytest>=8.3,<9.0",
   "hypothesis>=6.100,<7.0",
