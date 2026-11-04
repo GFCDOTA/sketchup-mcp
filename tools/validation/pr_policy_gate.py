@@ -45,6 +45,9 @@ _APPROVED = re.compile(r"(visual|apar[eê]ncia|funcional)\w*\s+(?:est[aá]\s+)?(
 
 BASELINE_PATH = "artifacts/review/fp055/p4/defect_baseline.json"
 
+# `Decisão: não aplicada`, tolerando enfase Markdown (`**Decisão:** não aplicada`, `_..._`) entre as palavras (#578):
+# a formatacao nao muda a declaracao; outro texto (`aplicada`, `pendente`) continua reprovando.
+_DECISION_NOT_APPLIED = re.compile(r"decis[ãa]o[*_]*\s*:\s*[*_]*\s*n[ãa]o\s+aplicada", re.I)
 
 def check(body: str, files: list[str], issues: dict[int, dict], critical_paths: list[str] | tuple[str, ...] = (),
           baseline: tuple[list[dict], list[dict]] | None = None) -> list[Finding]:
@@ -63,7 +66,7 @@ def check(body: str, files: list[str], issues: dict[int, dict], critical_paths: 
         found.append(Finding(0, "PR_NO_ISSUE_LINK", "corpo sem 'Refs #N' para uma Issue existente (ou 'Issue: N/A — motivo')"))
     for n in refs:
         lab = {x["name"] for x in issues.get(n, {}).get("labels", [])}
-        if "bloqueio:human-decision" in lab and issues[n].get("state") == "OPEN" and not re.search(r"decis[ãa]o:\s*n[ãa]o aplicada", body, re.I):
+        if "bloqueio:human-decision" in lab and issues[n].get("state") == "OPEN" and not _DECISION_NOT_APPLIED.search(body):
             found.append(Finding(n, "PR_REFS_HUMAN_BLOCKED", f"#{n} e decisao humana pendente; declare 'Decisão: não aplicada'"))
     if not re.search(r"SKP-proof\s*:", body, re.IGNORECASE):
         found.append(Finding(0, "PR_NO_SKP_PROOF_DECLARATION", "corpo sem 'SKP-proof: ...'"))
