@@ -2286,6 +2286,24 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_r3_remaining/board_r004.png",
+      "blob_sha": "910670c05e5082ca546983af97f85a0b2c5bbbb1",
+      "blob_size": 219581,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/board_r005.png",
+      "blob_sha": "d11be9e0bde412880c2ddef2a34fdb3747dc05eb",
+      "blob_size": 282793,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/board_r006.png",
+      "blob_sha": "5c8fe45fe6e3bf9ef4010fac6c618daeaf192dc0",
+      "blob_size": 320084,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp056/p7_as1_real_wall/as1_real_wall_plan.png",
       "blob_sha": "30cf7a7320110611c60e15e318fe84148ec963ad",
       "blob_size": 353698,

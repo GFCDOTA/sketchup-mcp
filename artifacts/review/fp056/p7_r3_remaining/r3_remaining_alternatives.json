@@ -1,0 +1,263 @@
+{
+ "generated_by": "artifacts/review/fp056/p7_r3_remaining/measure_r3_remaining.py (em memoria; nada aplicado)",
+ "commit": "b556ca9f",
+ "results": [
+  {
+   "alternative": "atual",
+   "room": "r004",
+   "target": "r004|OBJECTS|backsplash+cooktop_module",
+   "applied": "nada",
+   "target_measure_m": 0.04624,
+   "target_resolved": false,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:NOT_APPLICABLE",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "atual",
+   "room": "r004",
+   "target": "r004|OBJECTS|backsplash+sink_module",
+   "applied": "nada",
+   "target_measure_m": 0.04625,
+   "target_resolved": false,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:NOT_APPLICABLE",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(a) deslocar cooktop+cuba",
+   "room": "r004",
+   "target": "r004|OBJECTS|backsplash+cooktop_module",
+   "applied": "cooktop_module e sink_module +4.6 cm para longe da parede (frente do backsplash)",
+   "target_measure_m": 0.0,
+   "target_resolved": true,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:NOT_APPLICABLE",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(a) deslocar cooktop+cuba",
+   "room": "r004",
+   "target": "r004|OBJECTS|backsplash+sink_module",
+   "applied": "cooktop_module e sink_module +4.6 cm para longe da parede (frente do backsplash)",
+   "target_measure_m": 0.0,
+   "target_resolved": true,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:NOT_APPLICABLE",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(b) backsplash acima do vidro/borda",
+   "room": "r004",
+   "target": "r004|OBJECTS|backsplash+cooktop_module",
+   "applied": "backsplash comeca no topo do vidro/borda da cuba (z0 90.5 cm)",
+   "target_measure_m": 0.01424,
+   "target_resolved": false,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:NOT_APPLICABLE",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(b) backsplash acima do vidro/borda",
+   "room": "r004",
+   "target": "r004|OBJECTS|backsplash+sink_module",
+   "applied": "backsplash comeca no topo do vidro/borda da cuba (z0 90.5 cm)",
+   "target_measure_m": 0.00102,
+   "target_resolved": false,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:NOT_APPLICABLE",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(c) recortar vidro/cuba pela face do backsplash",
+   "room": "r004",
+   "target": "r004|OBJECTS|backsplash+cooktop_module",
+   "applied": "vidro do cooktop e cuba recortados atras do backsplash (comecam na face dele)",
+   "target_measure_m": 0.0,
+   "target_resolved": true,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:NOT_APPLICABLE",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(c) recortar vidro/cuba pela face do backsplash",
+   "room": "r004",
+   "target": "r004|OBJECTS|backsplash+sink_module",
+   "applied": "vidro do cooktop e cuba recortados atras do backsplash (comecam na face dele)",
+   "target_measure_m": 0.0,
+   "target_resolved": true,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:NOT_APPLICABLE",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "atual",
+   "room": "r005",
+   "target": "r005|OBJECTS|Enxoval+Vaso",
+   "applied": "nada",
+   "target_measure_m": 0.16384,
+   "target_resolved": false,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:PASS",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(a) encolher o tapete ate a borda do vaso",
+   "room": "r005",
+   "target": "r005|OBJECTS|Enxoval+Vaso",
+   "applied": "tapete encurtado pelo lado x1 ate a borda do vaso: 0.318 m2 de 0.400 m2 (perde 20%)",
+   "target_measure_m": 0.0,
+   "target_resolved": true,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:PASS",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(b) tirar o tapete",
+   "room": "r005",
+   "target": "r005|OBJECTS|Enxoval+Vaso",
+   "applied": "tapete retirado do Banho 01",
+   "target_measure_m": 0.0,
+   "target_resolved": true,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:PASS",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "atual",
+   "room": "r006",
+   "target": "r006|OBJECTS|Bancada+Enxoval",
+   "applied": "nada",
+   "target_measure_m": 0.09398,
+   "target_resolved": false,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:PASS",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(a) papeleira acima do tampo",
+   "room": "r006",
+   "target": "r006|OBJECTS|Bancada+Enxoval",
+   "applied": "papeleira acima do tampo da bancada (z0 105.7 cm; atual 66 cm)",
+   "target_measure_m": 0.0,
+   "target_resolved": true,
+   "new_defects": [],
+   "worse_defects": [
+    "r006|OBJECTS|Enxoval+Espelho"
+   ],
+   "preflight_apartment": "FAIL",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:PASS",
+    "module_interpenetration:FAIL",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(b) deslocar ao longo da parede +0,-60 cm",
+   "room": "r006",
+   "target": "r006|OBJECTS|Bancada+Enxoval",
+   "applied": "papeleira deslocada (+0, -60) cm ao longo da parede",
+   "target_measure_m": 0.0,
+   "target_resolved": true,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:PASS",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  },
+  {
+   "alternative": "(c) tirar a papeleira",
+   "room": "r006",
+   "target": "r006|OBJECTS|Bancada+Enxoval",
+   "applied": "papeleira retirada do Banho 02",
+   "target_measure_m": 0.0,
+   "target_resolved": true,
+   "new_defects": [],
+   "worse_defects": [],
+   "preflight_apartment": "PASS",
+   "preflight_room": [
+    "circulation:NOT_APPLICABLE",
+    "furniture_overlap:PASS",
+    "module_interpenetration:PASS",
+    "room_collisions:PASS"
+   ]
+  }
+ ]
+}

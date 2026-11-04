@@ -4247,6 +4247,48 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_r3_remaining/README.md",
+      "blob_sha": "ab9a95357dba698d51d61e51f3ac0fbbcbe0999b",
+      "blob_size": 4382,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/measure_r3_remaining.py",
+      "blob_sha": "dee51ca1693ecdbd91ab5bf423b9ea3b11342a4f",
+      "blob_size": 8514,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/r3_remaining_alternatives.json",
+      "blob_sha": "ff90e37aa367d141deec29409844c2f4d41097d8",
+      "blob_size": 7509,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/render_r3_boards.py",
+      "blob_sha": "f70d76ec44bd9191520b95d29fa5376207cfad94",
+      "blob_size": 5287,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/board_r004.png",
+      "blob_sha": "910670c05e5082ca546983af97f85a0b2c5bbbb1",
+      "blob_size": 219581,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/board_r005.png",
+      "blob_sha": "d11be9e0bde412880c2ddef2a34fdb3747dc05eb",
+      "blob_size": 282793,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/board_r006.png",
+      "blob_sha": "5c8fe45fe6e3bf9ef4010fac6c618daeaf192dc0",
+      "blob_size": 320084,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp056/p7_as1_real_wall/README.md",
       "blob_sha": "456f1fa63f81fcce775d0bb6f5b4bed783500c90",
       "blob_size": 7019,
