@@ -4211,6 +4211,42 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_446_box_swing/README.md",
+      "blob_sha": "988bfbcefbb6aa8008db5d0c17bbe359df9537ef",
+      "blob_size": 4086,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/box_swing_r005_opening070_summary.json",
+      "blob_sha": "73007b59fd69f962225c46bb4ce19e530de74248",
+      "blob_size": 12462,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/measure_box_swing.py",
+      "blob_sha": "b5919fb14ec466ef097cd4a9ddb65e009bd0b279",
+      "blob_size": 29987,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/box_swing_r005_best.png",
+      "blob_sha": "501b15d1fe920cf0c0770603d0cce5c06aee21e2",
+      "blob_size": 563157,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/box_swing_r005_original.png",
+      "blob_sha": "cb41434cfecc8c9cbe69034b1db04e9b7c4a3792",
+      "blob_size": 563551,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/render_box_swing.py",
+      "blob_sha": "c61321d2664ff38ab8bd6c11f1fa5fc718924f80",
+      "blob_size": 15204,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp056/p7_r3_remaining/README.md",
       "blob_sha": "ab9a95357dba698d51d61e51f3ac0fbbcbe0999b",
       "blob_size": 4382,
