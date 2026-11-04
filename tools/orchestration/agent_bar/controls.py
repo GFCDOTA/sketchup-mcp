@@ -25,7 +25,7 @@ class Result:
 
 def run_ps(script: str, timeout: float = 30.0) -> tuple[int, str]:
     r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script], capture_output=True, text=True,
-                       encoding="utf-8", errors="replace", timeout=timeout)
+                       encoding="utf-8", errors="replace", timeout=timeout, creationflags=col.NO_WINDOW)
     return r.returncode, (r.stdout + r.stderr).strip()
 
 

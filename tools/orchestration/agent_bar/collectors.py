@@ -20,6 +20,7 @@ from typing import Callable
 from tools.orchestration.agent_bar.models import AgentStatus, Event, Level, Snapshot
 
 TASK_NAME = "sketchup-mcp event bridge"
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)   # Windows: subprocesso da barra nunca abre janela de console
 STALE_HEARTBEAT_S = 600                 # o listener faz ciclo a cada ~120 s: 10 min sem ciclo = parado/travado
 LISTENER_RE = re.compile(r"event_executor(\.py)?\s+run|event_executor run|run_event_bridge", re.I)
 EXECUTOR_RE = re.compile(r"event_executor(\.py)?\s+run|event_executor run", re.I)
@@ -55,7 +56,7 @@ def default_gov_dir() -> Path:
         return Path(env)
     here = Path(__file__).resolve().parents[3]
     try:
-        r = subprocess.run(["git", "rev-parse", "--git-common-dir"], cwd=here, capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["git", "rev-parse", "--git-common-dir"], cwd=here, capture_output=True, text=True, timeout=10, creationflags=NO_WINDOW)
         common = Path(r.stdout.strip())
         if r.returncode == 0 and r.stdout.strip():
             return ((common if common.is_absolute() else here / common).resolve().parent / "runs" / "governance")
@@ -73,7 +74,7 @@ def list_processes(timeout: float = 15.0) -> list[Proc] | None:
           "@{n='C';e={if($_.CreationDate){$_.CreationDate.ToUniversalTime().ToString('o')}}} | ConvertTo-Json -Compress")
     try:
         r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps], capture_output=True, text=True,
-                           encoding="utf-8", errors="replace", timeout=timeout)
+                           encoding="utf-8", errors="replace", timeout=timeout, creationflags=NO_WINDOW)
         data = json.loads(r.stdout) if r.returncode == 0 and r.stdout.strip() else None
     except (OSError, subprocess.SubprocessError, ValueError):
         return None
@@ -92,7 +93,7 @@ def task_state(timeout: float = 15.0) -> str | None:
     try:
         r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command",
                             f"(Get-ScheduledTask -TaskName '{TASK_NAME}' -ErrorAction Stop).State"],
-                           capture_output=True, text=True, timeout=timeout)
+                           capture_output=True, text=True, timeout=timeout, creationflags=NO_WINDOW)
     except (OSError, subprocess.SubprocessError):
         return None
     out = r.stdout.strip()
@@ -103,7 +104,7 @@ def run_gh(args: list[str], timeout: float = 20.0) -> tuple[int, str]:
     exe = shutil.which("gh") or "gh"
     env = {k: v for k, v in os.environ.items() if k not in ("GH_TOKEN", "GITHUB_TOKEN")}
     try:
-        r = subprocess.run([exe, *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, env=env)
+        r = subprocess.run([exe, *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, env=env, creationflags=NO_WINDOW)
     except (OSError, subprocess.SubprocessError) as exc:
         return 127, f"{type(exc).__name__}: {exc}"
     return r.returncode, (r.stdout if r.returncode == 0 else (r.stdout + r.stderr)).strip()

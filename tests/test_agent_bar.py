@@ -276,3 +276,12 @@ def test_gui_is_frameless_topmost_550x65_with_four_indicators(tmp_path):
     finally:
         bar.worker.stop()
         app.processEvents()
+
+
+def test_every_subprocess_of_the_bar_is_created_without_a_console_window():
+    import re
+    for f in Path(ctl.__file__).parent.glob("*.py"):
+        src = f.read_text(encoding="utf-8")
+        for m in re.finditer(r"subprocess\.run\(", src):
+            call = src[m.start():src.index("\n    ", m.start() + 40) if False else m.start() + 700]
+            assert "creationflags=" in call.split("subprocess.run(", 2)[1][:700], f"{f.name}: subprocess.run sem creationflags"
