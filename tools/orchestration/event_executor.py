@@ -69,7 +69,7 @@ def venv_python() -> str:
     (a worktree do PR nao tem venv proprio). Barras normais: o padrao da allowlist e casado como texto."""
     env = os.environ.get("BRIDGE_PYTHON")
     if env:
-        return Path(env).as_posix()
+        return env.replace(chr(92), "/")                                      # explicito: pathlib no Linux nao trata \ como separador
     sub = ("Scripts", "python.exe") if os.name == "nt" else ("bin", "python")
     return (repo_root() / ".venv" / sub[0] / sub[1]).as_posix()
 

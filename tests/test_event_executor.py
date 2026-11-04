@@ -447,8 +447,12 @@ def test_venv_python_is_derived_not_hardcoded_and_can_be_overridden(monkeypatch)
     py = ex.venv_python()
     assert py.endswith((".venv/Scripts/python.exe", ".venv/bin/python")) and "\\" not in py
     assert py.startswith(ex.repo_root().as_posix())
-    monkeypatch.setenv("BRIDGE_PYTHON", "D:\\outra\\maquina\\py.exe")
-    assert ex.venv_python() == "D:/outra/maquina/py.exe"
+    bs = chr(92)
+    for given in (f"D:{bs}outra{bs}maquina{bs}py.exe", "D:/outra/maquina/py.exe", f"D:/outra{bs}maquina/py.exe",
+                  "/opt/venv/bin/python"):                                   # Windows, Unix e misto: mesmo resultado em qualquer host
+        monkeypatch.setenv("BRIDGE_PYTHON", given)
+        assert ex.venv_python() == given.replace(bs, "/")
+    monkeypatch.setenv("BRIDGE_PYTHON", "D:/outra/maquina/py.exe")
     assert "D:/outra/maquina/py.exe -m pytest" in " ".join(ex.build_command("claude", Path("wt"), "b"))
     src = Path(ex.__file__).read_text(encoding="utf-8")
     assert "E:/Claude" not in src and "E:\\Claude" not in src
