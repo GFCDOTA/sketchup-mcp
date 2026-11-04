@@ -9,6 +9,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="agent_bar")
     ap.add_argument("--once-json", action="store_true", help="imprime o diagnostico da coleta e sai (sem GUI)")
     ap.add_argument("--screenshot", help="grava um PNG da barra (e do painel expandido) apos a 1a coleta e sai")
+    ap.add_argument("--open-panel", action="store_true", help="abre o painel expandido ao iniciar (evidencia/teste)")
     ns = ap.parse_args(argv)
     if ns.once_json:
         from tools.orchestration.agent_bar import collectors as col
@@ -26,6 +27,8 @@ def main(argv: list[str] | None = None) -> int:
     app.setQuitOnLastWindowClosed(False)
     bar = Bar(cfg.load())
     bar.show()
+    if ns.open_panel:
+        QTimer.singleShot(4000, bar.toggle_details)
     if ns.screenshot:
         def shot() -> None:
             bar.details.show()

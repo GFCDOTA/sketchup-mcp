@@ -55,3 +55,9 @@ o kill switch (`New-Item runs\governance\EXECUTOR_DISABLED`, o executor passa a 
 ## Validacao grafica (separada dos testes sem Qt)
 Os testes de coletores/controles NAO contam como validacao grafica. A prova grafica e: (1) testes da GUI (PySide6, offscreen) para flags, tamanho,
 botoes e painel; (2) execucao real no Windows com captura de tela do desktop; (3) veredito visual do Felipe.
+
+## Painel: barra de titulo, arraste e limites
+Barra de titulo fixa ("Agent Control") com `—` recolher (so o titulo), `□` restaurar/ajustar ao conteudo e `✕` **fechar so o painel** (nao para
+listener, Claude nem Codex, nem a coleta). Arrasta-se pelo titulo (botao esquerdo); depois de movido manualmente o painel fica **independente da barra** e preserva
+a posicao ao reabrir. `Esc` fecha o painel; o menu de contexto separa "Fechar painel" de "Encerrar barra". O painel nunca passa da area util do monitor
+(multi-monitor, escala DPI em pixels logicos, barra de tarefas) e o conteudo excedente rola por dentro: titulo e botoes ficam sempre acessiveis.

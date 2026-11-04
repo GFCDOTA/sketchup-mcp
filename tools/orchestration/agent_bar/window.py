@@ -11,9 +11,10 @@ from pathlib import Path
 from typing import Callable
 
 from PySide6.QtCore import QObject, QPoint, Qt, QTimer, Signal
-from PySide6.QtGui import QAction, QColor, QGuiApplication, QPainter
+from PySide6.QtGui import QAction, QColor, QGuiApplication, QKeySequence, QPainter, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
+    QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -22,6 +23,7 @@ from PySide6.QtWidgets import (
     QMenu,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QSystemTrayIcon,
     QVBoxLayout,
     QWidget,
@@ -29,6 +31,7 @@ from PySide6.QtWidgets import (
 
 from tools.orchestration.agent_bar import collectors as col
 from tools.orchestration.agent_bar import controls as ctl
+from tools.orchestration.agent_bar import geometry as geo
 from tools.orchestration.agent_bar import settings as cfg
 from tools.orchestration.agent_bar.models import GroupedEvent, Level, Snapshot
 
@@ -87,15 +90,85 @@ def esc(text: str) -> str:
     return html.escape(text or "")
 
 
+def screen_areas() -> list[geo.Rect]:
+    """Area util (sem barra de tarefas) de cada monitor, em pixels logicos (Qt ja aplica a escala DPI de cada monitor)."""
+    out = []
+    for s in QGuiApplication.screens():
+        g = s.availableGeometry()
+        out.append(geo.Rect(g.left(), g.top(), g.width(), g.height()))
+    return out
+
+
+TB_CSS = ("QPushButton{background:transparent;color:#cfcfd4;border:0;border-radius:4px;font-size:13px;padding:0}"
+          "QPushButton:hover{background:#3a3a44}")
+TB_CLOSE_CSS = TB_CSS + "QPushButton:hover{background:#c0392b;color:white}"
+
+
+class TitleBar(QWidget):
+    """Barra de titulo fixa do painel: arrasta o painel pelo botao esquerdo; sempre visivel (fica fora da area com rolagem)."""
+    HEIGHT = 30
+
+    def __init__(self, panel: "Details"):
+        super().__init__()
+        self.panel = panel
+        self._off: QPoint | None = None
+        self.setFixedHeight(self.HEIGHT)
+        self.setCursor(Qt.CursorShape.SizeAllCursor)
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(12, 0, 6, 0)
+        lay.setSpacing(2)
+        self.title = QLabel("Agent Control")
+        self.title.setStyleSheet("color:#f0f0f0;font-size:12px;font-weight:600")
+        lay.addWidget(self.title)
+        lay.addStretch(1)
+        self.btn_min = self._btn("\u2014", "Recolher o painel (so a barra de titulo); a barra flutuante continua", panel.toggle_collapsed)
+        self.btn_max = self._btn("\u25a1", "Restaurar / ajustar o tamanho ao conteudo", panel.restore_fit)
+        self.btn_close = self._btn("\u2715", "Fechar SOMENTE o painel (nao para o listener, Claude nem Codex)", panel.close_panel, TB_CLOSE_CSS)
+        for b in (self.btn_min, self.btn_max, self.btn_close):
+            lay.addWidget(b)
+
+    def _btn(self, text: str, tip: str, fn: Callable[[], None], css: str = TB_CSS) -> QPushButton:
+        b = QPushButton(text)
+        b.setFixedSize(26, 22)
+        b.setToolTip(tip)
+        b.setStyleSheet(css)
+        b.setCursor(Qt.CursorShape.ArrowCursor)
+        b.clicked.connect(lambda _=False: fn())
+        return b
+
+    def mousePressEvent(self, e) -> None:                                       # noqa: N802
+        if e.button() == Qt.MouseButton.LeftButton:
+            self._off = e.globalPosition().toPoint() - self.panel.frameGeometry().topLeft()
+
+    def mouseMoveEvent(self, e) -> None:                                        # noqa: N802
+        if self._off is not None and e.buttons() & Qt.MouseButton.LeftButton:
+            self.panel.move_to(e.globalPosition().toPoint() - self._off, user=True)
+
+    def mouseReleaseEvent(self, e) -> None:                                     # noqa: N802
+        self._off = None
+
+
 class Details(QWidget):
+    WIDTH = 560
+
     def __init__(self, bar: "Bar"):
         super().__init__(None, Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.bar = bar
         self._seen_top: str | None = None
+        self.user_moved = False                                  # depois que o usuario move o painel, ele NAO segue mais a barra
+        self.collapsed = False
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setFixedWidth(560)
-        lay = QVBoxLayout(self)
-        lay.setContentsMargins(12, 9, 12, 9)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setFixedWidth(self.WIDTH)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+        self.titlebar = TitleBar(self)
+        outer.addWidget(self.titlebar)
+        # corpo com rolagem interna (a barra de titulo e o rodape ficam fixos e sempre acessiveis)
+        self.body = QWidget()
+        lay = QVBoxLayout(self.body)
+        lay.setContentsMargins(12, 6, 12, 6)
         lay.setSpacing(2)
         self.banner, self.agents, self.health, self.backlog = QLabel(), QLabel(), QLabel(), QLabel()
         for w in (self.banner, self.agents, self.health, self.backlog):
@@ -111,15 +184,26 @@ class Details(QWidget):
         self.events.setToolTip("Duplo clique: abre o log original")
         self.events.itemDoubleClicked.connect(lambda _i: bar.action_logs())
         lay.addWidget(self.events)
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll.setStyleSheet("QScrollArea{background:transparent}QScrollArea>QWidget>QWidget{background:transparent}")
+        self.scroll.setWidget(self.body)
+        outer.addWidget(self.scroll, 1)
+        self.footer = QWidget()
+        flay = QVBoxLayout(self.footer)
+        flay.setContentsMargins(12, 2, 12, 9)
+        flay.setSpacing(3)
         self.status = QLabel("pronto")
         self.status.setWordWrap(True)
         self.status.setStyleSheet("color:#9a9aa2;font-size:11px")
-        lay.addWidget(self.status)
+        flay.addWidget(self.status)
         grid = QGridLayout()
         grid.setSpacing(4)
         self.buttons: dict[str, QPushButton] = {}
-        specs = [("repo", "Repositório", bar.action_repo), ("project", "Project #1", bar.action_project), ("pr", "PR atual", bar.action_pr),
-                 ("logs", "Logs", bar.action_logs), ("diag", "Copiar diagnóstico", bar.action_copy_diag),
+        specs = [("repo", "Reposit\u00f3rio", bar.action_repo), ("project", "Project #1", bar.action_project), ("pr", "PR atual", bar.action_pr),
+                 ("logs", "Logs", bar.action_logs), ("diag", "Copiar diagn\u00f3stico", bar.action_copy_diag),
                  ("refresh", "Atualizar", bar.action_refresh), ("restart", "Reiniciar DRY_RUN", bar.action_restart), ("stop", "Parar", bar.action_stop)]
         for i, (key, text, fn) in enumerate(specs):
             b = QPushButton(text)
@@ -127,7 +211,87 @@ class Details(QWidget):
             b.clicked.connect(lambda _=False, f=fn: f())
             self.buttons[key] = b
             grid.addWidget(b, i // 4, i % 4)
-        lay.addLayout(grid)
+        flay.addLayout(grid)
+        outer.addWidget(self.footer)
+        QShortcut(QKeySequence("Esc"), self, activated=self.close_panel)       # Esc recolhe (fecha o painel; NAO encerra a barra)
+
+    # ----------------------------------------------------------------------------------------------- janela / limites
+    def keyPressEvent(self, e) -> None:                                         # noqa: N802
+        if e.key() == Qt.Key.Key_Escape:
+            self.close_panel()
+        else:
+            super().keyPressEvent(e)
+
+    def contextMenuEvent(self, e) -> None:                                      # noqa: N802
+        m = QMenu(self)
+        m.addAction("Fechar painel", self.close_panel)
+        m.addAction("Recolher / restaurar", self.toggle_collapsed)
+        m.addSeparator()
+        m.addAction("Encerrar barra", self.bar.close_app)
+        m.exec(e.globalPos())
+
+    def area(self) -> geo.Rect:
+        return geo.pick_screen(screen_areas(), self.x(), self.y(), self.width(), self.height())
+
+    def clamp(self) -> None:
+        nx, ny = geo.clamp_window(self.x(), self.y(), self.width(), self.height(), self.area())
+        if (nx, ny) != (self.x(), self.y()):
+            self.move(nx, ny)
+
+    def move_to(self, pos: QPoint, user: bool = False) -> None:
+        """Move (limitado ao monitor onde fica). `user=True`: a partir daqui o painel e independente da barra."""
+        if user:
+            self.user_moved = True
+        area = geo.pick_screen(screen_areas(), pos.x(), pos.y(), self.width(), self.height())
+        x, y = geo.clamp_window(pos.x(), pos.y(), self.width(), self.height(), area)
+        self.move(x, y)
+
+    def place_near_bar(self) -> None:
+        if self.user_moved:
+            self.clamp()
+            return
+        b = self.bar
+        x, y = geo.place_below(b.x(), b.y(), b.height(), self.width(), self.height(), screen_areas())
+        self.move(x, y)
+
+    def fit(self) -> None:
+        """Altura = conteudo, limitada a area util do monitor; o excedente rola por dentro (titulo e botoes continuam visiveis)."""
+        if self.collapsed:
+            self.setFixedHeight(TitleBar.HEIGHT)
+            return
+        lay = self.body.layout()
+        inner_w = self.WIDTH - 24
+        body_h = lay.totalHeightForWidth(inner_w) if lay.hasHeightForWidth() else lay.sizeHint().height()
+        desired = TitleBar.HEIGHT + body_h + 12 + self.footer.sizeHint().height()
+        self.setFixedHeight(geo.fit_height(desired, self.area()))
+        self.clamp()
+
+    def toggle_collapsed(self) -> None:
+        self.collapsed = not self.collapsed
+        self.scroll.setVisible(not self.collapsed)
+        self.footer.setVisible(not self.collapsed)
+        self.fit()
+        self.clamp()
+
+    def restore_fit(self) -> None:
+        """'□': se recolhido, restaura; senao reajusta ao conteudo e volta a posicionar na tela."""
+        if self.collapsed:
+            self.toggle_collapsed()
+        else:
+            self.fit()
+            self.clamp()
+
+    def close_panel(self) -> None:
+        """Fecha SOMENTE o painel. Nao toca no listener, no Claude nem no Codex (nem na coleta da barra)."""
+        self.hide()
+
+    def open_panel(self) -> None:
+        self.fit()
+        self.place_near_bar()
+        self.show()
+        self.raise_()
+        self.activateWindow()
+        self.setFocus()
 
     def paintEvent(self, _e) -> None:                                           # noqa: N802
         p = QPainter(self)
@@ -186,7 +350,7 @@ class Details(QWidget):
         self._seen_top = top or self._seen_top
         rows_h = self.events.sizeHintForRow(0) if self.events.count() else 0
         self.events.setFixedHeight(min(max(self.events.count(), 1), 6) * max(rows_h, 20) + 6)       # sem espaco vazio; rola acima de 6
-        self.adjustSize()
+        self.fit()
 
 
 class Bar(QWidget):
@@ -252,7 +416,7 @@ class Bar(QWidget):
     def mouseMoveEvent(self, e) -> None:                                        # noqa: N802
         if self._drag is not None and e.buttons() & Qt.MouseButton.LeftButton:
             self._moved = True
-            self.move(e.globalPosition().toPoint() - self._drag)
+            self.move(self._clamped(e.globalPosition().toPoint() - self._drag))
             self._sync_details()
 
     def mouseReleaseEvent(self, e) -> None:                                     # noqa: N802
@@ -266,28 +430,42 @@ class Bar(QWidget):
 
     def contextMenuEvent(self, e) -> None:                                      # noqa: N802
         m = QMenu(self)
-        m.addAction("Expandir / recolher", self.toggle_details)
+        m.addAction("Expandir painel" if not self.details.isVisible() else "Fechar painel", self.toggle_details)
         m.addAction("Atualizar agora", self.action_refresh)
         n = QAction("Notificacoes", m, checkable=True, checked=self.settings.notifications)
         n.toggled.connect(self.set_notifications)
         m.addAction(n)
         m.addAction("Minimizar para icone", self.toggle_minimized)
         m.addSeparator()
-        m.addAction("Encerrar barra", self.close_app)
+        m.addAction("Encerrar barra (fecha a barra inteira)", self.close_app)
         m.exec(e.globalPos())
 
     # ---------------------------------------------------------------------------------------------------- painel/estado
     def toggle_details(self) -> None:
         if self.details.isVisible():
-            self.details.hide()
+            self.details.close_panel()
         else:
-            self._sync_details()
-            self.details.show()
+            self.details.open_panel()
+
+    def close_panel(self) -> None:
+        """Fecha SO o painel (acao distinta de `close_app`, que encerra a barra)."""
+        self.details.close_panel()
+
+    def _clamped(self, pos: QPoint) -> QPoint:
+        area = geo.pick_screen(screen_areas(), pos.x(), pos.y(), self.width(), self.height())
+        x, y = geo.clamp_window(pos.x(), pos.y(), self.width(), self.height(), area, margin=0)
+        return QPoint(x, y)
 
     def _sync_details(self) -> None:
-        g = QGuiApplication.primaryScreen().availableGeometry()
-        x = min(max(self.x(), g.left()), g.right() - self.details.width())       # nunca fora da tela (escalas/resolucoes)
-        self.details.move(x, min(self.y() + self.height() + 6, g.bottom() - self.details.height()))
+        """Enquanto o usuario nao moveu o painel, ele acompanha a barra; depois disso e independente (so respeita os limites da tela)."""
+        if self.details.isVisible() and not self.details.user_moved:
+            self.details.place_near_bar()
+
+    def keyPressEvent(self, e) -> None:                                         # noqa: N802
+        if e.key() == Qt.Key.Key_Escape:
+            self.close_panel()
+        else:
+            super().keyPressEvent(e)
 
     def toggle_minimized(self) -> None:
         self.settings.minimized = not self.settings.minimized
