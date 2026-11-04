@@ -53,7 +53,7 @@ HEARTBEAT_S = 60
 BRANCH_OK = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,100}$")
 SECRET = re.compile(r"(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,})")
 CRED_HINTS = ("not logged in", "/login", "invalid api key", "authentication", "oauth token", "unauthorized")
-Runner = Callable[[list, Path, dict, str, int], tuple]
+Runner = Callable[..., tuple]            # (argv, cwd, env, stdin, timeout, cancel: threading.Event) -> (rc, out, err, timed_out)
 
 PROMPT = """Voce e o EXECUTOR do repositorio {repo}. Tarefa automatica (bridge #589), PR #{pr}, Issue #{issue}.
 O Tech Lead `fmmodesto` registrou o review {review_id} (CHANGES_REQUESTED) no HEAD {sha} da branch `{branch}`.
@@ -102,10 +102,11 @@ def build_command(claude_bin: str, worktree: Path, branch: str, python: str | No
     return [claude_bin, "-p", "--output-format", "stream-json", "--verbose", "--permission-mode", "dontAsk",
             "--allowedTools", ",".join(allow_list(python or venv_python()) + [push_allow(branch)]), "--disallowedTools", ",".join(DENY),
             "--add-dir", str(worktree), "--max-budget-usd", MAX_BUDGET_USD, "--no-session-persistence",
-            # Medido no Windows real: o hook `rtk` do USUARIO reescreve `git status` -> `rtk git status` ANTES da checagem de permissao e
-            # TODO padrao `Bash(git ...)` passava a negar. `local` descarta settings de usuario/projeto (hooks, allow do usuario e
-            # qualquer settings.json vindo da branch do PR); sem MCP. A allowlist abaixo e a unica fonte de permissao.
-            "--setting-sources", "local", "--strict-mcp-config"]
+            # Medido no Windows real (claude 2.1.158; tools/orchestration/isolation_probe.py): o hook `rtk` do USUARIO reescreve
+            # `git status` -> `rtk git status` antes da checagem e todo padrao `Bash(git ...)` negava; e `--setting-sources local` AINDA
+            # carrega `.claude/settings.local.json` do cwd (hook hostil executou). Fonte VAZIA = nenhuma de user/project/local; sem MCP.
+            # `--bare` nao serve (exige ANTHROPIC_API_KEY, nunca le o login OAuth). Limite: managed settings da maquina nao sao desligaveis.
+            "--setting-sources", "", "--strict-mcp-config"]
 
 
 def resolve_claude(name: str = "claude") -> str:
@@ -131,17 +132,36 @@ def child_env(base: dict | None = None) -> dict:
     return env
 
 
-def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int) -> tuple:
-    """(rc, stdout, stderr, timed_out). Sem shell. No timeout derruba a arvore do PROPRIO processo (taskkill /T no PID dele)."""
+def kill_tree(p: subprocess.Popen) -> None:
+    """Derruba a arvore do PROPRIO processo filho (taskkill /T no PID dele; nunca por nome de imagem)."""
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)], capture_output=True)
+    else:
+        p.kill()
+
+
+def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, cancel: threading.Event | None = None,
+                   poll_s: float = 0.5) -> tuple:
+    """(rc, stdout, stderr, timed_out). Sem shell. Derruba o filho no timeout OU quando `cancel` e acionado (lease perdido/nao
+    renovado: o filho nao pode continuar apto a dar push enquanto outro executor reivindica o item)."""
     p = subprocess.Popen(argv, cwd=cwd, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          text=True, encoding="utf-8", errors="replace")
-    try:
-        out, err = p.communicate(stdin, timeout=timeout)
-        return p.returncode, out, err, False
-    except subprocess.TimeoutExpired:
-        subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)], capture_output=True) if os.name == "nt" else p.kill()
-        out, err = p.communicate()
-        return -1, out or "", err or "", True
+    deadline = time.monotonic() + timeout
+    first = True
+    while True:
+        try:
+            out, err = p.communicate(stdin if first else None, timeout=poll_s)
+            return p.returncode, out, err, False
+        except subprocess.TimeoutExpired:
+            first = False
+        if cancel is not None and cancel.is_set():
+            kill_tree(p)
+            out, err = p.communicate()
+            return -2, out or "", err or "", False
+        if time.monotonic() >= deadline:
+            kill_tree(p)
+            out, err = p.communicate()
+            return -1, out or "", err or "", True
 
 
 def git(args: list, cwd: Path) -> tuple[int, str]:
@@ -257,12 +277,18 @@ def update_owned(key: str, owner: str, mutate: Callable[[dict, dict], None], rel
 
 
 class Heartbeat(threading.Thread):
-    """Renova o lease do item enquanto este processo vive (trava curta a cada tick). Se perder o dono, sinaliza `lost`."""
+    """Renova o lease do item enquanto este processo vive (trava curta a cada tick). Fail-closed: se perder o dono OU nao conseguir
+    renovar antes do lease (conhecido) vencer, aciona `cancel` e o filho e derrubado (ver `default_runner`)."""
 
     def __init__(self, key: str, owner: str, interval: float | None = None):
         super().__init__(daemon=True, name=f"lease-{key[:20]}")
         self.key, self.owner, self.interval = key, owner, HEARTBEAT_S if interval is None else interval
-        self.stop_evt, self.lost = threading.Event(), False
+        self.stop_evt, self.cancel = threading.Event(), threading.Event()
+        self.valid_until = time.monotonic() + LEASE_S                         # o claim acabou de gravar um lease de LEASE_S
+
+    @property
+    def lost(self) -> bool:
+        return self.cancel.is_set()
 
     def run(self) -> None:
         while not self.stop_evt.wait(self.interval):
@@ -271,14 +297,17 @@ class Heartbeat(threading.Thread):
                     b = eb.load()
                     it = _owned(b, self.key, self.owner)
                     if it is None:
-                        self.lost = True
+                        self.cancel.set()                                     # outro dono: este filho nao pode mais publicar
                         return
                     t = _utc(None)
                     it["heartbeat_at"] = es.now_iso(t)
                     it["lease_expires"] = es.now_iso(t + dt.timedelta(seconds=LEASE_S))
                     eb.save(b)
+                    self.valid_until = time.monotonic() + LEASE_S
             except (TimeoutError, OSError, ValueError):
-                continue                                                      # tenta no proximo tick; o lease tem folga
+                if time.monotonic() >= self.valid_until - self.interval:      # sem como provar posse ate o fim do lease
+                    self.cancel.set()
+                    return
 
     def stop(self) -> None:
         self.stop_evt.set()
@@ -346,7 +375,7 @@ PARKED = {"SUPERSEDED": "SUPERSEDED", "REFUSED": "REFUSED", "UNSUPPORTED": "PARK
 
 
 def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runner, claude_bin: str, wt_prep, t: dt.datetime,
-            python: str | None) -> dict:
+            python: str | None, cancel: threading.Event) -> dict:
     key, branch = item["key"], pr["head"]["ref"]
     ok, msg, wt = wt_prep(item["pr"], branch, item["head_sha"], repo_root())
     if not ok:
@@ -368,7 +397,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
         note = f"lease da Issue #{item['issue']} indisponivel: {exc}"
         update_owned(key, owner, lambda it, b: eb.diagnose(b, note, t), now=t)
     try:
-        rc, out, err, timed_out = runner(argv, wt, child_env(), build_prompt(item, branch, repo), RUN_TIMEOUT_S)
+        rc, out, err, timed_out = runner(argv, wt, child_env(), build_prompt(item, branch, repo), RUN_TIMEOUT_S, cancel)
     except FileNotFoundError:
         release_issue(item)
         reason = f"CLI {claude_bin!r} nao encontrada no PATH"
@@ -404,7 +433,8 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
             it["attempts"] = it.get("attempts", 0) + 1
         update_owned(key, owner, done, release=True, now=t)
         return {"action": "DONE", "item": key, "new_head": new_head}
-    reason = "timeout" if timed_out else (f"claude saiu com codigo {rc}" if rc != 0 else "terminou sem commit novo no PR")
+    reason = ("timeout" if timed_out else "lease perdido/nao renovado: filho derrubado (fail-closed)" if cancel.is_set() and rc == -2
+              else f"claude saiu com codigo {rc}" if rc != 0 else "terminou sem commit novo no PR")
 
     def failed(it, b):
         it["attempts"] = it.get("attempts", 0) + 1
@@ -416,7 +446,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
 
 
 def _handle_claimed(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, execute: bool, runner: Runner, claude_bin: str,
-                    wt_prep, t: dt.datetime, python: str | None) -> dict:
+                    wt_prep, t: dt.datetime, python: str | None, cancel: threading.Event) -> dict:
     key = item["key"]
     verdict, why, pr = preflight(item, gh, policy, repo)
     if verdict != "OK":
@@ -432,7 +462,7 @@ def _handle_claimed(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, 
         update_owned(key, owner, back, release=True, now=t)
         return {"action": "DRY_RUN", "item": key, "reason": "dry-run: nao executa", "pr": item["pr"], "branch": branch,
                 "command": build_command(claude_bin, worktree_path(item["pr"]), branch, python)[:6]}
-    return _launch(item, owner, pr, gh, repo, runner, claude_bin, wt_prep, t, python)
+    return _launch(item, owner, pr, gh, repo, runner, claude_bin, wt_prep, t, python, cancel)
 
 
 def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False, runner: Runner = default_runner,
@@ -449,7 +479,7 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
     hb = Heartbeat(item["key"], owner, heartbeat_s)
     hb.start()
     try:
-        return _handle_claimed(item, owner, gh, policy, repo, execute, runner, claude_bin, wt_prep, _utc(now), python)
+        return _handle_claimed(item, owner, gh, policy, repo, execute, runner, claude_bin, wt_prep, _utc(now), python, hb.cancel)
     except Exception as exc:                                                 # noqa: BLE001 — falha inesperada nunca deixa RUNNING orfao
         reason = f"erro inesperado no executor ({type(exc).__name__}): {exc}"[:300]
 

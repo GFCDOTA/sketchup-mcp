@@ -59,7 +59,7 @@ class Runner:
         self.gh, self.push, self.rc, self.out, self.err, self.timed_out, self.boom = gh, push, rc, out, err, timed_out, boom
         self.calls = []
 
-    def __call__(self, argv, cwd, env, stdin, timeout):
+    def __call__(self, argv, cwd, env, stdin, timeout, cancel=None):
         self.calls.append({"argv": argv, "cwd": cwd, "env": env, "stdin": stdin, "timeout": timeout})
         if self.boom:
             raise self.boom
@@ -245,7 +245,7 @@ def test_running_is_persisted_before_the_child_starts_so_a_crash_is_recoverable(
     gh = FakeGh()
     seen = {}
 
-    def spy(argv, cwd, env, stdin, timeout):
+    def spy(argv, cwd, env, stdin, timeout, cancel=None):
         seen["disk"] = json.loads((tmp_path / "bridge.json").read_text(encoding="utf-8"))["queue"][0]["state"]
         gh.head = NEWHEAD
         return 0, "", "", False
@@ -291,7 +291,7 @@ def test_issue_lease_is_visible_to_the_scheduler_state_and_released_after(tmp_pa
     gh = FakeGh()
     seen = {}
 
-    def spy(argv, cwd, env, stdin, timeout):
+    def spy(argv, cwd, env, stdin, timeout, cancel=None):
         seen["claims"] = sorted(ex.es.load(tmp_path / "exec.json")["claims"])
         gh.head = NEWHEAD
         return 0, "", "", False
@@ -328,7 +328,7 @@ def test_the_state_lock_is_not_held_while_claude_runs_and_a_second_process_never
     first = Runner(gh)
     inside = {}
 
-    def blocking(argv, cwd, env, stdin, timeout):
+    def blocking(argv, cwd, env, stdin, timeout, cancel=None):
         started.set()
         assert release.wait(10)
         return first(argv, cwd, env, stdin, timeout)
@@ -361,7 +361,7 @@ def test_heartbeat_renews_the_lease_while_the_child_runs(monkeypatch):
     started, release = threading.Event(), threading.Event()
     seen = {}
 
-    def slow(argv, cwd, env, stdin, timeout):
+    def slow(argv, cwd, env, stdin, timeout, cancel=None):
         seen["before"] = eb.load()["queue"][0]["lease_expires"]
         started.set()
         release.wait(10)
@@ -383,7 +383,7 @@ def test_a_process_that_lost_its_lease_never_overwrites_the_new_owner_state():
     gh = FakeGh()
     eb.save(bstate(item()))
 
-    def runner(argv, cwd, env, stdin, timeout):                              # outro processo assume o item no meio da execucao
+    def runner(argv, cwd, env, stdin, timeout, cancel=None):                              # outro processo assume o item no meio da execucao
         b = eb.load()
         b["queue"][0].update(state="RUNNING", owner="outro-dono")
         eb.save(b)
@@ -468,7 +468,8 @@ def test_execution_is_never_the_default_in_main_and_the_launcher():
 # --------------------------------------------- achados medidos no Windows real (claude.cmd, hook do usuario, instalador)
 def test_child_ignores_user_and_branch_settings_and_mcp_so_the_allowlist_is_the_only_permission_source():
     argv = ex.build_command("claude", Path("wt"), "feat/x")
-    assert argv[argv.index("--setting-sources") + 1] == "local" and "--strict-mcp-config" in argv
+    # `local` AINDA carrega .claude/settings.local.json do cwd (medido: hook hostil executou) => fonte VAZIA
+    assert argv[argv.index("--setting-sources") + 1] == "" and "--strict-mcp-config" in argv and "local" not in argv
 
 
 def test_resolve_claude_prefers_the_real_exe_next_to_the_npm_cmd_shim_and_never_runs_a_cmd(tmp_path, monkeypatch):
@@ -493,3 +494,63 @@ def test_task_scheduler_installer_is_ascii_dry_run_by_default_and_has_a_remove_s
     assert "[switch]$Execute" in ps1 and 'if ($Execute) { $argLine += " -Execute" }' in ps1
     assert "[switch]$Remove" in ps1 and "Unregister-ScheduledTask" in ps1 and "-MultipleInstances IgnoreNew" in ps1
     assert "-RunLevel Limited" in ps1 and "Start-ScheduledTask" not in ps1.replace("# Nada e iniciado aqui: use `Start-ScheduledTask", "")
+
+
+# ------------------------------------------- perda de lease com o filho AINDA VIVO: ele e derrubado (fail-closed, 2o review)
+def test_losing_the_lease_while_the_child_is_alive_cancels_the_child_and_discards_its_result():
+    gh = FakeGh()
+    eb.save(bstate(item()))
+    seen = {}
+
+    def live_child(argv, cwd, env, stdin, timeout, cancel=None):
+        b = eb.load()                                                          # outro executor reivindica o item
+        b["queue"][0].update(state="RUNNING", owner="outro-dono")
+        eb.save(b)
+        seen["cancelled"] = cancel.wait(5)                                     # o filho "vivo" so termina porque foi cancelado
+        gh.head = NEWHEAD                                                      # se NAO fosse derrubado, ainda publicaria
+        return -2, "", "", False
+
+    ex.process_one(gh, POLICY, REPO, True, live_child, "claude", wt_ok, NOW, None, 0.05)
+    t = eb.load()["queue"][0]
+    assert seen["cancelled"] is True                                           # heartbeat acionou o cancelamento
+    assert t["state"] == "RUNNING" and t["owner"] == "outro-dono"              # resultado do 1o processo descartado
+
+
+def test_heartbeat_that_cannot_renew_before_the_lease_ends_cancels_the_child(monkeypatch):
+    gh = FakeGh()
+    eb.save(bstate(item()))
+    monkeypatch.setattr(ex, "LEASE_S", 0.4)
+    real_locked = ex.es.locked
+    seen = {}
+
+    def broken_locked(*a, **k):
+        raise TimeoutError("disco/trava indisponivel")
+
+    def child(argv, cwd, env, stdin, timeout, cancel=None):
+        monkeypatch.setattr(ex.es, "locked", broken_locked)                    # renovacoes passam a falhar
+        seen["cancelled"] = cancel.wait(5)
+        monkeypatch.setattr(ex.es, "locked", real_locked)                      # restaura para a gravacao final
+        return -2, "", "", False
+
+    res = ex.process_one(gh, POLICY, REPO, True, child, "claude", wt_ok, NOW, None, 0.05)
+    assert seen["cancelled"] is True and res["action"] == "FAILED" and "fail-closed" in res["reason"]
+
+
+def test_default_runner_kills_a_live_process_tree_as_soon_as_cancel_is_set(tmp_path):
+    import sys
+    import threading
+    import time
+    cancel = threading.Event()
+    threading.Timer(0.5, cancel.set).start()
+    t0 = time.monotonic()
+    rc, _, _, timed_out = ex.default_runner([sys.executable, "-c", "import time; time.sleep(60)"], tmp_path, dict(ex.child_env()), "",
+                                            120, cancel, poll_s=0.1)
+    assert rc == -2 and not timed_out and time.monotonic() - t0 < 15
+
+
+def test_isolation_probe_plants_hostile_settings_in_both_files(tmp_path):
+    from tools.orchestration import isolation_probe as ip
+    ip.plant(tmp_path)
+    for name in ("settings.json", "settings.local.json"):
+        blob = json.loads((tmp_path / ".claude" / name).read_text(encoding="utf-8"))
+        assert "Bash(rm:*)" in blob["permissions"]["allow"] and blob["hooks"]["PreToolUse"]

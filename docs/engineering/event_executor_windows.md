@@ -14,7 +14,8 @@ Sem `-Execute` é **dry-run**: ingere a fila e mostra o que rodaria. Com `-Execu
 | Achado | Consequência no código |
 |---|---|
 | `claude` instalado pelo npm é um shim `claude.cmd`; `CreateProcess("claude")` falha (WinError 2) e `.cmd` passaria pelo `cmd.exe` | `resolve_claude()` usa o `claude.exe` ao lado do shim (ou `CLAUDE_BIN`); nunca roda `.cmd` |
-| O hook `rtk` do usuário reescreve `git status` → `rtk git status` **antes** da checagem de permissão; **todo** padrão `Bash(git …)` passava a negar (inclusive `git status`) | `--setting-sources local --strict-mcp-config`: o filho ignora settings de usuário/projeto (hooks, allow, `settings.json` vindo da branch do PR) e MCP; a allowlist do comando é a única fonte |
+| O hook `rtk` do usuário reescreve `git status` → `rtk git status` **antes** da checagem de permissão; **todo** padrão `Bash(git …)` passava a negar (inclusive `git status`) | `--setting-sources ""` (fonte vazia) `--strict-mcp-config` |
+| **Correção do 2º review:** `--setting-sources local` NÃO isola — `local` é uma fonte a carregar (`.claude/settings.local.json` do cwd). Sonda negativa com settings hostis (`allow Bash(rm:*)` + hook que grava marcador) em claude 2.1.158: `local` → **INVADIDO** (hook executou); `""` → **ISOLADO** (nenhum hook, nenhuma permissão extra). `--bare` não serve (exige `ANTHROPIC_API_KEY`, nunca lê o login OAuth) | `build_command` usa fonte vazia; `tools/orchestration/isolation_probe.py` reproduz a medição. Com as settings hostis presentes, a sonda 8/8 da allowlist continua igual |
 | Com isso, 8/8 casos deram o resultado esperado | ver tabela abaixo |
 
 Sonda (`tools/orchestration/allowlist_probe.py`, remoto bare local, nada tocou o GitHub; custo ≈ US$ 0,08):
@@ -23,6 +24,8 @@ Sonda (`tools/orchestration/allowlist_probe.py`, remoto bare local, nada tocou o
 |---|---|
 | `git status` · `<venv>/python.exe -m pytest --version` · `git push origin HEAD:feat/x` | permitido |
 | `git push origin HEAD:other` · `… HEAD:feat/x --force` · `rm a.txt` · `gh api user` · `<venv>/python.exe -c …` | **negado** |
+
+Limite do isolamento: *managed settings* da máquina (política corporativa) não são desligáveis por flag; esta máquina não tem.
 
 Limites que continuam: `Edit`/`Write` não têm restrição de caminho além do cwd/`--add-dir` da worktree; o venv (`BRIDGE_PYTHON`
 ou `.venv` do checkout principal) é compartilhado com a worktree do PR; não há merge automático nem tratamento de `APPROVED`.
@@ -33,6 +36,8 @@ O `lockfile` do `execution_state` é quebrado após 60 s — não serve para pro
 + `lease_expires`) gravado sob trava curta; o Claude roda **sem** a trava; um *heartbeat* renova o lease a cada 60 s (lease 5 min);
 toda gravação final exige `owner` igual (perdeu o lease → resultado descartado e diagnosticado). Lease vencido = dono morto →
 reenfileira; se o HEAD já mudou (o Claude chegou a empurrar) vira `SUPERSEDED`, nunca reexecuta.
+
+**Perda de lease com o filho vivo (2º review):** o heartbeat, ao perder o dono ou não conseguir renovar antes do lease acabar, aciona `cancel` e `default_runner` derruba a árvore do filho (`taskkill /T` no PID dele) — fail-closed; o resultado é descartado. Backstop adicional: o push do prompt é `git push origin HEAD:<branch>` **sem force**; um 2º filho a partir do mesmo SHA seria rejeitado como não-fast-forward. Janela residual: pausa do SO (suspensão) em que nem o heartbeat roda — ao voltar, o 1º tick cancela, mas o filho pode ter publicado nesse intervalo.
 
 ## Iniciar automaticamente pelo Agendador de Tarefas
 
