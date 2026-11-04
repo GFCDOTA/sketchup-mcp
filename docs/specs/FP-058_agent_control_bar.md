@@ -20,8 +20,9 @@ recusa com execucao ativa, processos indisponiveis ou `-Execute` na acao da tare
 
 ## Fases
 1. **Slice 1 (este PR):** modelos, coletores, controles, settings, barra + painel, launcher, testes, evidencia visual real.
-2. Backlog real (contagens Ready/In Progress/GPT Review/Blocked) quando houver coletor confiavel do Project #1.
-3. Estado do Codex quando a integracao existir (FP-057 fase B).
+2. **Entregue neste PR:** backlog real do Project #1 (GraphQL enxuto, cache, erro tecnico explicito, ultima leitura boa marcada desatualizada); Codex/Claude/lock
+   correlacionados com processos reais; historico agrupado; painel compacto; botoes com resultado real; preflight unico de Parar/Reiniciar.
+3. Pendente: estado real do Codex quando a integracao existir (FP-057 fase B; hoje contrato `runs/governance/codex/last_review.json`).
 
 ## Aceite
 Barra abre no Windows; arrastavel e sobre outras janelas; dados reais do listener; Claude executando != instalado; Codex nao integrado;

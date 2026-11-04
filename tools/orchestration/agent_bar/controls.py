@@ -62,13 +62,32 @@ def _wait_gone(procs_fn, wait_s: float, sleep) -> bool:
         waited += 1.0
 
 
-def stop_listener(procs_fn=col.list_processes, run: Callable[[str], tuple[int, str]] = run_ps, confirmed: bool = False,
-                  wait_s: float = 15.0, sleep=time.sleep) -> Result:
+def preflight(procs_fn, run: Callable[[str], tuple[int, str]], gov: Path | None, confirmed: bool, verb: str) -> Result | None:
+    """Preflight UNICO e fail-closed de parar/reiniciar (mesma politica nas duas operacoes). Devolve a recusa, ou None se pode seguir:
+    confirmacao, kill switch, acao da tarefa legivel e SEM -Execute (modo DRY_RUN garantido), tabela de processos observavel e
+    nenhuma execucao ativa. A parada de emergencia (fora da barra) esta documentada em docs/engineering/agent_bar.md."""
     if not confirmed:
-        return Result(False, "confirmacao necessaria para parar o listener")
-    why = active_execution(procs_fn())
+        return Result(False, f"confirmacao necessaria para {verb} o listener")
+    g = gov or col.default_gov_dir()
+    if (g / "EXECUTOR_DISABLED").exists():
+        return Result(False, f"{verb}: recusado - kill switch (EXECUTOR_DISABLED) ativo; remova-o manualmente se for intencional")
+    ex = task_has_execute(run)
+    if ex is None:
+        return Result(False, f"{verb}: recusado - nao foi possivel ler a acao da tarefa (nao provo que e DRY_RUN)")
+    if ex:
+        return Result(False, f"{verb}: recusado - a tarefa tem -Execute; a barra so controla o listener em DRY_RUN")
+    procs = procs_fn()
+    why = active_execution(procs)
     if why:
-        return Result(False, f"parada recusada: {why}")
+        return Result(False, f"{verb}: recusado - {why}")
+    return None
+
+
+def stop_listener(procs_fn=col.list_processes, run: Callable[[str], tuple[int, str]] = run_ps, confirmed: bool = False,
+                  gov: Path | None = None, wait_s: float = 15.0, sleep=time.sleep) -> Result:
+    refusal = preflight(procs_fn, run, gov, confirmed, "parada")
+    if refusal:
+        return refusal
     rc, out = run(f"Stop-ScheduledTask -TaskName '{col.TASK_NAME}' -ErrorAction Stop")
     if rc != 0:
         return Result(False, f"Stop-ScheduledTask falhou: {out[:200]}")
@@ -79,24 +98,17 @@ def stop_listener(procs_fn=col.list_processes, run: Callable[[str], tuple[int, s
 
 def restart_listener_dry_run(procs_fn=col.list_processes, run: Callable[[str], tuple[int, str]] = run_ps, confirmed: bool = False,
                              gov: Path | None = None, wait_s: float = 15.0, sleep=time.sleep) -> Result:
-    """Nunca burla o kill switch, a politica (-Execute) nem o InstanceLock: so inicia se o executor antigo SUMIU."""
-    if not confirmed:
-        return Result(False, "confirmacao necessaria para reiniciar o listener")
-    g = gov or col.default_gov_dir()
-    if (g / "EXECUTOR_DISABLED").exists():
-        return Result(False, "reinicio recusado: kill switch (EXECUTOR_DISABLED) ativo; remova-o manualmente se for intencional")
-    ex = task_has_execute(run)
-    if ex is None:
-        return Result(False, "reinicio recusado: nao foi possivel ler a acao da tarefa (nao provo que e DRY_RUN)")
-    if ex:
-        return Result(False, "reinicio recusado: a tarefa tem -Execute; a barra so reinicia em DRY_RUN")
+    """Mesmo preflight do Stop; so inicia se o executor antigo SUMIU (nunca 2a instancia: respeita o InstanceLock)."""
+    refusal = preflight(procs_fn, run, gov, confirmed, "reinicio")
+    if refusal:
+        return refusal
     procs = procs_fn()
     if procs is not None and col.executor_roots(procs):
-        stopped = stop_listener(procs_fn, run, confirmed=True, wait_s=wait_s, sleep=sleep)
-        if not stopped.ok:
-            return stopped
-    elif procs is None:
-        return Result(False, "reinicio recusado: tabela de processos indisponivel (nao provo que o lock esta livre)")
+        rc, out = run(f"Stop-ScheduledTask -TaskName '{col.TASK_NAME}' -ErrorAction Stop")
+        if rc != 0:
+            return Result(False, f"Stop-ScheduledTask falhou: {out[:200]}")
+        if not _wait_gone(procs_fn, wait_s, sleep):
+            return Result(False, f"o executor antigo ainda esta vivo apos {wait_s:.0f}s: nao inicio outro (InstanceLock)")
     rc, out = run(f"Start-ScheduledTask -TaskName '{col.TASK_NAME}' -ErrorAction Stop")
     return Result(rc == 0, "tarefa reiniciada em DRY_RUN" if rc == 0 else f"Start-ScheduledTask falhou: {out[:200]}")
 

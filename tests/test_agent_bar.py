@@ -335,70 +335,90 @@ class Ran:
         return (0 if self.ok else 1), self.out
 
 
-def test_stop_requires_confirmation_and_does_nothing_without_it():
-    r = Ran()
-    assert not ctl.stop_listener(lambda: LISTENER_OK, r).ok and r.calls == []
-
-
-def test_stop_refused_while_claude_is_executing_and_kills_nothing():
-    r = Ran()
-    procs = LISTENER_OK + [col.Proc(40, 21, "claude.exe", "claude -p")]
-    res = ctl.stop_listener(lambda: procs, r, confirmed=True)
-    assert not res.ok and "execucao ativa" in res.message and r.calls == []
-
-
-def test_stop_refused_when_process_table_is_unavailable():
-    r = Ran()
-    assert not ctl.stop_listener(lambda: None, r, confirmed=True).ok and r.calls == []
-
-
 class World:
     """Processos que somem depois do Stop-ScheduledTask (ou nao, se stuck=True)."""
 
-    def __init__(self, stuck=False, execute=False):
-        self.stopped, self.stuck, self.execute, self.calls = False, stuck, execute, []
+    def __init__(self, stuck=False, execute=False, unreadable=False, fail=None, busy=False, table=True):
+        self.stopped, self.stuck, self.execute, self.unreadable, self.fail, self.busy, self.table = False, stuck, execute, unreadable, fail, busy, table
+        self.calls = []
 
     def procs(self):
-        return [] if self.stopped and not self.stuck else LISTENER_OK
+        if not self.table:
+            return None
+        base = [] if self.stopped and not self.stuck else list(LISTENER_OK)
+        return base + ([col.Proc(40, 21, "claude.exe", "claude -p")] if self.busy and base else [])
 
     def run(self, script):
         self.calls.append(script)
         if "Get-ScheduledTask" in script:
+            if self.unreadable:
+                return 1, "acesso negado"
             return 0, "-File x.ps1 -Execute" if self.execute else "-File x.ps1"
+        if self.fail and self.fail in script:
+            return 1, "acesso negado"
         if "Stop-ScheduledTask" in script:
             self.stopped = True
         return 0, ""
+
+    def mutated(self):
+        return any("Stop-ScheduledTask" in c or "Start-ScheduledTask" in c for c in self.calls)
 
 
 def kw(w, tmp_path):
     return {"procs_fn": w.procs, "run": w.run, "gov": tmp_path, "wait_s": 2, "sleep": lambda s: None}
 
 
-def test_stop_uses_only_the_scheduled_task_never_taskkill_by_name_and_proves_the_executor_is_gone():
+OPS = [ctl.stop_listener, ctl.restart_listener_dry_run]
+
+
+@pytest.mark.parametrize("op", OPS)
+def test_both_controls_require_confirmation_and_touch_nothing_without_it(op, tmp_path):
     w = World()
-    assert ctl.stop_listener(w.procs, w.run, confirmed=True, wait_s=2, sleep=lambda s: None).ok
-    assert len(w.calls) == 1 and "Stop-ScheduledTask" in w.calls[0]
-    assert "taskkill" not in w.calls[0].lower() and "Stop-Process" not in w.calls[0]
+    assert not op(**kw(w, tmp_path)).ok and w.calls == []
 
 
-def test_stop_does_not_claim_success_when_the_executor_survives():
+@pytest.mark.parametrize("op", OPS)
+@pytest.mark.parametrize("world,needle", [
+    (dict(execute=True), "-Execute"), (dict(unreadable=True), "nao foi possivel ler a acao da tarefa"),
+    (dict(busy=True), "execucao ativa"), (dict(table=False), "indisponivel")])
+def test_stop_and_restart_share_one_fail_closed_preflight(op, world, needle, tmp_path):
+    w = World(**world)
+    res = op(confirmed=True, **kw(w, tmp_path))
+    assert not res.ok and needle in res.message and not w.mutated()
+
+
+@pytest.mark.parametrize("op", OPS)
+def test_kill_switch_blocks_both_controls_and_nothing_is_even_queried(op, tmp_path):
+    (tmp_path / "EXECUTOR_DISABLED").write_text("x", encoding="utf-8")
+    w = World()
+    res = op(confirmed=True, **kw(w, tmp_path))
+    assert not res.ok and "kill switch" in res.message and w.calls == []
+
+
+def test_stop_uses_only_the_scheduled_task_never_taskkill_by_name_and_proves_the_executor_is_gone(tmp_path):
+    w = World()
+    assert ctl.stop_listener(confirmed=True, **kw(w, tmp_path)).ok
+    stop_calls = [c for c in w.calls if "ScheduledTask" in c and "Stop-" in c]
+    assert len(stop_calls) == 1
+    assert all("taskkill" not in c.lower() and "Stop-Process" not in c for c in w.calls)
+
+
+def test_stop_does_not_claim_success_when_the_executor_survives(tmp_path):
     w = World(stuck=True)
-    res = ctl.stop_listener(w.procs, w.run, confirmed=True, wait_s=2, sleep=lambda s: None)
+    res = ctl.stop_listener(confirmed=True, **kw(w, tmp_path))
     assert not res.ok and "ainda esta vivo" in res.message
 
 
-def test_restart_refused_if_task_has_execute_or_is_unreadable(tmp_path):
-    w = World(execute=True)
-    assert "-Execute" in ctl.restart_listener_dry_run(confirmed=True, **kw(w, tmp_path)).message
-    assert not any("Start-ScheduledTask" in c or "Stop-ScheduledTask" in c for c in w.calls)
-    assert not ctl.restart_listener_dry_run(lambda: LISTENER_OK, Ran(ok=False), confirmed=True, gov=tmp_path).ok
+def test_failed_stop_command_is_reported_with_the_real_error(tmp_path):
+    w = World(fail="Stop-ScheduledTask")
+    res = ctl.stop_listener(confirmed=True, **kw(w, tmp_path))
+    assert not res.ok and "acesso negado" in res.message
 
 
-def test_restart_refused_with_kill_switch_and_touches_nothing(tmp_path):
-    (tmp_path / "EXECUTOR_DISABLED").write_text("x", encoding="utf-8")
-    w = World()
+def test_failed_start_command_is_reported_with_the_real_error(tmp_path):
+    w = World(fail="Start-ScheduledTask")
     res = ctl.restart_listener_dry_run(confirmed=True, **kw(w, tmp_path))
-    assert not res.ok and "kill switch" in res.message and w.calls == []
+    assert not res.ok and "acesso negado" in res.message
 
 
 def test_restart_does_not_start_a_second_instance_if_the_old_one_is_still_alive(tmp_path):
@@ -414,16 +434,11 @@ def test_restart_dry_run_stops_waits_for_the_lock_release_then_starts(tmp_path):
     assert order == ["stop", "start"]
 
 
-def test_restart_refused_while_claude_executes(tmp_path):
+def test_restart_when_already_stopped_just_starts(tmp_path):
     w = World()
-    busy = LISTENER_OK + [col.Proc(40, 21, "claude.exe", "claude -p")]
-    res = ctl.restart_listener_dry_run(lambda: busy, w.run, confirmed=True, gov=tmp_path, wait_s=1, sleep=lambda s: None)
-    assert not res.ok and "execucao ativa" in res.message and not any("Stop-ScheduledTask" in c for c in w.calls)
-
-
-def test_control_command_failure_is_reported_not_swallowed():
-    res = ctl.stop_listener(lambda: LISTENER_OK, Ran(ok=False, out="acesso negado"), confirmed=True)
-    assert not res.ok and "acesso negado" in res.message
+    w.stopped = True
+    assert ctl.restart_listener_dry_run(confirmed=True, **kw(w, tmp_path)).ok
+    assert not any("Stop-ScheduledTask" in c for c in w.calls) and any("Start-ScheduledTask" in c for c in w.calls)
 
 
 def test_open_url_only_accepts_github():

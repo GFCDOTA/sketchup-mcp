@@ -42,3 +42,16 @@ Coleta em thread propria; a UI so recebe `Snapshot` por sinal. Backlog = Project
 - **Historico:** eventos consecutivos identicos agrupados (`xN`, faixa de horario); erros em vermelho, novos em azul; duplo clique abre o log original.
 - **Botoes:** cada um reporta o resultado REAL na linha de status (✓/✗); parar/reiniciar rodam fora da UI, recusam com kill switch, execucao ativa, `-Execute`
   ou executor que nao encerrou (nunca inicia 2a instancia).
+
+## Politica unica de Parar/Reiniciar (preflight compartilhado)
+`controls.preflight()` e o MESMO para as duas operacoes e fail-closed: confirmacao -> kill switch (`EXECUTOR_DISABLED`) -> acao da tarefa legivel
+-> **sem `-Execute`** (DRY_RUN garantido) -> tabela de processos observavel -> nenhuma execucao ativa (Claude filho do executor). Qualquer falha recusa
+com o motivo e nao toca a tarefa. Depois do Stop, a barra so declara sucesso se o executor SUMIU (lock liberado); o Reiniciar nunca inicia 2a instancia.
+
+**Parada de emergencia (fora da barra, caminho separado):** a barra nao oferece parada com `-Execute`/execucao ativa/kill switch. Para emergencia use
+o kill switch (`New-Item runs\governance\EXECUTOR_DISABLED`, o executor passa a nao consumir a fila) ou, no PowerShell do proprietario,
+`Stop-ScheduledTask -TaskName 'sketchup-mcp event bridge'` e confirme com `python -m tools.orchestration.event_executor status`. Nao ha `taskkill` por nome.
+
+## Validacao grafica (separada dos testes sem Qt)
+Os testes de coletores/controles NAO contam como validacao grafica. A prova grafica e: (1) testes da GUI (PySide6, offscreen) para flags, tamanho,
+botoes e painel; (2) execucao real no Windows com captura de tela do desktop; (3) veredito visual do Felipe.

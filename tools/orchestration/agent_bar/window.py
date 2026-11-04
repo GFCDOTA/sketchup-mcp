@@ -357,7 +357,7 @@ class Bar(QWidget):
     def action_stop(self) -> None:
         if self.confirm("Parar o listener (Tarefa Agendada)? Recusa se houver execucao ativa."):
             self.details.set_status(True, "parando o listener...")
-            self._run_async(lambda: ctl.stop_listener(confirmed=True))
+            self._run_async(lambda: ctl.stop_listener(confirmed=True, gov=self.gov))
 
     def confirm(self, text: str) -> bool:
         return QMessageBox.question(self, "Confirmar", text) == QMessageBox.StandardButton.Yes
