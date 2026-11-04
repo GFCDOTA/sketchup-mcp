@@ -7,7 +7,11 @@ Tres perguntas, todas respondidas por funcao pura (a ligacao no executor vem em 
   - `evaluate_diff`   o diff (saida de `git diff --numstat --no-renames`) respeita paths criticos e o teto de arquivos/linhas?
 
 Fail-closed: entrada ilegivel, caminho com `..`, numero invalido ou binario => violacao (nunca "assume que esta ok"). A comparacao de
-caminhos normaliza barras e ignora caixa (NTFS). Os tetos iniciais sao PROPOSTAS (decisao do Tech Lead na SPEC FP-057/P8).
+caminhos normaliza barras, ignora caixa e remove ponto/espaco final de cada componente (NTFS). Configuracao incompleta ou de tipo errado
+RECUSA a carga (`ValueError`): nunca cai num conjunto parcial. Tetos iniciais: 8 arquivos / 300 linhas (confirmados pelo TL na SPEC).
+
+CONTRATO DO CALLER: a entrada de `evaluate_diff` e EXATAMENTE a saida de `git` com `NUMSTAT_ARGS` (`--numstat -z --no-renames`): registros
+`adicionadas<TAB>removidas<TAB>caminho<NUL>`, caminho CRU (sem aspas C do `core.quotePath`). Saida sem terminador NUL e recusada.
 """
 from __future__ import annotations
 
@@ -16,6 +20,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# Piso imutavel no codigo: vale mesmo que review_policy.json e executor_guards.json sejam editados/esvaziados.
+BASELINE_CRITICAL = (".github/workflows/", "docs/governance/")
+NUMSTAT_ARGS = ("diff", "--numstat", "-z", "--no-renames")
 GUARDS_PATH = ROOT / "docs/governance/executor_guards.json"
 POLICY_PATH = ROOT / "docs/governance/review_policy.json"
 
@@ -47,18 +54,42 @@ def norm(path: str) -> str:
     parts = p.split("/")
     if not p or p.startswith("/") or (len(p) > 1 and p[1] == ":") or ".." in parts:
         raise ValueError(f"caminho invalido: {path!r}")
-    joined = "/".join(x for x in parts if x not in ("", ".")).casefold()
+    comps = [c.rstrip(". ") if c not in (".", "") else c for c in parts]       # NTFS: "workflows /" e "workflows./" == "workflows"
+    joined = "/".join(x for x in comps if x not in ("", ".")).casefold()
     return joined + "/" if p.endswith("/") else joined                  # preserva a marca de diretorio das regras
 
 
+def _str_list(value: object, what: str, allow_empty: bool) -> list[str]:
+    if not isinstance(value, list) or any(not isinstance(x, str) or not x.strip() for x in value) or (not value and not allow_empty):
+        raise ValueError(f"{what}: esperado lista{'' if allow_empty else ' NAO vazia'} de strings nao vazias; recusa a carga (fail-closed)")
+    return value
+
+
+def _pos_int(value: object, what: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ValueError(f"{what}: esperado inteiro positivo, veio {value!r}; recusa a carga (fail-closed)")
+    return value
+
+
 def load_config(guards_path: Path | None = None, policy_path: Path | None = None) -> Config:
+    """Carrega e VALIDA. Qualquer ausencia/tipo errado/limite nao positivo => ValueError (nunca um conjunto parcial)."""
     g = json.loads((guards_path or GUARDS_PATH).read_text(encoding="utf-8"))
     pol = json.loads((policy_path or POLICY_PATH).read_text(encoding="utf-8"))
-    critical = tuple(sorted({norm(x) for x in [*pol.get("critical_paths", []), *g.get("extra_critical_paths", [])]}))
-    if not critical:
-        raise ValueError("nenhum caminho critico configurado: recusa (fail-closed)")
-    limits = g["limits"]
-    return Config(label=g["label"].casefold(), critical=critical, max_files=int(limits["max_files"]), max_lines=int(limits["max_lines"]))
+    if not isinstance(g, dict) or not isinstance(pol, dict):
+        raise ValueError("configuracao: esperado objeto JSON; recusa a carga (fail-closed)")
+    if "critical_paths" not in pol:
+        raise ValueError("review_policy.json sem `critical_paths`: recusa a carga (fail-closed)")
+    policy_paths = _str_list(pol["critical_paths"], "review_policy.critical_paths", allow_empty=False)
+    extra = _str_list(g.get("extra_critical_paths"), "executor_guards.extra_critical_paths", allow_empty=True)
+    label = g.get("label")
+    if not isinstance(label, str) or not label.strip():
+        raise ValueError("executor_guards.label: esperado string nao vazia; recusa a carga (fail-closed)")
+    limits = g.get("limits")
+    if not isinstance(limits, dict):
+        raise ValueError("executor_guards.limits: esperado objeto; recusa a carga (fail-closed)")
+    critical = tuple(sorted({norm(x) for x in [*BASELINE_CRITICAL, *policy_paths, *extra]}))
+    return Config(label=label.strip().casefold(), critical=critical, max_files=_pos_int(limits.get("max_files"), "limits.max_files"),
+                  max_lines=_pos_int(limits.get("max_lines"), "limits.max_lines"))
 
 
 def label_ok(labels: object, cfg: Config) -> bool:
@@ -82,15 +113,22 @@ def is_critical(path: str, cfg: Config) -> str | None:
 
 
 def parse_numstat(text: str) -> list[tuple[int | None, int | None, str]]:
-    """`git diff --numstat --no-renames`: `added<TAB>removed<TAB>path`; binario vem como `-<TAB>-<TAB>path` (=> None). Linha ruim levanta."""
+    """Saida de `git diff --numstat -z --no-renames` (ver `NUMSTAT_ARGS`): `adicionadas<TAB>removidas<TAB>caminho` terminado em NUL.
+    O caminho e CRU (pode conter TAB ou aspas): so os dois primeiros TAB separam campos. Binario = `-<TAB>-` (=> None). Formato ambiguo
+    (sem NUL final, campo faltando, numero invalido, caminho vazio) levanta ValueError."""
+    if not text:
+        return []
+    if not text.endswith("\0"):
+        raise ValueError("numstat sem terminador NUL: use `git diff --numstat -z --no-renames` (formato com aspas C e ambiguo)")
     out = []
-    for line in (text or "").splitlines():
-        if not line.strip():
-            continue
-        parts = line.split("\t")
-        if len(parts) != 3:
-            raise ValueError(f"linha numstat invalida: {line!r}")
+    for rec in text[:-1].split("\0"):
+        parts = rec.split("\t", 2)
+        if len(parts) != 3 or not parts[2]:
+            raise ValueError(f"registro numstat invalido: {rec!r}")
         a, r, path = parts
+        for n in (a, r):
+            if n != "-" and not (n.isascii() and n.isdigit()):
+                raise ValueError(f"numero invalido no numstat: {n!r}")
         out.append((None if a == "-" else int(a), None if r == "-" else int(r), path))
     return out
 
