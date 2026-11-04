@@ -30,7 +30,7 @@ class Gh:
     def __call__(self, path):
         if path == "user": return {"login": "fmodesto30"}
         if path == f"repos/{REPO}/pulls/7":
-            return {"number": 7, "body": "Refs #589", "state": "open", "head": {"sha": self.head, "ref": "feat/x", "repo": {"full_name": REPO}}}
+            return {"number": 7, "body": "Refs #589", "state": "open", "labels": [{"name": "executor-ok"}], "head": {"sha": self.head, "ref": "feat/x", "repo": {"full_name": REPO}}}
         if path == f"repos/{REPO}/pulls/7/reviews/9":
             return {"id": 9, "user": {"login": "fmmodesto"}, "state": "CHANGES_REQUESTED", "commit_id": HEAD}
         raise AssertionError(path)

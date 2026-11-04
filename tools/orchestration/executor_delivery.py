@@ -60,20 +60,19 @@ def validate_candidate(wt: Path, rel: str, status: str, cfg: "guards.Config") ->
     if not rel.lower().endswith(ALLOWED_SUFFIXES):
         return f"{rel}: tipo nao autorizado (permitido: {', '.join(ALLOWED_SUFFIXES)})"
     full = wt / rel
+    if "D" not in status:                                                   # remocao: nada a inspecionar no disco
+        try:
+            st = os.lstat(full)                                             # lstat ANTES de resolver: nao segue o symlink
+        except OSError:
+            return f"{rel}: ilegivel"
+        if stat.S_ISLNK(st.st_mode) or not stat.S_ISREG(st.st_mode):
+            return f"{rel}: nao e arquivo regular (symlink/diretorio/especial)"
     try:
-        inside = full.resolve(strict=False).is_relative_to(wt.resolve())
+        inside = full.parent.resolve(strict=False).is_relative_to(wt.resolve())   # resolve so o diretorio pai
     except OSError:
         inside = False
     if not inside:
         return f"{rel}: fora da worktree"
-    if "D" in status:                                                       # remocao: nada a inspecionar no disco
-        return None
-    try:
-        st = os.lstat(full)
-    except OSError:
-        return f"{rel}: ilegivel"
-    if stat.S_ISLNK(st.st_mode) or not stat.S_ISREG(st.st_mode):
-        return f"{rel}: nao e arquivo regular (symlink/diretorio/especial)"
     return None
 
 
