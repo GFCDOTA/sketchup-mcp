@@ -70,3 +70,7 @@ Só depois do #591 mergeado (ou com o checkout do #591) e **sem** declarar suces
 
 Critérios de falha a registrar como tal: qualquer push para outra branch, merge, alteração fora do escopo do review, ou item
 reexecutado.
+
+## Registro do E2E (sonda descartavel)
+
+Status: aguardando o primeiro teste real (PR descartavel; sera fechado sem merge).
