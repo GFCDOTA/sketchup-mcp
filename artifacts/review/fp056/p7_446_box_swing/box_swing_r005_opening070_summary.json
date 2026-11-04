@@ -1,0 +1,513 @@
+{
+ "what": "#446 R6 — arco de giro da porta do box (BANHO 01 r005, abertura declarada 0,70 m). SO MEDICAO (L1, sem SketchUp).",
+ "git_head": "b556ca9f69bc114eef2d27b16da2b2a0cb1a3afd",
+ "git_dirty_tracked": false,
+ "PT_TO_M": 0.0259,
+ "code_sha256_16": {
+  "tools/rooms/bathroom/layout.py": "6115076c2891e747",
+  "tools/rooms/bathroom/solver_policy.py": "65f2c2c500e3ef31",
+  "tools/rooms/shared/clearance.py": "60090702bf780191",
+  "tools/rooms/shared/spatial_solver/solver.py": "3ba322ee47c6092f",
+  "tools/rooms/shared/spatial_solver/candidates.py": "3451390342adfa0f",
+  "tools/rooms/shared/spatial_solver/engine.py": "66e03e784a95b59f",
+  "tools/rooms/shared/spatial_solver/geometry.py": "f3da4464924f6e89",
+  "tools/validation/room_collisions.py": "5f60f97693ec69b2",
+  "tools/validation/penetration.py": "e1658062b3a9d744",
+  "artifacts/review/fp056/p9_r6_errata_2026-10-25/probe_door_opening.py": "b14d5f05a8be3bcb",
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "adeace53cdb3dba1"
+ },
+ "origins": {
+  "abertura_0_70_m": "artifacts/review/fp056/p9_r6_errata_2026-10-25/probe_door_opening.py:20",
+  "monkeypatch_fixw_eq_abertura_mais_0_05": "artifacts/review/fp056/p9_r6_errata_2026-10-25/probe_door_opening.py:12-16",
+  "resultado_PR559_FEASIBLE_6724_so_Vaso": "artifacts/review/fp056/p9_r6_errata_2026-10-25/door_opening_alternatives.json:19-29",
+  "frente_do_box_fonte_unica": "tools/rooms/bathroom/layout.py:188-205",
+  "segmento_e_normal_da_interface_do_box": "tools/rooms/bathroom/layout.py:221-227",
+  "espessura_vidro_0_008_m": "tools/rooms/bathroom/layout.py:422",
+  "altura_folha_z_0_014_a_2_44_m": "tools/rooms/bathroom/layout.py:441-442",
+  "toalheiro_z_1_10_a_1_14_m_a_0_14_m_da_frente": "tools/rooms/bathroom/layout.py:746-762",
+  "tapete_z_0_013_a_0_020_m_a_0_12_m_da_frente": "tools/rooms/bathroom/layout.py:835-853",
+  "revestimento_kb_parede_pedra_2_cm": "tools/rooms/bathroom/layout.py:606-638",
+  "graus_de_liberdade_do_solver": "tools/rooms/bathroom/solver_policy.py:17-21",
+  "solver_e_ordem": "tools/rooms/shared/spatial_solver/solver.py:69-98; ranking.py:40-65; tools/orchestration/intelligent_pipeline.py:102-126",
+  "vao_usavel_medido_pelo_solver": "tools/rooms/shared/spatial_solver/geometry.py:50-64",
+  "largura_minima_de_entrada_0_60_m": "core/functional_constraints.py:270-273",
+  "laje_entra_0_4_espessura_sob_a_parede": "tools/rooms/shared/clearance.py:6-8 (D-007)",
+  "giro_quarto_de_circulo": "tools/rooms/shared/clearance.py:56-77 (door_swings_pt)",
+  "varredura_da_folha": "tools/rooms/shared/clearance.py:80-111 (door_sweeps_pt)",
+  "massa_de_parede": "tools/rooms/shared/clearance.py:21-25 (wall_mass_pt)",
+  "pegada_da_peca": "tools/rooms/shared/clearance.py:114-118 (box_footprint_pt)",
+  "limiar_de_hit_1_cm2": "tools/validation/room_collisions.py:76,82",
+  "angulo_max_sem_penetracao": "tools/validation/penetration.py:140-163 (door_open_angle), EPS_DEPTH :38",
+  "porta_do_comodo_h_o002": "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json:376-420 (largura 24.358 pt, hinge left, swing neg; parede m008 :109-119)"
+ },
+ "params": {
+  "opening_m": 0.7,
+  "glass_t_m": 0.008,
+  "leaf_z_m": [
+   0.014,
+   2.44
+  ],
+  "hit_min_m2": 0.0001,
+  "swing_deg": 90,
+  "swing_side": "para fora do box (normal da interface)"
+ },
+ "reproduction": {
+  "pr559": {
+   "status": "FEASIBLE",
+   "candidates": 6724,
+   "moves": [
+    "r005:Vaso"
+   ]
+  },
+  "agora": {
+   "status": "FEASIBLE",
+   "candidates": 6724,
+   "moves": [
+    "r005:Vaso"
+   ]
+  },
+  "reproduz": true
+ },
+ "solve": {
+  "status": "FEASIBLE",
+  "total_candidates": 6724,
+  "evaluated": 6724,
+  "feasible_count": 319,
+  "seconds": 999,
+  "best_candidate_id": "r005:Vaso:-0.16",
+  "best_status": "FEASIBLE",
+  "best_moves": [
+   "r005:Vaso"
+  ],
+  "original_feasible": true,
+  "original_rank": 270,
+  "feasible_by_moved_objects": {
+   "": 1,
+   "r005:Bancada": 6,
+   "r005:Bancada+r005:Vaso": 289,
+   "r005:Vaso": 23
+  },
+  "builder_symbol": "tools.rooms.bathroom.layout.build_boxes"
+ },
+ "room_doors_considered": [
+  "h_o002"
+ ],
+ "vaso_slides_in_feasible_m": [
+  -0.36,
+  -0.34,
+  -0.32,
+  -0.3,
+  -0.28,
+  -0.26,
+  -0.24,
+  -0.22,
+  -0.2,
+  -0.18,
+  -0.16,
+  -0.14,
+  -0.12,
+  -0.1,
+  -0.08,
+  -0.06,
+  -0.04,
+  -0.02,
+  0.0,
+  0.02,
+  0.04,
+  0.06,
+  0.08,
+  0.1,
+  0.12
+ ],
+ "summary": {
+  "A_declarada:lado_parede": {
+   "feasible_total": 319,
+   "livre_de_loucas(Vaso,Bancada)": 319,
+   "livre_de_loucas+porta_do_comodo+parede": 0,
+   "livre_de_tudo(inclui enxoval/pele)": 0,
+   "abre_90_sem_penetracao": 0,
+   "leaf_len_m": [
+    0.7
+   ],
+   "wall_area_sweep_cm2": [
+    362.2
+   ],
+   "wall_area_quarter_cm2": [
+    356.1
+   ],
+   "room_doors": {
+    "h_o002": {
+     "max_sweep_x_sweep_cm2": 0.0,
+     "max_quarter_x_swing_cm2": 0.0,
+     "min_gap_cm": 29.4
+    }
+   },
+   "min_gap_to_cm": {
+    "Vaso": 5.2,
+    "Bancada": 32.0
+   },
+   "pieces_hit_counting": {
+    "Enxoval/kb_tapete": {
+     "candidates": 319,
+     "max_sweep_cm2": 1958.1,
+     "max_quarter_cm2": 2275.6,
+     "z_m": [
+      0.013,
+      0.0201
+     ],
+     "intent": "SOFT"
+    },
+    "Pele/kb_parede_pedra": {
+     "candidates": 319,
+     "max_sweep_cm2": 131.0,
+     "max_quarter_cm2": 139.9,
+     "z_m": [
+      0.0119,
+      2.5019
+     ],
+     "intent": "STRUCTURAL"
+    },
+    "Enxoval/kb_toalheiro": {
+     "candidates": 319,
+     "max_sweep_cm2": 111.1,
+     "max_quarter_cm2": 121.5,
+     "z_m": [
+      1.1001,
+      1.14
+     ],
+     "intent": "DECORATIVE"
+    }
+   },
+   "open_angle_distribution": [
+    [
+     0.0,
+     "BANHO 01|Pele|kb_parede_pedra"
+    ]
+   ],
+   "abre_90_por_conjunto_de_obstaculos": {
+    "todas_as_pecas+parede": 0,
+    "sem_tapete": 0,
+    "sem_enxoval(tapete,toalheiro,...)": 0,
+    "so_loucas+parede": 0
+   },
+   "angulo_por_conjunto_de_obstaculos": {
+    "todas_as_pecas+parede": [
+     [
+      0.0,
+      "BANHO 01|Pele|kb_parede_pedra"
+     ]
+    ],
+    "sem_tapete": [
+     [
+      0.0,
+      "BANHO 01|Pele|kb_parede_pedra"
+     ]
+    ],
+    "sem_enxoval(tapete,toalheiro,...)": [
+     [
+      0.0,
+      "BANHO 01|Pele|kb_parede_pedra"
+     ]
+    ],
+    "so_loucas+parede": [
+     [
+      0.0,
+      "PAREDE"
+     ]
+    ]
+   },
+   "passage_with_leaf_open_m": [
+    0.696
+   ]
+  },
+  "A_declarada:lado_vidro_fixo": {
+   "feasible_total": 319,
+   "livre_de_loucas(Vaso,Bancada)": 319,
+   "livre_de_loucas+porta_do_comodo+parede": 0,
+   "livre_de_tudo(inclui enxoval/pele)": 0,
+   "abre_90_sem_penetracao": 0,
+   "leaf_len_m": [
+    0.7
+   ],
+   "wall_area_sweep_cm2": [
+    62.5
+   ],
+   "wall_area_quarter_cm2": [
+    89.0
+   ],
+   "room_doors": {
+    "h_o002": {
+     "max_sweep_x_sweep_cm2": 0.0,
+     "max_quarter_x_swing_cm2": 0.0,
+     "min_gap_cm": 40.9
+    }
+   },
+   "min_gap_to_cm": {
+    "Vaso": 4.4,
+    "Bancada": 22.5
+   },
+   "pieces_hit_counting": {
+    "Enxoval/kb_tapete": {
+     "candidates": 319,
+     "max_sweep_cm2": 2402.2,
+     "max_quarter_cm2": 2678.4,
+     "z_m": [
+      0.013,
+      0.0201
+     ],
+     "intent": "SOFT"
+    },
+    "Pele/kb_parede_pedra": {
+     "candidates": 319,
+     "max_sweep_cm2": 40.6,
+     "max_quarter_cm2": 57.1,
+     "z_m": [
+      0.0119,
+      2.5019
+     ],
+     "intent": "STRUCTURAL"
+    },
+    "Enxoval/kb_toalheiro": {
+     "candidates": 319,
+     "max_sweep_cm2": 31.9,
+     "max_quarter_cm2": 45.5,
+     "z_m": [
+      1.1001,
+      1.14
+     ],
+     "intent": "DECORATIVE"
+    }
+   },
+   "open_angle_distribution": [
+    [
+     0.0,
+     "BANHO 01|Pele|kb_parede_pedra"
+    ]
+   ],
+   "abre_90_por_conjunto_de_obstaculos": {
+    "todas_as_pecas+parede": 0,
+    "sem_tapete": 0,
+    "sem_enxoval(tapete,toalheiro,...)": 0,
+    "so_loucas+parede": 0
+   },
+   "angulo_por_conjunto_de_obstaculos": {
+    "todas_as_pecas+parede": [
+     [
+      0.0,
+      "BANHO 01|Pele|kb_parede_pedra"
+     ]
+    ],
+    "sem_tapete": [
+     [
+      0.0,
+      "BANHO 01|Pele|kb_parede_pedra"
+     ]
+    ],
+    "sem_enxoval(tapete,toalheiro,...)": [
+     [
+      0.0,
+      "BANHO 01|Pele|kb_parede_pedra"
+     ]
+    ],
+    "so_loucas+parede": [
+     [
+      0.0,
+      "PAREDE"
+     ]
+    ]
+   },
+   "passage_with_leaf_open_m": [
+    0.696
+   ]
+  },
+  "B_vao_usavel:lado_parede": {
+   "feasible_total": 319,
+   "livre_de_loucas(Vaso,Bancada)": 319,
+   "livre_de_loucas+porta_do_comodo+parede": 319,
+   "livre_de_tudo(inclui enxoval/pele)": 0,
+   "abre_90_sem_penetracao": 0,
+   "leaf_len_m": [
+    0.6165
+   ],
+   "wall_area_sweep_cm2": [
+    0.0
+   ],
+   "wall_area_quarter_cm2": [
+    0.0
+   ],
+   "room_doors": {
+    "h_o002": {
+     "max_sweep_x_sweep_cm2": 0.0,
+     "max_quarter_x_swing_cm2": 0.0,
+     "min_gap_cm": 37.6
+    }
+   },
+   "min_gap_to_cm": {
+    "Vaso": 5.3,
+    "Bancada": 32.8
+   },
+   "pieces_hit_counting": {
+    "Enxoval/kb_tapete": {
+     "candidates": 319,
+     "max_sweep_cm2": 1946.3,
+     "max_quarter_cm2": 2107.3,
+     "z_m": [
+      0.013,
+      0.0201
+     ],
+     "intent": "SOFT"
+    },
+    "Enxoval/kb_toalheiro": {
+     "candidates": 319,
+     "max_sweep_cm2": 100.9,
+     "max_quarter_cm2": 91.9,
+     "z_m": [
+      1.1001,
+      1.14
+     ],
+     "intent": "DECORATIVE"
+    }
+   },
+   "open_angle_distribution": [
+    [
+     10.0,
+     "BANHO 01|Enxoval|kb_tapete"
+    ]
+   ],
+   "abre_90_por_conjunto_de_obstaculos": {
+    "todas_as_pecas+parede": 0,
+    "sem_tapete": 0,
+    "sem_enxoval(tapete,toalheiro,...)": 319,
+    "so_loucas+parede": 319
+   },
+   "angulo_por_conjunto_de_obstaculos": {
+    "todas_as_pecas+parede": [
+     [
+      10.0,
+      "BANHO 01|Enxoval|kb_tapete"
+     ]
+    ],
+    "sem_tapete": [
+     [
+      80.0,
+      "BANHO 01|Enxoval|kb_toalheiro"
+     ]
+    ],
+    "sem_enxoval(tapete,toalheiro,...)": [
+     [
+      90.0,
+      "-"
+     ]
+    ],
+    "so_loucas+parede": [
+     [
+      90.0,
+      "-"
+     ]
+    ]
+   },
+   "passage_with_leaf_open_m": [
+    0.6125
+   ]
+  },
+  "B_vao_usavel:lado_vidro_fixo": {
+   "feasible_total": 319,
+   "livre_de_loucas(Vaso,Bancada)": 319,
+   "livre_de_loucas+porta_do_comodo+parede": 319,
+   "livre_de_tudo(inclui enxoval/pele)": 0,
+   "abre_90_sem_penetracao": 0,
+   "leaf_len_m": [
+    0.6165
+   ],
+   "wall_area_sweep_cm2": [
+    0.0
+   ],
+   "wall_area_quarter_cm2": [
+    0.0
+   ],
+   "room_doors": {
+    "h_o002": {
+     "max_sweep_x_sweep_cm2": 0.0,
+     "max_quarter_x_swing_cm2": 0.0,
+     "min_gap_cm": 49.3
+    }
+   },
+   "min_gap_to_cm": {
+    "Vaso": 4.4,
+    "Bancada": 22.5
+   },
+   "pieces_hit_counting": {
+    "Enxoval/kb_tapete": {
+     "candidates": 319,
+     "max_sweep_cm2": 2096.5,
+     "max_quarter_cm2": 2242.7,
+     "z_m": [
+      0.013,
+      0.0201
+     ],
+     "intent": "SOFT"
+    }
+   },
+   "open_angle_distribution": [
+    [
+     11.0,
+     "BANHO 01|Enxoval|kb_tapete"
+    ]
+   ],
+   "abre_90_por_conjunto_de_obstaculos": {
+    "todas_as_pecas+parede": 0,
+    "sem_tapete": 0,
+    "sem_enxoval(tapete,toalheiro,...)": 319,
+    "so_loucas+parede": 319
+   },
+   "angulo_por_conjunto_de_obstaculos": {
+    "todas_as_pecas+parede": [
+     [
+      11.0,
+      "BANHO 01|Enxoval|kb_tapete"
+     ]
+    ],
+    "sem_tapete": [
+     [
+      12.0,
+      "BANHO 01|Enxoval|kb_toalheiro"
+     ]
+    ],
+    "sem_enxoval(tapete,toalheiro,...)": [
+     [
+      90.0,
+      "-"
+     ]
+    ],
+    "so_loucas+parede": [
+     [
+      90.0,
+      "-"
+     ]
+    ]
+   },
+   "passage_with_leaf_open_m": [
+    0.6125
+   ]
+  }
+ },
+ "seconds_arc": 5,
+ "seconds_total": 1007,
+ "pivot_bound_derived": {
+  "entry_width_min_m": 0.6,
+  "origin": "core/functional_constraints.py:270-273 (shower.entry_width, 0,60 m)",
+  "usable_len_m": [
+   0.6165
+  ],
+  "max_pivot_offset_m": [
+   0.0125
+  ],
+  "why": "pivo a p da ponta: aberta a 90 graus a parte longa fica na linha do pivo -> passagem = vao_usavel - p - t/2; p acima disso reprova a largura de entrada que o proprio solver exige. A parte externa de qualquer pivo fica DENTRO do setor de abrir com dobradica na mesma ponta (|E + p.u + r.v - E| <= p + r <= L), entao o resultado 'abrir' e envelope da parte externa; a parte interna (raio p, dentro do box) nao foi medida."
+ },
+ "not_modeled": [
+  "pivotante: PR 559 cita 'abrir/pivotante' mas nao define a posicao do pivo; sem esse valor nao ha poligono",
+  "folha com sobreposicao de batente (folha > vao): nenhum valor no codigo/PR",
+  "abrir para DENTRO do box: fora do pedido (arco medido para fora)"
+ ],
+ "per_candidate_omitted": "319 candidatos: detalhe por candidato omitido do versionado (4,5 MB); reproduzir com o script"
+}

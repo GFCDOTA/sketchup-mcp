@@ -4247,6 +4247,120 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/fp056/p7_484_strokes/README.md",
+      "blob_sha": "097c7f6196afdc4e86968e794da4f8c0e0f5d3ae",
+      "blob_size": 8302,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_484_strokes/contours_zoom.png",
+      "blob_sha": "159a36842e4427e0e989e314ccf985c369c87d7b",
+      "blob_size": 447750,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_484_strokes/probe_strokes.py",
+      "blob_sha": "16f3cd2759ad24a21825a3ef1bd18342686fa064",
+      "blob_size": 22887,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_484_strokes/strokes.json",
+      "blob_sha": "ca84770c048b0e607224c4ac1fb8f33b00dc2d4d",
+      "blob_size": 23164,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_484_strokes/strokes_board.png",
+      "blob_sha": "c9341d04e6ccbea5cd4098410aa213766fbd4b10",
+      "blob_size": 489175,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_484_strokes/strokes_overview.png",
+      "blob_sha": "42b35c042239a125af1ea0efa1436ade03420b94",
+      "blob_size": 270160,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/README.md",
+      "blob_sha": "988bfbcefbb6aa8008db5d0c17bbe359df9537ef",
+      "blob_size": 4086,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/box_swing_r005_opening070_summary.json",
+      "blob_sha": "73007b59fd69f962225c46bb4ce19e530de74248",
+      "blob_size": 12462,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/measure_box_swing.py",
+      "blob_sha": "b5919fb14ec466ef097cd4a9ddb65e009bd0b279",
+      "blob_size": 29987,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/box_swing_r005_best.png",
+      "blob_sha": "501b15d1fe920cf0c0770603d0cce5c06aee21e2",
+      "blob_size": 563157,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/box_swing_r005_original.png",
+      "blob_sha": "cb41434cfecc8c9cbe69034b1db04e9b7c4a3792",
+      "blob_size": 563551,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_446_box_swing/render_box_swing.py",
+      "blob_sha": "c61321d2664ff38ab8bd6c11f1fa5fc718924f80",
+      "blob_size": 15204,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/README.md",
+      "blob_sha": "ab9a95357dba698d51d61e51f3ac0fbbcbe0999b",
+      "blob_size": 4382,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/measure_r3_remaining.py",
+      "blob_sha": "dee51ca1693ecdbd91ab5bf423b9ea3b11342a4f",
+      "blob_size": 8514,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/r3_remaining_alternatives.json",
+      "blob_sha": "ff90e37aa367d141deec29409844c2f4d41097d8",
+      "blob_size": 7509,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/render_r3_boards.py",
+      "blob_sha": "f70d76ec44bd9191520b95d29fa5376207cfad94",
+      "blob_size": 5287,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/board_r004.png",
+      "blob_sha": "910670c05e5082ca546983af97f85a0b2c5bbbb1",
+      "blob_size": 219581,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/board_r005.png",
+      "blob_sha": "d11be9e0bde412880c2ddef2a34fdb3747dc05eb",
+      "blob_size": 282793,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp056/p7_r3_remaining/board_r006.png",
+      "blob_sha": "5c8fe45fe6e3bf9ef4010fac6c618daeaf192dc0",
+      "blob_size": 320084,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/fp056/p7_as1_real_wall/README.md",
       "blob_sha": "456f1fa63f81fcce775d0bb6f5b4bed783500c90",
       "blob_size": 7019,
