@@ -74,3 +74,5 @@ reexecutado.
 ## Registro do E2E (sonda descartavel)
 
 Status: aguardando o primeiro teste real (PR descartavel; sera fechado sem merge).
+
+Marcador de prova E2E: REVIEW_REQUEST_CONSUMED_592
