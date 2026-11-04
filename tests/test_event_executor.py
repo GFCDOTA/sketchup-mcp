@@ -459,3 +459,33 @@ def test_execution_is_never_the_default_in_main_and_the_launcher():
     assert "--execute" in inspect.getsource(ex.main) and 'action="store_true"' in inspect.getsource(ex.main)
     ps1 = (ex.repo_root() / "tools/orchestration/run_event_bridge.ps1").read_text(encoding="utf-8")
     assert "[switch]$Execute" in ps1 and "if ($Execute)" in ps1
+
+
+# --------------------------------------------- achados medidos no Windows real (claude.cmd, hook do usuario, instalador)
+def test_child_ignores_user_and_branch_settings_and_mcp_so_the_allowlist_is_the_only_permission_source():
+    argv = ex.build_command("claude", Path("wt"), "feat/x")
+    assert argv[argv.index("--setting-sources") + 1] == "local" and "--strict-mcp-config" in argv
+
+
+def test_resolve_claude_prefers_the_real_exe_next_to_the_npm_cmd_shim_and_never_runs_a_cmd(tmp_path, monkeypatch):
+    monkeypatch.delenv("CLAUDE_BIN", raising=False)
+    shim = tmp_path / "claude.cmd"
+    shim.write_text("@echo off", encoding="utf-8")
+    exe = tmp_path / "node_modules" / "@anthropic-ai" / "claude-code" / "bin" / "claude.exe"
+    exe.parent.mkdir(parents=True)
+    exe.write_text("x", encoding="utf-8")
+    monkeypatch.setattr(ex.shutil, "which", lambda name: str(shim))
+    assert ex.resolve_claude() == str(exe)
+    exe.unlink()
+    assert ex.resolve_claude() == "claude"                                   # sem exe: nao devolve o .cmd (cmd.exe = injecao)
+    monkeypatch.setenv("CLAUDE_BIN", "D:/x/claude.exe")
+    assert ex.resolve_claude() == "D:/x/claude.exe"
+
+
+def test_task_scheduler_installer_is_ascii_dry_run_by_default_and_has_a_remove_switch():
+    raw = (ex.repo_root() / "tools/orchestration/install_event_bridge_task.ps1").read_bytes()
+    assert all(b < 128 for b in raw)                                         # PS 5.1 sem BOM le ANSI: acento quebra
+    ps1 = raw.decode("ascii")
+    assert "[switch]$Execute" in ps1 and 'if ($Execute) { $argLine += " -Execute" }' in ps1
+    assert "[switch]$Remove" in ps1 and "Unregister-ScheduledTask" in ps1 and "-MultipleInstances IgnoreNew" in ps1
+    assert "-RunLevel Limited" in ps1 and "Start-ScheduledTask" not in ps1.replace("# Nada e iniciado aqui: use `Start-ScheduledTask", "")

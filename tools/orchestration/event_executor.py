@@ -30,6 +30,7 @@ import datetime as dt
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -100,7 +101,27 @@ def build_prompt(item: dict, branch: str, repo: str) -> str:
 def build_command(claude_bin: str, worktree: Path, branch: str, python: str | None = None) -> list:
     return [claude_bin, "-p", "--output-format", "stream-json", "--verbose", "--permission-mode", "dontAsk",
             "--allowedTools", ",".join(allow_list(python or venv_python()) + [push_allow(branch)]), "--disallowedTools", ",".join(DENY),
-            "--add-dir", str(worktree), "--max-budget-usd", MAX_BUDGET_USD, "--no-session-persistence"]
+            "--add-dir", str(worktree), "--max-budget-usd", MAX_BUDGET_USD, "--no-session-persistence",
+            # Medido no Windows real: o hook `rtk` do USUARIO reescreve `git status` -> `rtk git status` ANTES da checagem de permissao e
+            # TODO padrao `Bash(git ...)` passava a negar. `local` descarta settings de usuario/projeto (hooks, allow do usuario e
+            # qualquer settings.json vindo da branch do PR); sem MCP. A allowlist abaixo e a unica fonte de permissao.
+            "--setting-sources", "local", "--strict-mcp-config"]
+
+
+def resolve_claude(name: str = "claude") -> str:
+    """Caminho REAL do executavel. No Windows o npm instala `claude.cmd` (shim); CreateProcess nao o acha por nome e rodar `.cmd` passa
+    pelo cmd.exe (metacaracteres de `--allowedTools` virariam injecao): usa o `claude.exe` ao lado do shim. Sem achar, devolve o
+    nome (o executor cai em BLOCKED_CLI com mensagem). `CLAUDE_BIN` sobrescreve."""
+    env = os.environ.get("CLAUDE_BIN")
+    if env:
+        return env
+    found = shutil.which(name)
+    if not found:
+        return name
+    if found.lower().endswith((".cmd", ".bat", ".ps1")):
+        exe = Path(found).parent / "node_modules" / "@anthropic-ai" / "claude-code" / "bin" / "claude.exe"
+        return str(exe) if exe.exists() else name
+    return found
 
 
 def child_env(base: dict | None = None) -> dict:
@@ -497,8 +518,9 @@ def main(argv: list[str] | None = None) -> int:
     except (PermissionError, RuntimeError) as exc:
         print(json.dumps({"at": es.now_iso(), "fatal": str(exc)[:300]}), flush=True)
         return 3
+    claude_bin = resolve_claude()
     while True:
-        res = run_cycle(eb.gh_json, policy, a.repo, a.execute)
+        res = run_cycle(eb.gh_json, policy, a.repo, a.execute, claude_bin=claude_bin)
         print(json.dumps({"at": es.now_iso(), "execute": a.execute, **res}, ensure_ascii=False), flush=True)
         if a.once:
             return 0
