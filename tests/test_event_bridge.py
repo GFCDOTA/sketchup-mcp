@@ -216,4 +216,4 @@ def test_main_exits_3_and_never_polls_when_gh_is_the_wrong_account(monkeypatch, 
 def test_launcher_contract_checks_the_login_not_only_that_gh_is_authenticated():
     ps1 = (Path(__file__).resolve().parents[1] / "tools/orchestration/run_event_bridge.ps1").read_text(encoding="utf-8")
     assert "api user" in ps1 and "ExpectedLogin" in ps1 and "fmodesto30" in ps1 and "exit 3" in ps1
-    assert "claude" not in ps1.lower().replace("claude code", "")             # fase 1: o launcher nao invoca o Claude
+    assert "--execute" in ps1 and "if ($Execute)" in ps1                    # executar so com -Execute explicito

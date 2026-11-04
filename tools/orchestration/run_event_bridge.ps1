@@ -1,9 +1,9 @@
 # Launcher do event_bridge (Issue #589, fase 1: dry-run). Sem bash/MSYS. Sem segredos: usa o `gh auth` ja existente do executor.
-# Uso:  powershell -File tools\orchestration\run_event_bridge.ps1 [-Once] [-IntervalSeconds 120]
+# Uso:  powershell -File tools\orchestration\run_event_bridge.ps1 [-Once] [-IntervalSeconds 120] [-Execute]
 # Log:  runs\governance\event_bridge.log (uma linha JSON por ciclo). Parar: Ctrl+C ou encerrar a tarefa agendada.
 # Agendador de Tarefas (logon do usuario, so roda com o PC ligado e a sessao ativa):
 #   schtasks /Create /TN "sketchup-mcp event bridge" /SC ONLOGON /TR "powershell -NoProfile -File <repo>\tools\orchestration\run_event_bridge.ps1"
-param([switch]$Once, [int]$IntervalSeconds = 120, [string]$ExpectedLogin = "fmodesto30")
+param([switch]$Once, [int]$IntervalSeconds = 120, [string]$ExpectedLogin = "fmodesto30", [switch]$Execute)
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $py = Join-Path $repo ".venv\Scripts\python.exe"
@@ -21,7 +21,9 @@ if ($login -ne $ExpectedLogin) { [Console]::Error.WriteLine("gh autenticado como
 $logDir = Join-Path $repo "runs\governance"
 New-Item -ItemType Directory -Force $logDir | Out-Null
 $log = Join-Path $logDir "event_bridge.log"
-$argsList = @("-m", "tools.orchestration.event_bridge", "poll", "--interval", $IntervalSeconds)
+# Sem -Execute: so ingestao (fase 1, dry-run). Com -Execute: event_executor consome a fila e roda o Claude local (fase 2).
+if ($Execute) { $argsList = @("-m", "tools.orchestration.event_executor", "run", "--interval", $IntervalSeconds, "--execute") }
+else { $argsList = @("-m", "tools.orchestration.event_executor", "run", "--interval", $IntervalSeconds) }
 if ($Once) { $argsList += "--once" }
 Push-Location $repo
 try { & $py @argsList 2>&1 | Tee-Object -FilePath $log -Append } finally { Pop-Location }
