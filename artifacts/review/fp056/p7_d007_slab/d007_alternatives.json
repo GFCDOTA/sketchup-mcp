@@ -1,0 +1,6485 @@
+{
+ "commit": "aa46a07b40f78d734e06bb08a9a751049af59126",
+ "dirty": false,
+ "issue": 447,
+ "variants": {
+  "a_atual": {
+   "label": "a_atual",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 15.901,
+    "r001": 15.409,
+    "r002": 14.737,
+    "r003": 7.977,
+    "r004": 5.289,
+    "r005": 3.2,
+    "r006": 2.867,
+    "r007": 1.85
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 390,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 51,
+    "r003": 47,
+    "r004": 76,
+    "r005": 59,
+    "r006": 58,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "PASS",
+   "preflight_by_room": {
+    "r000": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r006": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r007": {
+     "status": "PASS",
+     "blocking": {}
+    }
+   },
+   "twin": {
+    "new": [],
+    "worse": [],
+    "resolved": [
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": []
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.05598
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.05598
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.00059
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.00466
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.00464
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05086
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 12,
+    "R2": 2,
+    "R2b": 5,
+    "R3": 9,
+    "R5": 2
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box"
+   ],
+   "twin_findings_total": 30,
+   "seconds": 17.6
+  },
+  "a_atual+484b": {
+   "label": "a_atual+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 16.895,
+    "r001": 17.376,
+    "r002": 15.679,
+    "r003": 8.468,
+    "r004": 5.546,
+    "r005": 3.825,
+    "r006": 3.503,
+    "r007": 2.571
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 376,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 53,
+    "r003": 47,
+    "r004": 78,
+    "r005": 58,
+    "r006": 40,
+    "r007": 34
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Tanque/tanque 446.6 cm2",
+        "Maquina de lavar/maq_lavar 368.6 cm2",
+        "Armario de servico/armario_servico 502.6 cm2",
+        "Prateleira servico/prateleira_servico 893.3 cm2",
+        "Varal de teto/varal_teto 725.8 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 419.6 cm2",
+        "Sofa/plinth_riser 335.4 cm2",
+        "Sofa/base_main 503.4 cm2",
+        "Sofa/seat_2 153.1 cm2",
+        "Sofa/back_2 248.4 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [
+        "h_sb001:Sofa/arm_right 53.3 cm2",
+        "h_sb001:Sofa/base_main 149.5 cm2",
+        "h_sb001:Sofa/back_3 149.5 cm2"
+       ],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Bancada/bancada_banho 27.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r001|CONTAINMENT|Tanque",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Armario de servico",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Maquina de lavar",
+      "measure": 0.05584
+     },
+     {
+      "key": "r001|WALL|Tanque",
+      "measure": 0.05585
+     },
+     {
+      "key": "r002|CONTAINMENT|Rack TV",
+      "measure": 1.88847
+     },
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 0.8926
+     },
+     {
+      "key": "r002|CONTAINMENT|TV",
+      "measure": 1.87837
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 0.6365
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.36002
+     },
+     {
+      "key": "r004|CONTAINMENT|fridge",
+      "measure": 0.01279
+     },
+     {
+      "key": "r004|WALL|fridge",
+      "measure": 0.01484
+     },
+     {
+      "key": "r005|CONTAINMENT|Enxoval",
+      "measure": 0.05599
+     },
+     {
+      "key": "r005|WALL|Enxoval",
+      "measure": 0.056
+     },
+     {
+      "key": "r006|WALL|Bancada",
+      "measure": 0.00588
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r000|CONTAINMENT|rug",
+      "measure": 0.07909,
+      "baseline": 0.056
+     },
+     {
+      "key": "r000|WALL|rug",
+      "measure": 0.0792,
+      "baseline": 0.05603
+     },
+     {
+      "key": "r001|CONTAINMENT|Armario de servico",
+      "measure": 0.05583,
+      "baseline": 0.0331
+     },
+     {
+      "key": "r002|CONTAINMENT|Painel TV",
+      "measure": 2.17998,
+      "baseline": 0.0091
+     },
+     {
+      "key": "r004|CONTAINMENT|base_cabinet_01",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|CONTAINMENT|countertop",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|WALL|backsplash",
+      "measure": 0.04579,
+      "baseline": 0.00052
+     },
+     {
+      "key": "r004|WALL|base_cabinet_01",
+      "measure": 0.04988,
+      "baseline": 0.00462
+     },
+     {
+      "key": "r004|WALL|countertop",
+      "measure": 0.04986,
+      "baseline": 0.00464
+     },
+     {
+      "key": "r005|WALL|Box",
+      "measure": 0.05096,
+      "baseline": 0.05082
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.2728,
+      "baseline": 0.16383
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r005|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r006|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.07909
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.0792
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.04579
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.04988
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.04986
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05096
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 24,
+    "R2": 6,
+    "R3": 8,
+    "R5": 4
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r001|CONTAINMENT|Armario de servico",
+    "r001|CONTAINMENT|Maquina de lavar",
+    "r001|CONTAINMENT|Tanque",
+    "r001|WALL|Armario de servico",
+    "r001|WALL|Maquina de lavar",
+    "r001|WALL|Tanque",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|CONTAINMENT|fridge",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r004|WALL|fridge",
+    "r005|CONTAINMENT|Box",
+    "r005|CONTAINMENT|Enxoval",
+    "r005|WALL|Box",
+    "r005|WALL|Enxoval",
+    "r006|CONTAINMENT|Bancada",
+    "r006|WALL|Bancada"
+   ],
+   "twin_findings_total": 42,
+   "seconds": 23.6
+  },
+  "b_under0": {
+   "label": "b_under0",
+   "generation": "ABORTED",
+   "abort": {
+    "traceback": [
+     "artifacts/review/fp056/p7_d007_slab/measure_d007.py:123 measure",
+     "tools/orchestration/furnish_apartment.py:91 collect_boxes",
+     "tools/orchestration/furnish_apartment.py:110 collect_boxes_ex",
+     "tools/rooms/kitchen/validation/__init__.py:21 require_kitchen_anchor",
+     "SystemExit: [furnish-apt] BUILD ABORTADO: cozinha reprovou o anchor da pia (None)"
+    ],
+    "stdout_tail": [
+     "[furnish-apt] circulation_gate: mesa de centro OMITIDA — nenhuma posição preserva os 5 portais conectados (sala compacta, sofá+rack já deixam a faixa da varanda no limite)",
+     "",
+     "kitchen_validation => FAIL"
+    ],
+    "diagnostic_continuation": "gate da ancora da pia desligado SO para medir; a geracao real aborta"
+   },
+   "cell_m2": {
+    "r000": 14.832,
+    "r001": 14.152,
+    "r002": 13.803,
+    "r003": 7.333,
+    "r004": 4.769,
+    "r005": 2.767,
+    "r006": 2.453,
+    "r007": 1.551
+   },
+   "sink_anchor": {
+    "result": "FAIL",
+    "checks": {
+     "build": "sem parede limpa p/ bancada"
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'SUITE 01': escrivaninha não coube com cadeira puxada livre",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': tanque -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)"
+   ],
+   "n_boxes": 183,
+   "boxes_by_room": {
+    "r000": 50,
+    "r001": 8,
+    "r002": 28,
+    "r003": 0,
+    "r004": 0,
+    "r005": 39,
+    "r006": 35,
+    "r007": 23
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "NO_VALID_LAYOUT",
+    "r004": "NO_VALID_LAYOUT",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      },
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 147.3 cm2",
+        "Sofa/plinth_riser 63.1 cm2",
+        "Sofa/base_main 56.4 cm2",
+        "Sofa/seat_1 126.3 cm2",
+        "Sofa/back_1 90.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o004:Sofa/plinth 3564.7 cm2",
+        "h_o004:Sofa/plinth_riser 3140.9 cm2",
+        "h_o004:Sofa/base_main 3953.2 cm2",
+        "h_o004:Sofa/seat_1 928.6 cm2",
+        "h_o004:Sofa/seat_2 1417.0 cm2",
+        "h_o004:Sofa/back_1 357.5 cm2",
+        "h_o004:Sofa/back_2 910.8 cm2",
+        "h_o004:Sofa/almofada 295.7 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o004:Sofa/plinth 3700.3 cm2",
+        "h_o004:Sofa/plinth_riser 3264.1 cm2",
+        "h_o004:Sofa/base_main 4136.4 cm2",
+        "h_o004:Sofa/seat_1 1032.4 cm2",
+        "h_o004:Sofa/seat_2 1419.9 cm2",
+        "h_o004:Sofa/back_1 433.2 cm2",
+        "h_o004:Sofa/back_2 1006.9 cm2",
+        "h_o004:Sofa/almofada 324.3 cm2",
+        "h_o004:Tapete/rug_border 742.8 cm2",
+        "h_o004:Tapete/rug_field 364.4 cm2"
+       ]
+      }
+     }
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o002:Enxoval/kb_gancho 17.4 cm2",
+        "h_o002:Enxoval/kb_gancho 17.4 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o002:Enxoval/kb_gancho 17.4 cm2",
+        "h_o002:Enxoval/kb_gancho 17.4 cm2"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.4 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.4 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 1.7772
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 1.57644
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.10534
+     },
+     {
+      "key": "r002|WALL|Tapete",
+      "measure": 0.36327
+     },
+     {
+      "key": "r005|DOOR|h_o002",
+      "measure": 24.0
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|CONTAINMENT|Bancada",
+      "measure": 0.04602
+     },
+     {
+      "key": "r007|CONTAINMENT|Enxoval",
+      "measure": 0.01605
+     },
+     {
+      "key": "r007|CONTAINMENT|Espelho",
+      "measure": 0.04018
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r000|CONTAINMENT|Guarda-roupa",
+      "measure": 0.05105,
+      "baseline": 0.0078
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|rug",
+     "r000|WALL|rug",
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r002|CONTAINMENT|Painel TV",
+     "r003|DOOR|h_o004",
+     "r005|CONTAINMENT|Bancada",
+     "r005|OBJECTS|Enxoval+Espelho",
+     "r005|OBJECTS|Enxoval+Vaso",
+     "r006|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r003|CONTAINMENT|rug",
+     "r003|OBJECTS|Cama+Painel cabeceira",
+     "r003|WALL|rug",
+     "r004|CONTAINMENT|base_cabinet_01",
+     "r004|CONTAINMENT|countertop",
+     "r004|OBJECTS|backsplash+cooktop_module",
+     "r004|OBJECTS|backsplash+sink_module",
+     "r004|WALL|backsplash",
+     "r004|WALL|base_cabinet_01",
+     "r004|WALL|countertop",
+     "r005|CONTAINMENT|Box",
+     "r005|WALL|Box",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r007|PROGRAM|Vaso",
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta",
+     "r001|PROGRAM|Tanque",
+     "r004|PROGRAM|backsplash",
+     "r004|PROGRAM|base_cabinet_01",
+     "r004|PROGRAM|cooktop_module",
+     "r004|PROGRAM|countertop",
+     "r004|PROGRAM|decor_board",
+     "r004|PROGRAM|decor_vaso",
+     "r004|PROGRAM|fridge",
+     "r004|PROGRAM|hood",
+     "r004|PROGRAM|sink_module",
+     "r004|PROGRAM|upper_cabinet_01",
+     "r004|PROGRAM|upper_cabinet_02",
+     "r000|PROGRAM|Escrivaninha",
+     "r005|PROGRAM|Box",
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug"
+    ],
+    "missing_program_unregistered": [
+     "r000|PROGRAM|Escrivaninha",
+     "r001|PROGRAM|Tanque",
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente",
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug",
+     "r004|PROGRAM|backsplash",
+     "r004|PROGRAM|base_cabinet_01",
+     "r004|PROGRAM|cooktop_module",
+     "r004|PROGRAM|countertop",
+     "r004|PROGRAM|decor_board",
+     "r004|PROGRAM|decor_vaso",
+     "r004|PROGRAM|fridge",
+     "r004|PROGRAM|hood",
+     "r004|PROGRAM|sink_module",
+     "r004|PROGRAM|upper_cabinet_01",
+     "r004|PROGRAM|upper_cabinet_02",
+     "r005|PROGRAM|Box",
+     "r006|PROGRAM|Box",
+     "r007|PROGRAM|Vaso"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": null
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": null
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": null
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": null
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": null
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": null
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": null
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": null
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": null
+    }
+   },
+   "r1_baseline_persisting": 0,
+   "twin_findings_by_cause": {
+    "R2": 4,
+    "R2b": 4,
+    "R3": 3,
+    "R5": 4
+   },
+   "twin_r1_findings": [],
+   "twin_findings_total": 15,
+   "seconds": 13.4
+  },
+  "b_under0+484b": {
+   "label": "b_under0+484b",
+   "generation": "ABORTED",
+   "abort": {
+    "traceback": [
+     "artifacts/review/fp056/p7_d007_slab/measure_d007.py:123 measure",
+     "tools/orchestration/furnish_apartment.py:91 collect_boxes",
+     "tools/orchestration/furnish_apartment.py:110 collect_boxes_ex",
+     "tools/rooms/kitchen/validation/__init__.py:21 require_kitchen_anchor",
+     "SystemExit: [furnish-apt] BUILD ABORTADO: cozinha reprovou o anchor da pia (None)"
+    ],
+    "stdout_tail": [
+     "[furnish-apt] circulation_gate: mesa de centro OMITIDA — nenhuma posição preserva os 5 portais conectados (sala compacta, sofá+rack já deixam a faixa da varanda no limite)",
+     "",
+     "kitchen_validation => FAIL"
+    ],
+    "diagnostic_continuation": "gate da ancora da pia desligado SO para medir; a geracao real aborta"
+   },
+   "cell_m2": {
+    "r000": 15.793,
+    "r001": 15.987,
+    "r002": 14.743,
+    "r003": 7.807,
+    "r004": 5.012,
+    "r005": 3.383,
+    "r006": 3.064,
+    "r007": 2.219
+   },
+   "sink_anchor": {
+    "result": "FAIL",
+    "checks": {
+     "build": "sem parede limpa p/ bancada"
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)"
+   ],
+   "n_boxes": 269,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 53,
+    "r003": 0,
+    "r004": 0,
+    "r005": 60,
+    "r006": 57,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "NO_VALID_LAYOUT",
+    "r004": "NO_VALID_LAYOUT",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 419.6 cm2",
+        "Sofa/plinth_riser 335.4 cm2",
+        "Sofa/base_main 503.4 cm2",
+        "Sofa/seat_2 153.1 cm2",
+        "Sofa/back_2 248.4 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [
+        "h_sb001:Sofa/arm_right 53.3 cm2",
+        "h_sb001:Sofa/base_main 149.5 cm2",
+        "h_sb001:Sofa/back_3 149.5 cm2"
+       ],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r006|OBJECTS|Bancada+Enxoval"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 346.8 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 347.7 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r002|CONTAINMENT|Rack TV",
+      "measure": 1.88847
+     },
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 0.8926
+     },
+     {
+      "key": "r002|CONTAINMENT|TV",
+      "measure": 1.87837
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 0.69244
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.36002
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r002|CONTAINMENT|Painel TV",
+      "measure": 2.17998,
+      "baseline": 0.0091
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.32895,
+      "baseline": 0.16383
+     },
+     {
+      "key": "r006|OBJECTS|Bancada+Enxoval",
+      "measure": 0.09907,
+      "baseline": 0.09392
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r000|CONTAINMENT|rug",
+     "r000|WALL|rug",
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r003|DOOR|h_o004",
+     "r005|CONTAINMENT|Bancada",
+     "r006|CONTAINMENT|Bancada",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r003|CONTAINMENT|rug",
+     "r003|OBJECTS|Cama+Painel cabeceira",
+     "r003|WALL|rug",
+     "r004|CONTAINMENT|base_cabinet_01",
+     "r004|CONTAINMENT|countertop",
+     "r004|OBJECTS|backsplash+cooktop_module",
+     "r004|OBJECTS|backsplash+sink_module",
+     "r004|WALL|backsplash",
+     "r004|WALL|base_cabinet_01",
+     "r004|WALL|countertop"
+    ],
+    "twin_borderline_ignored": [],
+    "missing_program": [
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta",
+     "r004|PROGRAM|backsplash",
+     "r004|PROGRAM|base_cabinet_01",
+     "r004|PROGRAM|cooktop_module",
+     "r004|PROGRAM|countertop",
+     "r004|PROGRAM|decor_board",
+     "r004|PROGRAM|decor_vaso",
+     "r004|PROGRAM|fridge",
+     "r004|PROGRAM|hood",
+     "r004|PROGRAM|sink_module",
+     "r004|PROGRAM|upper_cabinet_01",
+     "r004|PROGRAM|upper_cabinet_02",
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug"
+    ],
+    "missing_program_unregistered": [
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug",
+     "r004|PROGRAM|backsplash",
+     "r004|PROGRAM|base_cabinet_01",
+     "r004|PROGRAM|cooktop_module",
+     "r004|PROGRAM|countertop",
+     "r004|PROGRAM|decor_board",
+     "r004|PROGRAM|decor_vaso",
+     "r004|PROGRAM|fridge",
+     "r004|PROGRAM|hood",
+     "r004|PROGRAM|sink_module",
+     "r004|PROGRAM|upper_cabinet_01",
+     "r004|PROGRAM|upper_cabinet_02"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": null
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": null
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": null
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": null
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": null
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": null
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": null
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.00596
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.00598
+    }
+   },
+   "r1_baseline_persisting": 2,
+   "twin_findings_by_cause": {
+    "R2": 8,
+    "R3": 6,
+    "R5": 2
+   },
+   "twin_r1_findings": [],
+   "twin_findings_total": 16,
+   "seconds": 11.2
+  },
+  "c_usable_global": {
+   "label": "c_usable_global",
+   "generation": "ABORTED",
+   "abort": {
+    "traceback": [
+     "artifacts/review/fp056/p7_d007_slab/measure_d007.py:123 measure",
+     "tools/orchestration/furnish_apartment.py:91 collect_boxes",
+     "tools/orchestration/furnish_apartment.py:110 collect_boxes_ex",
+     "tools/rooms/kitchen/validation/__init__.py:21 require_kitchen_anchor",
+     "SystemExit: [furnish-apt] BUILD ABORTADO: cozinha reprovou o anchor da pia (LEFT)"
+    ],
+    "stdout_tail": [
+     "- kitchen_door_clearance_ok = false  (bloqueando: ['countertop'])",
+     "- modules_grouped_individually = true",
+     "kitchen_validation => FAIL"
+    ],
+    "diagnostic_continuation": "gate da ancora da pia desligado SO para medir; a geracao real aborta"
+   },
+   "cell_m2": {
+    "r000": 14.832,
+    "r001": 14.152,
+    "r002": 13.693,
+    "r003": 7.333,
+    "r004": 4.882,
+    "r005": 2.767,
+    "r006": 2.453,
+    "r007": 1.551
+   },
+   "sink_anchor": {
+    "result": "FAIL",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": false,
+     "_blocking": [
+      "countertop"
+     ],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'SUITE 01': escrivaninha não coube com cadeira puxada livre",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': tanque -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)"
+   ],
+   "n_boxes": 255,
+   "boxes_by_room": {
+    "r000": 50,
+    "r001": 8,
+    "r002": 28,
+    "r003": 0,
+    "r004": 72,
+    "r005": 39,
+    "r006": 35,
+    "r007": 23
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "NO_VALID_LAYOUT",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      },
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 147.3 cm2",
+        "Sofa/plinth_riser 63.1 cm2",
+        "Sofa/base_main 56.4 cm2",
+        "Sofa/seat_1 126.3 cm2",
+        "Sofa/back_1 90.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o004:Sofa/plinth 3564.7 cm2",
+        "h_o004:Sofa/plinth_riser 3140.9 cm2",
+        "h_o004:Sofa/base_main 3953.2 cm2",
+        "h_o004:Sofa/seat_1 928.6 cm2",
+        "h_o004:Sofa/seat_2 1417.0 cm2",
+        "h_o004:Sofa/back_1 357.5 cm2",
+        "h_o004:Sofa/back_2 910.8 cm2",
+        "h_o004:Sofa/almofada 295.7 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o004:Sofa/plinth 3700.3 cm2",
+        "h_o004:Sofa/plinth_riser 3264.1 cm2",
+        "h_o004:Sofa/base_main 4136.4 cm2",
+        "h_o004:Sofa/seat_1 1032.4 cm2",
+        "h_o004:Sofa/seat_2 1419.9 cm2",
+        "h_o004:Sofa/back_1 433.2 cm2",
+        "h_o004:Sofa/back_2 1006.9 cm2",
+        "h_o004:Sofa/almofada 324.3 cm2",
+        "h_o004:Tapete/rug_border 742.8 cm2",
+        "h_o004:Tapete/rug_field 364.4 cm2"
+       ]
+      }
+     }
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o002:Enxoval/kb_gancho 17.4 cm2",
+        "h_o002:Enxoval/kb_gancho 17.4 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o002:Enxoval/kb_gancho 17.4 cm2",
+        "h_o002:Enxoval/kb_gancho 17.4 cm2"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.4 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.4 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 1.72067
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 1.52051
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.10534
+     },
+     {
+      "key": "r002|WALL|Tapete",
+      "measure": 0.36327
+     },
+     {
+      "key": "r005|DOOR|h_o002",
+      "measure": 24.0
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r000|CONTAINMENT|rug",
+     "r000|WALL|rug",
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r002|CONTAINMENT|Painel TV",
+     "r003|DOOR|h_o004",
+     "r004|CONTAINMENT|base_cabinet_01",
+     "r004|CONTAINMENT|countertop",
+     "r004|WALL|backsplash",
+     "r004|WALL|base_cabinet_01",
+     "r004|WALL|countertop",
+     "r005|CONTAINMENT|Bancada",
+     "r005|OBJECTS|Enxoval+Espelho",
+     "r005|OBJECTS|Enxoval+Vaso",
+     "r006|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r003|CONTAINMENT|rug",
+     "r003|OBJECTS|Cama+Painel cabeceira",
+     "r003|WALL|rug",
+     "r005|CONTAINMENT|Box",
+     "r005|WALL|Box",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r007|PROGRAM|Vaso",
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta",
+     "r001|PROGRAM|Tanque",
+     "r000|PROGRAM|Escrivaninha",
+     "r005|PROGRAM|Box",
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug"
+    ],
+    "missing_program_unregistered": [
+     "r000|PROGRAM|Escrivaninha",
+     "r001|PROGRAM|Tanque",
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente",
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug",
+     "r005|PROGRAM|Box",
+     "r006|PROGRAM|Box",
+     "r007|PROGRAM|Vaso"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": null
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": null
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": null
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": null
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": null
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": null
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": null
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": null
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": null
+    }
+   },
+   "r1_baseline_persisting": 0,
+   "twin_findings_by_cause": {
+    "R2": 4,
+    "R3": 5,
+    "R5": 4
+   },
+   "twin_r1_findings": [],
+   "twin_findings_total": 13,
+   "seconds": 14.5
+  },
+  "c_usable_global+484b": {
+   "label": "c_usable_global+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 15.793,
+    "r001": 15.962,
+    "r002": 14.432,
+    "r003": 7.807,
+    "r004": 5.324,
+    "r005": 3.383,
+    "r006": 3.064,
+    "r007": 2.219
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)"
+   ],
+   "n_boxes": 318,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 26,
+    "r003": 0,
+    "r004": 76,
+    "r005": 60,
+    "r006": 57,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "NO_VALID_LAYOUT",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r006|OBJECTS|Bancada+Enxoval"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 346.8 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 347.7 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.32895,
+      "baseline": 0.16383
+     },
+     {
+      "key": "r006|OBJECTS|Bancada+Enxoval",
+      "measure": 0.09907,
+      "baseline": 0.09392
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r000|CONTAINMENT|rug",
+     "r000|WALL|rug",
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r002|CONTAINMENT|Painel TV",
+     "r003|DOOR|h_o004",
+     "r004|CONTAINMENT|base_cabinet_01",
+     "r004|CONTAINMENT|countertop",
+     "r004|WALL|backsplash",
+     "r004|WALL|base_cabinet_01",
+     "r004|WALL|countertop",
+     "r005|CONTAINMENT|Bancada",
+     "r006|CONTAINMENT|Bancada",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r003|CONTAINMENT|rug",
+     "r003|OBJECTS|Cama+Painel cabeceira",
+     "r003|WALL|rug"
+    ],
+    "twin_borderline_ignored": [],
+    "missing_program": [
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta",
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug"
+    ],
+    "missing_program_unregistered": [
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente",
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": null
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": null
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": null
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": null
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": null
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": null
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": null
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.00596
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.00598
+    }
+   },
+   "r1_baseline_persisting": 2,
+   "twin_findings_by_cause": {
+    "R1": 2,
+    "R3": 8,
+    "R5": 2
+   },
+   "twin_r1_findings": [
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box"
+   ],
+   "twin_findings_total": 12,
+   "seconds": 14.8
+  },
+  "c_usable_only_r000": {
+   "label": "c_usable_only_r000",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 14.832,
+    "r001": 15.409,
+    "r002": 14.737,
+    "r003": 7.977,
+    "r004": 5.289,
+    "r005": 3.2,
+    "r006": 2.867,
+    "r007": 1.85
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'SUITE 01': escrivaninha não coube com cadeira puxada livre",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 383,
+   "boxes_by_room": {
+    "r000": 50,
+    "r001": 9,
+    "r002": 51,
+    "r003": 47,
+    "r004": 76,
+    "r005": 59,
+    "r006": 58,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r006": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r007": {
+     "status": "PASS",
+     "blocking": {}
+    }
+   },
+   "twin": {
+    "new": [],
+    "worse": [],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r000|CONTAINMENT|rug",
+     "r000|WALL|rug",
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta",
+     "r000|PROGRAM|Escrivaninha"
+    ],
+    "missing_program_unregistered": [
+     "r000|PROGRAM|Escrivaninha"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": null
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": null
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.00059
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.00466
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.00464
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05086
+    }
+   },
+   "r1_baseline_persisting": 9,
+   "twin_findings_by_cause": {
+    "R1": 10,
+    "R2": 2,
+    "R2b": 4,
+    "R3": 9,
+    "R5": 2
+   },
+   "twin_r1_findings": [
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box"
+   ],
+   "twin_findings_total": 27,
+   "seconds": 23.4
+  },
+  "c_usable_only_r000+484b": {
+   "label": "c_usable_only_r000+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 15.793,
+    "r001": 17.376,
+    "r002": 15.679,
+    "r003": 8.468,
+    "r004": 5.546,
+    "r005": 3.825,
+    "r006": 3.503,
+    "r007": 2.571
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 376,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 53,
+    "r003": 47,
+    "r004": 78,
+    "r005": 58,
+    "r006": 40,
+    "r007": 34
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Tanque/tanque 446.6 cm2",
+        "Maquina de lavar/maq_lavar 368.6 cm2",
+        "Armario de servico/armario_servico 502.6 cm2",
+        "Prateleira servico/prateleira_servico 893.3 cm2",
+        "Varal de teto/varal_teto 725.8 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 419.6 cm2",
+        "Sofa/plinth_riser 335.4 cm2",
+        "Sofa/base_main 503.4 cm2",
+        "Sofa/seat_2 153.1 cm2",
+        "Sofa/back_2 248.4 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [
+        "h_sb001:Sofa/arm_right 53.3 cm2",
+        "h_sb001:Sofa/base_main 149.5 cm2",
+        "h_sb001:Sofa/back_3 149.5 cm2"
+       ],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Bancada/bancada_banho 27.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r001|CONTAINMENT|Tanque",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Armario de servico",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Maquina de lavar",
+      "measure": 0.05584
+     },
+     {
+      "key": "r001|WALL|Tanque",
+      "measure": 0.05585
+     },
+     {
+      "key": "r002|CONTAINMENT|Rack TV",
+      "measure": 1.88847
+     },
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 0.8926
+     },
+     {
+      "key": "r002|CONTAINMENT|TV",
+      "measure": 1.87837
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 0.6365
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.36002
+     },
+     {
+      "key": "r004|CONTAINMENT|fridge",
+      "measure": 0.01279
+     },
+     {
+      "key": "r004|WALL|fridge",
+      "measure": 0.01484
+     },
+     {
+      "key": "r005|CONTAINMENT|Enxoval",
+      "measure": 0.05599
+     },
+     {
+      "key": "r005|WALL|Enxoval",
+      "measure": 0.056
+     },
+     {
+      "key": "r006|WALL|Bancada",
+      "measure": 0.00588
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r001|CONTAINMENT|Armario de servico",
+      "measure": 0.05583,
+      "baseline": 0.0331
+     },
+     {
+      "key": "r002|CONTAINMENT|Painel TV",
+      "measure": 2.17998,
+      "baseline": 0.0091
+     },
+     {
+      "key": "r004|CONTAINMENT|base_cabinet_01",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|CONTAINMENT|countertop",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|WALL|backsplash",
+      "measure": 0.04579,
+      "baseline": 0.00052
+     },
+     {
+      "key": "r004|WALL|base_cabinet_01",
+      "measure": 0.04988,
+      "baseline": 0.00462
+     },
+     {
+      "key": "r004|WALL|countertop",
+      "measure": 0.04986,
+      "baseline": 0.00464
+     },
+     {
+      "key": "r005|WALL|Box",
+      "measure": 0.05096,
+      "baseline": 0.05082
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.2728,
+      "baseline": 0.16383
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r000|CONTAINMENT|rug",
+     "r000|WALL|rug",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r005|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r006|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": null
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": null
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.04579
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.04988
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.04986
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05096
+    }
+   },
+   "r1_baseline_persisting": 9,
+   "twin_findings_by_cause": {
+    "R1": 22,
+    "R2": 6,
+    "R3": 8,
+    "R5": 4
+   },
+   "twin_r1_findings": [
+    "r001|CONTAINMENT|Armario de servico",
+    "r001|CONTAINMENT|Maquina de lavar",
+    "r001|CONTAINMENT|Tanque",
+    "r001|WALL|Armario de servico",
+    "r001|WALL|Maquina de lavar",
+    "r001|WALL|Tanque",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|CONTAINMENT|fridge",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r004|WALL|fridge",
+    "r005|CONTAINMENT|Box",
+    "r005|CONTAINMENT|Enxoval",
+    "r005|WALL|Box",
+    "r005|WALL|Enxoval",
+    "r006|CONTAINMENT|Bancada",
+    "r006|WALL|Bancada"
+   ],
+   "twin_findings_total": 40,
+   "seconds": 26.0
+  },
+  "c_usable_only_r001": {
+   "label": "c_usable_only_r001",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 15.901,
+    "r001": 14.152,
+    "r002": 14.737,
+    "r003": 7.977,
+    "r004": 5.289,
+    "r005": 3.2,
+    "r006": 2.867,
+    "r007": 1.85
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': tanque -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 389,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 8,
+    "r002": 51,
+    "r003": 47,
+    "r004": 76,
+    "r005": 59,
+    "r006": 58,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "PASS",
+   "preflight_by_room": {
+    "r000": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r006": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r007": {
+     "status": "PASS",
+     "blocking": {}
+    }
+   },
+   "twin": {
+    "new": [],
+    "worse": [],
+    "resolved": [
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta",
+     "r001|PROGRAM|Tanque"
+    ],
+    "missing_program_unregistered": [
+     "r001|PROGRAM|Tanque"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.05598
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.05598
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.00059
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.00466
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.00464
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05086
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 12,
+    "R2": 2,
+    "R2b": 5,
+    "R3": 9,
+    "R5": 2
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box"
+   ],
+   "twin_findings_total": 30,
+   "seconds": 25.4
+  },
+  "c_usable_only_r001+484b": {
+   "label": "c_usable_only_r001+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 16.895,
+    "r001": 15.962,
+    "r002": 15.679,
+    "r003": 8.468,
+    "r004": 5.546,
+    "r005": 3.825,
+    "r006": 3.503,
+    "r007": 2.571
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 376,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 53,
+    "r003": 47,
+    "r004": 78,
+    "r005": 58,
+    "r006": 40,
+    "r007": 34
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 419.6 cm2",
+        "Sofa/plinth_riser 335.4 cm2",
+        "Sofa/base_main 503.4 cm2",
+        "Sofa/seat_2 153.1 cm2",
+        "Sofa/back_2 248.4 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [
+        "h_sb001:Sofa/arm_right 53.3 cm2",
+        "h_sb001:Sofa/base_main 149.5 cm2",
+        "h_sb001:Sofa/back_3 149.5 cm2"
+       ],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Bancada/bancada_banho 27.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r002|CONTAINMENT|Rack TV",
+      "measure": 1.88847
+     },
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 0.8926
+     },
+     {
+      "key": "r002|CONTAINMENT|TV",
+      "measure": 1.87837
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 0.6365
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.36002
+     },
+     {
+      "key": "r004|CONTAINMENT|fridge",
+      "measure": 0.01279
+     },
+     {
+      "key": "r004|WALL|fridge",
+      "measure": 0.01484
+     },
+     {
+      "key": "r005|CONTAINMENT|Enxoval",
+      "measure": 0.05599
+     },
+     {
+      "key": "r005|WALL|Enxoval",
+      "measure": 0.056
+     },
+     {
+      "key": "r006|WALL|Bancada",
+      "measure": 0.00588
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r000|CONTAINMENT|rug",
+      "measure": 0.07909,
+      "baseline": 0.056
+     },
+     {
+      "key": "r000|WALL|rug",
+      "measure": 0.0792,
+      "baseline": 0.05603
+     },
+     {
+      "key": "r002|CONTAINMENT|Painel TV",
+      "measure": 2.17998,
+      "baseline": 0.0091
+     },
+     {
+      "key": "r004|CONTAINMENT|base_cabinet_01",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|CONTAINMENT|countertop",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|WALL|backsplash",
+      "measure": 0.04579,
+      "baseline": 0.00052
+     },
+     {
+      "key": "r004|WALL|base_cabinet_01",
+      "measure": 0.04988,
+      "baseline": 0.00462
+     },
+     {
+      "key": "r004|WALL|countertop",
+      "measure": 0.04986,
+      "baseline": 0.00464
+     },
+     {
+      "key": "r005|WALL|Box",
+      "measure": 0.05096,
+      "baseline": 0.05082
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.2728,
+      "baseline": 0.16383
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r005|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r006|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.07909
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.0792
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.04579
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.04988
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.04986
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05096
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 18,
+    "R2": 6,
+    "R3": 8,
+    "R5": 4
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|CONTAINMENT|fridge",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r004|WALL|fridge",
+    "r005|CONTAINMENT|Box",
+    "r005|CONTAINMENT|Enxoval",
+    "r005|WALL|Box",
+    "r005|WALL|Enxoval",
+    "r006|CONTAINMENT|Bancada",
+    "r006|WALL|Bancada"
+   ],
+   "twin_findings_total": 36,
+   "seconds": 26.5
+  },
+  "c_usable_only_r002": {
+   "label": "c_usable_only_r002",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 15.901,
+    "r001": 15.409,
+    "r002": 13.693,
+    "r003": 7.977,
+    "r004": 5.289,
+    "r005": 3.2,
+    "r006": 2.867,
+    "r007": 1.85
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 367,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 28,
+    "r003": 47,
+    "r004": 76,
+    "r005": 59,
+    "r006": 58,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      },
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 147.3 cm2",
+        "Sofa/plinth_riser 63.1 cm2",
+        "Sofa/base_main 56.4 cm2",
+        "Sofa/seat_1 126.3 cm2",
+        "Sofa/back_1 90.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o004:Sofa/plinth 3564.7 cm2",
+        "h_o004:Sofa/plinth_riser 3140.9 cm2",
+        "h_o004:Sofa/base_main 3953.2 cm2",
+        "h_o004:Sofa/seat_1 928.6 cm2",
+        "h_o004:Sofa/seat_2 1417.0 cm2",
+        "h_o004:Sofa/back_1 357.5 cm2",
+        "h_o004:Sofa/back_2 910.8 cm2",
+        "h_o004:Sofa/almofada 295.7 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o004:Sofa/plinth 3700.3 cm2",
+        "h_o004:Sofa/plinth_riser 3264.1 cm2",
+        "h_o004:Sofa/base_main 4136.4 cm2",
+        "h_o004:Sofa/seat_1 1032.4 cm2",
+        "h_o004:Sofa/seat_2 1419.9 cm2",
+        "h_o004:Sofa/back_1 433.2 cm2",
+        "h_o004:Sofa/back_2 1006.9 cm2",
+        "h_o004:Sofa/almofada 324.3 cm2",
+        "h_o004:Tapete/rug_border 742.8 cm2",
+        "h_o004:Tapete/rug_field 364.4 cm2"
+       ]
+      }
+     }
+    },
+    "r003": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r006": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r007": {
+     "status": "PASS",
+     "blocking": {}
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 1.72067
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 1.52051
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.10534
+     },
+     {
+      "key": "r002|WALL|Tapete",
+      "measure": 0.36327
+     }
+    ],
+    "worse": [],
+    "resolved": [
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r002|CONTAINMENT|Painel TV"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.05598
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.05598
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.00059
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.00466
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.00464
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05086
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 12,
+    "R2": 6,
+    "R2b": 4,
+    "R3": 9,
+    "R5": 2
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box"
+   ],
+   "twin_findings_total": 33,
+   "seconds": 23.7
+  },
+  "c_usable_only_r002+484b": {
+   "label": "c_usable_only_r002+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 16.895,
+    "r001": 17.376,
+    "r002": 14.432,
+    "r003": 8.468,
+    "r004": 5.546,
+    "r005": 3.825,
+    "r006": 3.503,
+    "r007": 2.571
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 349,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 26,
+    "r003": 47,
+    "r004": 78,
+    "r005": 58,
+    "r006": 40,
+    "r007": 34
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Tanque/tanque 446.6 cm2",
+        "Maquina de lavar/maq_lavar 368.6 cm2",
+        "Armario de servico/armario_servico 502.6 cm2",
+        "Prateleira servico/prateleira_servico 893.3 cm2",
+        "Varal de teto/varal_teto 725.8 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Bancada/bancada_banho 27.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r001|CONTAINMENT|Tanque",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Armario de servico",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Maquina de lavar",
+      "measure": 0.05584
+     },
+     {
+      "key": "r001|WALL|Tanque",
+      "measure": 0.05585
+     },
+     {
+      "key": "r004|CONTAINMENT|fridge",
+      "measure": 0.01279
+     },
+     {
+      "key": "r004|WALL|fridge",
+      "measure": 0.01484
+     },
+     {
+      "key": "r005|CONTAINMENT|Enxoval",
+      "measure": 0.05599
+     },
+     {
+      "key": "r005|WALL|Enxoval",
+      "measure": 0.056
+     },
+     {
+      "key": "r006|WALL|Bancada",
+      "measure": 0.00588
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r000|CONTAINMENT|rug",
+      "measure": 0.07909,
+      "baseline": 0.056
+     },
+     {
+      "key": "r000|WALL|rug",
+      "measure": 0.0792,
+      "baseline": 0.05603
+     },
+     {
+      "key": "r001|CONTAINMENT|Armario de servico",
+      "measure": 0.05583,
+      "baseline": 0.0331
+     },
+     {
+      "key": "r004|CONTAINMENT|base_cabinet_01",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|CONTAINMENT|countertop",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|WALL|backsplash",
+      "measure": 0.04579,
+      "baseline": 0.00052
+     },
+     {
+      "key": "r004|WALL|base_cabinet_01",
+      "measure": 0.04988,
+      "baseline": 0.00462
+     },
+     {
+      "key": "r004|WALL|countertop",
+      "measure": 0.04986,
+      "baseline": 0.00464
+     },
+     {
+      "key": "r005|WALL|Box",
+      "measure": 0.05096,
+      "baseline": 0.05082
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.2728,
+      "baseline": 0.16383
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r002|CONTAINMENT|Painel TV",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r005|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r002|PROGRAM|Cadeira jantar",
+     "r002|PROGRAM|Mesa de jantar",
+     "r002|PROGRAM|Pendente",
+     "r006|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.07909
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.0792
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.04579
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.04988
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.04986
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05096
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 24,
+    "R3": 8,
+    "R5": 4
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r001|CONTAINMENT|Armario de servico",
+    "r001|CONTAINMENT|Maquina de lavar",
+    "r001|CONTAINMENT|Tanque",
+    "r001|WALL|Armario de servico",
+    "r001|WALL|Maquina de lavar",
+    "r001|WALL|Tanque",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|CONTAINMENT|fridge",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r004|WALL|fridge",
+    "r005|CONTAINMENT|Box",
+    "r005|CONTAINMENT|Enxoval",
+    "r005|WALL|Box",
+    "r005|WALL|Enxoval",
+    "r006|CONTAINMENT|Bancada",
+    "r006|WALL|Bancada"
+   ],
+   "twin_findings_total": 36,
+   "seconds": 27.4
+  },
+  "c_usable_only_r003": {
+   "label": "c_usable_only_r003",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 15.901,
+    "r001": 15.409,
+    "r002": 14.737,
+    "r003": 7.333,
+    "r004": 5.289,
+    "r005": 3.2,
+    "r006": 2.867,
+    "r007": 1.85
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)"
+   ],
+   "n_boxes": 343,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 51,
+    "r003": 0,
+    "r004": 76,
+    "r005": 59,
+    "r006": 58,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "NO_VALID_LAYOUT",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "PASS",
+   "preflight_by_room": {
+    "r000": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r006": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r007": {
+     "status": "PASS",
+     "blocking": {}
+    }
+   },
+   "twin": {
+    "new": [],
+    "worse": [],
+    "resolved": [
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r003|DOOR|h_o004"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r003|CONTAINMENT|rug",
+     "r003|OBJECTS|Cama+Painel cabeceira",
+     "r003|WALL|rug"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta",
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug"
+    ],
+    "missing_program_unregistered": [
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.05598
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.05598
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": null
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": null
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.00059
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.00466
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.00464
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05086
+    }
+   },
+   "r1_baseline_persisting": 9,
+   "twin_findings_by_cause": {
+    "R1": 10,
+    "R2": 2,
+    "R2b": 4,
+    "R3": 8,
+    "R5": 1
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box"
+   ],
+   "twin_findings_total": 25,
+   "seconds": 17.9
+  },
+  "c_usable_only_r003+484b": {
+   "label": "c_usable_only_r003+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 16.895,
+    "r001": 17.376,
+    "r002": 15.679,
+    "r003": 7.807,
+    "r004": 5.546,
+    "r005": 3.825,
+    "r006": 3.503,
+    "r007": 2.571
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)"
+   ],
+   "n_boxes": 329,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 53,
+    "r003": 0,
+    "r004": 78,
+    "r005": 58,
+    "r006": 40,
+    "r007": 34
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "NO_VALID_LAYOUT",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Tanque/tanque 446.6 cm2",
+        "Maquina de lavar/maq_lavar 368.6 cm2",
+        "Armario de servico/armario_servico 502.6 cm2",
+        "Prateleira servico/prateleira_servico 893.3 cm2",
+        "Varal de teto/varal_teto 725.8 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 419.6 cm2",
+        "Sofa/plinth_riser 335.4 cm2",
+        "Sofa/base_main 503.4 cm2",
+        "Sofa/seat_2 153.1 cm2",
+        "Sofa/back_2 248.4 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [
+        "h_sb001:Sofa/arm_right 53.3 cm2",
+        "h_sb001:Sofa/base_main 149.5 cm2",
+        "h_sb001:Sofa/back_3 149.5 cm2"
+       ],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Bancada/bancada_banho 27.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r001|CONTAINMENT|Tanque",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Armario de servico",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Maquina de lavar",
+      "measure": 0.05584
+     },
+     {
+      "key": "r001|WALL|Tanque",
+      "measure": 0.05585
+     },
+     {
+      "key": "r002|CONTAINMENT|Rack TV",
+      "measure": 1.88847
+     },
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 0.8926
+     },
+     {
+      "key": "r002|CONTAINMENT|TV",
+      "measure": 1.87837
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 0.6365
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.36002
+     },
+     {
+      "key": "r004|CONTAINMENT|fridge",
+      "measure": 0.01279
+     },
+     {
+      "key": "r004|WALL|fridge",
+      "measure": 0.01484
+     },
+     {
+      "key": "r005|CONTAINMENT|Enxoval",
+      "measure": 0.05599
+     },
+     {
+      "key": "r005|WALL|Enxoval",
+      "measure": 0.056
+     },
+     {
+      "key": "r006|WALL|Bancada",
+      "measure": 0.00588
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r000|CONTAINMENT|rug",
+      "measure": 0.07909,
+      "baseline": 0.056
+     },
+     {
+      "key": "r000|WALL|rug",
+      "measure": 0.0792,
+      "baseline": 0.05603
+     },
+     {
+      "key": "r001|CONTAINMENT|Armario de servico",
+      "measure": 0.05583,
+      "baseline": 0.0331
+     },
+     {
+      "key": "r002|CONTAINMENT|Painel TV",
+      "measure": 2.17998,
+      "baseline": 0.0091
+     },
+     {
+      "key": "r004|CONTAINMENT|base_cabinet_01",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|CONTAINMENT|countertop",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|WALL|backsplash",
+      "measure": 0.04579,
+      "baseline": 0.00052
+     },
+     {
+      "key": "r004|WALL|base_cabinet_01",
+      "measure": 0.04988,
+      "baseline": 0.00462
+     },
+     {
+      "key": "r004|WALL|countertop",
+      "measure": 0.04986,
+      "baseline": 0.00464
+     },
+     {
+      "key": "r005|WALL|Box",
+      "measure": 0.05096,
+      "baseline": 0.05082
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.2728,
+      "baseline": 0.16383
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r003|DOOR|h_o004",
+     "r005|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r003|CONTAINMENT|rug",
+     "r003|OBJECTS|Cama+Painel cabeceira",
+     "r003|WALL|rug",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta",
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug"
+    ],
+    "missing_program_unregistered": [
+     "r003|PROGRAM|Cama",
+     "r003|PROGRAM|Criado-mudo 1",
+     "r003|PROGRAM|Criado-mudo 2",
+     "r003|PROGRAM|Guarda-roupa",
+     "r003|PROGRAM|Painel cabeceira",
+     "r003|PROGRAM|rug",
+     "r006|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.07909
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.0792
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": null
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": null
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.04579
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.04988
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.04986
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05096
+    }
+   },
+   "r1_baseline_persisting": 9,
+   "twin_findings_by_cause": {
+    "R1": 22,
+    "R2": 6,
+    "R3": 7,
+    "R5": 3
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r001|CONTAINMENT|Armario de servico",
+    "r001|CONTAINMENT|Maquina de lavar",
+    "r001|CONTAINMENT|Tanque",
+    "r001|WALL|Armario de servico",
+    "r001|WALL|Maquina de lavar",
+    "r001|WALL|Tanque",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|CONTAINMENT|fridge",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r004|WALL|fridge",
+    "r005|CONTAINMENT|Box",
+    "r005|CONTAINMENT|Enxoval",
+    "r005|WALL|Box",
+    "r005|WALL|Enxoval",
+    "r006|CONTAINMENT|Bancada",
+    "r006|WALL|Bancada"
+   ],
+   "twin_findings_total": 38,
+   "seconds": 20.2
+  },
+  "c_usable_only_r004": {
+   "label": "c_usable_only_r004",
+   "generation": "ABORTED",
+   "abort": {
+    "traceback": [
+     "artifacts/review/fp056/p7_d007_slab/measure_d007.py:123 measure",
+     "tools/orchestration/furnish_apartment.py:91 collect_boxes",
+     "tools/orchestration/furnish_apartment.py:110 collect_boxes_ex",
+     "tools/rooms/kitchen/validation/__init__.py:21 require_kitchen_anchor",
+     "SystemExit: [furnish-apt] BUILD ABORTADO: cozinha reprovou o anchor da pia (LEFT)"
+    ],
+    "stdout_tail": [
+     "- kitchen_door_clearance_ok = false  (bloqueando: ['countertop'])",
+     "- modules_grouped_individually = true",
+     "kitchen_validation => FAIL"
+    ],
+    "diagnostic_continuation": "gate da ancora da pia desligado SO para medir; a geracao real aborta"
+   },
+   "cell_m2": {
+    "r000": 15.901,
+    "r001": 15.409,
+    "r002": 14.737,
+    "r003": 7.977,
+    "r004": 4.882,
+    "r005": 3.2,
+    "r006": 2.867,
+    "r007": 1.85
+   },
+   "sink_anchor": {
+    "result": "FAIL",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": false,
+     "_blocking": [
+      "countertop"
+     ],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 386,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 51,
+    "r003": 47,
+    "r004": 72,
+    "r005": 59,
+    "r006": 58,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "PASS",
+   "preflight_by_room": {
+    "r000": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r006": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r007": {
+     "status": "PASS",
+     "blocking": {}
+    }
+   },
+   "twin": {
+    "new": [],
+    "worse": [],
+    "resolved": [
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r004|CONTAINMENT|base_cabinet_01",
+     "r004|CONTAINMENT|countertop",
+     "r004|WALL|backsplash",
+     "r004|WALL|base_cabinet_01",
+     "r004|WALL|countertop"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet"
+    ],
+    "twin_borderline_ignored": [],
+    "missing_program": [
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": []
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.05598
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.05598
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": null
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": null
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": null
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05086
+    }
+   },
+   "r1_baseline_persisting": 6,
+   "twin_findings_by_cause": {
+    "R1": 6,
+    "R2": 2,
+    "R2b": 5,
+    "R3": 9,
+    "R5": 2
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box"
+   ],
+   "twin_findings_total": 24,
+   "seconds": 26.4
+  },
+  "c_usable_only_r004+484b": {
+   "label": "c_usable_only_r004+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 16.895,
+    "r001": 17.376,
+    "r002": 15.679,
+    "r003": 8.468,
+    "r004": 5.324,
+    "r005": 3.825,
+    "r006": 3.503,
+    "r007": 2.571
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 374,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 53,
+    "r003": 47,
+    "r004": 76,
+    "r005": 58,
+    "r006": 40,
+    "r007": 34
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Tanque/tanque 446.6 cm2",
+        "Maquina de lavar/maq_lavar 368.6 cm2",
+        "Armario de servico/armario_servico 502.6 cm2",
+        "Prateleira servico/prateleira_servico 893.3 cm2",
+        "Varal de teto/varal_teto 725.8 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 419.6 cm2",
+        "Sofa/plinth_riser 335.4 cm2",
+        "Sofa/base_main 503.4 cm2",
+        "Sofa/seat_2 153.1 cm2",
+        "Sofa/back_2 248.4 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [
+        "h_sb001:Sofa/arm_right 53.3 cm2",
+        "h_sb001:Sofa/base_main 149.5 cm2",
+        "h_sb001:Sofa/back_3 149.5 cm2"
+       ],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Bancada/bancada_banho 27.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r001|CONTAINMENT|Tanque",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Armario de servico",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Maquina de lavar",
+      "measure": 0.05584
+     },
+     {
+      "key": "r001|WALL|Tanque",
+      "measure": 0.05585
+     },
+     {
+      "key": "r002|CONTAINMENT|Rack TV",
+      "measure": 1.88847
+     },
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 0.8926
+     },
+     {
+      "key": "r002|CONTAINMENT|TV",
+      "measure": 1.87837
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 0.6365
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.36002
+     },
+     {
+      "key": "r005|CONTAINMENT|Enxoval",
+      "measure": 0.05599
+     },
+     {
+      "key": "r005|WALL|Enxoval",
+      "measure": 0.056
+     },
+     {
+      "key": "r006|WALL|Bancada",
+      "measure": 0.00588
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r000|CONTAINMENT|rug",
+      "measure": 0.07909,
+      "baseline": 0.056
+     },
+     {
+      "key": "r000|WALL|rug",
+      "measure": 0.0792,
+      "baseline": 0.05603
+     },
+     {
+      "key": "r001|CONTAINMENT|Armario de servico",
+      "measure": 0.05583,
+      "baseline": 0.0331
+     },
+     {
+      "key": "r002|CONTAINMENT|Painel TV",
+      "measure": 2.17998,
+      "baseline": 0.0091
+     },
+     {
+      "key": "r005|WALL|Box",
+      "measure": 0.05096,
+      "baseline": 0.05082
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.2728,
+      "baseline": 0.16383
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r004|CONTAINMENT|base_cabinet_01",
+     "r004|CONTAINMENT|countertop",
+     "r004|WALL|backsplash",
+     "r004|WALL|base_cabinet_01",
+     "r004|WALL|countertop",
+     "r005|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r006|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.07909
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.0792
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": null
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": null
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": null
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": null
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05096
+    }
+   },
+   "r1_baseline_persisting": 6,
+   "twin_findings_by_cause": {
+    "R1": 16,
+    "R2": 6,
+    "R3": 8,
+    "R5": 4
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r001|CONTAINMENT|Armario de servico",
+    "r001|CONTAINMENT|Maquina de lavar",
+    "r001|CONTAINMENT|Tanque",
+    "r001|WALL|Armario de servico",
+    "r001|WALL|Maquina de lavar",
+    "r001|WALL|Tanque",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r005|CONTAINMENT|Box",
+    "r005|CONTAINMENT|Enxoval",
+    "r005|WALL|Box",
+    "r005|WALL|Enxoval",
+    "r006|CONTAINMENT|Bancada",
+    "r006|WALL|Bancada"
+   ],
+   "twin_findings_total": 34,
+   "seconds": 26.6
+  },
+  "c_usable_only_r005": {
+   "label": "c_usable_only_r005",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 15.901,
+    "r001": 15.409,
+    "r002": 14.737,
+    "r003": 7.977,
+    "r004": 5.289,
+    "r005": 2.767,
+    "r006": 2.867,
+    "r007": 1.85
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 370,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 51,
+    "r003": 47,
+    "r004": 76,
+    "r005": 39,
+    "r006": 58,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o002:Enxoval/kb_gancho 17.4 cm2",
+        "h_o002:Enxoval/kb_gancho 17.4 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o002:Enxoval/kb_gancho 17.4 cm2",
+        "h_o002:Enxoval/kb_gancho 17.4 cm2"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r007": {
+     "status": "PASS",
+     "blocking": {}
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r005|DOOR|h_o002",
+      "measure": 24.0
+     }
+    ],
+    "worse": [],
+    "resolved": [
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r005|CONTAINMENT|Bancada",
+     "r005|OBJECTS|Enxoval+Espelho",
+     "r005|OBJECTS|Enxoval+Vaso"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r005|CONTAINMENT|Box",
+     "r005|WALL|Box"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta",
+     "r005|PROGRAM|Box"
+    ],
+    "missing_program_unregistered": [
+     "r005|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.05598
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.05598
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.00059
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.00466
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.00464
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": null
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": null
+    }
+   },
+   "r1_baseline_persisting": 9,
+   "twin_findings_by_cause": {
+    "R1": 10,
+    "R2": 2,
+    "R2b": 4,
+    "R3": 7,
+    "R5": 3
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop"
+   ],
+   "twin_findings_total": 26,
+   "seconds": 24.4
+  },
+  "c_usable_only_r005+484b": {
+   "label": "c_usable_only_r005+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 16.895,
+    "r001": 17.376,
+    "r002": 15.679,
+    "r003": 8.468,
+    "r004": 5.546,
+    "r005": 3.383,
+    "r006": 3.503,
+    "r007": 2.571
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 378,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 53,
+    "r003": 47,
+    "r004": 78,
+    "r005": 60,
+    "r006": 40,
+    "r007": 34
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Tanque/tanque 446.6 cm2",
+        "Maquina de lavar/maq_lavar 368.6 cm2",
+        "Armario de servico/armario_servico 502.6 cm2",
+        "Prateleira servico/prateleira_servico 893.3 cm2",
+        "Varal de teto/varal_teto 725.8 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 419.6 cm2",
+        "Sofa/plinth_riser 335.4 cm2",
+        "Sofa/base_main 503.4 cm2",
+        "Sofa/seat_2 153.1 cm2",
+        "Sofa/back_2 248.4 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [
+        "h_sb001:Sofa/arm_right 53.3 cm2",
+        "h_sb001:Sofa/base_main 149.5 cm2",
+        "h_sb001:Sofa/back_3 149.5 cm2"
+       ],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Bancada/bancada_banho 27.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r001|CONTAINMENT|Tanque",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Armario de servico",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Maquina de lavar",
+      "measure": 0.05584
+     },
+     {
+      "key": "r001|WALL|Tanque",
+      "measure": 0.05585
+     },
+     {
+      "key": "r002|CONTAINMENT|Rack TV",
+      "measure": 1.88847
+     },
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 0.8926
+     },
+     {
+      "key": "r002|CONTAINMENT|TV",
+      "measure": 1.87837
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 0.6365
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.36002
+     },
+     {
+      "key": "r004|CONTAINMENT|fridge",
+      "measure": 0.01279
+     },
+     {
+      "key": "r004|WALL|fridge",
+      "measure": 0.01484
+     },
+     {
+      "key": "r006|WALL|Bancada",
+      "measure": 0.00588
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r000|CONTAINMENT|rug",
+      "measure": 0.07909,
+      "baseline": 0.056
+     },
+     {
+      "key": "r000|WALL|rug",
+      "measure": 0.0792,
+      "baseline": 0.05603
+     },
+     {
+      "key": "r001|CONTAINMENT|Armario de servico",
+      "measure": 0.05583,
+      "baseline": 0.0331
+     },
+     {
+      "key": "r002|CONTAINMENT|Painel TV",
+      "measure": 2.17998,
+      "baseline": 0.0091
+     },
+     {
+      "key": "r004|CONTAINMENT|base_cabinet_01",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|CONTAINMENT|countertop",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|WALL|backsplash",
+      "measure": 0.04579,
+      "baseline": 0.00052
+     },
+     {
+      "key": "r004|WALL|base_cabinet_01",
+      "measure": 0.04988,
+      "baseline": 0.00462
+     },
+     {
+      "key": "r004|WALL|countertop",
+      "measure": 0.04986,
+      "baseline": 0.00464
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.32895,
+      "baseline": 0.16383
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r005|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r006|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.07909
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.0792
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.04579
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.04988
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.04986
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.00596
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.00598
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 22,
+    "R2": 6,
+    "R3": 8,
+    "R5": 4
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r001|CONTAINMENT|Armario de servico",
+    "r001|CONTAINMENT|Maquina de lavar",
+    "r001|CONTAINMENT|Tanque",
+    "r001|WALL|Armario de servico",
+    "r001|WALL|Maquina de lavar",
+    "r001|WALL|Tanque",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|CONTAINMENT|fridge",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r004|WALL|fridge",
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box",
+    "r006|CONTAINMENT|Bancada",
+    "r006|WALL|Bancada"
+   ],
+   "twin_findings_total": 40,
+   "seconds": 26.7
+  },
+  "c_usable_only_r006": {
+   "label": "c_usable_only_r006",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 15.901,
+    "r001": 15.409,
+    "r002": 14.737,
+    "r003": 7.977,
+    "r004": 5.289,
+    "r005": 3.2,
+    "r006": 2.453,
+    "r007": 1.85
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 367,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 51,
+    "r003": 47,
+    "r004": 76,
+    "r005": 59,
+    "r006": 35,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.4 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.4 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "PASS",
+     "blocking": {}
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     }
+    ],
+    "worse": [],
+    "resolved": [
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar",
+     "r006|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r006|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.05598
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.05598
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.00059
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.00466
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.00464
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05086
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 12,
+    "R2b": 4,
+    "R3": 8,
+    "R5": 3
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box"
+   ],
+   "twin_findings_total": 27,
+   "seconds": 23.4
+  },
+  "c_usable_only_r006+484b": {
+   "label": "c_usable_only_r006+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 16.895,
+    "r001": 17.376,
+    "r002": 15.679,
+    "r003": 8.468,
+    "r004": 5.546,
+    "r005": 3.825,
+    "r006": 3.064,
+    "r007": 2.571
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 393,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 53,
+    "r003": 47,
+    "r004": 78,
+    "r005": 58,
+    "r006": 57,
+    "r007": 34
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Tanque/tanque 446.6 cm2",
+        "Maquina de lavar/maq_lavar 368.6 cm2",
+        "Armario de servico/armario_servico 502.6 cm2",
+        "Prateleira servico/prateleira_servico 893.3 cm2",
+        "Varal de teto/varal_teto 725.8 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 419.6 cm2",
+        "Sofa/plinth_riser 335.4 cm2",
+        "Sofa/base_main 503.4 cm2",
+        "Sofa/seat_2 153.1 cm2",
+        "Sofa/back_2 248.4 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [
+        "h_sb001:Sofa/arm_right 53.3 cm2",
+        "h_sb001:Sofa/base_main 149.5 cm2",
+        "h_sb001:Sofa/back_3 149.5 cm2"
+       ],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r006|OBJECTS|Bancada+Enxoval"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r001|CONTAINMENT|Tanque",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Armario de servico",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Maquina de lavar",
+      "measure": 0.05584
+     },
+     {
+      "key": "r001|WALL|Tanque",
+      "measure": 0.05585
+     },
+     {
+      "key": "r002|CONTAINMENT|Rack TV",
+      "measure": 1.88847
+     },
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 0.8926
+     },
+     {
+      "key": "r002|CONTAINMENT|TV",
+      "measure": 1.87837
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 0.6365
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.36002
+     },
+     {
+      "key": "r004|CONTAINMENT|fridge",
+      "measure": 0.01279
+     },
+     {
+      "key": "r004|WALL|fridge",
+      "measure": 0.01484
+     },
+     {
+      "key": "r005|CONTAINMENT|Enxoval",
+      "measure": 0.05599
+     },
+     {
+      "key": "r005|WALL|Enxoval",
+      "measure": 0.056
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r000|CONTAINMENT|rug",
+      "measure": 0.07909,
+      "baseline": 0.056
+     },
+     {
+      "key": "r000|WALL|rug",
+      "measure": 0.0792,
+      "baseline": 0.05603
+     },
+     {
+      "key": "r001|CONTAINMENT|Armario de servico",
+      "measure": 0.05583,
+      "baseline": 0.0331
+     },
+     {
+      "key": "r002|CONTAINMENT|Painel TV",
+      "measure": 2.17998,
+      "baseline": 0.0091
+     },
+     {
+      "key": "r004|CONTAINMENT|base_cabinet_01",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|CONTAINMENT|countertop",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|WALL|backsplash",
+      "measure": 0.04579,
+      "baseline": 0.00052
+     },
+     {
+      "key": "r004|WALL|base_cabinet_01",
+      "measure": 0.04988,
+      "baseline": 0.00462
+     },
+     {
+      "key": "r004|WALL|countertop",
+      "measure": 0.04986,
+      "baseline": 0.00464
+     },
+     {
+      "key": "r005|WALL|Box",
+      "measure": 0.05096,
+      "baseline": 0.05082
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.2728,
+      "baseline": 0.16383
+     },
+     {
+      "key": "r006|OBJECTS|Bancada+Enxoval",
+      "measure": 0.09907,
+      "baseline": 0.09392
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r005|CONTAINMENT|Bancada",
+     "r006|CONTAINMENT|Bancada",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": []
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.07909
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.0792
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.04579
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.04988
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.04986
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05096
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 22,
+    "R2": 6,
+    "R3": 9,
+    "R5": 3
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r001|CONTAINMENT|Armario de servico",
+    "r001|CONTAINMENT|Maquina de lavar",
+    "r001|CONTAINMENT|Tanque",
+    "r001|WALL|Armario de servico",
+    "r001|WALL|Maquina de lavar",
+    "r001|WALL|Tanque",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|CONTAINMENT|fridge",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r004|WALL|fridge",
+    "r005|CONTAINMENT|Box",
+    "r005|CONTAINMENT|Enxoval",
+    "r005|WALL|Box",
+    "r005|WALL|Enxoval"
+   ],
+   "twin_findings_total": 40,
+   "seconds": 27.6
+  },
+  "c_usable_only_r007": {
+   "label": "c_usable_only_r007",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 15.901,
+    "r001": 15.409,
+    "r002": 14.737,
+    "r003": 7.977,
+    "r004": 5.289,
+    "r005": 3.2,
+    "r006": 2.867,
+    "r007": 1.551
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 380,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 51,
+    "r003": 47,
+    "r004": 76,
+    "r005": 59,
+    "r006": 58,
+    "r007": 23
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r001": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r002": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r006": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 399.6 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [],
+    "resolved": [
+     "r001|CONTAINMENT|Armario de servico",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r001|CONTAINMENT|Maquina de lavar"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r007|PROGRAM|Vaso",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r007|PROGRAM|Vaso"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.05598
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.05598
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.00463
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.00059
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.00466
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.00464
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05086
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 12,
+    "R2": 2,
+    "R2b": 5,
+    "R3": 9,
+    "R5": 3
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r005|CONTAINMENT|Box",
+    "r005|WALL|Box"
+   ],
+   "twin_findings_total": 31,
+   "seconds": 23.4
+  },
+  "c_usable_only_r007+484b": {
+   "label": "c_usable_only_r007+484b",
+   "generation": "OK",
+   "abort": null,
+   "cell_m2": {
+    "r000": 16.895,
+    "r001": 17.376,
+    "r002": 15.679,
+    "r003": 8.468,
+    "r004": 5.546,
+    "r005": 3.825,
+    "r006": 3.503,
+    "r007": 2.219
+   },
+   "sink_anchor": {
+    "result": "PASS",
+    "checks": {
+     "sink_wall": "LEFT",
+     "sink_anchor_source": "PDF_WEST_WALL",
+     "sink_distance_to_left_wall_in": 1.2,
+     "sink_touches_left": true,
+     "sink_inside_kitchen": true,
+     "sink_not_inside_AS": true,
+     "fridge_inside_kitchen": true,
+     "cooktop_inside_kitchen": true,
+     "kitchen_door_clearance_ok": true,
+     "_blocking": [],
+     "modules_grouped_individually": true
+    }
+   },
+   "trade_offs": [
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': maq_secar -> nao coube com folga em nenhuma largura",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': bancada_gourmet -> nenhuma largura preserva a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': cuba_gourmet -> sem bancada_gourmet pra apoiar",
+    "[furnish-apt] TRADE-OFF 'A.S. | TERRACO SOCIAL | TERRACO TECNICO': mesa_externa -> mesa externa OMITIDA — derrubaria a circulacao do comodo (circulation_gate)",
+    "[furnish-apt] TRADE-OFF 'SUITE 02': escrivaninha não coube com cadeira puxada livre"
+   ],
+   "n_boxes": 375,
+   "boxes_by_room": {
+    "r000": 57,
+    "r001": 9,
+    "r002": 53,
+    "r003": 47,
+    "r004": 78,
+    "r005": 58,
+    "r006": 40,
+    "r007": 33
+   },
+   "planner_result_by_room": {
+    "r000": "OK",
+    "r001": "OK",
+    "r002": "OK",
+    "r003": "OK",
+    "r004": "OK",
+    "r005": "OK",
+    "r006": "OK",
+    "r007": "OK"
+   },
+   "preflight": "FAIL",
+   "preflight_by_room": {
+    "r000": {
+     "status": "FAIL",
+     "blocking": {
+      "circulation": {
+       "corredor_principal": "CORRIDOR_BLOCKED"
+      }
+     }
+    },
+    "r001": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Tanque/tanque 446.6 cm2",
+        "Maquina de lavar/maq_lavar 368.6 cm2",
+        "Armario de servico/armario_servico 502.6 cm2",
+        "Prateleira servico/prateleira_servico 893.3 cm2",
+        "Varal de teto/varal_teto 725.8 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r002": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Sofa/plinth 419.6 cm2",
+        "Sofa/plinth_riser 335.4 cm2",
+        "Sofa/base_main 503.4 cm2",
+        "Sofa/seat_2 153.1 cm2",
+        "Sofa/back_2 248.4 cm2"
+       ],
+       "door_swing_hits": [],
+       "barrier_penetration": [
+        "h_sb001:Sofa/arm_right 53.3 cm2",
+        "h_sb001:Sofa/base_main 149.5 cm2",
+        "h_sb001:Sofa/back_3 149.5 cm2"
+       ],
+       "door_sweep_hits": []
+      }
+     }
+    },
+    "r003": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r004": {
+     "status": "PASS",
+     "blocking": {}
+    },
+    "r005": {
+     "status": "FAIL",
+     "blocking": {
+      "module_interpenetration": {
+       "new": [],
+       "worse": [
+        "r005|OBJECTS|Enxoval+Vaso"
+       ]
+      }
+     }
+    },
+    "r006": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [
+        "Bancada/bancada_banho 27.0 cm2"
+       ],
+       "door_swing_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o006:Enxoval/kb_gancho 17.5 cm2",
+        "h_o006:Enxoval/kb_gancho 17.5 cm2"
+       ]
+      }
+     }
+    },
+    "r007": {
+     "status": "FAIL",
+     "blocking": {
+      "room_collisions": {
+       "wall_penetration": [],
+       "door_swing_hits": [
+        "h_o001:Enxoval/kb_lixeira 346.8 cm2"
+       ],
+       "barrier_penetration": [],
+       "door_sweep_hits": [
+        "h_o001:Enxoval/kb_lixeira 347.7 cm2"
+       ]
+      }
+     }
+    }
+   },
+   "twin": {
+    "new": [
+     {
+      "key": "r001|CONTAINMENT|Tanque",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Armario de servico",
+      "measure": 0.05583
+     },
+     {
+      "key": "r001|WALL|Maquina de lavar",
+      "measure": 0.05584
+     },
+     {
+      "key": "r001|WALL|Tanque",
+      "measure": 0.05585
+     },
+     {
+      "key": "r002|CONTAINMENT|Rack TV",
+      "measure": 1.88847
+     },
+     {
+      "key": "r002|CONTAINMENT|Sofa",
+      "measure": 0.8926
+     },
+     {
+      "key": "r002|CONTAINMENT|TV",
+      "measure": 1.87837
+     },
+     {
+      "key": "r002|CONTAINMENT|Tapete",
+      "measure": 0.6365
+     },
+     {
+      "key": "r002|WALL|Sofa",
+      "measure": 0.36002
+     },
+     {
+      "key": "r004|CONTAINMENT|fridge",
+      "measure": 0.01279
+     },
+     {
+      "key": "r004|WALL|fridge",
+      "measure": 0.01484
+     },
+     {
+      "key": "r005|CONTAINMENT|Enxoval",
+      "measure": 0.05599
+     },
+     {
+      "key": "r005|WALL|Enxoval",
+      "measure": 0.056
+     },
+     {
+      "key": "r006|WALL|Bancada",
+      "measure": 0.00588
+     },
+     {
+      "key": "r006|DOOR|h_o006",
+      "measure": 88.0
+     },
+     {
+      "key": "r007|DOOR|h_o001",
+      "measure": 87.0
+     }
+    ],
+    "worse": [
+     {
+      "key": "r000|CONTAINMENT|rug",
+      "measure": 0.07909,
+      "baseline": 0.056
+     },
+     {
+      "key": "r000|WALL|rug",
+      "measure": 0.0792,
+      "baseline": 0.05603
+     },
+     {
+      "key": "r001|CONTAINMENT|Armario de servico",
+      "measure": 0.05583,
+      "baseline": 0.0331
+     },
+     {
+      "key": "r002|CONTAINMENT|Painel TV",
+      "measure": 2.17998,
+      "baseline": 0.0091
+     },
+     {
+      "key": "r004|CONTAINMENT|base_cabinet_01",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|CONTAINMENT|countertop",
+      "measure": 0.04984,
+      "baseline": 0.0046
+     },
+     {
+      "key": "r004|WALL|backsplash",
+      "measure": 0.04579,
+      "baseline": 0.00052
+     },
+     {
+      "key": "r004|WALL|base_cabinet_01",
+      "measure": 0.04988,
+      "baseline": 0.00462
+     },
+     {
+      "key": "r004|WALL|countertop",
+      "measure": 0.04986,
+      "baseline": 0.00464
+     },
+     {
+      "key": "r005|WALL|Box",
+      "measure": 0.05096,
+      "baseline": 0.05082
+     },
+     {
+      "key": "r005|OBJECTS|Enxoval+Vaso",
+      "measure": 0.2728,
+      "baseline": 0.16383
+     }
+    ],
+    "resolved": [
+     "r000|CONTAINMENT|Guarda-roupa",
+     "r001|CONTAINMENT|Condensadora",
+     "r001|CONTAINMENT|Jardineira",
+     "r003|CONTAINMENT|Painel cabeceira",
+     "r005|CONTAINMENT|Bancada",
+     "r006|OBJECTS|Enxoval+Espelho"
+    ],
+    "vanished_with_piece": [
+     "r001|CONTAINMENT|Bancada gourmet",
+     "r006|CONTAINMENT|Box",
+     "r006|WALL|Box"
+    ],
+    "twin_borderline_ignored": [
+     "r004|CONTAINMENT|backsplash"
+    ],
+    "missing_program": [
+     "r006|PROGRAM|Box",
+     "r001|PROGRAM|Bancada gourmet",
+     "r001|PROGRAM|Banqueta"
+    ],
+    "missing_program_unregistered": [
+     "r006|PROGRAM|Box"
+    ]
+   },
+   "r1_baseline_keys": {
+    "r000|CONTAINMENT|rug": {
+     "baseline": 0.056,
+     "now": 0.07909
+    },
+    "r000|WALL|rug": {
+     "baseline": 0.05603,
+     "now": 0.0792
+    },
+    "r003|CONTAINMENT|rug": {
+     "baseline": 0.0559,
+     "now": 0.05596
+    },
+    "r003|WALL|rug": {
+     "baseline": 0.05593,
+     "now": 0.05598
+    },
+    "r004|CONTAINMENT|base_cabinet_01": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|CONTAINMENT|countertop": {
+     "baseline": 0.0046,
+     "now": 0.04984
+    },
+    "r004|WALL|backsplash": {
+     "baseline": 0.00052,
+     "now": 0.04579
+    },
+    "r004|WALL|base_cabinet_01": {
+     "baseline": 0.00462,
+     "now": 0.04988
+    },
+    "r004|WALL|countertop": {
+     "baseline": 0.00464,
+     "now": 0.04986
+    },
+    "r005|CONTAINMENT|Box": {
+     "baseline": 0.062,
+     "now": 0.06203
+    },
+    "r005|WALL|Box": {
+     "baseline": 0.05082,
+     "now": 0.05096
+    }
+   },
+   "r1_baseline_persisting": 11,
+   "twin_findings_by_cause": {
+    "R1": 24,
+    "R2": 6,
+    "R3": 8,
+    "R5": 4
+   },
+   "twin_r1_findings": [
+    "r000|CONTAINMENT|rug",
+    "r000|WALL|rug",
+    "r001|CONTAINMENT|Armario de servico",
+    "r001|CONTAINMENT|Maquina de lavar",
+    "r001|CONTAINMENT|Tanque",
+    "r001|WALL|Armario de servico",
+    "r001|WALL|Maquina de lavar",
+    "r001|WALL|Tanque",
+    "r003|CONTAINMENT|rug",
+    "r003|WALL|rug",
+    "r004|CONTAINMENT|backsplash",
+    "r004|CONTAINMENT|base_cabinet_01",
+    "r004|CONTAINMENT|countertop",
+    "r004|CONTAINMENT|fridge",
+    "r004|WALL|backsplash",
+    "r004|WALL|base_cabinet_01",
+    "r004|WALL|countertop",
+    "r004|WALL|fridge",
+    "r005|CONTAINMENT|Box",
+    "r005|CONTAINMENT|Enxoval",
+    "r005|WALL|Box",
+    "r005|WALL|Enxoval",
+    "r006|CONTAINMENT|Bancada",
+    "r006|WALL|Bancada"
+   ],
+   "twin_findings_total": 42,
+   "seconds": 17.1
+  }
+ },
+ "protected_before": {
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "adeace53cdb3dba1b7ca8d5bb78a5d6d70d1adb17a903ee6b8082f188d750aa2",
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397"
+ },
+ "protected_after": {
+  "fixtures/planta_74/consensus_with_human_walls_and_soft_barriers.json": "adeace53cdb3dba1b7ca8d5bb78a5d6d70d1adb17a903ee6b8082f188d750aa2",
+  "artifacts/planta_74/planta_74.skp": "7512d592e1d81208f3954bc24165b9ca069c7713b1fce990c4a23eaad1d91294",
+  "artifacts/planta_74/furnished/planta_74_furnished.skp": "d2846ab684f47638f8177f29b3593c566d60c5cdb9c07addf56a9276e11a9397"
+ },
+ "protected_unchanged": true
+}
