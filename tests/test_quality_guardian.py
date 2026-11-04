@@ -98,6 +98,15 @@ def test_pr_touching_human_decision_issue_must_declare_it_does_not_apply_the_dec
     assert "PR_REFS_HUMAN_BLOCKED" not in pr(PR_OK + "Decisão: não aplicada\n", ["docs/x.md"], issues)
 
 
+def test_decision_declaration_survives_markdown_emphasis_but_not_a_different_statement():
+    """#578/#580/#581 reprovaram com `**Decisão:** não aplicada` no corpo: a enfase Markdown nao muda a declaracao."""
+    issues = {5: {"state": "OPEN", "labels": [{"name": "bloqueio:human-decision"}]}}
+    for decl in ("**Decisão:** não aplicada", "**Decisão: não aplicada**", "_Decisão:_ não aplicada", "- **Decisao:** nao aplicada"):
+        assert "PR_REFS_HUMAN_BLOCKED" not in pr(PR_OK + decl + "\n", ["docs/x.md"], issues), decl
+    for wrong in ("**Decisão:** aplicada", "não aplicada", "Decisão pendente"):
+        assert "PR_REFS_HUMAN_BLOCKED" in pr(PR_OK + wrong + "\n", ["docs/x.md"], issues), wrong
+
+
 def test_skp_affecting_pr_needs_a_final_skp_and_na_does_not_excuse_it():
     assert "PR_NO_SKP_PROOF_DECLARATION" in pr("Refs #5", ["docs/x.md"])
     f = ["tools/sketchup/shell/build_plan_shell_skp.py", "tests/test_x.py"]

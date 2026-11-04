@@ -63,6 +63,8 @@ Rodar sempre de dentro do repo (rodar da raiz do workspace cria caches lá).
   grava o fecho calculado no commit da prova. Skill `capability-l2-proof`.
 - `human_review` de uma fonte vale para **uma recipe e um trecho**; outra recipe do mesmo vídeo não herda.
 - Capacidade que não existe **recusa com o motivo** (`BLOCKED_*`); não contornar por outra tool.
+- Decisão espacial pedida ao Felipe: medição **+ prancha com o PDF por baixo e conflito destacado** (regra em
+  `.claude/rules/evidence-and-protected-files.md`); só JSON não é prova que um humano valide.
 
 ## Documentação de tecnologia externa (DOC-EXT)
 
