@@ -23,6 +23,8 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("EXECUTION_STATE_PATH", str(tmp_path / "exec.json"))
     monkeypatch.setenv("BRIDGE_WORKTREE_ROOT", str(tmp_path / "wt"))
     monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
+    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("SKIPPED", ""))      # a entrega tem testes proprios (test_event_executor_deliver)
+    monkeypatch.setattr(ex, "comment_pr", lambda *a, **k: None)
 
 
 def item(**kw):
@@ -95,7 +97,7 @@ def test_execute_runs_claude_once_in_the_pr_worktree_and_records_done_awaiting_r
     r = Runner(gh)
     b = bstate(item())
     res = go(gh, b, r)
-    assert res == {"action": "DONE", "item": b["queue"][0]["key"], "new_head": NEWHEAD}
+    assert res == {"action": "DONE", "item": b["queue"][0]["key"], "new_head": NEWHEAD, "delivery": "SKIPPED"}
     t = b["queue"][0]
     assert t["state"] == "DONE_AWAITING_REREVIEW" and t["new_head"] == NEWHEAD and t["attempts"] == 1 and len(r.calls) == 1
     assert r.calls[0]["cwd"].name == "bridge-pr7" and r.calls[0]["timeout"] == ex.RUN_TIMEOUT_S
