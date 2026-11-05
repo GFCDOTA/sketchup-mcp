@@ -20,8 +20,9 @@ X_TEXT = "def soma(a, b):\n    return a - b  # bug\n"
 X_SHA = hashlib.sha256(X_TEXT.encode("utf-8")).hexdigest()
 PKG = {"base": "b" * 40, "sha": SHA, "files": {"x.py": {"sha256": X_SHA, "text": X_TEXT}}}
 REVIEWED = [{"path": "x.py", "sha256": X_SHA, "code_excerpt": "return a - b  # bug"}]
-GREEN = {"source": "trusted_test_runner", "tests_passed": True, "selected": ["tests/test_x.py"], "summary": "1 passed"}
-REAL = {"review_package": cr.review_package, "run_trusted_tests": cr.run_trusted_tests, "check_untouched": cr.check_untouched}  # antes do autouse
+GREEN = {"source": "coordinator_test_runner", "isolation": "env_allowlist_only", "tests_passed": True, "selected": ["tests/test_x.py"],
+         "uncovered": [], "summary": "1 passed"}
+REAL = {"review_package": cr.review_package, "run_coordinator_tests": cr.run_coordinator_tests, "check_untouched": cr.check_untouched}  # antes do autouse
 
 
 def verdict(**kw):
@@ -76,15 +77,15 @@ def test_prompt_pins_the_exact_head_and_forbids_edits():
 
 # ------------------------------------------------------------------------------------------------------ fluxo (mocks)
 class FakeGh:
-    def __init__(self, head=SHA, state="open", login="fmodesto30", moved=None):
-        self.head, self.state, self.login, self.moved, self.calls = head, state, login, moved, 0
+    def __init__(self, head=SHA, state="open", login="fmodesto30", moved=None, moved_after=1):
+        self.head, self.state, self.login, self.moved, self.calls, self.moved_after = head, state, login, moved, 0, moved_after
 
     def __call__(self, path):
         if path == "user":
             return {"login": self.login}
         if path == f"repos/{REPO}/pulls/7":
             self.calls += 1
-            head = self.moved if (self.moved and self.calls > 1) else self.head
+            head = self.moved if (self.moved and self.calls > self.moved_after) else self.head
             return {"state": self.state, "head": {"sha": head, "repo": {"full_name": REPO}}, "base": {"sha": "b" * 40}}
         raise AssertionError(path)
 
@@ -108,7 +109,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(cr, "review_worktree", lambda pr, sha, root, run=None: tmp_path / "wt" / f"codex-pr{pr}")
     (tmp_path / "wt" / "codex-pr7").mkdir(parents=True)
     monkeypatch.setattr(cr, "review_package", lambda wt, base, sha: PKG)
-    monkeypatch.setattr(cr, "run_trusted_tests", lambda wt, files: dict(GREEN))
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: dict(GREEN))
     monkeypatch.setattr(cr, "check_untouched", lambda wt, sha, stage: None)
 
 
@@ -275,14 +276,14 @@ def test_excerpt_matches_across_crlf_checkouts():
 
 @pytest.mark.parametrize("evidence", [{"tests_passed": False, "summary": "1 failed"}, {"tests_passed": None, "summary": "nenhum teste"}])
 def test_approve_requires_green_tests_from_the_trusted_runner_not_from_the_model(tmp_path, monkeypatch, evidence):
-    monkeypatch.setattr(cr, "run_trusted_tests", lambda wt, files: {"source": "trusted_test_runner", "selected": [], **evidence})
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {"source": "coordinator_test_runner", "selected": [], **evidence})
     run = Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"]))
     res = review(tmp_path, run=run)
-    assert res["action"] == "REVIEW_BLOCKED" and "teste confiavel" in res["reason"]
+    assert res["action"] == "REVIEW_BLOCKED" and "testes do coordenador nao verdes" in res["reason"]
 
 
 def test_request_changes_is_still_valid_when_trusted_tests_are_red(tmp_path, monkeypatch):
-    monkeypatch.setattr(cr, "run_trusted_tests", lambda wt, files: {"source": "trusted_test_runner", "selected": [], "tests_passed": False,
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {"source": "coordinator_test_runner", "selected": [], "tests_passed": False,
                                                                    "summary": "1 failed"})
     assert review(tmp_path)["action"] == "DONE"
 
@@ -291,13 +292,13 @@ def test_the_trusted_test_result_and_the_file_contents_go_into_the_prompt(tmp_pa
     run = Run(verdict())
     review(tmp_path, run=run)
     prompt = run.calls[0][2]
-    assert X_SHA in prompt and "return a - b  # bug" in prompt and "1 passed" in prompt and "trusted_test_runner" in prompt
+    assert X_SHA in prompt and "return a - b  # bug" in prompt and "1 passed" in prompt and "coordinator_test_runner" in prompt
 
 
 def test_approve_with_green_trusted_tests_and_real_inspection_is_done(tmp_path):
     res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])))
     assert res["action"] == "DONE" and res["verdict"]["verdict"] == "APPROVE"
-    assert rec(tmp_path)["tests_passed"] is True and rec(tmp_path)["files_reviewed"] == ["x.py"]
+    assert rec(tmp_path)["tests_passed"] is True and rec(tmp_path)["files_reviewed"] == ["x.py"] and rec(tmp_path)["isolation"] == "env_allowlist_only"
 
 
 def test_codex_touching_the_worktree_invalidates_the_review(tmp_path, monkeypatch):
@@ -320,8 +321,8 @@ def test_check_untouched_blocks_on_dirty_tree_or_moved_head():
 
 def test_trusted_runner_without_changed_tests_gives_no_evidence_and_never_runs_pytest(monkeypatch):
     monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("nao deveria rodar")))
-    ev = REAL["run_trusted_tests"](Path("."), ["tools/orchestration/x.py"])
-    assert ev["tests_passed"] is None and ev["selected"] == [] and ev["source"] == "trusted_test_runner"
+    ev = REAL["run_coordinator_tests"](Path("."), ["tools/orchestration/x.py"])
+    assert ev["tests_passed"] is None and ev["selected"] == [] and ev["source"] == "coordinator_test_runner"
 
 
 def test_trusted_runner_reports_the_real_exit_code_of_the_selected_tests(tmp_path, monkeypatch):
@@ -334,8 +335,8 @@ def test_trusted_runner_reports_the_real_exit_code_of_the_selected_tests(tmp_pat
         return type("R", (), {"returncode": 1, "stdout": "1 failed", "stderr": ""})()
     monkeypatch.setenv("GH_TOKEN", "x")
     monkeypatch.setattr(cr.subprocess, "run", fake_run)
-    ev = REAL["run_trusted_tests"](tmp_path, ["tests/test_x.py", "tools/y.py"], python="py")
-    assert ev["tests_passed"] is False and ev["selected"] == ["tests/test_x.py"] and "1 failed" in ev["summary"]
+    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/y.py"], python="py")
+    assert ev["tests_passed"] is False and ev["selected"] == ["tests/test_x.py"] and "1 failed" in ev["summary"] and ev["uncovered"] == ["tools/y.py"]
     assert seen["argv"][:3] == ["py", "-m", "pytest"] and "no:cacheprovider" in seen["argv"] and "GH_TOKEN" not in seen["env"]
 
 
@@ -343,3 +344,77 @@ def test_review_package_hashes_the_blob_at_the_head_and_skips_deleted_files():
     blobs = {"x.py": X_TEXT.encode("utf-8"), "gone.py": None}
     pkg = REAL["review_package"](Path("."), "b" * 40, SHA, run=lambda a, c: (0, "x.py\ngone.py"), blob=lambda wt, sha, p: blobs[p])
     assert pkg["files"] == {"x.py": {"sha256": X_SHA, "text": X_TEXT}}
+
+
+# ------------------------------------------------- review 2026-11-05: isolamento declarado, cobertura, TOCTOU na publicacao
+def test_child_env_is_an_allowlist_with_gh_and_git_credentials_cut():
+    base = {"PATH": "p", "USERPROFILE": "u", "CODEX_HOME": "c", "GH_TOKEN": "x", "AWS_SECRET_ACCESS_KEY": "a", "OPENAI_API_KEY": "o",
+            "SSH_AUTH_SOCK": "s", "QUALQUER": "q", "CODEX_REVIEWER_GH_TOKEN": "z"}
+    env = cr._child_env(base)
+    assert {"PATH", "USERPROFILE", "CODEX_HOME"} <= set(env)
+    assert not ({"GH_TOKEN", "AWS_SECRET_ACCESS_KEY", "OPENAI_API_KEY", "SSH_AUTH_SOCK", "QUALQUER", "CODEX_REVIEWER_GH_TOKEN"} & set(env))
+    assert Path(env["GH_CONFIG_DIR"]).is_dir() and env["GIT_CONFIG_NOSYSTEM"] == "1" and Path(env["GIT_CONFIG_GLOBAL"]).read_text() == ""
+
+
+def test_the_runner_never_claims_to_be_trusted_and_declares_its_isolation():
+    src = Path(cr.__file__).read_text(encoding="utf-8")
+    assert "trusted_test_runner" not in src and cr.RUNNER_SOURCE == "coordinator_test_runner" and cr.ISOLATION == "env_allowlist_only"
+
+
+def test_select_tests_maps_changed_modules_to_their_tests_and_reports_uncovered_code(tmp_path):
+    (tmp_path / "tests" / "orch").mkdir(parents=True)
+    for name in ("tests/test_alpha.py", "tests/orch/test_alpha_extra.py", "tests/test_changed.py"):
+        (tmp_path / name).write_text("", encoding="utf-8")
+    sel, unc = cr.select_tests(tmp_path, ["tools/a/alpha.py", "tools/b/beta.py", "tests/test_changed.py", "ops/run.ps1", "docs/x.md",
+                                          "docs/specs/fp042_inventory.v1.json"])
+    assert sel == ["tests/orch/test_alpha_extra.py", "tests/test_alpha.py", "tests/test_changed.py"]
+    assert unc == ["ops/run.ps1", "tools/b/beta.py"]
+
+
+@pytest.mark.parametrize("evidence,v_kw,needle", [
+    ({"uncovered": ["tools/b.py"]}, {}, "sem teste correspondente"),
+    ({}, {"tests_reviewed": ["tests/test_outro.py"]}, "fora dos testes executados"),
+    ({}, {"tests_reviewed": []}, "tests_reviewed vazio"),
+])
+def test_approve_without_coverage_or_with_tests_not_actually_run_is_blocked(tmp_path, monkeypatch, evidence, v_kw, needle):
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {**GREEN, **evidence})
+    kw = {"verdict": "APPROVE", "findings": [], "tests_reviewed": ["tests/test_x.py"], **v_kw}
+    if not kw["tests_reviewed"]:
+        res = review(tmp_path, run=Run(verdict(**kw)))                              # validate_verdict ja barra APPROVE sem tests_reviewed
+        assert res["action"] == "REVIEW_BLOCKED"
+        return
+    res = review(tmp_path, run=Run(verdict(**kw)))
+    assert res["action"] == "REVIEW_BLOCKED" and needle in res["reason"]
+
+
+def test_approve_must_inspect_every_code_file_of_the_diff(tmp_path, monkeypatch):
+    y = "def y():\n    return 42\n"
+    pkg = {**PKG, "files": {**PKG["files"], "y.py": {"sha256": hashlib.sha256(y.encode()).hexdigest(), "text": y}}}
+    monkeypatch.setattr(cr, "review_package", lambda wt, base, sha: pkg)
+    res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])))
+    assert res["action"] == "REVIEW_BLOCKED" and "nao inspecionado: y.py" in res["reason"]
+
+
+def test_a_valid_approve_is_recorded_but_never_auto_published_without_an_os_sandbox(tmp_path, monkeypatch):
+    monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
+    published = []
+    res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])), do_publish=True,
+                 gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a))
+    assert res["action"] == "REVIEW_BLOCKED" and "sandbox de SO" in res["reason"] and not published
+    assert rec(tmp_path)["verdict"] == "APPROVE" and rec(tmp_path)["blocked"]
+
+
+def test_head_moving_between_validation_and_publish_aborts_the_post(tmp_path, monkeypatch):
+    monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
+    published = []
+    gh = FakeGh(moved="c" * 40, moved_after=2)                                   # 1 = inicio, 2 = checagem pos-Codex, 3 = antes do POST
+    res = review(tmp_path, gh=gh, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a) or "u")
+    assert res["action"] == "STALE" and "antes de publicar" in res["reason"] and not published
+
+
+def test_head_moving_right_after_publish_is_reconciled_and_reported(tmp_path, monkeypatch):
+    monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
+    gh = FakeGh(moved="c" * 40, moved_after=3)                                   # 4 = reconciliacao depois do POST
+    res = review(tmp_path, gh=gh, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a: "https://x/r/2")
+    assert res["action"] == "DONE" and res["published"] == "https://x/r/2" and res["head_moved_after_publish"] == "c" * 40
+    assert rec(tmp_path)["head_moved_after_publish"] == "c" * 40

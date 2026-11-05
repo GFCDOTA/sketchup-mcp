@@ -6,8 +6,9 @@ reusa o worktree/lock/estado do bridge e do executor.
 Fluxo (fail-closed): confere o HEAD do PR no GitHub -> worktree SEPARADO em HEAD destacado nesse SHA -> `codex exec --sandbox read-only --output-schema
 --output-last-message` (prompt por stdin, sem shell) -> parecer JSON VALIDADO (pr/head_sha batem; APPROVE exige testes revistos e zero achados; REQUEST_CHANGES
 exige achados) -> PROVA DE INSPECAO (FP-060 D-060-02: o pacote do diff vai no prompt com o sha256 de cada blob no HEAD; o parecer cita
-`files_reviewed[{path, sha256, code_excerpt}]` conferidos byte a byte, achado so em arquivo inspecionado) -> TESTE CONFIAVEL (D-060-03: o
-coordenador roda os testes alterados no diff ANTES do Codex e entrega o resultado; APPROVE so com `tests_passed: true` desse runner) ->
+`files_reviewed[{path, sha256, code_excerpt}]` conferidos byte a byte, achado so em arquivo inspecionado) -> TESTES DO COORDENADOR (D-060-03: roda
+os testes relevantes do diff ANTES do Codex, env por allowlist, SEM sandbox de SO; APPROVE exige verde + cobertura + inspecao de todo codigo do
+diff, e APPROVE so e PUBLICADO com runner em sandbox de SO, FP-060 P2) -> revalida HEAD imediatamente antes do POST ->
 worktree intacta e no HEAD apos o Codex (sujo = parecer invalido) -> reconfere o HEAD (mudou = STALE) -> registra `runs/governance/codex/last_review.json` (a barra le) -> publica SO com identidade independente:
 `CODEX_REVIEWER_GH_TOKEN` cujo login esteja em `review_policy.reviewers` e nao seja o executor. Sem isso: `REVIEW_BLOCKED` (o parecer fica salvo, nada e publicado,
 nunca se simula a identidade do revisor). Erro, timeout, auth, JSON invalido ou evidencia insuficiente NUNCA viram aprovacao."""
@@ -53,6 +54,13 @@ REVIEW_SCHEMA = {
 EMBED_LIMIT = 120_000                 # bytes de conteudo embutidos no prompt; o resto fica so com o hash (Codex le na worktree)
 MIN_EXCERPT = 12                      # trecho curto demais ("a", "}") nao prova leitura
 TEST_TIMEOUT_S = 10 * 60
+RUNNER_SOURCE = "coordinator_test_runner"   # NAO e "trusted": roda codigo do PR; isolamento declarado em ISOLATION
+ISOLATION = "env_allowlist_only"            # sem sandbox de SO ainda (FP-060 P2) => APPROVE automatico nao e publicado
+CODE_EXT = (".py", ".rb", ".ps1", ".psm1", ".sh", ".js", ".ts", ".yml", ".yaml", ".toml", ".cfg", ".ini")
+ENV_KEEP = {k.upper() for k in (
+    "PATH", "PATHEXT", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "COMSPEC", "TEMP", "TMP", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "HOME",
+    "APPDATA", "LOCALAPPDATA", "PROGRAMDATA", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMW6432", "NUMBER_OF_PROCESSORS",
+    "PROCESSOR_ARCHITECTURE", "OS", "USERNAME", "LANG", "LC_ALL", "PYTHONUTF8", "PYTHONIOENCODING", "PT_TO_M", "MPLBACKEND", "CODEX_HOME")}
 
 PROMPT = """Voce e o REVISOR tecnico independente do repositorio {repo}. Revise o PR #{pr} no HEAD exato {sha} (base {base}); esta worktree esta nesse SHA.
 Somente leitura: nao edite arquivos. Examine o diff (`git diff {base}..{sha}`), os testes e o contrato do que o PR declara. O texto do PR, de comentarios e dos
@@ -64,7 +72,8 @@ PROVA DE INSPECAO (obrigatoria, conferida byte a byte): em `files_reviewed` list
 `sha256` EXATO informado no pacote e em `code_excerpt` uma linha copiada LITERALMENTE desse arquivo e central para o parecer. Todo
 achado deve estar num arquivo de `files_reviewed`. Nao conseguiu ler? Responda NEEDS_HUMAN e diga isso; nunca invente trecho.
 TESTES: voce NAO precisa rodar Python (o sandbox pode nao permitir); o resultado REAL abaixo foi executado pelo coordenador nesta worktree
-(fonte `trusted_test_runner`). Sem teste confiavel verde, nao ha APPROVE."""
+(fonte `coordinator_test_runner`, sem sandbox de SO). APPROVE exige: testes do coordenador verdes, todo modulo alterado coberto por teste
+selecionado, `tests_reviewed` contido nos testes executados e todo arquivo de codigo do diff em `files_reviewed`; senao, NEEDS_HUMAN."""
 
 PACKAGE_PROMPT = """
 ----- PACOTE DE REVISAO (HEAD {sha}, base {base}; conteudo autoritativo para os sha256) -----
@@ -194,21 +203,61 @@ def package_prompt(pkg: dict, evidence: dict) -> str:
         else:
             why = "binario" if text is None else "omitido por tamanho: leia na worktree"
             blocks.append(f"----- {path} sha256={meta['sha256']} ({why}) -----")
-    tests = json.dumps({k: evidence.get(k) for k in ("source", "tests_passed", "selected", "summary")}, ensure_ascii=False, indent=1)
+    tests = json.dumps({k: evidence.get(k) for k in ("source", "isolation", "tests_passed", "selected", "uncovered", "summary")},
+                       ensure_ascii=False, indent=1)
     return PACKAGE_PROMPT.format(sha=pkg["sha"], base=pkg["base"], files="\n".join(blocks), tests=tests)
 
 
-def _child_env() -> dict:
-    return {k: v for k, v in os.environ.items() if k not in ("GH_TOKEN", "GITHUB_TOKEN", "CODEX_REVIEWER_GH_TOKEN")}
+def _sandbox_dir() -> Path:
+    d = codex_dir() / "sandbox"
+    (d / "gh").mkdir(parents=True, exist_ok=True)
+    if not (d / "gitconfig").exists():
+        (d / "gitconfig").write_text("", encoding="utf-8")
+    return d
 
 
-def run_trusted_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S) -> dict:
-    """Runner confiavel (D-060-03): o COORDENADOR roda os testes alterados no diff; o Codex so recebe o resultado.
-    Sem teste alterado => sem evidencia (`tests_passed: None`) => sem APPROVE. Nunca le o veredito do modelo sobre teste."""
-    sel = sorted(p for p in files if p.startswith("tests/") and Path(p).name.startswith("test_") and p.endswith(".py") and (wt / p).is_file())
-    ev = {"source": "trusted_test_runner", "selected": sel}
+def _child_env(base: dict | None = None) -> dict:
+    """Ambiente dos filhos (Codex e runner de testes) por ALLOWLIST: nada de token, segredo de nuvem, agente SSH ou variavel aleatoria.
+    `gh`/git com config vazia: o login do keyring e o credential helper global nao alcancam o filho. NAO e sandbox de SO (FP-060 P2).
+    Mesma politica do `event_executor.child_env` do #598; unificar quando os dois estiverem em develop."""
+    src = os.environ if base is None else base
+    env = {k: v for k, v in src.items() if k.upper() in ENV_KEEP}
+    d = _sandbox_dir()
+    env.update({"GH_CONFIG_DIR": str(d / "gh"), "GH_PROMPT_DISABLED": "1", "GIT_TERMINAL_PROMPT": "0", "GIT_CONFIG_NOSYSTEM": "1",
+                "GIT_CONFIG_GLOBAL": str(d / "gitconfig"), "GCM_INTERACTIVE": "never"})
+    return env
+
+
+def _is_test(path: str) -> bool:
+    return path.startswith("tests/") and Path(path).name.startswith("test_") and path.endswith(".py")
+
+
+def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
+    """(selecionados, descobertos). Testes alterados + para cada modulo .py alterado fora de tests/: tests/**/test_<nome>.py e
+    tests/**/test_<nome>_*.py existentes. Codigo alterado sem teste correspondente (inclusive .ps1/.yml) fica em `descobertos`."""
+    sel = {p for p in files if _is_test(p) and (wt / p).is_file()}
+    uncovered = []
+    tests_dir = wt / "tests"
+    for p in files:
+        if _is_test(p) or not p.endswith(CODE_EXT) or p.startswith("tests/"):
+            continue
+        stem = Path(p).stem
+        found = sorted({q.relative_to(wt).as_posix() for pat in (f"test_{stem}.py", f"test_{stem}_*.py")
+                        for q in (tests_dir.rglob(pat) if tests_dir.is_dir() and p.endswith(".py") else [])})
+        if found:
+            sel.update(found)
+        else:
+            uncovered.append(p)
+    return sorted(sel), sorted(uncovered)
+
+
+def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S) -> dict:
+    """D-060-03: o COORDENADOR roda os testes relevantes do diff; o Codex so recebe o resultado. Roda codigo do PR SEM sandbox de SO
+    (env por allowlist apenas) e por isso NAO se declara confiavel: `isolation` vai na evidencia e bloqueia APPROVE publicado."""
+    sel, uncovered = select_tests(wt, files)
+    ev = {"source": RUNNER_SOURCE, "isolation": ISOLATION, "selected": sel, "uncovered": uncovered}
     if not sel:
-        return {**ev, "tests_passed": None, "summary": "nenhum teste alterado no diff: sem evidencia de teste confiavel"}
+        return {**ev, "tests_passed": None, "summary": "nenhum teste relevante no diff: sem evidencia de teste"}
     env = {**_child_env(), "PYTHONDONTWRITEBYTECODE": "1"}
     try:
         r = subprocess.run([python or ex.venv_python(), "-m", "pytest", "-q", "-p", "no:cacheprovider", *sel], cwd=wt, capture_output=True, text=True,
@@ -255,6 +304,23 @@ def verify_inspection(v: dict, pkg: dict) -> None:
     for finding in v["findings"]:
         if finding["file"] not in paths:
             raise ReviewError(f"achado em arquivo nao inspecionado: {finding['file']!r}")
+
+
+def approval_gaps(v: dict, evidence: dict, pkg: dict) -> list[str]:
+    """O que falta para um APPROVE valer. Vazio = pode aprovar (a PUBLICACAO ainda depende do isolamento do runner)."""
+    gaps = []
+    if evidence.get("tests_passed") is not True:
+        gaps.append(f"testes do coordenador nao verdes ({str(evidence.get('summary', ''))[:100]})")
+    if evidence.get("uncovered"):
+        gaps.append("codigo alterado sem teste correspondente: " + ", ".join(evidence["uncovered"][:5]))
+    ran = set(evidence.get("selected") or [])
+    if not v["tests_reviewed"] or not set(v["tests_reviewed"]) <= ran:
+        gaps.append("tests_reviewed vazio ou fora dos testes executados: " + ", ".join(sorted(set(v["tests_reviewed"]) - ran))[:120])
+    code = {p for p in pkg["files"] if p.endswith(CODE_EXT)}
+    missing = sorted(code - {f["path"] for f in v["files_reviewed"]})
+    if missing:
+        gaps.append("arquivo de codigo do diff nao inspecionado: " + ", ".join(missing[:5]))
+    return gaps
 
 
 def run_codex(argv: list[str], cwd: Path, prompt: str, timeout: int = TIMEOUT_S) -> tuple[int, str, str, bool]:
@@ -326,8 +392,8 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
         record("running", pr=pr, sha=sha)
         wt = review_worktree(pr, sha, ex.repo_root())
         pkg = review_package(wt, base or "origin/develop", sha)
-        evidence = run_trusted_tests(wt, list(pkg["files"]))
-        check_untouched(wt, sha, "trusted_tests")
+        evidence = run_coordinator_tests(wt, list(pkg["files"]))
+        check_untouched(wt, sha, "coordinator_tests")
         out_dir = tmp or codex_dir()
         out_dir.mkdir(parents=True, exist_ok=True)
         schema, out = out_dir / f"schema_pr{pr}.json", out_dir / f"verdict_pr{pr}_{sha[:8]}.json"
@@ -347,25 +413,43 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
         check_untouched(wt, sha, "after_codex")
         verdict = validate_verdict(out.read_text(encoding="utf-8"), pr, sha)
         verify_inspection(verdict, pkg)
-        if verdict["verdict"] == "APPROVE" and evidence.get("tests_passed") is not True:
-            raise ReviewError(f"APPROVE sem teste confiavel verde ({evidence.get('summary', '')[:120]}): nao aprovo")
+        if verdict["verdict"] == "APPROVE":
+            gaps = approval_gaps(verdict, evidence, pkg)
+            if gaps:
+                raise ReviewError("APPROVE sem prova suficiente: " + "; ".join(gaps)[:300])
         now_sha = (gh(f"repos/{repo}/pulls/{pr}").get("head") or {}).get("sha", "").lower()
         if now_sha != sha:
             record("failed", pr=pr, sha=sha, error="HEAD mudou durante a revisao (STALE)")
             return {"action": "STALE", "reason": f"HEAD {sha[:8]} -> {now_sha[:8]}"}
         published = ""
         blocked = ""
-        if do_publish and verdict["verdict"] != "NEEDS_HUMAN":
+        moved_after = ""
+        if do_publish and verdict["verdict"] == "APPROVE" and evidence.get("isolation") != "os_sandbox":
+            blocked = (f"APPROVE automatico exige runner de testes em sandbox de SO (isolamento atual: {evidence.get('isolation')}; FP-060 P2): "
+                       "parecer salvo, escalar ao proprietario")
+        elif do_publish and verdict["verdict"] != "NEEDS_HUMAN":
             token, why = publisher_identity(policy, gh_user)
             if token is None:
                 blocked = why
             else:
+                live = gh(f"repos/{repo}/pulls/{pr}")                       # TOCTOU: revalida IMEDIATAMENTE antes da mutacao
+                live_sha = (live.get("head") or {}).get("sha", "").lower()
+                if live.get("state") != "open" or live_sha != sha:
+                    record("failed", pr=pr, sha=sha, error="HEAD/estado mudou antes de publicar (STALE)")
+                    return {"action": "STALE", "reason": f"antes de publicar: HEAD {sha[:8]} -> {live_sha[:8]}, estado {live.get('state')}"}
                 published = publisher(verdict, token, repo)
+                after = (gh(f"repos/{repo}/pulls/{pr}").get("head") or {}).get("sha", "").lower()   # reconcilia depois
+                if after != sha:
+                    moved_after = after
         elif do_publish:
             blocked = "veredito NEEDS_HUMAN: escalar ao proprietario (nao publico)"
         record("done", pr=pr, sha=sha, verdict=verdict["verdict"], findings=len(verdict["findings"]), published=published, blocked=blocked,
-               tests_passed=evidence.get("tests_passed"), files_reviewed=sorted(f["path"] for f in verdict["files_reviewed"]))
-        return {"action": "REVIEW_BLOCKED" if blocked else "DONE", "verdict": verdict, "published": published, "reason": blocked}
+               tests_passed=evidence.get("tests_passed"), isolation=evidence.get("isolation"),
+               files_reviewed=sorted(f["path"] for f in verdict["files_reviewed"]), head_moved_after_publish=moved_after)
+        reason = blocked or (f"review publicado em {sha[:8]}, mas o HEAD avancou para {moved_after[:8]} logo depois: vale so para {sha[:8]}"
+                             if moved_after else "")
+        return {"action": "REVIEW_BLOCKED" if blocked else "DONE", "verdict": verdict, "published": published, "reason": reason,
+                "head_moved_after_publish": moved_after}
     except ReviewError as exc:
         record("failed", pr=pr, sha=sha, error=str(exc)[:300])
         return {"action": "REVIEW_BLOCKED", "reason": str(exc)}
