@@ -622,3 +622,45 @@ def test_prompt_never_tells_the_child_to_publish_and_says_the_executor_does():
     prompt = r.calls[0]["stdin"]
     assert "NAO faca git add, git commit nem git push" in prompt and "o executor valida" in prompt
     assert "e `git push origin HEAD" not in prompt and "commit (um por intencao)" not in prompt
+
+
+# ------------------------------------------------------------------------------------------------- FP-060 §7.1 / D-060-04
+@pytest.mark.parametrize("cmd", ["gh pr comment", "gh pr review", "gh pr merge", "gh pr edit", "gh pr close", "gh issue comment",
+                                 "gh issue edit", "gh api", "gh label", "gh release"])
+def test_the_child_has_no_github_mutation_in_its_allowlist(cmd):
+    """O `gh` autentica pelo keyring: tirar GH_TOKEN do env NAO tira a credencial. So leitura do GitHub e permitida ao filho."""
+    allow = ex.allow_list("py")
+    assert not any(a.startswith(f"Bash({cmd}") for a in allow)
+    gh_allowed = sorted(a for a in allow if a.startswith("Bash(gh "))
+    assert gh_allowed == ["Bash(gh pr checks:*)", "Bash(gh pr view:*)", "Bash(gh run view:*)"]
+
+
+def test_the_prompt_never_tells_the_child_to_comment_or_publish():
+    prompt = ex.build_prompt(item(), "feat/589-x", REPO)
+    assert "gh pr comment" not in prompt and "DUVIDA:" in prompt
+
+
+def _result(text, is_error=False):
+    return json.dumps({"type": "result", "subtype": "success", "is_error": is_error, "result": text})
+
+
+def test_is_error_with_exit_zero_and_subtype_success_is_a_failure_and_nothing_is_delivered(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ex, "deliver", lambda *a, **k: calls.append(1) or ("PUSHED", "x"))
+    gh = FakeGh()
+    r = Runner(gh, push=False, out=_result("algo deu errado", is_error=True))
+    b = bstate(item())
+    res = go(gh, b, r)
+    assert calls == [] and res["action"] != "DONE"
+    assert "is_error" in b["queue"][0]["last_error"]
+
+
+def test_a_question_from_the_child_is_posted_by_the_executor_not_by_the_child(monkeypatch):
+    posted = []
+    monkeypatch.setattr(ex, "comment_pr", lambda pr, repo, body: posted.append((pr, body)))
+    gh = FakeGh()
+    token = "ghp_" + "y" * 30
+    r = Runner(gh, push=False, out=_result(f"Analisei.\nDUVIDA: o review pede A ou B? {token}"))
+    go(gh, bstate(item()), r)
+    assert len(posted) == 1 and posted[0][0] == 7
+    assert "o review pede A ou B?" in posted[0][1] and token not in posted[0][1]
