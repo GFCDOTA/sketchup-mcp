@@ -23,7 +23,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("EXECUTION_STATE_PATH", str(tmp_path / "exec.json"))
     monkeypatch.setenv("BRIDGE_WORKTREE_ROOT", str(tmp_path / "wt"))
     monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
-    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("SKIPPED", ""))      # a entrega tem testes proprios (test_event_executor_deliver)
+    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("PUSHED", "fake"))   # a entrega tem testes proprios (test_event_executor_deliver)
     monkeypatch.setattr(ex, "comment_pr", lambda *a, **k: None)
 
 
@@ -54,6 +54,8 @@ class FakeGh:
                                                   "repo": {"full_name": "outro/fork" if self.fork else REPO}}}
         if path == f"repos/{REPO}/pulls/7/reviews/9":
             return self.rev
+        if path == f"repos/{REPO}/pulls/7/reviews/9/comments":
+            return [{"path": "x.py", "line": 3, "body": "troque isto"}]
         raise AssertionError(path)
 
 
@@ -99,7 +101,7 @@ def test_execute_runs_claude_once_in_the_pr_worktree_and_records_done_awaiting_r
     r = Runner(gh)
     b = bstate(item())
     res = go(gh, b, r)
-    assert res == {"action": "DONE", "item": b["queue"][0]["key"], "new_head": NEWHEAD, "delivery": "SKIPPED"}
+    assert res == {"action": "DONE", "item": b["queue"][0]["key"], "new_head": NEWHEAD, "delivery": "PUSHED"}
     t = b["queue"][0]
     assert t["state"] == "DONE_AWAITING_REREVIEW" and t["new_head"] == NEWHEAD and t["attempts"] == 1 and len(r.calls) == 1
     assert r.calls[0]["cwd"].name == "bridge-pr7" and r.calls[0]["timeout"] == ex.RUN_TIMEOUT_S
@@ -631,8 +633,7 @@ def test_the_child_has_no_github_mutation_in_its_allowlist(cmd):
     """O `gh` autentica pelo keyring: tirar GH_TOKEN do env NAO tira a credencial. So leitura do GitHub e permitida ao filho."""
     allow = ex.allow_list("py")
     assert not any(a.startswith(f"Bash({cmd}") for a in allow)
-    gh_allowed = sorted(a for a in allow if a.startswith("Bash(gh "))
-    assert gh_allowed == ["Bash(gh pr checks:*)", "Bash(gh pr view:*)", "Bash(gh run view:*)"]
+    assert not [a for a in allow if a.startswith("Bash(gh")]                  # nenhum gh: o review chega como arquivo
 
 
 def test_the_prompt_never_tells_the_child_to_comment_or_publish():
@@ -660,7 +661,73 @@ def test_a_question_from_the_child_is_posted_by_the_executor_not_by_the_child(mo
     monkeypatch.setattr(ex, "comment_pr", lambda pr, repo, body: posted.append((pr, body)))
     gh = FakeGh()
     token = "ghp_" + "y" * 30
+    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("NOOP", "nenhuma alteracao"))   # quem duvida nao edita
     r = Runner(gh, push=False, out=_result(f"Analisei.\nDUVIDA: o review pede A ou B? {token}"))
     go(gh, bstate(item()), r)
     assert len(posted) == 1 and posted[0][0] == 7
     assert "o review pede A ou B?" in posted[0][1] and token not in posted[0][1]
+
+
+# ------------------------------------------------------------------------- review 2026-11-05: DONE so com PUSHED; env minimo
+@pytest.mark.parametrize("delivery", ["STALE", "BLOCKED_GUARDS", "FAILED_CHECKS", "ERROR", "SKIPPED", "NOOP"])
+def test_a_head_moved_by_someone_else_is_never_recorded_as_executor_done(monkeypatch, delivery):
+    """Claude saiu 0 e o HEAD remoto mudou, mas a entrega NAO foi do executor: concorrencia externa, nao sucesso."""
+    monkeypatch.setattr(ex, "deliver", lambda *a, **k: (delivery, "x"))
+    gh = FakeGh()
+    r = Runner(gh, push=True)                                                 # alguem mudou o HEAD durante a execucao
+    b = bstate(item())
+    res = go(gh, b, r)
+    assert res["action"] != "DONE" and b["queue"][0]["state"] != "DONE_AWAITING_REREVIEW"
+
+
+def test_pushed_delivery_is_the_only_path_to_done(monkeypatch):
+    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("PUSHED", "1 arquivo"))
+    gh = FakeGh()
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=True))
+    assert res["action"] == "DONE" and res["delivery"] == "PUSHED" and b["queue"][0]["state"] == "DONE_AWAITING_REREVIEW"
+
+
+def test_an_external_head_change_is_superseded_not_retried(monkeypatch):
+    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("STALE", "HEAD remoto mudou durante a validacao"))
+    gh = FakeGh()
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=True))
+    assert res["action"] == "SUPERSEDED" and b["queue"][0]["state"] == "SUPERSEDED"
+
+
+def test_child_env_is_an_allowlist_without_credentials_or_cloud_secrets():
+    base = {"PATH": "p", "SYSTEMROOT": "s", "USERPROFILE": "u", "TEMP": "t", "GH_TOKEN": "x", "GITHUB_TOKEN": "y",
+            "AWS_SECRET_ACCESS_KEY": "z", "OPENAI_API_KEY": "k", "AZURE_CLIENT_SECRET": "a", "SSH_AUTH_SOCK": "s", "RANDOM_VAR": "r",
+            "ANTHROPIC_API_KEY": "c"}
+    env = ex.child_env(base)
+    assert {"PATH", "SYSTEMROOT", "USERPROFILE", "TEMP"} <= set(env)
+    assert not ({"GH_TOKEN", "GITHUB_TOKEN", "AWS_SECRET_ACCESS_KEY", "OPENAI_API_KEY", "AZURE_CLIENT_SECRET", "SSH_AUTH_SOCK",
+                 "RANDOM_VAR"} & set(env))
+    assert env["GH_PROMPT_DISABLED"] == "1" and env["GIT_TERMINAL_PROMPT"] == "0"
+
+
+def test_the_executor_hands_the_authorized_review_to_the_child_as_a_file(tmp_path):
+    gh = FakeGh()
+    gh.rev["body"] = "corrija x " + "ghp_" + "z" * 30
+    r = Runner(gh)
+    go(gh, bstate(item()), r)
+    prompt = r.calls[0]["stdin"]
+    path = Path(prompt.split("leia (ferramenta Read) o arquivo ")[1].split(":")[0] + ":" + prompt.split("leia (ferramenta Read) o arquivo ")[1].split(":")[1])         if ":" in prompt.split("leia (ferramenta Read) o arquivo ")[1][:3] else Path(prompt.split("leia (ferramenta Read) o arquivo ")[1].split(":")[0])
+    data = json.loads(path.read_text(encoding="utf-8"))
+    assert data["untrusted_data"] is True and data["review_id"] == "9" and data["author"] == "fmmodesto"
+    assert "corrija x" in data["body"] and "ghp_" not in data["body"] and data["comments"] == [{"path": "x.py", "line": 3, "body": "troque isto"}]
+    assert "gh pr view" not in prompt and r.calls[0]["env"]["GH_CONFIG_DIR"]
+
+
+def test_review_fetch_failure_blocks_without_launching_the_child():
+    class Broken(FakeGh):
+        def __call__(self, path):
+            if path.endswith("/comments"):
+                raise RuntimeError("gh 502")
+            return super().__call__(path)
+    gh = Broken()
+    r = Runner(gh)
+    b = bstate(item())
+    res = go(gh, b, r)
+    assert res["action"] == "BLOCKED_REVIEW_FETCH" and r.calls == [] and b["queue"][0]["state"] == "BLOCKED_REVIEW_FETCH"

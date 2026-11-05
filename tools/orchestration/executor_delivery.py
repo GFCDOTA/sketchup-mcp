@@ -150,13 +150,23 @@ def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _g
         return "STALE", why
     if remote_head(wt, branch, run) != base:
         return "STALE", "HEAD remoto da branch difere do SHA revisado (alguem publicou): nao publico"
+    rc, head = run(["rev-parse", "HEAD"], wt)
+    if rc != 0:
+        return "ERROR", f"rev-parse falhou: {head[:200]}"
+    if head.strip().lower() != base.lower():
+        # Commit local previo (tentativa anterior que nao publicou, ou qualquer outro) NAO passou pelos guards. Em vez de publica-lo,
+        # devolve TODO o diff base..HEAD ao indice (`reset --soft`, conteudo intacto) e o submete aos MESMOS guards de uma edicao nova;
+        # o que sai e um unico commit do executor sobre o SHA revisado.
+        rc, _ = run(["merge-base", "--is-ancestor", base, "HEAD"], wt)
+        if rc != 0:
+            return "BLOCKED_GUARDS", f"HEAD local {head.strip()[:12]} nao descende do SHA revisado {base[:12]}: nao publico"
+        rc, out = run(["reset", "--soft", base], wt)
+        if rc != 0:
+            return "ERROR", f"reset --soft para o SHA revisado falhou: {out[:200]}"
     try:
         cands = status_candidates(wt)
     except ValueError as exc:
         return "ERROR", str(exc)
-    rc, head = run(["rev-parse", "HEAD"], wt)
-    if rc != 0:
-        return "ERROR", f"rev-parse falhou: {head[:200]}"
     if len(cands) > cfg.max_files * 4:
         return "BLOCKED_GUARDS", f"{len(cands)} caminhos pendentes na worktree: acima do razoavel, nao stageio"
     refusals = [r for st, rel in cands if (r := validate_candidate(wt, rel, st, cfg))]
@@ -200,9 +210,10 @@ def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _g
         rc, out = run(["commit", "-m", msg], wt)
         if rc != 0:
             return "ERROR", f"git commit falhou: {out[:200]}"
-    rc, anc = run(["merge-base", "--is-ancestor", base, "HEAD"], wt)
-    if rc != 0:
-        return "BLOCKED_GUARDS", "HEAD local nao descende do SHA revisado: nao publico"
+    rc, parent = run(["rev-parse", "HEAD^"], wt)                            # exatamente UM commit, o do executor, sobre o SHA revisado
+    rc2, count = run(["rev-list", "--count", f"{base}..HEAD"], wt)
+    if rc != 0 or rc2 != 0 or parent.strip().lower() != base.lower() or count.strip() != "1":
+        return "BLOCKED_GUARDS", "o que seria publicado nao e exatamente um commit do executor sobre o SHA revisado: nao publico"
     ok, why = authorized("imediatamente antes do push")                     # TOCTOU: os checks levaram minutos
     if not ok:
         return "STALE", why

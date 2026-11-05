@@ -70,11 +70,54 @@ def test_no_change_is_a_noop_and_pushes_nothing(repo):
     assert run(wt, base)[0] == "NOOP" and untouched(remote, base)
 
 
-def test_a_local_commit_made_by_the_llm_is_verified_and_pushed_too(repo):
+def test_a_prior_local_commit_is_revalidated_and_republished_as_one_executor_commit(repo):
+    """Commit previo nunca e publicado como esta: o diff COMPLETO base..HEAD volta ao indice e passa pelos mesmos guards."""
     wt, remote, base = repo
     edit_test(wt, "assert 2 == 2")
     sh(wt, "commit", "-aqm", "fix: llm")
-    assert run(wt, base)[0] == "PUSHED" and sh(remote, "rev-parse", "feat/x") == sh(wt, "rev-parse", "HEAD")
+    llm = sh(wt, "rev-parse", "HEAD")
+    assert run(wt, base)[0] == "PUSHED"
+    pushed = sh(remote, "rev-parse", "feat/x")
+    assert pushed != llm and sh(wt, "rev-parse", f"{pushed}^") == base and sh(wt, "rev-list", "--count", f"{base}..{pushed}") == "1"
+    assert "executor" in sh(wt, "log", "-1", "--format=%s", pushed)
+
+
+def test_a_prior_commit_hiding_a_critical_file_is_blocked_by_the_guards(repo):
+    wt, remote, base = repo
+    (wt / "tools" / "validation").mkdir()
+    (wt / "tools" / "validation" / "x.py").write_text("x = 1\n", encoding="utf-8")
+    sh(wt, "add", "tools/validation/x.py")
+    sh(wt, "commit", "-qm", "chore: gate afrouxado")
+    edit_test(wt, "assert 3 == 3")                                             # edicao pendente inocente por cima
+    action, msg = run(wt, base)
+    assert action == "BLOCKED_GUARDS" and "critico" in msg and untouched(remote, base)
+    assert (wt / "tools" / "validation" / "x.py").exists()                     # nada perdido: conteudo preservado na worktree
+
+
+def test_symlink_inside_a_prior_commit_is_blocked_by_the_raw_diff(repo):
+    wt, remote, base = repo
+    blob = subprocess.run(["git", "hash-object", "-w", "--stdin"], cwd=wt, input="alvo\n", capture_output=True, text=True, check=True).stdout.strip()
+    sh(wt, "update-index", "--add", "--cacheinfo", f"120000,{blob},tests/test_link.py")
+    sh(wt, "commit", "-qm", "fix: symlink do llm")
+    sh(wt, "checkout", "--", "tests/test_link.py")
+    action, msg = run(wt, base)
+    assert action == "BLOCKED_GUARDS" and "120000" in msg and untouched(remote, base)
+
+
+def test_a_local_head_that_does_not_descend_from_the_reviewed_sha_is_blocked(repo):
+    wt, remote, base = repo
+    sh(wt, "checkout", "-q", "--orphan", "outra")
+    sh(wt, "commit", "-qm", "orfao", "--allow-empty")
+    action, msg = run(wt, base)
+    assert action == "BLOCKED_GUARDS" and "nao descende" in msg and untouched(remote, base)
+
+
+def test_what_is_pushed_is_exactly_one_executor_commit_on_top_of_the_reviewed_sha(repo):
+    wt, remote, base = repo
+    edit_test(wt, "assert 4 == 4")
+    assert run(wt, base)[0] == "PUSHED"
+    pushed = sh(remote, "rev-parse", "feat/x")
+    assert sh(wt, "rev-list", "--count", f"{base}..{pushed}") == "1" and sh(wt, "rev-parse", f"{pushed}^") == base
 
 
 # ------------------------------------------------------------------------- TOCTOU / autorizacao revalidada (bloqueio 1)
@@ -181,17 +224,6 @@ def test_symlink_is_refused(repo):
     os.symlink("/etc/passwd", wt / "tests" / "test_link.py")
     action, msg = run(wt, base)
     assert action == "BLOCKED_GUARDS" and "symlink" in msg and untouched(remote, base)
-
-
-def test_symlink_mode_in_a_commit_made_by_the_llm_is_refused_by_the_raw_diff(repo):
-    wt, remote, base = repo
-    blob = sh(wt, "hash-object", "-w", "--stdin") if False else subprocess.run(
-        ["git", "hash-object", "-w", "--stdin"], cwd=wt, input="alvo\n", capture_output=True, text=True, check=True).stdout.strip()
-    sh(wt, "update-index", "--add", "--cacheinfo", f"120000,{blob},tests/test_link.py")
-    sh(wt, "commit", "-qm", "fix: symlink do llm")
-    sh(wt, "checkout", "--", "tests/test_link.py")                              # materializa como numa worktree real
-    action, msg = run(wt, base)
-    assert action == "BLOCKED_GUARDS" and "120000" in msg and untouched(remote, base)
 
 
 def test_critical_path_blocks_before_any_commit_or_push(repo):
