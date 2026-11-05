@@ -682,7 +682,18 @@ def run_cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fals
     """Poll do bridge (trava curta) + um item da fila (claim curto; o trabalho roda SEM a trava do arquivo)."""
     counts = eb.run_cycle(gh, policy, repo=repo, now=now)
     out = process_one(gh, policy, repo, execute, runner, claude_bin, wt_prep, now, python)
-    return {"poll": counts, **out}
+    return {"poll": counts, **out, "reconcile": _reconcile_summary(gh, policy, repo, now)}
+
+
+def _reconcile_summary(gh: eb.Gh, policy: dict, repo: str, now: dt.datetime | None) -> dict:
+    """Reconciliador duravel (FP-059/F4) dentro do MESMO ciclo do listener. Somente observa e planeja (execute=False): nunca derruba o ciclo."""
+    try:
+        from tools.orchestration import lifecycle
+        r = lifecycle.reconcile(gh, policy, repo, execute=False, now=now)
+        return {"tracked": r["tracked"], "transitions": [f"#{t['pr']} {t['from']}->{t['to']}" for t in r["transitions"]],
+                "actions": [f"#{a['pr']} {a['action']}" for a in r["actions"]], "errors": r["errors"][:3]}
+    except Exception as exc:                                                 # noqa: BLE001 — o reconciliador nunca interrompe o executor
+        return {"errors": [f"{type(exc).__name__}: {exc}"[:200]]}
 
 
 def lease_issue(item: dict, branch: str, base: str, epath: Path | None = None) -> None:
