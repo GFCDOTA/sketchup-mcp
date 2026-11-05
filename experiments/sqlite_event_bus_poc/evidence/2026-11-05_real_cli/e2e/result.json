@@ -1,0 +1,63 @@
+{
+ "run_id": "run_20261105T011535Z",
+ "started_utc": "2026-11-05T01:15:35.912585+00:00",
+ "cli": {
+  "claude": {
+   "argv0": "C:\\Users\\felip_local\\AppData\\Roaming\\npm\\node_modules\\@anthropic-ai\\claude-code\\bin\\claude.exe",
+   "version": "2.1.158 (Claude Code)",
+   "exit_code": 0
+  },
+  "codex": {
+   "argv0": "C:\\Users\\felip_local\\AppData\\Roaming\\npm\\node_modules\\@openai\\codex\\bin\\codex.js",
+   "version": "codex-cli 0.164.0",
+   "exit_code": 0
+  }
+ },
+ "python": "3.12.13",
+ "lab_dir": "E:\\Claude\\data\\runs\\poc605_lab\\lab_v2\\run_20261105T011535Z",
+ "code": {
+  "commit": "53efa09933d1968bbd715868300eb60831e3e953",
+  "dirty": false
+ },
+ "worker_pids": {
+  "claude": 24924,
+  "codex": 12144,
+  "coordinator": 31228
+ },
+ "worker_exit_codes": {
+  "claude": 0,
+  "codex": 0,
+  "coordinator": 0
+ },
+ "finished_utc": "2026-11-05T01:16:12.405337+00:00",
+ "wall_seconds": 36.0,
+ "checks": {
+  "claude_cli_really_ran_ok": true,
+  "codex_cli_really_ran_ok": true,
+  "no_unfinished_events": true,
+  "every_accepted_review_inspected_code": true,
+  "all_jobs_approved": true,
+  "correction_loop_exercised": true
+ },
+ "jobs": {
+  "jobA-fresh": {
+   "terminal": "REVIEW_APPROVED",
+   "approved_sha_matches_final_artifact": true,
+   "final_tests_pass": true,
+   "implementation_rounds": 1,
+   "changes_requested": 0,
+   "dlq": 0,
+   "final_sha256": "2a2cdf9746fe36361ce4a9e70278b6c3085be265323c52530a7d3a1945de4d80"
+  },
+  "jobB-seeded-defect": {
+   "terminal": "REVIEW_APPROVED",
+   "approved_sha_matches_final_artifact": true,
+   "final_tests_pass": true,
+   "implementation_rounds": 1,
+   "changes_requested": 1,
+   "dlq": 0,
+   "final_sha256": "ab2ec95c75bf77c28486c5b0802ab6c917091de06df32ac49c6b88bcfedd24db"
+  }
+ },
+ "verdict": "PASS"
+}

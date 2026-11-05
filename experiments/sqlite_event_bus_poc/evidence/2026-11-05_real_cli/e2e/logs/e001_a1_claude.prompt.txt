@@ -1,0 +1,6 @@
+You are the IMPLEMENTATION agent working in an isolated lab directory (your current working directory).
+Create `slugify.py` defining `slugify(text: str) -> str` that: (1) converts the text to lowercase; (2) removes whitespace at both ends; (3) replaces each run of consecutive spaces with a single hyphen. Example: slugify(" Hello World ") == "hello-world". Python standard library only.
+Also create `test_slugify.py` with unittest tests that cover each requirement and sensible edge cases.
+Only create or edit `slugify.py` and `test_slugify.py` in the current directory. Do not touch any other path. No git, no network, no package installs.
+
+When finished, reply with a one-line summary of what you changed.

@@ -1,0 +1,200 @@
+[
+ {
+  "id": 1,
+  "event_id": 1,
+  "at": 1793841336.233954,
+  "from_status": null,
+  "to_status": "PENDING",
+  "actor": "publisher",
+  "detail": "published IMPLEMENT_REQUESTED"
+ },
+ {
+  "id": 2,
+  "event_id": 2,
+  "at": 1793841336.3217833,
+  "from_status": null,
+  "to_status": "PENDING",
+  "actor": "publisher",
+  "detail": "published REVIEW_REQUESTED"
+ },
+ {
+  "id": 3,
+  "event_id": 1,
+  "at": 1793841336.5219383,
+  "from_status": "PENDING",
+  "to_status": "RUNNING",
+  "actor": "claude-worker-pid8452",
+  "detail": "claimed; attempt 1"
+ },
+ {
+  "id": 4,
+  "event_id": 2,
+  "at": 1793841336.5254817,
+  "from_status": "PENDING",
+  "to_status": "RUNNING",
+  "actor": "codex-worker-pid36968",
+  "detail": "claimed; attempt 1"
+ },
+ {
+  "id": 5,
+  "event_id": 1,
+  "at": 1793841347.9095998,
+  "from_status": "RUNNING",
+  "to_status": "DONE",
+  "actor": "claude-worker-pid8452",
+  "detail": "completed"
+ },
+ {
+  "id": 6,
+  "event_id": 3,
+  "at": 1793841347.9095998,
+  "from_status": null,
+  "to_status": "RECORDED",
+  "actor": "claude-worker-pid8452",
+  "detail": "published IMPLEMENT_COMPLETED by event 1"
+ },
+ {
+  "id": 7,
+  "event_id": 4,
+  "at": 1793841347.9095998,
+  "from_status": null,
+  "to_status": "PENDING",
+  "actor": "claude-worker-pid8452",
+  "detail": "published REVIEW_REQUESTED by event 1"
+ },
+ {
+  "id": 8,
+  "event_id": 2,
+  "at": 1793841348.2040627,
+  "from_status": "RUNNING",
+  "to_status": "DONE",
+  "actor": "codex-worker-pid36968",
+  "detail": "completed"
+ },
+ {
+  "id": 9,
+  "event_id": 5,
+  "at": 1793841348.2040627,
+  "from_status": null,
+  "to_status": "PENDING",
+  "actor": "codex-worker-pid36968",
+  "detail": "published REVIEW_CHANGES_REQUESTED by event 2"
+ },
+ {
+  "id": 10,
+  "event_id": 4,
+  "at": 1793841348.2140896,
+  "from_status": "PENDING",
+  "to_status": "RUNNING",
+  "actor": "codex-worker-pid36968",
+  "detail": "claimed; attempt 1"
+ },
+ {
+  "id": 11,
+  "event_id": 5,
+  "at": 1793841348.5975296,
+  "from_status": "PENDING",
+  "to_status": "RUNNING",
+  "actor": "coordinator-worker-pid35244",
+  "detail": "claimed; attempt 1"
+ },
+ {
+  "id": 12,
+  "event_id": 5,
+  "at": 1793841348.619183,
+  "from_status": "RUNNING",
+  "to_status": "DONE",
+  "actor": "coordinator-worker-pid35244",
+  "detail": "completed"
+ },
+ {
+  "id": 13,
+  "event_id": 6,
+  "at": 1793841348.619183,
+  "from_status": null,
+  "to_status": "PENDING",
+  "actor": "coordinator-worker-pid35244",
+  "detail": "published IMPLEMENT_REQUESTED by event 5"
+ },
+ {
+  "id": 14,
+  "event_id": 6,
+  "at": 1793841348.9621837,
+  "from_status": "PENDING",
+  "to_status": "RUNNING",
+  "actor": "claude-worker-pid8452",
+  "detail": "claimed; attempt 1"
+ },
+ {
+  "id": 15,
+  "event_id": 4,
+  "at": 1793841357.8212457,
+  "from_status": "RUNNING",
+  "to_status": "DONE",
+  "actor": "codex-worker-pid36968",
+  "detail": "completed"
+ },
+ {
+  "id": 16,
+  "event_id": 7,
+  "at": 1793841357.8212457,
+  "from_status": null,
+  "to_status": "RECORDED",
+  "actor": "codex-worker-pid36968",
+  "detail": "published REVIEW_APPROVED by event 4"
+ },
+ {
+  "id": 17,
+  "event_id": 6,
+  "at": 1793841361.399992,
+  "from_status": "RUNNING",
+  "to_status": "DONE",
+  "actor": "claude-worker-pid8452",
+  "detail": "completed"
+ },
+ {
+  "id": 18,
+  "event_id": 8,
+  "at": 1793841361.399992,
+  "from_status": null,
+  "to_status": "RECORDED",
+  "actor": "claude-worker-pid8452",
+  "detail": "published IMPLEMENT_COMPLETED by event 6"
+ },
+ {
+  "id": 19,
+  "event_id": 9,
+  "at": 1793841361.399992,
+  "from_status": null,
+  "to_status": "PENDING",
+  "actor": "claude-worker-pid8452",
+  "detail": "published REVIEW_REQUESTED by event 6"
+ },
+ {
+  "id": 20,
+  "event_id": 9,
+  "at": 1793841361.841404,
+  "from_status": "PENDING",
+  "to_status": "RUNNING",
+  "actor": "codex-worker-pid36968",
+  "detail": "claimed; attempt 1"
+ },
+ {
+  "id": 21,
+  "event_id": 9,
+  "at": 1793841370.9872625,
+  "from_status": "RUNNING",
+  "to_status": "DONE",
+  "actor": "codex-worker-pid36968",
+  "detail": "completed"
+ },
+ {
+  "id": 22,
+  "event_id": 10,
+  "at": 1793841370.9872625,
+  "from_status": null,
+  "to_status": "RECORDED",
+  "actor": "codex-worker-pid36968",
+  "detail": "published REVIEW_APPROVED by event 9"
+ }
+]
