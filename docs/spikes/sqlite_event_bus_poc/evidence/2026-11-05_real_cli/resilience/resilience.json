@@ -1,0 +1,131 @@
+{
+ "R1": {
+  "pass": true,
+  "exit_code": 1,
+  "pid": 25556,
+  "error": "claude exit 1; is_error=True subtype=success result=Not logged in \u00b7 Please run /login; stderr: ",
+  "events": [
+   [
+    1,
+    "IMPLEMENT_REQUESTED",
+    "DLQ",
+    1
+   ],
+   [
+    2,
+    "JOB_FAILED",
+    "RECORDED",
+    0
+   ]
+  ],
+  "terminal": "JOB_FAILED"
+ },
+ "R2": {
+  "pass": true,
+  "exit_code": 1,
+  "pid": 38700,
+  "error": "codex exit 1; stderr:  Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses, cf-ray: a55802b3c83da648-GRU, request id: req_164d0210f7a1423390b023aac8a4ba46\nERROR: unexpected status 401 Unauthorized: Missing bearer or basic authentication in header,",
+  "events": [
+   [
+    3,
+    "REVIEW_REQUESTED",
+    "DLQ",
+    1
+   ],
+   [
+    4,
+    "JOB_FAILED",
+    "RECORDED",
+    0
+   ]
+  ],
+  "terminal": "JOB_FAILED"
+ },
+ "R3": {
+  "pass": true,
+  "states_after_each_attempt": [
+   "PENDING",
+   "DLQ"
+  ],
+  "runs": [
+   [
+    8580,
+    1,
+    1
+   ],
+   [
+    12228,
+    1,
+    1
+   ]
+  ],
+  "events": [
+   [
+    5,
+    "IMPLEMENT_REQUESTED",
+    "DLQ",
+    2
+   ],
+   [
+    6,
+    "JOB_FAILED",
+    "RECORDED",
+    0
+   ]
+  ],
+  "terminal": "JOB_FAILED"
+ },
+ "R4": {
+  "pass": true,
+  "killed": {
+   "worker_pid": 5316,
+   "claude_pid": 23668,
+   "worker_alive": false,
+   "claude_alive": false,
+   "event_status_after_kill": "RUNNING",
+   "lease_owner": "claude-worker-pid28500"
+  },
+  "restarted_worker_pid": 16728,
+  "final_status": "DONE",
+  "final_attempt": 2,
+  "final_lease_owner": "claude-worker-pid33516",
+  "runs": [
+   [
+    23668,
+    null,
+    null
+   ],
+   [
+    39572,
+    0,
+    "ok"
+   ]
+  ],
+  "events": [
+   [
+    7,
+    "IMPLEMENT_REQUESTED",
+    "DONE",
+    2
+   ],
+   [
+    8,
+    "IMPLEMENT_COMPLETED",
+    "RECORDED",
+    0
+   ],
+   [
+    9,
+    "REVIEW_REQUESTED",
+    "PENDING",
+    0
+   ]
+  ],
+  "terminal": null
+ },
+ "_code": {
+  "pass": true,
+  "commit": "53efa09933d1968bbd715868300eb60831e3e953",
+  "dirty": false
+ }
+}
