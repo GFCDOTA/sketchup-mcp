@@ -100,6 +100,9 @@ def evaluate(store: EventStore, run_dir: Path, jobs: list[str]) -> dict:
         "claude_cli_really_ran_ok": any(r["exit_code"] == 0 and r["outcome"] == "ok" for r in by_agent["claude"]),
         "codex_cli_really_ran_ok": any(r["exit_code"] == 0 and r["outcome"] == "ok" for r in by_agent["codex"]),
         "no_unfinished_events": all(e["status"] not in ("PENDING", "RUNNING") for e in store.events()),
+        "every_accepted_review_inspected_code": all(
+            json.loads(e["result"]).get("inspected") is True
+            for e in store.events() if e["event_type"] == "REVIEW_REQUESTED" and e["status"] == "DONE"),
     }
     per_job = {}
     for job in jobs:

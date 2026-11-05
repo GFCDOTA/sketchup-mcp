@@ -153,30 +153,44 @@ class TestStaleVersions(Base):
         self.assertEqual(self.store.job_terminal("job"), "JOB_FAILED")
 
 
+SRC = "def slugify(x):\n    return x.lower()\n"
+
+
 class TestReviewValidation(unittest.TestCase):
     def good(self, **kw):
-        r = {"verdict": "APPROVE", "artifact_sha256": "abc",
+        r = {"verdict": "APPROVE", "artifact_sha256": "abc", "inspected": True, "code_excerpt": "return x.lower()",
              "requirements": [{"id": i, "met": True, "evidence": "e"} for i in ("lowercase", "strip_ends", "collapse_spaces", "example")],
              "tests_assessment": {"adequate": True, "notes": ""}, "issues": [], "summary": "ok"}
         r.update(kw)
         return r
 
     def test_accepts_consistent_approval(self):
-        validate_review(self.good(), "abc")
+        validate_review(self.good(), "abc", SRC)
 
     def test_rejects_review_of_other_version(self):
         with self.assertRaises(ValueError):
-            validate_review(self.good(), "def")
+            validate_review(self.good(), "def", SRC)
 
     def test_rejects_approve_with_unmet_requirement(self):
         r = self.good()
         r["requirements"][0]["met"] = False
         with self.assertRaises(ValueError):
-            validate_review(r, "abc")
+            validate_review(r, "abc", SRC)
 
     def test_rejects_changes_without_issues(self):
         with self.assertRaises(ValueError):
-            validate_review(self.good(verdict="REQUEST_CHANGES"), "abc")
+            validate_review(self.good(verdict="REQUEST_CHANGES"), "abc", SRC)
+
+
+    def test_rejects_review_that_did_not_inspect_code(self):
+        with self.assertRaises(ValueError):
+            validate_review(self.good(inspected=False, verdict="REQUEST_CHANGES",
+                                      issues=[{"severity": "major", "description": "could not read", "suggested_fix": ""}]),
+                            "abc", SRC)
+
+    def test_rejects_excerpt_not_present_in_reviewed_file(self):
+        with self.assertRaises(ValueError):
+            validate_review(self.good(code_excerpt="return re.sub(' +', '-', x)"), "abc", SRC)
 
 
 CHILD = r'''

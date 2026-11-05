@@ -35,10 +35,13 @@ ARTIFACT = "slugify.py"
 
 REVIEW_SCHEMA = {
     "type": "object", "additionalProperties": False,
-    "required": ["verdict", "artifact_sha256", "requirements", "tests_assessment", "issues", "summary"],
+    "required": ["verdict", "artifact_sha256", "inspected", "code_excerpt", "requirements", "tests_assessment",
+                 "issues", "summary"],
     "properties": {
         "verdict": {"type": "string", "enum": ["APPROVE", "REQUEST_CHANGES"]},
         "artifact_sha256": {"type": "string"},
+        "inspected": {"type": "boolean"},
+        "code_excerpt": {"type": "string"},
         "requirements": {"type": "array", "items": {
             "type": "object", "additionalProperties": False, "required": ["id", "met", "evidence"],
             "properties": {"id": {"type": "string", "enum": ["lowercase", "strip_ends", "collapse_spaces", "example"]},
@@ -243,13 +246,29 @@ def handle_implement(store, ev, ctx):
         print(f"[claude] {e}", flush=True)
 
 
-def review_prompt(ev, sha) -> str:
+def review_prompt(ev, sha, files: dict[str, str], harness_tests: dict) -> str:
+    """The exact persisted file contents are embedded (bound to the sha):
+    Codex's sandboxed shell on Windows intermittently fails to spawn
+    processes, so reading must not depend on it. Tests are executed by the
+    harness (Codex cannot run python.exe in its read-only sandbox here) and
+    their real output is handed over for analysis."""
+    blocks = []
+    for name, text in files.items():
+        blocks += [f"----- BEGIN {name} -----", text.rstrip("\n"), f"----- END {name} -----"]
+    test_report = json.dumps({k: {"exit_code": v["exit_code"], "output": v["output"][-1500:]}
+                              for k, v in harness_tests.items() if isinstance(v, dict) and "exit_code" in v}, indent=1)
     return "\n".join([
         "You are an independent CODE REVIEWER. You are in a read-only sandbox: do NOT modify, create or delete any file.",
-        "Read `slugify.py` and `test_slugify.py` in the current directory (you may run read-only commands such as "
-        "`python -m unittest -v` to observe behavior).",
+        "The files under review are in the current directory and their exact contents are reproduced below "
+        "(authoritative for this sha256). You may additionally inspect them with read-only commands.",
+        *blocks,
+        "Real test output, executed by the harness on this exact version (agent_tests = the implementer's "
+        "test_slugify.py; acceptance_tests = independent harness tests):",
+        test_report,
         "Requirements under review: " + SPEC,
         f"The version under review has sha256 {sha}. Echo it exactly in artifact_sha256.",
+        "Set inspected=true only if you actually read the code above; put in code_excerpt one line copied verbatim "
+        "from slugify.py that is central to your verdict.",
         "Evaluate each requirement id: lowercase, strip_ends, collapse_spaces, example — with concrete evidence.",
         "Assess whether the tests actually exercise the requirements.",
         "Report only REAL defects against the stated requirements or broken/inadequate tests as blocker/major. "
@@ -259,9 +278,17 @@ def review_prompt(ev, sha) -> str:
     ])
 
 
-def validate_review(review: dict, sha: str) -> None:
+def validate_review(review: dict, sha: str, source: str) -> None:
+    """Reject anything that is not a real, consistent review of THIS version.
+    A reviewer that could not inspect the code produces an invalid review
+    (-> retry/DLQ), never a verdict."""
     if review.get("verdict") not in ("APPROVE", "REQUEST_CHANGES"):
         raise ValueError("invalid verdict")
+    if review.get("inspected") is not True:
+        raise ValueError("reviewer reports it did not inspect the code; not a valid review")
+    excerpt = (review.get("code_excerpt") or "").strip()
+    if not excerpt or excerpt not in source:
+        raise ValueError(f"code_excerpt {excerpt[:80]!r} is not a verbatim line of the reviewed slugify.py")
     if review.get("artifact_sha256") != sha:
         raise ValueError(f"review refers to sha {review.get('artifact_sha256')!r}, expected {sha}")
     ids = sorted(r["id"] for r in review["requirements"])
@@ -283,12 +310,19 @@ def handle_review(store, ev, ctx):
         store.supersede(ev, f"stale review request: requested {sha[:12]}, workspace now {str(current)[:12]}")
         print(f"[codex] event {ev['id']} SUPERSEDED (stale version)", flush=True)
         return
+    source = paths.artifact.read_text(encoding="utf-8")
+    files = {ARTIFACT: source}
+    tests_file = paths.workspace / "test_slugify.py"
+    if tests_file.exists():
+        files["test_slugify.py"] = tests_file.read_text(encoding="utf-8")
+    harness_tests = run_tests(paths)
     snap_before = tree_digest(paths.workspace)
     out = paths.codex / f"review_e{ev['id']:03d}_a{ev['attempt']}.json"
     out.unlink(missing_ok=True)
     with Heartbeat(store, ev, ctx.lease) as hb:
         run, run_id, _ = launch(store, ev, "codex", codex_argv(ctx.bins, paths.workspace, paths.codex / "review_schema.json", out),
-                                review_prompt(ev, sha), paths.workspace, ctx.timeout, paths, ctx.extra_env)
+                                review_prompt(ev, sha, files, harness_tests), paths.workspace, ctx.timeout, paths,
+                                ctx.extra_env)
     err, review = None, None
     try:
         if run.timed_out:
@@ -300,7 +334,7 @@ def handle_review(store, ev, ctx):
         if not out.exists() or not out.read_text(encoding="utf-8").strip():
             raise RuntimeError("codex produced no final message")
         review = json.loads(out.read_text(encoding="utf-8"))
-        validate_review(review, sha)
+        validate_review(review, sha, source)
     except Exception as e:  # noqa: BLE001
         err = str(e)
     store.run_finished(run_id, run.exit_code, run.timed_out, "ok" if not err else f"failed: {err[:200]}")
