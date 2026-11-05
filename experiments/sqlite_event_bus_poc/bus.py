@@ -5,6 +5,7 @@ import sqlite3
 import subprocess
 import sys
 import time
+from contextlib import closing
 from pathlib import Path
 
 SCHEMA = """
@@ -25,11 +26,13 @@ class Bus:
   self.path = str(path)
   with self.db() as db: db.executescript(SCHEMA)
  def db(self):
+  # closing(): sqlite3's own context manager commits but never closes, which
+  # leaks the file handle and breaks temp-dir cleanup on Windows.
   db = sqlite3.connect(self.path, timeout=10, isolation_level=None)
   db.row_factory = sqlite3.Row
   db.execute('PRAGMA busy_timeout=10000')
   db.execute('PRAGMA journal_mode=WAL')
-  return db
+  return closing(db)
  def publish(self, event_key, kind, payload):
   with self.db() as db:
    db.execute('INSERT OR IGNORE INTO jobs(event_key,kind,payload) VALUES(?,?,?)',
