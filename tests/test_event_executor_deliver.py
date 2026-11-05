@@ -101,7 +101,8 @@ def test_symlink_inside_a_prior_commit_is_blocked_by_the_raw_diff(repo):
     sh(wt, "commit", "-qm", "fix: symlink do llm")
     sh(wt, "checkout", "--", "tests/test_link.py")
     action, msg = run(wt, base)
-    assert action == "BLOCKED_GUARDS" and "120000" in msg and untouched(remote, base)
+    # Windows materializa como arquivo comum (pego pelo diff --raw, modo 120000); Linux como symlink real (pego antes do stage)
+    assert action == "BLOCKED_GUARDS" and ("120000" in msg or "symlink" in msg) and untouched(remote, base)
 
 
 def test_a_local_head_that_does_not_descend_from_the_reviewed_sha_is_blocked(repo):
