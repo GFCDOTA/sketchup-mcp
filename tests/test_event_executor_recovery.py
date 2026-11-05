@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os
 import subprocess
 import sys
 import time
@@ -30,17 +31,21 @@ class Gh:
     def __call__(self, path):
         if path == "user": return {"login": "fmodesto30"}
         if path == f"repos/{REPO}/pulls/7":
-            return {"number": 7, "body": "Refs #589", "state": "open", "head": {"sha": self.head, "ref": "feat/x", "repo": {"full_name": REPO}}}
+            return {"number": 7, "body": "Refs #589", "state": "open", "labels": [{"name": "executor-ok"}], "head": {"sha": self.head, "ref": "feat/x", "repo": {"full_name": REPO}}}
         if path == f"repos/{REPO}/pulls/7/reviews/9":
             return {"id": 9, "user": {"login": "fmmodesto"}, "state": "CHANGES_REQUESTED", "commit_id": HEAD}
+        if path == f"repos/{REPO}/pulls/7/reviews/9/comments": return []
         raise AssertionError(path)
 gh = Gh()
 def child(argv, cwd, env, stdin, timeout, cancel=None):
     marker.write_text("child-started", encoding="utf-8")
     if mode == "block":
         time.sleep(120)                         # simula o Claude em andamento (sera morto de fora)
-    gh.head = "d" * 40                          # "publica" um commit
-    return 0, "", "", False
+    return 0, "", "", False                     # o filho so edita: quem publica e o executor (R4)
+def fake_deliver(*a, **k):
+    gh.head = "d" * 40                          # o executor "publica" um commit
+    return "PUSHED", "fake"
+ex.deliver = fake_deliver
 now = dt.datetime.strptime(now_iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
 res = ex.process_one(gh, POLICY, REPO, True, child, "claude", lambda pr, b, s, r: (True, "", Path("wt")), now, None, 0.05)
 print(json.dumps(res), flush=True)
@@ -187,3 +192,35 @@ def test_launcher_death_cancels_a_running_child_instead_of_leaving_an_orphan(mon
 def test_launcher_passes_its_own_pid_so_the_executor_never_outlives_it():
     ps1 = (ROOT / "tools/orchestration/run_event_bridge.ps1").read_text(encoding="ascii")
     assert ps1.count('"--watch-pid", $PID') == 2                               # dry-run e -Execute
+
+
+# ------------------------------------------------------------- trava de dono morto (crash durante o heartbeat): quebra na hora
+def test_a_lock_left_by_a_dead_process_is_broken_immediately_not_after_60s(tmp_path):
+    from tools.validation import execution_state as es
+    p = subprocess.Popen([sys.executable, "-c", "import os; print(os.getpid())"], stdout=subprocess.PIPE, text=True)
+    dead = int(p.communicate(timeout=30)[0].strip())                          # PID real que ja terminou
+    lock = (tmp_path / "s.json").with_suffix(".lock")
+    lock.write_text(str(dead), encoding="utf-8")                              # trava fresca (mtime agora) de um dono morto
+    t0 = time.time()
+    with es.locked(tmp_path / "s.json", wait_s=2.0):
+        assert lock.read_text(encoding="utf-8").strip() == str(os.getpid())   # agora e nossa
+    assert time.time() - t0 < 1.5 and not lock.exists()
+
+
+def test_a_lock_held_by_a_live_process_is_respected(tmp_path):
+    from tools.validation import execution_state as es
+    lock = (tmp_path / "s.json").with_suffix(".lock")
+    lock.write_text(str(os.getpid()), encoding="utf-8")                       # dono vivo (este processo, outra "thread")
+    with pytest.raises(TimeoutError):
+        with es.locked(tmp_path / "s.json", wait_s=0.3):
+            pass
+    assert lock.exists()
+
+
+def test_a_legacy_lock_without_pid_still_waits_for_the_60s_rule(tmp_path):
+    from tools.validation import execution_state as es
+    lock = (tmp_path / "s.json").with_suffix(".lock")
+    lock.write_text("", encoding="utf-8")
+    with pytest.raises(TimeoutError):
+        with es.locked(tmp_path / "s.json", wait_s=0.3):
+            pass
