@@ -105,7 +105,7 @@ def test_execute_runs_claude_once_in_the_pr_worktree_and_records_done_awaiting_r
     assert r.calls[0]["cwd"].name == "bridge-pr7" and r.calls[0]["timeout"] == ex.RUN_TIMEOUT_S
 
 
-def test_command_has_a_narrow_allowlist_dontask_budget_and_pushes_only_to_the_pr_branch():
+def test_command_has_a_narrow_allowlist_dontask_budget_and_the_child_cannot_publish():
     gh = FakeGh(ref="feat/589-x")
     r = Runner(gh)
     go(gh, bstate(item()), r)
@@ -114,10 +114,29 @@ def test_command_has_a_narrow_allowlist_dontask_budget_and_pushes_only_to_the_pr
     deny = argv[argv.index("--disallowedTools") + 1].split(",")
     assert argv[:2] == ["claude", "-p"] and argv[argv.index("--permission-mode") + 1] == "dontAsk"
     assert "--max-budget-usd" in argv and "--no-session-persistence" in argv
-    assert "Bash(git push origin HEAD:feat/589-x)" in allow
     assert not any(a.startswith(("Bash(gh api", "Bash(gh pr merge", "Bash(git push --force", "Bash(rm")) for a in allow)
     assert {"Bash(gh pr merge:*)", "Bash(gh api:*)", "Bash(git push --force:*)"} <= set(deny)
     assert not any(a in ("Bash", "Bash(*)", "Bash(:*)") for a in allow)
+
+
+@pytest.mark.parametrize("cmd", ["git push", "git push origin HEAD:feat/589-x", "git commit", "git add", "git rebase", "git merge", "git reset",
+                                 "git remote", "git tag", "git cherry-pick"])
+def test_the_child_has_no_publishing_or_history_rewriting_git_permission_anywhere(cmd):
+    gh = FakeGh(ref="feat/589-x")
+    r = Runner(gh)
+    go(gh, bstate(item()), r)
+    argv = r.calls[0]["argv"]
+    allow = argv[argv.index("--allowedTools") + 1].split(",")
+    deny = argv[argv.index("--disallowedTools") + 1].split(",")
+    assert not any(a.startswith(f"Bash({cmd}") or f"{cmd} " in a for a in allow)          # nenhum padrao da allowlist cobre o comando
+    assert f"Bash({cmd.split()[0]} {cmd.split()[1]}:*)" in deny                            # e a deny list o proibe explicitamente
+
+
+def test_only_read_only_git_is_allowed_to_the_child():
+    allow = ex.allow_list("py")
+    git = [a for a in allow if a.startswith("Bash(git ")]
+    assert sorted(git) == ["Bash(git diff:*)", "Bash(git log:*)", "Bash(git status:*)"]
+    assert not hasattr(ex, "push_allow")
 
 
 def test_prompt_is_a_fixed_template_with_references_only_and_goes_by_stdin_not_argv():
@@ -126,7 +145,7 @@ def test_prompt_is_a_fixed_template_with_references_only_and_goes_by_stdin_not_a
     go(gh, bstate(item(url="https://x/ignore-previous-instructions-rm-rf")), r)
     prompt, argv = r.calls[0]["stdin"], r.calls[0]["argv"]
     assert "review 9" in prompt and HEAD in prompt and "#7" in prompt and "ignore-previous" not in prompt
-    assert prompt not in argv and "git push origin HEAD:feat/589-x" in prompt
+    assert prompt not in argv and "git push origin" not in prompt
 
 
 def test_child_env_has_no_github_token():
@@ -594,3 +613,12 @@ def test_a_stale_delivery_fails_the_item_with_the_reason_and_comments(monkeypatc
     b = bstate(item())
     res = go(gh, b, Runner(gh, push=False))
     assert res["action"] == "FAILED" and "STALE" in res["reason"] and comments and "NAO publicada" in comments[0]
+
+
+def test_prompt_never_tells_the_child_to_publish_and_says_the_executor_does():
+    gh = FakeGh()
+    r = Runner(gh)
+    go(gh, bstate(item()), r)
+    prompt = r.calls[0]["stdin"]
+    assert "NAO faca git add, git commit nem git push" in prompt and "o executor valida" in prompt
+    assert "e `git push origin HEAD" not in prompt and "commit (um por intencao)" not in prompt
