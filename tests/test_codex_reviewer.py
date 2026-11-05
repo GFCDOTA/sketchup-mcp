@@ -1,6 +1,7 @@
 """FP-059/F2 (#601): revisor Codex — read-only, parecer JSON validado, HEAD verificado, publicacao so com identidade independente, falha fechada."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -15,8 +16,17 @@ REPO = "o/r"
 FINDING = {"severity": "HIGH", "file": "x.py", "line": 3, "reason": "bug", "required_change": "corrigir"}
 
 
+X_TEXT = "def soma(a, b):\n    return a - b  # bug\n"
+X_SHA = hashlib.sha256(X_TEXT.encode("utf-8")).hexdigest()
+PKG = {"base": "b" * 40, "sha": SHA, "files": {"x.py": {"sha256": X_SHA, "text": X_TEXT}}}
+REVIEWED = [{"path": "x.py", "sha256": X_SHA, "code_excerpt": "return a - b  # bug"}]
+GREEN = {"source": "trusted_test_runner", "tests_passed": True, "selected": ["tests/test_x.py"], "summary": "1 passed"}
+REAL = {"review_package": cr.review_package, "run_trusted_tests": cr.run_trusted_tests, "check_untouched": cr.check_untouched}  # antes do autouse
+
+
 def verdict(**kw):
-    base = {"pr": 7, "head_sha": SHA, "verdict": "REQUEST_CHANGES", "findings": [FINDING], "tests_reviewed": [], "confidence": "HIGH"}
+    base = {"pr": 7, "head_sha": SHA, "verdict": "REQUEST_CHANGES", "findings": [FINDING], "tests_reviewed": [], "confidence": "HIGH",
+            "files_reviewed": REVIEWED}
     return json.dumps({**base, **kw})
 
 
@@ -97,6 +107,9 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.delenv("CODEX_REVIEWER_GH_TOKEN", raising=False)
     monkeypatch.setattr(cr, "review_worktree", lambda pr, sha, root, run=None: tmp_path / "wt" / f"codex-pr{pr}")
     (tmp_path / "wt" / "codex-pr7").mkdir(parents=True)
+    monkeypatch.setattr(cr, "review_package", lambda wt, base, sha: PKG)
+    monkeypatch.setattr(cr, "run_trusted_tests", lambda wt, files: dict(GREEN))
+    monkeypatch.setattr(cr, "check_untouched", lambda wt, sha, stage: None)
 
 
 def rec(tmp_path):
@@ -212,3 +225,121 @@ def test_review_worktree_is_separate_and_a_dirty_one_blocks(tmp_path, monkeypatc
 def test_module_has_no_write_capable_codex_flags():
     src = Path(cr.__file__).read_text(encoding="utf-8")
     assert "danger-full-access" not in src and "dangerously-bypass" not in src and '"workspace-write"' not in src
+
+
+# ------------------------------------------------------------------- FP-060 D-060-02 / D-060-03: prova de inspecao e teste confiavel
+def test_schema_requires_files_reviewed_with_hash_and_verbatim_excerpt():
+    assert "files_reviewed" in cr.REVIEW_SCHEMA["required"]
+    item = cr.REVIEW_SCHEMA["properties"]["files_reviewed"]["items"]
+    assert item["additionalProperties"] is False and set(item["required"]) == {"path", "sha256", "code_excerpt"}
+
+
+def test_a_review_that_cites_real_bytes_of_the_reviewed_head_is_accepted():
+    v = cr.validate_verdict(verdict(), 7, SHA)
+    cr.verify_inspection(v, PKG)                                                     # nao levanta
+
+
+@pytest.mark.parametrize("reviewed,needle", [
+    ([], "sem prova de inspecao"),
+    ([{**REVIEWED[0], "sha256": "0" * 64}], "sha256"),
+    ([{**REVIEWED[0], "path": "y.py"}], "fora do diff"),
+    ([{**REVIEWED[0], "code_excerpt": "return a + b"}], "nao e trecho literal"),
+    ([{**REVIEWED[0], "code_excerpt": "a"}], "nao e trecho literal"),
+])
+def test_a_review_without_verifiable_inspection_is_blocked(reviewed, needle):
+    v = cr.validate_verdict(verdict(files_reviewed=reviewed), 7, SHA)
+    with pytest.raises(cr.ReviewError, match=needle):
+        cr.verify_inspection(v, PKG)
+
+
+@pytest.mark.parametrize("bad", ["x", [1], [{"path": "x.py"}], [{**REVIEWED[0], "extra": 1}], [{**REVIEWED[0], "sha256": 5}]])
+def test_malformed_files_reviewed_is_refused(bad):
+    with pytest.raises(cr.ReviewError, match="files_reviewed"):
+        cr.validate_verdict(verdict(files_reviewed=bad), 7, SHA)
+
+
+def test_needs_human_may_declare_it_could_not_inspect():
+    cr.verify_inspection(cr.validate_verdict(verdict(verdict="NEEDS_HUMAN", findings=[], files_reviewed=[]), 7, SHA), PKG)
+
+
+def test_a_finding_on_a_file_that_was_not_inspected_is_blocked():
+    v = cr.validate_verdict(verdict(findings=[{**FINDING, "file": "z.py"}]), 7, SHA)
+    with pytest.raises(cr.ReviewError, match="nao inspecionado"):
+        cr.verify_inspection(v, PKG)
+
+
+def test_excerpt_matches_across_crlf_checkouts():
+    pkg = {**PKG, "files": {"x.py": {"sha256": X_SHA, "text": X_TEXT.replace("\n", "\r\n")}}}
+    cr.verify_inspection(cr.validate_verdict(verdict(), 7, SHA), pkg)
+
+
+@pytest.mark.parametrize("evidence", [{"tests_passed": False, "summary": "1 failed"}, {"tests_passed": None, "summary": "nenhum teste"}])
+def test_approve_requires_green_tests_from_the_trusted_runner_not_from_the_model(tmp_path, monkeypatch, evidence):
+    monkeypatch.setattr(cr, "run_trusted_tests", lambda wt, files: {"source": "trusted_test_runner", "selected": [], **evidence})
+    run = Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"]))
+    res = review(tmp_path, run=run)
+    assert res["action"] == "REVIEW_BLOCKED" and "teste confiavel" in res["reason"]
+
+
+def test_request_changes_is_still_valid_when_trusted_tests_are_red(tmp_path, monkeypatch):
+    monkeypatch.setattr(cr, "run_trusted_tests", lambda wt, files: {"source": "trusted_test_runner", "selected": [], "tests_passed": False,
+                                                                   "summary": "1 failed"})
+    assert review(tmp_path)["action"] == "DONE"
+
+
+def test_the_trusted_test_result_and_the_file_contents_go_into_the_prompt(tmp_path):
+    run = Run(verdict())
+    review(tmp_path, run=run)
+    prompt = run.calls[0][2]
+    assert X_SHA in prompt and "return a - b  # bug" in prompt and "1 passed" in prompt and "trusted_test_runner" in prompt
+
+
+def test_approve_with_green_trusted_tests_and_real_inspection_is_done(tmp_path):
+    res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])))
+    assert res["action"] == "DONE" and res["verdict"]["verdict"] == "APPROVE"
+    assert rec(tmp_path)["tests_passed"] is True and rec(tmp_path)["files_reviewed"] == ["x.py"]
+
+
+def test_codex_touching_the_worktree_invalidates_the_review(tmp_path, monkeypatch):
+    def untouched(wt, sha, stage):
+        if stage == "after_codex":
+            raise cr.ReviewError("Codex alterou a worktree do revisor")
+    monkeypatch.setattr(cr, "check_untouched", untouched)
+    res = review(tmp_path, run=Run(verdict()))
+    assert res["action"] == "REVIEW_BLOCKED" and "alterou a worktree" in res["reason"]
+
+
+def test_check_untouched_blocks_on_dirty_tree_or_moved_head():
+    check = REAL["check_untouched"]
+    with pytest.raises(cr.ReviewError, match="alterou a worktree"):
+        check(Path("."), SHA, "after_codex", run=lambda a, c: (0, " M x.py") if a[0] == "status" else (0, SHA))
+    with pytest.raises(cr.ReviewError, match="HEAD"):
+        check(Path("."), SHA, "after_codex", run=lambda a, c: (0, "") if a[0] == "status" else (0, "c" * 40))
+    check(Path("."), SHA, "after_codex", run=lambda a, c: (0, "") if a[0] == "status" else (0, SHA))
+
+
+def test_trusted_runner_without_changed_tests_gives_no_evidence_and_never_runs_pytest(monkeypatch):
+    monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("nao deveria rodar")))
+    ev = REAL["run_trusted_tests"](Path("."), ["tools/orchestration/x.py"])
+    assert ev["tests_passed"] is None and ev["selected"] == [] and ev["source"] == "trusted_test_runner"
+
+
+def test_trusted_runner_reports_the_real_exit_code_of_the_selected_tests(tmp_path, monkeypatch):
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_x.py").write_text("", encoding="utf-8")
+    seen = {}
+
+    def fake_run(argv, **kw):
+        seen["argv"], seen["env"] = argv, kw["env"]
+        return type("R", (), {"returncode": 1, "stdout": "1 failed", "stderr": ""})()
+    monkeypatch.setenv("GH_TOKEN", "x")
+    monkeypatch.setattr(cr.subprocess, "run", fake_run)
+    ev = REAL["run_trusted_tests"](tmp_path, ["tests/test_x.py", "tools/y.py"], python="py")
+    assert ev["tests_passed"] is False and ev["selected"] == ["tests/test_x.py"] and "1 failed" in ev["summary"]
+    assert seen["argv"][:3] == ["py", "-m", "pytest"] and "no:cacheprovider" in seen["argv"] and "GH_TOKEN" not in seen["env"]
+
+
+def test_review_package_hashes_the_blob_at_the_head_and_skips_deleted_files():
+    blobs = {"x.py": X_TEXT.encode("utf-8"), "gone.py": None}
+    pkg = REAL["review_package"](Path("."), "b" * 40, SHA, run=lambda a, c: (0, "x.py\ngone.py"), blob=lambda wt, sha, p: blobs[p])
+    assert pkg["files"] == {"x.py": {"sha256": X_SHA, "text": X_TEXT}}
