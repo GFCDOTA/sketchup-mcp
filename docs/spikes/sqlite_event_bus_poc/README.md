@@ -1,12 +1,12 @@
 # SQLite event-bus PoC — isolated experiment
 
 Small proof of concept for FP-059. **Not wired to SketchUp, GitHub events, Claude Code or Codex CLI.**
-All source lives under `experiments/sqlite_event_bus_poc/`. No runtime integrations, permissions or scheduled tasks are modified.
+All source lives under `docs/spikes/sqlite_event_bus_poc/`. No runtime integrations, permissions or scheduled tasks are modified.
 
 ## Run (Python standard library only)
 
 ```bash
-cd experiments/sqlite_event_bus_poc
+cd docs/spikes/sqlite_event_bus_poc
 python demo.py
 python -m unittest discover -v
 ```
