@@ -291,11 +291,75 @@ def test_failing_checks_block_the_push(repo):
     assert action == "FAILED_CHECKS" and "pytest" in msg and untouched(remote, base)
 
 
+@pytest.mark.skipif(not Path(ex.venv_python()).exists(), reason="venv nao existe nesta worktree (CI cria)")
 def test_run_checks_runs_ruff_and_pytest_for_the_selected_files_with_the_real_venv(repo):
     wt, _remote, _base = repo
-    assert ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"])[0]
+    assert ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"], sandbox_mode="env_allowlist")[0]
     edit_test(wt, "assert False")
-    assert not ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"])[0]
+    assert not ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"], sandbox_mode="env_allowlist")[0]
+
+
+# -------------------------------------- seguranca: sandbox gating e integridade pos-teste (review #598)
+def test_run_checks_refuses_without_os_sandbox():
+    ok, msg = dl.run_checks("python", Path("."), ["x.py"])
+    assert not ok and "sandbox" in msg.lower() and "FP-060 P2" in msg
+
+
+def test_run_checks_sanitizes_env_no_gh_token(repo, monkeypatch):
+    wt, _remote, _base = repo
+    monkeypatch.setenv("GH_TOKEN", "ghp_SECRET_LEAKED")
+    monkeypatch.setenv("GITHUB_TOKEN", "ghp_ANOTHER_SECRET")
+    env = dl._check_env()
+    assert "GH_TOKEN" not in env and "GITHUB_TOKEN" not in env
+    for forbidden in ("GH_TOKEN", "GITHUB_TOKEN", "CODEX_REVIEWER_GH_TOKEN", "AWS_SECRET_ACCESS_KEY", "AZURE_CLIENT_SECRET"):
+        assert forbidden not in env, f"{forbidden} leaked into check env"
+
+
+def test_run_checks_env_allowlist_keeps_only_safe_vars(monkeypatch):
+    monkeypatch.setenv("EVIL_VAR", "should_not_leak")
+    monkeypatch.setenv("PATH", "/usr/bin")
+    env = dl._check_env()
+    assert "EVIL_VAR" not in env
+    assert "PATH" in env
+
+
+def test_staged_content_changed_during_tests_blocks_push(repo):
+    wt, remote, base = repo
+    edit_test(wt, "assert 'original'")
+
+    def sneaky_check(py, w, files, tests=None):
+        (w / "tests" / "test_a.py").write_text("def test_a():\n    assert 'tampered'\n", encoding="utf-8")
+        sh(w, "add", "tests/test_a.py")
+        return True, ""
+
+    action, msg = run(wt, base, check=sneaky_check)
+    assert action == "BLOCKED_GUARDS" and "alterado durante" in msg and untouched(remote, base)
+
+
+def test_new_file_staged_during_tests_blocks_push(repo):
+    wt, remote, base = repo
+    edit_test(wt, "assert 'clean'")
+
+    def inject_check(py, w, files, tests=None):
+        (w / "tools" / "injected.py").write_text("import os; os.system('evil')\n", encoding="utf-8")
+        sh(w, "add", "tools/injected.py")
+        return True, ""
+
+    action, msg = run(wt, base, check=inject_check)
+    assert action == "BLOCKED_GUARDS" and "alterado durante" in msg and untouched(remote, base)
+
+
+def test_source_never_passes_full_env_to_subprocess():
+    src = Path(dl.__file__).read_text(encoding="utf-8")
+    lines = src.split("\n")
+    in_run_checks = False
+    for line in lines:
+        if "def run_checks" in line:
+            in_run_checks = True
+        elif in_run_checks and line and not line[0].isspace() and "def " in line:
+            break
+        if in_run_checks and "subprocess.run" in line and "env=" not in line:
+            raise AssertionError("subprocess.run in run_checks without env= parameter")
 
 
 def test_prompt_tells_the_model_a_denied_command_does_not_block_the_allowed_ones():

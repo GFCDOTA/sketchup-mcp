@@ -1,13 +1,15 @@
 """executor_delivery.py — entrega PELO EXECUTOR (nao pelo LLM) da correcao feita na worktree (FP-057/P8, Issue #589, regra R4).
 
-Fail-closed e em duas barreiras de autorizacao (o review do Tech Lead exige):
+Fail-closed e em tres barreiras de autorizacao (o review do Tech Lead exige):
   1. ANTES de tocar no indice e DE NOVO imediatamente antes do push: `revalidate()` (preflight no GitHub: PR aberto, mesmo repo, branch,
      HEAD == SHA revisado, review valido, label `executor-ok`, identidade do executor) + o HEAD remoto da branch == SHA revisado (`ls-remote`).
   2. Nada e staged em massa (sem add com flag -A): os candidatos vem de `git status -z`, cada caminho e validado (arquivo REGULAR, nao symlink, tipo
      permitido, nao critico, dentro da worktree) e so entao staged EXPLICITAMENTE; depois os modos do diff (`--raw`) recusam symlink/gitlink
      e `execution_guards` mede arquivos/linhas/binario/paths criticos.
+  3. APOS os testes: revalidacao de integridade do indice (diff staged identico ao pre-teste) para detectar side effects de testes maliciosos.
 Testes: so roda o que da para SELECIONAR com seguranca (testes alterados + `tests/test_<modulo>*.py` do codigo alterado); sem selecao
-segura (codigo sem teste, fixtures/conftest, tipos sem teste) => BLOCKED, nada e publicado."""
+segura (codigo sem teste, fixtures/conftest, tipos sem teste) => BLOCKED, nada e publicado.
+Sandbox: `run_checks` recusa execucao sem sandbox de SO (FP-060 P2); ambiente SEMPRE por allowlist (FP-060 7.1)."""
 from __future__ import annotations
 
 import os
@@ -19,6 +21,12 @@ from typing import Callable
 from tools.orchestration import execution_guards as guards
 
 ALLOWED_SUFFIXES = (".py", ".md", ".txt", ".json")
+SANDBOX_AVAILABLE = False
+
+ENV_KEEP = {k.upper() for k in (
+    "PATH", "PATHEXT", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "COMSPEC", "TEMP", "TMP", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "HOME",
+    "APPDATA", "LOCALAPPDATA", "PROGRAMDATA", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMW6432", "NUMBER_OF_PROCESSORS",
+    "PROCESSOR_ARCHITECTURE", "OS", "USERNAME", "LANG", "LC_ALL", "PYTHONUTF8", "PYTHONIOENCODING", "PT_TO_M", "MPLBACKEND")}
 SAFE_MODES = {"100644", "100755"}
 Run = Callable[[list, Path], "tuple[int, str]"]
 Revalidate = Callable[[], "tuple[bool, str]"]
@@ -116,14 +124,26 @@ def select_tests(files: list[str], root: Path) -> tuple[list[str] | None, str]:
     return sorted(set(tests)), ""
 
 
-def run_checks(py: str, wt: Path, files: list, tests: list[str] | None = None) -> tuple[bool, str]:
-    """ruff em todos os .py tocados e pytest na selecao. Falha => (False, trecho)."""
+def _check_env() -> dict:
+    """Ambiente dos processos de teste por ALLOWLIST: nada de token, segredo de nuvem, agente SSH ou variavel de CI herdado.
+    Mesma politica do `event_executor.child_env`; nao e sandbox de SO (FP-060 P2)."""
+    return {k: v for k, v in os.environ.items() if k.upper() in ENV_KEEP}
+
+
+def run_checks(py: str, wt: Path, files: list, tests: list[str] | None = None, *, sandbox_mode: str | None = None) -> tuple[bool, str]:
+    """ruff em todos os .py tocados e pytest na selecao. Falha => (False, trecho).
+    Sem sandbox de SO (FP-060 P2): recusa execucao de testes nao confiaveis. Ambiente SEMPRE por allowlist."""
+    if sandbox_mode is None:
+        sandbox_mode = "os_sandbox" if SANDBOX_AVAILABLE else "none"
+    if sandbox_mode == "none":
+        return False, "BLOCKED: execucao de testes requer sandbox de SO (FP-060 P2); edicoes preservadas na worktree"
+    env = _check_env()
     pys = [f for f in files if f.endswith(".py")]
     chosen = tests if tests is not None else [f for f in pys if f.startswith("tests/") and Path(f).name.startswith("test_")]
     for argv in ([py, "-m", "ruff", "check", *pys] if pys else None, [py, "-m", "pytest", "-q", *chosen] if chosen else None):
         if not argv:
             continue
-        r = subprocess.run(argv, cwd=wt, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=900)
+        r = subprocess.run(argv, cwd=wt, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=900, env=env)
         if r.returncode != 0:
             return False, f"{' '.join(argv[2:4])} rc={r.returncode}: {(r.stdout + r.stderr).strip()[-400:]}"
     return True, ""
@@ -201,9 +221,21 @@ def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _g
     if tests is None:
         unstage()
         return "BLOCKED_GUARDS", why
+    rc_tree, tree_before = run(["write-tree"], wt)
+    if rc_tree != 0:
+        unstage()
+        return "ERROR", "write-tree pre-teste falhou"
     ok, why = check(py, wt, files, tests)
     if not ok:
         return "FAILED_CHECKS", why
+    rc_tree2, tree_after = run(["write-tree"], wt)
+    if rc_tree2 != 0 or tree_after.strip() != tree_before.strip():
+        unstage()
+        return "BLOCKED_GUARDS", "indice alterado durante a execucao dos testes (possivel side effect): nao publico"
+    post_modes = raw_mode_violations(wt, base)
+    if post_modes:
+        unstage()
+        return "BLOCKED_GUARDS", "modo de arquivo alterado durante os testes: " + "; ".join(post_modes)[:300]
     rc, _ = run(["diff", "--cached", "--quiet"], wt)
     if rc != 0:
         msg = f"fix: atende review {item['event_id'].split(':')[1]} do PR #{item['pr']} (executor, Refs #{item['issue']})"
