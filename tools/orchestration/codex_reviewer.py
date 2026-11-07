@@ -54,8 +54,10 @@ REVIEW_SCHEMA = {
 EMBED_LIMIT = 120_000                 # bytes de conteudo embutidos no prompt; o resto fica so com o hash (Codex le na worktree)
 MIN_EXCERPT = 12                      # trecho curto demais ("a", "}") nao prova leitura
 TEST_TIMEOUT_S = 10 * 60
-RUNNER_SOURCE = "coordinator_test_runner"   # NAO e "trusted": roda codigo do PR; isolamento declarado em ISOLATION
-ISOLATION = "env_allowlist_only"            # sem sandbox de SO ainda (FP-060 P2) => APPROVE automatico nao e publicado
+RUNNER_SOURCE = "coordinator_test_runner"   # NAO e "trusted": roda codigo do PR; isolamento em ISOLATION_ENV ou ISOLATION_SKIPPED
+SANDBOX_AVAILABLE = False                  # FP-060 P2: flip quando Job Objects estiver pronto
+ISOLATION_SKIPPED = "tests_skipped_no_sandbox"
+ISOLATION_ENV = "env_allowlist_only"
 CODE_EXT = (".py", ".rb", ".ps1", ".psm1", ".sh", ".js", ".ts", ".yml", ".yaml", ".toml", ".cfg", ".ini")
 ENV_KEEP = {k.upper() for k in (
     "PATH", "PATHEXT", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "COMSPEC", "TEMP", "TMP", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "HOME",
@@ -251,11 +253,18 @@ def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
     return sorted(sel), sorted(uncovered)
 
 
-def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S) -> dict:
-    """D-060-03: o COORDENADOR roda os testes relevantes do diff; o Codex so recebe o resultado. Roda codigo do PR SEM sandbox de SO
-    (env por allowlist apenas) e por isso NAO se declara confiavel: `isolation` vai na evidencia e bloqueia APPROVE publicado."""
+def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S,
+                          *, sandbox_mode: str | None = None) -> dict:
+    """D-060-03: o COORDENADOR roda os testes relevantes do diff; o Codex so recebe o resultado.
+    Sem sandbox de SO (FP-060 P2): NAO executa codigo nao confiavel do PR — retorna evidencia vazia e ISOLATION_SKIPPED.
+    Com sandbox (futuro): roda com env por allowlist e declara ISOLATION_ENV."""
+    if sandbox_mode is None:
+        sandbox_mode = "os_sandbox" if SANDBOX_AVAILABLE else "skip"
     sel, uncovered = select_tests(wt, files)
-    ev = {"source": RUNNER_SOURCE, "isolation": ISOLATION, "selected": sel, "uncovered": uncovered}
+    if sandbox_mode == "skip":
+        return {"source": RUNNER_SOURCE, "isolation": ISOLATION_SKIPPED, "selected": sel, "uncovered": uncovered,
+                "tests_passed": None, "summary": "testes NAO executados: sem sandbox de SO (FP-060 P2); escalar ao proprietario"}
+    ev = {"source": RUNNER_SOURCE, "isolation": ISOLATION_ENV, "selected": sel, "uncovered": uncovered}
     if not sel:
         return {**ev, "tests_passed": None, "summary": "nenhum teste relevante no diff: sem evidencia de teste"}
     env = {**_child_env(), "PYTHONDONTWRITEBYTECODE": "1"}

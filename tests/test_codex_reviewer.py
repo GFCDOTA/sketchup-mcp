@@ -335,7 +335,7 @@ def test_trusted_runner_reports_the_real_exit_code_of_the_selected_tests(tmp_pat
         return type("R", (), {"returncode": 1, "stdout": "1 failed", "stderr": ""})()
     monkeypatch.setenv("GH_TOKEN", "x")
     monkeypatch.setattr(cr.subprocess, "run", fake_run)
-    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/y.py"], python="py")
+    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/y.py"], python="py", sandbox_mode="os_sandbox")
     assert ev["tests_passed"] is False and ev["selected"] == ["tests/test_x.py"] and "1 failed" in ev["summary"] and ev["uncovered"] == ["tools/y.py"]
     assert seen["argv"][:3] == ["py", "-m", "pytest"] and "no:cacheprovider" in seen["argv"] and "GH_TOKEN" not in seen["env"]
 
@@ -358,7 +358,8 @@ def test_child_env_is_an_allowlist_with_gh_and_git_credentials_cut():
 
 def test_the_runner_never_claims_to_be_trusted_and_declares_its_isolation():
     src = Path(cr.__file__).read_text(encoding="utf-8")
-    assert "trusted_test_runner" not in src and cr.RUNNER_SOURCE == "coordinator_test_runner" and cr.ISOLATION == "env_allowlist_only"
+    assert "trusted_test_runner" not in src and cr.RUNNER_SOURCE == "coordinator_test_runner"
+    assert cr.ISOLATION_ENV == "env_allowlist_only" and cr.ISOLATION_SKIPPED == "tests_skipped_no_sandbox"
 
 
 def test_select_tests_maps_changed_modules_to_their_tests_and_reports_uncovered_code(tmp_path):
@@ -418,3 +419,74 @@ def test_head_moving_right_after_publish_is_reconciled_and_reported(tmp_path, mo
     res = review(tmp_path, gh=gh, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a: "https://x/r/2")
     assert res["action"] == "DONE" and res["published"] == "https://x/r/2" and res["head_moved_after_publish"] == "c" * 40
     assert rec(tmp_path)["head_moved_after_publish"] == "c" * 40
+
+
+# ------------------------------------------------- FP-060 #603: sandbox gating — testes NAO executados sem sandbox de SO
+def test_run_coordinator_tests_skips_execution_without_os_sandbox(tmp_path, monkeypatch):
+    """Sem sandbox de SO (SANDBOX_AVAILABLE=False), run_coordinator_tests NAO executa nenhum teste e retorna ISOLATION_SKIPPED."""
+    monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("subprocess nao deveria ser chamado")))
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_x.py").write_text("def test_a(): pass\n", encoding="utf-8")
+    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/orphan.py"])
+    assert ev["tests_passed"] is None
+    assert ev["isolation"] == cr.ISOLATION_SKIPPED
+    assert "sandbox" in ev["summary"].lower()
+    assert ev["selected"] == ["tests/test_x.py"]
+    assert ev["uncovered"] == ["tools/orphan.py"]
+
+
+def test_run_coordinator_tests_with_sandbox_executes_and_declares_env_isolation(tmp_path, monkeypatch):
+    """Com sandbox_mode='os_sandbox', os testes rodam e a evidencia declara ISOLATION_ENV."""
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_x.py").write_text("", encoding="utf-8")
+    seen = {}
+
+    def fake_run(argv, **kw):
+        seen["env"] = kw["env"]
+        return type("R", (), {"returncode": 0, "stdout": "1 passed", "stderr": ""})()
+    monkeypatch.setattr(cr.subprocess, "run", fake_run)
+    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py"], python="py", sandbox_mode="os_sandbox")
+    assert ev["tests_passed"] is True and ev["isolation"] == cr.ISOLATION_ENV
+    assert "GH_TOKEN" not in seen.get("env", {}) and "CODEX_REVIEWER_GH_TOKEN" not in seen.get("env", {})
+
+
+def test_run_coordinator_tests_env_allowlist_keeps_only_safe_vars(monkeypatch):
+    """Mesmo com sandbox, o ambiente dos testes usa allowlist — nenhum segredo vaza."""
+    monkeypatch.setenv("GH_TOKEN", "secret")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "secret")
+    monkeypatch.setenv("SSH_AUTH_SOCK", "/agent")
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
+    monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "secret")
+    env = cr._child_env()
+    assert not ({"GH_TOKEN", "AWS_SECRET_ACCESS_KEY", "SSH_AUTH_SOCK", "OPENAI_API_KEY", "CODEX_REVIEWER_GH_TOKEN"} & set(env))
+
+
+def test_skipped_tests_evidence_blocks_approve_publication_in_full_flow(tmp_path, monkeypatch):
+    """No fluxo completo, APPROVE com testes skippados (sem sandbox) e bloqueado na publicacao."""
+    skipped_ev = {"source": cr.RUNNER_SOURCE, "isolation": cr.ISOLATION_SKIPPED, "tests_passed": None,
+                  "selected": ["tests/test_x.py"], "uncovered": [], "summary": "testes NAO executados: sem sandbox de SO"}
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: skipped_ev)
+    monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
+    published = []
+    res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])),
+                 do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a))
+    assert res["action"] == "REVIEW_BLOCKED" and "sandbox" in res["reason"].lower() and not published
+
+
+def test_child_env_is_the_only_env_used_by_codex_and_test_runner():
+    """run_codex e run_coordinator_tests usam _child_env (allowlist); nenhum passa os.environ diretamente."""
+    src = Path(cr.__file__).read_text(encoding="utf-8")
+    assert src.count("_child_env()") >= 2, "run_codex e run_coordinator_tests devem chamar _child_env"
+    import ast
+    tree = ast.parse(src)
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.FunctionDef) and node.name in ("run_codex", "run_coordinator_tests")):
+            continue
+        for child in ast.walk(node):
+            if isinstance(child, ast.Call) and isinstance(child.func, ast.Attribute) and child.func.attr == "run":
+                env_kw = [kw for kw in child.keywords if kw.arg == "env"]
+                assert env_kw, f"{node.name}: subprocess.run na linha {child.lineno} sem env= explicito"
+                kw = env_kw[0]
+                if isinstance(kw.value, ast.Attribute) and isinstance(kw.value.value, ast.Name):
+                    assert not (kw.value.value.id == "os" and kw.value.attr == "environ"), \
+                        f"{node.name}: subprocess.run na linha {child.lineno} passa os.environ diretamente"
