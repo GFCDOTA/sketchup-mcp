@@ -253,15 +253,13 @@ def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
     return sorted(sel), sorted(uncovered)
 
 
-def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S,
-                          *, sandbox_mode: str | None = None) -> dict:
+def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S) -> dict:
     """D-060-03: o COORDENADOR roda os testes relevantes do diff; o Codex so recebe o resultado.
+    SANDBOX_AVAILABLE e a unica autoridade; nenhum parametro externo pode declarar isolamento.
     Sem sandbox de SO (FP-060 P2): NAO executa codigo nao confiavel do PR — retorna evidencia vazia e ISOLATION_SKIPPED.
     Com sandbox (futuro): roda com env por allowlist e declara ISOLATION_ENV."""
-    if sandbox_mode is None:
-        sandbox_mode = "os_sandbox" if SANDBOX_AVAILABLE else "skip"
     sel, uncovered = select_tests(wt, files)
-    if sandbox_mode == "skip":
+    if not SANDBOX_AVAILABLE:
         return {"source": RUNNER_SOURCE, "isolation": ISOLATION_SKIPPED, "selected": sel, "uncovered": uncovered,
                 "tests_passed": None, "summary": "testes NAO executados: sem sandbox de SO (FP-060 P2); escalar ao proprietario"}
     ev = {"source": RUNNER_SOURCE, "isolation": ISOLATION_ENV, "selected": sel, "uncovered": uncovered}

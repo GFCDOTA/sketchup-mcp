@@ -335,7 +335,8 @@ def test_trusted_runner_reports_the_real_exit_code_of_the_selected_tests(tmp_pat
         return type("R", (), {"returncode": 1, "stdout": "1 failed", "stderr": ""})()
     monkeypatch.setenv("GH_TOKEN", "x")
     monkeypatch.setattr(cr.subprocess, "run", fake_run)
-    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/y.py"], python="py", sandbox_mode="os_sandbox")
+    monkeypatch.setattr(cr, "SANDBOX_AVAILABLE", True)
+    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/y.py"], python="py")
     assert ev["tests_passed"] is False and ev["selected"] == ["tests/test_x.py"] and "1 failed" in ev["summary"] and ev["uncovered"] == ["tools/y.py"]
     assert seen["argv"][:3] == ["py", "-m", "pytest"] and "no:cacheprovider" in seen["argv"] and "GH_TOKEN" not in seen["env"]
 
@@ -436,7 +437,7 @@ def test_run_coordinator_tests_skips_execution_without_os_sandbox(tmp_path, monk
 
 
 def test_run_coordinator_tests_with_sandbox_executes_and_declares_env_isolation(tmp_path, monkeypatch):
-    """Com sandbox_mode='os_sandbox', os testes rodam e a evidencia declara ISOLATION_ENV."""
+    """Com SANDBOX_AVAILABLE=True, os testes rodam e a evidencia declara ISOLATION_ENV."""
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests" / "test_x.py").write_text("", encoding="utf-8")
     seen = {}
@@ -445,7 +446,8 @@ def test_run_coordinator_tests_with_sandbox_executes_and_declares_env_isolation(
         seen["env"] = kw["env"]
         return type("R", (), {"returncode": 0, "stdout": "1 passed", "stderr": ""})()
     monkeypatch.setattr(cr.subprocess, "run", fake_run)
-    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py"], python="py", sandbox_mode="os_sandbox")
+    monkeypatch.setattr(cr, "SANDBOX_AVAILABLE", True)
+    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py"], python="py")
     assert ev["tests_passed"] is True and ev["isolation"] == cr.ISOLATION_ENV
     assert "GH_TOKEN" not in seen.get("env", {}) and "CODEX_REVIEWER_GH_TOKEN" not in seen.get("env", {})
 
@@ -471,6 +473,13 @@ def test_skipped_tests_evidence_blocks_approve_publication_in_full_flow(tmp_path
     res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])),
                  do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a))
     assert res["action"] == "REVIEW_BLOCKED" and "sandbox" in res["reason"].lower() and not published
+
+
+def test_run_coordinator_tests_has_no_sandbox_mode_parameter():
+    """Regression: sandbox_mode parameter was a bypass vector (GPT review 2026-11-07). Only SANDBOX_AVAILABLE decides."""
+    import inspect
+    sig = inspect.signature(cr.run_coordinator_tests)
+    assert "sandbox_mode" not in sig.parameters, "sandbox_mode parameter reintroduced — bypass vulnerability"
 
 
 def test_child_env_is_the_only_env_used_by_codex_and_test_runner():
