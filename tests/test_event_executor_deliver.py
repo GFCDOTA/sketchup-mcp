@@ -292,11 +292,12 @@ def test_failing_checks_block_the_push(repo):
 
 
 @pytest.mark.skipif(not Path(ex.venv_python()).exists(), reason="venv nao existe nesta worktree (CI cria)")
-def test_run_checks_runs_ruff_and_pytest_for_the_selected_files_with_the_real_venv(repo):
+def test_run_checks_runs_ruff_and_pytest_for_the_selected_files_with_the_real_venv(repo, monkeypatch):
     wt, _remote, _base = repo
-    assert ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"], sandbox_mode="env_allowlist")[0]
+    monkeypatch.setattr(dl, "SANDBOX_AVAILABLE", True)
+    assert ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"])[0]
     edit_test(wt, "assert False")
-    assert not ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"], sandbox_mode="env_allowlist")[0]
+    assert not ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"])[0]
 
 
 # -------------------------------------- seguranca: sandbox gating e integridade pos-teste (review #598)
@@ -360,6 +361,13 @@ def test_source_never_passes_full_env_to_subprocess():
             break
         if in_run_checks and "subprocess.run" in line and "env=" not in line:
             raise AssertionError("subprocess.run in run_checks without env= parameter")
+
+
+def test_run_checks_has_no_sandbox_mode_parameter():
+    """Regression: sandbox_mode parameter was a bypass vector (GPT review 2026-11-07). Only SANDBOX_AVAILABLE decides."""
+    import inspect
+    sig = inspect.signature(dl.run_checks)
+    assert "sandbox_mode" not in sig.parameters, "sandbox_mode parameter reintroduced — bypass vulnerability"
 
 
 def test_prompt_tells_the_model_a_denied_command_does_not_block_the_allowed_ones():

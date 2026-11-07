@@ -130,12 +130,11 @@ def _check_env() -> dict:
     return {k: v for k, v in os.environ.items() if k.upper() in ENV_KEEP}
 
 
-def run_checks(py: str, wt: Path, files: list, tests: list[str] | None = None, *, sandbox_mode: str | None = None) -> tuple[bool, str]:
+def run_checks(py: str, wt: Path, files: list, tests: list[str] | None = None) -> tuple[bool, str]:
     """ruff em todos os .py tocados e pytest na selecao. Falha => (False, trecho).
-    Sem sandbox de SO (FP-060 P2): recusa execucao de testes nao confiaveis. Ambiente SEMPRE por allowlist."""
-    if sandbox_mode is None:
-        sandbox_mode = "os_sandbox" if SANDBOX_AVAILABLE else "none"
-    if sandbox_mode == "none":
+    Sem sandbox de SO (FP-060 P2): recusa execucao de testes nao confiaveis. Ambiente SEMPRE por allowlist.
+    SANDBOX_AVAILABLE e a unica autoridade; nenhum parametro externo pode declarar isolamento."""
+    if not SANDBOX_AVAILABLE:
         return False, "BLOCKED: execucao de testes requer sandbox de SO (FP-060 P2); edicoes preservadas na worktree"
     env = _check_env()
     pys = [f for f in files if f.endswith(".py")]
