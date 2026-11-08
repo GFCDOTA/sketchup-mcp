@@ -2,8 +2,10 @@
 
 Wiring layer between the existing event_bridge / event_executor (JSON-file
 queue) and the new durable EventStore (SQLite).  SPEC §6.3 migration: shadow
-mode — the bridge dual-writes to both JSON and SQLite; the executor prefers
-SQLite claims and falls back to JSON.  Rollback = disable SQLite reads.
+mode only — the bridge dual-writes to both JSON and SQLite; the executor
+syncs completed JSON items back to the EventStore.  The JSON queue remains
+the primary execution path.  Cutover (executor claiming from SQLite) and
+rollback are deferred to a follow-up PR.
 
 Path: ``runs/governance/event_store.db`` (overridable via
 ``EVENT_STORE_DB_PATH``).  The db lives outside worktrees so it survives
@@ -12,11 +14,17 @@ worktree cleanup.
 from __future__ import annotations
 
 import os
+import threading
+import time
 from pathlib import Path
 
 from tools.orchestration.event_store import EventStore
 
 _STORE: EventStore | None = None
+
+_shadow_lock = threading.Lock()
+_shadow_stats: dict = {"publish_ok": 0, "publish_err": 0, "sync_ok": 0, "sync_err": 0,
+                       "sync_skip": 0, "last_error": None, "last_error_at": None}
 
 
 def store_path() -> Path:
@@ -40,9 +48,29 @@ def get_store(path: Path | str | None = None, **kw) -> EventStore:
 
 
 def reset_store() -> None:
-    """Test helper: drop the cached singleton."""
+    """Test helper: drop the cached singleton and counters."""
     global _STORE
     _STORE = None
+    with _shadow_lock:
+        _shadow_stats.update(publish_ok=0, publish_err=0, sync_ok=0, sync_err=0,
+                             sync_skip=0, last_error=None, last_error_at=None)
+
+
+def shadow_diagnostics() -> dict:
+    """Return a snapshot of shadow-mode publish/sync counters."""
+    with _shadow_lock:
+        return dict(_shadow_stats)
+
+
+def _record_shadow_error(exc: BaseException) -> None:
+    with _shadow_lock:
+        _shadow_stats["last_error"] = f"{type(exc).__name__}: {exc}"[:300]
+        _shadow_stats["last_error_at"] = time.time()
+
+
+def _inc(key: str) -> None:
+    with _shadow_lock:
+        _shadow_stats[key] += 1
 
 
 def bridge_event_type(event: dict) -> str | None:

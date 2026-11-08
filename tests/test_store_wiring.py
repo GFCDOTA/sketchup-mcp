@@ -26,12 +26,31 @@ def review(rid=1, login="fmmodesto", state="CHANGES_REQUESTED", commit=HEAD):
             "html_url": f"https://x/r/{rid}", "submitted_at": "2026-11-08T11:00:00Z"}
 
 
+HEAD2 = "c" * 40
+
+
 def fake_gh(reviews=(), head=HEAD, body="Refs #606"):
     def gh(path):
         if path.startswith("repos/GFCDOTA/sketchup-mcp/pulls?"):
             return [{"number": 10, "head": {"sha": head}, "body": body}]
         if "/reviews" in path:
             return list(reviews)
+        if "/issues/comments" in path:
+            return []
+        raise AssertionError(path)
+    return gh
+
+
+def fake_gh_two_prs(reviews_pr10=(), reviews_pr20=()):
+    """Two open PRs: #10 and #20, each with its own reviews."""
+    def gh(path):
+        if path.startswith("repos/GFCDOTA/sketchup-mcp/pulls?"):
+            return [{"number": 10, "head": {"sha": HEAD}, "body": "Refs #606"},
+                    {"number": 20, "head": {"sha": HEAD2}, "body": "Refs #607"}]
+        if "/pulls/10/reviews" in path:
+            return list(reviews_pr10)
+        if "/pulls/20/reviews" in path:
+            return list(reviews_pr20)
         if "/issues/comments" in path:
             return []
         raise AssertionError(path)
@@ -197,3 +216,68 @@ class TestResultSync:
         ee._sync_result_to_store(store, item, {"action": "DRY_RUN", "item": item["key"]})
         ev = store.events()[0]
         assert ev["status"] == "PENDING"
+
+    def test_two_prs_sync_never_touches_other_pr_event(self, tmp_path, store):
+        """Adversarial order: PR #20 published first (lower event ID), PR #10 second.
+        Syncing PR #10's result must not claim PR #20's event."""
+        bp = tmp_path / "bridge.json"
+        r10 = review(rid=1, commit=HEAD)
+        r20 = {"id": 2, "user": {"login": "fmmodesto"}, "state": "CHANGES_REQUESTED",
+               "commit_id": HEAD2, "html_url": "https://x/r/2", "submitted_at": "2026-11-08T10:00:00Z"}
+        gh = fake_gh_two_prs(reviews_pr10=[r10], reviews_pr20=[r20])
+        eb.run_cycle(gh, POLICY, bp, now=NOW, store=store)
+        b = eb.load(bp)
+        assert len(b["queue"]) == 2
+        events = store.events()
+        assert len(events) == 2
+        pr10_item = next(t for t in b["queue"] if t["pr"] == 10)
+        ee._sync_result_to_store(store, pr10_item, {"action": "DONE", "item": pr10_item["key"], "new_head": "d" * 40})
+        pr10_ev = next(e for e in store.events() if e["job_id"] == "pr:10")
+        pr20_ev_after = next(e for e in store.events() if e["job_id"] == "pr:20")
+        assert pr10_ev["status"] == "DONE"
+        assert pr20_ev_after["status"] == "PENDING"
+
+
+# ---- shadow diagnostics ---------------------------------------------------
+
+class TestShadowDiagnostics:
+    def test_publish_ok_increments_counter(self, tmp_path, store):
+        bp = tmp_path / "bridge.json"
+        eb.run_cycle(fake_gh(reviews=[review()]), POLICY, bp, now=NOW, store=store)
+        diag = sf.shadow_diagnostics()
+        assert diag["publish_ok"] >= 1
+        assert diag["publish_err"] == 0
+
+    def test_publish_error_records_last_error(self, tmp_path):
+        bp = tmp_path / "bridge.json"
+
+        class BrokenStore:
+            def publish(self, **kw):
+                raise RuntimeError("disk full")
+
+        eb.run_cycle(fake_gh(reviews=[review()]), POLICY, bp, now=NOW, store=BrokenStore())
+        diag = sf.shadow_diagnostics()
+        assert diag["publish_err"] >= 1
+        assert "disk full" in (diag["last_error"] or "")
+
+    def test_sync_ok_increments_counter(self, tmp_path, store):
+        bp = tmp_path / "bridge.json"
+        eb.run_cycle(fake_gh(reviews=[review()]), POLICY, bp, now=NOW, store=store)
+        b = eb.load(bp)
+        item = b["queue"][0]
+        ee._sync_result_to_store(store, item, {"action": "DONE", "item": item["key"], "new_head": "d" * 40})
+        diag = sf.shadow_diagnostics()
+        assert diag["sync_ok"] >= 1
+
+    def test_claim_job_id_filter_isolates_aggregates(self, tmp_path):
+        """EventStore.claim(job_id=...) only returns events for that job."""
+        s = EventStore(tmp_path / "test.db")
+        s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="k1",
+                  job_id="pr:10", payload={"pr": 10}, producer="test")
+        s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="k2",
+                  job_id="pr:20", payload={"pr": 20}, producer="test")
+        claimed = s.claim(("CORRECTION_REQUESTED",), "owner", 30.0, job_id="pr:20")
+        assert claimed is not None
+        assert claimed["job_id"] == "pr:20"
+        pr10_ev = next(e for e in s.events() if e["job_id"] == "pr:10")
+        assert pr10_ev["status"] == "PENDING"

@@ -176,12 +176,19 @@ def _shadow_publish(store, event: dict, pr_facts: dict) -> None:
     """Dual-write to EventStore (shadow mode, SPEC §6.3 step 4).  Best-effort:
     a failure here never blocks the JSON queue."""
     try:
-        from tools.orchestration.store_factory import bridge_to_store_args
+        from tools.orchestration.store_factory import (
+            _inc,
+            _record_shadow_error,
+            bridge_to_store_args,
+        )
         args = bridge_to_store_args(event, pr_facts)
         if args:
             store.publish(**args)
-    except Exception:  # noqa: BLE001
-        pass
+            _inc("publish_ok")
+    except Exception as exc:  # noqa: BLE001
+        from tools.orchestration.store_factory import _inc, _record_shadow_error
+        _inc("publish_err")
+        _record_shadow_error(exc)
 
 
 def poll_once(gh: Gh, policy: dict, bstate: dict, repo: str = REPO, now: dt.datetime | None = None,

@@ -687,21 +687,27 @@ def _get_store():
 
 def _sync_result_to_store(store, item: dict, result: dict) -> None:
     """After completing a JSON queue item, mirror the outcome to the EventStore.
-    Best-effort: never blocks the JSON path."""
+    Best-effort: never blocks the JSON path.  Claims by job_id so that events
+    for other PRs are never touched (review finding #1)."""
     if store is None:
         return
     try:
+        from tools.orchestration.store_factory import _inc, _record_shadow_error
         idem = f"review:{item.get('event_id', '').split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
-        events = [e for e in store.events() if e.get("idempotency_key") == idem]
+        job_id = f"pr:{item.get('pr', '')}"
+        events = [e for e in store.events(job_id=job_id) if e.get("idempotency_key") == idem]
         if not events:
+            _inc("sync_skip")
             return
         ev = events[0]
         if ev["status"] != "PENDING":
+            _inc("sync_skip")
             return
         action = result.get("action")
         owner = f"sync:{uuid.uuid4().hex[:8]}"
-        claimed = store.claim((ev["event_type"],), owner, 30.0)
+        claimed = store.claim((ev["event_type"],), owner, 30.0, job_id=job_id)
         if claimed is None or claimed["id"] != ev["id"]:
+            _inc("sync_skip")
             return
         if action == "DONE":
             store.complete(claimed, {"synced_from": "json_queue", "action": action,
@@ -713,8 +719,11 @@ def _sync_result_to_store(store, item: dict, result: dict) -> None:
             store.fail(claimed, result.get("reason", action)[:2000])
         elif action == "DRY_RUN":
             store.fail(claimed, "dry-run: executor did not run", retry_delay=0)
-    except Exception:  # noqa: BLE001
-        pass
+        _inc("sync_ok")
+    except Exception as exc:  # noqa: BLE001
+        from tools.orchestration.store_factory import _inc, _record_shadow_error
+        _inc("sync_err")
+        _record_shadow_error(exc)
 
 
 def run_cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False, runner: Runner = default_runner,
@@ -732,8 +741,15 @@ def run_cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fals
             item = next((t for t in b["queue"] if t["key"] == out["item"]), None)
         if item:
             _sync_result_to_store(store, item, out)
+    shadow_diag = {}
+    if store:
+        try:
+            from tools.orchestration.store_factory import shadow_diagnostics
+            shadow_diag = shadow_diagnostics()
+        except Exception:  # noqa: BLE001
+            pass
     return {"poll": counts, **out, "reconcile": _reconcile_summary(gh, policy, repo, now),
-            "store": "shadow" if store else "unavailable"}
+            "store": "shadow" if store else "unavailable", "shadow_diagnostics": shadow_diag}
 
 
 def _reconcile_summary(gh: eb.Gh, policy: dict, repo: str, now: dt.datetime | None) -> dict:
