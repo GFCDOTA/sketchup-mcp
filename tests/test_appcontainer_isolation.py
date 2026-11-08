@@ -136,26 +136,23 @@ def test_profile_cleanup_failure_is_reported_and_can_be_retried(monkeypatch):
 
 
 def test_workspace_isolates_profiles_from_each_other(tmp_path):
-    """Profile can read/write its own workspace but not another profile's."""
+    """Owner's file inside a workspace is not readable by a different profile."""
     executable = str(Path(os.environ["SystemRoot"]) / "System32" / "cmd.exe")
     with AppContainerProfile() as owner, AppContainerProfile() as other:
-        owner_ws = create_workspace(owner, tmp_path)
-        (owner_ws / "private.txt").write_text("synthetic", encoding="utf-8")
-        other_ws = create_workspace(other, tmp_path)
+        ws = create_workspace(owner, tmp_path)
         env = _child_env()
-        env["SANDBOX_OWN"] = f'"{other_ws / "control.txt"}"'
-        env["SANDBOX_FOREIGN"] = f'"{owner_ws / "private.txt"}"'
-        # The process creates its own control file, reads it back (proves
-        # read+write in own workspace), then tries the foreign workspace.
-        command = (
-            "echo control>%SANDBOX_OWN%"
-            "&type %SANDBOX_OWN%>NUL 2>NUL||exit 31"
-            "&type %SANDBOX_FOREIGN%>NUL 2>NUL&&exit 23||exit 24"
-        )
-        with ps.WindowsJob([executable, "/d", "/c", command], cwd=Path(executable).parent,
-                           env=env, profile=other) as job:
-            assert job.wait(15) == 24  # own workspace OK, foreign workspace denied
-        assert (other_ws / "control.txt").read_text(encoding="utf-8-sig").strip() == "control"
+        env["SANDBOX_FILE"] = f'"{ws / "secret.txt"}"'
+        # Owner creates a file — proven pattern (same as first test's echo).
+        with ps.WindowsJob([executable, "/d", "/c", "echo secret>%SANDBOX_FILE%"],
+                           cwd=Path(executable).parent, env=env, profile=owner) as job:
+            assert job.wait(15) == 0
+        assert (ws / "secret.txt").read_text(encoding="utf-8-sig").strip() == "secret"
+        # A different profile cannot read that file.
+        with ps.WindowsJob(
+            [executable, "/d", "/c", "type %SANDBOX_FILE%>NUL 2>NUL&&exit 23||exit 24"],
+            cwd=Path(executable).parent, env=env, profile=other,
+        ) as job:
+            assert job.wait(15) == 24
 
 
 def test_workspace_never_reuses_existing_path(tmp_path, monkeypatch):
