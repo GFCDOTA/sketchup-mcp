@@ -23,6 +23,17 @@ from tools.orchestration import execution_guards as guards
 KEEP = 20
 PENDING = ("queued", "in_progress", "pending", "waiting", "requested", None)
 
+MANDATORY_CHECKS = frozenset({
+    "uv lock is current",
+    "pytest (py3.11)",
+    "pytest (py3.12)",
+    "deterministic fidelity gates",
+    "mcp server (smoke + stdio handshake)",
+    "qg: backlog, issues and specs",
+    "qg: PR policy",
+    "qg: geometry, program and integration",
+})
+
 
 def state_path() -> Path:
     return eb.bridge_path().with_name("lifecycle.json")
@@ -53,15 +64,27 @@ def now_iso(now: dt.datetime | None = None) -> str:
     return (now or dt.datetime.now(dt.timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def checks_state(runs: list[dict]) -> str:
-    """'passed' | 'failed' | 'pending' | 'none' a partir dos check-runs do HEAD."""
+def checks_state(runs: list[dict], mandatory: frozenset[str] = MANDATORY_CHECKS) -> str:
+    """'passed' | 'failed' | 'pending' | 'none' a partir dos check-runs do HEAD.
+
+    Exige que TODOS os checks obrigatorios estejam presentes, completed e com
+    conclusion=success.  Subconjunto verde nunca e 'passed': checks ausentes
+    sao 'pending'; conclusoes nao-success em check obrigatorio sao 'failed'."""
     if not runs:
         return "none"
-    concl = [r.get("conclusion") for r in runs]
-    if any(c in ("failure", "cancelled", "timed_out", "action_required", "startup_failure") for c in concl):
-        return "failed"
-    if any(r.get("status") != "completed" or c in PENDING for r, c in zip(runs, concl)):
-        return "pending"
+    by_name: dict[str, dict] = {}
+    for r in runs:
+        by_name[r.get("name", "")] = r
+    for r in by_name.values():
+        c = r.get("conclusion")
+        if c in ("failure", "cancelled", "timed_out", "action_required", "startup_failure"):
+            return "failed"
+    for name in mandatory:
+        r = by_name.get(name)
+        if r is None or r.get("status") != "completed":
+            return "pending"
+        if r.get("conclusion") != "success":
+            return "failed"
     return "passed"
 
 
@@ -108,6 +131,23 @@ def refs_issue(body: str) -> int | None:
     return int(m.group(1)) if m else None
 
 
+def _list_open_prs(gh: eb.Gh, repo: str, per_page: int = 50) -> list[dict]:
+    """Busca TODOS os PRs abertos com paginacao.  Fail-closed: erros propagam."""
+    all_prs: list[dict] = []
+    page = 1
+    while True:
+        batch = gh(f"repos/{repo}/pulls?state=open&per_page={per_page}&page={page}")
+        if not isinstance(batch, list):
+            break
+        all_prs.extend(batch)
+        if len(batch) < per_page:
+            break
+        page += 1
+        if page > 20:
+            break
+    return all_prs
+
+
 def reconcile(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False, now: dt.datetime | None = None,
               codex_review: Callable[..., dict] | None = None, state_file: Path | None = None) -> dict:
     """Um ciclo. Rastreia PRs abertos com a label de autorizacao + os que ja estavam no estado (para ver o merge). Nunca lanca."""
@@ -115,7 +155,7 @@ def reconcile(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fals
     st = load(state_file)
     try:
         cfg = guards.load_config()
-        opened = gh(f"repos/{repo}/pulls?state=open&per_page=50")
+        opened = _list_open_prs(gh, repo)
         numbers = {p["number"] for p in opened if isinstance(p, dict) and guards.label_ok(p.get("labels"), cfg)}
         numbers |= {int(n) for n, r in st["prs"].items() if r.get("state") not in ("COMPLETED", "SUPERSEDED")}
     except (PermissionError, RuntimeError, KeyError, ValueError, TypeError, OSError) as exc:
