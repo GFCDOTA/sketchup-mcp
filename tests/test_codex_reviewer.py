@@ -319,26 +319,25 @@ def test_check_untouched_blocks_on_dirty_tree_or_moved_head():
     check(Path("."), SHA, "after_codex", run=lambda a, c: (0, "") if a[0] == "status" else (0, SHA))
 
 
-def test_trusted_runner_without_changed_tests_gives_no_evidence_and_never_runs_pytest(monkeypatch):
-    monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("nao deveria rodar")))
-    ev = REAL["run_coordinator_tests"](Path("."), ["tools/orchestration/x.py"])
-    assert ev["tests_passed"] is None and ev["selected"] == [] and ev["source"] == "coordinator_test_runner"
-
-
-def test_trusted_runner_reports_the_real_exit_code_of_the_selected_tests(tmp_path, monkeypatch):
+def test_coordinator_runner_never_calls_subprocess(tmp_path, monkeypatch):
+    """run_coordinator_tests NUNCA executa subprocess — toda execucao de codigo removida ate P2."""
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests" / "test_x.py").write_text("", encoding="utf-8")
-    seen = {}
-
-    def fake_run(argv, **kw):
-        seen["argv"], seen["env"] = argv, kw["env"]
-        return type("R", (), {"returncode": 1, "stdout": "1 failed", "stderr": ""})()
-    monkeypatch.setenv("GH_TOKEN", "x")
-    monkeypatch.setattr(cr.subprocess, "run", fake_run)
-    monkeypatch.setattr(cr, "SANDBOX_AVAILABLE", True)
+    monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("subprocess.run called — bypass!")))
     ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/y.py"], python="py")
-    assert ev["tests_passed"] is False and ev["selected"] == ["tests/test_x.py"] and "1 failed" in ev["summary"] and ev["uncovered"] == ["tools/y.py"]
-    assert seen["argv"][:3] == ["py", "-m", "pytest"] and "no:cacheprovider" in seen["argv"] and "GH_TOKEN" not in seen["env"]
+    assert ev["tests_passed"] is None and ev["isolation"] == cr.ISOLATION_SKIPPED
+    assert ev["selected"] == ["tests/test_x.py"] and ev["uncovered"] == ["tools/y.py"]
+
+
+def test_coordinator_runner_blocks_even_with_monkeypatched_flags(tmp_path, monkeypatch):
+    """Nenhum atributo do modulo pode habilitar execucao de testes nao confiaveis."""
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_x.py").write_text("", encoding="utf-8")
+    monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("subprocess.run called — bypass!")))
+    for attr in ("SANDBOX_AVAILABLE", "SANDBOX_RUNNER", "SANDBOX_ENABLED", "_SANDBOX_OVERRIDE"):
+        monkeypatch.setattr(cr, attr, True, raising=False)
+    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py"])
+    assert ev["tests_passed"] is None and ev["isolation"] == cr.ISOLATION_SKIPPED
 
 
 def test_review_package_hashes_the_blob_at_the_head_and_skips_deleted_files():
@@ -422,10 +421,10 @@ def test_head_moving_right_after_publish_is_reconciled_and_reported(tmp_path, mo
     assert rec(tmp_path)["head_moved_after_publish"] == "c" * 40
 
 
-# ------------------------------------------------- FP-060 #603: sandbox gating — testes NAO executados sem sandbox de SO
-def test_run_coordinator_tests_skips_execution_without_os_sandbox(tmp_path, monkeypatch):
-    """Sem sandbox de SO (SANDBOX_AVAILABLE=False), run_coordinator_tests NAO executa nenhum teste e retorna ISOLATION_SKIPPED."""
-    monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("subprocess nao deveria ser chamado")))
+# ------------------------------------------------- FP-060 #603: fail-closed — sem execucao de codigo nao confiavel ate P2
+def test_run_coordinator_tests_always_skips_without_real_sandbox(tmp_path, monkeypatch):
+    """run_coordinator_tests e incondicionalmente ISOLATION_SKIPPED — nenhuma flag habilita subprocess."""
+    monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("subprocess.run called — bypass!")))
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests" / "test_x.py").write_text("def test_a(): pass\n", encoding="utf-8")
     ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/orphan.py"])
@@ -436,24 +435,20 @@ def test_run_coordinator_tests_skips_execution_without_os_sandbox(tmp_path, monk
     assert ev["uncovered"] == ["tools/orphan.py"]
 
 
-def test_run_coordinator_tests_with_sandbox_executes_and_declares_env_isolation(tmp_path, monkeypatch):
-    """Com SANDBOX_AVAILABLE=True, os testes rodam e a evidencia declara ISOLATION_ENV."""
-    (tmp_path / "tests").mkdir()
-    (tmp_path / "tests" / "test_x.py").write_text("", encoding="utf-8")
-    seen = {}
-
-    def fake_run(argv, **kw):
-        seen["env"] = kw["env"]
-        return type("R", (), {"returncode": 0, "stdout": "1 passed", "stderr": ""})()
-    monkeypatch.setattr(cr.subprocess, "run", fake_run)
-    monkeypatch.setattr(cr, "SANDBOX_AVAILABLE", True)
-    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py"], python="py")
-    assert ev["tests_passed"] is True and ev["isolation"] == cr.ISOLATION_ENV
-    assert "GH_TOKEN" not in seen.get("env", {}) and "CODEX_REVIEWER_GH_TOKEN" not in seen.get("env", {})
+def test_run_coordinator_tests_contains_no_subprocess_call():
+    """run_coordinator_tests nao executa subprocess — toda execucao de codigo nao confiavel removida ate P2."""
+    import ast
+    src = Path(cr.__file__).read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == "run_coordinator_tests":
+            for child in ast.walk(node):
+                if isinstance(child, ast.Attribute) and child.attr == "run" and isinstance(child.value, ast.Name) and child.value.id == "subprocess":
+                    raise AssertionError(f"subprocess.run found in run_coordinator_tests at line {child.lineno} — untrusted code execution path reintroduced")
 
 
 def test_run_coordinator_tests_env_allowlist_keeps_only_safe_vars(monkeypatch):
-    """Mesmo com sandbox, o ambiente dos testes usa allowlist — nenhum segredo vaza."""
+    """Infra de allowlist preservada para P2 — nenhum segredo vaza."""
     monkeypatch.setenv("GH_TOKEN", "secret")
     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "secret")
     monkeypatch.setenv("SSH_AUTH_SOCK", "/agent")
@@ -475,21 +470,23 @@ def test_skipped_tests_evidence_blocks_approve_publication_in_full_flow(tmp_path
     assert res["action"] == "REVIEW_BLOCKED" and "sandbox" in res["reason"].lower() and not published
 
 
-def test_run_coordinator_tests_has_no_sandbox_mode_parameter():
-    """Regression: sandbox_mode parameter was a bypass vector (GPT review 2026-11-07). Only SANDBOX_AVAILABLE decides."""
+def test_run_coordinator_tests_has_no_bypass_parameters():
+    """Regression: nenhum parametro (sandbox_mode, sandbox, isolation...) pode habilitar execucao."""
     import inspect
     sig = inspect.signature(cr.run_coordinator_tests)
-    assert "sandbox_mode" not in sig.parameters, "sandbox_mode parameter reintroduced — bypass vulnerability"
+    forbidden = {"sandbox_mode", "sandbox", "isolation", "enable_tests", "force_run", "unsafe"}
+    found = forbidden & set(sig.parameters)
+    assert not found, f"bypass parameter(s) reintroduced: {found}"
 
 
-def test_child_env_is_the_only_env_used_by_codex_and_test_runner():
-    """run_codex e run_coordinator_tests usam _child_env (allowlist); nenhum passa os.environ diretamente."""
+def test_child_env_is_the_only_env_used_by_codex_runner():
+    """run_codex usa _child_env (allowlist); nenhum passa os.environ diretamente."""
     src = Path(cr.__file__).read_text(encoding="utf-8")
-    assert src.count("_child_env()") >= 2, "run_codex e run_coordinator_tests devem chamar _child_env"
+    assert src.count("_child_env()") >= 1, "run_codex deve chamar _child_env"
     import ast
     tree = ast.parse(src)
     for node in ast.walk(tree):
-        if not (isinstance(node, ast.FunctionDef) and node.name in ("run_codex", "run_coordinator_tests")):
+        if not (isinstance(node, ast.FunctionDef) and node.name == "run_codex"):
             continue
         for child in ast.walk(node):
             if isinstance(child, ast.Call) and isinstance(child.func, ast.Attribute) and child.func.attr == "run":

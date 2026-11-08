@@ -55,7 +55,7 @@ EMBED_LIMIT = 120_000                 # bytes de conteudo embutidos no prompt; o
 MIN_EXCERPT = 12                      # trecho curto demais ("a", "}") nao prova leitura
 TEST_TIMEOUT_S = 10 * 60
 RUNNER_SOURCE = "coordinator_test_runner"   # NAO e "trusted": roda codigo do PR; isolamento em ISOLATION_ENV ou ISOLATION_SKIPPED
-SANDBOX_AVAILABLE = False                  # FP-060 P2: flip quando Job Objects estiver pronto
+SANDBOX_RUNNER = None                      # FP-060 P2: sera o runner de Job Objects real; None = fail-closed
 ISOLATION_SKIPPED = "tests_skipped_no_sandbox"
 ISOLATION_ENV = "env_allowlist_only"
 CODE_EXT = (".py", ".rb", ".ps1", ".psm1", ".sh", ".js", ".ts", ".yml", ".yaml", ".toml", ".cfg", ".ini")
@@ -254,26 +254,11 @@ def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
 
 
 def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S) -> dict:
-    """D-060-03: o COORDENADOR roda os testes relevantes do diff; o Codex so recebe o resultado.
-    SANDBOX_AVAILABLE e a unica autoridade; nenhum parametro externo pode declarar isolamento.
-    Sem sandbox de SO (FP-060 P2): NAO executa codigo nao confiavel do PR — retorna evidencia vazia e ISOLATION_SKIPPED.
-    Com sandbox (futuro): roda com env por allowlist e declara ISOLATION_ENV."""
+    """Fail-closed: nenhum caminho executa testes nao confiaveis do PR ate P2 introduzir sandbox de SO real (Job Objects).
+    Nao existe flag, constante ou parametro que habilite subprocess.run(pytest) — P2 adicionara o runner isolado via SANDBOX_RUNNER."""
     sel, uncovered = select_tests(wt, files)
-    if not SANDBOX_AVAILABLE:
-        return {"source": RUNNER_SOURCE, "isolation": ISOLATION_SKIPPED, "selected": sel, "uncovered": uncovered,
-                "tests_passed": None, "summary": "testes NAO executados: sem sandbox de SO (FP-060 P2); escalar ao proprietario"}
-    ev = {"source": RUNNER_SOURCE, "isolation": ISOLATION_ENV, "selected": sel, "uncovered": uncovered}
-    if not sel:
-        return {**ev, "tests_passed": None, "summary": "nenhum teste relevante no diff: sem evidencia de teste"}
-    env = {**_child_env(), "PYTHONDONTWRITEBYTECODE": "1"}
-    try:
-        r = subprocess.run([python or ex.venv_python(), "-m", "pytest", "-q", "-p", "no:cacheprovider", *sel], cwd=wt, capture_output=True, text=True,
-                           encoding="utf-8", errors="replace", timeout=timeout, env=env, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-    except subprocess.TimeoutExpired:
-        return {**ev, "tests_passed": False, "summary": "timeout do runner de testes"}
-    except OSError as exc:
-        return {**ev, "tests_passed": False, "summary": f"runner indisponivel: {exc}"}
-    return {**ev, "tests_passed": r.returncode == 0, "exit_code": r.returncode, "summary": ex.redact((r.stdout + r.stderr)[-1500:])}
+    return {"source": RUNNER_SOURCE, "isolation": ISOLATION_SKIPPED, "selected": sel, "uncovered": uncovered,
+            "tests_passed": None, "summary": "testes NAO executados: sem sandbox de SO real (FP-060 P2); escalar ao proprietario"}
 
 
 def check_untouched(wt: Path, sha: str, stage: str, run=ex.git) -> None:
