@@ -131,21 +131,51 @@ def refs_issue(body: str) -> int | None:
     return int(m.group(1)) if m else None
 
 
-def _list_open_prs(gh: eb.Gh, repo: str, per_page: int = 50) -> list[dict]:
-    """Busca TODOS os PRs abertos com paginacao.  Fail-closed: erros propagam."""
-    all_prs: list[dict] = []
+def _paginated_list(gh: eb.Gh, url: str, per_page: int = 100, max_pages: int = 20) -> list[dict]:
+    """Fetch all items from a paginated GitHub list endpoint.  Fail-closed:
+    non-list responses and safety-cap overflow raise RuntimeError."""
+    items: list[dict] = []
     page = 1
     while True:
-        batch = gh(f"repos/{repo}/pulls?state=open&per_page={per_page}&page={page}")
+        batch = gh(f"{url}{'&' if '?' in url else '?'}per_page={per_page}&page={page}")
         if not isinstance(batch, list):
-            break
-        all_prs.extend(batch)
+            raise RuntimeError(f"non-list response from {url} page {page}: {type(batch).__name__}")
+        items.extend(batch)
         if len(batch) < per_page:
             break
         page += 1
-        if page > 20:
+        if page > max_pages:
+            raise RuntimeError(f"safety cap ({max_pages} pages) exceeded for {url}; {len(items)} items so far")
+    return items
+
+
+def _check_runs(gh: eb.Gh, repo: str, head: str, per_page: int = 100, max_pages: int = 10) -> list[dict]:
+    """Fetch ALL check-runs for a commit, paginating and verifying total_count.
+    Fail-closed: raises on incomplete or malformed responses."""
+    all_runs: list[dict] = []
+    total: int | None = None
+    page = 1
+    while True:
+        resp = gh(f"repos/{repo}/commits/{head}/check-runs?per_page={per_page}&page={page}")
+        if not isinstance(resp, dict) or "check_runs" not in resp:
+            raise RuntimeError(f"malformed check-runs response for {head[:8]} page {page}")
+        batch = resp["check_runs"]
+        if total is None:
+            total = resp.get("total_count", 0)
+        all_runs.extend(batch)
+        if len(all_runs) >= total or len(batch) < per_page:
             break
-    return all_prs
+        page += 1
+        if page > max_pages:
+            raise RuntimeError(f"check-runs safety cap ({max_pages} pages) exceeded for {head[:8]}; got {len(all_runs)}/{total}")
+    if total is not None and len(all_runs) < total:
+        raise RuntimeError(f"check-runs incomplete for {head[:8]}: got {len(all_runs)}, expected {total}")
+    return all_runs
+
+
+def _list_open_prs(gh: eb.Gh, repo: str, per_page: int = 50) -> list[dict]:
+    """Busca TODOS os PRs abertos com paginacao.  Fail-closed: erros propagam."""
+    return _paginated_list(gh, f"repos/{repo}/pulls?state=open", per_page=per_page)
 
 
 def reconcile(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False, now: dt.datetime | None = None,
@@ -165,8 +195,8 @@ def reconcile(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fals
         try:
             pr = gh(f"repos/{repo}/pulls/{n}")
             head = (pr.get("head") or {}).get("sha", "")
-            runs = (gh(f"repos/{repo}/commits/{head}/check-runs?per_page=100") or {}).get("check_runs", []) if head else []
-            reviews = gh(f"repos/{repo}/pulls/{n}/reviews?per_page=100")
+            runs = _check_runs(gh, repo, head) if head else []
+            reviews = _paginated_list(gh, f"repos/{repo}/pulls/{n}/reviews")
             new, reason, rid = derive(pr, runs, reviews if isinstance(reviews, list) else [], policy)
             rec = st["prs"].get(str(n))
             if rec and rec.get("head_sha") and rec["head_sha"] != head and new not in ("COMPLETED", "SUPERSEDED"):

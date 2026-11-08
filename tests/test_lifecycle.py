@@ -50,14 +50,14 @@ class World:
         self.fail_list = False
 
     def __call__(self, path):
-        if path.startswith(f"repos/{REPO}/pulls?state=open"):
+        if "pulls?" in path and ("state=open" in path or "pulls?per_page=" in path) and "reviews" not in path:
             if self.fail_list:
                 raise RuntimeError("rate limit")
             return [self.pr] if self.pr["state"] == "open" else []
         if path == f"repos/{REPO}/pulls/7":
             return self.pr
         if path.startswith(f"repos/{REPO}/commits/") and "check-runs" in path:
-            return {"check_runs": self.runs}
+            return {"total_count": len(self.runs), "check_runs": self.runs}
         if path.startswith(f"repos/{REPO}/pulls/7/reviews"):
             return self.reviews
         raise AssertionError(path)
@@ -270,49 +270,96 @@ class TestOldHeadSha:
         assert out["transitions"][0]["to"] == "REVIEW_QUEUED"
 
 
-# ------------------------------------------------------------------------------- pagination
-class TestPagination:
-    """_list_open_prs deve coletar TODOS os PRs abertos, paginando."""
+# ------------------------------------------------------------------------------- pagination (fail-closed)
+def _parse_page(path):
+    per_pg = int(path.split("per_page=")[1].split("&")[0])
+    pg = int(path.split("&page=")[1].split("&")[0]) if "&page=" in path else 1
+    return per_pg, pg
+
+
+class TestPaginationPRs:
+    """_list_open_prs: paginacao completa com erro em truncamento ou resposta invalida."""
 
     def test_single_page(self):
         called = []
-
         def gh(path):
             called.append(path)
             return [pr()]
-
         result = lc._list_open_prs(gh, REPO, per_page=50)
         assert len(result) == 1 and len(called) == 1
 
     def test_multiple_pages(self):
-        prs = [{"number": i, "state": "open", "labels": [{"name": "executor-ok"}]} for i in range(5)]
-
+        prs = [{"number": i} for i in range(5)]
         def gh(path):
-            per_pg = int(path.split("per_page=")[1].split("&")[0])
-            pg = int(path.split("&page=")[1].split("&")[0]) if "&page=" in path else 1
-            start = (pg - 1) * per_pg
-            return prs[start:start + per_pg]
+            per_pg, pg = _parse_page(path)
+            return prs[(pg - 1) * per_pg:pg * per_pg]
+        assert len(lc._list_open_prs(gh, REPO, per_page=2)) == 5
 
-        result = lc._list_open_prs(gh, REPO, per_page=2)
-        assert len(result) == 5
-
-    def test_exact_per_page_boundary(self):
+    def test_exact_per_page_boundary_fetches_extra_page(self):
         prs = [{"number": i} for i in range(4)]
-        pages_called = []
-
+        pages = []
         def gh(path):
-            per_pg = int(path.split("per_page=")[1].split("&")[0])
-            pg = int(path.split("&page=")[1].split("&")[0]) if "&page=" in path else 1
-            pages_called.append(pg)
-            start = (pg - 1) * per_pg
-            return prs[start:start + per_pg]
+            per_pg, pg = _parse_page(path)
+            pages.append(pg)
+            return prs[(pg - 1) * per_pg:pg * per_pg]
+        assert len(lc._list_open_prs(gh, REPO, per_page=2)) == 4
+        assert pages == [1, 2, 3]
 
-        result = lc._list_open_prs(gh, REPO, per_page=2)
-        assert len(result) == 4 and pages_called == [1, 2, 3]
+    def test_non_list_response_raises(self):
+        with pytest.raises(RuntimeError, match="non-list response"):
+            lc._list_open_prs(lambda p: {"error": "bad"}, REPO)
 
-    def test_non_list_response_stops(self):
-        assert lc._list_open_prs(lambda p: {"error": "bad"}, REPO) == []
+    def test_safety_cap_raises(self):
+        with pytest.raises(RuntimeError, match="safety cap"):
+            lc._list_open_prs(lambda p: [{"number": 1}] * 50, REPO, per_page=50)
 
-    def test_safety_cap_at_20_pages(self):
-        result = lc._list_open_prs(lambda p: [{"number": 1}] * 50, REPO, per_page=50)
-        assert len(result) == 1000
+
+class TestPaginationCheckRuns:
+    """_check_runs: pagina e verifica total_count; erra em resposta incompleta."""
+
+    def test_single_page_all_present(self):
+        runs = all_green()
+        def gh(path):
+            return {"total_count": len(runs), "check_runs": runs}
+        assert len(lc._check_runs(gh, REPO, HEAD)) == len(NAMES)
+
+    def test_multi_page_collects_all(self):
+        runs = all_green()
+        def gh(path):
+            _, pg = _parse_page(path)
+            batch = runs[(pg - 1) * 3:pg * 3]
+            return {"total_count": len(runs), "check_runs": batch}
+        result = lc._check_runs(gh, REPO, HEAD, per_page=3)
+        assert len(result) == len(runs)
+
+    def test_malformed_response_raises(self):
+        with pytest.raises(RuntimeError, match="malformed"):
+            lc._check_runs(lambda p: [1, 2, 3], REPO, HEAD)
+
+    def test_incomplete_response_raises(self):
+        runs = all_green()
+        def gh(path):
+            return {"total_count": len(runs) + 5, "check_runs": runs}
+        with pytest.raises(RuntimeError, match="incomplete"):
+            lc._check_runs(gh, REPO, HEAD)
+
+    def test_safety_cap_raises(self):
+        def gh(path):
+            return {"total_count": 9999, "check_runs": [run(name=f"c{i}") for i in range(100)]}
+        with pytest.raises(RuntimeError, match="safety cap"):
+            lc._check_runs(gh, REPO, HEAD, per_page=100, max_pages=2)
+
+
+class TestPaginationReviews:
+    """Reviews usam _paginated_list: mesma semantica fail-closed."""
+
+    def test_single_page_reviews(self):
+        reviews = [rev("APPROVED")]
+        def gh(path):
+            return reviews
+        result = lc._paginated_list(gh, f"repos/{REPO}/pulls/7/reviews")
+        assert len(result) == 1
+
+    def test_non_list_review_response_raises(self):
+        with pytest.raises(RuntimeError, match="non-list response"):
+            lc._paginated_list(lambda p: {"message": "Not Found"}, f"repos/{REPO}/pulls/7/reviews")
