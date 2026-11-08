@@ -130,8 +130,8 @@ def _check_env() -> dict:
 
 
 def run_checks(py: str, wt: Path, files: list, tests: list[str] | None = None) -> tuple[bool, str]:
-    """Fail-closed: nenhum caminho executa testes nao confiaveis do PR ate P2 introduzir sandbox de SO real (Job Objects).
-    Nao existe flag, constante ou parametro que habilite subprocess — P2 adicionara o runner isolado."""
+    """Fail-closed: testes nao confiaveis exigem isolamento de SO verificavel.
+    Job Objects gerenciam processos, mas nao sao um sandbox de seguranca. Nao ha fallback via subprocess."""
     return False, "BLOCKED: execucao de testes requer sandbox de SO real (FP-060 P2); edicoes preservadas na worktree"
 
 
