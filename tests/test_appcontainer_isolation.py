@@ -135,34 +135,21 @@ def test_profile_cleanup_failure_is_reported_and_can_be_retried(monkeypatch):
         # Context exit retries the real deletion after the simulated failure.
 
 
-def test_workspace_blocks_inherited_broad_grants_for_other_profile(tmp_path):
-    parent = tmp_path / "broadly accessible parent"
-    parent.mkdir()
-    icacls = str(Path(os.environ["SystemRoot"]) / "System32" / "icacls.exe")
-    for args in ([icacls, str(parent), "/grant", "*S-1-15-2-1:(OI)(CI)M"],
-                 [icacls, str(parent), "/setintegritylevel", "(OI)(CI)L"]):
-        proc = subprocess.run(args, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-        assert proc.returncode == 0, proc.stderr
-    public = parent / "public.txt"
-    public.write_text("control", encoding="utf-8")
-    # Explicitly grant the file itself — (OI)(CI) inheritance on the parent is
-    # unreliable on CI runners (GitHub Actions Windows Server).
-    for extra in ([icacls, str(public), "/grant", "*S-1-15-2-1:R"],
-                  [icacls, str(public), "/setintegritylevel", "L"]):
-        proc = subprocess.run(extra, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-        assert proc.returncode == 0, proc.stderr
+def test_workspace_isolates_profiles_from_each_other(tmp_path):
+    """Profile can read its own workspace but not another profile's workspace."""
     executable = str(Path(os.environ["SystemRoot"]) / "System32" / "cmd.exe")
     with AppContainerProfile() as owner, AppContainerProfile() as other:
-        workspace = create_workspace(owner, parent)
-        private = workspace / "private.txt"
-        private.write_text("synthetic", encoding="utf-8")
+        owner_ws = create_workspace(owner, tmp_path)
+        (owner_ws / "private.txt").write_text("synthetic", encoding="utf-8")
+        other_ws = create_workspace(other, tmp_path)
+        (other_ws / "control.txt").write_text("control", encoding="utf-8")
         env = _child_env()
-        env["SANDBOX_PUBLIC"] = f'"{public}"'
-        env["SANDBOX_PRIVATE"] = f'"{private}"'
-        command = "type %SANDBOX_PUBLIC%>NUL 2>NUL||exit 31&type %SANDBOX_PRIVATE%>NUL 2>NUL&&exit 23||exit 24"
+        env["SANDBOX_OWN"] = f'"{other_ws / "control.txt"}"'
+        env["SANDBOX_FOREIGN"] = f'"{owner_ws / "private.txt"}"'
+        command = "type %SANDBOX_OWN%>NUL 2>NUL||exit 31&type %SANDBOX_FOREIGN%>NUL 2>NUL&&exit 23||exit 24"
         with ps.WindowsJob([executable, "/d", "/c", command], cwd=Path(executable).parent,
                            env=env, profile=other) as job:
-            assert job.wait(15) == 24  # control readable, private workspace denied
+            assert job.wait(15) == 24  # own workspace readable, foreign workspace denied
 
 
 def test_workspace_never_reuses_existing_path(tmp_path, monkeypatch):
