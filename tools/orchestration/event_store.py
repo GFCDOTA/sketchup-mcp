@@ -17,6 +17,11 @@ its side effects queued.
 
 Properties (SPEC §6.2): WAL, configurable busy_timeout, explicit close
 (D-060-01), atomic claim/update, transactional outbox, fenced lease tokens.
+
+The aggregate identity is (aggregate_type, job_id); producers must use a
+stable job_id across all events for the same PR. Outbox delivery is at least
+once: publishers must reconcile unknown outcomes and use idempotency keys.
+Lease fencing protects database writes, not an already-issued remote call.
 """
 from __future__ import annotations
 
@@ -80,6 +85,8 @@ CREATE TABLE IF NOT EXISTS events (
 );
 CREATE INDEX IF NOT EXISTS ix_events_claim
   ON events(event_type, status, available_at);
+CREATE INDEX IF NOT EXISTS ix_events_aggregate
+  ON events(aggregate_type, job_id, status, lease_until);
 
 CREATE TABLE IF NOT EXISTS transitions (
   id          INTEGER PRIMARY KEY,
@@ -117,6 +124,10 @@ CREATE TABLE IF NOT EXISTS outbox (
   status          TEXT    NOT NULL DEFAULT 'PENDING',
   attempts        INTEGER NOT NULL DEFAULT 0,
   max_attempts    INTEGER NOT NULL DEFAULT 5,
+  available_at    REAL    NOT NULL,
+  lease_owner     TEXT,
+  lease_token     TEXT,
+  lease_until     REAL    NOT NULL DEFAULT 0,
   created_at      REAL    NOT NULL,
   updated_at      REAL    NOT NULL,
   error           TEXT
@@ -201,17 +212,22 @@ class EventStore:
     # -- consuming ----------------------------------------------------------
     def claim(self, event_types, owner: str, lease_seconds: float) -> dict | None:
         """Atomically claim the oldest eligible event (PENDING & available, or
-        RUNNING with an expired lease). Returns a dict or None."""
+        RUNNING with an expired lease), excluding any live aggregate owner."""
+        if lease_seconds <= 0:
+            raise ValueError("lease_seconds must be positive")
         if isinstance(event_types, str):
             event_types = (event_types,)
         now = self.clock()
         marks = ",".join("?" * len(event_types))
         with self._tx() as db:
             job = db.execute(
-                f"""SELECT * FROM events WHERE event_type IN ({marks}) AND
-                    ((status='PENDING' AND available_at<=?) OR (status='RUNNING' AND lease_until<=?))
-                    ORDER BY id LIMIT 1""",
-                (*event_types, now, now),
+                f"""SELECT e.* FROM events e WHERE e.event_type IN ({marks}) AND
+                    ((e.status='PENDING' AND e.available_at<=?) OR (e.status='RUNNING' AND e.lease_until<=?))
+                    AND NOT EXISTS (SELECT 1 FROM events active
+                        WHERE active.aggregate_type=e.aggregate_type AND active.job_id=e.job_id
+                        AND active.id<>e.id AND active.status='RUNNING' AND active.lease_until>?)
+                    ORDER BY e.id LIMIT 1""",
+                (*event_types, now, now, now),
             ).fetchone()
             if not job:
                 return None
@@ -237,6 +253,8 @@ class EventStore:
         self._log(db, ev["id"], "RUNNING", to_status, ev["lease_owner"], detail, now)
 
     def renew(self, ev: dict, lease_seconds: float) -> bool:
+        if lease_seconds <= 0:
+            raise ValueError("lease_seconds must be positive")
         now = self.clock()
         with self._tx() as db:
             cur = db.execute(
@@ -261,7 +279,7 @@ class EventStore:
                     """INSERT OR IGNORE INTO events(event_id,event_type,aggregate_type,idempotency_key,
                        job_id,correlation_id,parent_event_id,producer,payload,status,max_attempts,
                        created_at,updated_at,available_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                    (uuid.uuid4().hex, f["event_type"], f.get("aggregate_type", "pull_request"),
+                    (uuid.uuid4().hex, f["event_type"], f.get("aggregate_type", ev.get("aggregate_type", "pull_request")),
                      f["idempotency_key"], ev["job_id"], cor, ev["id"],
                      f.get("producer", ev.get("producer", "coordinator")),
                      json.dumps(f["payload"], sort_keys=True), status,
@@ -276,9 +294,10 @@ class EventStore:
             for o in outbox_entries:
                 cur = db.execute(
                     """INSERT OR IGNORE INTO outbox(event_id,target,operation,payload,idempotency_key,
-                       created_at,updated_at) VALUES(?,?,?,?,?,?,?)""",
+                       max_attempts,created_at,updated_at,available_at) VALUES(?,?,?,?,?,?,?,?,?)""",
                     (ev["id"], o["target"], o["operation"],
-                     json.dumps(o["payload"], sort_keys=True), o["idempotency_key"], now, now),
+                     json.dumps(o["payload"], sort_keys=True), o["idempotency_key"],
+                     o.get("max_attempts", 5), now, now, now),
                 )
                 row = db.execute("SELECT id FROM outbox WHERE idempotency_key=?", (o["idempotency_key"],)).fetchone()
                 oids.append(row["id"])
@@ -328,6 +347,7 @@ class EventStore:
 
     # -- outbox reads -------------------------------------------------------
     def pending_outbox(self, target: str | None = None) -> list[dict]:
+        """Inspection only. Publishers must obtain ownership via claim_outbox."""
         with self._conn() as db:
             if target:
                 rows = db.execute("SELECT * FROM outbox WHERE status='PENDING' AND target=? ORDER BY id", (target,))
@@ -335,20 +355,65 @@ class EventStore:
                 rows = db.execute("SELECT * FROM outbox WHERE status='PENDING' ORDER BY id")
             return [dict(r) for r in rows]
 
-    def complete_outbox(self, entry_id: int) -> None:
-        now = self.clock()
-        with self._tx() as db:
-            db.execute("UPDATE outbox SET status='DONE', updated_at=? WHERE id=? AND status='PENDING'", (now, entry_id))
+    def claim_outbox(self, owner: str, lease_seconds: float, target: str | None = None) -> dict | None:
+        """Claim before any external effect. A reclaimed entry gets a new token.
 
-    def fail_outbox(self, entry_id: int, reason: str) -> str:
+        A crash after the remote call is an unknown outcome: the next publisher
+        must reconcile the idempotency key before sending again.
+        """
+        if lease_seconds <= 0:
+            raise ValueError("lease_seconds must be positive")
         now = self.clock()
         with self._tx() as db:
-            row = db.execute("SELECT * FROM outbox WHERE id=?", (entry_id,)).fetchone()
-            if not row:
-                return "NOT_FOUND"
-            to = "DLQ" if row["attempts"] + 1 >= row["max_attempts"] else "PENDING"
-            db.execute("UPDATE outbox SET status=?, attempts=attempts+1, error=?, updated_at=? WHERE id=?",
-                       (to, reason[:2000], now, entry_id))
+            db.execute("""UPDATE outbox SET status='DLQ', lease_until=0, updated_at=?,
+                       error='lease expired after final attempt; remote outcome requires reconciliation'
+                       WHERE status='RUNNING' AND lease_until<=? AND attempts>=max_attempts""", (now, now))
+            row = db.execute(
+                """SELECT * FROM outbox WHERE attempts<max_attempts AND
+                   ((status='PENDING' AND available_at<=?) OR (status='RUNNING' AND lease_until<=?))
+                   AND (? IS NULL OR target=?) ORDER BY id LIMIT 1""", (now, now, target, target),
+            ).fetchone()
+            if row is None:
+                return None
+            db.execute("""UPDATE outbox SET status='RUNNING', attempts=attempts+1,
+                       lease_owner=?, lease_token=?, lease_until=?, updated_at=? WHERE id=?""",
+                       (owner, uuid.uuid4().hex, now + lease_seconds, now, row['id']))
+            return dict(db.execute("SELECT * FROM outbox WHERE id=?", (row['id'],)).fetchone())
+
+    def _owned_outbox_update(self, db, entry: dict, sql: str, params: tuple, now: float) -> None:
+        cur = db.execute(sql + " WHERE id=? AND lease_token=? AND status='RUNNING' AND lease_until>?",
+                         (*params, entry['id'], entry['lease_token'], now))
+        if cur.rowcount != 1:
+            raise LeaseLost(f"outbox {entry['id']}: lease lost; update refused")
+
+    def renew_outbox(self, entry: dict, lease_seconds: float) -> bool:
+        if lease_seconds <= 0:
+            raise ValueError("lease_seconds must be positive")
+        now = self.clock()
+        with self._tx() as db:
+            cur = db.execute("""UPDATE outbox SET lease_until=?, updated_at=? WHERE id=?
+                             AND lease_token=? AND status='RUNNING' AND lease_until>?""",
+                             (now + lease_seconds, now, entry['id'], entry['lease_token'], now))
+            return cur.rowcount == 1
+
+    def complete_outbox(self, entry: dict) -> None:
+        """Only the current unexpired owner can acknowledge delivery."""
+        now = self.clock()
+        with self._tx() as db:
+            self._owned_outbox_update(db, entry,
+                                     "UPDATE outbox SET status='DONE', lease_until=0, updated_at=?", (now,), now)
+
+    def fail_outbox(self, entry: dict, reason: str, retry_delay: float = 1.0) -> str:
+        """Terminal states are immutable; delayed/duplicate outcomes are fenced."""
+        now = self.clock()
+        with self._tx() as db:
+            row = db.execute("SELECT attempts, max_attempts FROM outbox WHERE id=?", (entry['id'],)).fetchone()
+            if row is None:
+                raise LeaseLost(f"outbox {entry['id']}: missing entry")
+            to = "DLQ" if row['attempts'] >= row['max_attempts'] else "PENDING"
+            self._owned_outbox_update(db, entry,
+                                     "UPDATE outbox SET status=?, error=?, available_at=?, lease_until=0, updated_at=?",
+                                     (to, reason[:2000], now + retry_delay, now), now)
             return to
 
     # -- event reads --------------------------------------------------------

@@ -3,10 +3,7 @@ transactional outbox, correlation tracking, restart recovery."""
 from __future__ import annotations
 
 import json
-import sqlite3
-import subprocess
-import sys
-import textwrap
+import multiprocessing
 import uuid
 from pathlib import Path
 
@@ -224,7 +221,8 @@ class TestComplete:
         _, oids = store.complete(ev, {}, outbox_entries=[
             {"target": "github", "operation": "comment", "payload": {}, "idempotency_key": "ob-2"},
         ])
-        store.complete_outbox(oids[0])
+        entry = store.claim_outbox("publisher", 60)
+        store.complete_outbox(entry)
         assert store.pending_outbox("github") == []
 
     def test_outbox_retry_then_dlq(self, store, clock):
@@ -234,10 +232,15 @@ class TestComplete:
             {"target": "github", "operation": "post", "payload": {}, "idempotency_key": "ob-3"},
         ])
         oid = oids[0]
-        for i in range(4):
-            result = store.fail_outbox(oid, f"err-{i}")
-            assert result == "PENDING"
-        assert store.fail_outbox(oid, "final") == "DLQ"
+        for i in range(5):
+            entry = store.claim_outbox("publisher", 60)
+            assert entry["id"] == oid
+            result = store.fail_outbox(entry, f"err-{i}", retry_delay=2)
+            assert result == ("PENDING" if i < 4 else "DLQ")
+            assert store.claim_outbox("publisher", 60) is None
+            clock.advance(3)
+        assert store.claim_outbox("publisher", 60) is None
+
 
 
 # -- fail / retry / DLQ ---------------------------------------------------
@@ -371,38 +374,201 @@ class TestPersistence:
 
 
 # -- real process isolation -------------------------------------------------
+def _claim_process(path, barrier, results, mode, hold=None):
+    # Both children connect before the barrier opens; each gets its own SQLite connection.
+    store = EventStore(path, clock=Clock())
+    barrier.wait(timeout=15)
+    if mode == "outbox":
+        entry = store.claim_outbox(str(multiprocessing.current_process().pid), 60)
+    else:
+        entry = store.claim(["IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED"],
+                            str(multiprocessing.current_process().pid), 60)
+    results.put(entry)
+    if hold is not None:
+        hold.wait(timeout=30)
+
+
+def _race(path, mode="event"):
+    ctx = multiprocessing.get_context("spawn")
+    barrier, results = ctx.Barrier(3), ctx.Queue()
+    processes = [ctx.Process(target=_claim_process, args=(path, barrier, results, mode)) for _ in range(2)]
+    try:
+        for proc in processes:
+            proc.start()
+        barrier.wait(timeout=15)
+        claimed = [results.get(timeout=15) for _ in processes]
+        for proc in processes:
+            proc.join(timeout=15)
+            assert proc.exitcode == 0
+        return claimed
+    finally:
+        for proc in processes:
+            if proc.is_alive():
+                proc.kill()
+                proc.join(timeout=5)
+            proc.close()
+        results.close()
+        results.join_thread()
+
+
 class TestRealProcesses:
-    def test_two_consumers_never_share_a_job(self, tmp_path, clock):
-        repo_root = Path(__file__).resolve().parent.parent
-        path = tmp_path / "race.db"
-        store = EventStore(path, clock=clock)
+    def test_same_event_has_only_one_concurrent_owner(self, store):
         store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        assert sum(e is not None for e in _race(store.path)) == 1
 
-        script = textwrap.dedent(f"""\
-            import sys, json
-            sys.path.insert(0, r"{repo_root}")
-            from tools.orchestration.event_store import EventStore
-            s = EventStore(r"{path}")
-            ev = s.claim("IMPLEMENT_REQUESTED", f"proc-{{sys.argv[1]}}", 60)
-            print(json.dumps({{"claimed": ev is not None}}))
-        """)
-        script_path = tmp_path / "claimer.py"
-        script_path.write_text(script, encoding="utf-8")
+    def test_same_aggregate_different_events_have_only_one_owner(self, store):
+        store.publish("IMPLEMENT_REQUESTED", "k1", "pr:7", {})
+        store.publish("CORRECTION_REQUESTED", "k2", "pr:7", {})
+        assert sum(e is not None for e in _race(store.path)) == 1
 
-        results = []
-        for i in range(2):
-            r = subprocess.run(
-                [sys.executable, str(script_path), str(i)],
-                capture_output=True, text=True, timeout=10,
-                cwd=str(repo_root),
-            )
-            results.append(json.loads(r.stdout.strip()))
+    def test_different_aggregates_can_run_concurrently(self, store):
+        store.publish("IMPLEMENT_REQUESTED", "k1", "pr:7", {})
+        store.publish("CORRECTION_REQUESTED", "k2", "pr:8", {})
+        entries = _race(store.path)
+        assert {e["job_id"] for e in entries} == {"pr:7", "pr:8"}
 
-        claims = [r["claimed"] for r in results]
-        assert claims.count(True) == 1
+    def test_outbox_only_one_concurrent_publisher(self, store):
+        _outbox_entry(store)
+        assert sum(e is not None for e in _race(store.path, "outbox")) == 1
+
+    @pytest.mark.parametrize("mode", ["event", "outbox"])
+    def test_process_crash_recovery_fences_old_owner(self, store, clock, mode):
+        if mode == "outbox":
+            _outbox_entry(store)
+        else:
+            store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ctx = multiprocessing.get_context("spawn")
+        barrier, results, hold = ctx.Barrier(2), ctx.Queue(), ctx.Event()
+        proc = ctx.Process(target=_claim_process, args=(store.path, barrier, results, mode, hold))
+        try:
+            proc.start()
+            barrier.wait(timeout=15)
+            old = results.get(timeout=15)
+            assert old is not None
+            proc.kill()
+            proc.join(timeout=5)
+            assert not proc.is_alive()
+            reopened = EventStore(store.path, clock=clock)
+            clock.advance(61)
+            if mode == "outbox":
+                new = reopened.claim_outbox("replacement", 60)
+                with pytest.raises(LeaseLost):
+                    reopened.complete_outbox(old)
+                reopened.complete_outbox(new)
+            else:
+                new = reopened.claim("IMPLEMENT_REQUESTED", "replacement", 60)
+                with pytest.raises(LeaseLost):
+                    reopened.complete(old, {})
+                reopened.complete(new, {})
+            assert new["id"] == old["id"]
+            assert new["lease_token"] != old["lease_token"]
+        finally:
+            if proc.is_alive():
+                proc.kill()
+                proc.join(timeout=5)
+            proc.close()
+            results.close()
+            results.join_thread()
 
 
 # -- event types completeness ----------------------------------------------
+def _outbox_entry(store, **overrides):
+    store.publish("IMPLEMENT_REQUESTED", "outbox-parent", "j1", {})
+    ev = store.claim("IMPLEMENT_REQUESTED", "worker", 60)
+    _, ids = store.complete(ev, {}, outbox_entries=[{
+        "target": "github", "operation": "comment", "payload": {}, "idempotency_key": "ob-test", **overrides,
+    }])
+    return ids[0]
+
+
+class TestOutboxFencing:
+    @pytest.mark.parametrize("terminal", ["DONE", "DLQ"])
+    def test_terminal_entries_reject_late_and_duplicate_outcomes(self, store, terminal):
+        oid = _outbox_entry(store, max_attempts=1)
+        entry = store.claim_outbox("publisher", 60)
+        if terminal == "DONE":
+            store.complete_outbox(entry)
+        else:
+            assert store.fail_outbox(entry, "fatal") == "DLQ"
+        for action in (lambda: store.complete_outbox(entry), lambda: store.fail_outbox(entry, "late")):
+            with pytest.raises(LeaseLost):
+                action()
+        assert store.pending_outbox() == []
+        assert store.claim_outbox("other", 60) is None
+        with store._conn() as db:
+            assert db.execute("SELECT status FROM outbox WHERE id=?", (oid,)).fetchone()[0] == terminal
+
+    def test_expired_owner_cannot_complete_fail_or_renew(self, store, clock):
+        _outbox_entry(store)
+        old = store.claim_outbox("old", 10)
+        clock.advance(11)
+        for action in (lambda: store.complete_outbox(old), lambda: store.fail_outbox(old, "late")):
+            with pytest.raises(LeaseLost):
+                action()
+        assert store.renew_outbox(old, 60) is False
+        new = store.claim_outbox("new", 60)
+        assert new["lease_token"] != old["lease_token"]
+        with pytest.raises(LeaseLost):
+            store.fail_outbox(old, "stale failure after reclaim")
+        store.complete_outbox(new)
+
+    def test_retried_entry_fences_delayed_failure_of_previous_attempt(self, store, clock):
+        _outbox_entry(store)
+        old = store.claim_outbox("publisher", 60)
+        store.fail_outbox(old, "retry", retry_delay=10)
+        assert store.claim_outbox("publisher", 60) is None
+        clock.advance(11)
+        new = store.claim_outbox("publisher", 60)
+        with pytest.raises(LeaseLost):
+            store.fail_outbox(old, "duplicate error")
+        assert new["attempts"] == 2
+        store.complete_outbox(new)
+
+    def test_renewal_prevents_reclaim(self, store, clock):
+        _outbox_entry(store)
+        entry = store.claim_outbox("publisher", 30)
+        clock.advance(20)
+        assert store.renew_outbox(entry, 60)
+        clock.advance(20)
+        assert store.claim_outbox("other", 30) is None
+        store.complete_outbox(entry)
+
+    def test_final_attempt_crash_enters_dlq_without_resurrection(self, store, clock):
+        _outbox_entry(store, max_attempts=1)
+        entry = store.claim_outbox("publisher", 10)
+        clock.advance(11)
+        assert store.claim_outbox("other", 60) is None
+        with pytest.raises(LeaseLost):
+            store.fail_outbox(entry, "late")
+        assert store.pending_outbox() == []
+
+    def test_target_filter_does_not_claim_other_destination(self, store):
+        _outbox_entry(store)
+        assert store.claim_outbox("publisher", 60, target="different") is None
+        assert store.claim_outbox("publisher", 60, target="github") is not None
+
+
+class TestAggregateLeases:
+    def test_other_event_types_cannot_bypass_aggregate_owner(self, store, clock):
+        store.publish("IMPLEMENT_REQUESTED", "impl", "pr:7", {})
+        store.publish("REVIEW_REQUESTED", "review", "pr:7", {})
+        first = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        assert store.claim("REVIEW_REQUESTED", "w2", 60) is None
+        store.complete(first, {})
+        assert store.claim("REVIEW_REQUESTED", "w2", 60) is not None
+
+    def test_expired_aggregate_owner_cannot_complete_after_successor(self, store, clock):
+        store.publish("IMPLEMENT_REQUESTED", "impl", "pr:7", {})
+        store.publish("REVIEW_REQUESTED", "review", "pr:7", {})
+        first = store.claim("IMPLEMENT_REQUESTED", "w1", 10)
+        clock.advance(11)
+        second = store.claim("REVIEW_REQUESTED", "w2", 60)
+        assert second is not None
+        with pytest.raises(LeaseLost):
+            store.complete(first, {})
+        assert store.claim("IMPLEMENT_REQUESTED", "w3", 60) is None
+
+
 class TestEventTypes:
     def test_consumable_is_subset_of_event_types(self):
         assert CONSUMABLE <= EVENT_TYPES
