@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import json
 import multiprocessing
+import sqlite3
+import threading
 import uuid
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -618,6 +621,99 @@ class TestOutboxFencing:
         _outbox_entry(store)
         assert store.claim_outbox("publisher", 60, target="different") is None
         assert store.claim_outbox("publisher", 60, target="github") is not None
+
+
+class TestLeaseClockAfterLock:
+    @pytest.mark.parametrize("kind,action", [
+        ("event", "renew"), ("event", "complete"), ("event", "fail"), ("event", "supersede"),
+        ("outbox", "renew"), ("outbox", "complete"), ("outbox", "fail"),
+    ])
+    def test_expiry_while_waiting_for_write_lock_is_fenced(self, store, clock, monkeypatch, kind, action):
+        if kind == "event":
+            store.publish("IMPLEMENT_REQUESTED", "event", "pr:7", {})
+            old = store.claim("IMPLEMENT_REQUESTED", "worker", 10)
+            calls = {"renew": lambda: store.renew(old, 60), "complete": lambda: store.complete(old, {}),
+                     "fail": lambda: store.fail(old, "late"), "supersede": lambda: store.supersede(old, "late")}
+        else:
+            _outbox_entry(store)
+            old = store.claim_outbox("publisher", 10)
+            calls = {"renew": lambda: store.renew_outbox(old, 60),
+                     "complete": lambda: store.complete_outbox(old),
+                     "fail": lambda: store.fail_outbox(old, "late")}
+        entered = threading.Event()
+        original = store._tx
+
+        @contextmanager
+        def signalled_tx():
+            entered.set()
+            with original() as db:
+                yield db
+
+        monkeypatch.setattr(store, "_tx", signalled_tx)
+        results = []
+
+        def run():
+            try:
+                results.append(calls[action]())
+            except Exception as exc:
+                results.append(exc)
+
+        lock = sqlite3.connect(store.path, isolation_level=None)
+        lock.execute("BEGIN IMMEDIATE")
+        thread = threading.Thread(target=run)
+        try:
+            thread.start()
+            assert entered.wait(5)
+            clock.advance(11)
+        finally:
+            lock.execute("ROLLBACK")
+            lock.close()
+            thread.join(timeout=10)
+        assert not thread.is_alive()
+        assert len(results) == 1
+        assert results[0] is False if action == "renew" else isinstance(results[0], LeaseLost)
+        if kind == "event":
+            assert store.get(old["id"])["status"] == "RUNNING"
+        else:
+            with store._conn() as db:
+                assert db.execute("SELECT status FROM outbox WHERE id=?", (old["id"],)).fetchone()[0] == "RUNNING"
+
+    @pytest.mark.parametrize("kind", ["event", "outbox"])
+    def test_claim_lease_starts_after_write_lock_acquired(self, store, clock, monkeypatch, kind):
+        if kind == "event":
+            store.publish("IMPLEMENT_REQUESTED", "event", "pr:7", {})
+        else:
+            _outbox_entry(store)
+
+        def claim():
+            if kind == "event":
+                return store.claim("IMPLEMENT_REQUESTED", "worker", 10)
+            return store.claim_outbox("publisher", 10)
+
+        entered = threading.Event()
+        original = store._tx
+
+        @contextmanager
+        def signalled_tx():
+            entered.set()
+            with original() as db:
+                yield db
+
+        monkeypatch.setattr(store, "_tx", signalled_tx)
+        results = []
+        lock = sqlite3.connect(store.path, isolation_level=None)
+        lock.execute("BEGIN IMMEDIATE")
+        thread = threading.Thread(target=lambda: results.append(claim()))
+        try:
+            thread.start()
+            assert entered.wait(5)
+            clock.advance(11)
+        finally:
+            lock.execute("ROLLBACK")
+            lock.close()
+            thread.join(timeout=10)
+        assert not thread.is_alive()
+        assert results[0]["lease_until"] == clock() + 10
 
 
 class TestAggregateLeases:
