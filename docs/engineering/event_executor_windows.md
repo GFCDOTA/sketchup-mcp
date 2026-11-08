@@ -85,3 +85,10 @@ reexecutado.
   em < 8 s; um 2º launcher com o 1º vivo sai com 4; reinício normal sobe 1 cadeia.
 - **Limite:** as 3 provas acima usaram o launcher desta branch num checkout de teste; o listener do Agendador só passa a ter o comportamento
   depois do merge e do reinício da tarefa.
+
+
+## Entrega pelo executor e autorizacao por label (review #598)
+O PR so e processado com a label `executor-ok` (autorizacao explicita, revalidada no preflight). A entrega (`executor_delivery.deliver`) revalida a
+autorizacao no GitHub ANTES de stagear e de novo IMEDIATAMENTE antes do push (HEAD == SHA revisado, review valido, label, identidade) e confere o HEAD remoto
+(`ls-remote`). Staging explicito da allowlist validada (nunca `git add` em massa): arquivo regular, tipo permitido, nao critico, sem symlink/gitlink; depois
+`execution_guards` (teto, binario, paths). Testes so rodam por selecao segura (testes alterados + `tests/test_<modulo>*.py`); sem selecao => bloqueia.
