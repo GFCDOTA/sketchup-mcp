@@ -687,8 +687,8 @@ def _get_store():
 
 def _sync_result_to_store(store, item: dict, result: dict) -> None:
     """After completing a JSON queue item, mirror the outcome to the EventStore.
-    Best-effort: never blocks the JSON path.  Claims by job_id so that events
-    for other PRs are never touched (review finding #1)."""
+    Best-effort: never blocks the JSON path.  Claims the exact event by its
+    database ID (review finding #1) — no other event is ever touched."""
     if store is None:
         return
     try:
@@ -705,8 +705,8 @@ def _sync_result_to_store(store, item: dict, result: dict) -> None:
             return
         action = result.get("action")
         owner = f"sync:{uuid.uuid4().hex[:8]}"
-        claimed = store.claim((ev["event_type"],), owner, 30.0, job_id=job_id)
-        if claimed is None or claimed["id"] != ev["id"]:
+        claimed = store.claim_by_id(ev["id"], owner, 30.0)
+        if claimed is None:
             _inc("sync_skip")
             return
         if action == "DONE":

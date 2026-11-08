@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import threading
 from pathlib import Path
 
 import pytest
@@ -281,3 +282,121 @@ class TestShadowDiagnostics:
         assert claimed["job_id"] == "pr:20"
         pr10_ev = next(e for e in s.events() if e["job_id"] == "pr:10")
         assert pr10_ev["status"] == "PENDING"
+
+
+# ---- claim_by_id adversarial tests ------------------------------------------
+
+class TestClaimByIdAdversarial:
+    """Adversarial tests for exact-ID claiming (review finding #1 fix)."""
+
+    def test_claim_by_id_targets_exact_event(self, tmp_path):
+        """Two events of the same type in the same job: claim_by_id gets only
+        the one we ask for; the other stays PENDING."""
+        s = EventStore(tmp_path / "test.db")
+        eid1, _ = s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="round1",
+                            job_id="pr:10", payload={"round": 1}, producer="test")
+        eid2, _ = s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="round2",
+                            job_id="pr:10", payload={"round": 2}, producer="test")
+        claimed = s.claim_by_id(eid2, "owner-a", 30.0)
+        assert claimed is not None
+        assert claimed["id"] == eid2
+        ev1 = next(e for e in s.events() if e["id"] == eid1)
+        assert ev1["status"] == "PENDING"
+
+    def test_two_events_same_pr_sync_targets_exact_one(self, tmp_path, store):
+        """Two CORRECTION_REQUESTED events for the same PR (different rounds).
+        _sync_result_to_store completes only the one whose idempotency_key matches."""
+        store.publish(event_type="CORRECTION_REQUESTED", idempotency_key="review:42:10:" + HEAD,
+                      job_id="pr:10", payload={"pr": 10, "round": 1}, producer="bridge")
+        store.publish(event_type="CORRECTION_REQUESTED", idempotency_key="review:99:10:" + HEAD,
+                      job_id="pr:10", payload={"pr": 10, "round": 2}, producer="bridge")
+        item = {"event_id": "review:42", "pr": 10, "head_sha": HEAD, "key": "review:42:10:" + HEAD}
+        ee._sync_result_to_store(store, item, {"action": "DONE", "item": item["key"], "new_head": "d" * 40})
+        events = store.events(job_id="pr:10")
+        round1 = next(e for e in events if e["idempotency_key"] == "review:42:10:" + HEAD)
+        round2 = next(e for e in events if e["idempotency_key"] == "review:99:10:" + HEAD)
+        assert round1["status"] == "DONE"
+        assert round2["status"] == "PENDING"
+
+    def test_claim_by_id_concurrent_threads(self, tmp_path):
+        """Two threads claim different events simultaneously: each gets its own,
+        neither gets the other's."""
+        s = EventStore(tmp_path / "test.db")
+        eid1, _ = s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="k1",
+                            job_id="pr:10", payload={"pr": 10}, producer="test")
+        eid2, _ = s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="k2",
+                            job_id="pr:20", payload={"pr": 20}, producer="test")
+        results = [None, None]
+        barrier = threading.Barrier(2)
+
+        def claim_event(idx, event_id, owner):
+            barrier.wait()
+            results[idx] = s.claim_by_id(event_id, owner, 30.0)
+
+        t1 = threading.Thread(target=claim_event, args=(0, eid1, "thread-A"))
+        t2 = threading.Thread(target=claim_event, args=(1, eid2, "thread-B"))
+        t1.start()
+        t2.start()
+        t1.join(timeout=5)
+        t2.join(timeout=5)
+        assert results[0] is not None and results[0]["id"] == eid1
+        assert results[1] is not None and results[1]["id"] == eid2
+        assert results[0]["lease_owner"] == "thread-A"
+        assert results[1]["lease_owner"] == "thread-B"
+
+    def test_claim_by_id_concurrent_same_event(self, tmp_path):
+        """Two threads race on the SAME event: exactly one wins."""
+        s = EventStore(tmp_path / "test.db")
+        eid, _ = s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="k1",
+                           job_id="pr:10", payload={"pr": 10}, producer="test")
+        results = [None, None]
+        barrier = threading.Barrier(2)
+
+        def claim_event(idx, owner):
+            barrier.wait()
+            results[idx] = s.claim_by_id(eid, owner, 30.0)
+
+        t1 = threading.Thread(target=claim_event, args=(0, "racer-A"))
+        t2 = threading.Thread(target=claim_event, args=(1, "racer-B"))
+        t1.start()
+        t2.start()
+        t1.join(timeout=5)
+        t2.join(timeout=5)
+        winners = [r for r in results if r is not None]
+        assert len(winners) == 1, f"expected exactly 1 winner, got {len(winners)}"
+        assert winners[0]["id"] == eid
+
+    def test_claim_by_id_crash_retry_after_lease_expiry(self, tmp_path):
+        """Claim, simulate crash (lease expires), re-claim succeeds."""
+        clock_time = [0.0]
+        s = EventStore(tmp_path / "test.db", clock=lambda: clock_time[0])
+        eid, _ = s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="k1",
+                           job_id="pr:10", payload={"pr": 10}, producer="test")
+        claimed = s.claim_by_id(eid, "worker-1", 10.0)
+        assert claimed is not None
+        assert claimed["lease_owner"] == "worker-1"
+        clock_time[0] = 5.0
+        stale = s.claim_by_id(eid, "worker-2", 10.0)
+        assert stale is None, "lease still valid — should not be claimable"
+        clock_time[0] = 11.0
+        recovered = s.claim_by_id(eid, "worker-2", 10.0)
+        assert recovered is not None
+        assert recovered["lease_owner"] == "worker-2"
+        assert recovered["attempt"] == 2
+
+    def test_claim_by_id_respects_aggregate_exclusion(self, tmp_path):
+        """If another event in the same aggregate is actively RUNNING,
+        claim_by_id refuses even for a PENDING event in that aggregate."""
+        s = EventStore(tmp_path / "test.db")
+        eid1, _ = s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="k1",
+                            job_id="pr:10", payload={"pr": 10}, producer="test")
+        eid2, _ = s.publish(event_type="CORRECTION_REQUESTED", idempotency_key="k2",
+                            job_id="pr:10", payload={"pr": 10}, producer="test")
+        claimed1 = s.claim_by_id(eid1, "worker-a", 60.0)
+        assert claimed1 is not None
+        blocked = s.claim_by_id(eid2, "worker-b", 60.0)
+        assert blocked is None, "aggregate sibling RUNNING — claim should be blocked"
+
+    def test_claim_by_id_nonexistent_returns_none(self, tmp_path):
+        s = EventStore(tmp_path / "test.db")
+        assert s.claim_by_id(9999, "owner", 30.0) is None
