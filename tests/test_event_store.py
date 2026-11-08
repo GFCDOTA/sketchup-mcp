@@ -1,5 +1,6 @@
 """FP-060/P1 (#606): Durable event store — publish/dedup, fenced claim, retry/DLQ,
-transactional outbox, correlation tracking, restart recovery."""
+transactional outbox with fenced claims, aggregate-level locking, correlation
+tracking, restart recovery, crash recovery."""
 from __future__ import annotations
 
 import json
@@ -60,6 +61,11 @@ class TestSchema:
         assert s["events"]["PENDING"] == 1
         assert s["events"]["RECORDED"] == 1
         assert s["schema_version"] == 1
+
+    def test_outbox_has_lease_columns(self, store):
+        with store._conn() as db:
+            cols = {r[1] for r in db.execute("PRAGMA table_info(outbox)").fetchall()}
+        assert {"lease_owner", "lease_token", "lease_until"} <= cols
 
 
 # -- publish & dedup --------------------------------------------------------
@@ -175,6 +181,59 @@ class TestClaim:
         assert ev["payload"]["order"] == 1
 
 
+# -- aggregate-level locking ------------------------------------------------
+class TestAggregateLock:
+    def test_same_job_exclusive(self, store, clock):
+        """Two events for same job_id: only one can be RUNNING at a time."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {"first": True})
+        store.publish("CORRECTION_REQUESTED", "k2", "j1", {"second": True})
+        ev1 = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        assert ev1 is not None
+        ev2 = store.claim("CORRECTION_REQUESTED", "w2", 60)
+        assert ev2 is None
+
+    def test_different_jobs_parallel(self, store, clock):
+        """Events for different job_ids can be claimed in parallel."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        store.publish("IMPLEMENT_REQUESTED", "k2", "j2", {})
+        ev1 = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        ev2 = store.claim("IMPLEMENT_REQUESTED", "w2", 60)
+        assert ev1 is not None and ev2 is not None
+        assert ev1["job_id"] != ev2["job_id"]
+
+    def test_lock_released_after_completion(self, store, clock):
+        """Completing an event releases the aggregate lock for the same job_id."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        store.publish("CORRECTION_REQUESTED", "k2", "j1", {})
+        ev1 = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        store.complete(ev1, {"ok": True})
+        ev2 = store.claim("CORRECTION_REQUESTED", "w2", 60)
+        assert ev2 is not None
+
+    def test_lock_released_after_lease_expiry(self, store, clock):
+        """Expired lease releases the aggregate lock so a different event can be claimed."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        store.publish("CORRECTION_REQUESTED", "k2", "j1", {})
+        ev1 = store.claim("IMPLEMENT_REQUESTED", "w1", 30)
+        assert ev1 is not None
+        clock.advance(31)
+        ev2 = store.claim("CORRECTION_REQUESTED", "w2", 60)
+        assert ev2 is not None
+        assert ev2["event_type"] == "CORRECTION_REQUESTED"
+
+    def test_aggregate_lock_skips_to_next_job(self, store, clock):
+        """When first candidate's aggregate is locked, claim picks the next eligible job."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        clock.advance(1)
+        store.publish("IMPLEMENT_REQUESTED", "k2", "j2", {})
+        ev1 = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        assert ev1["job_id"] == "j1"
+        store.publish("CORRECTION_REQUESTED", "k3", "j1", {})
+        ev2 = store.claim(["IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED"], "w2", 60)
+        assert ev2 is not None
+        assert ev2["job_id"] == "j2"
+
+
 # -- complete with follow-ups & outbox -------------------------------------
 class TestComplete:
     def test_complete_marks_done(self, store, clock):
@@ -218,13 +277,16 @@ class TestComplete:
         assert len(pending) == 1
         assert json.loads(pending[0]["payload"]) == {"pr": 7}
 
-    def test_outbox_complete_and_fail(self, store, clock):
+    def test_outbox_claim_complete(self, store, clock):
         store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
         ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
         _, oids = store.complete(ev, {}, outbox_entries=[
             {"target": "github", "operation": "comment", "payload": {}, "idempotency_key": "ob-2"},
         ])
-        store.complete_outbox(oids[0])
+        entry = store.claim_outbox("github", "worker", 60)
+        assert entry is not None
+        assert entry["lease_token"]
+        store.complete_outbox(entry)
         assert store.pending_outbox("github") == []
 
     def test_outbox_retry_then_dlq(self, store, clock):
@@ -233,11 +295,82 @@ class TestComplete:
         _, oids = store.complete(ev, {}, outbox_entries=[
             {"target": "github", "operation": "post", "payload": {}, "idempotency_key": "ob-3"},
         ])
-        oid = oids[0]
         for i in range(4):
-            result = store.fail_outbox(oid, f"err-{i}")
+            entry = store.claim_outbox("github", "worker", 60)
+            assert entry is not None, f"claim should succeed on retry {i}"
+            result = store.fail_outbox(entry, f"err-{i}")
             assert result == "PENDING"
-        assert store.fail_outbox(oid, "final") == "DLQ"
+        entry = store.claim_outbox("github", "worker", 60)
+        assert entry is not None
+        assert store.fail_outbox(entry, "final") == "DLQ"
+
+
+# -- outbox fencing ---------------------------------------------------------
+class TestOutboxFencing:
+    def _make_outbox_entry(self, store, clock):
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        store.complete(ev, {}, outbox_entries=[
+            {"target": "github", "operation": "comment", "payload": {"x": 1},
+             "idempotency_key": "ob-fence"},
+        ])
+
+    def test_claim_outbox_returns_fenced_entry(self, store, clock):
+        self._make_outbox_entry(store, clock)
+        entry = store.claim_outbox("github", "worker-1", 60)
+        assert entry is not None
+        assert entry["lease_owner"] == "worker-1"
+        assert entry["lease_token"]
+        assert entry["status"] == "RUNNING"
+        assert entry["payload"] == {"x": 1}
+
+    def test_outbox_exclusive_claim(self, store, clock):
+        self._make_outbox_entry(store, clock)
+        e1 = store.claim_outbox("github", "w1", 60)
+        e2 = store.claim_outbox("github", "w2", 60)
+        assert e1 is not None and e2 is None
+
+    def test_outbox_expired_lease_reclaimed(self, store, clock):
+        self._make_outbox_entry(store, clock)
+        e1 = store.claim_outbox("github", "w1", 30)
+        clock.advance(31)
+        e2 = store.claim_outbox("github", "w2", 60)
+        assert e2 is not None
+        assert e2["lease_token"] != e1["lease_token"]
+        assert e2["lease_owner"] == "w2"
+
+    def test_outbox_complete_with_stale_token_raises(self, store, clock):
+        self._make_outbox_entry(store, clock)
+        e1 = store.claim_outbox("github", "w1", 30)
+        clock.advance(31)
+        store.claim_outbox("github", "w2", 60)
+        with pytest.raises(LeaseLost):
+            store.complete_outbox(e1)
+
+    def test_outbox_fail_with_stale_token_raises(self, store, clock):
+        self._make_outbox_entry(store, clock)
+        e1 = store.claim_outbox("github", "w1", 30)
+        clock.advance(31)
+        store.claim_outbox("github", "w2", 60)
+        with pytest.raises(LeaseLost):
+            store.fail_outbox(e1, "too late")
+
+    def test_done_outbox_never_reclaimable(self, store, clock):
+        self._make_outbox_entry(store, clock)
+        entry = store.claim_outbox("github", "worker", 60)
+        store.complete_outbox(entry)
+        assert store.claim_outbox("github", "worker", 60) is None
+
+    def test_dlq_outbox_never_reclaimable(self, store, clock):
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        store.complete(ev, {}, outbox_entries=[
+            {"target": "github", "operation": "post", "payload": {},
+             "idempotency_key": "ob-dlq", "max_attempts": 1},
+        ])
+        entry = store.claim_outbox("github", "worker", 60)
+        assert store.fail_outbox(entry, "fatal") == "DLQ"
+        assert store.claim_outbox("github", "worker", 60) is None
 
 
 # -- fail / retry / DLQ ---------------------------------------------------
@@ -370,36 +503,235 @@ class TestPersistence:
         assert ev is not None and ev["lease_owner"] == "new-worker"
 
 
-# -- real process isolation -------------------------------------------------
-class TestRealProcesses:
-    def test_two_consumers_never_share_a_job(self, tmp_path, clock):
+# -- crash, retry, lease expiry, late messages, duplicate effects -----------
+class TestCrashAndLateMessages:
+    def test_crash_recovery_event_lease_expires(self, store, clock):
+        """Worker crashes mid-processing; lease expires; new worker reclaims."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev1 = store.claim("IMPLEMENT_REQUESTED", "crashed-worker", 30)
+        clock.advance(31)
+        ev2 = store.claim("IMPLEMENT_REQUESTED", "recovery-worker", 60)
+        assert ev2 is not None
+        assert ev2["lease_owner"] == "recovery-worker"
+        assert ev2["lease_token"] != ev1["lease_token"]
+        assert ev2["attempt"] == 2
+
+    def test_late_complete_after_reclaim_raises(self, store, clock):
+        """Crashed worker's stale complete is rejected; recovery worker succeeds."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev1 = store.claim("IMPLEMENT_REQUESTED", "w1", 30)
+        clock.advance(31)
+        ev2 = store.claim("IMPLEMENT_REQUESTED", "w2", 60)
+        with pytest.raises(LeaseLost):
+            store.complete(ev1, {"stale": True})
+        store.complete(ev2, {"ok": True})
+        assert store.get(ev2["id"])["status"] == "DONE"
+
+    def test_duplicate_complete_raises(self, store, clock):
+        """Completing an already-completed event raises LeaseLost (no double effects)."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        store.complete(ev, {"first": True})
+        with pytest.raises(LeaseLost):
+            store.complete(ev, {"second": True})
+
+    def test_outbox_crash_and_reclaim(self, store, clock):
+        """Outbox entry claimed, worker crashes, new worker reclaims after lease expiry."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        store.complete(ev, {}, outbox_entries=[
+            {"target": "github", "operation": "comment", "payload": {},
+             "idempotency_key": "ob-crash"},
+        ])
+        e1 = store.claim_outbox("github", "worker-1", 30)
+        assert e1 is not None
+        clock.advance(31)
+        e2 = store.claim_outbox("github", "worker-2", 60)
+        assert e2 is not None
+        assert e2["lease_token"] != e1["lease_token"]
+        with pytest.raises(LeaseLost):
+            store.complete_outbox(e1)
+        store.complete_outbox(e2)
+
+    def test_late_outbox_fail_on_done_entry(self, store, clock):
+        """Late fail callback on a DONE outbox entry raises LeaseLost."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        store.complete(ev, {}, outbox_entries=[
+            {"target": "github", "operation": "post", "payload": {},
+             "idempotency_key": "ob-late"},
+        ])
+        entry = store.claim_outbox("github", "worker", 60)
+        store.complete_outbox(entry)
+        with pytest.raises(LeaseLost):
+            store.fail_outbox(entry, "too late")
+
+    def test_lease_expiry_during_outbox_processing(self, store, clock):
+        """Outbox lease expires while processing; complete with stale token raises."""
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        store.complete(ev, {}, outbox_entries=[
+            {"target": "github", "operation": "post", "payload": {},
+             "idempotency_key": "ob-expire"},
+        ])
+        entry = store.claim_outbox("github", "worker", 10)
+        clock.advance(11)
+        with pytest.raises(LeaseLost):
+            store.complete_outbox(entry)
+        e2 = store.claim_outbox("github", "worker-2", 60)
+        assert e2 is not None
+        store.complete_outbox(e2)
+
+
+# -- real process concurrency -----------------------------------------------
+class TestRealConcurrency:
+    def test_concurrent_claim_barrier(self, tmp_path):
+        """4 processes claim simultaneously via multiprocessing.Barrier; exactly one wins."""
         repo_root = Path(__file__).resolve().parent.parent
-        path = tmp_path / "race.db"
-        store = EventStore(path, clock=clock)
+        path = tmp_path / "concurrent.db"
+        store = EventStore(path)
         store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
 
         script = textwrap.dedent(f"""\
             import sys, json
             sys.path.insert(0, r"{repo_root}")
-            from tools.orchestration.event_store import EventStore
-            s = EventStore(r"{path}")
-            ev = s.claim("IMPLEMENT_REQUESTED", f"proc-{{sys.argv[1]}}", 60)
-            print(json.dumps({{"claimed": ev is not None}}))
+            import multiprocessing
+
+            def worker(barrier, db_path, wid, results):
+                from tools.orchestration.event_store import EventStore
+                s = EventStore(db_path)
+                barrier.wait()
+                ev = s.claim("IMPLEMENT_REQUESTED", f"w-{{wid}}", 60)
+                results[wid] = ev is not None
+
+            if __name__ == "__main__":
+                manager = multiprocessing.Manager()
+                results = manager.dict()
+                barrier = multiprocessing.Barrier(4)
+                procs = []
+                for i in range(4):
+                    p = multiprocessing.Process(target=worker,
+                        args=(barrier, r"{path}", i, results))
+                    procs.append(p)
+                for p in procs:
+                    p.start()
+                for p in procs:
+                    p.join(timeout=30)
+                claims = [results.get(i, False) for i in range(4)]
+                print(json.dumps({{"winners": sum(claims)}}))
         """)
-        script_path = tmp_path / "claimer.py"
+        script_path = tmp_path / "conc_claim.py"
         script_path.write_text(script, encoding="utf-8")
 
-        results = []
-        for i in range(2):
-            r = subprocess.run(
-                [sys.executable, str(script_path), str(i)],
-                capture_output=True, text=True, timeout=10,
-                cwd=str(repo_root),
-            )
-            results.append(json.loads(r.stdout.strip()))
+        r = subprocess.run(
+            [sys.executable, str(script_path)],
+            capture_output=True, text=True, timeout=60,
+            cwd=str(repo_root),
+        )
+        assert r.returncode == 0, f"script failed: {r.stderr}"
+        result = json.loads(r.stdout.strip())
+        assert result["winners"] == 1
 
-        claims = [r["claimed"] for r in results]
-        assert claims.count(True) == 1
+    def test_concurrent_aggregate_lock(self, tmp_path):
+        """Two events for same job_id, concurrent claims via Barrier: only one wins."""
+        repo_root = Path(__file__).resolve().parent.parent
+        path = tmp_path / "agg.db"
+        store = EventStore(path)
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        store.publish("CORRECTION_REQUESTED", "k2", "j1", {})
+
+        script = textwrap.dedent(f"""\
+            import sys, json
+            sys.path.insert(0, r"{repo_root}")
+            import multiprocessing
+
+            def worker(barrier, db_path, wid, etype, results):
+                from tools.orchestration.event_store import EventStore
+                s = EventStore(db_path)
+                barrier.wait()
+                ev = s.claim(etype, f"w-{{wid}}", 60)
+                results[wid] = ev is not None
+
+            if __name__ == "__main__":
+                manager = multiprocessing.Manager()
+                results = manager.dict()
+                barrier = multiprocessing.Barrier(2)
+                types = ["IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED"]
+                procs = []
+                for i in range(2):
+                    p = multiprocessing.Process(target=worker,
+                        args=(barrier, r"{path}", i, types[i], results))
+                    procs.append(p)
+                for p in procs:
+                    p.start()
+                for p in procs:
+                    p.join(timeout=30)
+                claims = [results.get(i, False) for i in range(2)]
+                print(json.dumps({{"winners": sum(claims)}}))
+        """)
+        script_path = tmp_path / "conc_agg.py"
+        script_path.write_text(script, encoding="utf-8")
+
+        r = subprocess.run(
+            [sys.executable, str(script_path)],
+            capture_output=True, text=True, timeout=60,
+            cwd=str(repo_root),
+        )
+        assert r.returncode == 0, f"script failed: {r.stderr}"
+        result = json.loads(r.stdout.strip())
+        assert result["winners"] == 1
+
+    def test_concurrent_outbox_claim(self, tmp_path):
+        """3 processes claim the same outbox entry via Barrier; exactly one wins."""
+        repo_root = Path(__file__).resolve().parent.parent
+        path = tmp_path / "outbox_conc.db"
+        store = EventStore(path)
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 300)
+        store.complete(ev, {}, outbox_entries=[
+            {"target": "github", "operation": "comment", "payload": {},
+             "idempotency_key": "ob-conc"},
+        ])
+
+        script = textwrap.dedent(f"""\
+            import sys, json
+            sys.path.insert(0, r"{repo_root}")
+            import multiprocessing
+
+            def worker(barrier, db_path, wid, results):
+                from tools.orchestration.event_store import EventStore
+                s = EventStore(db_path)
+                barrier.wait()
+                entry = s.claim_outbox("github", f"w-{{wid}}", 60)
+                results[wid] = entry is not None
+
+            if __name__ == "__main__":
+                manager = multiprocessing.Manager()
+                results = manager.dict()
+                barrier = multiprocessing.Barrier(3)
+                procs = []
+                for i in range(3):
+                    p = multiprocessing.Process(target=worker,
+                        args=(barrier, r"{path}", i, results))
+                    procs.append(p)
+                for p in procs:
+                    p.start()
+                for p in procs:
+                    p.join(timeout=30)
+                claims = [results.get(i, False) for i in range(3)]
+                print(json.dumps({{"winners": sum(claims)}}))
+        """)
+        script_path = tmp_path / "conc_outbox.py"
+        script_path.write_text(script, encoding="utf-8")
+
+        r = subprocess.run(
+            [sys.executable, str(script_path)],
+            capture_output=True, text=True, timeout=60,
+            cwd=str(repo_root),
+        )
+        assert r.returncode == 0, f"script failed: {r.stderr}"
+        result = json.loads(r.stdout.strip())
+        assert result["winners"] == 1
 
 
 # -- event types completeness ----------------------------------------------

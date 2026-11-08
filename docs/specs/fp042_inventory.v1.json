@@ -14903,7 +14903,8 @@
       "phase": "P5",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "document_owner": "regression_test_suite",
-      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS",
+      "sha256": "aecb07e99383f544e67fe62e8a3b38a85474999600788b5aea6280abac6c8b3a"
     },
     {
       "path": "tests/test_event_executor.py",
@@ -17999,7 +18000,8 @@
       "phase": "P4",
       "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
       "tool_owner": "cross_room_pipeline_tooling",
-      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF",
+      "sha256": "64cfb9047551064f19337f2ccd636859c68f58c5a01de4f658ce1dd7103dc101"
     },
     {
       "path": "tools/orchestration/event_executor.py",

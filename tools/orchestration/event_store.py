@@ -17,6 +17,11 @@ its side effects queued.
 
 Properties (SPEC §6.2): WAL, configurable busy_timeout, explicit close
 (D-060-01), atomic claim/update, transactional outbox, fenced lease tokens.
+
+Delivery guarantee: the transactional outbox ensures no completed job loses
+its side effects.  Outbox delivery to external targets is AT-LEAST-ONCE;
+exactly-once external delivery is NOT guaranteed.  External targets MUST be
+idempotent (keyed by idempotency_key).
 """
 from __future__ import annotations
 
@@ -119,6 +124,9 @@ CREATE TABLE IF NOT EXISTS outbox (
   max_attempts    INTEGER NOT NULL DEFAULT 5,
   created_at      REAL    NOT NULL,
   updated_at      REAL    NOT NULL,
+  lease_owner     TEXT,
+  lease_token     TEXT,
+  lease_until     REAL    NOT NULL DEFAULT 0,
   error           TEXT
 );
 CREATE INDEX IF NOT EXISTS ix_outbox_pending ON outbox(status, target);
@@ -210,8 +218,12 @@ class EventStore:
             job = db.execute(
                 f"""SELECT * FROM events WHERE event_type IN ({marks}) AND
                     ((status='PENDING' AND available_at<=?) OR (status='RUNNING' AND lease_until<=?))
+                    AND NOT EXISTS (
+                        SELECT 1 FROM events e2 WHERE e2.job_id = events.job_id
+                        AND e2.status='RUNNING' AND e2.lease_until>? AND e2.id != events.id
+                    )
                     ORDER BY id LIMIT 1""",
-                (*event_types, now, now),
+                (*event_types, now, now, now),
             ).fetchone()
             if not job:
                 return None
@@ -276,9 +288,10 @@ class EventStore:
             for o in outbox_entries:
                 cur = db.execute(
                     """INSERT OR IGNORE INTO outbox(event_id,target,operation,payload,idempotency_key,
-                       created_at,updated_at) VALUES(?,?,?,?,?,?,?)""",
+                       max_attempts,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)""",
                     (ev["id"], o["target"], o["operation"],
-                     json.dumps(o["payload"], sort_keys=True), o["idempotency_key"], now, now),
+                     json.dumps(o["payload"], sort_keys=True), o["idempotency_key"],
+                     o.get("max_attempts", 5), now, now),
                 )
                 row = db.execute("SELECT id FROM outbox WHERE idempotency_key=?", (o["idempotency_key"],)).fetchone()
                 oids.append(row["id"])
@@ -335,20 +348,58 @@ class EventStore:
                 rows = db.execute("SELECT * FROM outbox WHERE status='PENDING' ORDER BY id")
             return [dict(r) for r in rows]
 
-    def complete_outbox(self, entry_id: int) -> None:
+    def claim_outbox(self, target: str, owner: str, lease_seconds: float) -> dict | None:
+        """Atomically claim the oldest processable outbox entry for *target*.
+        Returns a dict with lease_token (for fencing) or None.  Terminal entries
+        (DONE/DLQ) are never claimable."""
         now = self.clock()
         with self._tx() as db:
-            db.execute("UPDATE outbox SET status='DONE', updated_at=? WHERE id=? AND status='PENDING'", (now, entry_id))
-
-    def fail_outbox(self, entry_id: int, reason: str) -> str:
-        now = self.clock()
-        with self._tx() as db:
-            row = db.execute("SELECT * FROM outbox WHERE id=?", (entry_id,)).fetchone()
+            row = db.execute(
+                """SELECT * FROM outbox WHERE target=? AND status NOT IN ('DONE','DLQ')
+                   AND lease_until<=? ORDER BY id LIMIT 1""",
+                (target, now),
+            ).fetchone()
             if not row:
-                return "NOT_FOUND"
+                return None
+            token = uuid.uuid4().hex
+            db.execute(
+                """UPDATE outbox SET status='RUNNING', lease_owner=?, lease_token=?,
+                   lease_until=?, updated_at=? WHERE id=?""",
+                (owner, token, now + lease_seconds, now, row["id"]),
+            )
+            claimed = dict(db.execute("SELECT * FROM outbox WHERE id=?", (row["id"],)).fetchone())
+            claimed["payload"] = json.loads(claimed["payload"])
+            return claimed
+
+    def complete_outbox(self, entry: dict) -> None:
+        """Mark a claimed outbox entry DONE.  Fenced: requires valid lease."""
+        now = self.clock()
+        with self._tx() as db:
+            cur = db.execute(
+                "UPDATE outbox SET status='DONE', lease_until=0, updated_at=? "
+                "WHERE id=? AND lease_token=? AND status='RUNNING' AND lease_until>?",
+                (now, entry["id"], entry["lease_token"], now),
+            )
+            if cur.rowcount != 1:
+                raise LeaseLost(f"outbox {entry['id']}: lease lost or not RUNNING; DONE not committed")
+
+    def fail_outbox(self, entry: dict, reason: str) -> str:
+        """Fail a claimed outbox entry (retry or DLQ).  Fenced: requires valid
+        lease.  Terminal states (DONE/DLQ) can never be reversed."""
+        now = self.clock()
+        with self._tx() as db:
+            row = db.execute(
+                "SELECT * FROM outbox WHERE id=? AND lease_token=? AND status='RUNNING' AND lease_until>?",
+                (entry["id"], entry["lease_token"], now),
+            ).fetchone()
+            if not row:
+                raise LeaseLost(f"outbox {entry['id']}: lease lost or not RUNNING")
             to = "DLQ" if row["attempts"] + 1 >= row["max_attempts"] else "PENDING"
-            db.execute("UPDATE outbox SET status=?, attempts=attempts+1, error=?, updated_at=? WHERE id=?",
-                       (to, reason[:2000], now, entry_id))
+            db.execute(
+                "UPDATE outbox SET status=?, attempts=attempts+1, error=?, "
+                "lease_until=0, lease_owner=NULL, lease_token=NULL, updated_at=? WHERE id=?",
+                (to, reason[:2000], now, entry["id"]),
+            )
             return to
 
     # -- event reads --------------------------------------------------------
