@@ -276,3 +276,9 @@ def run_claimed(store, event: dict, argv: list[str], *, cwd: str | Path, env: di
         finally:
             stopped.set()
             watcher.join()
+            # TerminateJobObject requests termination asynchronously. Never
+            # report an outcome until the root process handle is signalled.
+            # This alone does not establish that every descendant has exited.
+            job.terminate()
+            if job.wait(5.0) is None:
+                raise ProcessSupervisorError("root process did not signal termination")

@@ -239,3 +239,13 @@ def test_renewal_error_kills_tree_and_never_returns_success(tmp_path):
                     lease_seconds=3, timeout=10, interval=.1)
     time.sleep(3.5)
     assert not effect.exists()
+
+
+def test_unsignalled_root_is_an_error_not_a_success(tmp_path, monkeypatch):
+    store = EventStore(tmp_path / "events.db")
+    store.publish("IMPLEMENT_REQUESTED", "key", "pr:7", {})
+    event = store.claim("IMPLEMENT_REQUESTED", "worker", 2)
+    monkeypatch.setattr(process_supervisor, "_wait", lambda *_: 0x102)
+    with pytest.raises(ProcessSupervisorError, match="did not signal termination"):
+        run_claimed(store, event, [sys.executable, "-c", "import time; time.sleep(60)"],
+                    cwd=tmp_path, env=_env(), lease_seconds=2, timeout=.4, interval=.1)
