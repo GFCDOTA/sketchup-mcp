@@ -27,6 +27,7 @@ MANDATORY_CHECKS = frozenset({
     "uv lock is current",
     "pytest (py3.11)",
     "pytest (py3.12)",
+    "windows process supervisor",
     "deterministic fidelity gates",
     "mcp server (smoke + stdio handshake)",
     "qg: backlog, issues and specs",

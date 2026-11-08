@@ -234,6 +234,11 @@ class TestChecksStateMandatory:
     def test_one_mandatory_absent_is_pending(self):
         assert lc.checks_state(all_green_without(NAMES[3])) == "pending"
 
+    def test_windows_supervisor_check_is_required(self):
+        assert "windows process supervisor" in lc.MANDATORY_CHECKS
+        assert lc.checks_state(all_green_without("windows process supervisor")) == "pending"
+        assert lc.checks_state(all_green_except("windows process supervisor", conclusion="failure")) == "failed"
+
     def test_mandatory_check_skipped_is_failed(self):
         assert lc.checks_state(all_green_except(NAMES[0], conclusion="skipped")) == "failed"
 
