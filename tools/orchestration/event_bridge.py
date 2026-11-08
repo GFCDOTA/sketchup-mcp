@@ -172,7 +172,20 @@ def pr_facts(pr_raw: dict) -> dict:
             "refs": sorted({int(n) for n in REFS.findall(pr_raw.get("body") or "")})}
 
 
-def poll_once(gh: Gh, policy: dict, bstate: dict, repo: str = REPO, now: dt.datetime | None = None) -> dict:
+def _shadow_publish(store, event: dict, pr_facts: dict) -> None:
+    """Dual-write to EventStore (shadow mode, SPEC §6.3 step 4).  Best-effort:
+    a failure here never blocks the JSON queue."""
+    try:
+        from tools.orchestration.store_factory import bridge_to_store_args
+        args = bridge_to_store_args(event, pr_facts)
+        if args:
+            store.publish(**args)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def poll_once(gh: Gh, policy: dict, bstate: dict, repo: str = REPO, now: dt.datetime | None = None,
+              store=None) -> dict:
     """Um ciclo de polling (dry-run: so enfileira). Erro de API => backoff + diagnostico, sem perder estado. Devolve contagens."""
     counts = {"ACCEPT": 0, "DUPLICATE": 0, "STALE": 0, "IGNORE": 0, "ERROR": 0}
     try:
@@ -180,8 +193,11 @@ def poll_once(gh: Gh, policy: dict, bstate: dict, repo: str = REPO, now: dt.date
         for raw_pr in prs:
             facts = pr_facts(raw_pr)
             for raw in gh(f"repos/{repo}/pulls/{raw_pr['number']}/reviews?per_page=100"):
-                verdict, why = ingest(normalize_review(raw, facts, repo), facts, policy, bstate, now, repo)
+                ev = normalize_review(raw, facts, repo)
+                verdict, why = ingest(ev, facts, policy, bstate, now, repo)
                 counts[verdict] += 1
+                if verdict == "ACCEPT" and store is not None:
+                    _shadow_publish(store, ev, facts)
                 if verdict in ("STALE", "IGNORE") and (raw.get("state") or "").upper() == "CHANGES_REQUESTED":
                     diagnose(bstate, f"review {raw.get('id')} PR #{facts['number']} {verdict}: {why}", now)
         since = bstate.get("cursor_comments")
@@ -207,12 +223,14 @@ def poll_once(gh: Gh, policy: dict, bstate: dict, repo: str = REPO, now: dt.date
     return counts
 
 
-def run_cycle(gh: Gh, policy: dict, bpath: Path | None = None, repo: str = REPO, now: dt.datetime | None = None) -> dict:
+def run_cycle(gh: Gh, policy: dict, bpath: Path | None = None, repo: str = REPO, now: dt.datetime | None = None,
+              store=None) -> dict:
     """Um ciclo sob trava: carrega, enfileira e grava UM unico arquivo (fila + chaves vistas + cursor) com `os.replace`.
-    Crash antes do replace = nada mudou (o proximo ciclo reenfileira uma vez); crash depois = tudo gravado. Sem estado em dois lugares."""
+    Crash antes do replace = nada mudou (o proximo ciclo reenfileira uma vez); crash depois = tudo gravado. Sem estado em dois lugares.
+    When ``store`` is given, accepted events are also shadow-published to the EventStore (SPEC §6.3)."""
     with es.locked(bpath or bridge_path()):
         bstate = load(bpath)
-        counts = poll_once(gh, policy, bstate, repo, now)
+        counts = poll_once(gh, policy, bstate, repo, now, store=store)
         save(bstate, bpath)
     return counts
 

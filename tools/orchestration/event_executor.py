@@ -676,13 +676,64 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
         hb.stop()
 
 
+def _get_store():
+    """Best-effort EventStore for shadow mode (SPEC §6.3 step 4)."""
+    try:
+        from tools.orchestration.store_factory import get_store
+        return get_store()
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _sync_result_to_store(store, item: dict, result: dict) -> None:
+    """After completing a JSON queue item, mirror the outcome to the EventStore.
+    Best-effort: never blocks the JSON path."""
+    if store is None:
+        return
+    try:
+        idem = f"review:{item.get('event_id', '').split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
+        events = [e for e in store.events() if e.get("idempotency_key") == idem]
+        if not events:
+            return
+        ev = events[0]
+        if ev["status"] != "PENDING":
+            return
+        action = result.get("action")
+        owner = f"sync:{uuid.uuid4().hex[:8]}"
+        claimed = store.claim((ev["event_type"],), owner, 30.0)
+        if claimed is None or claimed["id"] != ev["id"]:
+            return
+        if action == "DONE":
+            store.complete(claimed, {"synced_from": "json_queue", "action": action,
+                                     "new_head": result.get("new_head", "")})
+        elif action in ("SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"):
+            store.supersede(claimed, result.get("reason", action)[:2000])
+        elif action in ("FAILED", "BLOCKED_WORKTREE", "BLOCKED_CLI", "BLOCKED_CREDENTIALS",
+                         "BLOCKED_REVIEW_FETCH", "LOST_LEASE"):
+            store.fail(claimed, result.get("reason", action)[:2000])
+        elif action == "DRY_RUN":
+            store.fail(claimed, "dry-run: executor did not run", retry_delay=0)
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def run_cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False, runner: Runner = default_runner,
               claude_bin: str = "claude", wt_prep=prepare_worktree, now: dt.datetime | None = None,
               python: str | None = None) -> dict:
-    """Poll do bridge (trava curta) + um item da fila (claim curto; o trabalho roda SEM a trava do arquivo)."""
-    counts = eb.run_cycle(gh, policy, repo=repo, now=now)
+    """Poll do bridge (trava curta) + um item da fila (claim curto; o trabalho roda SEM a trava do arquivo).
+    Shadow mode (SPEC §6.3): accepted events are dual-written to the EventStore;
+    execution results are synced back after completion."""
+    store = _get_store()
+    counts = eb.run_cycle(gh, policy, repo=repo, now=now, store=store)
     out = process_one(gh, policy, repo, execute, runner, claude_bin, wt_prep, now, python)
-    return {"poll": counts, **out, "reconcile": _reconcile_summary(gh, policy, repo, now)}
+    if out.get("item"):
+        with es.locked(eb.bridge_path()):
+            b = eb.load()
+            item = next((t for t in b["queue"] if t["key"] == out["item"]), None)
+        if item:
+            _sync_result_to_store(store, item, out)
+    return {"poll": counts, **out, "reconcile": _reconcile_summary(gh, policy, repo, now),
+            "store": "shadow" if store else "unavailable"}
 
 
 def _reconcile_summary(gh: eb.Gh, policy: dict, repo: str, now: dt.datetime | None) -> dict:
