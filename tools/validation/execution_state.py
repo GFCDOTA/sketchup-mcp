@@ -58,9 +58,40 @@ def save(state: dict, path: Path | None = None) -> None:
     os.replace(tmp, p)
 
 
+def pid_alive(pid: int) -> bool:
+    """O processo `pid` existe? Windows: OpenProcess+WaitForSingleObject (os.kill(pid, 0) TERMINARIA o processo no Windows)."""
+    if os.name == "nt":
+        import ctypes
+        k32 = ctypes.windll.kernel32
+        h = k32.OpenProcess(0x00100000, False, int(pid))                     # SYNCHRONIZE
+        if not h:
+            return False
+        try:
+            return k32.WaitForSingleObject(h, 0) == 0x102                    # WAIT_TIMEOUT => ainda vivo
+        finally:
+            k32.CloseHandle(h)
+    try:
+        os.kill(int(pid), 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _lock_owner_dead(p: Path) -> bool:
+    """A trava guarda o PID do dono. Dono morto (crash duro DURANTE a secao critica, ex. heartbeat) => trava orfa: quebrar ja,
+    em vez de bloquear todo mundo por 60 s. Sem PID legivel (formato antigo/escrita parcial) => nao decide aqui (regra dos 60 s)."""
+    try:
+        raw = p.read_text(encoding="utf-8").strip()
+    except OSError:
+        return False
+    return raw.isdigit() and int(raw) != os.getpid() and not pid_alive(int(raw))
+
+
 @contextlib.contextmanager
 def locked(path: Path | None = None, wait_s: float = 5.0):
-    """Trava exclusiva curta em torno de ler-alterar-gravar. Trava velha (> 60 s) e considerada de execucao morta e quebrada."""
+    """Trava exclusiva curta em torno de ler-alterar-gravar. Dono morto (PID gravado) ou trava velha (> 60 s) => quebrada."""
     import time
     p = (path or state_path()).with_suffix(".lock")
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -68,14 +99,17 @@ def locked(path: Path | None = None, wait_s: float = 5.0):
     while True:
         try:
             fd = os.open(p, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            os.close(fd)
+            try:
+                os.write(fd, str(os.getpid()).encode("ascii"))
+            finally:
+                os.close(fd)
             break
         except FileExistsError:
             try:
                 age = time.time() - p.stat().st_mtime
             except FileNotFoundError:
                 continue                                             # o dono soltou a trava entre o open e o stat: tenta de novo
-            if age > 60:
+            if age > 60 or _lock_owner_dead(p):
                 p.unlink(missing_ok=True)
                 continue
             if time.time() > deadline:

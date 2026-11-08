@@ -16,9 +16,11 @@ py = ex.venv_python()
 CASES = [
     ("1 git status (esperado: OK)", "git status"),
     ("2 pytest do venv (esperado: OK)", f"{py} -m pytest --version"),
-    ("3 push da branch do PR (esperado: OK)", "git push origin HEAD:feat/x"),
+    ("3 push da branch do PR (esperado: NEGADO - o filho nao publica)", "git push origin HEAD:feat/x"),
     ("4 push para OUTRA branch (esperado: NEGADO)", "git push origin HEAD:other"),
     ("5 push --force na branch do PR (esperado: NEGADO)", "git push origin HEAD:feat/x --force"),
+    ("9 git add (esperado: NEGADO)", "git add -A"),
+    ("10 git commit (esperado: NEGADO)", 'git commit -m x'),
     ("6 rm (esperado: NEGADO)", "rm a.txt"),
     ("7 gh api (esperado: NEGADO)", "gh api user"),
     ("8 python arbitrario do venv (esperado: NEGADO)", f'{py} -c "print(1)"'),
