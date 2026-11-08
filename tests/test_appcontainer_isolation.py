@@ -4,10 +4,10 @@ These tests do not authorize execution of agents or untrusted PR code.
 """
 from __future__ import annotations
 
-import base64
 import ctypes
 import os
 import subprocess
+import uuid
 from ctypes import wintypes
 from pathlib import Path
 
@@ -15,7 +15,11 @@ import pytest
 
 from tools.orchestration import appcontainer
 from tools.orchestration import process_supervisor as ps
-from tools.orchestration.appcontainer import AppContainerError, AppContainerProfile
+from tools.orchestration.appcontainer import (
+    AppContainerError,
+    AppContainerProfile,
+    create_workspace,
+)
 from tools.orchestration.event_store import EventStore
 
 pytestmark = pytest.mark.skipif(os.name != "nt", reason="requires real Windows AppContainer")
@@ -30,18 +34,12 @@ def _child_env():
 
 
 def test_appcontainer_limits_file_access_and_has_no_capabilities(tmp_path):
-    allowed, outside = tmp_path / "allowed test", tmp_path / "outside test"
-    allowed.mkdir()
+    outside = tmp_path / "outside test"
     outside.mkdir()
     sentinel = outside / "sentinel.txt"
     sentinel.write_text("synthetic sentinel", encoding="utf-8")
 
     advapi = ctypes.WinDLL("advapi32", use_last_error=True)
-    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
-    sid_to_string = advapi.ConvertSidToStringSidW
-    sid_to_string.argtypes = [ctypes.c_void_p, ctypes.POINTER(wintypes.LPWSTR)]
-    sid_to_string.restype = wintypes.BOOL
-    kernel.LocalFree.argtypes, kernel.LocalFree.restype = [ctypes.c_void_p], ctypes.c_void_p
     open_token = advapi.OpenProcessToken
     open_token.argtypes = [wintypes.HANDLE, wintypes.DWORD, ctypes.POINTER(wintypes.HANDLE)]
     open_token.restype = wintypes.BOOL
@@ -51,26 +49,16 @@ def test_appcontainer_limits_file_access_and_has_no_capabilities(tmp_path):
     get_token.restype = wintypes.BOOL
 
     with AppContainerProfile() as profile:
-        text = wintypes.LPWSTR()
-        assert sid_to_string(profile.sid, ctypes.byref(text))
-        sid_string = text.value
-        kernel.LocalFree(text)
-        # Grant only this synthetic, newly created test directory.
-        icacls = str(Path(os.environ["SystemRoot"]) / "System32" / "icacls.exe")
-        for args in ([icacls, str(allowed), "/grant", f"*{sid_string}:(OI)(CI)M"],
-                     [icacls, str(allowed), "/setintegritylevel", "(OI)(CI)L"]):
-            proc = subprocess.run(args, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-            assert proc.returncode == 0, proc.stderr
+        allowed = create_workspace(profile, tmp_path)
 
-        writable = str(allowed / "allowed.txt").replace("'", "''")
-        blocked = str(sentinel).replace("'", "''")
-        script = (f"$ErrorActionPreference='Stop'; try {{ Set-Content -LiteralPath '{writable}' -Value 'allowed' -Encoding UTF8; "
-                  f"try {{ Get-Content -LiteralPath '{blocked}' | Out-Null; exit 23 }} catch {{ exit 24 }} "
-                  "} catch { exit 31 }")
-        encoded = base64.b64encode(script.encode("utf-16-le")).decode("ascii")
-        executable = str(Path(os.environ["SystemRoot"]) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe")
+        executable = str(Path(os.environ["SystemRoot"]) / "System32" / "cmd.exe")
         env = _child_env()
-        argv = [executable, "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded]
+        env["SANDBOX_OUTPUT"] = f'"{allowed / "allowed.txt"}"'
+        env["SANDBOX_COPY"] = f'"{allowed / "copy.txt"}"'
+        env["SANDBOX_BLOCKED"] = f'"{sentinel}"'
+        # Quoted paths are expanded from variables after cmd parses the command.
+        command = "echo allowed>%SANDBOX_OUTPUT%&type %SANDBOX_BLOCKED%>%SANDBOX_COPY% 2>NUL&&exit 23||exit 24"
+        argv = [executable, "/d", "/c", command]
         with ps.WindowsJob(argv, cwd=Path(executable).parent, env=env, suspended=True, profile=profile) as job:
             token = wintypes.HANDLE()
             assert open_token(job._process, 0x0008, ctypes.byref(token))
@@ -145,3 +133,48 @@ def test_profile_cleanup_failure_is_reported_and_can_be_retried(monkeypatch):
                 profile.close()
             assert profile.sid
         # Context exit retries the real deletion after the simulated failure.
+
+
+def test_workspace_blocks_inherited_broad_grants_for_other_profile(tmp_path):
+    parent = tmp_path / "broadly accessible parent"
+    parent.mkdir()
+    icacls = str(Path(os.environ["SystemRoot"]) / "System32" / "icacls.exe")
+    for args in ([icacls, str(parent), "/grant", "*S-1-15-2-1:(OI)(CI)M"],
+                 [icacls, str(parent), "/setintegritylevel", "(OI)(CI)L"]):
+        proc = subprocess.run(args, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        assert proc.returncode == 0, proc.stderr
+    public = parent / "public.txt"
+    public.write_text("control", encoding="utf-8")
+    executable = str(Path(os.environ["SystemRoot"]) / "System32" / "cmd.exe")
+    with AppContainerProfile() as owner, AppContainerProfile() as other:
+        workspace = create_workspace(owner, parent)
+        private = workspace / "private.txt"
+        private.write_text("synthetic", encoding="utf-8")
+        env = _child_env()
+        env["SANDBOX_PUBLIC"] = f'"{public}"'
+        env["SANDBOX_PRIVATE"] = f'"{private}"'
+        command = "type %SANDBOX_PUBLIC%>NUL 2>NUL||exit 31&type %SANDBOX_PRIVATE%>NUL 2>NUL&&exit 23||exit 24"
+        with ps.WindowsJob([executable, "/d", "/c", command], cwd=Path(executable).parent,
+                           env=env, profile=other) as job:
+            assert job.wait(15) == 24  # control readable, private workspace denied
+
+
+def test_workspace_never_reuses_existing_path(tmp_path, monkeypatch):
+    fixed = uuid.UUID("00112233-4455-6677-8899-aabbccddeeff")
+    target = tmp_path / ("sandbox-" + fixed.hex)
+    target.mkdir()
+    marker = target / "preserve.txt"
+    marker.write_text("keep", encoding="utf-8")
+    with AppContainerProfile() as profile:
+        monkeypatch.setattr(appcontainer.uuid, "uuid4", lambda: fixed)
+        with pytest.raises(AppContainerError, match="CreateDirectoryW"):
+            create_workspace(profile, tmp_path)
+    assert marker.read_text(encoding="utf-8") == "keep"
+
+
+def test_workspace_security_descriptor_failure_creates_nothing(tmp_path, monkeypatch):
+    with AppContainerProfile() as profile:
+        monkeypatch.setattr(appcontainer, "_sddl_to_sd", lambda *_: 0)
+        with pytest.raises(AppContainerError, match="ConvertStringSecurityDescriptor"):
+            create_workspace(profile, tmp_path)
+    assert list(tmp_path.iterdir()) == []
