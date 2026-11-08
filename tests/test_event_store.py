@@ -282,6 +282,65 @@ class TestFailRetryDlq:
         ev2 = store.claim("IMPLEMENT_REQUESTED", "w2", 60)
         assert ev2 is not None
 
+    @pytest.mark.parametrize("max_attempts", [1, 2])
+    def test_crashed_final_attempt_dead_letters_and_releases_aggregate(self, tmp_path, clock, max_attempts):
+        path = tmp_path / "crashed.db"
+        store = EventStore(path, clock=clock)
+        event_id, _ = store.publish("IMPLEMENT_REQUESTED", "impl", "pr:7", {},
+                                    max_attempts=max_attempts, correlation_id="chain",
+                                    aggregate_type="custom")
+        successor_id, _ = store.publish("REVIEW_REQUESTED", "review", "pr:7", {},
+                                        aggregate_type="custom")
+        old_claims = []
+        for attempt in range(1, max_attempts + 1):
+            claim = store.claim("IMPLEMENT_REQUESTED", f"crashed-{attempt}", 10)
+            assert claim["id"] == event_id and claim["attempt"] == attempt
+            old_claims.append(claim)
+            # Simulate worker death without fail(), then restart the store after expiry.
+            clock.advance(11)
+            store = EventStore(path, clock=clock)
+
+        successor = store.claim("REVIEW_REQUESTED", "other-consumer", 60)
+        assert successor["id"] == successor_id
+        dead = store.get(event_id)
+        assert dead["status"] == "DLQ" and dead["attempt"] == max_attempts
+        assert dead["lease_owner"] is None and dead["lease_token"] is None
+        assert "lease expired" in dead["error"]
+        for old in old_claims:
+            with pytest.raises(LeaseLost):
+                store.complete(old, {"late": True})
+            with pytest.raises(LeaseLost):
+                store.fail(old, "late")
+            assert not store.renew(old, 60)
+        store.complete(successor, {})
+        for _ in range(2):
+            assert store.claim("IMPLEMENT_REQUESTED", "replacement", 60) is None
+        facts = [e for e in store.events("pr:7") if e["event_type"] == "JOB_FAILED"]
+        assert len(facts) == 1
+        assert facts[0]["parent_event_id"] == event_id and facts[0]["status"] == "RECORDED"
+        assert facts[0]["aggregate_type"] == "custom" and facts[0]["correlation_id"] == "chain"
+        assert len([t for t in store.transitions()
+                    if t["event_id"] == event_id and t["to_status"] == "DLQ"]) == 1
+
+    def test_expiry_dlq_and_fact_roll_back_together(self, store, clock, monkeypatch):
+        event_id, _ = store.publish("IMPLEMENT_REQUESTED", "impl", "pr:7", {}, max_attempts=1)
+        old = store.claim("IMPLEMENT_REQUESTED", "crashed", 10)
+        clock.advance(11)
+
+        def fail_fact(*args):
+            raise RuntimeError("injected failure")
+
+        with monkeypatch.context() as patch:
+            patch.setattr(EventStore, "_record_dlq_fact", fail_fact)
+            with pytest.raises(RuntimeError, match="injected failure"):
+                store.claim("IMPLEMENT_REQUESTED", "replacement", 60)
+        assert store.get(event_id)["status"] == "RUNNING"
+        assert not [t for t in store.transitions() if t["to_status"] == "DLQ"]
+        assert store.claim("IMPLEMENT_REQUESTED", "replacement", 60) is None
+        assert store.get(event_id)["status"] == "DLQ"
+        with pytest.raises(LeaseLost):
+            store.complete(old, {})
+
 
 # -- supersede -------------------------------------------------------------
 class TestSupersede:
@@ -374,9 +433,9 @@ class TestPersistence:
 
 
 # -- real process isolation -------------------------------------------------
-def _claim_process(path, barrier, results, mode, hold=None):
+def _claim_process(path, barrier, results, mode, hold=None, clock_time=1_000_000.0):
     # Both children connect before the barrier opens; each gets its own SQLite connection.
-    store = EventStore(path, clock=Clock())
+    store = EventStore(path, clock=Clock(clock_time))
     barrier.wait(timeout=15)
     if mode == "outbox":
         entry = store.claim_outbox(str(multiprocessing.current_process().pid), 60)
@@ -388,10 +447,10 @@ def _claim_process(path, barrier, results, mode, hold=None):
         hold.wait(timeout=30)
 
 
-def _race(path, mode="event"):
+def _race(path, mode="event", clock_time=1_000_000.0):
     ctx = multiprocessing.get_context("spawn")
     barrier, results = ctx.Barrier(3), ctx.Queue()
-    processes = [ctx.Process(target=_claim_process, args=(path, barrier, results, mode)) for _ in range(2)]
+    processes = [ctx.Process(target=_claim_process, args=(path, barrier, results, mode, None, clock_time)) for _ in range(2)]
     try:
         for proc in processes:
             proc.start()
@@ -426,6 +485,19 @@ class TestRealProcesses:
         store.publish("CORRECTION_REQUESTED", "k2", "pr:8", {})
         entries = _race(store.path)
         assert {e["job_id"] for e in entries} == {"pr:7", "pr:8"}
+
+    def test_concurrent_recovery_records_one_dlq_and_claims_successor_once(self, store, clock):
+        event_id, _ = store.publish("IMPLEMENT_REQUESTED", "old", "pr:7", {}, max_attempts=1)
+        store.claim("IMPLEMENT_REQUESTED", "crashed", 10)
+        successor_id, _ = store.publish("CORRECTION_REQUESTED", "next", "pr:7", {})
+        clock.advance(11)
+        claims = _race(store.path, clock_time=clock())
+        assert [entry["id"] for entry in claims if entry is not None] == [successor_id]
+        assert store.get(event_id)["status"] == "DLQ"
+        facts = [e for e in store.events("pr:7") if e["event_type"] == "JOB_FAILED"]
+        assert len(facts) == 1 and facts[0]["parent_event_id"] == event_id
+        assert len([t for t in store.transitions()
+                    if t["event_id"] == event_id and t["to_status"] == "DLQ"]) == 1
 
     def test_outbox_only_one_concurrent_publisher(self, store):
         _outbox_entry(store)

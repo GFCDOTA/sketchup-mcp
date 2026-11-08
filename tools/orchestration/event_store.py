@@ -209,6 +209,19 @@ class EventStore:
                 self._log(db, row["id"], None, status, actor, f"published {event_type}", now)
             return row["id"], created
 
+    @staticmethod
+    def _record_dlq_fact(db, ev, reason, now):
+        key = f"{ev['job_id']}:job_failed:dlq:{ev['id']}"
+        db.execute(
+            """INSERT OR IGNORE INTO events(event_id,event_type,aggregate_type,idempotency_key,job_id,
+               correlation_id,parent_event_id,payload,status,created_at,updated_at,available_at)
+               VALUES(?,?,?,?,?,?,?,?,'RECORDED',?,?,?)""",
+            (uuid.uuid4().hex, "JOB_FAILED", ev["aggregate_type"], key, ev["job_id"],
+             ev["correlation_id"], ev["id"],
+             json.dumps({"reason": "dead-lettered", "event_type": ev["event_type"], "error": reason[:500]}),
+             now, now, now),
+        )
+
     # -- consuming ----------------------------------------------------------
     def claim(self, event_types, owner: str, lease_seconds: float) -> dict | None:
         """Atomically claim the oldest eligible event (PENDING & available, or
@@ -220,8 +233,23 @@ class EventStore:
         now = self.clock()
         marks = ",".join("?" * len(event_types))
         with self._tx() as db:
+            # Reap exhausted leases across event types before selecting work, so a
+            # different consumer also records the terminal state and frees the aggregate.
+            expired = db.execute(
+                """SELECT * FROM events WHERE status='RUNNING' AND lease_until<=?
+                   AND attempt>=max_attempts""", (now,),
+            ).fetchall()
+            for ev in expired:
+                reason = "lease expired after final attempt"
+                db.execute(
+                    """UPDATE events SET status='DLQ', error=?, lease_owner=NULL,
+                       lease_token=NULL, lease_until=0, updated_at=? WHERE id=?""",
+                    (reason, now, ev["id"]),
+                )
+                self._log(db, ev["id"], "RUNNING", "DLQ", owner, reason, now)
+                self._record_dlq_fact(db, ev, reason, now)
             job = db.execute(
-                f"""SELECT e.* FROM events e WHERE e.event_type IN ({marks}) AND
+                f"""SELECT e.* FROM events e WHERE e.event_type IN ({marks}) AND e.attempt<e.max_attempts AND
                     ((e.status='PENDING' AND e.available_at<=?) OR (e.status='RUNNING' AND e.lease_until<=?))
                     AND NOT EXISTS (SELECT 1 FROM events active
                         WHERE active.aggregate_type=e.aggregate_type AND active.job_id=e.job_id
@@ -312,14 +340,7 @@ class EventStore:
             self._owned_update(db, ev, "UPDATE events SET status=?, error=?, available_at=?, lease_until=0, updated_at=?",
                                (to, reason[:2000], now + retry_delay, now), to, f"failed: {reason[:300]}", now)
             if to == "DLQ":
-                key = f"{ev['job_id']}:job_failed:dlq:{ev['id']}"
-                db.execute(
-                    """INSERT OR IGNORE INTO events(event_id,event_type,idempotency_key,job_id,parent_event_id,
-                       payload,status,created_at,updated_at,available_at) VALUES(?,?,?,?,?,?,'RECORDED',?,?,?)""",
-                    (uuid.uuid4().hex, "JOB_FAILED", key, ev["job_id"], ev["id"],
-                     json.dumps({"reason": "dead-lettered", "event_type": ev["event_type"], "error": reason[:500]}),
-                     now, now, now),
-                )
+                self._record_dlq_fact(db, ev, reason, now)
             return to
 
     def supersede(self, ev: dict, reason: str) -> None:
