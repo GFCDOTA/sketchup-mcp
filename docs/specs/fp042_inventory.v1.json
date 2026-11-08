@@ -14924,6 +14924,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_appcontainer_isolation.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_event_executor.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -18030,6 +18039,15 @@
     },
     {
       "path": "tools/orchestration/process_supervisor.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/orchestration/appcontainer.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",

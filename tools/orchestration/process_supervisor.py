@@ -14,6 +14,8 @@ import time
 from ctypes import wintypes
 from pathlib import Path
 
+from tools.orchestration.appcontainer import AppContainerProfile
+
 
 class ProcessSupervisorError(RuntimeError):
     """A supervised process could not be safely launched or observed."""
@@ -55,6 +57,10 @@ if os.name == "nt":
     class _StartupInfoEx(ctypes.Structure):
         _fields_ = [("startup", _StartupInfo), ("attributes", ctypes.c_void_p)]
 
+    class _SecurityCapabilities(ctypes.Structure):
+        _fields_ = [("sid", ctypes.c_void_p), ("capabilities", ctypes.c_void_p),
+                    ("count", wintypes.DWORD), ("reserved", wintypes.DWORD)]
+
     class _ProcessInfo(ctypes.Structure):
         _fields_ = [("process", _HANDLE), ("thread", _HANDLE),
                     ("pid", wintypes.DWORD), ("tid", wintypes.DWORD)]
@@ -92,11 +98,17 @@ class WindowsJob:
     Closing this object kills the job tree, even after the root exits. A supervisor
     crash closes its non-inheritable job handle. Child handles are never inherited.
     No fallback launches an uncontained process when the job API is unavailable.
+    An optional AppContainer profile adds a zero-capability token; by itself it
+    does not establish safe workspace ACLs or authorize untrusted execution.
     """
 
-    def __init__(self, argv: list[str], *, cwd: str | Path, env: dict[str, str], suspended: bool = False):
+    def __init__(self, argv: list[str], *, cwd: str | Path, env: dict[str, str], suspended: bool = False,
+                 profile: AppContainerProfile | None = None):
         if os.name != "nt":
             raise ProcessSupervisorError("Windows Job Objects are required")
+        if profile is not None and not isinstance(profile, AppContainerProfile):
+            raise TypeError("profile must be an AppContainerProfile")
+        profile_sid = profile.sid if profile is not None else None
         if not argv or not Path(argv[0]).is_absolute():
             raise ValueError("argv[0] must be an absolute executable path")
         if not Path(cwd).is_dir():
@@ -116,17 +128,22 @@ class WindowsJob:
             if not _set_job(job, 9, ctypes.byref(limits), ctypes.sizeof(limits)):
                 raise _error("SetInformationJobObject")
             size = _SIZE()
-            _init_attrs(None, 1, 0, ctypes.byref(size))
+            attribute_count = 2 if profile_sid is not None else 1
+            _init_attrs(None, attribute_count, 0, ctypes.byref(size))
             if not size.value:
                 raise _error("InitializeProcThreadAttributeList size")
             attrs = ctypes.create_string_buffer(size.value)
-            if not _init_attrs(attrs, 1, 0, ctypes.byref(size)):
+            if not _init_attrs(attrs, attribute_count, 0, ctypes.byref(size)):
                 raise _error("InitializeProcThreadAttributeList")
             attrs_initialized = True
             job_list = (_HANDLE * 1)(job)
             # PROC_THREAD_ATTRIBUTE_JOB_LIST: assignment is part of process creation.
             if not _update_attrs(attrs, 0, 0x0002000D, job_list, ctypes.sizeof(job_list), None, None):
                 raise _error("UpdateProcThreadAttribute JOB_LIST")
+            if profile_sid is not None:
+                caps = _SecurityCapabilities(profile_sid, None, 0, 0)
+                if not _update_attrs(attrs, 0, 0x00020009, ctypes.byref(caps), ctypes.sizeof(caps), None, None):
+                    raise _error("UpdateProcThreadAttribute SECURITY_CAPABILITIES")
             startup = _StartupInfoEx()
             startup.startup.cb = ctypes.sizeof(startup)
             startup.attributes = ctypes.cast(attrs, ctypes.c_void_p)
@@ -200,7 +217,8 @@ class WindowsJob:
 
 
 def run_claimed(store, event: dict, argv: list[str], *, cwd: str | Path, env: dict[str, str],
-                lease_seconds: float, timeout: float, interval: float = 0.2) -> tuple[str, int | None]:
+                lease_seconds: float, timeout: float, interval: float = 0.2,
+                profile: AppContainerProfile | None = None) -> tuple[str, int | None]:
     """Run a trusted process while renewing its EventStore lease.
 
     A watchdog independently kills the job at a conservative local deadline even
@@ -209,6 +227,8 @@ def run_claimed(store, event: dict, argv: list[str], *, cwd: str | Path, env: di
     creation; callers must not give the child publishing credentials. Results must
     still be committed through EventStore.complete() using the original token.
     Requires EventStore to validate lease time *after* acquiring its write lock.
+    A profile adds a zero-capability AppContainer, but does not verify ACLs,
+    prevent every escape, or authorize execution of untrusted code.
     """
     if lease_seconds <= 0 or timeout <= 0 or interval <= 0 or interval * 4 >= lease_seconds:
         raise ValueError("lease_seconds, timeout and interval must be positive; interval must be < lease/4")
@@ -222,7 +242,7 @@ def run_claimed(store, event: dict, argv: list[str], *, cwd: str | Path, env: di
     if time.monotonic() >= deadline[0]:
         return "lease_lost", None
 
-    with WindowsJob(argv, cwd=cwd, env=env, suspended=True) as job:
+    with WindowsJob(argv, cwd=cwd, env=env, suspended=True, profile=profile) as job:
         def watch():
             while not stopped.wait(min(interval, 0.05)):
                 with lock:

@@ -46,8 +46,8 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --locked --extra dev
-      - name: Test real Windows Job Objects
-        run: uv run --no-sync python -m pytest --noconftest tests/test_process_supervisor.py -q
+      - name: Test real Windows Job Objects and AppContainer
+        run: uv run --no-sync python -m pytest --noconftest tests/test_process_supervisor.py tests/test_appcontainer_isolation.py -q
 
   tests:
     name: pytest (py${{ matrix.python }})
