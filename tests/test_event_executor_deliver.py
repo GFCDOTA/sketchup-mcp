@@ -291,19 +291,19 @@ def test_failing_checks_block_the_push(repo):
     assert action == "FAILED_CHECKS" and "pytest" in msg and untouched(remote, base)
 
 
-@pytest.mark.skipif(not Path(ex.venv_python()).exists(), reason="venv nao existe nesta worktree (CI cria)")
-def test_run_checks_runs_ruff_and_pytest_for_the_selected_files_with_the_real_venv(repo, monkeypatch):
-    wt, _remote, _base = repo
-    monkeypatch.setattr(dl, "SANDBOX_AVAILABLE", True)
-    assert ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"])[0]
-    edit_test(wt, "assert False")
-    assert not ex.run_checks(ex.venv_python(), wt, ["tests/test_a.py"], ["tests/test_a.py"])[0]
-
-
-# -------------------------------------- seguranca: sandbox gating e integridade pos-teste (review #598)
-def test_run_checks_refuses_without_os_sandbox():
+# -------------------------------------- seguranca: fail-closed sem sandbox de SO real (review #598)
+def test_run_checks_always_blocks_without_real_sandbox():
+    """run_checks e incondicionalmente bloqueado — nenhuma flag habilita subprocess."""
     ok, msg = dl.run_checks("python", Path("."), ["x.py"])
     assert not ok and "sandbox" in msg.lower() and "FP-060 P2" in msg
+
+
+def test_run_checks_blocks_even_with_monkeypatched_flags(monkeypatch):
+    """Nenhum atributo do modulo pode habilitar execucao de testes nao confiaveis."""
+    for attr in ("SANDBOX_AVAILABLE", "SANDBOX_RUNNER", "SANDBOX_ENABLED", "_SANDBOX_OVERRIDE"):
+        monkeypatch.setattr(dl, attr, True, raising=False)
+    ok, msg = dl.run_checks("python", Path("."), ["x.py"])
+    assert not ok and "sandbox" in msg.lower()
 
 
 def test_run_checks_sanitizes_env_no_gh_token(repo, monkeypatch):
@@ -350,24 +350,25 @@ def test_new_file_staged_during_tests_blocks_push(repo):
     assert action == "BLOCKED_GUARDS" and "alterado durante" in msg and untouched(remote, base)
 
 
-def test_source_never_passes_full_env_to_subprocess():
+def test_run_checks_contains_no_subprocess_call():
+    """run_checks nao executa subprocess — toda execucao de codigo nao confiavel removida ate P2."""
+    import ast
     src = Path(dl.__file__).read_text(encoding="utf-8")
-    lines = src.split("\n")
-    in_run_checks = False
-    for line in lines:
-        if "def run_checks" in line:
-            in_run_checks = True
-        elif in_run_checks and line and not line[0].isspace() and "def " in line:
-            break
-        if in_run_checks and "subprocess.run" in line and "env=" not in line:
-            raise AssertionError("subprocess.run in run_checks without env= parameter")
+    tree = ast.parse(src)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == "run_checks":
+            for child in ast.walk(node):
+                if isinstance(child, ast.Attribute) and child.attr == "run" and isinstance(child.value, ast.Name) and child.value.id == "subprocess":
+                    raise AssertionError(f"subprocess.run found in run_checks at line {child.lineno} — untrusted code execution path reintroduced")
 
 
-def test_run_checks_has_no_sandbox_mode_parameter():
-    """Regression: sandbox_mode parameter was a bypass vector (GPT review 2026-11-07). Only SANDBOX_AVAILABLE decides."""
+def test_run_checks_has_no_bypass_parameters():
+    """Regression: nenhum parametro (sandbox_mode, sandbox, isolation...) pode habilitar execucao."""
     import inspect
     sig = inspect.signature(dl.run_checks)
-    assert "sandbox_mode" not in sig.parameters, "sandbox_mode parameter reintroduced — bypass vulnerability"
+    forbidden = {"sandbox_mode", "sandbox", "isolation", "enable_tests", "force_run", "unsafe"}
+    found = forbidden & set(sig.parameters)
+    assert not found, f"bypass parameter(s) reintroduced: {found}"
 
 
 def test_prompt_tells_the_model_a_denied_command_does_not_block_the_allowed_ones():

@@ -21,7 +21,6 @@ from typing import Callable
 from tools.orchestration import execution_guards as guards
 
 ALLOWED_SUFFIXES = (".py", ".md", ".txt", ".json")
-SANDBOX_AVAILABLE = False
 
 ENV_KEEP = {k.upper() for k in (
     "PATH", "PATHEXT", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "COMSPEC", "TEMP", "TMP", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "HOME",
@@ -131,21 +130,9 @@ def _check_env() -> dict:
 
 
 def run_checks(py: str, wt: Path, files: list, tests: list[str] | None = None) -> tuple[bool, str]:
-    """ruff em todos os .py tocados e pytest na selecao. Falha => (False, trecho).
-    Sem sandbox de SO (FP-060 P2): recusa execucao de testes nao confiaveis. Ambiente SEMPRE por allowlist.
-    SANDBOX_AVAILABLE e a unica autoridade; nenhum parametro externo pode declarar isolamento."""
-    if not SANDBOX_AVAILABLE:
-        return False, "BLOCKED: execucao de testes requer sandbox de SO (FP-060 P2); edicoes preservadas na worktree"
-    env = _check_env()
-    pys = [f for f in files if f.endswith(".py")]
-    chosen = tests if tests is not None else [f for f in pys if f.startswith("tests/") and Path(f).name.startswith("test_")]
-    for argv in ([py, "-m", "ruff", "check", *pys] if pys else None, [py, "-m", "pytest", "-q", *chosen] if chosen else None):
-        if not argv:
-            continue
-        r = subprocess.run(argv, cwd=wt, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=900, env=env)
-        if r.returncode != 0:
-            return False, f"{' '.join(argv[2:4])} rc={r.returncode}: {(r.stdout + r.stderr).strip()[-400:]}"
-    return True, ""
+    """Fail-closed: nenhum caminho executa testes nao confiaveis do PR ate P2 introduzir sandbox de SO real (Job Objects).
+    Nao existe flag, constante ou parametro que habilite subprocess — P2 adicionara o runner isolado."""
+    return False, "BLOCKED: execucao de testes requer sandbox de SO real (FP-060 P2); edicoes preservadas na worktree"
 
 
 def remote_head(wt: Path, branch: str, run: Run) -> str | None:
