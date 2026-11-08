@@ -230,9 +230,9 @@ class EventStore:
             raise ValueError("lease_seconds must be positive")
         if isinstance(event_types, str):
             event_types = (event_types,)
-        now = self.clock()
         marks = ",".join("?" * len(event_types))
         with self._tx() as db:
+            now = self.clock()
             # Reap exhausted leases across event types before selecting work, so a
             # different consumer also records the terminal state and frees the aggregate.
             expired = db.execute(
@@ -283,8 +283,8 @@ class EventStore:
     def renew(self, ev: dict, lease_seconds: float) -> bool:
         if lease_seconds <= 0:
             raise ValueError("lease_seconds must be positive")
-        now = self.clock()
         with self._tx() as db:
+            now = self.clock()
             cur = db.execute(
                 "UPDATE events SET lease_until=?, updated_at=? WHERE id=? AND lease_token=? AND status='RUNNING' AND lease_until>?",
                 (now + lease_seconds, now, ev["id"], ev["lease_token"], now),
@@ -295,8 +295,8 @@ class EventStore:
         """Mark DONE and publish follow-up events + outbox entries in the SAME
         transaction (transactional outbox: no completed job without its
         side effects queued). Returns (follow_up_ids, outbox_ids)."""
-        now = self.clock()
         with self._tx() as db:
+            now = self.clock()
             self._owned_update(db, ev, "UPDATE events SET status='DONE', result=?, lease_until=0, updated_at=?",
                                (json.dumps(result, sort_keys=True), now), "DONE", "completed", now)
             fids: list[int] = []
@@ -334,9 +334,9 @@ class EventStore:
     def fail(self, ev: dict, reason: str, retry_delay: float = 1.0) -> str:
         """Retry (back to PENDING) or dead-letter when attempts are exhausted.
         Dead-lettering also records a JOB_FAILED fact in the same transaction."""
-        now = self.clock()
         to = "DLQ" if ev["attempt"] >= ev["max_attempts"] else "PENDING"
         with self._tx() as db:
+            now = self.clock()
             self._owned_update(db, ev, "UPDATE events SET status=?, error=?, available_at=?, lease_until=0, updated_at=?",
                                (to, reason[:2000], now + retry_delay, now), to, f"failed: {reason[:300]}", now)
             if to == "DLQ":
@@ -345,8 +345,8 @@ class EventStore:
 
     def supersede(self, ev: dict, reason: str) -> None:
         """Discard a claimed event that refers to an outdated artifact version."""
-        now = self.clock()
         with self._tx() as db:
+            now = self.clock()
             self._owned_update(db, ev, "UPDATE events SET status='SUPERSEDED', error=?, lease_until=0, updated_at=?",
                                (reason, now), "SUPERSEDED", reason, now)
 
@@ -384,8 +384,8 @@ class EventStore:
         """
         if lease_seconds <= 0:
             raise ValueError("lease_seconds must be positive")
-        now = self.clock()
         with self._tx() as db:
+            now = self.clock()
             db.execute("""UPDATE outbox SET status='DLQ', lease_until=0, updated_at=?,
                        error='lease expired after final attempt; remote outcome requires reconciliation'
                        WHERE status='RUNNING' AND lease_until<=? AND attempts>=max_attempts""", (now, now))
@@ -410,8 +410,8 @@ class EventStore:
     def renew_outbox(self, entry: dict, lease_seconds: float) -> bool:
         if lease_seconds <= 0:
             raise ValueError("lease_seconds must be positive")
-        now = self.clock()
         with self._tx() as db:
+            now = self.clock()
             cur = db.execute("""UPDATE outbox SET lease_until=?, updated_at=? WHERE id=?
                              AND lease_token=? AND status='RUNNING' AND lease_until>?""",
                              (now + lease_seconds, now, entry['id'], entry['lease_token'], now))
@@ -419,15 +419,15 @@ class EventStore:
 
     def complete_outbox(self, entry: dict) -> None:
         """Only the current unexpired owner can acknowledge delivery."""
-        now = self.clock()
         with self._tx() as db:
+            now = self.clock()
             self._owned_outbox_update(db, entry,
                                      "UPDATE outbox SET status='DONE', lease_until=0, updated_at=?", (now,), now)
 
     def fail_outbox(self, entry: dict, reason: str, retry_delay: float = 1.0) -> str:
         """Terminal states are immutable; delayed/duplicate outcomes are fenced."""
-        now = self.clock()
         with self._tx() as db:
+            now = self.clock()
             row = db.execute("SELECT attempts, max_attempts FROM outbox WHERE id=?", (entry['id'],)).fetchone()
             if row is None:
                 raise LeaseLost(f"outbox {entry['id']}: missing entry")
