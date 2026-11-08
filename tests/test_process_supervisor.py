@@ -219,3 +219,23 @@ def test_lost_lease_refuses_to_start_process(tmp_path):
     assert run_claimed(store, event, [sys.executable, "-c", script], cwd=tmp_path, env=_env(),
                        lease_seconds=2, timeout=5, interval=.1) == ("lease_lost", None)
     assert not marker.exists()
+
+
+def test_renewal_error_kills_tree_and_never_returns_success(tmp_path):
+    root, ready, effect = _tree_script(tmp_path)
+    store = EventStore(tmp_path / "events.db")
+    store.publish("IMPLEMENT_REQUESTED", "key", "pr:7", {})
+    event = store.claim("IMPLEMENT_REQUESTED", "worker", 3)
+    original = store.renew
+
+    def broken_after_start(*args):
+        if ready.exists():
+            raise RuntimeError("database unavailable")
+        return original(*args)
+
+    store.renew = broken_after_start
+    with pytest.raises(RuntimeError, match="database unavailable"):
+        run_claimed(store, event, [sys.executable, str(root)], cwd=tmp_path, env=_env(),
+                    lease_seconds=3, timeout=10, interval=.1)
+    time.sleep(3.5)
+    assert not effect.exists()
