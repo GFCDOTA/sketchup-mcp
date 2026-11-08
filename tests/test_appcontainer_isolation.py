@@ -145,6 +145,12 @@ def test_workspace_blocks_inherited_broad_grants_for_other_profile(tmp_path):
         assert proc.returncode == 0, proc.stderr
     public = parent / "public.txt"
     public.write_text("control", encoding="utf-8")
+    # Explicitly grant the file itself — (OI)(CI) inheritance on the parent is
+    # unreliable on CI runners (GitHub Actions Windows Server).
+    for extra in ([icacls, str(public), "/grant", "*S-1-15-2-1:R"],
+                  [icacls, str(public), "/setintegritylevel", "L"]):
+        proc = subprocess.run(extra, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+        assert proc.returncode == 0, proc.stderr
     executable = str(Path(os.environ["SystemRoot"]) / "System32" / "cmd.exe")
     with AppContainerProfile() as owner, AppContainerProfile() as other:
         workspace = create_workspace(owner, parent)
