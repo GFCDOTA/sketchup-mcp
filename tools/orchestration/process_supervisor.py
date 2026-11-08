@@ -9,6 +9,8 @@ from __future__ import annotations
 import ctypes
 import os
 import subprocess
+import threading
+import time
 from ctypes import wintypes
 from pathlib import Path
 
@@ -77,6 +79,7 @@ if os.name == "nt":
     _wait = _bind("WaitForSingleObject", [_HANDLE, wintypes.DWORD], wintypes.DWORD)
     _exit_code = _bind("GetExitCodeProcess", [_HANDLE, ctypes.POINTER(wintypes.DWORD)], wintypes.BOOL)
     _terminate_job = _bind("TerminateJobObject", [_HANDLE, wintypes.UINT], wintypes.BOOL)
+    _resume_thread = _bind("ResumeThread", [_HANDLE], wintypes.DWORD)
 
 
 def _error(action):
@@ -91,7 +94,7 @@ class WindowsJob:
     No fallback launches an uncontained process when the job API is unavailable.
     """
 
-    def __init__(self, argv: list[str], *, cwd: str | Path, env: dict[str, str]):
+    def __init__(self, argv: list[str], *, cwd: str | Path, env: dict[str, str], suspended: bool = False):
         if os.name != "nt":
             raise ProcessSupervisorError("Windows Job Objects are required")
         if not argv or not Path(argv[0]).is_absolute():
@@ -100,7 +103,7 @@ class WindowsJob:
             raise ValueError("cwd must be an existing directory")
         if not env or any(not k or "=" in k or "\0" in k or "\0" in v for k, v in env.items()):
             raise ValueError("an explicit valid environment is required")
-        self._job = self._process = None
+        self._job = self._process = self._thread = None
         self.pid = None
         job = _create_job(None, None)
         if not job:
@@ -131,17 +134,31 @@ class WindowsJob:
             command = ctypes.create_unicode_buffer(subprocess.list2cmdline(argv))
             block = ctypes.create_unicode_buffer("\0".join(f"{k}={v}" for k, v in sorted(env.items(), key=lambda x: x[0].upper())) + "\0\0")
             flags = 0x00080000 | 0x00000400 | 0x08000000  # EXTENDED_STARTUPINFO, UNICODE_ENV, NO_WINDOW
+            if suspended:
+                flags |= 0x00000004  # CREATE_SUSPENDED
             if not _create_process(argv[0], command, None, None, False, flags, block, str(cwd),
                                    ctypes.byref(startup), ctypes.byref(info)):
                 raise _error("CreateProcessW")
             self._process, self.pid = info.process, info.pid
-            _close(info.thread)
+            if suspended:
+                self._thread = info.thread
+            else:
+                _close(info.thread)
         except BaseException:
             self.close()
             raise
         finally:
             if attrs_initialized:
                 _delete_attrs(attrs)
+
+    def resume(self):
+        """Resume a process created suspended; failure leaves it in the job."""
+        if not self._thread:
+            raise ProcessSupervisorError("process is not suspended")
+        if _resume_thread(self._thread) == 0xFFFFFFFF:
+            raise _error("ResumeThread")
+        _close(self._thread)
+        self._thread = None
 
     def wait(self, timeout: float | None = None) -> int | None:
         """Return the root exit code, or None on timeout; children may still exist."""
@@ -165,6 +182,9 @@ class WindowsJob:
             raise _error("TerminateJobObject")
 
     def close(self):
+        if self._thread:
+            _close(self._thread)
+            self._thread = None
         if self._job:
             _close(self._job)
             self._job = None
@@ -177,3 +197,82 @@ class WindowsJob:
 
     def __exit__(self, *_):
         self.close()
+
+
+def run_claimed(store, event: dict, argv: list[str], *, cwd: str | Path, env: dict[str, str],
+                lease_seconds: float, timeout: float, interval: float = 0.2) -> tuple[str, int | None]:
+    """Run a trusted process while renewing its EventStore lease.
+
+    A watchdog independently kills the job at a conservative local deadline even
+    if SQLite is blocked. Loss detected on renewal also kills the job. This is
+    not a sandbox and cannot retract an external call or prevent indirect process
+    creation; callers must not give the child publishing credentials. Results must
+    still be committed through EventStore.complete() using the original token.
+    Requires EventStore to validate lease time *after* acquiring its write lock.
+    """
+    if lease_seconds <= 0 or timeout <= 0 or interval <= 0 or interval * 4 >= lease_seconds:
+        raise ValueError("lease_seconds, timeout and interval must be positive; interval must be < lease/4")
+    started = time.monotonic()
+    if not store.renew(event, lease_seconds):
+        return "lease_lost", None
+    deadline = [started + lease_seconds - interval]
+    lock = threading.Lock()
+    stopped = threading.Event()
+    lost = threading.Event()
+    if time.monotonic() >= deadline[0]:
+        return "lease_lost", None
+
+    with WindowsJob(argv, cwd=cwd, env=env, suspended=True) as job:
+        def watch():
+            while not stopped.wait(min(interval, 0.05)):
+                with lock:
+                    if time.monotonic() < deadline[0]:
+                        continue
+                    lost.set()
+                    job.terminate()
+                    return
+
+        watcher = threading.Thread(target=watch, name="lease-watchdog", daemon=True)
+        watcher.start()
+        try:
+            with lock:
+                if time.monotonic() >= deadline[0]:
+                    lost.set()
+                else:
+                    job.resume()
+            end = started + timeout
+            next_renewal = time.monotonic() + interval
+            while not lost.is_set():
+                remaining = end - time.monotonic()
+                if remaining <= 0:
+                    job.terminate()
+                    return "timeout", None
+                code = job.wait(min(interval, remaining))
+                if code is not None:
+                    # Close the job before returning, including descendants left by root.
+                    job.terminate()
+                    renewed = store.renew(event, lease_seconds)
+                    with lock:
+                        if lost.is_set() or not renewed or time.monotonic() >= deadline[0]:
+                            lost.set()
+                            return "lease_lost", None
+                        # No watchdog expiry can race the final ownership decision.
+                        stopped.set()
+                    return "finished", code
+                if time.monotonic() >= next_renewal:
+                    renewal_start = time.monotonic()
+                    renewed = store.renew(event, lease_seconds)
+                    with lock:
+                        if not renewed or lost.is_set() or time.monotonic() >= deadline[0]:
+                            lost.set()
+                        else:
+                            deadline[0] = renewal_start + lease_seconds - interval
+                    if lost.is_set():
+                        job.terminate()
+                        break
+                    next_renewal = time.monotonic() + interval
+            job.terminate()
+            return "lease_lost", None
+        finally:
+            stopped.set()
+            watcher.join()
