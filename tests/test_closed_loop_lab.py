@@ -90,13 +90,17 @@ class FakeClaude:
 def verdict(kind: str, findings: list | None = None, excerpt: str | None = None, touch: str | None = None,
             tests: tuple = ("tests/test_lab_slug.py",)):
     def action(repo: Path, out: Path, pid: int) -> CliResult:
-        data = (repo / lab_mod.ARTIFACT).read_bytes()
-        line = excerpt or next(ln for ln in data.decode("utf-8").splitlines() if "re.sub" in ln or "return" in ln)
+        reviewed = []
+        for rel in (lab_mod.ARTIFACT, lab_mod.REVIEW_TEST_FILE):
+            if (repo / rel).is_file():
+                data = (repo / rel).read_bytes()
+                line = next(ln for ln in data.decode("utf-8").splitlines() if "re.sub" in ln or "return" in ln or "assert" in ln)
+                reviewed.append({"path": rel, "sha256": hashlib.sha256(data).hexdigest(),
+                                 "code_excerpt": excerpt if excerpt and rel == lab_mod.ARTIFACT else line})
         _, sha = lab_mod.git(["rev-parse", "HEAD"], repo)
         out.write_text(json.dumps({
             "pr": lab_mod.LAB_PR, "head_sha": sha, "verdict": kind, "findings": findings or [], "tests_reviewed": list(tests),
-            "confidence": "HIGH", "files_reviewed": [{"path": lab_mod.ARTIFACT, "sha256": hashlib.sha256(data).hexdigest(),
-                                                      "code_excerpt": line}]}), encoding="utf-8")
+            "confidence": "HIGH", "files_reviewed": reviewed}), encoding="utf-8")
         if touch:
             (repo / touch).write_text("alterado pelo revisor", encoding="utf-8")
         return CliResult(pid, 0, "", "", False)
@@ -200,6 +204,34 @@ def test_correction_prompt_carries_the_reviewer_findings_and_the_spec(env):
     assert FINDING["reason"] not in claude.calls[0]["prompt"]
     assert FINDING["reason"] in claude.calls[1]["prompt"]
     assert "isalnum" in claude.calls[1]["prompt"]
+
+
+def test_correction_may_add_a_regression_test_that_is_run_delivered_and_reviewed(env):
+    lab, store = env
+    regression = 'from lab_slug import slugify\n\n\ndef test_unicode_letters_are_kept():\n    assert slugify("Café") == "café"\n'
+    claude = FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX, extra={lab_mod.REVIEW_TEST_FILE: regression}))
+    both = (lab_mod.TEST_FILE, lab_mod.REVIEW_TEST_FILE)
+    codex = FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE", tests=both))
+
+    actions = drive(lab, store, claude, codex)
+
+    assert actions[-2:] == ["APPROVED", "TERMINAL"]
+    assert (lab.repo / lab_mod.REVIEW_TEST_FILE).read_text(encoding="utf-8") == regression
+    review = [e for e in store.events(lab_mod.JOB_ID) if e["event_type"] == "REVIEW_REQUESTED"][-1]
+    assert json.loads(review["result"])["evidence"]["selected"] == sorted(both)
+    assert lab_mod.REVIEW_TEST_FILE in claude.calls[1]["prompt"]
+
+
+def test_needs_human_verdict_escalates_once_and_never_approves(env):
+    lab, store = env
+    codex = FakeCodex(verdict("NEEDS_HUMAN"))
+    run(lab, store, FakeClaude(writes(UNICODE_FIX)), codex)
+
+    res = run(lab, store, FakeClaude(), codex)
+
+    assert res["action"] == "ESCALATED" and len(codex.calls) == 1
+    assert types(store)[-2:] == ["REVIEW_BLOCKED", "JOB_FAILED"]
+    assert run(lab, store, FakeClaude(), codex) == {"action": "TERMINAL", "state": "JOB_FAILED"}
 
 
 def test_is_error_true_with_exit_zero_is_a_failure_not_a_delivery(env):

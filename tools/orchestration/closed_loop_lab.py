@@ -9,10 +9,12 @@ D-060-04). Sem GitHub, sem `--execute`, sem credencial de publicacao: o unico "e
 laboratorio, feito SO pelo coordenador Python (FP-060 7.1).
 
 Fluxo, um evento por `step` (cada `step` do `drive` roda num processo novo: nenhum estado vive em memoria):
-  IMPLEMENT_REQUESTED|CORRECTION_REQUESTED -> Claude numa copia exportada (sem `.git`) -> manifesto: so `ARTIFACT` pode mudar ->
+  IMPLEMENT_REQUESTED|CORRECTION_REQUESTED -> Claude numa copia exportada (sem `.git`) -> manifesto: so `ALLOWED_CHANGES` muda ->
   testes pelo coordenador -> renova o lease (fencing) -> commit com trailer de idempotencia -> REVIEW_REQUESTED
+  (na correcao o executor tambem pode criar `REVIEW_TEST_FILE`: correcao sem teste que a prove nao e aprovavel pelo revisor)
   REVIEW_REQUESTED -> Codex read-only no HEAD exato -> parecer validado + prova de inspecao -> REVIEW_APPROVED + WORKFLOW_COMPLETED
                       | REVIEW_CHANGES_REQUESTED | REVIEW_BLOCKED (falha, auth, parecer sem prova: nunca aprovacao)
+                      | NEEDS_HUMAN -> REVIEW_BLOCKED + JOB_FAILED (escala sem repetir a mesma revisao)
   REVIEW_CHANGES_REQUESTED -> coordenador: CORRECTION_REQUESTED (com o historico de achados) ou JOB_FAILED no limite de rodadas
 
 Limites declarados: os testes rodam com env por allowlist, SEM sandbox de SO (`env_allowlist_only`; Job Object/AppContainer e
@@ -40,7 +42,8 @@ JOB_ID = "lab:slug"
 AGGREGATE = "lab_workflow"
 ARTIFACT = "lab_slug.py"
 TEST_FILE = "tests/test_lab_slug.py"
-ALLOWED_CHANGES = frozenset({ARTIFACT})
+REVIEW_TEST_FILE = "tests/test_lab_slug_review.py"   # testes de regressao DO EXECUTOR; os de aceitacao (TEST_FILE) sao imutaveis
+ALLOWED_CHANGES = frozenset({ARTIFACT, REVIEW_TEST_FILE})
 LAB_PR = 1                                   # identificador local do workflow: o contrato do parecer exige `pr` inteiro
 MAX_ROUNDS = 3
 CLAIM_LEASE_S = 20.0                         # curto: coordenador morto logo apos o claim e recuperado rapido
@@ -113,7 +116,9 @@ ACHADOS DE RODADAS ANTERIORES (ja resolvidos; nao regrida neles):
 {history}
 ESPECIFICACAO AUTORITATIVA:
 {spec}
-Os testes em {tests} precisam continuar passando. Regras: edite SOMENTE {artifact}; nenhum outro arquivo. Voce nao tem shell.
+Os testes em {tests} precisam continuar passando e voce NAO pode altera-los. Toda correcao de comportamento precisa de um teste
+que a prove: escreva-o em {review_tests} (pytest; `from lab_slug import slugify`), cobrindo cada achado desta revisao.
+Regras: edite SOMENTE {artifact} e {review_tests}; nenhum outro arquivo. Voce nao tem shell: o coordenador roda os testes.
 Ao final, responda com uma linha resumindo a mudanca."""
 
 RETRY_NOTE = "\nA tentativa anterior desta rodada foi recusada pelo coordenador:\n{error}"
@@ -351,7 +356,7 @@ def _implement_prompt(ev: dict) -> str:
         prompt = IMPLEMENT_PROMPT.format(tests=TEST_FILE, artifact=ARTIFACT)
     else:
         prompt = CORRECTION_PROMPT.format(
-            round=p["round"], artifact=ARTIFACT, sha=p["head_sha"], tests=TEST_FILE, spec=SPEC,
+            round=p["round"], artifact=ARTIFACT, sha=p["head_sha"], tests=TEST_FILE, review_tests=REVIEW_TEST_FILE, spec=SPEC,
             findings=json.dumps(history[-1]["findings"], ensure_ascii=False, indent=1),
             history=json.dumps(history[:-1], ensure_ascii=False, indent=1) if history[:-1] else "(nenhum)")
     if ev.get("error"):
@@ -383,19 +388,24 @@ def _implement(lab: Lab, store: EventStore, ev: dict, runner: Runner, claude_bin
             why = "credencial/login" if ex.is_credential_problem(result, res.stderr) else "is_error=true"
             raise LabError(f"claude devolveu erro ({why}): {ex.redact(str(result.get('result')))[:200]}")
         changed = _changed(before, _scan(wt))
-        if not changed:
-            raise LabError("claude nao alterou o artefato")
         outside = [c for c in changed if c not in ALLOWED_CHANGES]
         if outside:
             raise LabError("alteracao fora do escopo autorizado: " + ", ".join(outside[:5]))
+        if ARTIFACT not in changed:
+            raise LabError("claude nao alterou o artefato")
+        missing = [c for c in changed if not (wt / c).is_file()]
+        if missing:
+            raise LabError("arquivo autorizado foi apagado: " + ", ".join(missing))
         evidence = run_trusted_tests(lab, wt, changed)
         if evidence["tests_passed"] is not True:
             raise LabError("testes do coordenador falharam: " + evidence["summary"][-600:])
         meta = {"pid": res.pid, "session_id": result.get("session_id"), "num_turns": result.get("num_turns"),
                 "total_cost_usd": result.get("total_cost_usd")}
         _hold(store, ev)                                    # fencing: worker que perdeu o lease nao entrega
-        (lab.repo / ARTIFACT).write_bytes((wt / ARTIFACT).read_bytes())
-        _must(["add", "--", ARTIFACT], lab.repo)
+        for path in changed:
+            (lab.repo / path).parent.mkdir(parents=True, exist_ok=True)
+            (lab.repo / path).write_bytes((wt / path).read_bytes())
+        _must(["add", "--", *changed], lab.repo)
         _must(["commit", "-q", "-m", f"lab: rodada {rnd} ({ev['event_type']})\n\n{TRAILER}: {key}"], lab.repo)
         new = head(lab.repo)
     if evidence["tests_passed"] is not True:
@@ -447,8 +457,6 @@ def _review(lab: Lab, store: EventStore, ev: dict, runner: Runner, codex_bin: st
         cr.check_untouched(lab.repo, sha, "after_codex", run=git)
         v = cr.validate_verdict(out.read_text(encoding="utf-8"), LAB_PR, sha)
         cr.verify_inspection(v, pkg)
-        if v["verdict"] == "NEEDS_HUMAN":
-            raise cr.ReviewError("veredito NEEDS_HUMAN: o laboratorio nao tem humano; nunca vira aprovacao")
         if v["verdict"] == "APPROVE":
             gaps = cr.approval_gaps(v, evidence, pkg)
             if gaps:
@@ -458,6 +466,14 @@ def _review(lab: Lab, store: EventStore, ev: dict, runner: Runner, codex_bin: st
     except (cr.ReviewError, LabError) as exc:
         return _blocked(store, ev, str(exc))
     result = {"verdict": v, "evidence": evidence, "codex_pid": res.pid}
+    if v["verdict"] == "NEEDS_HUMAN":                       # parecer valido e deterministico: repetir nao muda nada; escala e para
+        why = "revisor respondeu NEEDS_HUMAN (falta evidencia que so um humano supre): escalado, nunca aprovado"
+        store.complete(ev, result, follow_ups=[
+            {"event_type": "REVIEW_BLOCKED", "idempotency_key": f"{JOB_ID}:review_blocked:e{ev['id']}:needs_human",
+             "payload": {"round": rnd, "head_sha": sha, "reason": why}},
+            {"event_type": "JOB_FAILED", "idempotency_key": f"{JOB_ID}:job_failed:needs_human",
+             "payload": {"reason": why, "head_sha": sha}}])
+        return {"action": "ESCALATED", "event": ev["id"], "round": rnd, "reason": why}
     if v["verdict"] == "APPROVE":
         store.complete(ev, result, follow_ups=[
             {"event_type": "REVIEW_APPROVED", "idempotency_key": f"{JOB_ID}:r{rnd}:approved:{sha[:16]}",
