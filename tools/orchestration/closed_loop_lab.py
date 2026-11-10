@@ -559,7 +559,7 @@ def report(lab: Lab, store: EventStore) -> dict:
         "survived_coordinator_restart": len(owners) >= 2,
     }
     return {
-        "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado", "lab": str(lab.root), "job_id": JOB_ID,
+        "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado", "lab": lab.root.name, "job_id": JOB_ID,
         "verdict": "PASS" if all(criteria.values()) else "FAIL", "criteria": criteria,
         "final_head": final, "approved_head": approved_head, "rounds": max((json.loads(e["payload"]).get("round", 0) for e in events), default=0),
         "coordinator_owners": owners,
@@ -568,8 +568,10 @@ def report(lab: Lab, store: EventStore) -> dict:
         "events": [{"id": e["id"], "type": e["event_type"], "status": e["status"], "attempt": e["attempt"],
                     "parent": e["parent_event_id"], "key": e["idempotency_key"], "error": e["error"]} for e in events],
         "runs": [{"id": r["id"], "event": r["event_id"], "agent": r["agent"], "pid": r["pid"], "exit_code": r["exit_code"],
-                  "timed_out": bool(r["timed_out"]), "binary": json.loads(r["argv"])[0], "seconds": round((r["ended_at"] or 0) - r["started_at"], 1),
-                  "stdout": r["stdout_path"]} for r in runs],
+                  "timed_out": bool(r["timed_out"]), "binary": Path(json.loads(r["argv"])[0]).name, "finished": r["ended_at"] is not None,
+                  "seconds": round(r["ended_at"] - r["started_at"], 1) if r["ended_at"] is not None else None,
+                  "stdout": Path(r["stdout_path"]).name} for r in runs],
+        "interrupted_runs": [r["id"] for r in runs if r["ended_at"] is None],
         "commits": _must(["log", "--reverse", "--format=%H %s"], lab.repo).splitlines(),
         "transitions": len(transitions),
         "limits": ["testes sem sandbox de SO (env_allowlist_only; FP-060 P2)", "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
@@ -582,12 +584,14 @@ def render_markdown(rep: dict) -> str:
              "| Criterio (derivado do SQLite/git) | Resultado |", "|---|---|"]
     lines += [f"| {k} | {'PASS' if v else 'FAIL'} |" for k, v in rep["criteria"].items()]
     lines += ["", "| Run | Evento | Agente | PID | Exit | s | Binario |", "|---|---|---|---|---|---|---|"]
-    lines += [f"| {r['id']} | {r['event']} | {r['agent']} | {r['pid']} | {r['exit_code']} | {r['seconds']} | `{r['binary']}` |" for r in rep["runs"]]
+    lines += [f"| {r['id']} | {r['event']} | {r['agent']} | {r['pid']} | {r['exit_code'] if r['finished'] else 'INTERROMPIDO'} | "
+              f"{r['seconds'] if r['finished'] else '-'} | `{r['binary']}` |" for r in rep["runs"]]
     lines += ["", "| # | Evento | Estado | Tentativas | Pai |", "|---|---|---|---|---|"]
     lines += [f"| {e['id']} | {e['type']} | {e['status']} | {e['attempt']} | {e['parent'] or ''} |" for e in rep["events"]]
     lines += ["", "Commits: " + "; ".join(f"`{c[:12]}` {c[41:]}" for c in rep["commits"]),
               "Coordenadores (processos distintos): " + ", ".join(rep["coordinator_owners"]),
               "Leases retomados: " + ("; ".join(rep["reclaims"]) or "nenhum"),
+              "Runs sem termino registrado (coordenador morreu com o CLI no ar): " + (", ".join(map(str, rep["interrupted_runs"])) or "nenhum"),
               "Reviews bloqueados: " + ("; ".join(rep["blocked_reviews"]) or "nenhum"), "", "Limites: " + "; ".join(rep["limits"]), ""]
     return "\n".join(lines)
 

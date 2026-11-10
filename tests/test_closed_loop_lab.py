@@ -437,6 +437,18 @@ def test_report_passes_only_when_every_m1_criterion_is_derived_from_the_store(en
     assert [r["pid"] for r in rep["runs"]] == [4000, 5000, 4001, 5001]
 
 
+def test_report_shows_a_run_without_recorded_end_as_interrupted(env):
+    lab, store = env
+    store.run_started(1, "codex", ["C:/bin/codex.exe", "exec"], lab.repo, 777, lab.logs / "o.txt", lab.logs / "e.txt")
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["interrupted_runs"] == [1]
+    assert rep["runs"][0]["finished"] is False and rep["runs"][0]["seconds"] is None
+    assert rep["runs"][0]["binary"] == "codex.exe" and rep["lab"] == "lab"
+    assert "INTERROMPIDO" in lab_mod.render_markdown(rep)
+
+
 def test_report_fails_m1_when_the_correction_loop_was_not_exercised(env):
     lab, store = env
     drive(lab, store, FakeClaude(writes(UNICODE_FIX)), FakeCodex(verdict("APPROVE")))
