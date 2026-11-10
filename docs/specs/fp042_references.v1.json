@@ -8769,6 +8769,48 @@
       "blob_sha": "1a35751374d4553be5e1afd27c24787d32e48ec3",
       "blob_size": 663,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-10_auth_faults/README.md",
+      "blob_sha": "f418faa2d5c0a197072a628de0c25c735948e075",
+      "blob_size": 3962,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-10_auth_faults/claude_auth/DRIVE_LOG.jsonl",
+      "blob_sha": "c7c671e970f6e4d85bcbcc1eb771276e531232c2",
+      "blob_size": 959,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-10_auth_faults/claude_auth/REPORT.json",
+      "blob_sha": "50726edc004e83c9fc84e5ce1dfc9fdbf50ce19b",
+      "blob_size": 2312,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-10_auth_faults/claude_auth/REPORT.md",
+      "blob_sha": "11ff2e1d47b6bfa79c5e7d976a62a5275a27c4a4",
+      "blob_size": 1539,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-10_auth_faults/codex_auth/DRIVE_LOG.jsonl",
+      "blob_sha": "9e9428e23e9634289a6757ccc484f204acaaea50",
+      "blob_size": 1233,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-10_auth_faults/codex_auth/REPORT.json",
+      "blob_sha": "60eabfed2af4b7ce2a90b069412901045c6131a4",
+      "blob_size": 4061,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-10_auth_faults/codex_auth/REPORT.md",
+      "blob_sha": "9a3c649da379eee957f06ebfb38d94be8c0afe40",
+      "blob_size": 2350,
+      "owner_group": "artifacts"
     }
   ]
 }
