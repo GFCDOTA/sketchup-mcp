@@ -1,0 +1,25 @@
+{
+  "pr": 1,
+  "head_sha": "02610d3040aff0cd79c2c1f25ba73a448e26249e",
+  "verdict": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "severity": "MEDIUM",
+      "file": "lab_slug.py",
+      "line": 8,
+      "reason": "A expressão regular mantém apenas letras ASCII e dígitos, violando R2 para caracteres alfanuméricos Unicode. Por exemplo, slugify(\"Café com Leite!\") retorna \"caf-com-leite\" em vez de \"café-com-leite\".",
+      "required_change": "Após aplicar str.lower(), use str.isalnum() para decidir quais caracteres manter e converta cada sequência máxima dos demais em um hífen. Acrescente testes para letras e dígitos Unicode."
+    }
+  ],
+  "tests_reviewed": [
+    "tests/test_lab_slug.py: test_lowercases, test_collapses_spaces_and_strips_ends, test_punctuation_becomes_a_single_hyphen, test_no_leading_or_trailing_hyphen, test_empty_input; execução do coordenador: 5 passaram."
+  ],
+  "confidence": "HIGH",
+  "files_reviewed": [
+    {
+      "path": "lab_slug.py",
+      "sha256": "007e659400a71d6bf63295d4fa00d3e592f479f625ffadf79281b67c070f72a0",
+      "code_excerpt": "    text = re.sub(r\"[^a-z0-9]+\", \"-\", text)"
+    }
+  ]
+}
