@@ -1,0 +1,1 @@
+{"pr":1,"head_sha":"7f7fdd7ae7f2858b8169ca4dfedef75ed2abd6bf","verdict":"NEEDS_HUMAN","findings":[],"tests_reviewed":["tests/test_lab_slug.py"],"confidence":"HIGH","files_reviewed":[{"path":"lab_slug.py","sha256":"e2ef89c1da20f8dcf3a3ea9d7082eaf52b647536ac441747650cf0be74bb2260","code_excerpt":"        if ch.isalnum():"}]}

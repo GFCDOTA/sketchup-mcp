@@ -1,0 +1,22 @@
+{"step": 1, "exit_code": 0, "at": "2026-11-09T19:58:10", "action": "DELIVERED", "event": 1, "round": 1, "head_sha": "81f09d62c334b9998bb9cd602b2842bf0a3a7ccf", "reconciled": false}
+{"step": 2, "exit_code": 86, "at": "2026-11-09T19:58:11", "action": "CRASHED", "stderr": ""}
+{"step": 3, "exit_code": 0, "at": "2026-11-09T19:58:11", "action": "IDLE"}
+{"step": 4, "exit_code": 0, "at": "2026-11-09T19:58:13", "action": "IDLE"}
+{"step": 5, "exit_code": 0, "at": "2026-11-09T19:58:15", "action": "IDLE"}
+{"step": 6, "exit_code": 0, "at": "2026-11-09T19:58:17", "action": "IDLE"}
+{"step": 7, "exit_code": 0, "at": "2026-11-09T19:58:19", "action": "IDLE"}
+{"step": 8, "exit_code": 0, "at": "2026-11-09T19:58:21", "action": "IDLE"}
+{"step": 9, "exit_code": 0, "at": "2026-11-09T19:58:24", "action": "IDLE"}
+{"step": 10, "exit_code": 0, "at": "2026-11-09T19:58:26", "action": "IDLE"}
+{"step": 11, "exit_code": 0, "at": "2026-11-09T19:58:28", "action": "IDLE"}
+{"step": 12, "exit_code": 0, "at": "2026-11-09T19:58:30", "action": "IDLE"}
+{"step": 13, "exit_code": 0, "at": "2026-11-09T19:59:01", "action": "CHANGES_REQUESTED", "event": 3, "round": 1, "findings": 1}
+{"step": 14, "exit_code": 0, "at": "2026-11-09T19:59:02", "action": "CORRECTION_DISPATCHED", "event": 4, "round": 2}
+{"step": 15, "exit_code": 0, "at": "2026-11-09T19:59:13", "action": "DELIVERED", "event": 5, "round": 2, "head_sha": "7f7fdd7ae7f2858b8169ca4dfedef75ed2abd6bf", "reconciled": false}
+{"step": 16, "exit_code": 0, "at": "2026-11-09T19:59:47", "action": "REVIEW_BLOCKED", "event": 7, "to": "PENDING", "reason": "veredito NEEDS_HUMAN: o laboratorio nao tem humano; nunca vira aprovacao"}
+{"step": 17, "exit_code": 0, "at": "2026-11-09T19:59:48", "action": "IDLE"}
+{"step": 18, "exit_code": 0, "at": "2026-11-09T20:00:20", "action": "REVIEW_BLOCKED", "event": 7, "to": "PENDING", "reason": "veredito NEEDS_HUMAN: o laboratorio nao tem humano; nunca vira aprovacao"}
+{"step": 19, "exit_code": 0, "at": "2026-11-09T20:00:20", "action": "IDLE"}
+{"step": 20, "exit_code": 0, "at": "2026-11-09T20:00:56", "action": "REVIEW_BLOCKED", "event": 7, "to": "DLQ", "reason": "veredito NEEDS_HUMAN: o laboratorio nao tem humano; nunca vira aprovacao"}
+{"step": 21, "exit_code": 0, "at": "2026-11-09T20:00:56", "action": "TERMINAL", "state": "JOB_FAILED"}
+{"step": 1, "exit_code": 0, "at": "2026-11-09T21:21:06", "action": "TERMINAL", "state": "JOB_FAILED"}
