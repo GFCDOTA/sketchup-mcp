@@ -28,6 +28,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -134,6 +135,15 @@ ESPECIFICACAO AUTORITATIVA (meca o codigo contra ELA, nao so contra os testes):
 {spec}
 Achado so para violacao de R1..R5 ou defeito real de execucao; item "fora de escopo" nao e achado. O arquivo de testes
 {tests} esta nesta worktree (somente leitura) e o resultado real da execucao dele esta no pacote abaixo."""
+
+
+# Identificadores de rede que os CLIs colam nas mensagens de erro (medido no 401 do Codex): nao explicam a causa e o sufixo do
+# cf-ray revela o ponto de presenca. Ficam fora do motivo gravado no evento, no log e no relatorio.
+_NETWORK_IDS = re.compile(r",?\s*(?:cf-ray|request id):\s*[\w-]+", re.IGNORECASE)
+
+
+def _public(text: str) -> str:
+    return _NETWORK_IDS.sub("", ex.redact(text or "")).strip()
 
 
 class LabError(Exception):
@@ -373,6 +383,7 @@ def terminal(store: EventStore) -> str | None:
 
 # -- handlers ---------------------------------------------------------------------------------------------------------------
 def _fail(store: EventStore, ev: dict, reason: str, action: str = "FAILED") -> dict:
+    reason = _public(reason)
     to = store.fail(ev, reason)
     return {"action": action, "event": ev["id"], "to": to, "reason": reason}
 
@@ -459,6 +470,7 @@ def _implement(lab: Lab, store: EventStore, ev: dict, runner: Runner, claude_bin
 
 
 def _blocked(store: EventStore, ev: dict, reason: str) -> dict:
+    reason = _public(reason)
     store.publish("REVIEW_BLOCKED", f"{JOB_ID}:review_blocked:e{ev['id']}:a{ev['attempt']}", JOB_ID,
                   {"round": ev["payload"]["round"], "head_sha": ev["payload"]["head_sha"], "reason": reason[:500]},
                   parent_event_id=ev["id"], aggregate_type=ev["aggregate_type"], producer="lab_coordinator")

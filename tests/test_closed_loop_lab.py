@@ -519,6 +519,20 @@ def test_negative_report_fails_when_the_faulted_cli_still_completes_work(env):
     assert rep["criteria"]["faulted_cli_never_completed_an_event"] is False
 
 
+def test_failure_reason_keeps_the_cause_but_drops_network_identifiers(env):
+    lab, store = env
+    noisy = ("ERROR: unexpected status 401 Unauthorized: Missing bearer or basic authentication in header, "
+             "url: https://api.openai.com/v1/responses, cf-ray: a58178ef494c82ee-GIG, request id: req_416029f472244cae96c7")
+    codex = FakeCodex(cli_failure(1, noisy))
+    run(lab, store, FakeClaude(writes(UNICODE_FIX)), codex)
+
+    res = run(lab, store, FakeClaude(), codex)
+
+    stored = json.dumps([res, lab_mod.report(lab, store)])
+    assert "401 Unauthorized" in res["reason"]
+    assert "cf-ray" not in stored and "a58178ef494c82ee" not in stored and "req_416029f4" not in stored
+
+
 def test_machine_readable_output_is_pure_ascii_whatever_the_console_encoding(capsys):
     payload = {"action": "FAILED", "reason": "Not logged in · Please run /login — não é sucesso �"}
 
