@@ -519,6 +519,15 @@ def test_negative_report_fails_when_the_faulted_cli_still_completes_work(env):
     assert rep["criteria"]["faulted_cli_never_completed_an_event"] is False
 
 
+def test_machine_readable_output_is_pure_ascii_whatever_the_console_encoding(capsys):
+    payload = {"action": "FAILED", "reason": "Not logged in · Please run /login — não é sucesso �"}
+
+    lab_mod._emit(payload)
+
+    line = capsys.readouterr().out.strip()
+    assert line.isascii() and json.loads(line) == payload
+
+
 def test_report_shows_a_run_without_recorded_end_as_interrupted(env):
     lab, store = env
     store.run_started(1, "codex", ["C:/bin/codex.exe", "exec"], lab.repo, 777, lab.logs / "o.txt", lab.logs / "e.txt")

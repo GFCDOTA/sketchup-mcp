@@ -652,6 +652,12 @@ def render_markdown(rep: dict) -> str:
 
 
 # -- CLI --------------------------------------------------------------------------------------------------------------------
+def _emit(obj: dict) -> None:
+    """Linha JSON so com ASCII: o `step` fala com o `drive` por pipe e o console do Windows e cp1252 — um caractere fora dele
+    (medido: o "·" de "Not logged in · Please run /login") derrubava o driver com UnicodeEncodeError."""
+    print(json.dumps(obj, ensure_ascii=True, default=str), flush=True)
+
+
 def _version(argv: list) -> str:
     try:
         r = subprocess.run([*argv, "--version"], capture_output=True, text=True, timeout=30, env=ex.child_env(),
@@ -682,18 +688,18 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
     pre = preflight()
     (lab.root / "PREFLIGHT.json").write_text(json.dumps(pre, indent=1), encoding="utf-8")
     if not pre["ok"]:
-        print(json.dumps({"action": "BLOCKED", "preflight": pre}))
+        _emit({"action": "BLOCKED", "preflight": pre})
         return 2
     store = EventStore(lab.db)
     if not lab.repo.exists():
-        print(json.dumps(seed(lab, store)))
+        _emit(seed(lab, store))
     crash_pending, idle_since = crash_on, None
     for n in range(1, max_steps + 1):
         argv = [sys.executable, "-m", "tools.orchestration.closed_loop_lab", "step", "--lab", str(lab.root)]
         if crash_pending:
             argv += ["--crash-on", crash_pending]
-        r = subprocess.run(argv, cwd=ex.repo_root(), env=fault_env(lab), capture_output=True, text=True, encoding="utf-8",
-                           errors="replace")
+        r = subprocess.run(argv, cwd=ex.repo_root(), env=fault_env(lab), capture_output=True, text=True, encoding="ascii",
+                           errors="backslashreplace")
         try:
             res = json.loads(r.stdout.strip().splitlines()[-1])
         except (ValueError, IndexError):
@@ -703,7 +709,7 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
         entry = {"step": n, "exit_code": r.returncode, "at": time.strftime("%Y-%m-%dT%H:%M:%S"), **res}
         with log.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
-        print(json.dumps(entry, ensure_ascii=False), flush=True)
+        _emit(entry)
         if res["action"] in ("TERMINAL", "PAUSED", "STEP_ERROR"):
             break
         if res["action"] == "IDLE":
@@ -716,7 +722,7 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
     rep = report(lab, store)
     (lab.root / "REPORT.json").write_text(json.dumps(rep, indent=1, ensure_ascii=False), encoding="utf-8")
     (lab.root / "REPORT.md").write_text(render_markdown(rep), encoding="utf-8")
-    print(json.dumps({"verdict": rep["verdict"], "criteria": rep["criteria"], "report": str(lab.root / "REPORT.md")}))
+    _emit({"verdict": rep["verdict"], "mode": rep["mode"], "criteria": rep["criteria"], "report": str(lab.root / "REPORT.md")})
     return 0 if rep["verdict"] == "PASS" else 1
 
 
@@ -748,7 +754,7 @@ def main(argv: list[str] | None = None) -> int:
             if ev["event_type"] == ns.crash_on and ev["attempt"] == 1:
                 os._exit(CRASH_EXIT)                                             # morte abrupta: sem finally, sem liberar lease
         res = step(lab, store, f"{OWNER_PREFIX}{os.getpid()}", on_claimed=crash if ns.crash_on else None)
-    print(json.dumps(res, ensure_ascii=False, default=str))
+    _emit(res)
     return 0
 
 
