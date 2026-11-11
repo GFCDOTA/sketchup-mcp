@@ -1,0 +1,80 @@
+{
+ "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado",
+ "lab": "run_20261111_control_observed",
+ "job_id": "lab:slug",
+ "mode": "closed_loop",
+ "failure_reasons": [],
+ "verdict": "FAIL",
+ "criteria": {
+  "claude_cli_observed": false,
+  "codex_cli_observed": false,
+  "request_changes_then_correction": false,
+  "approved_after_correction": false,
+  "approval_bound_to_final_head": false,
+  "workflow_completed": false,
+  "no_pending_or_running_event": false,
+  "one_delivery_per_implement_event": true,
+  "survived_coordinator_restart": false,
+  "finished_cli_runs_job_contained": false,
+  "orphan_cli_tree_dead_after_coordinator_kill": false
+ },
+ "final_head": "90fa6ead750a3d1be01bfd0944e11d8be429c56e",
+ "approved_head": null,
+ "rounds": 1,
+ "coordinator_owners": [
+  "lab-coordinator:9724"
+ ],
+ "reclaims": [],
+ "blocked_reviews": [],
+ "events": [
+  {
+   "id": 1,
+   "type": "IMPLEMENT_REQUESTED",
+   "status": "RUNNING",
+   "attempt": 1,
+   "parent": null,
+   "key": "lab:slug:r1:implement",
+   "error": null
+  }
+ ],
+ "runs": [
+  {
+   "id": 1,
+   "event": 1,
+   "agent": "claude",
+   "pid": 32688,
+   "exit_code": null,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": false,
+   "seconds": null,
+   "stdout": "claude_e001_a1.stdout.txt",
+   "containment": null
+  }
+ ],
+ "interrupted_runs": [
+  1
+ ],
+ "orphan_checks": [
+  {
+   "run": 1,
+   "agent": "claude",
+   "pid": 32688,
+   "grace_s": 2.0,
+   "alive": [
+    30848,
+    32688
+   ]
+  }
+ ],
+ "commits": [
+  "90fa6ead750a3d1be01bfd0944e11d8be429c56e lab: semente com defeito conhecido"
+ ],
+ "transitions": 2,
+ "limits": [
+  "testes sem sandbox de SO (env_allowlist_only; FP-060 P2)",
+  "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
+  "sem GitHub, sem --execute, sem outbox externo",
+  "Job Object nao e sandbox: so prende a vida da arvore do CLI ao coordenador e ao lease"
+ ]
+}
