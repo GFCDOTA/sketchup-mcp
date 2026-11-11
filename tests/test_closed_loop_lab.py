@@ -437,6 +437,111 @@ def test_report_passes_only_when_every_m1_criterion_is_derived_from_the_store(en
     assert [r["pid"] for r in rep["runs"]] == [4000, 5000, 4001, 5001]
 
 
+def not_logged_in(cwd: Path, pid: int) -> CliResult:
+    """Assinatura medida no Claude Code 2.1.158 sem login: exit 1, subtype success, is_error true."""
+    return CliResult(pid, 1, _result_line(True, "Not logged in · Please run /login"), "", False)
+
+
+def exhaust(lab, store, clock, claude, codex, tries=6):
+    out = []
+    for i in range(tries):
+        out.append(run(lab, store, claude, codex, owner=f"lab-coordinator:{i}")["action"])
+        clock.advance(2)
+    return out
+
+
+def test_real_claude_not_logged_in_signature_is_classified_as_credential_failure(env):
+    lab, store = env
+    res = run(lab, store, FakeClaude(not_logged_in), FakeCodex())
+
+    assert res["action"] == "FAILED" and "credencial" in res["reason"]
+    assert commits(lab) == 1 and store.runs()[0]["exit_code"] == 1
+
+
+def test_fault_env_points_only_the_faulted_cli_at_a_lab_owned_config_dir(tmp_path):
+    lab = Lab(tmp_path / "lab")
+    lab.root.mkdir()
+    lab_mod.declare_fault(lab, "claude-auth")
+
+    env_ = lab_mod.fault_env(lab, base={"PATH": "x", "CLAUDE_CONFIG_DIR": "real", "CODEX_HOME": "real"})
+
+    assert Path(env_["CLAUDE_CONFIG_DIR"]).parent.parent == lab.root and Path(env_["CLAUDE_CONFIG_DIR"]).is_dir()
+    assert env_["CODEX_HOME"] == "real" and env_["PATH"] == "x"
+    assert lab_mod.fault_env(Lab(tmp_path / "sem_falha"), base={"CODEX_HOME": "real"}) == {"CODEX_HOME": "real"}
+
+
+def test_declared_fault_cannot_change_when_a_lab_is_resumed(tmp_path):
+    lab = Lab(tmp_path / "lab")
+    lab.root.mkdir()
+    lab_mod.declare_fault(lab, "claude-auth")
+    lab_mod.declare_fault(lab, "claude-auth")
+
+    with pytest.raises(LabError, match="claude-auth"):
+        lab_mod.declare_fault(lab, "codex-auth")
+
+
+def test_negative_report_passes_when_claude_auth_failure_dead_letters_with_nothing_delivered(env, clock):
+    lab, store = env
+    lab_mod.declare_fault(lab, "claude-auth")
+    claude = FakeClaude(not_logged_in, not_logged_in, not_logged_in)
+
+    actions = exhaust(lab, store, clock, claude, FakeCodex())
+    rep = lab_mod.report(lab, store)
+
+    assert actions[:3] == ["FAILED"] * 3 and actions[-1] == "TERMINAL" and len(claude.calls) == 3
+    assert rep["mode"] == "negative:claude-auth" and rep["verdict"] == "PASS" and all(rep["criteria"].values())
+    assert len(rep["commits"]) == 1 and "credencial" in rep["failure_reasons"][0]
+    assert "negative:claude-auth" in lab_mod.render_markdown(rep)
+
+
+def test_negative_report_for_codex_auth_keeps_the_delivery_and_blocks_every_review(env, clock):
+    lab, store = env
+    lab_mod.declare_fault(lab, "codex-auth")
+    unauthorized = cli_failure(1, "ERROR: unexpected status 401 Unauthorized: Missing bearer or basic authentication in header")
+    codex = FakeCodex(unauthorized, unauthorized, unauthorized)
+
+    actions = exhaust(lab, store, clock, FakeClaude(writes(UNICODE_FIX)), codex)
+    rep = lab_mod.report(lab, store)
+
+    assert actions[:4] == ["DELIVERED", "REVIEW_BLOCKED", "REVIEW_BLOCKED", "REVIEW_BLOCKED"] and actions[-1] == "TERMINAL"
+    assert rep["verdict"] == "PASS" and len(rep["commits"]) == 2 and len(rep["blocked_reviews"]) == 3
+    assert types(store)[-1] == "JOB_FAILED" and "REVIEW_APPROVED" not in types(store)
+
+
+def test_negative_report_fails_when_the_faulted_cli_still_completes_work(env):
+    lab, store = env
+    lab_mod.declare_fault(lab, "claude-auth")
+    drive(lab, store, FakeClaude(writes(UNICODE_FIX)), FakeCodex(verdict("APPROVE")))
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["verdict"] == "FAIL"
+    assert rep["criteria"]["faulted_cli_never_completed_an_event"] is False
+
+
+def test_failure_reason_keeps_the_cause_but_drops_network_identifiers(env):
+    lab, store = env
+    noisy = ("ERROR: unexpected status 401 Unauthorized: Missing bearer or basic authentication in header, "
+             "url: https://api.openai.com/v1/responses, cf-ray: a58178ef494c82ee-GIG, request id: req_416029f472244cae96c7")
+    codex = FakeCodex(cli_failure(1, noisy))
+    run(lab, store, FakeClaude(writes(UNICODE_FIX)), codex)
+
+    res = run(lab, store, FakeClaude(), codex)
+
+    stored = json.dumps([res, lab_mod.report(lab, store)])
+    assert "401 Unauthorized" in res["reason"]
+    assert "cf-ray" not in stored and "a58178ef494c82ee" not in stored and "req_416029f4" not in stored
+
+
+def test_machine_readable_output_is_pure_ascii_whatever_the_console_encoding(capsys):
+    payload = {"action": "FAILED", "reason": "Not logged in · Please run /login — não é sucesso �"}
+
+    lab_mod._emit(payload)
+
+    line = capsys.readouterr().out.strip()
+    assert line.isascii() and json.loads(line) == payload
+
+
 def test_report_shows_a_run_without_recorded_end_as_interrupted(env):
     lab, store = env
     store.run_started(1, "codex", ["C:/bin/codex.exe", "exec"], lab.repo, 777, lab.logs / "o.txt", lab.logs / "e.txt")

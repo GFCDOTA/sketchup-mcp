@@ -1,0 +1,97 @@
+{
+ "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado",
+ "lab": "run_20261110_neg_claude_auth_2",
+ "job_id": "lab:slug",
+ "mode": "negative:claude-auth",
+ "failure_reasons": [
+  "claude devolveu erro (credencial/login, exit 1): Not logged in · Please run /login"
+ ],
+ "verdict": "PASS",
+ "criteria": {
+  "faulted_cli_really_started": true,
+  "faulted_cli_never_exited_zero": true,
+  "faulted_cli_never_completed_an_event": true,
+  "no_approval_or_completion": true,
+  "dead_lettered_with_job_failed": true,
+  "one_delivery_per_implement_event": true,
+  "no_pending_or_running_event": true
+ },
+ "final_head": "3908cfa64b7f8c78b81b480da6fa7daa68f4bc36",
+ "approved_head": null,
+ "rounds": 1,
+ "coordinator_owners": [
+  "lab-coordinator:33644",
+  "lab-coordinator:35480",
+  "lab-coordinator:8888"
+ ],
+ "reclaims": [],
+ "blocked_reviews": [],
+ "events": [
+  {
+   "id": 1,
+   "type": "IMPLEMENT_REQUESTED",
+   "status": "DLQ",
+   "attempt": 3,
+   "parent": null,
+   "key": "lab:slug:r1:implement",
+   "error": "claude devolveu erro (credencial/login, exit 1): Not logged in · Please run /login"
+  },
+  {
+   "id": 2,
+   "type": "JOB_FAILED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 1,
+   "key": "lab:slug:job_failed:dlq:1",
+   "error": null
+  }
+ ],
+ "runs": [
+  {
+   "id": 1,
+   "event": 1,
+   "agent": "claude",
+   "pid": 5692,
+   "exit_code": 1,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 0.8,
+   "stdout": "claude_e001_a1.stdout.txt"
+  },
+  {
+   "id": 2,
+   "event": 1,
+   "agent": "claude",
+   "pid": 21012,
+   "exit_code": 1,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 0.6,
+   "stdout": "claude_e001_a2.stdout.txt"
+  },
+  {
+   "id": 3,
+   "event": 1,
+   "agent": "claude",
+   "pid": 23888,
+   "exit_code": 1,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 0.7,
+   "stdout": "claude_e001_a3.stdout.txt"
+  }
+ ],
+ "interrupted_runs": [],
+ "commits": [
+  "3908cfa64b7f8c78b81b480da6fa7daa68f4bc36 lab: semente com defeito conhecido"
+ ],
+ "transitions": 7,
+ "limits": [
+  "testes sem sandbox de SO (env_allowlist_only; FP-060 P2)",
+  "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
+  "sem GitHub, sem --execute, sem outbox externo"
+ ]
+}

@@ -1,0 +1,7 @@
+{"step": 1, "exit_code": 0, "at": "2026-11-09T23:03:45", "action": "FAILED", "event": 1, "to": "PENDING", "reason": "claude devolveu erro (credencial/login, exit 1): Not logged in · Please run /login"}
+{"step": 2, "exit_code": 0, "at": "2026-11-09T23:03:46", "action": "IDLE"}
+{"step": 3, "exit_code": 0, "at": "2026-11-09T23:03:48", "action": "FAILED", "event": 1, "to": "PENDING", "reason": "claude devolveu erro (credencial/login, exit 1): Not logged in · Please run /login"}
+{"step": 4, "exit_code": 0, "at": "2026-11-09T23:03:49", "action": "IDLE"}
+{"step": 5, "exit_code": 0, "at": "2026-11-09T23:03:52", "action": "FAILED", "event": 1, "to": "DLQ", "reason": "claude devolveu erro (credencial/login, exit 1): Not logged in · Please run /login"}
+{"step": 6, "exit_code": 0, "at": "2026-11-09T23:03:52", "action": "TERMINAL", "state": "JOB_FAILED"}
+{"step": 1, "exit_code": 0, "at": "2026-11-10T00:45:14", "action": "TERMINAL", "state": "JOB_FAILED"}
