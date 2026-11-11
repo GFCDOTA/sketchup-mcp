@@ -223,9 +223,13 @@ class EventStore:
         )
 
     # -- consuming ----------------------------------------------------------
-    def claim(self, event_types, owner: str, lease_seconds: float) -> dict | None:
+    def claim(self, event_types, owner: str, lease_seconds: float,
+              *, job_id: str | None = None) -> dict | None:
         """Atomically claim the oldest eligible event (PENDING & available, or
-        RUNNING with an expired lease), excluding any live aggregate owner."""
+        RUNNING with an expired lease), excluding any live aggregate owner.
+
+        When *job_id* is given, the claim is scoped to that aggregate only —
+        events belonging to other jobs are never touched."""
         if lease_seconds <= 0:
             raise ValueError("lease_seconds must be positive")
         if isinstance(event_types, str):
@@ -248,14 +252,16 @@ class EventStore:
                 )
                 self._log(db, ev["id"], "RUNNING", "DLQ", owner, reason, now)
                 self._record_dlq_fact(db, ev, reason, now)
+            job_filter = " AND e.job_id=?" if job_id else ""
+            job_params = (job_id,) if job_id else ()
             job = db.execute(
-                f"""SELECT e.* FROM events e WHERE e.event_type IN ({marks}) AND e.attempt<e.max_attempts AND
+                f"""SELECT e.* FROM events e WHERE e.event_type IN ({marks}){job_filter} AND e.attempt<e.max_attempts AND
                     ((e.status='PENDING' AND e.available_at<=?) OR (e.status='RUNNING' AND e.lease_until<=?))
                     AND NOT EXISTS (SELECT 1 FROM events active
                         WHERE active.aggregate_type=e.aggregate_type AND active.job_id=e.job_id
                         AND active.id<>e.id AND active.status='RUNNING' AND active.lease_until>?)
                     ORDER BY e.id LIMIT 1""",
-                (*event_types, now, now, now),
+                (*event_types, *job_params, now, now, now),
             ).fetchone()
             if not job:
                 return None
@@ -267,6 +273,53 @@ class EventStore:
                 (owner, token, now + lease_seconds, now, job["id"]),
             )
             self._log(db, job["id"], job["status"], "RUNNING", owner, f"{detail}; attempt {job['attempt'] + 1}", now)
+            claimed = dict(db.execute("SELECT * FROM events WHERE id=?", (job["id"],)).fetchone())
+            claimed["payload"] = json.loads(claimed["payload"])
+            return claimed
+
+    def claim_by_id(self, event_id: int, owner: str, lease_seconds: float) -> dict | None:
+        """Atomically claim a *specific* event by its database ID.
+
+        Same guards as ``claim()``: the event must be eligible (PENDING with
+        available_at reached, or RUNNING with an expired lease), below its
+        max_attempts, and have no active aggregate sibling.  Returns the
+        claimed event dict or ``None`` when ineligible."""
+        if lease_seconds <= 0:
+            raise ValueError("lease_seconds must be positive")
+        with self._tx() as db:
+            now = self.clock()
+            expired = db.execute(
+                """SELECT * FROM events WHERE status='RUNNING' AND lease_until<=?
+                   AND attempt>=max_attempts""", (now,),
+            ).fetchall()
+            for ev in expired:
+                reason = "lease expired after final attempt"
+                db.execute(
+                    """UPDATE events SET status='DLQ', error=?, lease_owner=NULL,
+                       lease_token=NULL, lease_until=0, updated_at=? WHERE id=?""",
+                    (reason, now, ev["id"]),
+                )
+                self._log(db, ev["id"], "RUNNING", "DLQ", owner, reason, now)
+                self._record_dlq_fact(db, ev, reason, now)
+            job = db.execute(
+                """SELECT e.* FROM events e WHERE e.id=? AND e.attempt<e.max_attempts AND
+                    ((e.status='PENDING' AND e.available_at<=?) OR (e.status='RUNNING' AND e.lease_until<=?))
+                    AND NOT EXISTS (SELECT 1 FROM events active
+                        WHERE active.aggregate_type=e.aggregate_type AND active.job_id=e.job_id
+                        AND active.id<>e.id AND active.status='RUNNING' AND active.lease_until>?)""",
+                (event_id, now, now, now),
+            ).fetchone()
+            if not job:
+                return None
+            token = uuid.uuid4().hex
+            detail = "claimed" if job["status"] == "PENDING" else f"reclaimed expired lease of {job['lease_owner']}"
+            db.execute(
+                """UPDATE events SET status='RUNNING', attempt=attempt+1, lease_owner=?, lease_token=?,
+                   lease_until=?, updated_at=? WHERE id=?""",
+                (owner, token, now + lease_seconds, now, job["id"]),
+            )
+            self._log(db, job["id"], job["status"], "RUNNING", owner,
+                      f"{detail} (by id); attempt {job['attempt'] + 1}", now)
             claimed = dict(db.execute("SELECT * FROM events WHERE id=?", (job["id"],)).fetchone())
             claimed["payload"] = json.loads(claimed["payload"])
             return claimed

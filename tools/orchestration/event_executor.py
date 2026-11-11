@@ -676,13 +676,80 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
         hb.stop()
 
 
+def _get_store():
+    """Best-effort EventStore for shadow mode (SPEC §6.3 step 4)."""
+    try:
+        from tools.orchestration.store_factory import get_store
+        return get_store()
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _sync_result_to_store(store, item: dict, result: dict) -> None:
+    """After completing a JSON queue item, mirror the outcome to the EventStore.
+    Best-effort: never blocks the JSON path.  Claims the exact event by its
+    database ID (review finding #1) — no other event is ever touched."""
+    if store is None:
+        return
+    try:
+        from tools.orchestration.store_factory import _inc, _record_shadow_error
+        idem = f"review:{item.get('event_id', '').split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
+        job_id = f"pr:{item.get('pr', '')}"
+        events = [e for e in store.events(job_id=job_id) if e.get("idempotency_key") == idem]
+        if not events:
+            _inc("sync_skip")
+            return
+        ev = events[0]
+        if ev["status"] != "PENDING":
+            _inc("sync_skip")
+            return
+        action = result.get("action")
+        owner = f"sync:{uuid.uuid4().hex[:8]}"
+        claimed = store.claim_by_id(ev["id"], owner, 30.0)
+        if claimed is None:
+            _inc("sync_skip")
+            return
+        if action == "DONE":
+            store.complete(claimed, {"synced_from": "json_queue", "action": action,
+                                     "new_head": result.get("new_head", "")})
+        elif action in ("SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"):
+            store.supersede(claimed, result.get("reason", action)[:2000])
+        elif action in ("FAILED", "BLOCKED_WORKTREE", "BLOCKED_CLI", "BLOCKED_CREDENTIALS",
+                         "BLOCKED_REVIEW_FETCH", "LOST_LEASE"):
+            store.fail(claimed, result.get("reason", action)[:2000])
+        elif action == "DRY_RUN":
+            store.fail(claimed, "dry-run: executor did not run", retry_delay=0)
+        _inc("sync_ok")
+    except Exception as exc:  # noqa: BLE001
+        from tools.orchestration.store_factory import _inc, _record_shadow_error
+        _inc("sync_err")
+        _record_shadow_error(exc)
+
+
 def run_cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False, runner: Runner = default_runner,
               claude_bin: str = "claude", wt_prep=prepare_worktree, now: dt.datetime | None = None,
               python: str | None = None) -> dict:
-    """Poll do bridge (trava curta) + um item da fila (claim curto; o trabalho roda SEM a trava do arquivo)."""
-    counts = eb.run_cycle(gh, policy, repo=repo, now=now)
+    """Poll do bridge (trava curta) + um item da fila (claim curto; o trabalho roda SEM a trava do arquivo).
+    Shadow mode (SPEC §6.3): accepted events are dual-written to the EventStore;
+    execution results are synced back after completion."""
+    store = _get_store()
+    counts = eb.run_cycle(gh, policy, repo=repo, now=now, store=store)
     out = process_one(gh, policy, repo, execute, runner, claude_bin, wt_prep, now, python)
-    return {"poll": counts, **out, "reconcile": _reconcile_summary(gh, policy, repo, now)}
+    if out.get("item"):
+        with es.locked(eb.bridge_path()):
+            b = eb.load()
+            item = next((t for t in b["queue"] if t["key"] == out["item"]), None)
+        if item:
+            _sync_result_to_store(store, item, out)
+    shadow_diag = {}
+    if store:
+        try:
+            from tools.orchestration.store_factory import shadow_diagnostics
+            shadow_diag = shadow_diagnostics()
+        except Exception:  # noqa: BLE001
+            pass
+    return {"poll": counts, **out, "reconcile": _reconcile_summary(gh, policy, repo, now),
+            "store": "shadow" if store else "unavailable", "shadow_diagnostics": shadow_diag}
 
 
 def _reconcile_summary(gh: eb.Gh, policy: dict, repo: str, now: dt.datetime | None) -> dict:

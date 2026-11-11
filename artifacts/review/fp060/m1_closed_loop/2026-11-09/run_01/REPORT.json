@@ -1,0 +1,225 @@
+{
+ "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado",
+ "lab": "run_20261109_01",
+ "job_id": "lab:slug",
+ "verdict": "FAIL",
+ "criteria": {
+  "claude_cli_observed": true,
+  "codex_cli_observed": true,
+  "request_changes_then_correction": true,
+  "approved_after_correction": false,
+  "approval_bound_to_final_head": false,
+  "workflow_completed": false,
+  "no_pending_or_running_event": true,
+  "one_delivery_per_implement_event": true,
+  "survived_coordinator_restart": true
+ },
+ "final_head": "7f7fdd7ae7f2858b8169ca4dfedef75ed2abd6bf",
+ "approved_head": null,
+ "rounds": 2,
+ "coordinator_owners": [
+  "lab-coordinator:11920",
+  "lab-coordinator:23588",
+  "lab-coordinator:30808",
+  "lab-coordinator:36136",
+  "lab-coordinator:36352",
+  "lab-coordinator:37448",
+  "lab-coordinator:37544",
+  "lab-coordinator:38496"
+ ],
+ "reclaims": [
+  "reclaimed expired lease of lab-coordinator:36352; attempt 2"
+ ],
+ "blocked_reviews": [
+  "veredito NEEDS_HUMAN: o laboratorio nao tem humano; nunca vira aprovacao",
+  "veredito NEEDS_HUMAN: o laboratorio nao tem humano; nunca vira aprovacao",
+  "veredito NEEDS_HUMAN: o laboratorio nao tem humano; nunca vira aprovacao"
+ ],
+ "events": [
+  {
+   "id": 1,
+   "type": "IMPLEMENT_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": null,
+   "key": "lab:slug:r1:implement",
+   "error": null
+  },
+  {
+   "id": 2,
+   "type": "IMPLEMENT_COMPLETED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 1,
+   "key": "lab:slug:r1:implement_completed:81f09d62c334b999",
+   "error": null
+  },
+  {
+   "id": 3,
+   "type": "REVIEW_REQUESTED",
+   "status": "DONE",
+   "attempt": 2,
+   "parent": 1,
+   "key": "lab:slug:r1:review:81f09d62c334b999",
+   "error": null
+  },
+  {
+   "id": 4,
+   "type": "REVIEW_CHANGES_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": 3,
+   "key": "lab:slug:r1:changes_requested:81f09d62c334b999",
+   "error": null
+  },
+  {
+   "id": 5,
+   "type": "CORRECTION_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": 4,
+   "key": "lab:slug:r2:implement",
+   "error": null
+  },
+  {
+   "id": 6,
+   "type": "IMPLEMENT_COMPLETED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 5,
+   "key": "lab:slug:r2:implement_completed:7f7fdd7ae7f2858b",
+   "error": null
+  },
+  {
+   "id": 7,
+   "type": "REVIEW_REQUESTED",
+   "status": "DLQ",
+   "attempt": 3,
+   "parent": 5,
+   "key": "lab:slug:r2:review:7f7fdd7ae7f2858b",
+   "error": "veredito NEEDS_HUMAN: o laboratorio nao tem humano; nunca vira aprovacao"
+  },
+  {
+   "id": 8,
+   "type": "REVIEW_BLOCKED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 7,
+   "key": "lab:slug:review_blocked:e7:a1",
+   "error": null
+  },
+  {
+   "id": 9,
+   "type": "REVIEW_BLOCKED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 7,
+   "key": "lab:slug:review_blocked:e7:a2",
+   "error": null
+  },
+  {
+   "id": 10,
+   "type": "REVIEW_BLOCKED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 7,
+   "key": "lab:slug:review_blocked:e7:a3",
+   "error": null
+  },
+  {
+   "id": 11,
+   "type": "JOB_FAILED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 7,
+   "key": "lab:slug:job_failed:dlq:7",
+   "error": null
+  }
+ ],
+ "runs": [
+  {
+   "id": 1,
+   "event": 1,
+   "agent": "claude",
+   "pid": 27984,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 9.2,
+   "stdout": "claude_e001_a1.stdout.txt"
+  },
+  {
+   "id": 2,
+   "event": 3,
+   "agent": "codex",
+   "pid": 37328,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 26.0,
+   "stdout": "codex_e003_a2.stdout.txt"
+  },
+  {
+   "id": 3,
+   "event": 5,
+   "agent": "claude",
+   "pid": 1356,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 9.5,
+   "stdout": "claude_e005_a1.stdout.txt"
+  },
+  {
+   "id": 4,
+   "event": 7,
+   "agent": "codex",
+   "pid": 8856,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 32.4,
+   "stdout": "codex_e007_a1.stdout.txt"
+  },
+  {
+   "id": 5,
+   "event": 7,
+   "agent": "codex",
+   "pid": 35396,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 28.5,
+   "stdout": "codex_e007_a2.stdout.txt"
+  },
+  {
+   "id": 6,
+   "event": 7,
+   "agent": "codex",
+   "pid": 14824,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 31.6,
+   "stdout": "codex_e007_a3.stdout.txt"
+  }
+ ],
+ "interrupted_runs": [],
+ "commits": [
+  "e6836fcd65358ff325893a973783a82cbbd5f931 lab: semente com defeito conhecido",
+  "81f09d62c334b9998bb9cd602b2842bf0a3a7ccf lab: rodada 1 (IMPLEMENT_REQUESTED)",
+  "7f7fdd7ae7f2858b8169ca4dfedef75ed2abd6bf lab: rodada 2 (CORRECTION_REQUESTED)"
+ ],
+ "transitions": 25,
+ "limits": [
+  "testes sem sandbox de SO (env_allowlist_only; FP-060 P2)",
+  "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
+  "sem GitHub, sem --execute, sem outbox externo"
+ ]
+}

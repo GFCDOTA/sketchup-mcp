@@ -1,0 +1,193 @@
+{
+ "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado",
+ "lab": "run_20261109_02",
+ "job_id": "lab:slug",
+ "verdict": "PASS",
+ "criteria": {
+  "claude_cli_observed": true,
+  "codex_cli_observed": true,
+  "request_changes_then_correction": true,
+  "approved_after_correction": true,
+  "approval_bound_to_final_head": true,
+  "workflow_completed": true,
+  "no_pending_or_running_event": true,
+  "one_delivery_per_implement_event": true,
+  "survived_coordinator_restart": true
+ },
+ "final_head": "d414972da929d82dccf18c00fd6ecc8c7b0638f1",
+ "approved_head": "d414972da929d82dccf18c00fd6ecc8c7b0638f1",
+ "rounds": 2,
+ "coordinator_owners": [
+  "lab-coordinator:26496",
+  "lab-coordinator:28824",
+  "lab-coordinator:30804",
+  "lab-coordinator:33416",
+  "lab-coordinator:38008",
+  "lab-coordinator:38100",
+  "lab-coordinator:38556"
+ ],
+ "reclaims": [
+  "reclaimed expired lease of lab-coordinator:30804; attempt 2",
+  "reclaimed expired lease of lab-coordinator:38008; attempt 3"
+ ],
+ "blocked_reviews": [],
+ "events": [
+  {
+   "id": 1,
+   "type": "IMPLEMENT_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": null,
+   "key": "lab:slug:r1:implement",
+   "error": null
+  },
+  {
+   "id": 2,
+   "type": "IMPLEMENT_COMPLETED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 1,
+   "key": "lab:slug:r1:implement_completed:02610d3040aff0cd",
+   "error": null
+  },
+  {
+   "id": 3,
+   "type": "REVIEW_REQUESTED",
+   "status": "DONE",
+   "attempt": 3,
+   "parent": 1,
+   "key": "lab:slug:r1:review:02610d3040aff0cd",
+   "error": null
+  },
+  {
+   "id": 4,
+   "type": "REVIEW_CHANGES_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": 3,
+   "key": "lab:slug:r1:changes_requested:02610d3040aff0cd",
+   "error": null
+  },
+  {
+   "id": 5,
+   "type": "CORRECTION_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": 4,
+   "key": "lab:slug:r2:implement",
+   "error": null
+  },
+  {
+   "id": 6,
+   "type": "IMPLEMENT_COMPLETED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 5,
+   "key": "lab:slug:r2:implement_completed:d414972da929d82d",
+   "error": null
+  },
+  {
+   "id": 7,
+   "type": "REVIEW_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": 5,
+   "key": "lab:slug:r2:review:d414972da929d82d",
+   "error": null
+  },
+  {
+   "id": 8,
+   "type": "REVIEW_APPROVED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 7,
+   "key": "lab:slug:r2:approved:d414972da929d82d",
+   "error": null
+  },
+  {
+   "id": 9,
+   "type": "WORKFLOW_COMPLETED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 7,
+   "key": "lab:slug:workflow_completed",
+   "error": null
+  }
+ ],
+ "runs": [
+  {
+   "id": 1,
+   "event": 1,
+   "agent": "claude",
+   "pid": 7840,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 10.0,
+   "stdout": "claude_e001_a1.stdout.txt"
+  },
+  {
+   "id": 2,
+   "event": 3,
+   "agent": "codex",
+   "pid": 35444,
+   "exit_code": null,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": false,
+   "seconds": null,
+   "stdout": "codex_e003_a2.stdout.txt"
+  },
+  {
+   "id": 3,
+   "event": 3,
+   "agent": "codex",
+   "pid": 37956,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 52.2,
+   "stdout": "codex_e003_a3.stdout.txt"
+  },
+  {
+   "id": 4,
+   "event": 5,
+   "agent": "claude",
+   "pid": 7716,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 17.5,
+   "stdout": "claude_e005_a1.stdout.txt"
+  },
+  {
+   "id": 5,
+   "event": 7,
+   "agent": "codex",
+   "pid": 33776,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 29.8,
+   "stdout": "codex_e007_a1.stdout.txt"
+  }
+ ],
+ "interrupted_runs": [
+  2
+ ],
+ "commits": [
+  "369106ad8dfb8e63a1ddef13f04ff1d29c37c7f4 lab: semente com defeito conhecido",
+  "02610d3040aff0cd79c2c1f25ba73a448e26249e lab: rodada 1 (IMPLEMENT_REQUESTED)",
+  "d414972da929d82dccf18c00fd6ecc8c7b0638f1 lab: rodada 2 (CORRECTION_REQUESTED)"
+ ],
+ "transitions": 21,
+ "limits": [
+  "testes sem sandbox de SO (env_allowlist_only; FP-060 P2)",
+  "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
+  "sem GitHub, sem --execute, sem outbox externo"
+ ]
+}

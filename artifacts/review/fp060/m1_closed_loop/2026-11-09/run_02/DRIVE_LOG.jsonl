@@ -1,0 +1,18 @@
+{"step": 1, "exit_code": 0, "at": "2026-11-09T20:04:28", "action": "DELIVERED", "event": 1, "round": 1, "head_sha": "02610d3040aff0cd79c2c1f25ba73a448e26249e", "reconciled": false}
+{"step": 2, "exit_code": 86, "at": "2026-11-09T20:04:29", "action": "CRASHED", "stderr": ""}
+{"step": 3, "exit_code": 0, "at": "2026-11-09T20:04:29", "action": "IDLE"}
+{"step": 4, "exit_code": 0, "at": "2026-11-09T20:04:31", "action": "IDLE"}
+{"step": 5, "exit_code": 0, "at": "2026-11-09T20:04:33", "action": "IDLE"}
+{"step": 6, "exit_code": 0, "at": "2026-11-09T20:04:35", "action": "IDLE"}
+{"step": 7, "exit_code": 0, "at": "2026-11-09T20:04:37", "action": "IDLE"}
+{"step": 8, "exit_code": 0, "at": "2026-11-09T20:04:40", "action": "IDLE"}
+{"step": 9, "exit_code": 0, "at": "2026-11-09T20:04:42", "action": "IDLE"}
+{"step": 10, "exit_code": 0, "at": "2026-11-09T20:04:44", "action": "IDLE"}
+{"step": 11, "exit_code": 0, "at": "2026-11-09T20:04:46", "action": "IDLE"}
+{"step": 12, "exit_code": 0, "at": "2026-11-09T20:04:48", "action": "IDLE"}
+{"step": 1, "exit_code": 0, "at": "2026-11-09T21:13:47", "action": "CHANGES_REQUESTED", "event": 3, "round": 1, "findings": 1}
+{"step": 2, "exit_code": 0, "at": "2026-11-09T21:13:47", "action": "CORRECTION_DISPATCHED", "event": 4, "round": 2}
+{"step": 3, "exit_code": 0, "at": "2026-11-09T21:14:08", "action": "DELIVERED", "event": 5, "round": 2, "head_sha": "d414972da929d82dccf18c00fd6ecc8c7b0638f1", "reconciled": false}
+{"step": 4, "exit_code": 0, "at": "2026-11-09T21:14:41", "action": "APPROVED", "event": 7, "round": 2, "head_sha": "d414972da929d82dccf18c00fd6ecc8c7b0638f1"}
+{"step": 5, "exit_code": 0, "at": "2026-11-09T21:14:41", "action": "TERMINAL", "state": "WORKFLOW_COMPLETED"}
+{"step": 1, "exit_code": 0, "at": "2026-11-09T21:21:09", "action": "TERMINAL", "state": "WORKFLOW_COMPLETED"}

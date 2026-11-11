@@ -1,0 +1,23 @@
+{
+  "pr": 1,
+  "head_sha": "46502f957623310f683cb21e43da017f661cbcbf",
+  "verdict": "APPROVE",
+  "findings": [],
+  "tests_reviewed": [
+    "tests/test_lab_slug.py",
+    "tests/test_lab_slug_review.py"
+  ],
+  "confidence": "HIGH",
+  "files_reviewed": [
+    {
+      "path": "lab_slug.py",
+      "sha256": "24373b416ef39faa21d13cdccfef5ff236c5471b4549754faf42ba29074cb10a",
+      "code_excerpt": "        if ch.isalnum():"
+    },
+    {
+      "path": "tests/test_lab_slug_review.py",
+      "sha256": "b41764d98686f541626d07b91e1c47d4d56542c9400ab2532804c25fcb75e73e",
+      "code_excerpt": "    assert slugify(\"Café com Leite!\") == \"café-com-leite\""
+    }
+  ]
+}
