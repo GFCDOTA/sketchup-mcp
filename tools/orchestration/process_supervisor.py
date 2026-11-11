@@ -13,6 +13,7 @@ import threading
 import time
 from ctypes import wintypes
 from pathlib import Path
+from typing import Callable
 
 from tools.orchestration.appcontainer import AppContainerProfile
 
@@ -65,6 +66,11 @@ if os.name == "nt":
         _fields_ = [("process", _HANDLE), ("thread", _HANDLE),
                     ("pid", wintypes.DWORD), ("tid", wintypes.DWORD)]
 
+    class _SecurityAttributes(ctypes.Structure):
+        _fields_ = [("length", wintypes.DWORD), ("descriptor", ctypes.c_void_p), ("inherit", wintypes.BOOL)]
+
+    _INVALID_HANDLE = ctypes.c_void_p(-1).value
+
     def _bind(name, args, result):
         fn = getattr(_k32, name)
         fn.argtypes, fn.restype = args, result
@@ -86,24 +92,45 @@ if os.name == "nt":
     _exit_code = _bind("GetExitCodeProcess", [_HANDLE, ctypes.POINTER(wintypes.DWORD)], wintypes.BOOL)
     _terminate_job = _bind("TerminateJobObject", [_HANDLE, wintypes.UINT], wintypes.BOOL)
     _resume_thread = _bind("ResumeThread", [_HANDLE], wintypes.DWORD)
+    _create_file = _bind("CreateFileW", [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, ctypes.c_void_p,
+                                         wintypes.DWORD, wintypes.DWORD, _HANDLE], _HANDLE)
 
 
 def _error(action):
     return ProcessSupervisorError(f"{action}: Windows error {ctypes.get_last_error()}")
 
 
+def _open_std(path, *, write: bool, name: str):
+    """Inheritable handle for one standard stream: the given file, or the NUL device when no file is given.
+
+    stdin must already exist; stdout/stderr are created or truncated. Files, not pipes: nothing has to drain them, and
+    the bytes survive the supervisor.
+    """
+    security = _SecurityAttributes(ctypes.sizeof(_SecurityAttributes), None, True)
+    target = "NUL" if path is None else str(path)
+    access = 0x40000000 if write else 0x80000000            # GENERIC_WRITE / GENERIC_READ
+    creation = 2 if (write and path is not None) else 3     # CREATE_ALWAYS / OPEN_EXISTING
+    handle = _create_file(target, access, 0x1 | 0x2, ctypes.byref(security), creation, 0x80, None)
+    if not handle or handle == _INVALID_HANDLE:
+        raise _error(f"CreateFileW {name}")
+    return handle
+
+
 class WindowsJob:
     """Launch one trusted process already assigned to a kill-on-close Job Object.
 
     Closing this object kills the job tree, even after the root exits. A supervisor
-    crash closes its non-inheritable job handle. Child handles are never inherited.
+    crash closes its non-inheritable job handle. No handle is inherited, except the
+    three standard streams when any of stdin/stdout/stderr is given: those are files
+    opened here (NUL for the ones left out) and passed through an explicit handle list.
     No fallback launches an uncontained process when the job API is unavailable.
     An optional AppContainer profile adds a zero-capability token; by itself it
     does not establish safe workspace ACLs or authorize untrusted execution.
     """
 
     def __init__(self, argv: list[str], *, cwd: str | Path, env: dict[str, str], suspended: bool = False,
-                 profile: AppContainerProfile | None = None):
+                 profile: AppContainerProfile | None = None, stdin: str | Path | None = None,
+                 stdout: str | Path | None = None, stderr: str | Path | None = None):
         if os.name != "nt":
             raise ProcessSupervisorError("Windows Job Objects are required")
         if profile is not None and not isinstance(profile, AppContainerProfile):
@@ -122,13 +149,15 @@ class WindowsJob:
             raise _error("CreateJobObjectW")
         self._job = job
         attrs_initialized = False
+        redirect = any(stream is not None for stream in (stdin, stdout, stderr))
+        std: list = []
         try:
             limits = _ExtendedLimits()
             limits.BasicLimitInformation.LimitFlags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
             if not _set_job(job, 9, ctypes.byref(limits), ctypes.sizeof(limits)):
                 raise _error("SetInformationJobObject")
             size = _SIZE()
-            attribute_count = 2 if profile_sid is not None else 1
+            attribute_count = 1 + (profile_sid is not None) + redirect
             _init_attrs(None, attribute_count, 0, ctypes.byref(size))
             if not size.value:
                 raise _error("InitializeProcThreadAttributeList size")
@@ -147,13 +176,22 @@ class WindowsJob:
             startup = _StartupInfoEx()
             startup.startup.cb = ctypes.sizeof(startup)
             startup.attributes = ctypes.cast(attrs, ctypes.c_void_p)
+            if redirect:
+                for path, write, name in ((stdin, False, "stdin"), (stdout, True, "stdout"), (stderr, True, "stderr")):
+                    std.append(_open_std(path, write=write, name=name))
+                handle_list = (_HANDLE * 3)(*std)
+                # PROC_THREAD_ATTRIBUTE_HANDLE_LIST: only these three handles cross into the child.
+                if not _update_attrs(attrs, 0, 0x00020002, handle_list, ctypes.sizeof(handle_list), None, None):
+                    raise _error("UpdateProcThreadAttribute HANDLE_LIST")
+                startup.startup.dwFlags |= 0x00000100  # STARTF_USESTDHANDLES
+                startup.startup.hStdInput, startup.startup.hStdOutput, startup.startup.hStdError = std
             info = _ProcessInfo()
             command = ctypes.create_unicode_buffer(subprocess.list2cmdline(argv))
             block = ctypes.create_unicode_buffer("\0".join(f"{k}={v}" for k, v in sorted(env.items(), key=lambda x: x[0].upper())) + "\0\0")
             flags = 0x00080000 | 0x00000400 | 0x08000000  # EXTENDED_STARTUPINFO, UNICODE_ENV, NO_WINDOW
             if suspended:
                 flags |= 0x00000004  # CREATE_SUSPENDED
-            if not _create_process(argv[0], command, None, None, False, flags, block, str(cwd),
+            if not _create_process(argv[0], command, None, None, redirect, flags, block, str(cwd),
                                    ctypes.byref(startup), ctypes.byref(info)):
                 raise _error("CreateProcessW")
             self._process, self.pid = info.process, info.pid
@@ -165,6 +203,8 @@ class WindowsJob:
             self.close()
             raise
         finally:
+            for handle in std:
+                _close(handle)                 # the child keeps its own copies
             if attrs_initialized:
                 _delete_attrs(attrs)
 
@@ -218,7 +258,9 @@ class WindowsJob:
 
 def run_claimed(store, event: dict, argv: list[str], *, cwd: str | Path, env: dict[str, str],
                 lease_seconds: float, timeout: float, interval: float = 0.2,
-                profile: AppContainerProfile | None = None) -> tuple[str, int | None]:
+                profile: AppContainerProfile | None = None, stdin: str | Path | None = None,
+                stdout: str | Path | None = None, stderr: str | Path | None = None,
+                on_start: Callable[[int], None] | None = None) -> tuple[str, int | None]:
     """Run a trusted process while renewing its EventStore lease.
 
     A watchdog independently kills the job at a conservative local deadline even
@@ -229,6 +271,9 @@ def run_claimed(store, event: dict, argv: list[str], *, cwd: str | Path, env: di
     Requires EventStore to validate lease time *after* acquiring its write lock.
     A profile adds a zero-capability AppContainer, but does not verify ACLs,
     prevent every escape, or authorize execution of untrusted code.
+    stdin/stdout/stderr are files (see WindowsJob). on_start receives the root PID
+    while the process is still suspended, so an audit record exists before it runs;
+    if on_start raises, the process never runs.
     """
     if lease_seconds <= 0 or timeout <= 0 or interval <= 0 or interval * 4 >= lease_seconds:
         raise ValueError("lease_seconds, timeout and interval must be positive; interval must be < lease/4")
@@ -242,7 +287,11 @@ def run_claimed(store, event: dict, argv: list[str], *, cwd: str | Path, env: di
     if time.monotonic() >= deadline[0]:
         return "lease_lost", None
 
-    with WindowsJob(argv, cwd=cwd, env=env, suspended=True, profile=profile) as job:
+    with WindowsJob(argv, cwd=cwd, env=env, suspended=True, profile=profile, stdin=stdin, stdout=stdout,
+                    stderr=stderr) as job:
+        if on_start is not None:
+            on_start(job.pid)
+
         def watch():
             while not stopped.wait(min(interval, 0.05)):
                 with lock:

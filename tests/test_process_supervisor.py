@@ -249,3 +249,67 @@ def test_unsignalled_root_is_an_error_not_a_success(tmp_path, monkeypatch):
     with pytest.raises(ProcessSupervisorError, match="did not signal termination"):
         run_claimed(store, event, [sys.executable, "-c", "import time; time.sleep(60)"],
                     cwd=tmp_path, env=_env(), lease_seconds=2, timeout=.4, interval=.1)
+
+
+def test_stdio_files_feed_stdin_and_capture_stdout_and_stderr(tmp_path):
+    stdin, stdout, stderr = tmp_path / "in.txt", tmp_path / "out.txt", tmp_path / "err.txt"
+    stdin.write_text("ola mundo", encoding="utf-8")
+    code = "import sys; sys.stdout.write(sys.stdin.read().upper()); sys.stderr.write('erro'); raise SystemExit(3)"
+    with WindowsJob([sys.executable, "-c", code], cwd=tmp_path, env=_env(), stdin=stdin, stdout=stdout,
+                    stderr=stderr) as job:
+        assert job.wait(15) == 3
+    assert stdout.read_text(encoding="utf-8") == "OLA MUNDO"
+    assert stderr.read_text(encoding="utf-8") == "erro"
+
+
+def test_stdout_capture_alone_gives_the_child_an_empty_stdin(tmp_path):
+    stdout = tmp_path / "out.txt"
+    code = "import sys; sys.stdout.write(repr(sys.stdin.read()))"
+    with WindowsJob([sys.executable, "-c", code], cwd=tmp_path, env=_env(), stdout=stdout) as job:
+        assert job.wait(15) == 0
+    assert stdout.read_text(encoding="utf-8") == "''"
+
+
+def test_missing_stdin_file_never_launches_process(tmp_path):
+    marker = tmp_path / "launched"
+    script = f"from pathlib import Path; Path({str(marker)!r}).write_text('launched')"
+    with pytest.raises(ProcessSupervisorError, match="stdin"):
+        WindowsJob([sys.executable, "-c", script], cwd=tmp_path, env=_env(), stdin=tmp_path / "missing.txt")
+    time.sleep(0.5)
+    assert not marker.exists()
+
+
+def test_claimed_process_reports_its_pid_before_running_and_captures_output(tmp_path):
+    store = EventStore(tmp_path / "events.db")
+    store.publish("IMPLEMENT_REQUESTED", "key", "pr:7", {})
+    event = store.claim("IMPLEMENT_REQUESTED", "worker", 5)
+    stdout, seen = tmp_path / "out.txt", []
+
+    def started(pid):
+        seen.append((pid, stdout.exists() and stdout.read_text(encoding="utf-8")))
+
+    # The venv python.exe is a launcher that starts the real interpreter as a child (FP-060 D-060-05): the reported
+    # PID is the job root, not os.getpid() of the script, and the output below is written by that grandchild.
+    result = run_claimed(store, event, [sys.executable, "-c", "print('feito', end='')"],
+                         cwd=tmp_path, env=_env(), lease_seconds=5, timeout=15, interval=.1, stdout=stdout,
+                         on_start=started)
+    assert result == ("finished", 0)
+    assert len(seen) == 1 and seen[0][0] > 0 and seen[0][1] == ""
+    assert stdout.read_text(encoding="utf-8") == "feito"
+
+
+def test_on_start_failure_never_lets_the_process_run(tmp_path):
+    store = EventStore(tmp_path / "events.db")
+    store.publish("IMPLEMENT_REQUESTED", "key", "pr:7", {})
+    event = store.claim("IMPLEMENT_REQUESTED", "worker", 5)
+    marker = tmp_path / "launched"
+    script = f"from pathlib import Path; Path({str(marker)!r}).write_text('launched')"
+
+    def refuse(pid):
+        raise RuntimeError("audit store unavailable")
+
+    with pytest.raises(RuntimeError, match="audit store"):
+        run_claimed(store, event, [sys.executable, "-c", script], cwd=tmp_path, env=_env(), lease_seconds=5,
+                    timeout=15, interval=.1, on_start=refuse)
+    time.sleep(1.0)
+    assert not marker.exists()
