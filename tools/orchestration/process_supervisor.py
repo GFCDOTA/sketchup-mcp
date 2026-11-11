@@ -71,6 +71,15 @@ if os.name == "nt":
 
     _INVALID_HANDLE = ctypes.c_void_p(-1).value
 
+    class _ProcessEntry(ctypes.Structure):
+        _fields_ = [("size", wintypes.DWORD), ("usage", wintypes.DWORD), ("pid", wintypes.DWORD),
+                    ("heap", _SIZE), ("module", wintypes.DWORD), ("threads", wintypes.DWORD),
+                    ("parent", wintypes.DWORD), ("priority", ctypes.c_long), ("flags", wintypes.DWORD),
+                    ("exe", ctypes.c_wchar * 260)]
+
+    class _FileTime(ctypes.Structure):
+        _fields_ = [("low", wintypes.DWORD), ("high", wintypes.DWORD)]
+
     def _bind(name, args, result):
         fn = getattr(_k32, name)
         fn.argtypes, fn.restype = args, result
@@ -94,6 +103,11 @@ if os.name == "nt":
     _resume_thread = _bind("ResumeThread", [_HANDLE], wintypes.DWORD)
     _create_file = _bind("CreateFileW", [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, ctypes.c_void_p,
                                          wintypes.DWORD, wintypes.DWORD, _HANDLE], _HANDLE)
+    _snapshot = _bind("CreateToolhelp32Snapshot", [wintypes.DWORD, wintypes.DWORD], _HANDLE)
+    _process_first = _bind("Process32FirstW", [_HANDLE, ctypes.POINTER(_ProcessEntry)], wintypes.BOOL)
+    _process_next = _bind("Process32NextW", [_HANDLE, ctypes.POINTER(_ProcessEntry)], wintypes.BOOL)
+    _open_process = _bind("OpenProcess", [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD], _HANDLE)
+    _process_times = _bind("GetProcessTimes", [_HANDLE] + [ctypes.POINTER(_FileTime)] * 4, wintypes.BOOL)
 
 
 def _error(action):
@@ -114,6 +128,68 @@ def _open_std(path, *, write: bool, name: str):
     if not handle or handle == _INVALID_HANDLE:
         raise _error(f"CreateFileW {name}")
     return handle
+
+
+def _process_table() -> list[tuple[int, int]]:
+    """(pid, parent pid) of every live process, from one system snapshot."""
+    if os.name != "nt":
+        raise ProcessSupervisorError("Windows process snapshots are required")
+    snapshot = _snapshot(0x00000002, 0)                     # TH32CS_SNAPPROCESS
+    if not snapshot or snapshot == _INVALID_HANDLE:
+        raise _error("CreateToolhelp32Snapshot")
+    try:
+        entry = _ProcessEntry()
+        entry.size = ctypes.sizeof(entry)
+        table = []
+        more = _process_first(snapshot, ctypes.byref(entry))
+        while more:
+            table.append((entry.pid, entry.parent))
+            more = _process_next(snapshot, ctypes.byref(entry))
+        return table
+    finally:
+        _close(snapshot)
+
+
+def _creation_time(pid: int) -> float | None:
+    """Creation time (epoch seconds) of a live process; None when it cannot be read."""
+    handle = _open_process(0x1000, False, pid)              # PROCESS_QUERY_LIMITED_INFORMATION
+    if not handle:
+        return None
+    try:
+        created, exited, kernel, user = _FileTime(), _FileTime(), _FileTime(), _FileTime()
+        if not _process_times(handle, ctypes.byref(created), ctypes.byref(exited), ctypes.byref(kernel), ctypes.byref(user)):
+            return None
+        return ((created.high << 32) | created.low) / 1e7 - 11644473600.0
+    finally:
+        _close(handle)
+
+
+def tree_pids(root_pid: int, since: float | None = None) -> list[int]:
+    """Live PIDs of the tree rooted at root_pid (the root itself only while alive), sorted.
+
+    Observation only, for checking that nothing outlived a job. Windows keeps the parent PID of an orphan, so
+    descendants are found after the root died; for the same reason an old unrelated process can carry a stale
+    parent PID equal to root_pid. Pass since (epoch seconds, when the root was launched): descendants created
+    before it are ignored. A descendant whose creation time cannot be read is kept (reported alive).
+    """
+    children: dict[int, list[int]] = {}
+    alive = set()
+    for pid, parent in _process_table():
+        alive.add(pid)
+        children.setdefault(parent, []).append(pid)
+    found, queue = set(), [root_pid]
+    while queue:
+        for child in children.get(queue.pop(), []):
+            if child in found or child == root_pid:
+                continue
+            created = _creation_time(child) if since is not None else None
+            if since is not None and created is not None and created < since - 1.0:
+                continue
+            found.add(child)
+            queue.append(child)
+    if root_pid in alive:
+        found.add(root_pid)
+    return sorted(found)
 
 
 class WindowsJob:

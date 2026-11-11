@@ -313,3 +313,27 @@ def test_on_start_failure_never_lets_the_process_run(tmp_path):
                     timeout=15, interval=.1, on_start=refuse)
     time.sleep(1.0)
     assert not marker.exists()
+
+
+def test_tree_pids_lists_live_descendants_and_empties_once_the_job_is_terminated(tmp_path):
+    root, ready, _effect = _tree_script(tmp_path)
+    since = time.time()
+    with WindowsJob([sys.executable, str(root)], cwd=tmp_path, env=_env()) as job:
+        _wait_file(ready)
+        alive = process_supervisor.tree_pids(job.pid, since=since)
+        assert job.pid in alive and len(alive) >= 2
+        job.terminate()
+        assert job.wait(10) is not None
+        deadline = time.monotonic() + 10
+        while process_supervisor.tree_pids(job.pid, since=since) and time.monotonic() < deadline:
+            time.sleep(0.1)
+        assert process_supervisor.tree_pids(job.pid, since=since) == []
+
+
+def test_tree_pids_finds_orphans_of_a_dead_root_but_not_processes_older_than_it(monkeypatch):
+    # 10 is the dead root. 11 was started by it; 12 only carries a stale parent PID from an older, unrelated process.
+    monkeypatch.setattr(process_supervisor, "_process_table", lambda: [(11, 10), (12, 10), (13, 11), (99, 1)])
+    monkeypatch.setattr(process_supervisor, "_creation_time", lambda pid: {11: 105.0, 12: 40.0, 13: 106.0}.get(pid))
+
+    assert process_supervisor.tree_pids(10, since=100.0) == [11, 13]
+    assert process_supervisor.tree_pids(10) == [11, 12, 13]
