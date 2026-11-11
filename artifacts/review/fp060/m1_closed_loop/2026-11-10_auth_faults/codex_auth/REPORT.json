@@ -1,0 +1,160 @@
+{
+ "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado",
+ "lab": "run_20261110_neg_codex_auth_2",
+ "job_id": "lab:slug",
+ "mode": "negative:codex-auth",
+ "failure_reasons": [
+  "auth/limite de uso: cted status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses"
+ ],
+ "verdict": "PASS",
+ "criteria": {
+  "faulted_cli_really_started": true,
+  "faulted_cli_never_exited_zero": true,
+  "faulted_cli_never_completed_an_event": true,
+  "no_approval_or_completion": true,
+  "dead_lettered_with_job_failed": true,
+  "one_delivery_per_implement_event": true,
+  "no_pending_or_running_event": true
+ },
+ "final_head": "a8697a9cc9668a2eb22b1bd7f0c513ee6ea1ef02",
+ "approved_head": null,
+ "rounds": 1,
+ "coordinator_owners": [
+  "lab-coordinator:29904",
+  "lab-coordinator:32836",
+  "lab-coordinator:34476",
+  "lab-coordinator:34548"
+ ],
+ "reclaims": [],
+ "blocked_reviews": [
+  "auth/limite de uso: cted status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses",
+  "auth/limite de uso: cted status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses",
+  "auth/limite de uso: cted status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses"
+ ],
+ "events": [
+  {
+   "id": 1,
+   "type": "IMPLEMENT_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": null,
+   "key": "lab:slug:r1:implement",
+   "error": null
+  },
+  {
+   "id": 2,
+   "type": "IMPLEMENT_COMPLETED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 1,
+   "key": "lab:slug:r1:implement_completed:a8697a9cc9668a2e",
+   "error": null
+  },
+  {
+   "id": 3,
+   "type": "REVIEW_REQUESTED",
+   "status": "DLQ",
+   "attempt": 3,
+   "parent": 1,
+   "key": "lab:slug:r1:review:a8697a9cc9668a2e",
+   "error": "auth/limite de uso: cted status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses"
+  },
+  {
+   "id": 4,
+   "type": "REVIEW_BLOCKED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 3,
+   "key": "lab:slug:review_blocked:e3:a1",
+   "error": null
+  },
+  {
+   "id": 5,
+   "type": "REVIEW_BLOCKED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 3,
+   "key": "lab:slug:review_blocked:e3:a2",
+   "error": null
+  },
+  {
+   "id": 6,
+   "type": "REVIEW_BLOCKED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 3,
+   "key": "lab:slug:review_blocked:e3:a3",
+   "error": null
+  },
+  {
+   "id": 7,
+   "type": "JOB_FAILED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 3,
+   "key": "lab:slug:job_failed:dlq:3",
+   "error": null
+  }
+ ],
+ "runs": [
+  {
+   "id": 1,
+   "event": 1,
+   "agent": "claude",
+   "pid": 32044,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 8.7,
+   "stdout": "claude_e001_a1.stdout.txt"
+  },
+  {
+   "id": 2,
+   "event": 3,
+   "agent": "codex",
+   "pid": 12628,
+   "exit_code": 1,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 15.0,
+   "stdout": "codex_e003_a1.stdout.txt"
+  },
+  {
+   "id": 3,
+   "event": 3,
+   "agent": "codex",
+   "pid": 38180,
+   "exit_code": 1,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 13.8,
+   "stdout": "codex_e003_a2.stdout.txt"
+  },
+  {
+   "id": 4,
+   "event": 3,
+   "agent": "codex",
+   "pid": 9404,
+   "exit_code": 1,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 13.5,
+   "stdout": "codex_e003_a3.stdout.txt"
+  }
+ ],
+ "interrupted_runs": [],
+ "commits": [
+  "6e892ccfa6e32808999cc7643546a058cb9804c8 lab: semente com defeito conhecido",
+  "a8697a9cc9668a2eb22b1bd7f0c513ee6ea1ef02 lab: rodada 1 (IMPLEMENT_REQUESTED)"
+ ],
+ "transitions": 14,
+ "limits": [
+  "testes sem sandbox de SO (env_allowlist_only; FP-060 P2)",
+  "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
+  "sem GitHub, sem --execute, sem outbox externo"
+ ]
+}

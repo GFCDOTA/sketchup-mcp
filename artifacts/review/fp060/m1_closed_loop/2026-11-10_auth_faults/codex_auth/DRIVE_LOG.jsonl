@@ -1,0 +1,7 @@
+{"step": 1, "exit_code": 0, "at": "2026-11-10T00:44:12", "action": "DELIVERED", "event": 1, "round": 1, "head_sha": "a8697a9cc9668a2eb22b1bd7f0c513ee6ea1ef02", "reconciled": false}
+{"step": 2, "exit_code": 0, "at": "2026-11-10T00:44:28", "action": "REVIEW_BLOCKED", "event": 3, "to": "PENDING", "reason": "auth/limite de uso: cted status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses"}
+{"step": 3, "exit_code": 0, "at": "2026-11-10T00:44:28", "action": "IDLE"}
+{"step": 4, "exit_code": 0, "at": "2026-11-10T00:44:45", "action": "REVIEW_BLOCKED", "event": 3, "to": "PENDING", "reason": "auth/limite de uso: cted status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses"}
+{"step": 5, "exit_code": 0, "at": "2026-11-10T00:44:45", "action": "IDLE"}
+{"step": 6, "exit_code": 0, "at": "2026-11-10T00:45:02", "action": "REVIEW_BLOCKED", "event": 3, "to": "DLQ", "reason": "auth/limite de uso: cted status 401 Unauthorized: Missing bearer or basic authentication in header, url: https://api.openai.com/v1/responses"}
+{"step": 7, "exit_code": 0, "at": "2026-11-10T00:45:02", "action": "TERMINAL", "state": "JOB_FAILED"}

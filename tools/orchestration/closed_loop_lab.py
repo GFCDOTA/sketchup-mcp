@@ -1,6 +1,7 @@
 """closed_loop_lab.py — laboratorio ISOLADO do closed-loop minimo Claude Code CLI <-> Codex CLI (FP-060-A01 M1, Issue #606).
 
     python -m tools.orchestration.closed_loop_lab drive --lab <dir fora de qualquer repositorio git> [--crash-on REVIEW_REQUESTED]
+    python -m tools.orchestration.closed_loop_lab drive --lab <dir novo> --fault claude-auth|codex-auth     # prova negativa
 
 NAO e um orquestrador novo nem toca producao: liga, num repositorio git descartavel, os contratos que ja existem —
 `event_store.EventStore` (claim/lease/fencing/idempotencia), `codex_reviewer` (comando read-only, pacote imutavel, validacao do
@@ -27,6 +28,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -55,6 +57,10 @@ OWNER_PREFIX = "lab-coordinator:"
 TRAILER = "Lab-Idempotency-Key"
 CONSUMED = ("IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED", "REVIEW_REQUESTED", "REVIEW_CHANGES_REQUESTED")
 CRASH_EXIT = 86
+# Falha de autenticacao INJETADA: o filho do CLI indicado recebe um diretorio de config do laboratorio, sem login. Nenhuma
+# credencial real e lida, copiada ou alterada; so a variavel de ambiente do processo filho muda.
+FAULTS = {"claude-auth": ("claude", "CLAUDE_CONFIG_DIR"), "codex-auth": ("codex", "CODEX_HOME")}
+AGENT_EVENTS = {"claude": ("IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED"), "codex": ("REVIEW_REQUESTED",)}
 
 SPEC = """slugify(text: str) -> str
 R1. Converta o texto para minusculas com str.lower().
@@ -131,6 +137,15 @@ Achado so para violacao de R1..R5 ou defeito real de execucao; item "fora de esc
 {tests} esta nesta worktree (somente leitura) e o resultado real da execucao dele esta no pacote abaixo."""
 
 
+# Identificadores de rede que os CLIs colam nas mensagens de erro (medido no 401 do Codex): nao explicam a causa e o sufixo do
+# cf-ray revela o ponto de presenca. Ficam fora do motivo gravado no evento, no log e no relatorio.
+_NETWORK_IDS = re.compile(r",?\s*(?:cf-ray|request id):\s*[\w-]+", re.IGNORECASE)
+
+
+def _public(text: str) -> str:
+    return _NETWORK_IDS.sub("", ex.redact(text or "")).strip()
+
+
 class LabError(Exception):
     """Falha do laboratorio: vira falha do evento (retry/DLQ), nunca entrega."""
 
@@ -173,6 +188,10 @@ class Lab:
     @property
     def pytest_ini(self) -> Path:
         return self.root / "pytest_trusted.ini"
+
+    @property
+    def fault_file(self) -> Path:
+        return self.root / "FAULT.json"
 
 
 # -- git do coordenador (config global/sistema vazias: sem hook, assinatura ou credencial do usuario) -------------------------
@@ -305,6 +324,35 @@ def claude_command(claude_bin: str) -> list:
             "--no-session-persistence", "--setting-sources", "", "--strict-mcp-config"]
 
 
+# -- falha injetada (prova negativa com CLI real) ------------------------------------------------------------------------------
+def declared_fault(lab: Lab) -> str | None:
+    if not lab.fault_file.exists():
+        return None
+    return json.loads(lab.fault_file.read_text(encoding="utf-8"))["fault"]
+
+
+def declare_fault(lab: Lab, fault: str) -> None:
+    """Grava a falha do laboratorio UMA vez: retomar com outra falha (ou trocar no meio) invalidaria a prova."""
+    if fault not in FAULTS:
+        raise LabError(f"falha desconhecida: {fault!r}")
+    current = declared_fault(lab)
+    if current is not None and current != fault:
+        raise LabError(f"laboratorio ja declarado com a falha {current!r}: nao troco para {fault!r}")
+    agent = FAULTS[fault][0]
+    (lab.root / "fault" / f"{agent}_config").mkdir(parents=True, exist_ok=True)
+    lab.fault_file.write_text(json.dumps({"fault": fault, "agent": agent, "env": FAULTS[fault][1]}), encoding="utf-8")
+
+
+def fault_env(lab: Lab, base: dict | None = None) -> dict:
+    """Ambiente dos `step`: igual ao do processo, com a variavel de config do CLI em falha apontando para o laboratorio."""
+    env = dict(os.environ if base is None else base)
+    fault = declared_fault(lab)
+    if fault:
+        agent, var = FAULTS[fault]
+        env[var] = str(lab.root / "fault" / f"{agent}_config")
+    return env
+
+
 # -- semente ----------------------------------------------------------------------------------------------------------------
 def seed(lab: Lab, store: EventStore) -> dict:
     ensure_isolated(lab.root)
@@ -335,6 +383,7 @@ def terminal(store: EventStore) -> str | None:
 
 # -- handlers ---------------------------------------------------------------------------------------------------------------
 def _fail(store: EventStore, ev: dict, reason: str, action: str = "FAILED") -> dict:
+    reason = _public(reason)
     to = store.fail(ev, reason)
     return {"action": action, "event": ev["id"], "to": to, "reason": reason}
 
@@ -382,11 +431,11 @@ def _implement(lab: Lab, store: EventStore, ev: dict, runner: Runner, claude_bin
         if res.timed_out:
             raise LabError(f"claude excedeu {CLI_TIMEOUT_S}s")
         result = ex.parse_result(res.stdout)
+        if result.get("is_error"):                          # D-060-04: subtype success NAO e sucesso, com exit 0 ou nao
+            why = "credencial/login" if ex.is_credential_problem(result, res.stderr) else "is_error=true"
+            raise LabError(f"claude devolveu erro ({why}, exit {res.exit_code}): {ex.redact(str(result.get('result')))[:200]}")
         if res.exit_code != 0 or not result:
             raise LabError(f"claude saiu com codigo {res.exit_code} sem resultado valido: {ex.redact(res.stderr)[-200:]}")
-        if result.get("is_error"):                          # D-060-04: exit 0 + subtype success NAO e sucesso
-            why = "credencial/login" if ex.is_credential_problem(result, res.stderr) else "is_error=true"
-            raise LabError(f"claude devolveu erro ({why}): {ex.redact(str(result.get('result')))[:200]}")
         changed = _changed(before, _scan(wt))
         outside = [c for c in changed if c not in ALLOWED_CHANGES]
         if outside:
@@ -421,6 +470,7 @@ def _implement(lab: Lab, store: EventStore, ev: dict, runner: Runner, claude_bin
 
 
 def _blocked(store: EventStore, ev: dict, reason: str) -> dict:
+    reason = _public(reason)
     store.publish("REVIEW_BLOCKED", f"{JOB_ID}:review_blocked:e{ev['id']}:a{ev['attempt']}", JOB_ID,
                   {"round": ev["payload"]["round"], "head_sha": ev["payload"]["head_sha"], "reason": reason[:500]},
                   parent_event_id=ev["id"], aggregate_type=ev["aggregate_type"], producer="lab_coordinator")
@@ -547,7 +597,19 @@ def report(lab: Lab, store: EventStore) -> dict:
     delivered = [e for e in events if e["event_type"] in ("IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED") and e["status"] == "DONE"]
     owners = sorted({t["actor"] for t in transitions if (t["actor"] or "").startswith(OWNER_PREFIX)})
     clean = git(["status", "--porcelain"], lab.repo) == (0, "")
-    criteria = {
+    fault = declared_fault(lab)
+    consumed = [e for e in events if fault and e["event_type"] in AGENT_EVENTS[FAULTS[fault][0]]]
+    faulted_runs = [r for r in runs if fault and r["agent"] == FAULTS[fault][0]]
+    negative = {
+        "faulted_cli_really_started": bool(faulted_runs) and all((r["pid"] or 0) > 0 and r["ended_at"] is not None for r in faulted_runs),
+        "faulted_cli_never_exited_zero": bool(faulted_runs) and all(r["exit_code"] != 0 for r in faulted_runs),
+        "faulted_cli_never_completed_an_event": bool(consumed) and all(e["status"] != "DONE" for e in consumed),
+        "no_approval_or_completion": not approved and not of("WORKFLOW_COMPLETED"),
+        "dead_lettered_with_job_failed": any(e["status"] == "DLQ" for e in consumed) and bool(of("JOB_FAILED")),
+        "one_delivery_per_implement_event": len(keys) == len(set(keys)) == len(delivered),
+        "no_pending_or_running_event": all(e["status"] not in ("PENDING", "RUNNING") for e in events),
+    }
+    criteria = negative if fault else {
         "claude_cli_observed": bool(observed("claude")),
         "codex_cli_observed": bool(observed("codex")),
         "request_changes_then_correction": bool(of("REVIEW_CHANGES_REQUESTED") and corrections),
@@ -560,6 +622,8 @@ def report(lab: Lab, store: EventStore) -> dict:
     }
     return {
         "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado", "lab": lab.root.name, "job_id": JOB_ID,
+        "mode": f"negative:{fault}" if fault else "closed_loop",
+        "failure_reasons": [e["error"] for e in events if e["error"]],
         "verdict": "PASS" if all(criteria.values()) else "FAIL", "criteria": criteria,
         "final_head": final, "approved_head": approved_head, "rounds": max((json.loads(e["payload"]).get("round", 0) for e in events), default=0),
         "coordinator_owners": owners,
@@ -580,7 +644,8 @@ def report(lab: Lab, store: EventStore) -> dict:
 
 
 def render_markdown(rep: dict) -> str:
-    lines = [f"# {rep['title']}", "", f"**Veredito: {rep['verdict']}** · lab `{rep['lab']}` · HEAD final `{rep['final_head']}`", "",
+    lines = [f"# {rep['title']}", "",
+             f"**Veredito: {rep['verdict']}** · modo `{rep['mode']}` · lab `{rep['lab']}` · HEAD final `{rep['final_head']}`", "",
              "| Criterio (derivado do SQLite/git) | Resultado |", "|---|---|"]
     lines += [f"| {k} | {'PASS' if v else 'FAIL'} |" for k, v in rep["criteria"].items()]
     lines += ["", "| Run | Evento | Agente | PID | Exit | s | Binario |", "|---|---|---|---|---|---|---|"]
@@ -592,11 +657,19 @@ def render_markdown(rep: dict) -> str:
               "Coordenadores (processos distintos): " + ", ".join(rep["coordinator_owners"]),
               "Leases retomados: " + ("; ".join(rep["reclaims"]) or "nenhum"),
               "Runs sem termino registrado (coordenador morreu com o CLI no ar): " + (", ".join(map(str, rep["interrupted_runs"])) or "nenhum"),
-              "Reviews bloqueados: " + ("; ".join(rep["blocked_reviews"]) or "nenhum"), "", "Limites: " + "; ".join(rep["limits"]), ""]
+              "Reviews bloqueados: " + ("; ".join(rep["blocked_reviews"]) or "nenhum"),
+              "Motivos de falha gravados nos eventos: " + ("; ".join(rep["failure_reasons"]) or "nenhum"),
+              "", "Limites: " + "; ".join(rep["limits"]), ""]
     return "\n".join(lines)
 
 
 # -- CLI --------------------------------------------------------------------------------------------------------------------
+def _emit(obj: dict) -> None:
+    """Linha JSON so com ASCII: o `step` fala com o `drive` por pipe e o console do Windows e cp1252 — um caractere fora dele
+    (medido: o "·" de "Not logged in · Please run /login") derrubava o driver com UnicodeEncodeError."""
+    print(json.dumps(obj, ensure_ascii=True, default=str), flush=True)
+
+
 def _version(argv: list) -> str:
     try:
         r = subprocess.run([*argv, "--version"], capture_output=True, text=True, timeout=30, env=ex.child_env(),
@@ -618,23 +691,27 @@ def preflight() -> dict:
     return out
 
 
-def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float) -> int:
-    """Um processo NOVO por step. Sem semente previa, semeia; com semente, RETOMA (o estado esta no SQLite e no git)."""
+def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, fault: str | None = None) -> int:
+    """Um processo NOVO por step. Sem semente previa, semeia; com semente, RETOMA (o estado esta no SQLite e no git).
+    Com `fault`, o relatorio passa a medir a prova NEGATIVA: PASS = a falha foi tratada como falha ate o DLQ."""
+    if fault:
+        declare_fault(lab, fault)
     log = lab.root / "DRIVE_LOG.jsonl"
     pre = preflight()
     (lab.root / "PREFLIGHT.json").write_text(json.dumps(pre, indent=1), encoding="utf-8")
     if not pre["ok"]:
-        print(json.dumps({"action": "BLOCKED", "preflight": pre}))
+        _emit({"action": "BLOCKED", "preflight": pre})
         return 2
     store = EventStore(lab.db)
     if not lab.repo.exists():
-        print(json.dumps(seed(lab, store)))
+        _emit(seed(lab, store))
     crash_pending, idle_since = crash_on, None
     for n in range(1, max_steps + 1):
         argv = [sys.executable, "-m", "tools.orchestration.closed_loop_lab", "step", "--lab", str(lab.root)]
         if crash_pending:
             argv += ["--crash-on", crash_pending]
-        r = subprocess.run(argv, cwd=ex.repo_root(), capture_output=True, text=True, encoding="utf-8", errors="replace")
+        r = subprocess.run(argv, cwd=ex.repo_root(), env=fault_env(lab), capture_output=True, text=True, encoding="ascii",
+                           errors="backslashreplace")
         try:
             res = json.loads(r.stdout.strip().splitlines()[-1])
         except (ValueError, IndexError):
@@ -644,7 +721,7 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float) 
         entry = {"step": n, "exit_code": r.returncode, "at": time.strftime("%Y-%m-%dT%H:%M:%S"), **res}
         with log.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
-        print(json.dumps(entry, ensure_ascii=False), flush=True)
+        _emit(entry)
         if res["action"] in ("TERMINAL", "PAUSED", "STEP_ERROR"):
             break
         if res["action"] == "IDLE":
@@ -657,7 +734,7 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float) 
     rep = report(lab, store)
     (lab.root / "REPORT.json").write_text(json.dumps(rep, indent=1, ensure_ascii=False), encoding="utf-8")
     (lab.root / "REPORT.md").write_text(render_markdown(rep), encoding="utf-8")
-    print(json.dumps({"verdict": rep["verdict"], "criteria": rep["criteria"], "report": str(lab.root / "REPORT.md")}))
+    _emit({"verdict": rep["verdict"], "mode": rep["mode"], "criteria": rep["criteria"], "report": str(lab.root / "REPORT.md")})
     return 0 if rep["verdict"] == "PASS" else 1
 
 
@@ -671,13 +748,14 @@ def main(argv: list[str] | None = None) -> int:
     sub.choices["drive"].add_argument("--crash-on", choices=CONSUMED)
     sub.choices["drive"].add_argument("--max-steps", type=int, default=60)
     sub.choices["drive"].add_argument("--idle-limit", type=float, default=90.0)
+    sub.choices["drive"].add_argument("--fault", choices=sorted(FAULTS), help="prova negativa: o CLI indicado roda SEM login")
     ns = ap.parse_args(argv)
     lab = Lab(ns.lab.resolve())
     lab.root.mkdir(parents=True, exist_ok=True)
     ensure_isolated(lab.root)
     os.environ.setdefault("EVENT_BRIDGE_STATE_PATH", str(lab.root / "governance" / "event_bridge.json"))   # nada em runs/ de producao
     if ns.cmd == "drive":
-        return _drive(lab, ns.max_steps, ns.crash_on, ns.idle_limit)
+        return _drive(lab, ns.max_steps, ns.crash_on, ns.idle_limit, ns.fault)
     store = EventStore(lab.db)
     if ns.cmd == "seed":
         res = seed(lab, store)
@@ -688,7 +766,7 @@ def main(argv: list[str] | None = None) -> int:
             if ev["event_type"] == ns.crash_on and ev["attempt"] == 1:
                 os._exit(CRASH_EXIT)                                             # morte abrupta: sem finally, sem liberar lease
         res = step(lab, store, f"{OWNER_PREFIX}{os.getpid()}", on_claimed=crash if ns.crash_on else None)
-    print(json.dumps(res, ensure_ascii=False, default=str))
+    _emit(res)
     return 0
 
 
