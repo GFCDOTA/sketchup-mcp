@@ -6,14 +6,19 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import sys
 import threading
+import time
 from pathlib import Path
 
 import pytest
 
 from tools.orchestration import closed_loop_lab as lab_mod
 from tools.orchestration.closed_loop_lab import CliResult, Lab, LabError
-from tools.orchestration.event_store import EventStore
+from tools.orchestration.event_store import EventStore, LeaseLost
+
+windows_only = pytest.mark.skipif(os.name != "nt", reason="requires real Windows Job Objects")
 
 ASCII_FIX = '''"""lab_slug."""
 import re
@@ -77,14 +82,14 @@ def writes(code: str, extra: dict | None = None, is_error: bool = False, rc: int
 
 
 class FakeClaude:
-    def __init__(self, *actions):
-        self.actions, self.calls = list(actions), []
+    def __init__(self, *actions, containment="job_object"):
+        self.actions, self.calls, self.containment = list(actions), [], containment
 
-    def __call__(self, argv, cwd, env, stdin, timeout, on_start) -> CliResult:
+    def __call__(self, argv, cwd, env, stdin, timeout, on_start, **_) -> CliResult:
         pid = 4000 + len(self.calls)
         self.calls.append({"cwd": Path(cwd), "prompt": stdin, "argv": argv})
         on_start(pid)
-        return self.actions.pop(0)(Path(cwd), pid)
+        return self.actions.pop(0)(Path(cwd), pid)._replace(containment=self.containment)
 
 
 def verdict(kind: str, findings: list | None = None, excerpt: str | None = None, touch: str | None = None,
@@ -114,15 +119,15 @@ def cli_failure(rc: int, stderr: str):
 
 
 class FakeCodex:
-    def __init__(self, *actions):
-        self.actions, self.calls = list(actions), []
+    def __init__(self, *actions, containment="job_object"):
+        self.actions, self.calls, self.containment = list(actions), [], containment
 
-    def __call__(self, argv, cwd, env, stdin, timeout, on_start) -> CliResult:
+    def __call__(self, argv, cwd, env, stdin, timeout, on_start, **_) -> CliResult:
         pid = 5000 + len(self.calls)
         self.calls.append({"prompt": stdin, "argv": argv})
         on_start(pid)
         repo, out = Path(argv[argv.index("-C") + 1]), Path(argv[argv.index("--output-last-message") + 1])
-        return self.actions.pop(0)(repo, out, pid)
+        return self.actions.pop(0)(repo, out, pid)._replace(containment=self.containment)
 
 
 @pytest.fixture()
@@ -425,8 +430,16 @@ def test_lab_refuses_a_directory_inside_another_git_repository(tmp_path):
         lab_mod.seed(lab, EventStore(lab.db))
 
 
+def killed_cli(lab, store, alive=()):
+    """Um CLI cujo coordenador morreu com ele no ar (run sem termino) + a verificacao da arvore feita pelo driver."""
+    run_id = store.run_started(1, "claude", ["C:/bin/claude.exe"], lab.repo, 4999, lab.logs / "o.txt", lab.logs / "e.txt")
+    lab_mod.record_orphan_check(lab, {"run": run_id, "agent": "claude", "pid": 4999, "grace_s": 2.0, "alive": list(alive)})
+    return run_id
+
+
 def test_report_passes_only_when_every_m1_criterion_is_derived_from_the_store(env):
     lab, store = env
+    killed_cli(lab, store)
     drive(lab, store, FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX)),
           FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE")))
 
@@ -434,7 +447,119 @@ def test_report_passes_only_when_every_m1_criterion_is_derived_from_the_store(en
 
     assert rep["verdict"] == "PASS" and all(rep["criteria"].values())
     assert rep["final_head"] == rep["approved_head"]
-    assert [r["pid"] for r in rep["runs"]] == [4000, 5000, 4001, 5001]
+    assert [r["pid"] for r in rep["runs"]] == [4999, 4000, 5000, 4001, 5001]
+    assert [r["containment"] for r in rep["runs"]] == [None, "job_object", "job_object", "job_object", "job_object"]
+
+
+def test_report_fails_when_no_cli_was_killed_with_its_coordinator(env):
+    lab, store = env
+    drive(lab, store, FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX)),
+          FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE")))
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["criteria"]["orphan_cli_tree_dead_after_coordinator_kill"] is False and rep["verdict"] == "FAIL"
+
+
+def test_report_fails_when_an_orphan_cli_tree_is_still_alive(env):
+    lab, store = env
+    killed_cli(lab, store, alive=[4999, 5123])
+    drive(lab, store, FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX)),
+          FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE")))
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["criteria"]["orphan_cli_tree_dead_after_coordinator_kill"] is False and rep["verdict"] == "FAIL"
+    assert rep["orphan_checks"][0]["alive"] == [4999, 5123]
+
+
+def test_report_fails_when_a_finished_cli_ran_outside_a_job_object(env):
+    lab, store = env
+    killed_cli(lab, store)
+    drive(lab, store, FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX), containment="none"),
+          FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE")))
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["criteria"]["finished_cli_runs_job_contained"] is False and rep["verdict"] == "FAIL"
+
+
+def test_default_runner_is_the_job_object_supervisor_on_windows_only():
+    expected = lab_mod.run_supervised if os.name == "nt" else lab_mod.run_observed
+    assert lab_mod.default_runner() is expected
+    assert lab_mod.default_runner("observed") is lab_mod.run_observed
+
+
+def _real_env():
+    return {"SystemRoot": os.environ["SystemRoot"], "TEMP": os.environ["TEMP"], "TMP": os.environ["TEMP"]}
+
+
+def _io(tmp_path, prompt):
+    stdin, stdout, stderr = tmp_path / "in.txt", tmp_path / "out.txt", tmp_path / "err.txt"
+    stdin.write_text(prompt, encoding="utf-8")
+    return stdin, stdout, stderr
+
+
+@windows_only
+def test_supervised_runner_returns_real_output_pid_and_job_containment(tmp_path):
+    store = EventStore(tmp_path / "events.db")
+    store.publish("IMPLEMENT_REQUESTED", "key", "lab:x", {})
+    ev = store.claim("IMPLEMENT_REQUESTED", "lab-coordinator:t", 20)
+    pids = []
+    script = "import sys; sys.stdout.write(sys.stdin.read()[::-1]); sys.stderr.write('aviso'); raise SystemExit(4)"
+
+    res = lab_mod.run_supervised([sys.executable, "-c", script], tmp_path, _real_env(), "abc", 30, pids.append,
+                                 lease=(store, ev), io=_io(tmp_path, "abc"))
+
+    assert (res.exit_code, res.stdout, res.stderr, res.timed_out, res.containment) == (4, "cba", "aviso", False, "job_object")
+    assert pids == [res.pid] and res.pid > 0
+    assert store.renew(ev, 5) is True
+
+
+@windows_only
+def test_supervised_runner_kills_the_cli_tree_and_raises_when_the_lease_is_lost(tmp_path):
+    store = EventStore(tmp_path / "events.db")
+    store.publish("IMPLEMENT_REQUESTED", "key", "lab:x", {})
+    ev = store.claim("IMPLEMENT_REQUESTED", "lab-coordinator:t", 20)
+    ready, effect = tmp_path / "ready", tmp_path / "effect"
+    child = f"from pathlib import Path; import time; Path({str(ready)!r}).write_text('r'); time.sleep(3); Path({str(effect)!r}).write_text('escapou')"
+    root = tmp_path / "root.py"
+    root.write_text(f"import subprocess, sys, time\nsubprocess.Popen([sys.executable, '-c', {child!r}]); time.sleep(60)\n", encoding="utf-8")
+    outcome = []
+
+    def work():
+        try:
+            lab_mod.run_supervised([sys.executable, str(root)], tmp_path, _real_env(), "", 60, lambda pid: None,
+                                   lease=(store, ev), io=_io(tmp_path, ""))
+            outcome.append("returned")
+        except LeaseLost:
+            outcome.append("lease_lost")
+
+    t = threading.Thread(target=work)
+    t.start()
+    deadline = time.monotonic() + 20
+    while not ready.exists() and time.monotonic() < deadline:
+        time.sleep(0.05)
+    assert ready.exists()
+    with store._tx() as db:
+        db.execute("UPDATE events SET lease_until=0 WHERE id=?", (ev["id"],))
+    t.join(30)
+
+    assert outcome == ["lease_lost"]
+    time.sleep(3.5)
+    assert not effect.exists()
+
+
+def test_cli_started_hook_sees_agent_event_and_pid_after_the_audit_row_exists(env):
+    lab, store = env
+    seen = []
+
+    def hook(agent, ev, pid):
+        seen.append((agent, ev["event_type"], pid, [r["pid"] for r in store.runs()]))
+
+    run(lab, store, FakeClaude(writes(ASCII_FIX)), FakeCodex(), on_cli_started=hook)
+
+    assert seen == [("claude", "IMPLEMENT_REQUESTED", 4000, [4000])]
 
 
 def not_logged_in(cwd: Path, pid: int) -> CliResult:
