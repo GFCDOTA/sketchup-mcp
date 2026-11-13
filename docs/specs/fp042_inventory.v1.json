@@ -12921,6 +12921,411 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "docs/spikes/sqlite_event_bus_poc/README.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/agent.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/agents_cli.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/bus.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/demo.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/event_store.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/REPORT.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/artifacts/jobA-fresh/review_e004_a1.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/artifacts/jobA-fresh/slugify.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/artifacts/jobA-fresh/test_slugify.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/artifacts/jobB-seeded-defect/review_e002_a1.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/artifacts/jobB-seeded-defect/review_e009_a1.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/artifacts/jobB-seeded-defect/slugify.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/artifacts/jobB-seeded-defect/test_slugify.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/events.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e001_a1_claude.prompt.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e001_a1_claude.stderr.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e001_a1_claude.stdout.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e001_a1_claude.tests.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e002_a1_codex.prompt.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e002_a1_codex.stderr.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e002_a1_codex.stdout.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e004_a1_codex.prompt.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e004_a1_codex.stderr.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e004_a1_codex.stdout.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e006_a1_claude.prompt.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e006_a1_claude.stderr.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e006_a1_claude.stdout.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e006_a1_claude.tests.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e009_a1_codex.prompt.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e009_a1_codex.stderr.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/logs/e009_a1_codex.stdout.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/result.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/runner_stdout.txt",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/subprocess_runs.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/e2e/transitions.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/resilience/events.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/resilience/resilience.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/evidence/2026-11-05_real_cli/resilience/subprocess_runs.json",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/live_cli_e2e.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/live_resilience.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/run_real_e2e.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/test_bus.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/test_event_store.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "docs/spikes/sqlite_event_bus_poc/workers.py",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "project_documentation",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "docs/vision_acl_discrimination_findings.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",

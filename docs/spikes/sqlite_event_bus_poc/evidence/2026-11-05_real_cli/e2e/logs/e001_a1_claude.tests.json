@@ -1,0 +1,14 @@
+{
+ "agent_tests": {
+  "exit_code": 0,
+  "summary": "Ran 14 tests in 0.000s |  | OK",
+  "output": "test_already_lowercase (test_slugify.TestSlugify.test_already_lowercase) ... ok\ntest_empty_string (test_slugify.TestSlugify.test_empty_string) ... ok\ntest_example (test_slugify.TestSlugify.test_example) ... ok\ntest_leading_trailing_spaces_with_internal_runs (test_slugify.TestSlugify.test_leading_trailing_spaces_with_internal_runs) ... ok\ntest_lowercase (test_slugify.TestSlugify.test_lowercase) ... ok\ntest_many_words (test_slugify.TestSlugify.test_many_words) ... ok\ntest_mixed_case (test_slugify.TestSlugify.test_mixed_case) ... ok\ntest_multiple_spaces_become_single_hyphen (test_slugify.TestSlugify.test_multiple_spaces_become_single_hyphen) ... ok\ntest_only_spaces (test_slugify.TestSlugify.test_only_spaces) ... ok\ntest_single_space_between_words (test_slugify.TestSlugify.test_single_space_between_words) ... ok\ntest_single_word (test_slugify.TestSlugify.test_single_word) ... ok\ntest_strips_both_ends (test_slugify.TestSlugify.test_strips_both_ends) ... ok\ntest_strips_leading_whitespace (test_slugify.TestSlugify.test_strips_leading_whitespace) ... ok\ntest_strips_trailing_whitespace (test_slugify.TestSlugify.test_strips_trailing_whitespace) ... ok\n\n----------------------------------------------------------------------\nRan 14 tests in 0.000s\n\nOK\n",
+  "ran_zero": false
+ },
+ "acceptance_tests": {
+  "exit_code": 0,
+  "summary": "Ran 5 tests in 0.000s |  | OK",
+  "output": "test_collapses_space_runs (test_acceptance_slugify.Acceptance.test_collapses_space_runs) ... ok\ntest_empty (test_acceptance_slugify.Acceptance.test_empty) ... ok\ntest_example_from_spec (test_acceptance_slugify.Acceptance.test_example_from_spec) ... ok\ntest_lowercases (test_acceptance_slugify.Acceptance.test_lowercases) ... ok\ntest_strips_ends (test_acceptance_slugify.Acceptance.test_strips_ends) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n"
+ },
+ "passed": true
+}
