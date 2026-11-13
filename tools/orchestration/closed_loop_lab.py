@@ -2,6 +2,7 @@
 
     python -m tools.orchestration.closed_loop_lab drive --lab <dir fora de qualquer repositorio git> [--crash-on REVIEW_REQUESTED]
     python -m tools.orchestration.closed_loop_lab drive --lab <dir novo> --fault claude-auth|codex-auth     # prova negativa
+    python -m tools.orchestration.closed_loop_lab drive --lab <dir novo> --crash-on REVIEW_REQUESTED --kill-during claude
 
 NAO e um orquestrador novo nem toca producao: liga, num repositorio git descartavel, os contratos que ja existem —
 `event_store.EventStore` (claim/lease/fencing/idempotencia), `codex_reviewer` (comando read-only, pacote imutavel, validacao do
@@ -18,7 +19,11 @@ Fluxo, um evento por `step` (cada `step` do `drive` roda num processo novo: nenh
                       | NEEDS_HUMAN -> REVIEW_BLOCKED + JOB_FAILED (escala sem repetir a mesma revisao)
   REVIEW_CHANGES_REQUESTED -> coordenador: CORRECTION_REQUESTED (com o historico de achados) ou JOB_FAILED no limite de rodadas
 
-Limites declarados: os testes rodam com env por allowlist, SEM sandbox de SO (`env_allowlist_only`; Job Object/AppContainer e
+Processos: no Windows cada CLI roda dentro de um Job Object (`process_supervisor.run_claimed`, FP-060 P2) que renova o lease
+enquanto ele roda e mata a ARVORE inteira se o lease se perde, no timeout ou quando o coordenador morre (o SO fecha o handle
+do job). Fora do Windows o CLI roda sem contencao e o relatorio registra isso. Job Object NAO e sandbox.
+
+Limites declarados: os testes rodam com env por allowlist, SEM sandbox de SO (`env_allowlist_only`; AppContainer e
 FP-060 P2); o APPROVE daqui e tecnico de laboratorio e nao equivale a review independente no GitHub (M2). O lease protege a
 escrita no SQLite e e renovado imediatamente antes do commit; a janela entre a renovacao e o commit existe e e coberta pela
 reconciliacao por trailer (consulta o estado antes de repetir o efeito)."""
@@ -31,6 +36,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -38,6 +44,7 @@ from typing import Callable, NamedTuple
 
 from tools.orchestration import codex_reviewer as cr
 from tools.orchestration import event_executor as ex
+from tools.orchestration import process_supervisor as ps
 from tools.orchestration.event_store import EventStore, LeaseLost
 
 JOB_ID = "lab:slug"
@@ -51,6 +58,10 @@ MAX_ROUNDS = 3
 CLAIM_LEASE_S = 20.0                         # curto: coordenador morto logo apos o claim e recuperado rapido
 RUN_LEASE_S = 600.0                          # renovado antes de subir o CLI e antes do efeito
 CLI_TIMEOUT_S = 300
+SUPERVISED_LEASE_S = 30.0                    # com o CLI sob o supervisor o lease e curto e renovado a cada RENEW_INTERVAL_S:
+RENEW_INTERVAL_S = 2.0                       # coordenador morto => arvore morta na hora e evento retomavel em <= 30 s
+KILL_DELAY_S = 4.0                           # caos `--kill-during`: o coordenador morre este tempo depois de subir o CLI
+ORPHAN_GRACE_S = 2.0                         # espera antes de procurar sobreviventes da arvore de um CLI interrompido
 TEST_TIMEOUT_S = 120
 MAX_BUDGET_USD = "1"
 OWNER_PREFIX = "lab-coordinator:"
@@ -156,9 +167,11 @@ class CliResult(NamedTuple):
     stdout: str
     stderr: str
     timed_out: bool
+    containment: str = "none"                # "job_object" quando a arvore do CLI esta presa ao coordenador e ao lease
 
 
-Runner = Callable[[list, Path, dict, str, int, Callable[[int], None]], CliResult]
+# runner(argv, cwd, env, prompt, timeout, on_start, *, lease=(store, evento), io=(stdin, stdout, stderr como arquivos))
+Runner = Callable[..., CliResult]
 
 
 @dataclass(frozen=True)
@@ -284,8 +297,10 @@ def run_trusted_tests(lab: Lab, wt: Path, changed: list[str]) -> dict:
 
 
 # -- processos observados ---------------------------------------------------------------------------------------------------
-def run_observed(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, on_start: Callable[[int], None]) -> CliResult:
-    """Sobe o CLI sem shell e informa o PID ANTES de esperar (auditoria com PID real mesmo se o coordenador morrer depois)."""
+def run_observed(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, on_start: Callable[[int], None],
+                 **_: object) -> CliResult:
+    """Sobe o CLI sem shell e informa o PID ANTES de esperar (auditoria com PID real mesmo se o coordenador morrer depois).
+    SEM contencao: se o coordenador morrer, o CLI continua vivo. E o runner de fora do Windows e o controle do experimento."""
     p = subprocess.Popen(argv, cwd=cwd, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
                          encoding="utf-8", errors="replace", creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     on_start(p.pid)
@@ -298,22 +313,66 @@ def run_observed(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, on_
         return CliResult(p.pid, -1, out or "", err or "", True)
 
 
+def run_supervised(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, on_start: Callable[[int], None], *,
+                   lease: tuple, io: tuple) -> CliResult:
+    """Sobe o CLI dentro de um Job Object preso ao lease do evento (FP-060 P2). O PID chega ao `on_start` com o processo
+    ainda suspenso. Lease perdido => a arvore e encerrada e este runner levanta `LeaseLost` (nenhum resultado e devolvido).
+    Coordenador morto => o SO fecha o job e a arvore morre junto. `stdin` e lido do arquivo de prompt em `io`."""
+    store, ev = lease
+    stdin_path, stdout_path, stderr_path = io
+    pids: list[int] = []
+
+    def started(pid: int) -> None:
+        pids.append(pid)
+        on_start(pid)
+
+    try:
+        outcome, code = ps.run_claimed(store, ev, argv, cwd=cwd, env=env, lease_seconds=SUPERVISED_LEASE_S, timeout=timeout,
+                                       interval=RENEW_INTERVAL_S, stdin=stdin_path, stdout=stdout_path, stderr=stderr_path,
+                                       on_start=started)
+    except (ps.ProcessSupervisorError, ValueError) as exc:          # sem job nao ha fallback: o CLI nao sobe
+        raise OSError(f"supervisor recusou o processo: {exc}") from exc
+    if outcome == "lease_lost":
+        raise LeaseLost(f"event {ev['id']}: lease perdido com o CLI no ar; arvore de processos encerrada")
+    out, err = (path.read_text(encoding="utf-8", errors="replace") if path.exists() else "" for path in (stdout_path, stderr_path))
+    return CliResult(pids[0] if pids else 0, -1 if outcome == "timeout" else int(code), out, err, outcome == "timeout", "job_object")
+
+
+def default_runner(kind: str = "auto") -> Runner:
+    """`auto`: supervisor no Windows, sem contencao fora dele. `observed` forca o runner sem contencao (controle)."""
+    if kind == "observed":
+        return run_observed
+    if kind == "supervised" or os.name == "nt":
+        return run_supervised
+    return run_observed
+
+
 def _run_cli(lab: Lab, store: EventStore, ev: dict, agent: str, argv: list, cwd: Path, env: dict, prompt: str,
-             runner: Runner) -> CliResult:
+             runner: Runner, on_cli_started: Callable[[str, dict, int], None] | None = None) -> CliResult:
     lab.logs.mkdir(parents=True, exist_ok=True)
     stamp = lab.logs / f"{agent}_e{ev['id']:03d}_a{ev['attempt']}"
-    so, se = stamp.with_suffix(".stdout.txt"), stamp.with_suffix(".stderr.txt")
-    stamp.with_suffix(".prompt.txt").write_text(prompt, encoding="utf-8")
+    so, se, prompt_file = stamp.with_suffix(".stdout.txt"), stamp.with_suffix(".stderr.txt"), stamp.with_suffix(".prompt.txt")
+    prompt_file.write_text(prompt, encoding="utf-8")
     run_ids: list[int] = []
+
+    def started(pid: int) -> None:
+        run_ids.append(store.run_started(ev["id"], agent, argv, cwd, pid, so, se))
+        if on_cli_started:
+            on_cli_started(agent, ev, pid)
+
     try:
-        res = runner(argv, cwd, env, prompt, CLI_TIMEOUT_S, lambda pid: run_ids.append(
-            store.run_started(ev["id"], agent, argv, cwd, pid, so, se)))
+        res = runner(argv, cwd, env, prompt, CLI_TIMEOUT_S, started, lease=(store, ev), io=(prompt_file, so, se))
     except OSError as exc:
         res = CliResult(0, -1, "", f"{type(exc).__name__}: {exc}", False)
+    except LeaseLost:
+        if run_ids:
+            store.run_finished(run_ids[0], -1, False, "lease_lost; containment=job_object")
+        raise
     so.write_text(ex.redact(res.stdout), encoding="utf-8")
     se.write_text(ex.redact(res.stderr), encoding="utf-8")
     if run_ids:
-        store.run_finished(run_ids[0], res.exit_code, res.timed_out, "timeout" if res.timed_out else f"exit {res.exit_code}")
+        how = "timeout" if res.timed_out else f"exit {res.exit_code}"
+        store.run_finished(run_ids[0], res.exit_code, res.timed_out, f"{how}; containment={res.containment}")
     return res
 
 
@@ -413,7 +472,8 @@ def _implement_prompt(ev: dict) -> str:
     return prompt
 
 
-def _implement(lab: Lab, store: EventStore, ev: dict, runner: Runner, claude_bin: str | None) -> dict:
+def _implement(lab: Lab, store: EventStore, ev: dict, runner: Runner, claude_bin: str | None,
+               on_cli_started: Callable[[str, dict, int], None] | None = None) -> dict:
     p, key = ev["payload"], ev["idempotency_key"]
     rnd, stamp = p["round"], f"e{ev['id']:03d}_a{ev['attempt']}"
     new = _delivered_sha(lab, key)                         # efeito ja aplicado por uma tentativa que morreu antes do ACK?
@@ -427,7 +487,7 @@ def _implement(lab: Lab, store: EventStore, ev: dict, runner: Runner, claude_bin
         wt, before = _export(lab, f"implement_{stamp}", p["head_sha"])
         _hold(store, ev)
         res = _run_cli(lab, store, ev, "claude", claude_command(claude_bin or ex.resolve_claude()), wt, ex.child_env(),
-                       _implement_prompt(ev), runner)
+                       _implement_prompt(ev), runner, on_cli_started)
         if res.timed_out:
             raise LabError(f"claude excedeu {CLI_TIMEOUT_S}s")
         result = ex.parse_result(res.stdout)
@@ -477,7 +537,8 @@ def _blocked(store: EventStore, ev: dict, reason: str) -> dict:
     return _fail(store, ev, reason, "REVIEW_BLOCKED")
 
 
-def _review(lab: Lab, store: EventStore, ev: dict, runner: Runner, codex_bin: str | None) -> dict:
+def _review(lab: Lab, store: EventStore, ev: dict, runner: Runner, codex_bin: str | None,
+            on_cli_started: Callable[[str, dict, int], None] | None = None) -> dict:
     p = ev["payload"]
     rnd, sha, base, stamp = p["round"], p["head_sha"], p["base_sha"], f"e{ev['id']:03d}_a{ev['attempt']}"
     if head(lab.repo) != sha:
@@ -495,7 +556,7 @@ def _review(lab: Lab, store: EventStore, ev: dict, runner: Runner, codex_bin: st
         prompt = (cr.PROMPT.format(repo="fp060-m1-lab (repositorio local descartavel)", pr=LAB_PR, sha=sha, base=base)
                   + REVIEW_ADDENDUM.format(pr=LAB_PR, spec=SPEC, tests=TEST_FILE) + cr.package_prompt(pkg, evidence))
         res = _run_cli(lab, store, ev, "codex", cr.build_command(codex_bin or cr.resolve_codex(), lab.repo, schema, out),
-                       lab.repo, cr._child_env(), prompt, runner)
+                       lab.repo, cr._child_env(), prompt, runner, on_cli_started)
         if res.timed_out:
             raise cr.ReviewError("timeout do codex")
         if res.exit_code != 0:
@@ -552,10 +613,12 @@ def _decide(store: EventStore, ev: dict, max_rounds: int) -> dict:
     return {"action": "CORRECTION_DISPATCHED", "event": ev["id"], "round": rnd + 1}
 
 
-def step(lab: Lab, store: EventStore, owner: str, *, claude_runner: Runner = run_observed, codex_runner: Runner = run_observed,
+def step(lab: Lab, store: EventStore, owner: str, *, claude_runner: Runner | None = None, codex_runner: Runner | None = None,
          claude_bin: str | None = None, codex_bin: str | None = None, on_claimed: Callable[[dict], None] | None = None,
-         max_rounds: int = MAX_ROUNDS) -> dict:
+         max_rounds: int = MAX_ROUNDS, on_cli_started: Callable[[str, dict, int], None] | None = None,
+         runner_kind: str = "auto") -> dict:
     """Consome NO MAXIMO um evento. Pausa (kill switch) e estado terminal impedem novo claim e novo CLI."""
+    claude_runner, codex_runner = claude_runner or default_runner(runner_kind), codex_runner or default_runner(runner_kind)
     if lab.pause_flag.exists():
         return {"action": "PAUSED"}
     state = terminal(store)
@@ -569,14 +632,53 @@ def step(lab: Lab, store: EventStore, owner: str, *, claude_runner: Runner = run
     try:
         try:
             if ev["event_type"] in ("IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED"):
-                return _implement(lab, store, ev, claude_runner, claude_bin)
+                return _implement(lab, store, ev, claude_runner, claude_bin, on_cli_started)
             if ev["event_type"] == "REVIEW_REQUESTED":
-                return _review(lab, store, ev, codex_runner, codex_bin)
+                return _review(lab, store, ev, codex_runner, codex_bin, on_cli_started)
             return _decide(store, ev, max_rounds)
         except LabError as exc:
             return _fail(store, ev, str(exc))
     except LeaseLost as exc:
         return {"action": "LEASE_LOST", "event": ev["id"], "reason": str(exc)}
+
+
+# -- orfaos: o que sobrou vivo da arvore de um CLI cujo coordenador morreu ---------------------------------------------------
+def _orphan_file(lab: Lab) -> Path:
+    return lab.root / "ORPHAN_CHECKS.jsonl"
+
+
+def record_orphan_check(lab: Lab, entry: dict) -> None:
+    with _orphan_file(lab).open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(entry) + "\n")
+
+
+def orphan_checks(lab: Lab) -> list[dict]:
+    path = _orphan_file(lab)
+    return [json.loads(ln) for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()] if path.exists() else []
+
+
+def check_orphans(lab: Lab, store: EventStore, grace_s: float = ORPHAN_GRACE_S) -> list[dict]:
+    """Para cada run sem termino ainda nao verificado: espera `grace_s` e lista os PIDs vivos da arvore. So observa."""
+    done = {c["run"] for c in orphan_checks(lab)}
+    pending = [r for r in store.runs() if r["ended_at"] is None and r["id"] not in done]
+    if not pending:
+        return []
+    time.sleep(grace_s)
+    out = []
+    for r in pending:
+        if os.name == "nt":
+            alive = ps.tree_pids(r["pid"], since=r["started_at"])
+        else:
+            alive = [r["pid"]] if ex.pid_alive(r["pid"]) else []
+        entry = {"run": r["id"], "agent": r["agent"], "pid": r["pid"], "grace_s": grace_s, "alive": alive}
+        record_orphan_check(lab, entry)
+        out.append(entry)
+    return out
+
+
+def _containment(run: dict) -> str | None:
+    m = re.search(r"containment=(\w+)", run["outcome"] or "")
+    return m.group(1) if m else None
 
 
 # -- relatorio: tudo derivado do SQLite e do git, nada digitado --------------------------------------------------------------
@@ -597,6 +699,9 @@ def report(lab: Lab, store: EventStore) -> dict:
     delivered = [e for e in events if e["event_type"] in ("IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED") and e["status"] == "DONE"]
     owners = sorted({t["actor"] for t in transitions if (t["actor"] or "").startswith(OWNER_PREFIX)})
     clean = git(["status", "--porcelain"], lab.repo) == (0, "")
+    finished = [r for r in runs if r["ended_at"] is not None]
+    interrupted = [r for r in runs if r["ended_at"] is None]
+    checks = {c["run"]: c for c in orphan_checks(lab)}
     fault = declared_fault(lab)
     consumed = [e for e in events if fault and e["event_type"] in AGENT_EVENTS[FAULTS[fault][0]]]
     faulted_runs = [r for r in runs if fault and r["agent"] == FAULTS[fault][0]]
@@ -619,6 +724,9 @@ def report(lab: Lab, store: EventStore) -> dict:
         "no_pending_or_running_event": all(e["status"] not in ("PENDING", "RUNNING") for e in events),
         "one_delivery_per_implement_event": len(keys) == len(set(keys)) == len(delivered),
         "survived_coordinator_restart": len(owners) >= 2,
+        "finished_cli_runs_job_contained": bool(finished) and all(_containment(r) == "job_object" for r in finished),
+        "orphan_cli_tree_dead_after_coordinator_kill": bool(interrupted) and all(
+            r["id"] in checks and not checks[r["id"]]["alive"] for r in interrupted),
     }
     return {
         "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado", "lab": lab.root.name, "job_id": JOB_ID,
@@ -634,12 +742,14 @@ def report(lab: Lab, store: EventStore) -> dict:
         "runs": [{"id": r["id"], "event": r["event_id"], "agent": r["agent"], "pid": r["pid"], "exit_code": r["exit_code"],
                   "timed_out": bool(r["timed_out"]), "binary": Path(json.loads(r["argv"])[0]).name, "finished": r["ended_at"] is not None,
                   "seconds": round(r["ended_at"] - r["started_at"], 1) if r["ended_at"] is not None else None,
-                  "stdout": Path(r["stdout_path"]).name} for r in runs],
-        "interrupted_runs": [r["id"] for r in runs if r["ended_at"] is None],
+                  "stdout": Path(r["stdout_path"]).name, "containment": _containment(r)} for r in runs],
+        "interrupted_runs": [r["id"] for r in interrupted],
+        "orphan_checks": [checks[k] for k in sorted(checks)],
         "commits": _must(["log", "--reverse", "--format=%H %s"], lab.repo).splitlines(),
         "transitions": len(transitions),
         "limits": ["testes sem sandbox de SO (env_allowlist_only; FP-060 P2)", "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
-                   "sem GitHub, sem --execute, sem outbox externo"],
+                   "sem GitHub, sem --execute, sem outbox externo",
+                   "Job Object nao e sandbox: so prende a vida da arvore do CLI ao coordenador e ao lease"],
     }
 
 
@@ -648,15 +758,18 @@ def render_markdown(rep: dict) -> str:
              f"**Veredito: {rep['verdict']}** · modo `{rep['mode']}` · lab `{rep['lab']}` · HEAD final `{rep['final_head']}`", "",
              "| Criterio (derivado do SQLite/git) | Resultado |", "|---|---|"]
     lines += [f"| {k} | {'PASS' if v else 'FAIL'} |" for k, v in rep["criteria"].items()]
-    lines += ["", "| Run | Evento | Agente | PID | Exit | s | Binario |", "|---|---|---|---|---|---|---|"]
+    lines += ["", "| Run | Evento | Agente | PID | Exit | s | Contencao | Binario |", "|---|---|---|---|---|---|---|---|"]
     lines += [f"| {r['id']} | {r['event']} | {r['agent']} | {r['pid']} | {r['exit_code'] if r['finished'] else 'INTERROMPIDO'} | "
-              f"{r['seconds'] if r['finished'] else '-'} | `{r['binary']}` |" for r in rep["runs"]]
+              f"{r['seconds'] if r['finished'] else '-'} | {r['containment'] or '-'} | `{r['binary']}` |" for r in rep["runs"]]
     lines += ["", "| # | Evento | Estado | Tentativas | Pai |", "|---|---|---|---|---|"]
     lines += [f"| {e['id']} | {e['type']} | {e['status']} | {e['attempt']} | {e['parent'] or ''} |" for e in rep["events"]]
     lines += ["", "Commits: " + "; ".join(f"`{c[:12]}` {c[41:]}" for c in rep["commits"]),
               "Coordenadores (processos distintos): " + ", ".join(rep["coordinator_owners"]),
               "Leases retomados: " + ("; ".join(rep["reclaims"]) or "nenhum"),
               "Runs sem termino registrado (coordenador morreu com o CLI no ar): " + (", ".join(map(str, rep["interrupted_runs"])) or "nenhum"),
+              "Arvore dos CLIs interrompidos: " + ("; ".join(
+                  f"run {c['run']} ({c['agent']}, pid {c['pid']}) apos {c['grace_s']}s: " + (f"VIVOS {c['alive']}" if c["alive"] else "nenhum processo vivo")
+                  for c in rep["orphan_checks"]) or "nenhuma verificacao"),
               "Reviews bloqueados: " + ("; ".join(rep["blocked_reviews"]) or "nenhum"),
               "Motivos de falha gravados nos eventos: " + ("; ".join(rep["failure_reasons"]) or "nenhum"),
               "", "Limites: " + "; ".join(rep["limits"]), ""]
@@ -691,7 +804,8 @@ def preflight() -> dict:
     return out
 
 
-def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, fault: str | None = None) -> int:
+def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, fault: str | None = None,
+           kill_during: str | None = None, runner_kind: str = "auto") -> int:
     """Um processo NOVO por step. Sem semente previa, semeia; com semente, RETOMA (o estado esta no SQLite e no git).
     Com `fault`, o relatorio passa a medir a prova NEGATIVA: PASS = a falha foi tratada como falha ate o DLQ."""
     if fault:
@@ -705,11 +819,13 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
     store = EventStore(lab.db)
     if not lab.repo.exists():
         _emit(seed(lab, store))
-    crash_pending, idle_since = crash_on, None
+    crash_pending, kill_pending, idle_since = crash_on, kill_during, None
     for n in range(1, max_steps + 1):
-        argv = [sys.executable, "-m", "tools.orchestration.closed_loop_lab", "step", "--lab", str(lab.root)]
+        argv = [sys.executable, "-m", "tools.orchestration.closed_loop_lab", "step", "--lab", str(lab.root), "--runner", runner_kind]
         if crash_pending:
             argv += ["--crash-on", crash_pending]
+        if kill_pending:
+            argv += ["--kill-during", kill_pending]
         r = subprocess.run(argv, cwd=ex.repo_root(), env=fault_env(lab), capture_output=True, text=True, encoding="ascii",
                            errors="backslashreplace")
         try:
@@ -717,7 +833,12 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
         except (ValueError, IndexError):
             res = {"action": "CRASHED" if r.returncode == CRASH_EXIT else "STEP_ERROR", "stderr": r.stderr[-300:]}
         if res["action"] == "CRASHED":
-            crash_pending = None
+            orphans = check_orphans(lab, store)          # so um CLI que estava no ar deixa run sem termino
+            res["orphans"] = orphans
+            if orphans:
+                kill_pending = None
+            else:
+                crash_pending = None
         entry = {"step": n, "exit_code": r.returncode, "at": time.strftime("%Y-%m-%dT%H:%M:%S"), **res}
         with log.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
@@ -749,13 +870,18 @@ def main(argv: list[str] | None = None) -> int:
     sub.choices["drive"].add_argument("--max-steps", type=int, default=60)
     sub.choices["drive"].add_argument("--idle-limit", type=float, default=90.0)
     sub.choices["drive"].add_argument("--fault", choices=sorted(FAULTS), help="prova negativa: o CLI indicado roda SEM login")
+    for name in ("step", "drive"):
+        sub.choices[name].add_argument("--kill-during", choices=sorted(AGENT_EVENTS),
+                                       help="caos: o coordenador morre com este CLI no ar (1a tentativa do evento)")
+        sub.choices[name].add_argument("--runner", choices=("auto", "supervised", "observed"), default="auto",
+                                       help="observed = sem Job Object (controle do experimento)")
     ns = ap.parse_args(argv)
     lab = Lab(ns.lab.resolve())
     lab.root.mkdir(parents=True, exist_ok=True)
     ensure_isolated(lab.root)
     os.environ.setdefault("EVENT_BRIDGE_STATE_PATH", str(lab.root / "governance" / "event_bridge.json"))   # nada em runs/ de producao
     if ns.cmd == "drive":
-        return _drive(lab, ns.max_steps, ns.crash_on, ns.idle_limit, ns.fault)
+        return _drive(lab, ns.max_steps, ns.crash_on, ns.idle_limit, ns.fault, ns.kill_during, ns.runner)
     store = EventStore(lab.db)
     if ns.cmd == "seed":
         res = seed(lab, store)
@@ -765,7 +891,12 @@ def main(argv: list[str] | None = None) -> int:
         def crash(ev: dict) -> None:
             if ev["event_type"] == ns.crash_on and ev["attempt"] == 1:
                 os._exit(CRASH_EXIT)                                             # morte abrupta: sem finally, sem liberar lease
-        res = step(lab, store, f"{OWNER_PREFIX}{os.getpid()}", on_claimed=crash if ns.crash_on else None)
+
+        def kill_later(agent: str, ev: dict, pid: int) -> None:
+            if agent == ns.kill_during and ev["attempt"] == 1:
+                threading.Timer(KILL_DELAY_S, os._exit, [CRASH_EXIT]).start()   # morre com o CLI no ar; o job e fechado pelo SO
+        res = step(lab, store, f"{OWNER_PREFIX}{os.getpid()}", on_claimed=crash if ns.crash_on else None,
+                   on_cli_started=kill_later if ns.kill_during else None, runner_kind=ns.runner)
     _emit(res)
     return 0
 

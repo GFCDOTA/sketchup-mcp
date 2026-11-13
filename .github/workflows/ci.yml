@@ -34,6 +34,21 @@ jobs:
       - name: pyproject.toml and uv.lock agree
         run: uv lock --check
 
+  windows-process-supervisor:
+    name: windows process supervisor
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked --extra dev
+      - name: Test real Windows Job Objects and AppContainer
+        run: uv run --no-sync python -m pytest --noconftest tests/test_process_supervisor.py tests/test_appcontainer_isolation.py tests/test_closed_loop_lab.py -q
+
   tests:
     name: pytest (py${{ matrix.python }})
     runs-on: ubuntu-latest

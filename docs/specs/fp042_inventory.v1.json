@@ -14924,6 +14924,24 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": "tests/test_process_supervisor.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_appcontainer_isolation.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": "tests/test_store_wiring.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -18039,6 +18057,24 @@
     },
     {
       "path": "tools/orchestration/event_store.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/orchestration/process_supervisor.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/orchestration/appcontainer.py",
       "domain": "runtime_or_orchestrator",
       "disposition": "retain_legacy_public_or_tooling_path",
       "phase": "P4",
@@ -21619,6 +21655,83 @@
     },
     {
       "path": "artifacts/review/fp060/m1_closed_loop/2026-11-10_auth_faults/codex_auth/REPORT.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/control_observed/DRIVE_LOG.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/control_observed/ORPHAN_CHECKS.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/control_observed/REPORT.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/control_observed/REPORT.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/DRIVE_LOG.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/ORPHAN_CHECKS.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/REPORT.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/REPORT.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/verdict_e003_a2.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/verdict_e007_a1.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",

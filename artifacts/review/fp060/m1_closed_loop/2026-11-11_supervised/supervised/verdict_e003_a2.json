@@ -1,0 +1,25 @@
+{
+  "pr": 1,
+  "head_sha": "0f8c6b1d56f6dad231c057da5beddd07d0c96e55",
+  "verdict": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "severity": "MEDIUM",
+      "file": "lab_slug.py",
+      "line": 8,
+      "reason": "A expressão aceita apenas letras ASCII e dígitos ASCII, descartando caracteres Unicode para os quais str.isalnum() é verdadeiro. Por exemplo, slugify(\"Café com Leite!\") retorna \"caf-com-leite\", em vez de \"café-com-leite\", violando R2.",
+      "required_change": "Classificar cada caractere do texto convertido com str.lower() usando str.isalnum(), mantendo os caracteres alfanuméricos Unicode e agrupando as sequências restantes em um único hífen. Acrescentar testes para letras e dígitos Unicode."
+    }
+  ],
+  "tests_reviewed": [
+    "tests/test_lab_slug.py"
+  ],
+  "confidence": "HIGH",
+  "files_reviewed": [
+    {
+      "path": "lab_slug.py",
+      "sha256": "5cfa46c75ab3d956577c4cead15d92f1718e442e86698cdc910fb1bebd108424",
+      "code_excerpt": "    text = re.sub(r\"[^a-z0-9]+\", \"-\", text)"
+    }
+  ]
+}

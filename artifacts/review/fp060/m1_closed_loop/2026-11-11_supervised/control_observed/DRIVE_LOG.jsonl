@@ -1,0 +1,3 @@
+{"step": 1, "exit_code": 86, "at": "2026-11-11T13:41:23", "action": "CRASHED", "stderr": "", "orphans": [{"run": 1, "agent": "claude", "pid": 32688, "grace_s": 2.0, "alive": [30848, 32688]}]}
+{"step": 2, "exit_code": 0, "at": "2026-11-11T13:41:23", "action": "IDLE"}
+{"step": 3, "exit_code": 0, "at": "2026-11-11T13:41:25", "action": "IDLE"}

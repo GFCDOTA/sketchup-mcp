@@ -8811,6 +8811,72 @@
       "blob_sha": "9a3c649da379eee957f06ebfb38d94be8c0afe40",
       "blob_size": 2350,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/README.md",
+      "blob_sha": "6e1f332ce84f21948b249cfb92cf4e5db45d1a92",
+      "blob_size": 4672,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/control_observed/DRIVE_LOG.jsonl",
+      "blob_sha": "25323180daf896713f25128f9a367e1097d63655",
+      "blob_size": 342,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/control_observed/ORPHAN_CHECKS.jsonl",
+      "blob_sha": "fca6f9d70d8d1f451a5e33348148a94c31228c30",
+      "blob_size": 85,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/control_observed/REPORT.json",
+      "blob_sha": "878fb8671f425ac8ce523b1f656c787206a46358",
+      "blob_size": 1895,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/control_observed/REPORT.md",
+      "blob_sha": "eb8f95f74bb487a7475dc151b31017e419346ed6",
+      "blob_size": 1613,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/DRIVE_LOG.jsonl",
+      "blob_sha": "27f06f837aaa8fdea080ccc3de8272811cf1c92b",
+      "blob_size": 2909,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/ORPHAN_CHECKS.jsonl",
+      "blob_sha": "e6e80b9c0f93709fdecb6dd32c867cdb3402b495",
+      "blob_size": 73,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/REPORT.json",
+      "blob_sha": "51988c92f3e36adf9d7c5d05d882ab7b43dc4025",
+      "blob_size": 4803,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/REPORT.md",
+      "blob_sha": "09f599e40893bdd996ef65ffeda9194e3eb05e1a",
+      "blob_size": 2577,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/verdict_e003_a2.json",
+      "blob_sha": "1ae096d51e6de968fdaf3243f0b367d30e8ce483",
+      "blob_size": 1046,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/verdict_e007_a1.json",
+      "blob_sha": "9fff89a5ef8778b864920b84356b10bdb2cd441c",
+      "blob_size": 527,
+      "owner_group": "artifacts"
     }
   ]
 }
