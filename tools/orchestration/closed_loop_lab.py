@@ -657,8 +657,9 @@ def orphan_checks(lab: Lab) -> list[dict]:
     return [json.loads(ln) for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()] if path.exists() else []
 
 
-def check_orphans(lab: Lab, store: EventStore, grace_s: float = ORPHAN_GRACE_S) -> list[dict]:
+def check_orphans(lab: Lab, store: EventStore, grace_s: float | None = None) -> list[dict]:
     """Para cada run sem termino ainda nao verificado: espera `grace_s` e lista os PIDs vivos da arvore. So observa."""
+    grace_s = ORPHAN_GRACE_S if grace_s is None else grace_s
     done = {c["run"] for c in orphan_checks(lab)}
     pending = [r for r in store.runs() if r["ended_at"] is None and r["id"] not in done]
     if not pending:
@@ -804,14 +805,25 @@ def preflight() -> dict:
     return out
 
 
+def _spawn_step(argv: list, env: dict) -> tuple[int, str, str]:
+    """Um `step` num processo novo. A saida e JSON ASCII (`_emit`), entao o pipe nao depende da code page."""
+    r = subprocess.run(argv, cwd=ex.repo_root(), env=env, capture_output=True, text=True, encoding="ascii",
+                       errors="backslashreplace")
+    return r.returncode, r.stdout, r.stderr
+
+
 def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, fault: str | None = None,
-           kill_during: str | None = None, runner_kind: str = "auto") -> int:
+           kill_during: str | None = None, runner_kind: str = "auto", *,
+           run_step: Callable[[list, dict], tuple[int, str, str]] | None = None,
+           preflight_fn: Callable[[], dict] | None = None, sleep: Callable[[float], None] = time.sleep,
+           monotonic: Callable[[], float] = time.monotonic) -> int:
     """Um processo NOVO por step. Sem semente previa, semeia; com semente, RETOMA (o estado esta no SQLite e no git).
     Com `fault`, o relatorio passa a medir a prova NEGATIVA: PASS = a falha foi tratada como falha ate o DLQ."""
     if fault:
         declare_fault(lab, fault)
     log = lab.root / "DRIVE_LOG.jsonl"
-    pre = preflight()
+    run_step = run_step or _spawn_step
+    pre = (preflight_fn or preflight)()
     (lab.root / "PREFLIGHT.json").write_text(json.dumps(pre, indent=1), encoding="utf-8")
     if not pre["ok"]:
         _emit({"action": "BLOCKED", "preflight": pre})
@@ -826,12 +838,13 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
             argv += ["--crash-on", crash_pending]
         if kill_pending:
             argv += ["--kill-during", kill_pending]
-        r = subprocess.run(argv, cwd=ex.repo_root(), env=fault_env(lab), capture_output=True, text=True, encoding="ascii",
-                           errors="backslashreplace")
+        returncode, out, err = run_step(argv, fault_env(lab))
         try:
-            res = json.loads(r.stdout.strip().splitlines()[-1])
+            res = json.loads(out.strip().splitlines()[-1])
+            if not isinstance(res, dict) or "action" not in res:
+                raise ValueError("saida do step sem acao")
         except (ValueError, IndexError):
-            res = {"action": "CRASHED" if r.returncode == CRASH_EXIT else "STEP_ERROR", "stderr": r.stderr[-300:]}
+            res = {"action": "CRASHED" if returncode == CRASH_EXIT else "STEP_ERROR", "stderr": err[-300:]}
         if res["action"] == "CRASHED":
             orphans = check_orphans(lab, store)          # so um CLI que estava no ar deixa run sem termino
             res["orphans"] = orphans
@@ -839,17 +852,17 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
                 kill_pending = None
             else:
                 crash_pending = None
-        entry = {"step": n, "exit_code": r.returncode, "at": time.strftime("%Y-%m-%dT%H:%M:%S"), **res}
+        entry = {"step": n, "exit_code": returncode, "at": time.strftime("%Y-%m-%dT%H:%M:%S"), **res}
         with log.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
         _emit(entry)
         if res["action"] in ("TERMINAL", "PAUSED", "STEP_ERROR"):
             break
         if res["action"] == "IDLE":
-            idle_since = idle_since or time.monotonic()
-            if time.monotonic() - idle_since > idle_limit_s:
+            idle_since = monotonic() if idle_since is None else idle_since
+            if monotonic() - idle_since > idle_limit_s:
                 break
-            time.sleep(2)
+            sleep(2)
         else:
             idle_since = None
     rep = report(lab, store)
