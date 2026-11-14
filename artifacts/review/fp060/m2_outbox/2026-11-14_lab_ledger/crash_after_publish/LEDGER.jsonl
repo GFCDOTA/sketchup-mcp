@@ -1,0 +1,2 @@
+{"key": "lab:slug:review:d329e42645629f31969c1e541f7e8bfea01751cc:REQUEST_CHANGES", "operation": "publish_review", "payload": {"findings": 1, "head_sha": "d329e42645629f31969c1e541f7e8bfea01751cc", "round": 1, "verdict": "REQUEST_CHANGES"}}
+{"key": "lab:slug:review:94c05aa5eda4538f2aef699d67fbe7a3acac9d0b:APPROVE", "operation": "publish_review", "payload": {"findings": 0, "head_sha": "94c05aa5eda4538f2aef699d67fbe7a3acac9d0b", "round": 2, "verdict": "APPROVE"}}
