@@ -273,8 +273,12 @@ def _run(tree: Path, tests: list[str], root: Path, ini_text: str, timeout: float
             facts.update({"is_appcontainer": True, "capabilities": 0, "canary": {"read_outside": "denied", "write_outside": "denied"}})
             tests_out, tests_err = log_dir / f"sandbox_{tag}_tests.out", log_dir / f"sandbox_{tag}_tests.err"
             # `--confcutdir .`: sem ele o pytest faz stat no pai do workspace ao coletar, e o AppContainer nega (medido).
+            # No Windows Server 2025 o AppContainer nao pode abrir o dispositivo nulo (medido no runner do CI; no Windows 11
+            # pode), e o pytest o abre em dois pontos. `--capture=sys` evita a captura por descritor, que o abre para o stdin
+            # (a saida do teste segue capturada); `--log-file` da ao plugin de logging um arquivo do workspace no lugar dele.
             code = _contained(profile, [python, "-I", "-B", str(boot), str(runtime / "site"), *tests, "-q", "-p", "no:cacheprovider",
-                                        "-c", str(ini), "--rootdir", ".", "--confcutdir", "."],
+                                        "--capture=sys", "--log-file", str(coordinator / "pytest.log"), "-c", str(ini),
+                                        "--rootdir", ".", "--confcutdir", "."],
                               work, env, tests_out, tests_err, timeout)
             output = (_read(tests_out) + _read(tests_err)).strip()
         finally:

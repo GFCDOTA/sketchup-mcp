@@ -274,3 +274,34 @@ def test_workspace_that_cannot_be_removed_is_reported_not_hidden(tmp_path, monke
 
     monkeypatch.setattr(sb.shutil, "rmtree", locked)
     assert sb._remove_workspace(ws, tmp_path, retry_delays=(0.0, 0.0)) is False
+
+
+# Medido no runner Windows Server 2025 do CI: dentro do AppContainer abrir o dispositivo nulo e NEGADO (no Windows 11 e
+# permitido). O pytest o abre em dois pontos: a captura por descritor (stdin) e o plugin de logging (`log_file` padrao).
+# Este bootstrap reproduz a negacao para qualquer `open` do dispositivo.
+DENY_NULL_DEVICE = """import builtins
+import os
+
+_open = builtins.open
+
+
+def _deny_null(file, *args, **kwargs):
+    # O plugin de logging abre o caminho absoluto do dispositivo, entao compara-se so o final do caminho.
+    if isinstance(file, (str, os.PathLike)) and os.fspath(file).lower().endswith(os.devnull):
+        raise PermissionError(13, "Permission denied", file)
+    return _open(file, *args, **kwargs)
+
+
+builtins.open = _deny_null
+"""
+
+
+@windows_only
+def test_pytest_runs_where_the_null_device_is_denied_to_the_appcontainer(tmp_path, monkeypatch):
+    monkeypatch.setattr(sb, "BOOT_SOURCE", DENY_NULL_DEVICE + sb.BOOT_SOURCE)
+    tree = tree_with(tmp_path, test_ok=PASSING, test_bad="def test_bad():\n    print('saida do teste')\n    assert False\n")
+
+    run = sandboxed(tmp_path, tree, ["tests/test_ok.py", "tests/test_bad.py"])
+
+    assert run.exit_code == 1 and "1 failed, 1 passed" in run.output
+    assert "Captured stdout call" in run.output and "saida do teste" in run.output     # a saida do teste continua capturada
