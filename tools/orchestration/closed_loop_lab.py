@@ -10,6 +10,11 @@ parecer, prova de inspecao D-060-02, lacunas de aprovacao) e `event_executor` (e
 D-060-04). Sem GitHub, sem `--execute`, sem credencial de publicacao: o unico "efeito externo" e o commit no repositorio do
 laboratorio, feito SO pelo coordenador Python (FP-060 7.1).
 
+Publicacao (FP-060 M2, ensaio local): cada parecer APPROVE/REQUEST_CHANGES deixa uma entrada no outbox do `EventStore` na mesma
+transacao que conclui a revisao. O `step` a publica num arquivo local que faz o papel de sistema externo
+(`outbox_publisher.LedgerTarget`), reconciliando pela chave antes de enviar. Enquanto houver publicacao inacabada nenhum
+evento novo e reivindicado e o workflow nao e dado como terminado. Nada disto fala com o GitHub.
+
 Fluxo, um evento por `step` (cada `step` do `drive` roda num processo novo: nenhum estado vive em memoria):
   IMPLEMENT_REQUESTED|CORRECTION_REQUESTED -> Claude numa copia exportada (sem `.git`) -> manifesto: so `ALLOWED_CHANGES` muda ->
   testes pelo coordenador -> renova o lease (fencing) -> commit com trailer de idempotencia -> REVIEW_REQUESTED
@@ -49,6 +54,7 @@ from typing import Callable, NamedTuple
 
 from tools.orchestration import codex_reviewer as cr
 from tools.orchestration import event_executor as ex
+from tools.orchestration import outbox_publisher as op
 from tools.orchestration import process_supervisor as ps
 from tools.orchestration import sandboxed_tests as sb
 from tools.orchestration.event_store import EventStore, LeaseLost
@@ -68,6 +74,9 @@ SUPERVISED_LEASE_S = 30.0                    # com o CLI sob o supervisor o leas
 RENEW_INTERVAL_S = 2.0                       # coordenador morto => arvore morta na hora e evento retomavel em <= 30 s
 KILL_DELAY_S = 4.0                           # caos `--kill-during`: o coordenador morre este tempo depois de subir o CLI
 ORPHAN_GRACE_S = 2.0                         # espera antes de procurar sobreviventes da arvore de um CLI interrompido
+OUTBOX_TARGET = "lab_ledger"                 # o "sistema externo" do laboratorio: um arquivo local (nunca o GitHub)
+OUTBOX_LEASE_S = 20.0                        # curto: publicador morto entre o efeito e o ACK e reconciliado rapido
+PUBLISHED_VERDICTS = ("APPROVE", "REQUEST_CHANGES")   # NEEDS_HUMAN nao e publicado, como em `codex_reviewer.publish`
 TEST_TIMEOUT_S = 120
 TEST_ISOLATIONS = ("auto", "appcontainer", "env")   # auto = appcontainer no Windows; env = so allowlist (controle, sem sandbox)
 MAX_BUDGET_USD = "1"
@@ -222,6 +231,10 @@ class Lab:
     @property
     def sandboxes(self) -> Path:
         return self.root / "sandbox"
+
+    @property
+    def ledger(self) -> Path:
+        return self.root / "external" / "ledger.jsonl"
 
 
 # -- git do coordenador (config global/sistema vazias: sem hook, assinatura ou credencial do usuario) -------------------------
@@ -571,6 +584,28 @@ def _implement(lab: Lab, store: EventStore, ev: dict, runner: Runner, claude_bin
     return {"action": "DELIVERED", "event": ev["id"], "round": rnd, "head_sha": new, "reconciled": reconciled}
 
 
+def verdict_key(sha: str, kind: str) -> str:
+    """Um parecer por HEAD e veredito: repetir a revisao do mesmo SHA com o mesmo resultado nao gera segunda publicacao."""
+    return f"{JOB_ID}:review:{sha}:{kind}"
+
+
+def _verdict_outbox(rnd: int, sha: str, v: dict) -> dict:
+    return {"target": OUTBOX_TARGET, "operation": "publish_review", "idempotency_key": verdict_key(sha, v["verdict"]),
+            "payload": {"round": rnd, "head_sha": sha, "verdict": v["verdict"], "findings": len(v["findings"])}}
+
+
+def publish_outbox(lab: Lab, store: EventStore, owner: str,
+                   on_published: Callable[[dict, str], None] | None = None) -> list[dict]:
+    """Publica as entradas disponiveis do outbox no ledger do laboratorio (reconcilia pela chave antes de cada envio)."""
+    return op.drain(store, {OUTBOX_TARGET: op.LedgerTarget(lab.ledger)}, owner, lease_seconds=OUTBOX_LEASE_S,
+                    target=OUTBOX_TARGET, after_send=on_published)
+
+
+def outbox_unfinished(store: EventStore) -> bool:
+    """Ha efeito externo ainda sem desfecho (na fila, em retry ou com um publicador que pode ter morrido)."""
+    return any(o["status"] in ("PENDING", "RUNNING") for o in store.outbox_entries())
+
+
 def _blocked(store: EventStore, ev: dict, reason: str) -> dict:
     reason = _public(reason)
     store.publish("REVIEW_BLOCKED", f"{JOB_ID}:review_blocked:e{ev['id']}:a{ev['attempt']}", JOB_ID,
@@ -633,12 +668,13 @@ def _review(lab: Lab, store: EventStore, ev: dict, runner: Runner, codex_bin: st
             {"event_type": "REVIEW_APPROVED", "idempotency_key": f"{JOB_ID}:r{rnd}:approved:{sha[:16]}",
              "payload": {"round": rnd, "head_sha": sha, "files_reviewed": v["files_reviewed"], "tests": evidence["selected"]}},
             {"event_type": "WORKFLOW_COMPLETED", "idempotency_key": f"{JOB_ID}:workflow_completed",
-             "payload": {"head_sha": sha, "rounds": rnd}}])
+             "payload": {"head_sha": sha, "rounds": rnd}}], outbox_entries=[_verdict_outbox(rnd, sha, v)])
         return {"action": "APPROVED", "event": ev["id"], "round": rnd, "head_sha": sha}
     history = [*(p.get("history") or []), {"round": rnd, "head_sha": sha, "findings": v["findings"]}]
     store.complete(ev, result, follow_ups=[
         {"event_type": "REVIEW_CHANGES_REQUESTED", "idempotency_key": f"{JOB_ID}:r{rnd}:changes_requested:{sha[:16]}",
-         "payload": {"round": rnd, "base_sha": base, "head_sha": sha, "history": history}}])
+         "payload": {"round": rnd, "base_sha": base, "head_sha": sha, "history": history}}],
+        outbox_entries=[_verdict_outbox(rnd, sha, v)])
     return {"action": "CHANGES_REQUESTED", "event": ev["id"], "round": rnd, "findings": len(v["findings"])}
 
 
@@ -659,30 +695,41 @@ def _decide(store: EventStore, ev: dict, max_rounds: int) -> dict:
 def step(lab: Lab, store: EventStore, owner: str, *, claude_runner: Runner | None = None, codex_runner: Runner | None = None,
          claude_bin: str | None = None, codex_bin: str | None = None, on_claimed: Callable[[dict], None] | None = None,
          max_rounds: int = MAX_ROUNDS, on_cli_started: Callable[[str, dict, int], None] | None = None,
-         runner_kind: str = "auto") -> dict:
-    """Consome NO MAXIMO um evento. Pausa (kill switch) e estado terminal impedem novo claim e novo CLI."""
+         runner_kind: str = "auto", on_published: Callable[[dict, str], None] | None = None) -> dict:
+    """Consome NO MAXIMO um evento e publica o outbox antes e depois dele. Pausa (kill switch) impede publicacao, claim e
+    CLI; publicacao inacabada impede novo claim e o estado terminal. `outbox` no resultado lista o que foi publicado."""
     claude_runner, codex_runner = claude_runner or default_runner(runner_kind), codex_runner or default_runner(runner_kind)
     if lab.pause_flag.exists():
         return {"action": "PAUSED"}
+    published = publish_outbox(lab, store, owner, on_published)       # efeito que um step anterior deixou por publicar
+
+    def done(res: dict) -> dict:
+        return {**res, "outbox": published} if published else res
+
+    if outbox_unfinished(store):
+        return done({"action": "IDLE", "waiting": "outbox"})
     state = terminal(store)
     if state:
-        return {"action": "TERMINAL", "state": state}
+        return done({"action": "TERMINAL", "state": state})
     ev = store.claim(CONSUMED, owner, CLAIM_LEASE_S)
     if ev is None:
-        return {"action": "IDLE"}
+        return done({"action": "IDLE"})
     if on_claimed:
         on_claimed(ev)
     try:
         try:
             if ev["event_type"] in ("IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED"):
-                return _implement(lab, store, ev, claude_runner, claude_bin, on_cli_started)
-            if ev["event_type"] == "REVIEW_REQUESTED":
-                return _review(lab, store, ev, codex_runner, codex_bin, on_cli_started)
-            return _decide(store, ev, max_rounds)
+                res = _implement(lab, store, ev, claude_runner, claude_bin, on_cli_started)
+            elif ev["event_type"] == "REVIEW_REQUESTED":
+                res = _review(lab, store, ev, codex_runner, codex_bin, on_cli_started)
+            else:
+                res = _decide(store, ev, max_rounds)
         except LabError as exc:
-            return _fail(store, ev, str(exc))
+            res = _fail(store, ev, str(exc))
     except LeaseLost as exc:
-        return {"action": "LEASE_LOST", "event": ev["id"], "reason": str(exc)}
+        res = {"action": "LEASE_LOST", "event": ev["id"], "reason": str(exc)}
+    published += publish_outbox(lab, store, owner, on_published)      # o efeito do evento que acabou de ser concluido
+    return done(res)
 
 
 # -- orfaos: o que sobrou vivo da arvore de um CLI cujo coordenador morreu ---------------------------------------------------
@@ -738,6 +785,26 @@ def recorded_test_evidence(events: list[dict]) -> list[dict]:
     return found
 
 
+def expected_publications(events: list[dict]) -> list[str]:
+    """As chaves que DEVEM estar no ledger: um parecer publicavel por revisao concluida, derivado dos eventos."""
+    keys = []
+    for e in events:
+        if e["event_type"] != "REVIEW_REQUESTED" or e["status"] != "DONE" or not e["result"]:
+            continue
+        kind = (json.loads(e["result"]).get("verdict") or {}).get("verdict")
+        if kind in PUBLISHED_VERDICTS:
+            keys.append(verdict_key(json.loads(e["payload"])["head_sha"], kind))
+    return keys
+
+
+def ledger_keys(lab: Lab) -> list[str] | None:
+    """O que o "sistema externo" realmente recebeu. None = ledger ilegivel (nenhum criterio de publicacao passa)."""
+    try:
+        return [row["key"] for row in op.LedgerTarget(lab.ledger).lines()]
+    except op.TargetError:
+        return None
+
+
 def tests_sandboxed(evidence: list[dict]) -> bool:
     """Toda evidencia veio do AppContainer E carrega as duas provas da propria execucao (token e canario)."""
     return bool(evidence) and all(ev.get("isolation") == sb.ISOLATION and sb.proves_isolation(ev.get("sandbox")) for ev in evidence)
@@ -767,6 +834,9 @@ def report(lab: Lab, store: EventStore) -> dict:
     fault = declared_fault(lab)
     evidence = recorded_test_evidence(events)
     sandboxed = tests_sandboxed(evidence)
+    outbox, expected, in_ledger = store.outbox_entries(), expected_publications(events), ledger_keys(lab)
+    all_published = bool(expected) and in_ledger is not None and sorted(in_ledger) == sorted(expected) and all(
+        o["status"] == "DONE" for o in outbox)
     consumed = [e for e in events if fault and e["event_type"] in AGENT_EVENTS[FAULTS[fault][0]]]
     faulted_runs = [r for r in runs if fault and r["agent"] == FAULTS[fault][0]]
     negative = {
@@ -792,6 +862,8 @@ def report(lab: Lab, store: EventStore) -> dict:
         "orphan_cli_tree_dead_after_coordinator_kill": bool(interrupted) and all(
             r["id"] in checks and not checks[r["id"]]["alive"] for r in interrupted),
         "coordinator_tests_ran_in_os_sandbox": sandboxed,
+        "verdicts_published_once_via_outbox": all_published,
+        "interrupted_publication_was_reconciled": all_published and any(o["attempts"] >= 2 for o in outbox),
     }
     return {
         "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado", "lab": lab.root.name, "job_id": JOB_ID,
@@ -813,10 +885,13 @@ def report(lab: Lab, store: EventStore) -> dict:
         "commits": _must(["log", "--reverse", "--format=%H %s"], lab.repo).splitlines(),
         "transitions": len(transitions),
         "test_isolation": sorted({str(ev.get("isolation")) for ev in evidence}),
+        "outbox": [{"id": o["id"], "event": o["event_id"], "key": o["idempotency_key"], "status": o["status"],
+                    "attempts": o["attempts"]} for o in outbox],
+        "ledger": in_ledger,
         "limits": [("testes em AppContainer sem capacidades: contem arquivo e rede, NAO a integridade do resultado (o codigo testado "
                     "controla o exit code)") if sandboxed else "testes sem sandbox de SO comprovado (FP-060 P2)",
                    "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
-                   "sem GitHub, sem --execute, sem outbox externo",
+                   "sem GitHub, sem --execute; o alvo do outbox e um arquivo local que faz o papel de sistema externo",
                    "Job Object nao e sandbox: so prende a vida da arvore do CLI ao coordenador e ao lease"],
     }
 
@@ -839,6 +914,10 @@ def render_markdown(rep: dict) -> str:
                   f"run {c['run']} ({c['agent']}, pid {c['pid']}) apos {c['grace_s']}s: " + (f"VIVOS {c['alive']}" if c["alive"] else "nenhum processo vivo")
                   for c in rep["orphan_checks"]) or "nenhuma verificacao"),
               "Isolamento dos testes do coordenador (evidencia dos eventos concluidos): " + (", ".join(rep["test_isolation"]) or "nenhuma"),
+              "Outbox: " + ("; ".join(f"#{o['id']} `{o['key']}` {o['status']} em {o['attempts']} tentativa(s)"
+                                      for o in rep["outbox"]) or "vazio"),
+              "Ledger (o que o sistema externo recebeu): " + ("ILEGIVEL" if rep["ledger"] is None else
+                                                               f"{len(rep['ledger'])} linha(s), {len(set(rep['ledger']))} chave(s) distinta(s)"),
               "Reviews bloqueados: " + ("; ".join(rep["blocked_reviews"]) or "nenhum"),
               "Motivos de falha gravados nos eventos: " + ("; ".join(rep["failure_reasons"]) or "nenhum"),
               "", "Limites: " + "; ".join(rep["limits"]), ""]
@@ -884,7 +963,7 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
            kill_during: str | None = None, runner_kind: str = "auto", *,
            run_step: Callable[[list, dict], tuple[int, str, str]] | None = None,
            preflight_fn: Callable[[], dict] | None = None, sleep: Callable[[float], None] = time.sleep,
-           monotonic: Callable[[], float] = time.monotonic) -> int:
+           monotonic: Callable[[], float] = time.monotonic, crash_after_publish: bool = False) -> int:
     """Um processo NOVO por step. Sem semente previa, semeia; com semente, RETOMA (o estado esta no SQLite e no git).
     Com `fault`, o relatorio passa a medir a prova NEGATIVA: PASS = a falha foi tratada como falha ate o DLQ."""
     if fault:
@@ -899,10 +978,10 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
     store = EventStore(lab.db)
     if not lab.repo.exists():
         _emit(seed(lab, store))
-    crash_pending, kill_pending, idle_since = crash_on, kill_during, None
+    crash_pending, kill_pending, publish_crash_pending, idle_since = crash_on, kill_during, crash_after_publish, None
     for n in range(1, max_steps + 1):
         argv = [sys.executable, "-m", "tools.orchestration.closed_loop_lab", "step", "--test-isolation", lab.test_isolation,
-                "--lab", str(lab.root), "--runner", runner_kind]
+                *(["--crash-after-publish"] if publish_crash_pending else []), "--lab", str(lab.root), "--runner", runner_kind]
         if crash_pending:
             argv += ["--crash-on", crash_pending]
         if kill_pending:
@@ -919,6 +998,9 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
             res["orphans"] = orphans
             if orphans:
                 kill_pending = None
+            elif publish_crash_pending and any(o["status"] == "RUNNING" for o in store.outbox_entries()):
+                publish_crash_pending = False            # so um publicador morto deixa entrada RUNNING no outbox
+                res["interrupted_publication"] = True
             else:
                 crash_pending = None
         entry = {"step": n, "exit_code": returncode, "at": time.strftime("%Y-%m-%dT%H:%M:%S"), **res}
@@ -959,13 +1041,16 @@ def main(argv: list[str] | None = None) -> int:
                                        help="caos: o coordenador morre com este CLI no ar (1a tentativa do evento)")
         sub.choices[name].add_argument("--runner", choices=("auto", "supervised", "observed"), default="auto",
                                        help="observed = sem Job Object (controle do experimento)")
+        sub.choices[name].add_argument("--crash-after-publish", action="store_true",
+                                       help="caos: o coordenador morre entre o efeito externo e o ACK (1a tentativa da entrada)")
     ns = ap.parse_args(argv)
     lab = Lab(ns.lab.resolve(), ns.test_isolation)
     lab.root.mkdir(parents=True, exist_ok=True)
     ensure_isolated(lab.root)
     os.environ.setdefault("EVENT_BRIDGE_STATE_PATH", str(lab.root / "governance" / "event_bridge.json"))   # nada em runs/ de producao
     if ns.cmd == "drive":
-        return _drive(lab, ns.max_steps, ns.crash_on, ns.idle_limit, ns.fault, ns.kill_during, ns.runner)
+        return _drive(lab, ns.max_steps, ns.crash_on, ns.idle_limit, ns.fault, ns.kill_during, ns.runner,
+                      crash_after_publish=ns.crash_after_publish)
     store = EventStore(lab.db)
     if ns.cmd == "seed":
         res = seed(lab, store)
@@ -979,8 +1064,13 @@ def main(argv: list[str] | None = None) -> int:
         def kill_later(agent: str, ev: dict, pid: int) -> None:
             if agent == ns.kill_during and ev["attempt"] == 1:
                 threading.Timer(KILL_DELAY_S, os._exit, [CRASH_EXIT]).start()   # morre com o CLI no ar; o job e fechado pelo SO
+        def die_after_publish(entry: dict, reference: str) -> None:
+            if entry["attempts"] == 1:
+                os._exit(CRASH_EXIT)                                             # efeito aplicado, ACK nunca gravado
+
         res = step(lab, store, f"{OWNER_PREFIX}{os.getpid()}", on_claimed=crash if ns.crash_on else None,
-                   on_cli_started=kill_later if ns.kill_during else None, runner_kind=ns.runner)
+                   on_cli_started=kill_later if ns.kill_during else None, runner_kind=ns.runner,
+                   on_published=die_after_publish if ns.crash_after_publish else None)
     _emit(res)
     return 0
 
