@@ -688,3 +688,200 @@ def test_report_fails_m1_when_the_correction_loop_was_not_exercised(env):
     assert rep["criteria"]["workflow_completed"] is True
     assert rep["criteria"]["request_changes_then_correction"] is False
     assert rep["verdict"] == "FAIL"
+
+
+# -- driver, CLI e verificacao de orfaos (lacunas apontadas pelo crapper, 2026-11-13) -----------------------------------------
+def _ok_preflight():
+    return {"ok": True, "claude": {"version": "fake"}, "codex": {"version": "fake"}}
+
+
+def in_process_steps(lab, claude, codex, seen):
+    """Substitui o processo `step` por uma chamada em-processo com CLIs falsos; devolve o que o processo imprimiria."""
+    def run_step(argv, env):
+        seen.append(list(argv))
+        res = lab_mod.step(lab, EventStore(lab.db), f"lab-coordinator:{len(seen)}", claude_runner=claude, codex_runner=codex,
+                           claude_bin="claude", codex_bin="codex")
+        return 0, json.dumps(res), ""
+    return run_step
+
+
+def scripted_steps(seen, *outputs):
+    """Cada chamada devolve a proxima tupla (exit code, stdout, stderr); a ultima se repete."""
+    def run_step(argv, env):
+        seen.append(list(argv))
+        out = outputs[min(len(seen), len(outputs)) - 1]
+        return out() if callable(out) else out
+    return run_step
+
+
+PAUSED = (0, json.dumps({"action": "PAUSED"}), "")
+IDLE = (0, json.dumps({"action": "IDLE"}), "")
+
+
+def drive_log(lab):
+    return [json.loads(ln) for ln in (lab.root / "DRIVE_LOG.jsonl").read_text(encoding="utf-8").splitlines()]
+
+
+@pytest.fixture()
+def fresh_lab(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "governance" / "event_bridge.json"))
+    monkeypatch.setattr(lab_mod, "ORPHAN_GRACE_S", 0.0)
+    lab = Lab(tmp_path / "lab")
+    lab.root.mkdir()
+    return lab
+
+
+def test_drive_seeds_runs_steps_until_terminal_and_writes_log_and_reports(fresh_lab, capsys):
+    lab, seen = fresh_lab, []
+    claude = FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX))
+    codex = FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE"))
+
+    code = lab_mod._drive(lab, 20, None, 5.0, run_step=in_process_steps(lab, claude, codex, seen), preflight_fn=_ok_preflight)
+
+    assert [e["action"] for e in drive_log(lab)] == ["DELIVERED", "CHANGES_REQUESTED", "CORRECTION_DISPATCHED", "DELIVERED",
+                                                     "APPROVED", "TERMINAL"]
+    assert seen[0][-4:] == ["--lab", str(lab.root), "--runner", "auto"] and "step" in seen[0]
+    rep = json.loads((lab.root / "REPORT.json").read_text(encoding="utf-8"))
+    assert rep["criteria"]["workflow_completed"] is True and (lab.root / "REPORT.md").exists()
+    assert code == 1                                   # nenhum CLI foi morto com o coordenador: o relatorio M1 nao passa
+    assert capsys.readouterr().out.isascii()
+
+
+def test_drive_does_not_die_on_a_reason_outside_the_console_code_page(fresh_lab, capsys):
+    lab, seen = fresh_lab, []
+    reason = "Not logged in " + chr(0xB7) + " Please run /login " + chr(0xFFFD)        # o caso real de 2026-11-10
+    failed = (0, json.dumps({"action": "FAILED", "reason": reason}), "")
+
+    lab_mod._drive(lab, 5, None, 5.0, run_step=scripted_steps(seen, failed, PAUSED), preflight_fn=_ok_preflight)
+
+    out = capsys.readouterr().out
+    assert out.isascii() and len(seen) == 2
+    assert drive_log(lab)[0]["reason"] == reason
+
+
+def test_drive_checks_the_tree_after_a_crash_and_spends_each_chaos_switch_once(fresh_lab, monkeypatch):
+    lab, seen = fresh_lab, []
+    monkeypatch.setattr(lab_mod.ps, "tree_pids", lambda pid, since=None: [], raising=False)
+    monkeypatch.setattr(lab_mod.ex, "pid_alive", lambda pid: False)
+
+    def cli_in_the_air():                              # o step morreu com um CLI registrado e sem termino
+        EventStore(lab.db).run_started(1, "claude", ["C:/bin/claude.exe"], lab.repo, 4321, lab.logs / "o", lab.logs / "e")
+        return lab_mod.CRASH_EXIT, "", ""
+
+    lab_mod._drive(lab, 4, "REVIEW_REQUESTED", 5.0, kill_during="claude", preflight_fn=_ok_preflight,
+                   run_step=scripted_steps(seen, cli_in_the_air, (lab_mod.CRASH_EXIT, "", ""), PAUSED))
+
+    assert "--kill-during" in seen[0] and "--crash-on" in seen[0]
+    assert "--kill-during" not in seen[1] and "--crash-on" in seen[1]       # 1o crash deixou run sem termino: era o kill
+    assert "--kill-during" not in seen[2] and "--crash-on" not in seen[2]   # 2o crash sem run novo: era o crash-on
+    log = drive_log(lab)
+    assert log[0]["action"] == "CRASHED"
+    assert log[0]["orphans"] == [{"run": 1, "agent": "claude", "pid": 4321, "grace_s": 0.0, "alive": []}]
+    assert log[1]["orphans"] == []
+
+
+def test_drive_stops_after_idling_longer_than_the_limit(fresh_lab):
+    lab, seen = fresh_lab, []
+    clock = [0.0]                                      # relogio falso: so o `sleep` do driver o avanca (2 s por passo ocioso)
+    lab_mod._drive(lab, 50, None, 3.0, run_step=scripted_steps(seen, IDLE), preflight_fn=_ok_preflight,
+                   sleep=lambda seconds: clock.__setitem__(0, clock[0] + seconds), monotonic=lambda: clock[0])
+    assert len(seen) == 3 and clock[0] == 4.0
+
+
+def test_drive_restarts_the_idle_budget_after_a_step_that_did_work(fresh_lab):
+    lab, seen = fresh_lab, []
+    clock = [0.0]
+    worked = (0, json.dumps({"action": "DELIVERED"}), "")
+    lab_mod._drive(lab, 50, None, 3.0, preflight_fn=_ok_preflight, monotonic=lambda: clock[0],
+                   sleep=lambda seconds: clock.__setitem__(0, clock[0] + seconds),
+                   run_step=scripted_steps(seen, IDLE, IDLE, worked, IDLE))
+    assert [e["action"] for e in drive_log(lab)] == ["IDLE", "IDLE", "DELIVERED", "IDLE", "IDLE", "IDLE"]
+
+
+def test_drive_stops_at_a_step_that_neither_crashed_nor_answered(fresh_lab):
+    lab, seen = fresh_lab, []
+    lab_mod._drive(lab, 50, None, 5.0, run_step=scripted_steps(seen, (1, "Traceback ...", "boom")), preflight_fn=_ok_preflight)
+    log = drive_log(lab)
+    assert len(seen) == 1 and log[0]["action"] == "STEP_ERROR" and log[0]["stderr"] == "boom"
+
+
+def test_drive_is_blocked_and_seeds_nothing_when_a_cli_is_missing(fresh_lab, capsys):
+    lab, seen = fresh_lab, []
+    code = lab_mod._drive(lab, 5, None, 5.0, run_step=scripted_steps(seen, PAUSED),
+                          preflight_fn=lambda: {"ok": False, "codex": {"version": "INDISPONIVEL"}})
+    assert code == 2 and not seen and not lab.repo.exists()
+    assert json.loads(capsys.readouterr().out.strip().splitlines()[-1])["action"] == "BLOCKED"
+
+
+def test_drive_resumes_a_seeded_lab_without_seeding_again(env):
+    lab, store = env
+    seen = []
+    lab_mod._drive(lab, 5, None, 5.0, run_step=scripted_steps(seen, PAUSED), preflight_fn=_ok_preflight)
+    assert len(store.events(lab_mod.JOB_ID)) == 1 and commits(lab) == 1 and len(seen) == 1
+
+
+def test_check_orphans_records_each_unfinished_run_once(env, monkeypatch):
+    lab, store = env
+    monkeypatch.setattr(lab_mod.ps, "tree_pids", lambda pid, since=None: [pid, pid + 1], raising=False)
+    monkeypatch.setattr(lab_mod.ex, "pid_alive", lambda pid: True)
+    run_id = store.run_started(1, "codex", ["C:/bin/codex.exe"], lab.repo, 700, lab.logs / "o", lab.logs / "e")
+
+    first = lab_mod.check_orphans(lab, store, grace_s=0.0)
+    second = lab_mod.check_orphans(lab, store, grace_s=0.0)
+
+    assert [(c["run"], c["agent"], c["pid"]) for c in first] == [(run_id, "codex", 700)] and 700 in first[0]["alive"]
+    assert second == [] and len(lab_mod.orphan_checks(lab)) == 1
+
+
+def test_check_orphans_ignores_runs_that_finished(env):
+    lab, store = env
+    run_id = store.run_started(1, "codex", ["C:/bin/codex.exe"], lab.repo, 700, lab.logs / "o", lab.logs / "e")
+    store.run_finished(run_id, 0, False, "exit 0; containment=job_object")
+    assert lab_mod.check_orphans(lab, store, grace_s=0.0) == [] and lab_mod.orphan_checks(lab) == []
+
+
+def _last_json(capsys):
+    return json.loads(capsys.readouterr().out.strip().splitlines()[-1])
+
+
+def test_cli_seed_report_and_paused_step_speak_json(fresh_lab, capsys):
+    lab = fresh_lab
+    assert lab_mod.main(["seed", "--lab", str(lab.root)]) == 0
+    assert _last_json(capsys)["action"] == "SEEDED"
+    assert lab_mod.main(["report", "--lab", str(lab.root)]) == 0
+    assert _last_json(capsys)["verdict"] == "FAIL"
+    lab.pause_flag.write_text("pausado", encoding="utf-8")
+    assert lab_mod.main(["step", "--lab", str(lab.root)]) == 0
+    assert _last_json(capsys) == {"action": "PAUSED"}
+
+
+def test_cli_drive_forwards_every_switch_to_the_driver(fresh_lab, monkeypatch):
+    got = {}
+    monkeypatch.setattr(lab_mod, "_drive", lambda *a, **k: got.update(args=a, kwargs=k) or 7)
+
+    code = lab_mod.main(["drive", "--lab", str(fresh_lab.root), "--crash-on", "REVIEW_REQUESTED", "--kill-during", "codex",
+                         "--runner", "observed", "--max-steps", "9", "--idle-limit", "3", "--fault", "codex-auth"])
+
+    assert code == 7
+    assert got["args"] == (Lab(fresh_lab.root.resolve()), 9, "REVIEW_REQUESTED", 3.0, "codex-auth", "codex", "observed")
+
+
+def test_cli_refuses_a_lab_inside_a_git_repository(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "governance" / "event_bridge.json"))
+    (tmp_path / ".git").mkdir()
+    with pytest.raises(LabError, match="repositorio git"):
+        lab_mod.main(["seed", "--lab", str(tmp_path / "lab")])
+
+
+def test_observed_runner_feeds_stdin_reports_the_pid_and_declares_no_containment(tmp_path):
+    pids = []
+    res = lab_mod.run_observed([sys.executable, "-c", "import sys; sys.stdout.write(sys.stdin.read().upper())"], tmp_path,
+                               dict(os.environ), "abc", 60, pids.append)
+    assert (res.exit_code, res.stdout, res.timed_out, res.containment) == (0, "ABC", False, "none")
+    assert pids == [res.pid] and res.pid > 0
+
+
+def test_observed_runner_kills_and_flags_a_cli_that_exceeds_the_timeout(tmp_path):
+    res = lab_mod.run_observed([sys.executable, "-c", "import time; time.sleep(60)"], tmp_path, dict(os.environ), "", 1,
+                               lambda pid: None)
+    assert res.timed_out is True and res.exit_code == -1
