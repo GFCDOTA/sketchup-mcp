@@ -754,3 +754,89 @@ class TestEventTypes:
             "WORKFLOW_COMPLETED",
         }
         assert required <= EVENT_TYPES
+
+
+# -- lease boundary & audit trail (gaps exposed by mutation testing, 2026-11-13) -----
+LEASE_CALLS = {
+    "claim": lambda s, ev, entry, lease: s.claim("REVIEW_REQUESTED", "w2", lease),
+    "claim_by_id": lambda s, ev, entry, lease: s.claim_by_id(ev["id"] + 1, "w2", lease),
+    "renew": lambda s, ev, entry, lease: s.renew(ev, lease),
+    "claim_outbox": lambda s, ev, entry, lease: s.claim_outbox("pub", lease),
+    "renew_outbox": lambda s, ev, entry, lease: s.renew_outbox(entry, lease),
+}
+
+
+@pytest.fixture()
+def leased(store):
+    """One RUNNING event, one PENDING event, one RUNNING outbox entry and one PENDING outbox entry."""
+    store.publish("IMPLEMENT_REQUESTED", "k0", "j0", {})
+    first = store.claim("IMPLEMENT_REQUESTED", "w0", 60)
+    store.complete(first, {}, outbox_entries=[
+        {"target": "github", "operation": "comment", "payload": {}, "idempotency_key": "o1"},
+        {"target": "github", "operation": "comment", "payload": {}, "idempotency_key": "o2"}])
+    entry = store.claim_outbox("pub0", 60)
+    store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+    ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+    store.publish("REVIEW_REQUESTED", "k2", "j2", {})
+    return ev, entry
+
+
+class TestLeaseBoundary:
+    @pytest.mark.parametrize("call", sorted(LEASE_CALLS))
+    def test_zero_length_lease_is_rejected(self, store, leased, call):
+        with pytest.raises(ValueError, match="lease_seconds must be positive"):
+            LEASE_CALLS[call](store, *leased, 0)
+
+    @pytest.mark.parametrize("call", sorted(LEASE_CALLS))
+    def test_sub_second_lease_is_accepted(self, store, leased, call):
+        assert LEASE_CALLS[call](store, *leased, 0.5)
+
+
+class TestAuditTrail:
+    def test_claim_transition_names_first_claim_then_reclaim_with_previous_owner(self, store, clock):
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        store.claim("IMPLEMENT_REQUESTED", "w1", 30)
+        clock.advance(31)
+        store.claim("IMPLEMENT_REQUESTED", "w2", 60)
+        details = [t["detail"] for t in store.transitions() if t["to_status"] == "RUNNING"]
+        assert details == ["claimed; attempt 1", "reclaimed expired lease of w1; attempt 2"]
+
+    def test_claim_by_id_transition_names_first_claim_then_reclaim_with_previous_owner(self, store, clock):
+        eid, _ = store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        store.claim_by_id(eid, "w1", 30)
+        clock.advance(31)
+        store.claim_by_id(eid, "w2", 60)
+        details = [t["detail"] for t in store.transitions() if t["to_status"] == "RUNNING"]
+        assert details == ["claimed (by id); attempt 1", "reclaimed expired lease of w1 (by id); attempt 2"]
+
+    def test_followup_publication_is_logged_once_by_the_completing_owner(self, store, clock):
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        fids, _ = store.complete(ev, {}, follow_ups=[
+            {"event_type": "REVIEW_REQUESTED", "idempotency_key": "k-review", "payload": {}}])
+        logged = [t for t in store.transitions() if t["event_id"] == fids[0]]
+        assert [(t["from_status"], t["to_status"], t["actor"]) for t in logged] == [(None, "PENDING", "w1")]
+        assert logged[0]["detail"] == f"published REVIEW_REQUESTED by event {ev['id']}"
+
+    def test_followup_with_an_existing_key_is_not_logged_as_a_new_publication(self, store, clock):
+        existing, _ = store.publish("REVIEW_REQUESTED", "k-review", "j9", {})
+        store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        fids, _ = store.complete(ev, {}, follow_ups=[
+            {"event_type": "REVIEW_REQUESTED", "idempotency_key": "k-review", "payload": {}}])
+        assert fids == [existing]
+        assert len([t for t in store.transitions() if t["event_id"] == existing]) == 1
+
+
+class TestCanonicalJson:
+    def test_stored_json_does_not_depend_on_the_key_order_of_the_caller(self, store, clock):
+        eid, _ = store.publish("IMPLEMENT_REQUESTED", "k1", "j1", {"b": 1, "a": 2})
+        ev = store.claim("IMPLEMENT_REQUESTED", "w1", 60)
+        fids, _ = store.complete(ev, {"z": 1, "y": 2}, follow_ups=[
+            {"event_type": "REVIEW_REQUESTED", "idempotency_key": "k-review", "payload": {"b": 1, "a": 2}}],
+            outbox_entries=[{"target": "github", "operation": "comment", "payload": {"b": 1, "a": 2},
+                             "idempotency_key": "o1"}])
+        assert store.get(eid)["payload"] == '{"a": 2, "b": 1}'
+        assert store.get(eid)["result"] == '{"y": 2, "z": 1}'
+        assert store.get(fids[0])["payload"] == '{"a": 2, "b": 1}'
+        assert store.pending_outbox()[0]["payload"] == '{"a": 2, "b": 1}'
