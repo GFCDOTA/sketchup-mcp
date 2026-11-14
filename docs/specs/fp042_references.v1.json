@@ -8877,6 +8877,114 @@
       "blob_sha": "9fff89a5ef8778b864920b84356b10bdb2cd441c",
       "blob_size": 527,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/README.md",
+      "blob_sha": "b891211a44cb1f9db37cbc7e1b2e869ff2b996b4",
+      "blob_size": 5494,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/DRIVE_LOG.jsonl",
+      "blob_sha": "7231f3d1a97eaa482ebdada48563365cf326f6d3",
+      "blob_size": 2757,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/ORPHAN_CHECKS.jsonl",
+      "blob_sha": "09d34867c952fe1226f54e56ca7f9ac459d46a2e",
+      "blob_size": 73,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/REPORT.json",
+      "blob_sha": "4f8d886eb889eba5f631f1af2d09b5aa26863720",
+      "blob_size": 4983,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/REPORT.md",
+      "blob_sha": "5835c5b4c72038838b9a3871034ad6c09cc9a856",
+      "blob_size": 2801,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/TEST_EVIDENCE.json",
+      "blob_sha": "42694795b446899a99584dcfabbf54fb45587af1",
+      "blob_size": 2566,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_implement_e001_a2_probe.txt",
+      "blob_sha": "c61db5efa6a9bec287b7e29986fe58bc5008f423",
+      "blob_size": 81,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_implement_e001_a2_tests.txt",
+      "blob_sha": "69fcc1c5f8ccfd5e757b9db98978fdbde60cad25",
+      "blob_size": 98,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_implement_e005_a1_probe.txt",
+      "blob_sha": "c61db5efa6a9bec287b7e29986fe58bc5008f423",
+      "blob_size": 81,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_implement_e005_a1_tests.txt",
+      "blob_sha": "01bf2286bd62deb28f50acc47b5f8bb7b7f9435d",
+      "blob_size": 99,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_review_e003_a2_probe.txt",
+      "blob_sha": "c61db5efa6a9bec287b7e29986fe58bc5008f423",
+      "blob_size": 81,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_review_e003_a2_tests.txt",
+      "blob_sha": "69fcc1c5f8ccfd5e757b9db98978fdbde60cad25",
+      "blob_size": 98,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_review_e007_a1_probe.txt",
+      "blob_sha": "c61db5efa6a9bec287b7e29986fe58bc5008f423",
+      "blob_size": 81,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_review_e007_a1_tests.txt",
+      "blob_sha": "01bf2286bd62deb28f50acc47b5f8bb7b7f9435d",
+      "blob_size": 99,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_seed_check_probe.txt",
+      "blob_sha": "c61db5efa6a9bec287b7e29986fe58bc5008f423",
+      "blob_size": 81,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_seed_check_tests.txt",
+      "blob_sha": "4420a35f65f070829026d4a0778baca9b0c1ae88",
+      "blob_size": 1588,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/verdict_e003_a2.json",
+      "blob_sha": "c7688660233ffb1f683118e6b5f71c19477166ca",
+      "blob_size": 951,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/verdict_e007_a1.json",
+      "blob_sha": "59d4c473f302708fdd237eb3cd073af7325f776e",
+      "blob_size": 663,
+      "owner_group": "artifacts"
     }
   ]
 }

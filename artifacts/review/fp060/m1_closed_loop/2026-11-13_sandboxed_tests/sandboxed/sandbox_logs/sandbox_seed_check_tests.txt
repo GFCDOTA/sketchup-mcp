@@ -1,0 +1,39 @@
+.FFF.                                                                    [100%]
+================================== FAILURES ===================================
+____________________ test_collapses_spaces_and_strips_ends ____________________
+
+    def test_collapses_spaces_and_strips_ends():
+>       assert slugify("  Hello   World  ") == "hello-world"
+E       AssertionError: assert 'hello---world' == 'hello-world'
+E         
+E         - hello-world
+E         + hello---world
+E         ?       ++
+
+tests\test_lab_slug.py:10: AssertionError
+__________________ test_punctuation_becomes_a_single_hyphen ___________________
+
+    def test_punctuation_becomes_a_single_hyphen():
+>       assert slugify("Hello, World!") == "hello-world"
+E       AssertionError: assert 'hello--world-' == 'hello-world'
+E         
+E         - hello-world
+E         + hello--world-
+E         ?       +     +
+
+tests\test_lab_slug.py:14: AssertionError
+_____________________ test_no_leading_or_trailing_hyphen ______________________
+
+    def test_no_leading_or_trailing_hyphen():
+>       assert slugify("--a__b--") == "a-b"
+E       AssertionError: assert '--a--b--' == 'a-b'
+E         
+E         - a-b
+E         + --a--b--
+
+tests\test_lab_slug.py:18: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_lab_slug.py::test_collapses_spaces_and_strips_ends - Assert...
+FAILED tests/test_lab_slug.py::test_punctuation_becomes_a_single_hyphen - Ass...
+FAILED tests/test_lab_slug.py::test_no_leading_or_trailing_hyphen - Assertion...
+3 failed, 2 passed in 0.07s
