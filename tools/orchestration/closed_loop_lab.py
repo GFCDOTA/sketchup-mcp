@@ -23,8 +23,13 @@ Processos: no Windows cada CLI roda dentro de um Job Object (`process_supervisor
 enquanto ele roda e mata a ARVORE inteira se o lease se perde, no timeout ou quando o coordenador morre (o SO fecha o handle
 do job). Fora do Windows o CLI roda sem contencao e o relatorio registra isso. Job Object NAO e sandbox.
 
-Limites declarados: os testes rodam com env por allowlist, SEM sandbox de SO (`env_allowlist_only`; AppContainer e
-FP-060 P2); o APPROVE daqui e tecnico de laboratorio e nao equivale a review independente no GitHub (M2). O lease protege a
+Testes do coordenador: no Windows (`--test-isolation auto`) rodam sobre uma copia da arvore dentro de um AppContainer sem
+capacidades (`sandboxed_tests.run_pytest`): sem rede e sem acesso a arquivo fora do workspace, provado a cada execucao pelo
+token do processo e por um canario. Sandbox que nao sobe = evento falho; nunca ha fallback para rodar os testes fora dele.
+Fora do Windows, ou com `--test-isolation env`, rodam so com env por allowlist e o relatorio REPROVA o criterio de isolamento.
+
+Limites declarados: o sandbox contem o que o codigo testado alcanca, nao a integridade do resultado (esse codigo controla o
+exit code do pytest); o APPROVE daqui e tecnico de laboratorio e nao equivale a review independente no GitHub (M2). O lease protege a
 escrita no SQLite e e renovado imediatamente antes do commit; a janela entre a renovacao e o commit existe e e coberta pela
 reconciliacao por trailer (consulta o estado antes de repetir o efeito)."""
 from __future__ import annotations
@@ -45,6 +50,7 @@ from typing import Callable, NamedTuple
 from tools.orchestration import codex_reviewer as cr
 from tools.orchestration import event_executor as ex
 from tools.orchestration import process_supervisor as ps
+from tools.orchestration import sandboxed_tests as sb
 from tools.orchestration.event_store import EventStore, LeaseLost
 
 JOB_ID = "lab:slug"
@@ -63,6 +69,7 @@ RENEW_INTERVAL_S = 2.0                       # coordenador morto => arvore morta
 KILL_DELAY_S = 4.0                           # caos `--kill-during`: o coordenador morre este tempo depois de subir o CLI
 ORPHAN_GRACE_S = 2.0                         # espera antes de procurar sobreviventes da arvore de um CLI interrompido
 TEST_TIMEOUT_S = 120
+TEST_ISOLATIONS = ("auto", "appcontainer", "env")   # auto = appcontainer no Windows; env = so allowlist (controle, sem sandbox)
 MAX_BUDGET_USD = "1"
 OWNER_PREFIX = "lab-coordinator:"
 TRAILER = "Lab-Idempotency-Key"
@@ -147,6 +154,11 @@ ESPECIFICACAO AUTORITATIVA (meca o codigo contra ELA, nao so contra os testes):
 Achado so para violacao de R1..R5 ou defeito real de execucao; item "fora de escopo" nao e achado. O arquivo de testes
 {tests} esta nesta worktree (somente leitura) e o resultado real da execucao dele esta no pacote abaixo."""
 
+SANDBOX_NOTE = """
+ISOLAMENTO NESTA EXECUCAO: os testes do coordenador rodaram dentro de um AppContainer do Windows sem capacidades (campo
+`isolation` do pacote). A expressao "sem sandbox de SO" do contrato geral nao vale para esta execucao; as exigencias de um
+APPROVE nao mudam."""
+
 
 # Identificadores de rede que os CLIs colam nas mensagens de erro (medido no 401 do Codex): nao explicam a causa e o sufixo do
 # cf-ray revela o ponto de presenca. Ficam fora do motivo gravado no evento, no log e no relatorio.
@@ -177,6 +189,7 @@ Runner = Callable[..., CliResult]
 @dataclass(frozen=True)
 class Lab:
     root: Path
+    test_isolation: str = "auto"
 
     @property
     def repo(self) -> Path:
@@ -205,6 +218,10 @@ class Lab:
     @property
     def fault_file(self) -> Path:
         return self.root / "FAULT.json"
+
+    @property
+    def sandboxes(self) -> Path:
+        return self.root / "sandbox"
 
 
 # -- git do coordenador (config global/sistema vazias: sem hook, assinatura ou credencial do usuario) -------------------------
@@ -277,14 +294,39 @@ def _changed(before: dict[str, str], after: dict[str, str]) -> list[str]:
 
 
 # -- runner de testes do coordenador ----------------------------------------------------------------------------------------
+def resolve_test_isolation(kind: str) -> str:
+    """`auto`: AppContainer no Windows; fora dele so existe env por allowlist, e o relatorio registra a diferenca."""
+    if kind not in TEST_ISOLATIONS:
+        raise LabError(f"isolamento de testes desconhecido: {kind!r}")
+    if kind == "auto":
+        return "appcontainer" if os.name == "nt" else "env"
+    return kind
+
+
 def run_trusted_tests(lab: Lab, wt: Path, changed: list[str]) -> dict:
-    """Executa os testes selecionados pelo contrato do revisor. Env por allowlist, sem PYTHON* nem site do usuario, ini do
-    coordenador fora da copia. NAO e sandbox de SO: `isolation` diz isso (FP-060 P2)."""
+    """Executa os testes selecionados pelo contrato do revisor e diz, em `isolation`, COMO rodaram. Com AppContainer os
+    fatos provados na execucao vao em `sandbox`; se o sandbox falha, levanta `LabError` e nenhum teste roda fora dele."""
     selected, uncovered = cr.select_tests(wt, changed)
-    out = {"source": cr.RUNNER_SOURCE, "isolation": cr.ISOLATION_ENV, "selected": selected, "uncovered": uncovered,
-           "tests_passed": None, "summary": "nenhum teste selecionado"}
+    mode = resolve_test_isolation(lab.test_isolation)
+    out = {"source": cr.RUNNER_SOURCE, "isolation": sb.ISOLATION if mode == "appcontainer" else cr.ISOLATION_ENV,
+           "selected": selected, "uncovered": uncovered, "tests_passed": None, "summary": "nenhum teste selecionado"}
     if not selected:
         return out
+    if mode == "appcontainer":
+        try:
+            run = sb.run_pytest(wt, selected, root=lab.sandboxes, ini_text=lab.pytest_ini.read_text(encoding="utf-8"),
+                                timeout=TEST_TIMEOUT_S, log_dir=lab.logs, tag=wt.name)
+        except sb.SandboxError as exc:
+            raise LabError(f"sandbox de testes indisponivel; nenhum teste rodou fora dele: {exc}") from exc
+        if run.timed_out:
+            return {**out, "tests_passed": False, "summary": f"timeout de {TEST_TIMEOUT_S}s", "sandbox": run.facts}
+        return {**out, "tests_passed": run.exit_code == 0, "exit_code": run.exit_code, "summary": run.output[-1500:],
+                "sandbox": run.facts}
+    return {**out, **_run_env_tests(lab, wt, selected)}
+
+
+def _run_env_tests(lab: Lab, wt: Path, selected: list[str]) -> dict:
+    """Sem sandbox de SO: env por allowlist, sem PYTHON* nem site do usuario, ini do coordenador fora da copia."""
     # `-E -s`: ignora PYTHON* e o site do usuario; `-m` poe o cwd (a copia) no sys.path, que e o que o teste precisa importar.
     argv = [sys.executable, "-E", "-s", "-B", "-m", "pytest", *selected, "-q", "-p", "no:cacheprovider", "-c", str(lab.pytest_ini),
             "--rootdir", "."]
@@ -292,8 +334,8 @@ def run_trusted_tests(lab: Lab, wt: Path, changed: list[str]) -> dict:
         r = subprocess.run(argv, cwd=wt, env=ex.child_env(), capture_output=True, text=True, encoding="utf-8", errors="replace",
                            timeout=TEST_TIMEOUT_S, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     except subprocess.TimeoutExpired:
-        return {**out, "tests_passed": False, "summary": f"timeout de {TEST_TIMEOUT_S}s"}
-    return {**out, "tests_passed": r.returncode == 0, "exit_code": r.returncode, "summary": (r.stdout + r.stderr).strip()[-1500:]}
+        return {"tests_passed": False, "summary": f"timeout de {TEST_TIMEOUT_S}s"}
+    return {"tests_passed": r.returncode == 0, "exit_code": r.returncode, "summary": (r.stdout + r.stderr).strip()[-1500:]}
 
 
 # -- processos observados ---------------------------------------------------------------------------------------------------
@@ -554,7 +596,8 @@ def _review(lab: Lab, store: EventStore, ev: dict, runner: Runner, codex_bin: st
         schema, out = lab.logs / "review_schema.json", lab.logs / f"verdict_{stamp}.json"
         schema.write_text(json.dumps(cr.REVIEW_SCHEMA), encoding="utf-8")
         prompt = (cr.PROMPT.format(repo="fp060-m1-lab (repositorio local descartavel)", pr=LAB_PR, sha=sha, base=base)
-                  + REVIEW_ADDENDUM.format(pr=LAB_PR, spec=SPEC, tests=TEST_FILE) + cr.package_prompt(pkg, evidence))
+                  + REVIEW_ADDENDUM.format(pr=LAB_PR, spec=SPEC, tests=TEST_FILE)
+                  + (SANDBOX_NOTE if sb.proves_isolation(evidence.get("sandbox")) else "") + cr.package_prompt(pkg, evidence))
         res = _run_cli(lab, store, ev, "codex", cr.build_command(codex_bin or cr.resolve_codex(), lab.repo, schema, out),
                        lab.repo, cr._child_env(), prompt, runner, on_cli_started)
         if res.timed_out:
@@ -682,6 +725,24 @@ def _containment(run: dict) -> str | None:
     return m.group(1) if m else None
 
 
+def recorded_test_evidence(events: list[dict]) -> list[dict]:
+    """A evidencia de testes que sustentou cada entrega e cada parecer concluidos, como ficou gravada no evento."""
+    found = []
+    for e in events:
+        if e["status"] != "DONE" or not e["result"]:
+            continue
+        key = "evidence" if e["event_type"] == "REVIEW_REQUESTED" else "tests"
+        evidence = json.loads(e["result"]).get(key)
+        if isinstance(evidence, dict):
+            found.append(evidence)
+    return found
+
+
+def tests_sandboxed(evidence: list[dict]) -> bool:
+    """Toda evidencia veio do AppContainer E carrega as duas provas da propria execucao (token e canario)."""
+    return bool(evidence) and all(ev.get("isolation") == sb.ISOLATION and sb.proves_isolation(ev.get("sandbox")) for ev in evidence)
+
+
 # -- relatorio: tudo derivado do SQLite e do git, nada digitado --------------------------------------------------------------
 def report(lab: Lab, store: EventStore) -> dict:
     events, runs, transitions = store.events(JOB_ID), store.runs(), store.transitions()
@@ -704,6 +765,8 @@ def report(lab: Lab, store: EventStore) -> dict:
     interrupted = [r for r in runs if r["ended_at"] is None]
     checks = {c["run"]: c for c in orphan_checks(lab)}
     fault = declared_fault(lab)
+    evidence = recorded_test_evidence(events)
+    sandboxed = tests_sandboxed(evidence)
     consumed = [e for e in events if fault and e["event_type"] in AGENT_EVENTS[FAULTS[fault][0]]]
     faulted_runs = [r for r in runs if fault and r["agent"] == FAULTS[fault][0]]
     negative = {
@@ -728,6 +791,7 @@ def report(lab: Lab, store: EventStore) -> dict:
         "finished_cli_runs_job_contained": bool(finished) and all(_containment(r) == "job_object" for r in finished),
         "orphan_cli_tree_dead_after_coordinator_kill": bool(interrupted) and all(
             r["id"] in checks and not checks[r["id"]]["alive"] for r in interrupted),
+        "coordinator_tests_ran_in_os_sandbox": sandboxed,
     }
     return {
         "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado", "lab": lab.root.name, "job_id": JOB_ID,
@@ -748,7 +812,10 @@ def report(lab: Lab, store: EventStore) -> dict:
         "orphan_checks": [checks[k] for k in sorted(checks)],
         "commits": _must(["log", "--reverse", "--format=%H %s"], lab.repo).splitlines(),
         "transitions": len(transitions),
-        "limits": ["testes sem sandbox de SO (env_allowlist_only; FP-060 P2)", "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
+        "test_isolation": sorted({str(ev.get("isolation")) for ev in evidence}),
+        "limits": [("testes em AppContainer sem capacidades: contem arquivo e rede, NAO a integridade do resultado (o codigo testado "
+                    "controla o exit code)") if sandboxed else "testes sem sandbox de SO comprovado (FP-060 P2)",
+                   "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
                    "sem GitHub, sem --execute, sem outbox externo",
                    "Job Object nao e sandbox: so prende a vida da arvore do CLI ao coordenador e ao lease"],
     }
@@ -771,6 +838,7 @@ def render_markdown(rep: dict) -> str:
               "Arvore dos CLIs interrompidos: " + ("; ".join(
                   f"run {c['run']} ({c['agent']}, pid {c['pid']}) apos {c['grace_s']}s: " + (f"VIVOS {c['alive']}" if c["alive"] else "nenhum processo vivo")
                   for c in rep["orphan_checks"]) or "nenhuma verificacao"),
+              "Isolamento dos testes do coordenador (evidencia dos eventos concluidos): " + (", ".join(rep["test_isolation"]) or "nenhuma"),
               "Reviews bloqueados: " + ("; ".join(rep["blocked_reviews"]) or "nenhum"),
               "Motivos de falha gravados nos eventos: " + ("; ".join(rep["failure_reasons"]) or "nenhum"),
               "", "Limites: " + "; ".join(rep["limits"]), ""]
@@ -833,7 +901,8 @@ def _drive(lab: Lab, max_steps: int, crash_on: str | None, idle_limit_s: float, 
         _emit(seed(lab, store))
     crash_pending, kill_pending, idle_since = crash_on, kill_during, None
     for n in range(1, max_steps + 1):
-        argv = [sys.executable, "-m", "tools.orchestration.closed_loop_lab", "step", "--lab", str(lab.root), "--runner", runner_kind]
+        argv = [sys.executable, "-m", "tools.orchestration.closed_loop_lab", "step", "--test-isolation", lab.test_isolation,
+                "--lab", str(lab.root), "--runner", runner_kind]
         if crash_pending:
             argv += ["--crash-on", crash_pending]
         if kill_pending:
@@ -878,6 +947,8 @@ def main(argv: list[str] | None = None) -> int:
     for name in ("seed", "step", "drive", "report"):
         sp = sub.add_parser(name)
         sp.add_argument("--lab", required=True, type=Path, help="diretorio descartavel FORA de qualquer repositorio git")
+        sp.add_argument("--test-isolation", choices=TEST_ISOLATIONS, default="auto",
+                        help="auto = AppContainer no Windows; env = so allowlist de ambiente (controle, sem sandbox de SO)")
     sub.choices["step"].add_argument("--crash-on", choices=CONSUMED, help="caos: morre logo apos o 1o claim deste tipo")
     sub.choices["drive"].add_argument("--crash-on", choices=CONSUMED)
     sub.choices["drive"].add_argument("--max-steps", type=int, default=60)
@@ -889,7 +960,7 @@ def main(argv: list[str] | None = None) -> int:
         sub.choices[name].add_argument("--runner", choices=("auto", "supervised", "observed"), default="auto",
                                        help="observed = sem Job Object (controle do experimento)")
     ns = ap.parse_args(argv)
-    lab = Lab(ns.lab.resolve())
+    lab = Lab(ns.lab.resolve(), ns.test_isolation)
     lab.root.mkdir(parents=True, exist_ok=True)
     ensure_isolated(lab.root)
     os.environ.setdefault("EVENT_BRIDGE_STATE_PATH", str(lab.root / "governance" / "event_bridge.json"))   # nada em runs/ de producao
