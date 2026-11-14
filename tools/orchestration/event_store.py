@@ -429,6 +429,11 @@ class EventStore:
                 rows = db.execute("SELECT * FROM outbox WHERE status='PENDING' ORDER BY id")
             return [dict(r) for r in rows]
 
+    def outbox_entries(self) -> list[dict]:
+        """Inspection only: every entry, whatever its status, in creation order."""
+        with self._conn() as db:
+            return [dict(r) for r in db.execute("SELECT * FROM outbox ORDER BY id")]
+
     def claim_outbox(self, owner: str, lease_seconds: float, target: str | None = None) -> dict | None:
         """Claim before any external effect. A reclaimed entry gets a new token.
 

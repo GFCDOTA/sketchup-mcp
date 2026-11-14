@@ -21418,6 +21418,24 @@
       "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
     },
     {
+      "path": "tools/orchestration/sandboxed_tests.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
+      "path": "tools/orchestration/outbox_publisher.py",
+      "domain": "runtime_or_orchestrator",
+      "disposition": "retain_legacy_public_or_tooling_path",
+      "phase": "P4",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "tool_owner": "cross_room_pipeline_tooling",
+      "ownership_evidence": "FP042_P4_TOOL_ROLE_RULES_NOT_RUNTIME_FUNCTIONAL_PROOF"
+    },
+    {
       "path": "tests/test_scene_composer_facade_identity.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
@@ -21464,6 +21482,24 @@
     },
     {
       "path": "tests/test_launcher_guards.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_sandboxed_tests.py",
+      "domain": "test",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "regression_test_suite",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "tests/test_outbox_publisher.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
@@ -21732,6 +21768,405 @@
     },
     {
       "path": "artifacts/review/fp060/m1_closed_loop/2026-11-11_supervised/supervised/verdict_e007_a1.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/DRIVE_LOG.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/ORPHAN_CHECKS.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/REPORT.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/REPORT.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/TEST_EVIDENCE.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_implement_e001_a2_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_implement_e001_a2_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_implement_e005_a1_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_implement_e005_a1_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_review_e003_a2_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_review_e003_a2_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_review_e007_a1_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_review_e007_a1_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_seed_check_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_seed_check_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/verdict_e003_a2.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/verdict_e007_a1.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/CLI_VERSIONS.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/DRIVE_LOG.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/ORPHAN_CHECKS.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/REPORT.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/REPORT.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/TEST_EVIDENCE.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_implement_e001_a2_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_implement_e001_a2_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_implement_e005_a1_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_implement_e005_a1_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_review_e003_a2_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_review_e003_a2_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_review_e007_a1_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_review_e007_a1_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_seed_check_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/sandbox_logs/sandbox_seed_check_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/verdict_e003_a2.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/rerun_fa03d72/verdict_e007_a1.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/CLI_VERSIONS.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/DRIVE_LOG.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/LEDGER.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/ORPHAN_CHECKS.jsonl",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/REPORT.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/REPORT.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/TEST_EVIDENCE.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_implement_e001_a2_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_implement_e001_a2_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_implement_e005_a1_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_implement_e005_a1_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_review_e003_a2_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_review_e003_a2_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_review_e007_a1_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_review_e007_a1_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_seed_check_probe.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/sandbox_logs/sandbox_seed_check_tests.txt",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/verdict_e003_a2.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-14_lab_ledger/crash_after_publish/verdict_e007_a1.json",
       "domain": "reference_or_artifact",
       "disposition": "retain_canonical_location",
       "phase": "P6",

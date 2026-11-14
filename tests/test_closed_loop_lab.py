@@ -1,12 +1,15 @@
 """FP-060-A01 M1 (#606): laboratorio isolado do closed-loop minimo Claude <-> Codex sobre o EventStore de producao.
 
 Suite deterministica (sem LLM): os CLIs sao substituidos por runners falsos; git, SQLite e o runner de testes sao reais.
+Os laboratorios das fixtures rodam os testes do coordenador com `env` (sem sandbox de SO) para a suite ser rapida e igual em
+toda plataforma; o AppContainer real e exercitado nos testes `windows_only` do fim do arquivo e em `test_sandboxed_tests.py`.
 A prova com os dois CLIs reais e operacional (`python -m tools.orchestration.closed_loop_lab drive`), nunca esta suite."""
 from __future__ import annotations
 
 import hashlib
 import json
 import os
+import subprocess
 import sys
 import threading
 import time
@@ -15,6 +18,8 @@ from pathlib import Path
 import pytest
 
 from tools.orchestration import closed_loop_lab as lab_mod
+from tools.orchestration import outbox_publisher as op
+from tools.orchestration import sandboxed_tests as sb
 from tools.orchestration.closed_loop_lab import CliResult, Lab, LabError
 from tools.orchestration.event_store import EventStore, LeaseLost
 
@@ -138,7 +143,7 @@ def clock():
 @pytest.fixture()
 def env(tmp_path, monkeypatch, clock):
     monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "governance" / "event_bridge.json"))
-    lab = Lab(tmp_path / "lab")
+    lab = Lab(tmp_path / "lab", "env")
     lab.root.mkdir()
     store = EventStore(lab.db, clock=clock)
     lab_mod.seed(lab, store)
@@ -404,7 +409,7 @@ def test_crash_between_delivery_and_ack_is_reconciled_without_a_second_commit(en
 
 def test_two_coordinators_racing_launch_a_single_cli(tmp_path, monkeypatch):
     monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "governance" / "event_bridge.json"))
-    lab = Lab(tmp_path / "lab")
+    lab = Lab(tmp_path / "lab", "env")
     lab.root.mkdir()
     lab_mod.seed(lab, EventStore(lab.db))
     entered, release, out = threading.Event(), threading.Event(), {}
@@ -437,15 +442,14 @@ def killed_cli(lab, store, alive=()):
     return run_id
 
 
-def test_report_passes_only_when_every_m1_criterion_is_derived_from_the_store(env):
+def test_report_passes_only_when_every_m1_criterion_is_derived_from_the_store(env, fake_sandbox):
     lab, store = env
-    killed_cli(lab, store)
-    drive(lab, store, FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX)),
-          FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE")))
+    closed_loop(sandboxed_lab(lab), store)
 
     rep = lab_mod.report(lab, store)
 
     assert rep["verdict"] == "PASS" and all(rep["criteria"].values())
+    assert rep["test_isolation"] == [sb.ISOLATION]
     assert rep["final_head"] == rep["approved_head"]
     assert [r["pid"] for r in rep["runs"]] == [4999, 4000, 5000, 4001, 5001]
     assert [r["containment"] for r in rep["runs"]] == [None, "job_object", "job_object", "job_object", "job_object"]
@@ -726,7 +730,7 @@ def drive_log(lab):
 def fresh_lab(tmp_path, monkeypatch):
     monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "governance" / "event_bridge.json"))
     monkeypatch.setattr(lab_mod, "ORPHAN_GRACE_S", 0.0)
-    lab = Lab(tmp_path / "lab")
+    lab = Lab(tmp_path / "lab", "env")
     lab.root.mkdir()
     return lab
 
@@ -885,3 +889,386 @@ def test_observed_runner_kills_and_flags_a_cli_that_exceeds_the_timeout(tmp_path
     res = lab_mod.run_observed([sys.executable, "-c", "import time; time.sleep(60)"], tmp_path, dict(os.environ), "", 1,
                                lambda pid: None)
     assert res.timed_out is True and res.exit_code == -1
+
+
+# -- isolamento de SO do runner de testes (AppContainer; FP-060 P2) --------------------------------------------------------
+SANDBOX_FACTS = {"is_appcontainer": True, "capabilities": 0, "canary": {"read_outside": "denied", "write_outside": "denied"},
+                 "runtime": {"python": "fake", "distributions": ["pytest==fake"]}, "tree_files": 2, "workspace_removed": True}
+
+
+@pytest.fixture()
+def fake_sandbox(monkeypatch):
+    """Troca o AppContainer por um pytest comum que devolve os fatos de uma execucao isolada. So os testes `windows_only`
+    daqui e os de `test_sandboxed_tests.py` usam o sandbox real; estes medem o que o COORDENADOR faz com o resultado."""
+    box = {"calls": [], "facts": dict(SANDBOX_FACTS), "error": None, "timed_out": False}
+
+    def run_pytest(tree, tests, *, root, ini_text, timeout, log_dir, tag):
+        box["calls"].append(tag)
+        if box["error"]:
+            raise sb.SandboxError(box["error"])
+        if box["timed_out"]:
+            return sb.SandboxRun(None, True, "", dict(box["facts"]))
+        r = subprocess.run([sys.executable, "-E", "-s", "-B", "-m", "pytest", *tests, "-q", "-p", "no:cacheprovider", "--rootdir", "."],
+                           cwd=tree, capture_output=True, text=True)
+        return sb.SandboxRun(r.returncode, False, r.stdout + r.stderr, dict(box["facts"]))
+
+    monkeypatch.setattr(lab_mod.sb, "run_pytest", run_pytest)
+    return box
+
+
+def sandboxed_lab(lab):
+    return Lab(lab.root, "appcontainer")
+
+
+def expire_outbox_lease(store):
+    if hasattr(store.clock, "advance"):
+        store.clock.advance(lab_mod.OUTBOX_LEASE_S + 1)
+    else:
+        time.sleep(lab_mod.OUTBOX_LEASE_S + 0.3)
+
+
+def closed_loop(lab, store):
+    """Circuito completo com os dois caos que o relatorio exige: um CLI morto junto com o coordenador e um publicador morto
+    entre o efeito externo e o ACK (na primeira publicacao)."""
+    killed_cli(lab, store)
+    claude = FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX))
+    codex = FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE"))
+    actions, died = [], []
+
+    def die_once(entry, reference):
+        if not died:
+            died.append(entry["idempotency_key"])
+            raise Crash
+
+    for i in range(30):
+        try:
+            res = run(lab, store, claude, codex, owner=f"lab-coordinator:{i}", on_published=die_once)
+        except Crash:
+            actions.append("CRASHED")
+            expire_outbox_lease(store)
+            continue
+        actions.append(res["action"])
+        if res["action"] in ("TERMINAL", "IDLE"):
+            break
+    return actions
+
+
+def test_auto_isolation_means_appcontainer_on_windows_and_env_elsewhere():
+    assert lab_mod.resolve_test_isolation("auto") == ("appcontainer" if os.name == "nt" else "env")
+    assert lab_mod.resolve_test_isolation("env") == "env" and lab_mod.resolve_test_isolation("appcontainer") == "appcontainer"
+    with pytest.raises(LabError, match="isolamento de testes desconhecido"):
+        lab_mod.resolve_test_isolation("docker")
+
+
+def test_report_fails_the_isolation_criterion_when_the_tests_ran_without_an_os_sandbox(env):
+    lab, store = env
+    closed_loop(lab, store)
+
+    rep = lab_mod.report(lab, store)
+
+    failed = [name for name, ok in rep["criteria"].items() if not ok]
+    assert failed == ["coordinator_tests_ran_in_os_sandbox"] and rep["verdict"] == "FAIL"
+    assert rep["test_isolation"] == ["env_allowlist_only"] and "sem sandbox de SO comprovado" in rep["limits"][0]
+
+
+def test_evidence_that_names_the_sandbox_without_its_proofs_does_not_pass(env, fake_sandbox):
+    lab, store = env
+    del fake_sandbox["facts"]["canary"]
+    closed_loop(sandboxed_lab(lab), store)
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["test_isolation"] == [sb.ISOLATION]
+    assert rep["criteria"]["coordinator_tests_ran_in_os_sandbox"] is False and rep["verdict"] == "FAIL"
+
+
+def test_sandboxed_evidence_is_recorded_in_the_event_and_reaches_the_reviewer(env, fake_sandbox):
+    lab, store = env
+    codex = FakeCodex(verdict("APPROVE"))
+
+    drive(sandboxed_lab(lab), store, FakeClaude(writes(UNICODE_FIX)), codex)
+
+    delivered = json.loads(store.events(lab_mod.JOB_ID)[0]["result"])["tests"]
+    assert delivered["isolation"] == sb.ISOLATION and delivered["sandbox"] == SANDBOX_FACTS and delivered["tests_passed"] is True
+    assert fake_sandbox["calls"] == ["implement_e001_a1", "review_e003_a1"]
+    assert "ISOLAMENTO NESTA EXECUCAO" in codex.calls[0]["prompt"] and f'"isolation": "{sb.ISOLATION}"' in codex.calls[0]["prompt"]
+
+
+def test_reviewer_is_not_told_about_a_sandbox_when_there_was_none(env):
+    lab, store = env
+    codex = FakeCodex(verdict("APPROVE"))
+    drive(lab, store, FakeClaude(writes(UNICODE_FIX)), codex)
+    assert "ISOLAMENTO NESTA EXECUCAO" not in codex.calls[0]["prompt"] and '"isolation": "env_allowlist_only"' in codex.calls[0]["prompt"]
+
+
+def test_sandbox_that_cannot_start_fails_the_event_and_no_test_runs_outside_it(env, fake_sandbox, monkeypatch):
+    lab, store = env
+    fake_sandbox["error"] = "AppContainerError: CreateAppContainerProfile failed: 0x80070005"
+    monkeypatch.setattr(lab_mod, "_run_env_tests", lambda *a: pytest.fail("teste rodou fora do sandbox"))
+
+    res = run(sandboxed_lab(lab), store, FakeClaude(writes(UNICODE_FIX)), FakeCodex())
+
+    assert res["action"] == "FAILED" and "sandbox de testes indisponivel; nenhum teste rodou fora dele" in res["reason"]
+    assert commits(lab) == 1 and types(store) == ["IMPLEMENT_REQUESTED"]          # nada entregue, nada pedido ao revisor
+
+
+def test_review_with_a_broken_sandbox_is_blocked_and_codex_is_never_called(env, fake_sandbox, monkeypatch):
+    lab, store = env
+    box_lab, codex = sandboxed_lab(lab), FakeCodex()
+    assert run(box_lab, store, FakeClaude(writes(UNICODE_FIX)), codex)["action"] == "DELIVERED"
+    fake_sandbox["error"] = "sonda de isolamento reprovada: leu arquivo fora do workspace"
+    monkeypatch.setattr(lab_mod, "_run_env_tests", lambda *a: pytest.fail("teste rodou fora do sandbox"))
+
+    res = run(box_lab, store, FakeClaude(), codex)
+
+    assert res["action"] == "REVIEW_BLOCKED" and "leu arquivo fora do workspace" in res["reason"]
+    assert codex.calls == [] and "REVIEW_APPROVED" not in types(store)
+
+
+def test_sandboxed_run_that_times_out_is_a_failed_test_run_with_its_facts(env, fake_sandbox):
+    lab, _ = env
+    fake_sandbox["timed_out"] = True
+
+    evidence = lab_mod.run_trusted_tests(sandboxed_lab(lab), lab.attempts / "seed_check", [lab_mod.ARTIFACT])
+
+    assert evidence["tests_passed"] is False and "timeout" in evidence["summary"] and evidence["sandbox"] == SANDBOX_FACTS
+
+
+def test_nothing_is_sent_to_the_sandbox_when_no_test_covers_the_change(env, fake_sandbox):
+    lab, _ = env
+    evidence = lab_mod.run_trusted_tests(sandboxed_lab(lab), lab.attempts / "seed_check", ["README.md"])
+    assert fake_sandbox["calls"] == [] and evidence["tests_passed"] is None and "sandbox" not in evidence
+
+
+def test_cli_hands_the_chosen_test_isolation_to_the_lab(fresh_lab, monkeypatch):
+    got = {}
+    monkeypatch.setattr(lab_mod, "_drive", lambda *a, **k: got.update(args=a) or 0)
+    lab_mod.main(["drive", "--lab", str(fresh_lab.root), "--test-isolation", "env"])
+    assert got["args"][0] == Lab(fresh_lab.root.resolve(), "env")
+
+
+def test_drive_passes_the_lab_test_isolation_to_every_step(fresh_lab):
+    seen = []
+    lab_mod._drive(fresh_lab, 5, None, 5.0, run_step=scripted_steps(seen, PAUSED), preflight_fn=_ok_preflight)
+    at = seen[0].index("--test-isolation")
+    assert seen[0][at + 1] == "env" and seen[0].index("step") < at
+
+
+@windows_only
+def test_closed_loop_with_the_real_appcontainer_meets_every_m1_criterion(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "governance" / "event_bridge.json"))
+    monkeypatch.setattr(lab_mod, "OUTBOX_LEASE_S", 0.5)                      # relogio real: o lease do publicador morto vence logo
+    lab = Lab(tmp_path / "lab")                                              # padrao `auto`: AppContainer no Windows
+    lab.root.mkdir()
+    store = EventStore(lab.db)
+    lab_mod.seed(lab, store)
+
+    actions = closed_loop(lab, store)
+
+    rep = lab_mod.report(lab, store)
+    assert actions[-2:] == ["APPROVED", "TERMINAL"]
+    assert rep["verdict"] == "PASS" and all(rep["criteria"].values()), rep["criteria"]
+    assert rep["test_isolation"] == [sb.ISOLATION] and "AppContainer sem capacidades" in rep["limits"][0]
+    for evidence in lab_mod.recorded_test_evidence(store.events(lab_mod.JOB_ID)):
+        assert sb.proves_isolation(evidence["sandbox"]) and evidence["sandbox"]["workspace_removed"] is True
+    assert list(lab.sandboxes.iterdir()) == []                               # nenhum workspace nem canario sobrou
+    assert (lab.logs / "sandbox_seed_check_tests.out").exists() and (lab.logs / "sandbox_review_e003_a1_probe.out").exists()
+
+
+# -- publicacao via outbox com reconciliacao (FP-060 M2, ensaio local) ------------------------------------------------------
+def ledger(lab):
+    return op.LedgerTarget(lab.ledger).lines()
+
+
+def die_on_first_publication(seen):
+    """Gancho de caos: o coordenador morre entre o efeito externo e o ACK, uma unica vez."""
+    def hook(entry, reference):
+        if not seen:
+            seen.append(entry["idempotency_key"])
+            raise Crash
+    return hook
+
+
+def test_each_publishable_verdict_reaches_the_ledger_once_in_the_step_that_produced_it(env):
+    lab, store = env
+    claude, codex = FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX)), FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE"))
+    results = []
+    for i in range(10):
+        results.append(run(lab, store, claude, codex, owner=f"lab-coordinator:{i}"))
+        if results[-1]["action"] == "TERMINAL":
+            break
+
+    sent = [(r["action"], o["action"], o["key"].rsplit(":", 1)[1]) for r in results for o in r.get("outbox", [])]
+    assert sent == [("CHANGES_REQUESTED", "SENT", "REQUEST_CHANGES"), ("APPROVED", "SENT", "APPROVE")]
+    assert [(ln["payload"]["verdict"], ln["payload"]["round"]) for ln in ledger(lab)] == [("REQUEST_CHANGES", 1), ("APPROVE", 2)]
+    assert [ln["key"] for ln in ledger(lab)] == lab_mod.expected_publications(store.events(lab_mod.JOB_ID))
+    assert [o["status"] for o in store.outbox_entries()] == ["DONE", "DONE"]
+
+
+def test_publisher_killed_between_effect_and_ack_blocks_new_work_until_it_is_reconciled(env):
+    lab, store = env
+    claude, codex, died = FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX)), FakeCodex(verdict("REQUEST_CHANGES", [FINDING])), []
+    assert run(lab, store, claude, codex)["action"] == "DELIVERED"
+    with pytest.raises(Crash):
+        run(lab, store, claude, codex, on_published=die_on_first_publication(died))
+    assert len(ledger(lab)) == 1 and store.outbox_entries()[0]["status"] == "RUNNING"      # efeito feito, ACK nunca gravado
+
+    waiting = run(lab, store, claude, codex, owner="lab-coordinator:2")
+
+    assert waiting == {"action": "IDLE", "waiting": "outbox"}                               # o lease do morto ainda vale
+    assert len(claude.calls) == 1 and "CORRECTION_REQUESTED" not in types(store)            # nenhum trabalho novo
+    store.clock.advance(lab_mod.OUTBOX_LEASE_S + 1)
+
+    resumed = run(lab, store, claude, codex, owner="lab-coordinator:3")
+
+    assert resumed["action"] == "CORRECTION_DISPATCHED"
+    assert [(o["action"], o["attempt"]) for o in resumed["outbox"]] == [("RECONCILED", 2)]
+    assert len(ledger(lab)) == 1 and store.outbox_entries()[0]["status"] == "DONE"
+
+
+def test_workflow_is_not_terminal_while_the_approval_is_still_unpublished(env):
+    lab, store = env
+    claude, codex, died = FakeClaude(writes(UNICODE_FIX)), FakeCodex(verdict("APPROVE")), []
+    run(lab, store, claude, codex)
+    with pytest.raises(Crash):
+        run(lab, store, claude, codex, on_published=die_on_first_publication(died))
+    assert "WORKFLOW_COMPLETED" in types(store)
+
+    assert run(lab, store, claude, codex)["action"] == "IDLE"                               # nao TERMINAL
+    store.clock.advance(lab_mod.OUTBOX_LEASE_S + 1)
+    done = run(lab, store, claude, codex)
+
+    assert done["action"] == "TERMINAL" and done["outbox"][0]["action"] == "RECONCILED" and len(ledger(lab)) == 1
+
+
+def test_needs_human_verdict_is_never_published(env):
+    lab, store = env
+    drive(lab, store, FakeClaude(writes(UNICODE_FIX)), FakeCodex(verdict("NEEDS_HUMAN")))
+    assert store.outbox_entries() == [] and ledger(lab) == [] and not lab.ledger.exists()
+    assert lab_mod.expected_publications(store.events(lab_mod.JOB_ID)) == []       # e o relatorio tambem nao o espera no ledger
+
+
+def test_pause_blocks_a_pending_publication(env):
+    lab, store = env
+    claude, codex = FakeClaude(writes(UNICODE_FIX)), FakeCodex(verdict("APPROVE"))
+    run(lab, store, claude, codex)
+    with pytest.MonkeyPatch.context() as patch:                                            # a revisao conclui, mas nada e publicado ainda
+        patch.setattr(lab_mod, "publish_outbox", lambda *a, **k: [])
+        run(lab, store, claude, codex)
+    assert store.outbox_entries()[0]["status"] == "PENDING"
+    lab.pause_flag.write_text("pausado", encoding="utf-8")
+
+    assert run(lab, store, claude, codex) == {"action": "PAUSED"}
+    assert ledger(lab) == [] and store.outbox_entries()[0]["status"] == "PENDING"
+
+
+def test_unreadable_ledger_stops_the_workflow_instead_of_risking_a_second_publication(env):
+    lab, store = env
+    claude, codex = FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX)), FakeCodex(verdict("REQUEST_CHANGES", [FINDING]))
+    lab.ledger.parent.mkdir(parents=True)
+    lab.ledger.write_text("linha corrompida\n", encoding="utf-8")
+    run(lab, store, claude, codex)
+
+    reviewed = run(lab, store, claude, codex)
+    after = run(lab, store, claude, codex)
+
+    assert reviewed["action"] == "CHANGES_REQUESTED" and reviewed["outbox"][0]["action"] == "FAILED"
+    assert after["action"] == "IDLE" and after["waiting"] == "outbox" and len(claude.calls) == 1
+    assert lab.ledger.read_text(encoding="utf-8") == "linha corrompida\n"
+    assert lab_mod.report(lab, store)["ledger"] is None
+
+
+def test_report_fails_when_no_publication_was_interrupted(env, fake_sandbox):
+    lab, store = env
+    killed_cli(lab, store)
+    drive(sandboxed_lab(lab), store, FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX)),
+          FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE")))
+
+    rep = lab_mod.report(lab, store)
+
+    assert [name for name, ok in rep["criteria"].items() if not ok] == ["interrupted_publication_was_reconciled"]
+    assert rep["criteria"]["verdicts_published_once_via_outbox"] is True and rep["verdict"] == "FAIL"
+
+
+@pytest.mark.parametrize("tamper", ["duplicate", "missing", "foreign"])
+def test_report_fails_when_the_ledger_does_not_match_the_verdicts_exactly_once(env, fake_sandbox, tamper):
+    lab, store = env
+    closed_loop(sandboxed_lab(lab), store)
+    lines = lab.ledger.read_text(encoding="utf-8").splitlines()
+    changed = {"duplicate": [*lines, lines[0]], "missing": lines[:1],
+               "foreign": [*lines, json.dumps({"key": "outro", "operation": "x", "payload": {}})]}[tamper]
+    lab.ledger.write_text("\n".join(changed) + "\n", encoding="utf-8")
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["criteria"]["verdicts_published_once_via_outbox"] is False
+    assert rep["criteria"]["interrupted_publication_was_reconciled"] is False and rep["verdict"] == "FAIL"
+
+
+def test_report_lists_the_outbox_and_what_the_external_system_received(env, fake_sandbox):
+    lab, store = env
+    closed_loop(sandboxed_lab(lab), store)
+
+    rep = lab_mod.report(lab, store)
+
+    assert [(o["status"], o["attempts"]) for o in rep["outbox"]] == [("DONE", 2), ("DONE", 1)]
+    assert rep["ledger"] == [o["key"] for o in rep["outbox"]] and len(set(rep["ledger"])) == 2
+    text = lab_mod.render_markdown(rep)
+    assert "REQUEST_CHANGES` DONE em 2 tentativa(s)" in text and "2 linha(s), 2 chave(s) distinta(s)" in text
+    assert "arquivo local que faz o papel de sistema externo" in rep["limits"][2]
+
+
+def test_cli_passes_the_publication_chaos_to_the_driver_and_to_the_steps(fresh_lab, monkeypatch):
+    got, seen = {}, []
+    with monkeypatch.context() as patch:
+        patch.setattr(lab_mod, "_drive", lambda *a, **k: got.update(kwargs=k) or 0)
+        lab_mod.main(["drive", "--lab", str(fresh_lab.root), "--crash-after-publish"])
+    assert got["kwargs"] == {"crash_after_publish": True}
+
+    lab_mod._drive(fresh_lab, 5, None, 5.0, run_step=scripted_steps(seen, PAUSED), preflight_fn=_ok_preflight,
+                   crash_after_publish=True)
+    assert "--crash-after-publish" in seen[0] and seen[0][-4:] == ["--lab", str(fresh_lab.root), "--runner", "auto"]
+
+
+def test_drive_spends_the_publication_chaos_when_a_crash_left_an_entry_without_ack(fresh_lab, monkeypatch):
+    lab, seen = fresh_lab, []
+    monkeypatch.setattr(lab_mod.ps, "tree_pids", lambda pid, since=None: [], raising=False)
+
+    def publisher_dies():                              # o step morreu depois do efeito e antes do ACK
+        store = EventStore(lab.db)
+        store.publish("REVIEW_REQUESTED", "k", "job:x", {})
+        ev = store.claim("REVIEW_REQUESTED", "w", 60)
+        store.complete(ev, {}, outbox_entries=[{"target": lab_mod.OUTBOX_TARGET, "operation": "publish_review", "payload": {},
+                                                "idempotency_key": "ob"}])
+        store.claim_outbox("lab-coordinator:dead", 600)
+        return lab_mod.CRASH_EXIT, "", ""
+
+    lab_mod._drive(lab, 3, "REVIEW_REQUESTED", 5.0, preflight_fn=_ok_preflight, crash_after_publish=True,
+                   run_step=scripted_steps(seen, publisher_dies, (lab_mod.CRASH_EXIT, "", ""), PAUSED))
+
+    assert "--crash-after-publish" in seen[0] and "--crash-on" in seen[0]
+    assert "--crash-after-publish" not in seen[1] and "--crash-on" in seen[1]      # 1o crash: havia entrada RUNNING
+    assert "--crash-on" not in seen[2]                                              # 2o crash: o caos de publicacao ja foi gasto
+    log = drive_log(lab)
+    assert log[0]["interrupted_publication"] is True and "interrupted_publication" not in log[1]
+
+
+def test_report_does_not_count_a_publication_whose_ack_was_never_recorded(env, fake_sandbox):
+    lab, store = env
+    box_lab, died = sandboxed_lab(lab), ["a primeira publicacao passa"]
+    claude, codex = FakeClaude(writes(ASCII_FIX), writes(UNICODE_FIX)), FakeCodex(verdict("REQUEST_CHANGES", [FINDING]), verdict("APPROVE"))
+
+    def die_on_the_approval(entry, reference):
+        if entry["payload"]["verdict"] == "APPROVE":
+            died.append(entry["idempotency_key"])
+            raise Crash
+
+    with pytest.raises(Crash):
+        for i in range(10):
+            run(box_lab, store, claude, codex, owner=f"lab-coordinator:{i}", on_published=die_on_the_approval)
+
+    rep = lab_mod.report(lab, store)
+
+    assert sorted(rep["ledger"]) == sorted(lab_mod.expected_publications(store.events(lab_mod.JOB_ID)))   # o efeito existe
+    assert [o["status"] for o in rep["outbox"]] == ["DONE", "RUNNING"]                                     # o ACK nao
+    assert rep["criteria"]["verdicts_published_once_via_outbox"] is False and rep["verdict"] == "FAIL"
