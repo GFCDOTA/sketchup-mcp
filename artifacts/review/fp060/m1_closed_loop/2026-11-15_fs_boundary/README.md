@@ -1,10 +1,10 @@
-# FP-060 MT-01 — fronteira de arquivos do sandbox AppContainer, medida depois de duas pré-revisões do Codex
+# FP-060 MT-01 — fronteira de arquivos do sandbox AppContainer, medida depois de três pré-revisões do Codex
 
 Evidência datada (2026-11-15). Refs #606. Medida no commit `1eaa0fc` (árvore limpa), Windows 11, Python 3.12.13.
 
 ## O que é
 
-Duas execuções **reais** do Codex CLI, pelo caminho de produção do `codex_reviewer` (testes no AppContainer, **sem publicar
+Três execuções **reais** do Codex CLI, pelo caminho de produção do `codex_reviewer` (testes no AppContainer, **sem publicar
 nada**), revisaram o #617. Cada uma devolveu `REQUEST_CHANGES`; cada achado foi verificado antes de ser corrigido.
 
 | Passada | HEAD revisado | Achados | Verificação | Resposta |
@@ -12,6 +12,8 @@ nada**), revisaram o #617. Cada uma devolveu `REQUEST_CHANGES`; cada achado foi 
 | 1 (`codex_prereview_617_verdict.json`) | `3b9efef` | HIGH: a sonda prova a negação de **um** canário, não que nenhum arquivo fora do workspace é legível | medido: arquivo concedido a `ALL APPLICATION PACKAGES`, binários do Windows e Program Files são legíveis | o **contrato foi reduzido** ao que é verdade (não se alargou o sandbox) e travado com um teste |
 | 2 (`codex_prereview_617_verdict_2.json`) | `ac717cb` | HIGH: a cópia recusa reparse points mas aceita **hard links**, e um hard link para um arquivo privado seria copiado para dentro do sandbox | reproduzido por teste: o teste passou a falhar sem a guarda | `_copy_tree` recusa qualquer arquivo com mais de um link (usa `lstat`: `DirEntry.stat()` devolve `st_nlink = 0` no Windows) |
 | 2 | `ac717cb` | MEDIUM: a minha medição tratava alvo ausente como "permitida" e qualquer falha de leitura, inclusive arquivo inexistente, como "negada" | reproduzido: era verdade | o script registra cada tentativa explicitamente e **recusa** evidência incompleta; o teste de fronteira exige `PermissionError` e há um controle negativo para "arquivo inexistente" |
+| 3 (`codex_prereview_617_verdict_3.json`) | `e5b1ed5` | MEDIUM: `recorded_test_evidence` descartava evento concluído sem resultado/evidência; outra evidência válida bastava para o critério `coordinator_tests_ran_in_os_sandbox` passar | reproduzido: 3 testes novos falham sem a correção | cada entrega e cada parecer concluído vira uma entrada (`None` se faltar evidência); `None` reprova o critério; o relatório lista `AUSENTE` |
+| 3 | `e5b1ed5` | LOW: `measure_fs_boundary.py` não checava o código de saída do git (fora de um repositório gerava `commit` vazio) | reproduzido por inspeção; confirmado rodando o script fora de um repositório | o script usa `git -C <raiz do repo>`, recusa código de saída ≠ 0, SHA que não tenha 40 hex e árvore suja; rodado fora de um repo agora sai com erro |
 
 A passada 2 também reportou que os testes do coordenador "não ficaram verdes" (23 falhas, 42 erros): são os testes do próprio laboratório
 rodando dentro do sandbox. A causa é o `PATH` do sandbox ser só `System32`: o `git` não é encontrado (`WinError 2`, 52 casos) e outros
@@ -49,7 +51,7 @@ O isolamento foi provado na execução (token AppContainer com zero capacidades 
 - **Testes que dependem de `git` ou de outra ferramenta no `PATH` não rodam no sandbox** (o `PATH` é só `System32`). Um diff cujos testes
   selecionados incluam o laboratório closed-loop recebe `tests_passed=False` e não é aprovado automaticamente.
 - Não mediu todos os arquivos do sistema: foram 5 alvos representativos. É medição desta versão do Windows, não prova formal.
-- **Duas pré-revisões do Codex não são a revisão independente do PR**: são a pré-revisão adversarial do ciclo. A revisão independente
+- **Três pré-revisões do Codex não são a revisão independente do PR**: são a pré-revisão adversarial do ciclo. A revisão independente
   do #617 continua pendente.
 
 ## Reprodução
@@ -68,3 +70,4 @@ PYTHONPATH=. $PY artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/me
 | `measure_fs_boundary.py` | o script da medição (estrito: recusa evidência incompleta) |
 | `codex_prereview_617_verdict.json` | parecer bruto da passada 1 (`REQUEST_CHANGES`, HIGH) |
 | `codex_prereview_617_verdict_2.json` | parecer bruto da passada 2 (`REQUEST_CHANGES`: HIGH hard link, MEDIUM medição) |
+| `codex_prereview_617_verdict_3.json` | parecer bruto da passada 3 (`REQUEST_CHANGES`: MEDIUM evidência ausente, LOW git) |
