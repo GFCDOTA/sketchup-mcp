@@ -1,0 +1,13 @@
+{
+ "commit": "5ac5dfddcedb93fcba457a38bd12ae195ac5db2a",
+ "icacls_ok": true,
+ "isolamento_provado": true,
+ "exit_code": 1,
+ "leitura": {
+  "arquivo_comum_do_usuario": "NEGADA",
+  "arquivo_do_usuario_com_ACL_ALL_APPLICATION_PACKAGES": "PERMITIDA",
+  "windows_system32_cmd": "PERMITIDA",
+  "windows_hosts": "PERMITIDA",
+  "program_files_gh": "PERMITIDA"
+ }
+}
