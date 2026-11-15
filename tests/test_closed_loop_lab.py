@@ -1272,3 +1272,37 @@ def test_report_does_not_count_a_publication_whose_ack_was_never_recorded(env, f
     assert sorted(rep["ledger"]) == sorted(lab_mod.expected_publications(store.events(lab_mod.JOB_ID)))   # o efeito existe
     assert [o["status"] for o in rep["outbox"]] == ["DONE", "RUNNING"]                                     # o ACK nao
     assert rep["criteria"]["verdicts_published_once_via_outbox"] is False and rep["verdict"] == "FAIL"
+
+
+def _strip_evidence_of_one_done_event(lab, store, event_type, key):
+    import sqlite3
+    done = [e for e in store.events(lab_mod.JOB_ID) if e["event_type"] == event_type and e["status"] == "DONE"]
+    result = json.loads(done[0]["result"])
+    del result[key]
+    with sqlite3.connect(lab.db) as conn:
+        conn.execute("UPDATE events SET result = ? WHERE id = ?", (json.dumps(result), done[0]["id"]))
+
+
+@pytest.mark.parametrize("event_type,key", [("IMPLEMENT_REQUESTED", "tests"), ("REVIEW_REQUESTED", "evidence")])
+def test_a_completed_event_without_test_evidence_fails_the_sandbox_criterion_even_if_others_are_valid(env, fake_sandbox, event_type, key):
+    lab, store = env
+    closed_loop(sandboxed_lab(lab), store)
+    assert lab_mod.report(lab, store)["criteria"]["coordinator_tests_ran_in_os_sandbox"] is True       # controle: sem a mutilacao, passa
+    _strip_evidence_of_one_done_event(lab, store, event_type, key)
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["criteria"]["coordinator_tests_ran_in_os_sandbox"] is False and rep["verdict"] == "FAIL"
+
+
+def test_missing_or_unreadable_results_count_as_missing_evidence_not_as_absent_events():
+    valid = {"isolation": sb.ISOLATION, "sandbox": SANDBOX_FACTS}
+    events = [{"status": "DONE", "event_type": "IMPLEMENT_REQUESTED", "result": json.dumps({"tests": valid})},
+              {"status": "DONE", "event_type": "CORRECTION_REQUESTED", "result": None},
+              {"status": "DONE", "event_type": "REVIEW_REQUESTED", "result": "nao e json"},
+              {"status": "PENDING", "event_type": "REVIEW_REQUESTED", "result": None},
+              {"status": "DONE", "event_type": "WORKFLOW_COMPLETED", "result": None}]
+
+    found = lab_mod.recorded_test_evidence(events)
+
+    assert found == [valid, None, None] and lab_mod.tests_sandboxed(found) is False and lab_mod.tests_sandboxed([valid]) is True
