@@ -9,7 +9,7 @@ Fail-closed e em tres barreiras de autorizacao (o review do Tech Lead exige):
   3. APOS os testes: revalidacao de integridade do indice (diff staged identico ao pre-teste) para detectar side effects de testes maliciosos.
 Testes: so roda o que da para SELECIONAR com seguranca (testes alterados + `tests/test_<modulo>*.py` do codigo alterado); sem selecao
 segura (codigo sem teste, fixtures/conftest, tipos sem teste) => BLOCKED, nada e publicado.
-Sandbox: `run_checks` recusa execucao sem sandbox de SO (FP-060 P2); ambiente SEMPRE por allowlist (FP-060 7.1)."""
+Sandbox: `run_checks` so executa dentro do AppContainer com a prova da execucao (FP-060 P2); ambiente SEMPRE por allowlist (FP-060 7.1)."""
 from __future__ import annotations
 
 import os
@@ -27,6 +27,9 @@ ENV_KEEP = {k.upper() for k in (
     "APPDATA", "LOCALAPPDATA", "PROGRAMDATA", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMW6432", "NUMBER_OF_PROCESSORS",
     "PROCESSOR_ARCHITECTURE", "OS", "USERNAME", "LANG", "LC_ALL", "PYTHONUTF8", "PYTHONIOENCODING", "PT_TO_M", "MPLBACKEND")}
 SAFE_MODES = {"100644", "100755"}
+CHECK_TIMEOUT_S = 600
+SANDBOX_SKIP = ("artifacts", "assets", "ops", "runs", ".git")                # nao viajam para o sandbox (peso e segredo)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 Run = Callable[[list, Path], "tuple[int, str]"]
 Revalidate = Callable[[], "tuple[bool, str]"]
 
@@ -129,10 +132,36 @@ def _check_env() -> dict:
     return {k: v for k, v in os.environ.items() if k.upper() in ENV_KEEP}
 
 
+def _sandbox_root() -> Path:
+    from tools.orchestration import event_bridge as eb
+    return eb.bridge_path().with_name("executor") / "tests_sandbox"
+
+
 def run_checks(py: str, wt: Path, files: list, tests: list[str] | None = None) -> tuple[bool, str]:
-    """Fail-closed: testes nao confiaveis exigem isolamento de SO verificavel.
-    Job Objects gerenciam processos, mas nao sao um sandbox de seguranca. Nao ha fallback via subprocess."""
-    return False, "BLOCKED: execucao de testes requer sandbox de SO real (FP-060 P2); edicoes preservadas na worktree"
+    """Fail-closed: testes nao confiaveis SO rodam dentro de um AppContainer sem capacidades, com o token do processo e um canario
+    provados NESTA execucao (`sandboxed_tests.run_pytest`). Fora do Windows, sandbox que nao sobe, sonda reprovada, prova ausente ou
+    selecao de testes ausente => (False, "BLOCKED: ..."); nada roda fora do sandbox, e nao ha parametro, flag nem fallback que o permita.
+    So documentacao (selecao VAZIA, nao `None`) nao tem o que testar. As dependencias vem do `pyproject.toml` do PROPRIO coordenador,
+    nunca do codigo sob teste. O sandbox nega o que a ACL nao concede a um AppContainer, mas le o que ela abre a todos
+    (ver `sandboxed_tests`): nao e confinamento geral de arquivos."""
+    if tests is None:
+        return False, "BLOCKED: sem selecao segura de testes; execucao de testes requer sandbox de SO real (FP-060 P2); edicoes preservadas na worktree"
+    if not tests:
+        return True, "somente documentacao: nenhum teste a executar"
+    from tools.orchestration import sandboxed_tests as sb
+    root = _sandbox_root()
+    try:
+        run = sb.run_pytest(wt, tests, root=root, ini_text="[pytest]\n", timeout=CHECK_TIMEOUT_S, log_dir=root / "logs",
+                            tag=f"deliver_{wt.name}"[:40], dists=sb.project_distributions(PROJECT_ROOT / "pyproject.toml"), skip=SANDBOX_SKIP)
+    except sb.SandboxError as exc:
+        return False, f"BLOCKED: sandbox de SO indisponivel ({str(exc)[:200]}); execucao de testes requer sandbox de SO real (FP-060 P2); edicoes preservadas na worktree"
+    if not sb.proves_isolation(run.facts):
+        return False, "BLOCKED: isolamento de SO nao comprovado nesta execucao do sandbox (FP-060 P2); edicoes preservadas na worktree"
+    if run.timed_out:
+        return False, f"pytest estourou o limite de {CHECK_TIMEOUT_S}s no sandbox"
+    if run.exit_code != 0:
+        return False, f"pytest reprovou no sandbox (codigo {run.exit_code}): {run.output[-600:]}"
+    return True, f"{len(tests)} arquivo(s) de teste passaram no AppContainer"
 
 
 def remote_head(wt: Path, branch: str, run: Run) -> str | None:

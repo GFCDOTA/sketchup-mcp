@@ -292,18 +292,86 @@ def test_failing_checks_block_the_push(repo):
 
 
 # -------------------------------------- seguranca: fail-closed sem sandbox de SO real (review #598)
-def test_run_checks_always_blocks_without_real_sandbox():
-    """run_checks e incondicionalmente bloqueado — nenhuma flag habilita subprocess."""
-    ok, msg = dl.run_checks("python", Path("."), ["x.py"])
+class FakeRun:
+    """Resultado de `sandboxed_tests.run_pytest` com os fatos de uma execucao isolada (token AppContainer, 0 capacidades, canario negado)."""
+    def __init__(self, exit_code=0, timed_out=False, facts="ok", output="1 passed"):
+        from tests.test_closed_loop_lab import SANDBOX_FACTS
+        self.exit_code, self.timed_out, self.output = exit_code, timed_out, output
+        self.facts = dict(SANDBOX_FACTS) if facts == "ok" else facts
+
+
+def _sandbox(monkeypatch, run=None, error=None):
+    from tools.orchestration import sandboxed_tests as sb
+    calls = []
+
+    def fake(tree, tests, **kw):
+        calls.append({"tree": tree, "tests": tests, **kw})
+        if error:
+            raise sb.SandboxError(error)
+        return run or FakeRun()
+    monkeypatch.setattr(sb, "run_pytest", fake)
+    return calls
+
+
+def test_run_checks_blocks_when_there_is_no_real_os_sandbox(monkeypatch):
+    """Sem AppContainer (ou com ele indisponivel) nada roda: nenhuma flag, parametro ou fallback habilita subprocess."""
+    _sandbox(monkeypatch, error="AppContainer indisponivel")
+    ok, msg = dl.run_checks("python", Path("."), ["x.py"], ["tests/test_x.py"])
     assert not ok and "sandbox" in msg.lower() and "FP-060 P2" in msg
 
 
+def test_run_checks_blocks_without_a_safe_test_selection(monkeypatch):
+    calls = _sandbox(monkeypatch)
+    ok, msg = dl.run_checks("python", Path("."), ["x.py"])
+    assert not ok and "sandbox" in msg.lower() and calls == []
+
+
 def test_run_checks_blocks_even_with_monkeypatched_flags(monkeypatch):
-    """Nenhum atributo do modulo pode habilitar execucao de testes nao confiaveis."""
+    """Nenhum atributo do modulo habilita execucao: sem a prova de isolamento DESTA execucao o resultado e bloqueio, mesmo com pytest verde."""
     for attr in ("SANDBOX_AVAILABLE", "SANDBOX_RUNNER", "SANDBOX_ENABLED", "_SANDBOX_OVERRIDE"):
         monkeypatch.setattr(dl, attr, True, raising=False)
-    ok, msg = dl.run_checks("python", Path("."), ["x.py"])
-    assert not ok and "sandbox" in msg.lower()
+    _sandbox(monkeypatch, run=FakeRun(exit_code=0, facts={}))
+    ok, msg = dl.run_checks("python", Path("."), ["x.py"], ["tests/test_x.py"])
+    assert not ok and "isolamento" in msg.lower()
+
+
+def test_run_checks_blocks_when_a_single_proof_is_missing(monkeypatch):
+    from tests.test_closed_loop_lab import SANDBOX_FACTS
+    facts = dict(SANDBOX_FACTS)
+    del facts["canary"]
+    _sandbox(monkeypatch, run=FakeRun(exit_code=0, facts=facts))
+    ok, msg = dl.run_checks("python", Path("."), ["x.py"], ["tests/test_x.py"])
+    assert not ok and "isolamento" in msg.lower()
+
+
+def test_run_checks_passes_only_with_proven_isolation_and_a_green_run(monkeypatch):
+    calls = _sandbox(monkeypatch)
+    ok, msg = dl.run_checks("python", Path("wt-x"), ["x.py"], ["tests/test_x.py"])
+    assert ok and "AppContainer" in msg
+    c = calls[0]
+    assert c["tests"] == ["tests/test_x.py"] and c["tree"] == Path("wt-x") and set(dl.SANDBOX_SKIP) >= {".git", "runs", "artifacts"}
+    assert c["skip"] == dl.SANDBOX_SKIP and c["timeout"] == dl.CHECK_TIMEOUT_S
+    assert "pytest" in c["dists"] and Path(c["root"]).name == "tests_sandbox" and c["ini_text"] == "[pytest]\n"   # o PR nao escolhe deps nem ini
+
+
+@pytest.mark.parametrize("run,needle", [(FakeRun(exit_code=1, output="1 failed"), "reprovou"), (FakeRun(exit_code=0, timed_out=True), "limite")])
+def test_run_checks_blocks_a_red_or_timed_out_run(monkeypatch, run, needle):
+    _sandbox(monkeypatch, run=run)
+    ok, msg = dl.run_checks("python", Path("."), ["x.py"], ["tests/test_x.py"])
+    assert not ok and needle in msg
+
+
+def test_run_checks_needs_no_sandbox_for_a_docs_only_selection(monkeypatch):
+    calls = _sandbox(monkeypatch, error="nao deveria ser chamado")
+    ok, msg = dl.run_checks("python", Path("."), ["docs/a.md"], [])
+    assert ok and "documentacao" in msg and calls == []
+
+
+def test_run_checks_dependencies_come_from_the_coordinator_pyproject_not_the_tree(monkeypatch):
+    calls = _sandbox(monkeypatch)
+    dl.run_checks("python", Path("wt-x"), ["x.py"], ["tests/test_x.py"])
+    from tools.orchestration import sandboxed_tests as sb
+    assert calls[0]["dists"] == sb.project_distributions(dl.PROJECT_ROOT / "pyproject.toml")
 
 
 def test_run_checks_sanitizes_env_no_gh_token(repo, monkeypatch):
@@ -373,3 +441,18 @@ def test_run_checks_has_no_bypass_parameters():
 
 def test_prompt_tells_the_model_a_denied_command_does_not_block_the_allowed_ones():
     assert "tente-os" in ex.PROMPT and "o executor valida" in ex.PROMPT
+
+
+@pytest.mark.skipif(os.name != "nt", reason="requires real Windows AppContainer")
+def test_run_checks_with_the_real_appcontainer_passes_a_green_test_and_blocks_a_red_one(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "governance" / "event_bridge.json"))
+    wt = tmp_path / "wt" / "bridge-pr7"
+    (wt / "tests").mkdir(parents=True)
+    (wt / "tests" / "test_green.py").write_text("def test_green():\n    assert 1 + 1 == 2\n", encoding="utf-8")
+    (wt / "tests" / "test_red.py").write_text("def test_red():\n    assert 1 + 1 == 3\n", encoding="utf-8")
+
+    green_ok, green_msg = dl.run_checks("python", wt, ["tests/test_green.py"], ["tests/test_green.py"])
+    red_ok, red_msg = dl.run_checks("python", wt, ["tests/test_red.py"], ["tests/test_red.py"])
+
+    assert green_ok and "AppContainer" in green_msg, green_msg
+    assert not red_ok and "reprovou" in red_msg, red_msg
