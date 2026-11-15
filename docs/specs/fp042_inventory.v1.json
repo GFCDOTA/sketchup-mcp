@@ -22048,6 +22048,13 @@
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/codex_prereview_617_verdict_3.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     }
   ]
 }

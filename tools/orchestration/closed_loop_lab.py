@@ -80,6 +80,7 @@ CRASH_EXIT = 86
 # credencial real e lida, copiada ou alterada; so a variavel de ambiente do processo filho muda.
 FAULTS = {"claude-auth": ("claude", "CLAUDE_CONFIG_DIR"), "codex-auth": ("codex", "CODEX_HOME")}
 AGENT_EVENTS = {"claude": ("IMPLEMENT_REQUESTED", "CORRECTION_REQUESTED"), "codex": ("REVIEW_REQUESTED",)}
+EVIDENCE_EVENTS = AGENT_EVENTS["claude"] + AGENT_EVENTS["codex"]           # eventos concluidos que PRECISAM carregar evidencia de testes
 
 SPEC = """slugify(text: str) -> str
 R1. Converta o texto para minusculas com str.lower().
@@ -726,22 +727,27 @@ def _containment(run: dict) -> str | None:
     return m.group(1) if m else None
 
 
-def recorded_test_evidence(events: list[dict]) -> list[dict]:
-    """A evidencia de testes que sustentou cada entrega e cada parecer concluidos, como ficou gravada no evento."""
-    found = []
+def recorded_test_evidence(events: list[dict]) -> list[dict | None]:
+    """A evidencia de testes de CADA entrega e CADA parecer concluidos, como ficou gravada no evento. Um evento concluido sem
+    resultado ou sem evidencia valida entra como `None`: some-lo da lista deixaria outra evidencia valida falar por ele."""
+    found: list[dict | None] = []
     for e in events:
-        if e["status"] != "DONE" or not e["result"]:
+        if e["status"] != "DONE" or e["event_type"] not in EVIDENCE_EVENTS:
             continue
         key = "evidence" if e["event_type"] == "REVIEW_REQUESTED" else "tests"
-        evidence = json.loads(e["result"]).get(key)
-        if isinstance(evidence, dict):
-            found.append(evidence)
+        try:
+            evidence = json.loads(e["result"] or "null").get(key)
+        except (ValueError, AttributeError):
+            evidence = None
+        found.append(evidence if isinstance(evidence, dict) else None)
     return found
 
 
-def tests_sandboxed(evidence: list[dict]) -> bool:
-    """Toda evidencia veio do AppContainer E carrega as duas provas da propria execucao (token e canario)."""
-    return bool(evidence) and all(ev.get("isolation") == sb.ISOLATION and sb.proves_isolation(ev.get("sandbox")) for ev in evidence)
+def tests_sandboxed(evidence: list[dict | None]) -> bool:
+    """Toda entrega e todo parecer concluido tem evidencia do AppContainer E ela carrega as duas provas da propria execucao
+    (token e canario). Evidencia ausente ou invalida reprova o criterio."""
+    return bool(evidence) and all(
+        ev is not None and ev.get("isolation") == sb.ISOLATION and sb.proves_isolation(ev.get("sandbox")) for ev in evidence)
 
 
 # -- relatorio: tudo derivado do SQLite e do git, nada digitado --------------------------------------------------------------
@@ -813,7 +819,7 @@ def report(lab: Lab, store: EventStore) -> dict:
         "orphan_checks": [checks[k] for k in sorted(checks)],
         "commits": _must(["log", "--reverse", "--format=%H %s"], lab.repo).splitlines(),
         "transitions": len(transitions),
-        "test_isolation": sorted({str(ev.get("isolation")) for ev in evidence}),
+        "test_isolation": sorted({"AUSENTE" if ev is None else str(ev.get("isolation")) for ev in evidence}),
         "limits": [("testes em AppContainer sem capacidades: nega arquivos e credenciais do usuario e a rede, mas le o que a ACL abre a "
                     "todo AppContainer (Windows, Program Files), e NAO garante a integridade do resultado (o codigo testado controla o "
                     "exit code)") if sandboxed else "testes sem sandbox de SO comprovado (FP-060 P2)",

@@ -3,7 +3,7 @@
 Cada tentativa de leitura e registrada explicitamente, dentro do sandbox, como uma linha `RESULT {...}` escrita direto no descritor
 herdado (`sys.__stdout__`, que o pytest nao captura): NEGADA (PermissionError), PERMITIDA, INEXISTENTE (FileNotFoundError) ou ERRO_<errno>.
 O script RECUSA a evidencia se ela estiver incompleta: timeout, erro de coleta, alvo sem RESULT ou duplicado, alvo inexistente ou
-com erro diferente de permissao negada, isolamento nao provado, ou arvore suja."""
+com erro diferente de permissao negada, isolamento nao provado, falha do git (fora de um repositorio, sem HEAD) ou arvore suja."""
 import json
 import os
 import re
@@ -15,8 +15,20 @@ from tools.orchestration import sandboxed_tests as sb
 
 out = Path(sys.argv[1])
 out.mkdir(parents=True)
-head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
-if subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True).stdout.strip():
+REPO = Path(__file__).resolve().parents[5]                                   # a raiz do repositorio que contem este script
+
+
+def _git(*args: str) -> str:
+    done = subprocess.run(["git", "-C", str(REPO), *args], capture_output=True, text=True)
+    if done.returncode != 0:
+        sys.exit(f"git {' '.join(args)} falhou (codigo {done.returncode}): {done.stderr.strip()[:200]}")
+    return done.stdout.strip()
+
+
+head = _git("rev-parse", "HEAD")
+if not re.fullmatch(r"[0-9a-f]{40}", head):
+    sys.exit(f"HEAD invalido: {head!r}")
+if _git("status", "--porcelain"):
     sys.exit("arvore suja: a medicao precisa de um commit limpo")
 
 plain = out / "plain_user_file.txt"
