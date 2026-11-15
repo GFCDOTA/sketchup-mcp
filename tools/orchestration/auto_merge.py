@@ -1,0 +1,231 @@
+"""auto_merge.py — merge automatico PROTEGIDO de PR do executor (FP-060 MT-15, #647). DESLIGADO por padrao.
+
+    python -m tools.orchestration.auto_merge            # so o plano: decisao e motivos por PR candidato (nada e mesclado)
+    python -m tools.orchestration.auto_merge --apply    # mescla o que a decisao autorizar (exige AUTOMERGE_ENABLED=1)
+
+NAO e um caminho paralelo: o estado dos checks e a aprovacao vem de `lifecycle` (`checks_state`, `latest_review`), o teto de diff e os caminhos
+criticos vem de `execution_guards` e a politica de revisores vem de `docs/governance/review_policy.json`. Este modulo so DECIDE e executa o merge;
+nao altera protecao de branch, workflow, guarda nem politica, e o GitHub continua recusando o merge se a protecao da branch nao estiver satisfeita.
+
+Decisao (cada linha tem teste; fail-closed: na duvida NAO mescla):
+  DISABLED  `AUTOMERGE_ENABLED` != 1, ou o interruptor `AUTOMERGE_DISABLED` existe ao lado do estado do bridge.
+  REFUSE    ha uma decisao que e HUMANA: PR de fork, rascunho, base != develop, autor que nao e o executor, sem as DUAS chaves de autorizacao
+            (label `automerge-ok` no PR e `executor-automerge` em toda Issue citada), label de decisao humana (seguranca, governanca, validacao visual,
+            `aprovação-humana-pendente`), Issue citada fechada/inexistente, PR sem `Refs #N`, diff que toca caminho critico (governanca, workflows,
+            `tools/validation/`, `tools/orchestration/`, geometria...), passa dos tetos, binario ou tipo fora de .py/.md/.txt/.json, checks reprovados,
+            revisor independente pedindo mudancas, conflito de merge.
+  WAIT      nada decidido ainda: checks obrigatorios pendentes, sem aprovacao independente NO HEAD ATUAL, branch atrasada/bloqueada.
+  MERGE     todos os checks obrigatorios verdes NO HEAD EXATO, aprovacao de revisor independente (autorizado, nao-executor) vinculada a esse mesmo HEAD,
+            as duas chaves e nenhuma decisao humana pendente. O merge usa `--match-head-commit`: um commit novo entre a decisao e o merge o recusa.
+O que NAO e: nao liga o merge automatico em producao (o padrao e DISABLED), nao aprova nem revisa nada, nao decide visual."""
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from tools.orchestration import event_bridge as eb
+from tools.orchestration import execution_guards as guards
+from tools.orchestration import lifecycle
+
+ENABLE_ENV = "AUTOMERGE_ENABLED"
+PR_LABEL = "automerge-ok"
+ISSUE_LABEL = "executor-automerge"
+HUMAN_LABELS = frozenset({"aprovação-humana-pendente", "aprovacao-humana-pendente", "needs-human", "human-decision", "bloqueio:human-decision",
+                          "visual-review", "security", "governance", "blocked", "do-not-merge"})
+ALLOWED_SUFFIXES = (".py", ".md", ".txt", ".json")
+BASE_BRANCH = "develop"
+
+
+@dataclass
+class Decision:
+    code: str                                                   # DISABLED | REFUSE | WAIT | MERGE
+    reasons: list[str] = field(default_factory=list)
+
+    def as_dict(self) -> dict:
+        return {"code": self.code, "reasons": self.reasons}
+
+
+def kill_switch() -> Path:
+    return eb.bridge_path().with_name("AUTOMERGE_DISABLED")
+
+
+def enabled(env: dict | None = None) -> tuple[bool, str]:
+    import os
+    e = os.environ if env is None else env
+    if kill_switch().exists():
+        return False, f"interruptor {kill_switch().name} presente"
+    if e.get(ENABLE_ENV) != "1":
+        return False, f"{ENABLE_ENV} != 1 (padrao: desligado)"
+    return True, ""
+
+
+def _names(labels: object) -> set[str]:
+    return {(x.get("name") if isinstance(x, dict) else x) for x in (labels or []) if isinstance(x, (dict, str))} - {None}
+
+
+def numstat_from_files(files: list[dict]) -> str:
+    """O formato de `git diff --numstat -z --no-renames` que `execution_guards.evaluate_diff` exige (registro terminado em NUL; binario = `-`)."""
+    rows = []
+    for f in files:
+        add, rem = f.get("additions"), f.get("deletions")
+        binary = f.get("patch") is None and not add and not rem and f.get("changes", 0) == 0 and f.get("status") != "removed"
+        rows.append(f"{'-' if binary else add}\t{'-' if binary else rem}\t{f.get('filename')}")
+        if f.get("previous_filename"):                                       # renomeacao: o caminho de ORIGEM tambem conta
+            rows.append(f"0\t0\t{f['previous_filename']}")
+    return "".join(f"{r}\0" for r in rows)
+
+
+def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], issues: dict[int, dict], policy: dict, cfg: guards.Config,
+           is_enabled: tuple[bool, str] = (True, "")) -> Decision:
+    """Puro. `issues` mapeia numero -> Issue (REST) para cada `Refs #N` do PR; ausente = inexistente."""
+    ok, why = is_enabled
+    if not ok:
+        return Decision("DISABLED", [why])
+    if pr.get("merged") or pr.get("state") != "open":
+        return Decision("REFUSE", ["PR nao esta aberto"])
+    head = (pr.get("head") or {}).get("sha") or ""
+    refuse: list[str] = []
+    if pr.get("draft"):
+        refuse.append("PR em rascunho")
+    if (pr.get("base") or {}).get("ref") != BASE_BRANCH:
+        refuse.append(f"base != {BASE_BRANCH}")
+    if ((pr.get("head") or {}).get("repo") or {}).get("full_name") != ((pr.get("base") or {}).get("repo") or {}).get("full_name"):
+        refuse.append("PR de fork")
+    author = (pr.get("user") or {}).get("login")
+    if author not in policy.get("executor_logins", []):
+        refuse.append(f"autor {author!r} nao e o executor: so PR do executor e mesclado automaticamente")
+    labels = {str(n).casefold() for n in _names(pr.get("labels"))}
+    if PR_LABEL not in labels:
+        refuse.append(f"sem a label `{PR_LABEL}` (autorizacao humana por PR)")
+    if cfg.label not in labels:
+        refuse.append(f"sem a label `{cfg.label}`")
+    human = sorted(labels & {x.casefold() for x in HUMAN_LABELS})
+    if human:
+        refuse.append(f"decisao humana pendente (label {', '.join(human)})")
+    refs = sorted({int(n) for n in re.findall(r"\brefs?\s*:?\s*#(\d+)", pr.get("body") or "", re.I)})
+    if not refs:
+        refuse.append("PR sem `Refs #N`")
+    for n in refs:
+        iss = issues.get(n)
+        if not isinstance(iss, dict) or iss.get("state") != "open":
+            refuse.append(f"Issue #{n} inexistente ou fechada")
+            continue
+        il = {str(x).casefold() for x in _names(iss.get("labels"))}
+        if ISSUE_LABEL not in il:
+            refuse.append(f"Issue #{n} sem a label `{ISSUE_LABEL}` (autorizacao humana)")
+        if il & {x.casefold() for x in HUMAN_LABELS}:
+            refuse.append(f"Issue #{n} tem decisao humana pendente ({', '.join(sorted(il & {x.casefold() for x in HUMAN_LABELS}))})")
+    if not files:
+        refuse.append("PR sem arquivos")
+    verdict = guards.evaluate_diff(numstat_from_files(files), cfg)
+    refuse += [f"{v['rule']}: {v['detail']}" for v in verdict.violations]
+    refuse += [f"tipo nao permitido: {f.get('filename')}" for f in files if not str(f.get("filename", "")).lower().endswith(ALLOWED_SUFFIXES)]
+    state = lifecycle.checks_state(runs)
+    if state == "failed":
+        refuse.append("checks obrigatorios reprovados no HEAD")
+    review = lifecycle.latest_review(reviews, head, policy)
+    if review is not None and review.get("state") == "CHANGES_REQUESTED":
+        refuse.append(f"o revisor independente pede mudancas no HEAD atual (review {review.get('id')})")
+    if (pr.get("mergeable_state") or "") == "dirty":
+        refuse.append("conflito de merge")
+    if refuse:
+        return Decision("REFUSE", refuse)
+    wait: list[str] = []
+    if state != "passed":
+        wait.append(f"checks obrigatorios {state}")
+    if review is None:
+        wait.append("sem aprovacao do revisor independente NO HEAD ATUAL")
+    elif review.get("state") != "APPROVED":
+        wait.append("review no HEAD atual nao e APPROVED")
+    if (pr.get("mergeable_state") or "") != "clean":
+        wait.append(f"mergeable_state={pr.get('mergeable_state')!r} (protecao da branch ainda nao satisfeita)")
+    if wait:
+        return Decision("WAIT", wait)
+    return Decision("MERGE", [f"checks verdes e aprovacao (review {review['id']}) no HEAD {head[:12]}"])
+
+
+# --------------------------------------------------------------------------------------------------------------- facts / effect
+def gather(gh: eb.Gh, repo: str, number: int) -> tuple[dict, list[dict], list[dict], list[dict], dict[int, dict]]:
+    """Fatos FRESCOS do GitHub para um PR (paginados e fail-closed: `lifecycle` levanta em resposta incompleta/malformada)."""
+    pr = gh(f"repos/{repo}/pulls/{number}")
+    if not isinstance(pr, dict):
+        raise RuntimeError("resposta do PR nao e um objeto")
+    head = (pr.get("head") or {}).get("sha") or ""
+    files = lifecycle._paginated_list(gh, f"repos/{repo}/pulls/{number}/files")
+    runs = lifecycle._check_runs(gh, repo, head)
+    reviews = lifecycle._paginated_list(gh, f"repos/{repo}/pulls/{number}/reviews")
+    refs = sorted({int(n) for n in re.findall(r"\brefs?\s*:?\s*#(\d+)", pr.get("body") or "", re.I)})
+    issues = {}
+    for n in refs:
+        try:
+            iss = gh(f"repos/{repo}/issues/{n}")
+            issues[n] = iss if isinstance(iss, dict) and "pull_request" not in iss else None
+        except RuntimeError:
+            issues[n] = None
+    return pr, files, runs, reviews, {k: v for k, v in issues.items() if v}
+
+
+def merge(number: int, head: str, repo: str, runner=subprocess.run) -> tuple[bool, str]:
+    """`gh pr merge --merge --match-head-commit <sha>` com a identidade do executor: o GitHub recusa se o HEAD mudou ou se a protecao nao vale."""
+    from tools.orchestration import event_executor as ex
+    if not re.fullmatch(r"[0-9a-f]{40}", head or ""):
+        return False, f"HEAD invalido: {head!r}"
+    try:
+        done = runner(["gh", "pr", "merge", str(int(number)), "--repo", repo, "--merge", "--match-head-commit", head],
+                      env=ex.executor_env(), capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as exc:
+        return False, f"gh pr merge falhou: {type(exc).__name__}: {exc}"[:300]
+    if done.returncode != 0:
+        return False, f"gh pr merge recusado: {ex.redact((done.stderr or done.stdout or '')[:300])}"
+    return True, "mesclado"
+
+
+def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, runner=subprocess.run, is_enabled: tuple[bool, str] | None = None) -> dict:
+    """Um ciclo: para cada PR aberto com a label `automerge-ok`, decide com fatos frescos e, so com `apply` e decisao MERGE, mescla (rechecando o HEAD)."""
+    on = enabled() if is_enabled is None else is_enabled
+    if not on[0]:
+        return {"enabled": False, "reason": on[1], "prs": []}
+    cfg = guards.load_config()
+    out = []
+    try:
+        candidates = [p for p in lifecycle._paginated_list(gh, f"repos/{repo}/pulls?state=open")
+                      if PR_LABEL in {str(n).casefold() for n in _names(p.get("labels"))}]
+    except (RuntimeError, OSError, ValueError, KeyError, TypeError) as exc:
+        return {"enabled": True, "applied": apply, "prs": [{"pr": None, "code": "ERROR", "reasons": [f"listagem de PRs falhou: {type(exc).__name__}: {exc}"[:200]]}]}
+    for cand in candidates:
+        number = cand["number"]
+        row: dict = {"pr": number}
+        try:
+            pr, files, runs, reviews, issues = gather(gh, repo, number)
+            decision = decide(pr, files, runs, reviews, issues, policy, cfg, on)
+            row.update(head=(pr.get("head") or {}).get("sha"), **decision.as_dict())
+            if apply and decision.code == "MERGE":
+                fresh = gh(f"repos/{repo}/pulls/{number}")                    # TOCTOU: o que vai ser mesclado e o HEAD que foi decidido
+                if (fresh.get("head") or {}).get("sha") != row["head"] or fresh.get("state") != "open":
+                    row.update(code="WAIT", reasons=["HEAD ou estado mudou entre a decisao e o merge"])
+                else:
+                    done, msg = merge(number, row["head"], repo, runner)
+                    row.update(merged=done, merge_message=msg)
+        except (RuntimeError, OSError, ValueError, KeyError, TypeError) as exc:
+            row.update(code="ERROR", reasons=[f"{type(exc).__name__}: {exc}"[:200]])
+        out.append(row)
+    return {"enabled": True, "applied": apply, "prs": out}
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--apply", action="store_true", help="mescla o que for autorizado (exige AUTOMERGE_ENABLED=1); sem isto so planeja")
+    ap.add_argument("--repo", default=eb.REPO)
+    a = ap.parse_args(argv)
+    report = cycle(eb.gh_json, eb.load_policy(), a.repo, a.apply)
+    print(json.dumps(report, indent=1, ensure_ascii=False))
+    return 1 if any(p.get("code") == "ERROR" for p in report["prs"]) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
