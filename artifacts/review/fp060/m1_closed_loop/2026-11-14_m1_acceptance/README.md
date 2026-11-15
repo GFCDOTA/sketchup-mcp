@@ -52,8 +52,8 @@ intervenção).
 - **Revisão independente do #617.** A prova do critério 5 com isolamento de SO está num PR ainda não revisado. Sem ele em
   `develop`, o critério 5 vale só na forma anterior (runner do coordenador com allowlist de ambiente).
 - **"Efeito externo" no M1 é o commit no repositório do laboratório.** Não há efeito no GitHub; isso é M2.
-- **Integridade do resultado dos testes.** O código testado controla o exit code do pytest; o sandbox contém arquivo e
-  rede, não o que o código declara.
+- **Integridade do resultado dos testes.** O código testado controla o exit code do pytest; o sandbox nega os arquivos e credenciais do usuário e a
+  rede, mas lê o que a ACL abre a todo AppContainer (ver `../2026-11-15_fs_boundary/`), e não limita o que o código declara.
 - **Coordenador morto no meio dos testes** deixaria perfil AppContainer e pasta `sandbox-*` órfãos; os caos exercitados
   matam o coordenador fora dessa janela.
 - **Saída bruta do Claude** fica no diretório do laboratório, não versionado; quando o coordenador morre com o CLI no ar ela
