@@ -203,3 +203,52 @@ def test_restart_after_an_interruption_never_duplicates_or_loses_work(path, die_
     assert execute(gh, st2, 7, "feat/x") == "CONCLUIDO"
     assert execute(gh, st2, 7, "feat/x") == "CONCLUIDO"                               # e rodar de novo tambem e inofensivo
     assert len(gh.prs) == 1 and gh.merges == ["feat/x"] and gh.board == {7: "Done"} and gh.branches == {"feat/x"}
+
+
+# ------------------------------------------------------------------------- trava de arquivo no Windows (FP-060, concorrencia autonoma)
+def test_many_threads_acquiring_the_state_lock_repeatedly_all_get_it(path):
+    """Regressao: no Windows o `unlink` da trava falhava com WinError 32 quando outro thread acabava de abri-la/inspeciona-la; a trava ficava presa
+    e todos os demais estouravam o timeout (2 de 180 aquisicoes davam certo)."""
+    errors, wins = [], []
+
+    def run(i):
+        try:
+            with es.locked(path, wait_s=3):
+                wins.append(i)
+        except BaseException as exc:                                                       # noqa: BLE001 — o teste quer ver qualquer falha
+            errors.append(f"{type(exc).__name__}: {exc}")
+    for _ in range(25):
+        ts_ = [threading.Thread(target=run, args=(i,)) for i in range(4)]
+        [t.start() for t in ts_]
+        [t.join() for t in ts_]
+    assert errors == [] and len(wins) == 100
+
+
+def test_releasing_the_lock_retries_a_transient_permission_error(path, monkeypatch):
+    from pathlib import Path
+    real, calls = Path.unlink, []
+
+    def flaky(self, missing_ok=False):
+        calls.append(1)
+        if len(calls) <= 3:
+            raise PermissionError(13, "em uso", None, 32)
+        return real(self, missing_ok=missing_ok)
+    monkeypatch.setattr(Path, "unlink", flaky)
+    with es.locked(path):
+        pass
+    monkeypatch.undo()
+    assert len(calls) == 4 and not path.with_suffix(".lock").exists()
+
+
+def test_a_permission_error_creating_the_lock_means_busy_and_is_retried(path, monkeypatch):
+    real_open, calls = es.os.open, []
+
+    def flaky(p, flags, *a, **k):
+        calls.append(1)
+        if len(calls) <= 2:
+            raise PermissionError(13, "exclusao pendente", None, 5)
+        return real_open(p, flags, *a, **k)
+    monkeypatch.setattr(es.os, "open", flaky)
+    with es.locked(path, wait_s=5):
+        pass
+    assert len(calls) >= 3

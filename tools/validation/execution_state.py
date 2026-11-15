@@ -89,9 +89,24 @@ def _lock_owner_dead(p: Path) -> bool:
     return raw.isdigit() and int(raw) != os.getpid() and not pid_alive(int(raw))
 
 
+def _release(p: Path, tries: int = 100, pause: float = 0.02) -> None:
+    """Solta a trava. No Windows, outro thread/processo que acabou de abrir ou de dar `stat` no arquivo faz o `unlink` falhar com
+    PermissionError (WinError 32/5) por instantes; desistir ali deixava a trava presa e TODOS os demais esperavam ate o timeout.
+    Tenta de novo por ~2 s; se ainda assim nao soltar, a trava velha/dono morto (`locked`) a quebra depois."""
+    import time
+    for _ in range(tries):
+        try:
+            p.unlink(missing_ok=True)
+            return
+        except PermissionError:
+            time.sleep(pause)
+    p.unlink(missing_ok=True)
+
+
 @contextlib.contextmanager
 def locked(path: Path | None = None, wait_s: float = 5.0):
-    """Trava exclusiva curta em torno de ler-alterar-gravar. Dono morto (PID gravado) ou trava velha (> 60 s) => quebrada."""
+    """Trava exclusiva curta em torno de ler-alterar-gravar. Dono morto (PID gravado) ou trava velha (> 60 s) => quebrada.
+    PermissionError ao criar/inspecionar a trava (Windows: arquivo em uso ou com exclusao pendente) significa OCUPADA, nao erro."""
     import time
     p = (path or state_path()).with_suffix(".lock")
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -104,21 +119,23 @@ def locked(path: Path | None = None, wait_s: float = 5.0):
             finally:
                 os.close(fd)
             break
-        except FileExistsError:
+        except (FileExistsError, PermissionError):
             try:
                 age = time.time() - p.stat().st_mtime
             except FileNotFoundError:
                 continue                                             # o dono soltou a trava entre o open e o stat: tenta de novo
+            except PermissionError:
+                age = 0.0                                            # exclusao pendente: ainda ocupada, olha de novo
             if age > 60 or _lock_owner_dead(p):
-                p.unlink(missing_ok=True)
+                _release(p)
                 continue
             if time.time() > deadline:
                 raise TimeoutError(f"trava do estado de execucao ocupada: {p}") from None
-            time.sleep(0.05)
+            time.sleep(0.02)
     try:
         yield
     finally:
-        p.unlink(missing_ok=True)
+        _release(p)
 
 
 def now_iso(now: dt.datetime | None = None) -> str:
