@@ -291,6 +291,7 @@ def test_a_malformed_implement_event_is_discarded_and_never_executed(world):
     world.store.publish("IMPLEMENT_REQUESTED", "implement:issue:9:abc", "issue:9", {"issue": 9}, aggregate_type="issue")      # sem spec_hash
     world.store.publish("IMPLEMENT_REQUESTED", "implement:issue:8:zzz", "issue:8", {"issue": 8, "spec_hash": "outro"}, aggregate_type="issue")
     run(world)
+    run(world)                                                                                   # o claim e por ordem de id: o 1o ciclo fez o pedido bom
     by_key = {e["idempotency_key"]: e["status"] for e in world.store.events()}
     assert by_key["implement:issue:9:abc"] == "SUPERSEDED" and by_key["implement:issue:8:zzz"] == "SUPERSEDED"
     assert by_key[KEY] == "DONE"
@@ -301,7 +302,7 @@ def test_the_json_queue_never_runs_an_implement_item(world, monkeypatch):
     eb.save({**eb.default_bridge_state(), "queue": [{"key": KEY, "kind": "implement", "event_id": f"implement:{N}", "pr": None, "issue": N,
                                                       "head_sha": "", "state": "QUEUED"}]})
     res = ex.process_one(Gh(), POLICY, REPO, True, Child(), "claude", lambda *a: (True, "", Path("."), ""), None)
-    assert res["action"] == "PARKED_UNSUPPORTED" or res["action"] == "UNSUPPORTED" or "nao e uma revisao" in res.get("reason", "")
+    assert res["action"] == "UNSUPPORTED" and "nao e uma revisao" in res["reason"] and not res.get("pr")
 
 
 # ------------------------------------------------------------------------------------------------- git / gh (funcoes puras)
