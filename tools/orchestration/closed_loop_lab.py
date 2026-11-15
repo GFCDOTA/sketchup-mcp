@@ -29,11 +29,12 @@ enquanto ele roda e mata a ARVORE inteira se o lease se perde, no timeout ou qua
 do job). Fora do Windows o CLI roda sem contencao e o relatorio registra isso. Job Object NAO e sandbox.
 
 Testes do coordenador: no Windows (`--test-isolation auto`) rodam sobre uma copia da arvore dentro de um AppContainer sem
-capacidades (`sandboxed_tests.run_pytest`): sem rede e sem acesso a arquivo fora do workspace, provado a cada execucao pelo
-token do processo e por um canario. Sandbox que nao sobe = evento falho; nunca ha fallback para rodar os testes fora dele.
+capacidades (`sandboxed_tests.run_pytest`): sem rede e sem acesso aos arquivos e credenciais do usuario (o que a ACL nao concede a
+um AppContainer), provado a cada execucao pelo token do processo e por um canario; o que a ACL abre a todo AppContainer (Windows,
+Program Files) segue legivel. Sandbox que nao sobe = evento falho; nunca ha fallback para rodar os testes fora dele.
 Fora do Windows, ou com `--test-isolation env`, rodam so com env por allowlist e o relatorio REPROVA o criterio de isolamento.
 
-Limites declarados: o sandbox contem o que o codigo testado alcanca, nao a integridade do resultado (esse codigo controla o
+Limites declarados: o sandbox restringe o que o codigo testado alcanca (nao o confina em todo o sistema de arquivos), nao a integridade do resultado (esse codigo controla o
 exit code do pytest); o APPROVE daqui e tecnico de laboratorio e nao equivale a review independente no GitHub (M2). O lease protege a
 escrita no SQLite e e renovado imediatamente antes do commit; a janela entre a renovacao e o commit existe e e coberta pela
 reconciliacao por trailer (consulta o estado antes de repetir o efeito)."""
@@ -888,8 +889,9 @@ def report(lab: Lab, store: EventStore) -> dict:
         "outbox": [{"id": o["id"], "event": o["event_id"], "key": o["idempotency_key"], "status": o["status"],
                     "attempts": o["attempts"]} for o in outbox],
         "ledger": in_ledger,
-        "limits": [("testes em AppContainer sem capacidades: contem arquivo e rede, NAO a integridade do resultado (o codigo testado "
-                    "controla o exit code)") if sandboxed else "testes sem sandbox de SO comprovado (FP-060 P2)",
+        "limits": [("testes em AppContainer sem capacidades: nega arquivos e credenciais do usuario e a rede, mas le o que a ACL abre a "
+                    "todo AppContainer (Windows, Program Files), e NAO garante a integridade do resultado (o codigo testado controla o "
+                    "exit code)") if sandboxed else "testes sem sandbox de SO comprovado (FP-060 P2)",
                    "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
                    "sem GitHub, sem --execute; o alvo do outbox e um arquivo local que faz o papel de sistema externo",
                    "Job Object nao e sandbox: so prende a vida da arvore do CLI ao coordenador e ao lease"],

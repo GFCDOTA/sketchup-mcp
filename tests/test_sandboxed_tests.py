@@ -420,3 +420,34 @@ def test_run_pytest_leaves_the_skipped_entries_out_of_the_sandbox_copy(tmp_path)
                             log_dir=tmp_path / "logs_b", tag="b", skip=("artifacts",))
 
     assert (full.facts["tree_files"], skipped.facts["tree_files"]) == (2, 1) and skipped.exit_code == 0
+
+
+@windows_only
+def test_the_documented_file_boundary_hides_user_files_but_not_what_every_appcontainer_may_read(tmp_path):
+    """Trava o contrato MEDIDO (pre-revisao do Codex no #617): o sandbox nega arquivo de usuario sem concessao a AppContainer, mas le
+    arquivo concedido a ALL APPLICATION PACKAGES e os binarios do Windows. Se isto mudar, o contrato do modulo precisa mudar junto."""
+    plain, shared = tmp_path / "plain.txt", tmp_path / "shared.txt"
+    plain.write_text("x", encoding="ascii")
+    shared.write_text("x", encoding="ascii")
+    granted = subprocess.run(["icacls", str(shared), "/grant", "*S-1-15-2-1:(R)"], capture_output=True)       # ALL APPLICATION PACKAGES
+    assert granted.returncode == 0
+    system = Path(os.environ["SystemRoot"]) / "System32" / "cmd.exe"
+    tree = tree_with(tmp_path, test_boundary=f"""import pytest
+
+
+def test_user_file_without_an_appcontainer_grant_is_denied():
+    with pytest.raises(OSError):
+        open({str(plain)!r}, "rb").read(1)
+
+
+def test_user_file_granted_to_all_application_packages_is_readable():
+    assert open({str(shared)!r}, "rb").read(1) == b"x"
+
+
+def test_windows_binaries_are_readable():
+    assert open({str(system)!r}, "rb").read(2) == b"MZ"
+""")
+
+    run = sandboxed(tmp_path, tree, ["tests/test_boundary.py"])
+
+    assert run.exit_code == 0 and "3 passed" in run.output, run.output[-800:]
