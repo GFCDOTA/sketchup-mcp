@@ -57,6 +57,8 @@ MAX_BUDGET_USD = "5"
 RETRY_S = 900
 LEASE_S = 300                                                                 # lease de execucao; o heartbeat o renova
 HEARTBEAT_S = 60
+MAX_CONSECUTIVE_CYCLE_ERRORS = 8                                           # acima disto o processo sai (codigo 7) e a tarefa agendada o reinicia
+MAX_CYCLE_BACKOFF_S = 900
 BRANCH_OK = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,100}$")
 SECRET = re.compile(r"(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,})")
 CRED_HINTS = ("not logged in", "/login", "invalid api key", "authentication", "oauth token", "unauthorized")
@@ -763,6 +765,20 @@ def _reconcile_summary(gh: eb.Gh, policy: dict, repo: str, now: dt.datetime | No
         return {"errors": [f"{type(exc).__name__}: {exc}"[:200]]}
 
 
+def cycle_backoff(interval: int, consecutive: int) -> float:
+    """Espera apos `consecutive` ciclos seguidos com erro: dobra a cada falha, limitada. Nunca menor que o intervalo normal."""
+    return float(min(MAX_CYCLE_BACKOFF_S, max(interval, 1) * 2 ** max(consecutive, 0)))
+
+
+def guarded_cycle(cycle: Callable[[], dict], consecutive: int) -> tuple[dict, int]:
+    """Roda UM ciclo sem deixar uma excecao derrubar o processo. Devolve (resultado, falhas seguidas): o resultado de um ciclo com erro e
+    um registro (`cycle_error`) e o contador sobe; um ciclo sem erro zera o contador. `KeyboardInterrupt`/`SystemExit` sao `BaseException`: passam (nao sao falha de ciclo)."""
+    try:
+        return cycle(), 0
+    except Exception as exc:                                                 # noqa: BLE001 — rede, GitHub, estado ilegivel: o laco sobrevive
+        return {"cycle_error": f"{type(exc).__name__}: {redact(str(exc))}"[:300], "consecutive_errors": consecutive + 1}, consecutive + 1
+
+
 def lease_issue(item: dict, branch: str, base: str, epath: Path | None = None) -> None:
     """Visibilidade para o task_scheduler: claim da Issue (best-effort; o estado correto esta na fila do bridge)."""
     with es.locked(epath):
@@ -816,16 +832,24 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"at": es.now_iso(), "fatal": f"outra instancia do executor ja consome a fila (pid {lock.holder()}): nao inicia"}), flush=True)
         return 4
     claude_bin = resolve_claude()
+    failures = 0
     try:
         while True:
             if WATCH_PID is not None and not pid_alive(WATCH_PID):
                 print(json.dumps({"at": es.now_iso(), "fatal": f"processo pai {WATCH_PID} encerrou: saindo"}), flush=True)
                 return 5
-            res = run_cycle(eb.gh_json, policy, a.repo, a.execute, claude_bin=claude_bin)
+            res, failures = guarded_cycle(lambda: run_cycle(eb.gh_json, policy, a.repo, a.execute, claude_bin=claude_bin), failures)
             print(json.dumps({"at": es.now_iso(), "execute": a.execute, **res}, ensure_ascii=False), flush=True)
+            if failures >= MAX_CONSECUTIVE_CYCLE_ERRORS:
+                print(json.dumps({"at": es.now_iso(), "fatal": f"{failures} ciclos seguidos com erro: saindo para a tarefa agendada reiniciar"}), flush=True)
+                return 7
             if a.once:
-                return 0
-            if not sleep_watching(max(a.interval, eb.load()["backoff_s"]), WATCH_PID):
+                return 1 if failures else 0
+            try:
+                wait = cycle_backoff(a.interval, failures) if failures else max(a.interval, eb.load()["backoff_s"])
+            except (ValueError, OSError):                                    # estado ilegivel nao pode matar o laco que ja esta se recuperando
+                wait = cycle_backoff(a.interval, max(failures, 1))
+            if not sleep_watching(wait, WATCH_PID):
                 print(json.dumps({"at": es.now_iso(), "fatal": f"processo pai {WATCH_PID} encerrou: saindo"}), flush=True)
                 return 5
     finally:
