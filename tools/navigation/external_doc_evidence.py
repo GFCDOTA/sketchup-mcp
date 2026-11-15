@@ -67,6 +67,13 @@ def validate(ev: dict, lock: dict[str, str]) -> list[str]:
     return errors
 
 
+def normalize_source_label(text: str) -> str:
+    """Rotulo de fonte normalizado: minusculas, espacos internos colapsados e sem espacos nas pontas.
+
+    Levanta `ValueError` se o texto for vazio ou so tiver espacos."""
+    return " ".join(text.lower().split())
+
+
 def run(root: Path = ROOT) -> dict:
     lock_path = root / "uv.lock"
     lock = parse_lock(lock_path.read_text(encoding="utf-8")) if lock_path.is_file() else {}

@@ -84,3 +84,7 @@ def test_gate_never_imports_network_clients():
     for forbidden in ("urllib", "requests", "httpx", "socket", "context7.com"):
         assert forbidden not in text, forbidden
     json.dumps(ok())
+
+
+def test_normalize_source_label_lowercases_and_collapses_spaces():
+    assert ede.normalize_source_label("  Doc   OFICIAL 	 do  Shapely ") == "doc oficial do shapely"
