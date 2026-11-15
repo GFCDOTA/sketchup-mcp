@@ -9219,6 +9219,24 @@
       "blob_sha": "43f803b82657b984c34ed96a8e5fa11bf8e9e68d",
       "blob_size": 533,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-15_github_disposable_pr/README.md",
+      "blob_sha": "d53a9a88b2b7f898b0910e6ee887572c62a7d1a7",
+      "blob_size": 4620,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-15_github_disposable_pr/e2e_outbox_github.py",
+      "blob_sha": "0e957753e50f9ff3abde299e1846a71fa4f39d71",
+      "blob_size": 4375,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-15_github_disposable_pr/evidence.json",
+      "blob_sha": "91ce066e0f1605f5bc9f5a06af692155b290ceeb",
+      "blob_size": 1452,
+      "owner_group": "artifacts"
     }
   ]
 }

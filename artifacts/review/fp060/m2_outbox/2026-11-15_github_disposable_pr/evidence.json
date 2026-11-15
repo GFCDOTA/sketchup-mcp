@@ -1,0 +1,68 @@
+{
+ "pr": 622,
+ "head_sha": "0d89d2f93c67eeb0f1eac3e4ca092f5d159bf2a2",
+ "autor_do_pr": "fmodesto30",
+ "revisor": "fmmodesto",
+ "chave": "fp060-m2-e2e:pr622:0d89d2f93c67eeb0f1eac3e4ca092f5d159bf2a2:REQUEST_CHANGES",
+ "steps": [
+  {
+   "step": "publicador 1 morreu depois do POST e antes do ACK",
+   "outbox": [
+    {
+     "id": 1,
+     "status": "RUNNING",
+     "attempts": 1
+    }
+   ],
+   "reviews_com_a_chave": 1
+  },
+  {
+   "step": "publicador 2 logo depois (lease do morto ainda vale)",
+   "resultado": {
+    "action": "IDLE"
+   },
+   "reviews_com_a_chave": 1
+  },
+  {
+   "step": "publicador 2 depois do lease expirar",
+   "resultado": {
+    "action": "RECONCILED",
+    "outbox": 1,
+    "key": "fp060-m2-e2e:pr622:0d89d2f93c67eeb0f1eac3e4ca092f5d159bf2a2:REQUEST_CHANGES",
+    "target": "github",
+    "reference": "github-review:5911952280",
+    "attempt": 2
+   },
+   "outbox": [
+    {
+     "id": 1,
+     "status": "DONE",
+     "attempts": 2
+    }
+   ],
+   "reviews_com_a_chave": 1
+  },
+  {
+   "step": "publicador 2 de novo",
+   "resultado": {
+    "action": "IDLE"
+   }
+  }
+ ],
+ "reviews_com_a_chave": 1,
+ "review": {
+  "id": 5911952280,
+  "login": "fmmodesto",
+  "state": "CHANGES_REQUESTED",
+  "commit_id": "0d89d2f93c67eeb0f1eac3e4ca092f5d159bf2a2",
+  "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/622#pullrequestreview-5911952280"
+ },
+ "outbox_final": [
+  {
+   "id": 1,
+   "status": "DONE",
+   "attempts": 2
+  }
+ ],
+ "verdict": "PASS"
+}
