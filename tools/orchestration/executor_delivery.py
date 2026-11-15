@@ -141,7 +141,7 @@ def remote_head(wt: Path, branch: str, run: Run) -> str | None:
 
 
 def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _git, check=run_checks,
-            cfg: "guards.Config | None" = None, revalidate: Revalidate | None = None) -> tuple[str, str]:
+            cfg: "guards.Config | None" = None, revalidate: Revalidate | None = None, message: str | None = None) -> tuple[str, str]:
     """('NOOP'|'PUSHED'|'STALE'|'BLOCKED_GUARDS'|'FAILED_CHECKS'|'ERROR', msg). Nunca publica sem as duas barreiras de autorizacao."""
     cfg = cfg or guards.load_config()
 
@@ -224,7 +224,7 @@ def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _g
         return "BLOCKED_GUARDS", "modo de arquivo alterado durante os testes: " + "; ".join(post_modes)[:300]
     rc, _ = run(["diff", "--cached", "--quiet"], wt)
     if rc != 0:
-        msg = f"fix: atende review {item['event_id'].split(':')[1]} do PR #{item['pr']} (executor, Refs #{item['issue']})"
+        msg = message or f"fix: atende review {item['event_id'].split(':')[1]} do PR #{item['pr']} (executor, Refs #{item['issue']})"
         rc, out = run(["commit", "-m", msg], wt)
         if rc != 0:
             return "ERROR", f"git commit falhou: {out[:200]}"

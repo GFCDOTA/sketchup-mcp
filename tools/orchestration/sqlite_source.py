@@ -36,6 +36,8 @@ from tools.validation import execution_state as es
 SOURCE_ENV = "EXECUTOR_SOURCE"
 SOURCES = ("json", "sqlite")
 EVENT_TYPE = "CORRECTION_REQUESTED"
+IMPLEMENT_TYPE = "IMPLEMENT_REQUESTED"
+CLAIMED_TYPES = (EVENT_TYPE, IMPLEMENT_TYPE)                                   # correcao de review e pedido de implementacao (intake)
 PRODUCER = "event_bridge"
 PARKED_STATES = frozenset({"SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"})
 DAY_S = 24 * 3600
@@ -74,13 +76,15 @@ def _parse_iso(value: str) -> dt.datetime | None:
 
 # ------------------------------------------------------------------------------------------------------ evento <-> item
 def item_from_event(ev: dict, attempts: int | None = None) -> dict | None:
-    """O item no formato que os handlers do executor ja entendem. None = payload que nao descreve um review executavel."""
+    """O item no formato que os handlers do executor ja entendem. None = payload que nao descreve um trabalho executavel."""
     p = ev["payload"]                                                          # `claim` devolve o payload ja decodificado; `events()` devolve o texto
     if isinstance(p, str):
         try:
             p = json.loads(p)
         except ValueError:
             return None
+    if isinstance(p, dict) and ev.get("event_type") == IMPLEMENT_TYPE:
+        return _implement_item(ev, p, attempts)
     if not isinstance(p, dict) or not p.get("review_id") or not isinstance(p.get("pr"), int) or not p.get("head_sha"):
         return None
     key = f"review:{p['review_id']}:{p['pr']}:{p['head_sha']}"
@@ -88,6 +92,18 @@ def item_from_event(ev: dict, attempts: int | None = None) -> dict | None:
         return None                                                            # a chave do evento nao e a do review que o payload descreve
     return {"key": key, "kind": "review", "event_id": f"review:{p['review_id']}", "pr": p["pr"], "issue": p.get("issue"),
             "head_sha": p["head_sha"], "author": p.get("author"), "url": p.get("url"), "state": "RUNNING",
+            "attempts": max(0, ev["attempt"] - 1) if attempts is None else attempts, "store_event": ev["id"]}
+
+
+def _implement_item(ev: dict, p: dict, attempts: int | None) -> dict | None:
+    """Item de um `IMPLEMENT_REQUESTED`: so vale se a chave do evento e a do pedido que o payload descreve (Issue + hash da spec)."""
+    issue, digest = p.get("issue"), p.get("spec_hash")
+    if not isinstance(issue, int) or isinstance(issue, bool) or not isinstance(digest, str) or not digest:
+        return None
+    if ev["idempotency_key"] != f"implement:issue:{issue}:{digest}":
+        return None
+    return {"key": ev["idempotency_key"], "kind": "implement", "event_id": f"implement:{issue}", "issue": issue, "spec_hash": digest,
+            "title": p.get("title") or "", "pr": None, "head_sha": "", "state": "RUNNING",
             "attempts": max(0, ev["attempt"] - 1) if attempts is None else attempts, "store_event": ev["id"]}
 
 
@@ -122,7 +138,7 @@ def backfill_store(store: EventStore, bstate: dict | None = None) -> int:
 
 # --------------------------------------------------------------------------------------------------------- claim / lease
 def _recent_claims(store: EventStore, now: float) -> int:
-    ids = {e["id"] for e in store.events() if e["event_type"] == EVENT_TYPE}
+    ids = {e["id"] for e in store.events() if e["event_type"] in CLAIMED_TYPES}
     return sum(1 for t in store.transitions()
                if t["event_id"] in ids and t["to_status"] == "RUNNING" and (t["detail"] or "").startswith(("claimed", "reclaimed"))
                and t["at"] >= now - DAY_S)
@@ -134,12 +150,12 @@ def claim_next(owner: str, now: dt.datetime | None = None, *, lease_s: float, da
     if _recent_claims(store, store.clock()) >= daily_cap:
         return None
     for _ in range(MAX_MALFORMED_PER_CLAIM):
-        ev = store.claim((EVENT_TYPE,), owner, lease_s)
+        ev = store.claim(CLAIMED_TYPES, owner, lease_s)
         if ev is None:
             return None
         item = item_from_event(ev)
         if item is None:
-            store.supersede(ev, "payload ou chave nao descrevem um review executavel: descartado")
+            store.supersede(ev, "payload ou chave nao descrevem um trabalho executavel: descartado")
             continue
         with _LOCK:
             _CLAIMED[item["key"]] = {"ev": ev, "owner": owner, "item": item}
@@ -151,9 +167,9 @@ def peek_next() -> dict | None:
     """O proximo candidato SEM reivindicar (DRY_RUN): um claim gastaria uma tentativa do evento."""
     store = _store()
     now = store.clock()
-    live = {e["job_id"] for e in store.events() if e["event_type"] == EVENT_TYPE and e["status"] == "RUNNING" and e["lease_until"] > now}
+    live = {e["job_id"] for e in store.events() if e["event_type"] in CLAIMED_TYPES and e["status"] == "RUNNING" and e["lease_until"] > now}
     for ev in store.events():
-        if (ev["event_type"] == EVENT_TYPE and ev["status"] == "PENDING" and ev["available_at"] <= now
+        if (ev["event_type"] in CLAIMED_TYPES and ev["status"] == "PENDING" and ev["available_at"] <= now
                 and ev["attempt"] < ev["max_attempts"] and ev["job_id"] not in live):
             item = item_from_event(ev, attempts=ev["attempt"])
             if item is not None:
@@ -218,7 +234,8 @@ def _settle(store: EventStore, ev: dict, it: dict, now: dt.datetime | None, retr
     state = it.get("state")
     why = str(it.get("last_error") or state)
     if state == "DONE_AWAITING_REREVIEW":
-        store.complete(ev, {"action": "DONE", "new_head": it.get("new_head", ""), "log": it.get("log", "")})
+        store.complete(ev, {"action": "DONE", "new_head": it.get("new_head", ""), "log": it.get("log", ""),
+                            **({"pr": it["pr_number"]} if it.get("pr_number") else {})})
         return "DONE"
     if state in PARKED_STATES:
         store.supersede(ev, why[:2000])

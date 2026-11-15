@@ -643,6 +643,9 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
 def _handle_claimed(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, execute: bool, runner: Runner, claude_bin: str,
                     wt_prep, t: dt.datetime, python: str | None, cancel: threading.Event) -> dict:
     key = item["key"]
+    if item.get("kind") == "implement":                                      # pedido do intake (so com EXECUTOR_SOURCE=sqlite)
+        from tools.orchestration import implement_worker
+        return implement_worker.handle(item, owner, gh, policy, repo, runner, claude_bin, t, python, cancel)
     verdict, why, pr = preflight(item, gh, policy, repo)
     if verdict != "OK":
         def park(it, b):
@@ -705,6 +708,14 @@ def _dry_run_sqlite(gh: eb.Gh, policy: dict, repo: str, claude_bin: str, python:
     item = sq.peek_next()
     if item is None:
         return {"action": "IDLE"}
+    if item.get("kind") == "implement":
+        from tools.orchestration import implement_worker
+        verdict, why, _issue = implement_worker.preflight(item, gh, policy, repo)
+        if verdict != "OK":
+            return {"action": verdict, "item": item["key"], "reason": why, "dry_run": True}
+        return {"action": "DRY_RUN", "item": item["key"], "reason": "dry-run: nao executa", "issue": item["issue"],
+                "branch": implement_worker.branch_for(item["issue"], item["spec_hash"]),
+                "command": build_command(claude_bin, implement_worker.worktree_path(item["issue"]), "-", python)[:6]}
     verdict, why, pr = preflight(item, gh, policy, repo)
     if verdict != "OK":
         return {"action": verdict, "item": item["key"], "reason": why, "dry_run": True}
