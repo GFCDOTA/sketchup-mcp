@@ -8877,6 +8877,24 @@
       "blob_sha": "9fff89a5ef8778b864920b84356b10bdb2cd441c",
       "blob_size": 527,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/mt06_e2e/2026-11-15/README.md",
+      "blob_sha": "f0b4604993f7d9ad0083fe8c200d314f03c532f3",
+      "blob_size": 5621,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/mt06_e2e/2026-11-15/collect_evidence.py",
+      "blob_sha": "23dae5af9152bc26d60e190e423966908d712668",
+      "blob_size": 3924,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/mt06_e2e/2026-11-15/data/evidence.json",
+      "blob_sha": "e601783baf021f1f5800843898217fa5955a342a",
+      "blob_size": 11874,
+      "owner_group": "artifacts"
     }
   ]
 }

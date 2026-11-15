@@ -1,0 +1,431 @@
+{
+ "fluxos": {
+  "A_correcao": {
+   "arquivos": [
+    "tests/test_external_doc_evidence.py",
+    "tools/navigation/external_doc_evidence.py"
+   ],
+   "autor": "fmodesto30",
+   "base": "develop",
+   "checks_no_head_final": {
+    "deterministic fidelity gates": "success",
+    "mcp server (smoke + stdio handshake)": "success",
+    "pytest (py3.11)": "success",
+    "pytest (py3.12)": "success",
+    "qg: PR policy": "success",
+    "qg: backlog, issues and specs": "success",
+    "qg: geometry, program and integration": "success",
+    "uv lock is current": "success",
+    "windows process supervisor": "success"
+   },
+   "commits": [
+    {
+     "autor": "fmodesto30",
+     "mensagem": "feat: add normalize_source_label (E2E descartavel A, defeito semeado)",
+     "sha": "4346d5c2bd3b0e56db2ab697dcedeb4732e1161b"
+    },
+    {
+     "autor": "fmodesto30",
+     "mensagem": "fix: atende review 5913464181 do PR #651 (executor, Refs #650)",
+     "sha": "7c3d7bcae61e847cc1646377c97ac6968ab0178a"
+    }
+   ],
+   "criado_em": "2026-11-15T23:20:35Z",
+   "estado": "closed",
+   "head_final": "7c3d7bcae61e847cc1646377c97ac6968ab0178a",
+   "issue": 650,
+   "issue_estado": "closed",
+   "labels": [
+    "automerge-ok",
+    "e2e-descartavel",
+    "executor-ok"
+   ],
+   "merged": false,
+   "pr": 651,
+   "reviews": [
+    {
+     "commit": "4346d5c2bd3b0e56db2ab697dcedeb4732e1161b",
+     "em": "2026-11-15T23:21:31Z",
+     "estado": "CHANGES_REQUESTED",
+     "id": 5913464181,
+     "marcador_outbox": "review:GFCDOTA/sketchup-mcp#651:4346d5c2bd3b0e56db2ab697dcedeb4732e1161b:REQUEST_CHANGES",
+     "revisor": "fmmodesto"
+    },
+    {
+     "commit": "7c3d7bcae61e847cc1646377c97ac6968ab0178a",
+     "em": "2026-11-15T23:28:13Z",
+     "estado": "APPROVED",
+     "id": 5913490579,
+     "marcador_outbox": "review:GFCDOTA/sketchup-mcp#651:7c3d7bcae61e847cc1646377c97ac6968ab0178a:APPROVE",
+     "revisor": "fmmodesto"
+    }
+   ]
+  },
+  "B_implementacao": {
+   "arquivos": [
+    "tests/test_external_doc_evidence.py",
+    "tools/navigation/external_doc_evidence.py"
+   ],
+   "autor": "fmodesto30",
+   "base": "develop",
+   "checks_no_head_final": {
+    "deterministic fidelity gates": "success",
+    "mcp server (smoke + stdio handshake)": "success",
+    "pytest (py3.11)": "success",
+    "pytest (py3.12)": "success",
+    "qg: PR policy": "success",
+    "qg: backlog, issues and specs": "success",
+    "qg: geometry, program and integration": "success",
+    "uv lock is current": "success",
+    "windows process supervisor": "success"
+   },
+   "commits": [
+    {
+     "autor": "fmodesto30",
+     "mensagem": "feat: FP-060 E2E descartavel B \u2014 truncate_source_label (prova do worker de implementacao) (executor, Refs #653)",
+     "sha": "cf31eb4d2fe07b1270a7260d6649326a52c3600b"
+    }
+   ],
+   "criado_em": "2026-11-15T23:31:15Z",
+   "estado": "closed",
+   "head_final": "cf31eb4d2fe07b1270a7260d6649326a52c3600b",
+   "issue": 653,
+   "issue_estado": "closed",
+   "labels": [
+    "executor-ok"
+   ],
+   "merged": false,
+   "pr": 655,
+   "reviews": [
+    {
+     "commit": "cf31eb4d2fe07b1270a7260d6649326a52c3600b",
+     "em": "2026-11-15T23:32:39Z",
+     "estado": "APPROVED",
+     "id": 5913507326,
+     "marcador_outbox": "review:GFCDOTA/sketchup-mcp#655:cf31eb4d2fe07b1270a7260d6649326a52c3600b:APPROVE",
+     "revisor": "fmmodesto"
+    }
+   ]
+  },
+  "C_continua": {
+   "arquivos": [
+    "tests/test_external_doc_evidence.py",
+    "tools/navigation/external_doc_evidence.py"
+   ],
+   "autor": "fmodesto30",
+   "base": "develop",
+   "checks_no_head_final": {
+    "deterministic fidelity gates": "success",
+    "mcp server (smoke + stdio handshake)": "success",
+    "pytest (py3.11)": "success",
+    "pytest (py3.12)": "success",
+    "qg: PR policy": "success",
+    "qg: backlog, issues and specs": "success",
+    "qg: geometry, program and integration": "success",
+    "uv lock is current": "success",
+    "windows process supervisor": "success"
+   },
+   "commits": [
+    {
+     "autor": "fmodesto30",
+     "mensagem": "feat: FP-060 E2E descartavel C \u2014 mask_tokens (corrida continua sem disparo manual) (executor, Refs #658)",
+     "sha": "a6ee910f2385be780906be6ef5f2ba8d1f337235"
+    }
+   ],
+   "criado_em": "2026-11-15T23:49:14Z",
+   "estado": "closed",
+   "head_final": "a6ee910f2385be780906be6ef5f2ba8d1f337235",
+   "issue": 658,
+   "issue_estado": "closed",
+   "labels": [
+    "executor-ok"
+   ],
+   "merged": false,
+   "pr": 659,
+   "reviews": [
+    {
+     "commit": "a6ee910f2385be780906be6ef5f2ba8d1f337235",
+     "em": "2026-11-15T23:56:01Z",
+     "estado": "APPROVED",
+     "id": 5913613641,
+     "marcador_outbox": "review:GFCDOTA/sketchup-mcp#659:a6ee910f2385be780906be6ef5f2ba8d1f337235:APPROVE",
+     "revisor": "fmmodesto"
+    }
+   ]
+  }
+ },
+ "repo": "GFCDOTA/sketchup-mcp",
+ "stores": {
+  "AB": {
+   "eventos": [
+    {
+     "attempt": 1,
+     "created_at": 1794784875.3010335,
+     "error": null,
+     "event_type": "REVIEW_REQUESTED",
+     "id": 1,
+     "idempotency_key": "review:GFCDOTA/sketchup-mcp#651:4346d5c2bd3b0e56db2ab697dcedeb4732e1161b:REQUEST_CHANGES",
+     "job_id": "review:GFCDOTA/sketchup-mcp#651",
+     "max_attempts": 3,
+     "producer": "codex_reviewer",
+     "status": "DONE",
+     "updated_at": 1794784875.3397782
+    },
+    {
+     "attempt": 1,
+     "created_at": 1794784904.7027752,
+     "error": "terminou sem commit novo no PR",
+     "event_type": "CORRECTION_REQUESTED",
+     "id": 2,
+     "idempotency_key": "review:5913464181:651:4346d5c2bd3b0e56db2ab697dcedeb4732e1161b",
+     "job_id": "pr:651",
+     "max_attempts": 3,
+     "producer": "event_bridge",
+     "status": "PENDING",
+     "updated_at": 1794784983.3509374
+    },
+    {
+     "attempt": 1,
+     "created_at": 1794785277.2181532,
+     "error": null,
+     "event_type": "REVIEW_REQUESTED",
+     "id": 3,
+     "idempotency_key": "review:GFCDOTA/sketchup-mcp#651:7c3d7bcae61e847cc1646377c97ac6968ab0178a:APPROVE",
+     "job_id": "review:GFCDOTA/sketchup-mcp#651",
+     "max_attempts": 3,
+     "producer": "codex_reviewer",
+     "status": "DONE",
+     "updated_at": 1794785277.2659616
+    },
+    {
+     "attempt": 1,
+     "created_at": 1794785366.028517,
+     "error": null,
+     "event_type": "IMPLEMENT_REQUESTED",
+     "id": 4,
+     "idempotency_key": "implement:issue:653:647ca2e06569",
+     "job_id": "issue:653",
+     "max_attempts": 3,
+     "producer": "intake",
+     "status": "DONE",
+     "updated_at": 1794785464.2092843
+    },
+    {
+     "attempt": 1,
+     "created_at": 1794785543.6214948,
+     "error": null,
+     "event_type": "REVIEW_REQUESTED",
+     "id": 5,
+     "idempotency_key": "review:GFCDOTA/sketchup-mcp#655:cf31eb4d2fe07b1270a7260d6649326a52c3600b:APPROVE",
+     "job_id": "review:GFCDOTA/sketchup-mcp#655",
+     "max_attempts": 3,
+     "producer": "codex_reviewer",
+     "status": "DONE",
+     "updated_at": 1794785543.701083
+    }
+   ],
+   "transicoes": [
+    {
+     "actor": "publisher",
+     "at": 1794784875.3010335,
+     "detail": "published REVIEW_REQUESTED",
+     "event_id": 1,
+     "from_status": null,
+     "to_status": "PENDING"
+    },
+    {
+     "actor": "codex-reviewer:7376",
+     "at": 1794784875.3210254,
+     "detail": "claimed (by id); attempt 1",
+     "event_id": 1,
+     "from_status": "PENDING",
+     "to_status": "RUNNING"
+    },
+    {
+     "actor": "codex-reviewer:7376",
+     "at": 1794784875.3397782,
+     "detail": "completed",
+     "event_id": 1,
+     "from_status": "RUNNING",
+     "to_status": "DONE"
+    },
+    {
+     "actor": "publisher",
+     "at": 1794784904.7027752,
+     "detail": "published CORRECTION_REQUESTED",
+     "event_id": 2,
+     "from_status": null,
+     "to_status": "PENDING"
+    },
+    {
+     "actor": "9c56378ce294445e820504f2b32304e5",
+     "at": 1794784912.2656848,
+     "detail": "claimed; attempt 1",
+     "event_id": 2,
+     "from_status": "PENDING",
+     "to_status": "RUNNING"
+    },
+    {
+     "actor": "9c56378ce294445e820504f2b32304e5",
+     "at": 1794784983.3509374,
+     "detail": "failed: terminou sem commit novo no PR",
+     "event_id": 2,
+     "from_status": "RUNNING",
+     "to_status": "PENDING"
+    },
+    {
+     "actor": "publisher",
+     "at": 1794785277.2181532,
+     "detail": "published REVIEW_REQUESTED",
+     "event_id": 3,
+     "from_status": null,
+     "to_status": "PENDING"
+    },
+    {
+     "actor": "codex-reviewer:2060",
+     "at": 1794785277.2388031,
+     "detail": "claimed (by id); attempt 1",
+     "event_id": 3,
+     "from_status": "PENDING",
+     "to_status": "RUNNING"
+    },
+    {
+     "actor": "codex-reviewer:2060",
+     "at": 1794785277.2659616,
+     "detail": "completed",
+     "event_id": 3,
+     "from_status": "RUNNING",
+     "to_status": "DONE"
+    },
+    {
+     "actor": "publisher",
+     "at": 1794785366.028517,
+     "detail": "published IMPLEMENT_REQUESTED",
+     "event_id": 4,
+     "from_status": null,
+     "to_status": "PENDING"
+    },
+    {
+     "actor": "032f39e33b9a4fdc93cdadb0150ad389",
+     "at": 1794785398.7881918,
+     "detail": "claimed; attempt 1",
+     "event_id": 4,
+     "from_status": "PENDING",
+     "to_status": "RUNNING"
+    },
+    {
+     "actor": "032f39e33b9a4fdc93cdadb0150ad389",
+     "at": 1794785464.2092843,
+     "detail": "completed",
+     "event_id": 4,
+     "from_status": "RUNNING",
+     "to_status": "DONE"
+    },
+    {
+     "actor": "publisher",
+     "at": 1794785543.6214948,
+     "detail": "published REVIEW_REQUESTED",
+     "event_id": 5,
+     "from_status": null,
+     "to_status": "PENDING"
+    },
+    {
+     "actor": "codex-reviewer:37208",
+     "at": 1794785543.667295,
+     "detail": "claimed (by id); attempt 1",
+     "event_id": 5,
+     "from_status": "PENDING",
+     "to_status": "RUNNING"
+    },
+    {
+     "actor": "codex-reviewer:37208",
+     "at": 1794785543.701083,
+     "detail": "completed",
+     "event_id": 5,
+     "from_status": "RUNNING",
+     "to_status": "DONE"
+    }
+   ]
+  },
+  "C": {
+   "eventos": [
+    {
+     "attempt": 1,
+     "created_at": 1794786412.441175,
+     "error": null,
+     "event_type": "IMPLEMENT_REQUESTED",
+     "id": 1,
+     "idempotency_key": "implement:issue:658:1651b0821d40",
+     "job_id": "issue:658",
+     "max_attempts": 3,
+     "producer": "intake",
+     "status": "DONE",
+     "updated_at": 1794786542.1421638
+    },
+    {
+     "attempt": 1,
+     "created_at": 1794786945.8892095,
+     "error": null,
+     "event_type": "REVIEW_REQUESTED",
+     "id": 2,
+     "idempotency_key": "review:GFCDOTA/sketchup-mcp#659:a6ee910f2385be780906be6ef5f2ba8d1f337235:APPROVE",
+     "job_id": "review:GFCDOTA/sketchup-mcp#659",
+     "max_attempts": 3,
+     "producer": "codex_reviewer",
+     "status": "DONE",
+     "updated_at": 1794786945.9187944
+    }
+   ],
+   "transicoes": [
+    {
+     "actor": "publisher",
+     "at": 1794786412.441175,
+     "detail": "published IMPLEMENT_REQUESTED",
+     "event_id": 1,
+     "from_status": null,
+     "to_status": "PENDING"
+    },
+    {
+     "actor": "d794970208284322ad7ccc96a04b819f",
+     "at": 1794786468.1848466,
+     "detail": "claimed; attempt 1",
+     "event_id": 1,
+     "from_status": "PENDING",
+     "to_status": "RUNNING"
+    },
+    {
+     "actor": "d794970208284322ad7ccc96a04b819f",
+     "at": 1794786542.1421638,
+     "detail": "completed",
+     "event_id": 1,
+     "from_status": "RUNNING",
+     "to_status": "DONE"
+    },
+    {
+     "actor": "publisher",
+     "at": 1794786945.8892095,
+     "detail": "published REVIEW_REQUESTED",
+     "event_id": 2,
+     "from_status": null,
+     "to_status": "PENDING"
+    },
+    {
+     "actor": "codex-reviewer:19044",
+     "at": 1794786945.9010715,
+     "detail": "claimed (by id); attempt 1",
+     "event_id": 2,
+     "from_status": "PENDING",
+     "to_status": "RUNNING"
+    },
+    {
+     "actor": "codex-reviewer:19044",
+     "at": 1794786945.9187944,
+     "detail": "completed",
+     "event_id": 2,
+     "from_status": "RUNNING",
+     "to_status": "DONE"
+    }
+   ]
+  }
+ }
+}
