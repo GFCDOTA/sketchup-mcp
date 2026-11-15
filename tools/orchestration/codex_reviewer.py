@@ -28,7 +28,10 @@ from typing import Callable
 
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import event_executor as ex
+from tools.orchestration import github_review_target as gt
+from tools.orchestration import outbox_publisher as op
 from tools.orchestration import sandboxed_tests as sb
+from tools.orchestration import store_factory
 
 VERDICTS = ("APPROVE", "REQUEST_CHANGES", "NEEDS_HUMAN")
 SEVERITIES = ("LOW", "MEDIUM", "HIGH", "CRITICAL")
@@ -56,6 +59,7 @@ REVIEW_SCHEMA = {
 EMBED_LIMIT = 120_000                 # bytes de conteudo embutidos no prompt; o resto fica so com o hash (Codex le na worktree)
 MIN_EXCERPT = 12                      # trecho curto demais ("a", "}") nao prova leitura
 TEST_TIMEOUT_S = 10 * 60
+PUBLISH_LEASE_S = 60.0                # lease do evento de publicacao e da entrada do outbox
 RUNNER_SOURCE = "coordinator_test_runner"   # NAO e "trusted": roda codigo do PR; so em ISOLATION_OS (provado na execucao) ou nao roda
 ISOLATION_SKIPPED = "tests_skipped_no_sandbox"
 ISOLATION_OS = "os_sandbox"                # AppContainer sem capacidades, com token e canario provados NA execucao dos testes
@@ -373,26 +377,57 @@ def gh_user_with(token: str) -> str | None:
     return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else None
 
 
-def publish(v: dict, token: str, repo: str) -> str:
-    event = {"APPROVE": "APPROVE", "REQUEST_CHANGES": "REQUEST_CHANGES"}.get(v["verdict"])
-    if not event:
-        raise ReviewError("veredito NEEDS_HUMAN nao e publicado como review")
+def review_body(v: dict) -> str:
     lines = [f"Codex CLI (revisor independente) — HEAD {v['head_sha']} — confianca {v['confidence']}"]
     lines += [f"- [{f['severity']}] {f['file']}:{f['line']} — {f['reason']} → {f['required_change']}" for f in v["findings"]]
     if v["tests_reviewed"]:
         lines.append("Testes revistos: " + ", ".join(v["tests_reviewed"]))
-    gh = shutil.which("gh") or "gh"
-    body = "\n".join(lines)
-    r = subprocess.run([gh, "api", "-X", "POST", f"repos/{repo}/pulls/{v['pr']}/reviews", "-f", f"event={event}", "-f", f"commit_id={v['head_sha']}",
-                        "-f", f"body={body}", "--jq", ".html_url"], capture_output=True, text=True, env={**os.environ, "GH_TOKEN": token}, timeout=60,
-                       creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-    if r.returncode != 0:
-        raise ReviewError(f"publicacao falhou: {(r.stdout + r.stderr).strip()[:200]}")
-    return r.stdout.strip()
+    return "\n".join(lines)
+
+
+def review_key(repo: str, v: dict) -> str:
+    """Um parecer por PR, HEAD e veredito: repetir a revisao do mesmo SHA com o mesmo resultado nao gera segunda publicacao."""
+    return f"review:{repo}#{v['pr']}:{v['head_sha']}:{v['verdict']}"
+
+
+def publish_via_outbox(v: dict, token: str, repo: str, *, api: gt.Api | None = None, store=None) -> str:
+    """Publica o parecer pelo outbox transacional e devolve a URL do review. E o UNICO caminho de publicacao de producao.
+
+    O evento de publicacao e a entrada do outbox nascem na MESMA transacao (`EventStore.complete`); o publicador reconcilia pela chave
+    (marcador no corpo do review, escrito pela conta independente) antes de enviar; o destino revalida PR aberto e HEAD no momento do
+    POST; e o review e conferido no GitHub depois. Morte entre o POST e o ACK nao duplica: a proxima chamada acha o review.
+    `NEEDS_HUMAN` nunca entra na fila. Falha do GitHub deixa a entrada no outbox para nova tentativa e vira `ReviewError`."""
+    if v["verdict"] not in gt.PUBLISHABLE:
+        raise ReviewError("veredito NEEDS_HUMAN nao e publicado como review")
+    api = api or gt.gh_api
+    store = store or store_factory.get_store()
+    owner, key, job = f"codex-reviewer:{os.getpid()}", review_key(repo, v), f"review:{repo}#{v['pr']}"
+    payload = {"repo": repo, "pr": v["pr"], "head_sha": v["head_sha"], "verdict": v["verdict"], "body": review_body(v)}
+    try:
+        login = (api("GET", "user", token=token) or {}).get("login")
+        if not login:
+            raise op.TargetError("token do revisor sem login")
+        target = gt.GitHubReviewTarget(api, token=token, reviewer=login, repo=repo)
+        event_id, _ = store.publish("REVIEW_REQUESTED", key, job, {"pr": v["pr"], "head_sha": v["head_sha"], "verdict": v["verdict"]},
+                                    producer="codex_reviewer")
+        if store.get(event_id)["status"] != "DONE":                       # primeira vez, ou um coordenador morreu antes de concluir
+            event = store.claim_by_id(event_id, owner, PUBLISH_LEASE_S)
+            if event is None:
+                raise ReviewError("evento de publicacao ocupado por outro coordenador: tente de novo")
+            store.complete(event, {"verdict": v["verdict"], "findings": len(v["findings"])},
+                           outbox_entries=[{"target": "github", "operation": "publish_review", "idempotency_key": key, "payload": payload}])
+        results = op.drain(store, {"github": target}, owner, lease_seconds=PUBLISH_LEASE_S, target="github")
+        reference = target.find({"idempotency_key": key, "payload": payload})
+    except op.TargetError as exc:
+        raise ReviewError(f"publicacao falhou: {exc}") from exc
+    if reference is None:
+        reasons = "; ".join(str(r.get("reason")) for r in results if r.get("action") == "FAILED" and r.get("key") == key)
+        raise ReviewError(f"publicacao falhou: {reasons or 'review nao encontrado no GitHub depois do envio'} (a entrada segue no outbox)")
+    return f"https://github.com/{repo}/pull/{v['pr']}#pullrequestreview-{reference.rsplit(':', 1)[1]}"
 
 
 def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish: bool = False, runner=run_codex, codex_bin: str | None = None,
-              gh_user: Callable[[str], str | None] = gh_user_with, publisher=publish, tmp: Path | None = None) -> dict:
+              gh_user: Callable[[str], str | None] = gh_user_with, publisher=publish_via_outbox, tmp: Path | None = None) -> dict:
     """('DONE'|'REVIEW_BLOCKED'|'STALE'|'FAILED', ...). Nunca lanca; o estado vai para `last_review.json`."""
     sha = ""
     try:

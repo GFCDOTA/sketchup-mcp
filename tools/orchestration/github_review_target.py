@@ -96,8 +96,15 @@ class GitHubReviewTarget:
             raise TargetError("payload invalido: " + ", ".join(problems))
         return p
 
-    def find(self, entry: dict) -> str | None:
+    def _checked(self, entry: dict) -> dict:
+        """Payload valido E do repositorio deste destino: o outbox e compartilhado, e uma entrada de outro repositorio nunca e postada aqui."""
         p = self._payload(entry)
+        if "repo" in p and p["repo"] != self.repo:
+            raise TargetError("entrada de outro repositorio: nao publico neste destino")
+        return p
+
+    def find(self, entry: dict) -> str | None:
+        p = self._checked(entry)
         key = marker(entry["idempotency_key"])
         for page in range(1, self.max_pages + 1):
             rows = self._call("GET", f"repos/{self.repo}/pulls/{p['pr']}/reviews?per_page={self.page_size}&page={page}")
@@ -111,7 +118,7 @@ class GitHubReviewTarget:
         raise TargetError(f"listagem de reviews nao terminou em {self.max_pages} paginas: nao afirmo que o efeito nao existe")
 
     def send(self, entry: dict) -> str:
-        p = self._payload(entry)
+        p = self._checked(entry)
         pr = self._call("GET", f"repos/{self.repo}/pulls/{p['pr']}")
         if pr.get("state") != "open":
             raise TargetError(f"PR #{p['pr']} nao esta aberto")

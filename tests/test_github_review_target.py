@@ -243,3 +243,37 @@ def test_default_api_reports_a_failed_call_without_the_token(monkeypatch):
     with pytest.raises(TargetError) as exc:
         gt.gh_api("GET", "repos/x/y", token="segredo")
     assert "segredo" not in str(exc.value) and "401" in str(exc.value)
+
+
+def test_an_entry_of_another_repository_is_refused_by_find_and_send_without_any_call():
+    gh = FakeGitHub()
+    foreign = entry("k1", repo="outro/repositorio")
+    with pytest.raises(TargetError, match="outro repositorio"):
+        target(gh).find(foreign)
+    with pytest.raises(TargetError, match="outro repositorio"):
+        target(gh).send(foreign)
+    assert gh.calls == []
+
+
+def test_an_entry_that_names_this_repository_or_none_is_accepted():
+    gh = FakeGitHub()
+    target(gh).send(entry("k1", repo=REPO))
+    target(gh).send(entry("k2"))
+    assert len(gh.posts()) == 2
+
+
+def test_default_api_gives_the_child_process_only_an_allowlisted_environment(monkeypatch):
+    for name in ("AWS_SECRET_ACCESS_KEY", "OPENAI_API_KEY", "SSH_AUTH_SOCK", "CODEX_REVIEWER_GH_TOKEN", "ALGUMA_COISA"):
+        monkeypatch.setenv(name, "valor-que-nao-pode-vazar")
+    monkeypatch.setenv("GH_TOKEN", "token-do-executor")                       # o do executor tambem nao passa: so o do revisor, explicito
+    seen = {}
+
+    class Done:
+        returncode, stdout, stderr = 0, "{}", ""
+
+    monkeypatch.setattr(gt.subprocess, "run", lambda argv, **kw: seen.update(env=kw["env"]) or Done())
+
+    gt.gh_api("GET", "repos/x/y", token="token-do-revisor")
+
+    assert seen["env"]["GH_TOKEN"] == "token-do-revisor"
+    assert not ({"AWS_SECRET_ACCESS_KEY", "OPENAI_API_KEY", "SSH_AUTH_SOCK", "CODEX_REVIEWER_GH_TOKEN", "ALGUMA_COISA"} & set(seen["env"]))
