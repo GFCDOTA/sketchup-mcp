@@ -797,7 +797,51 @@ def run_cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fals
         except Exception:  # noqa: BLE001
             pass
     return {"poll": counts, **out, "reconcile": _reconcile_summary(gh, policy, repo, now),
+            "store_reconcile": _store_reconcile_summary(gh, repo, store),
+            "auto_merge": _auto_merge_summary(gh, policy, repo, execute),
             "store": "primary" if _sqlite_primary() else ("shadow" if store else "unavailable"), "shadow_diagnostics": shadow_diag}
+
+
+STEP_EVERY_S = {"store_reconcile": 300.0, "auto_merge": 300.0}               # custo de API: cada passo roda no maximo a cada 5 min
+_LAST_STEP: dict[str, float] = {}
+
+
+def _due(step: str) -> bool:
+    """True (e marca) se o passo ja pode rodar de novo. O relogio e o monotonico do processo: reinicio roda o passo no 1o ciclo."""
+    now = time.monotonic()
+    if now - _LAST_STEP.get(step, -1e18) < STEP_EVERY_S[step]:
+        return False
+    _LAST_STEP[step] = now
+    return True
+
+
+def _store_reconcile_summary(gh: eb.Gh, repo: str, store) -> dict:
+    """Reconcilia os eventos pendentes do SQLite com o GitHub (MT-12). So APLICA com o SQLite como fonte primaria (`supersede` de pedido obsoleto,
+    cercado pelo lease); no modo sombra so planeja, para nao mudar o espelho que o detector de divergencia compara com a fila JSON."""
+    if store is None or not _due("store_reconcile"):
+        return {"skipped": "sem store" if store is None else "intervalo"}
+    try:
+        from tools.orchestration import store_reconcile
+        report = store_reconcile.reconcile(store, gh, repo, apply=_sqlite_primary())
+        return {"applied": report["applied"], "counts": report["counts"]}
+    except Exception as exc:                                                 # noqa: BLE001 — a reconciliacao nunca interrompe o executor
+        return {"errors": [f"{type(exc).__name__}: {exc}"[:200]]}
+
+
+def _auto_merge_summary(gh: eb.Gh, policy: dict, repo: str, execute: bool) -> dict:
+    """Merge automatico protegido (MT-15): DESLIGADO por padrao (`AUTOMERGE_ENABLED=1`), nem le o GitHub quando desligado. So mescla com `--execute`
+    do executor; sem ele e plano."""
+    from tools.orchestration import auto_merge
+    on = auto_merge.enabled()
+    if not on[0]:
+        return {"enabled": False, "reason": on[1]}
+    if not _due("auto_merge"):
+        return {"skipped": "intervalo"}
+    try:
+        report = auto_merge.cycle(gh, policy, repo, apply=execute, is_enabled=on)
+        return {"applied": execute, "prs": [{k: r.get(k) for k in ("pr", "code", "merged")} for r in report["prs"]]}
+    except Exception as exc:                                                 # noqa: BLE001
+        return {"errors": [f"{type(exc).__name__}: {exc}"[:200]]}
 
 
 def _sqlite_primary() -> bool:
