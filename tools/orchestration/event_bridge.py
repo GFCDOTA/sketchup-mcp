@@ -55,9 +55,60 @@ def bridge_path() -> Path:
     return Path(env) if env else es.state_path().with_name("event_bridge.json")
 
 
-def load(path: Path | None = None) -> dict:
+class BridgeStateCorrupt(RuntimeError):
+    """O arquivo de estado existe mas nao e um estado valido (zerado, vazio, truncado, nao-JSON ou nao-objeto)."""
+
+
+def _read_state(p: Path) -> dict:
+    raw = p.read_bytes()
+    if not raw.strip(b"\x00 \t\r\n"):
+        raise ValueError("arquivo vazio ou so de bytes nulos (zero)")
+    data = json.loads(raw.decode("utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("a raiz do JSON nao e um objeto")
+    return data
+
+
+def load(path: Path | None = None, *, recover: bool = True) -> dict:
+    """Le o estado. Arquivo corrompido nunca derruba o ciclo: com `recover` (padrao) ele e PRESERVADO ao lado (`.corrupt-<data>`) e o
+    estado volta da copia anterior (`.bak`) ou limpo, com um diagnostico; a fila se reconstroi do GitHub, que e a fonte de verdade, e
+    cada item continua preso ao HEAD revisado. Leitor que nao pode mexer em nada usa `recover=False` e recebe `BridgeStateCorrupt`."""
     p = path or bridge_path()
-    return {**default_bridge_state(), **json.loads(p.read_text(encoding="utf-8"))} if p.exists() else default_bridge_state()
+    if not p.exists():
+        return default_bridge_state()
+    try:
+        return {**default_bridge_state(), **_read_state(p)}
+    except ValueError as exc:
+        if not recover:
+            raise BridgeStateCorrupt(f"estado do bridge corrompido ({exc}): {p.name}") from exc
+        return _recover(p, exc)
+
+
+def _recover(p: Path, exc: Exception) -> dict:
+    kept = None
+    if p.exists():
+        stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d%H%M%S")
+        kept, n = p.with_name(f"{p.name}.corrupt-{stamp}"), 1
+        while kept.exists():
+            n += 1
+            kept = p.with_name(f"{p.name}.corrupt-{stamp}-{n}")
+        try:
+            os.replace(p, kept)                                  # preserva: nada e apagado antes de recriar
+        except FileNotFoundError:
+            kept = None                                          # outro processo ja quarentenou
+        except OSError as os_exc:
+            raise BridgeStateCorrupt(f"estado do bridge corrompido ({exc}) e nao foi possivel preserva-lo: {os_exc}") from os_exc
+    where = f"preservado em {kept.name}" if kept else "ja preservado por outro processo"
+    try:
+        state, restored = {**default_bridge_state(), **_read_state(p.with_name(p.name + ".bak"))}, True
+    except (OSError, ValueError):
+        state, restored = default_bridge_state(), False
+    if restored:
+        es.write_durable(p, json.dumps(state, indent=1, ensure_ascii=False, sort_keys=True) + "\n")
+        diagnose(state, f"estado do bridge corrompido ({exc}); {where}; restaurado da copia anterior (.bak)")
+    else:
+        diagnose(state, f"estado do bridge corrompido ({exc}); {where}; fila reconstruida do GitHub no proximo poll (cursor e vistos zerados)")
+    return state
 
 
 def save(state: dict, path: Path | None = None) -> None:
@@ -66,9 +117,18 @@ def save(state: dict, path: Path | None = None) -> None:
         raise ValueError("o estado do bridge nao guarda segredos")
     p = path or bridge_path()
     p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_suffix(".tmp")
-    tmp.write_text(json.dumps(state, indent=1, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
-    os.replace(tmp, p)
+    _keep_backup(p)
+    es.write_durable(p, json.dumps(state, indent=1, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def _keep_backup(p: Path) -> None:
+    """Guarda a versao valida anterior em `.bak`. Um arquivo corrompido nunca vira o backup."""
+    try:
+        current = p.read_bytes()
+        json.loads(current.decode("utf-8"))
+    except (OSError, ValueError):
+        return
+    es.write_durable(p.with_name(p.name + ".bak"), current.decode("utf-8"))
 
 
 def load_policy(path: Path | None = None) -> dict:

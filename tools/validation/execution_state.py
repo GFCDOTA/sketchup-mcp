@@ -47,15 +47,25 @@ def load(path: Path | None = None) -> dict:
     return {**default_state(), **data}
 
 
+def write_durable(p: Path, text: str) -> None:
+    """Grava `text` em `p` de forma duravel: temporario -> flush -> fsync -> troca atomica. Sem o `fsync`, uma parada abrupta (queda de
+    energia, travamento do SO) pode deixar no NTFS o arquivo com o tamanho certo e o conteudo ZERADO: foi o que se mediu em
+    `event_bridge.json` (20.888 bytes, todos zero; #633). O `os.replace` sozinho garante atomicidade, nao durabilidade."""
+    tmp = p.with_name(p.name + ".tmp")
+    with open(tmp, "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(text)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(tmp, p)
+
+
 def save(state: dict, path: Path | None = None) -> None:
     blob = json.dumps(state)
     if any(k in blob for k in ("ghp_", "github_pat_", "gho_", "BEGIN PRIVATE KEY")):
         raise ValueError("o manifesto nao guarda segredos")
     p = path or state_path()
     p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_suffix(".tmp")
-    tmp.write_text(json.dumps(state, indent=1, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
-    os.replace(tmp, p)
+    write_durable(p, json.dumps(state, indent=1, ensure_ascii=False, sort_keys=True) + "\n")
 
 
 def pid_alive(pid: int) -> bool:
