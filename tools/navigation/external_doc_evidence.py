@@ -77,6 +77,20 @@ def run(root: Path = ROOT) -> dict:
             "proof": "EVIDENCIA_REGISTRADA_COERENTE_COM_O_LOCK_NAO_CONSULTA_REDE"}
 
 
+def truncate_source_label(text: str, limit: int = 80) -> str:
+    """Truncates *text* to at most *limit* characters.
+
+    Returns *text* unchanged when it fits; otherwise returns the first
+    ``limit - 1`` characters followed by U+2026 (…), so the result is
+    exactly *limit* characters.  Raises ``ValueError`` when *limit* < 1.
+    """
+    if limit < 1:
+        raise ValueError(f"limit must be >= 1, got {limit!r}")
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1] + "…"
+
+
 def main() -> int:
     report = run()
     sys.stdout.write(json.dumps(report, indent=1, ensure_ascii=False) + "\n")

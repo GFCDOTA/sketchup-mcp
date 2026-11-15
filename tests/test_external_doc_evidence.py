@@ -84,3 +84,30 @@ def test_gate_never_imports_network_clients():
     for forbidden in ("urllib", "requests", "httpx", "socket", "context7.com"):
         assert forbidden not in text, forbidden
     json.dumps(ok())
+
+
+# --- truncate_source_label ---
+
+def test_truncate_short_text_unchanged():
+    assert ede.truncate_source_label("hello", limit=80) == "hello"
+
+
+def test_truncate_text_exactly_at_limit():
+    text = "x" * 80
+    result = ede.truncate_source_label(text, limit=80)
+    assert result == text
+    assert len(result) == 80
+
+
+def test_truncate_text_above_limit():
+    text = "a" * 100
+    result = ede.truncate_source_label(text, limit=80)
+    assert result == "a" * 79 + "…"
+    assert len(result) == 80
+
+
+def test_truncate_limit_less_than_one_raises():
+    with pytest.raises(ValueError):
+        ede.truncate_source_label("any text", limit=0)
+    with pytest.raises(ValueError):
+        ede.truncate_source_label("any text", limit=-5)
