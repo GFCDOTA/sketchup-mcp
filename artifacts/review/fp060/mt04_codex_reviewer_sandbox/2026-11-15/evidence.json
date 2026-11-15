@@ -1,0 +1,67 @@
+{
+ "commit": "32947e0f98b21c23cc81ad490fe8bc93fc0221a7",
+ "casos": [
+  {
+   "caso": "diff que toca o publicador de outbox",
+   "arquivos_alterados": [
+    "tools/orchestration/outbox_publisher.py"
+   ],
+   "testes_selecionados": [
+    "tests/test_outbox_publisher.py"
+   ],
+   "sem_teste_correspondente": [],
+   "isolation": "os_sandbox",
+   "tests_passed": true,
+   "exit_code": 0,
+   "segundos": 25.0,
+   "ultima_linha_do_pytest": "17 passed in 8.39s",
+   "falhas": [],
+   "sandbox": {
+    "is_appcontainer": true,
+    "capabilities": 0,
+    "canary": {
+     "read_outside": "denied",
+     "write_outside": "denied"
+    },
+    "tree_files": 1788,
+    "workspace_removed": true
+   },
+   "dependencias_no_runtime": 27
+  },
+  {
+   "caso": "diff que toca o event_store (inclui testes com multiprocessing)",
+   "arquivos_alterados": [
+    "tools/orchestration/event_store.py"
+   ],
+   "testes_selecionados": [
+    "tests/test_event_store.py"
+   ],
+   "sem_teste_correspondente": [],
+   "isolation": "os_sandbox",
+   "tests_passed": false,
+   "exit_code": 1,
+   "segundos": 29.4,
+   "ultima_linha_do_pytest": "7 failed, 74 passed in 23.88s",
+   "falhas": [
+    "tests/test_event_store.py::TestRealProcesses::test_concurrent_recovery_records_one_dlq_and_claims_successor_once",
+    "tests/test_event_store.py::TestRealProcesses::test_different_aggregates_can_run_concurrently",
+    "tests/test_event_store.py::TestRealProcesses::test_outbox_only_one_concurrent_publisher",
+    "tests/test_event_store.py::TestRealProcesses::test_process_crash_recovery_fences_old_owner[event]",
+    "tests/test_event_store.py::TestRealProcesses::test_process_crash_recovery_fences_old_owner[outbox]",
+    "tests/test_event_store.py::TestRealProcesses::test_same_aggregate_different_events_have_only_one_owner",
+    "tests/test_event_store.py::TestRealProcesses::test_same_event_has_only_one_concurrent_owner"
+   ],
+   "sandbox": {
+    "is_appcontainer": true,
+    "capabilities": 0,
+    "canary": {
+     "read_outside": "denied",
+     "write_outside": "denied"
+    },
+    "tree_files": 1788,
+    "workspace_removed": true
+   },
+   "dependencias_no_runtime": 27
+  }
+ ]
+}

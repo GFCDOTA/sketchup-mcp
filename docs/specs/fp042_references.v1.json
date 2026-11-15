@@ -9237,6 +9237,24 @@
       "blob_sha": "91ce066e0f1605f5bc9f5a06af692155b290ceeb",
       "blob_size": 1452,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/mt04_codex_reviewer_sandbox/2026-11-15/README.md",
+      "blob_sha": "f3a3441f5a032019a884e7204681a434961c030e",
+      "blob_size": 4800,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/mt04_codex_reviewer_sandbox/2026-11-15/evidence.json",
+      "blob_sha": "20bf5c6b6e90d98b55143891157077657109056f",
+      "blob_size": 2148,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/mt04_codex_reviewer_sandbox/2026-11-15/mt04_real_run.py",
+      "blob_sha": "0643c3270e8b6b54537b4d3079282266cf8b2d6f",
+      "blob_size": 2398,
+      "owner_group": "artifacts"
     }
   ]
 }
