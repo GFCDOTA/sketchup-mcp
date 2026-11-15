@@ -23,6 +23,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("EXECUTION_STATE_PATH", str(tmp_path / "exec.json"))
     monkeypatch.setenv("BRIDGE_WORKTREE_ROOT", str(tmp_path / "wt"))
     monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
+    monkeypatch.setattr(ex, "CONFIRM_PAUSE_S", 0.0)                          # nao espera de verdade o GitHub atualizar o HEAD
     monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("PUSHED", "fake"))   # a entrega tem testes proprios (test_event_executor_deliver)
     monkeypatch.setattr(ex, "comment_pr", lambda *a, **k: None)
 
@@ -731,3 +732,68 @@ def test_review_fetch_failure_blocks_without_launching_the_child():
     b = bstate(item())
     res = go(gh, b, r)
     assert res["action"] == "BLOCKED_REVIEW_FETCH" and r.calls == [] and b["queue"][0]["state"] == "BLOCKED_REVIEW_FETCH"
+
+
+# ------------------------------------------------------------- HEAD confirmado depois do push (visto no E2E real da MT-06)
+class StaleGh:
+    """O GitHub devolve o HEAD antigo por `stale` leituras e so depois o novo."""
+    def __init__(self, stale, new=NEWHEAD, boom=None):
+        self.stale, self.new, self.boom, self.calls = stale, new, boom, 0
+
+    def __call__(self, path):
+        self.calls += 1
+        if self.boom:
+            raise self.boom
+        return {"head": {"sha": HEAD if self.calls <= self.stale else self.new}}
+
+
+def fake_git(local=NEWHEAD, remote=NEWHEAD):
+    def run(args, cwd):
+        if args[0] == "rev-parse":
+            return 0, local
+        if args[0] == "ls-remote":
+            return 0, f"{remote}\trefs/heads/feat/589-x"
+        raise AssertionError(args)
+    return run
+
+
+def test_confirm_head_does_not_wait_when_nothing_was_pushed(monkeypatch):
+    slept = []
+    monkeypatch.setattr(ex.time, "sleep", slept.append)
+    gh = StaleGh(stale=99)
+    assert ex.confirm_head(item(), gh, REPO, False, Path("."), "b", fake_git()) == HEAD and gh.calls == 1 and slept == []
+
+
+def test_confirm_head_waits_for_github_to_show_the_pushed_commit(monkeypatch):
+    slept = []
+    monkeypatch.setattr(ex.time, "sleep", slept.append)
+    gh = StaleGh(stale=2)
+    assert ex.confirm_head(item(), gh, REPO, True, Path("."), "b", fake_git(), tries=6, pause=2.0) == NEWHEAD
+    assert gh.calls == 3 and slept == [2.0, 2.0]
+
+
+def test_confirm_head_trusts_the_remote_ref_when_the_api_stays_stale_after_a_push(monkeypatch):
+    monkeypatch.setattr(ex.time, "sleep", lambda s: None)
+    assert ex.confirm_head(item(), StaleGh(stale=99), REPO, True, Path("."), "b", fake_git(), tries=3) == NEWHEAD
+
+
+@pytest.mark.parametrize("name,run", [("remote_differs", fake_git(remote="e" * 40)), ("local_is_the_old_head", fake_git(local=HEAD, remote=HEAD)),
+                                      ("local_is_not_a_sha", fake_git(local="nao-e-sha", remote="nao-e-sha"))])
+def test_confirm_head_never_invents_a_new_head_the_remote_does_not_have(monkeypatch, name, run):
+    monkeypatch.setattr(ex.time, "sleep", lambda s: None)
+    assert ex.confirm_head(item(), StaleGh(stale=99), REPO, True, Path("."), "b", run, tries=2) == HEAD
+
+
+def test_confirm_head_survives_github_errors_and_falls_back_to_the_remote(monkeypatch):
+    monkeypatch.setattr(ex.time, "sleep", lambda s: None)
+    assert ex.confirm_head(item(), StaleGh(stale=0, boom=RuntimeError("502")), REPO, True, Path("."), "b", fake_git(), tries=2) == NEWHEAD
+    assert ex.confirm_head(item(), StaleGh(stale=0, boom=RuntimeError("502")), REPO, False, Path("."), "b", fake_git()) == ""
+
+
+def test_a_push_that_github_shows_late_is_recorded_as_done_not_failed(monkeypatch):
+    gh = FakeGh()
+    r = Runner(gh, push=False)                                                    # o runner nao move o HEAD que o FakeGh devolve
+    monkeypatch.setattr(ex, "confirm_head", lambda item, gh, repo, pushed, wt, branch: NEWHEAD if pushed else HEAD)
+    b = bstate(item())
+    res = go(gh, b, r)
+    assert res["action"] == "DONE" and res["new_head"] == NEWHEAD and b["queue"][0]["state"] == "DONE_AWAITING_REREVIEW"
