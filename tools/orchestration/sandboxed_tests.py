@@ -11,9 +11,16 @@ O rotulo `ISOLATION` so e devolvido depois de duas provas feitas NAQUELA execuca
      pega o caso que o token nao mostra: uma raiz cuja ACL de por si liberasse acesso a qualquer AppContainer.
 Falha em qualquer etapa levanta `SandboxError` e NENHUM teste roda — nao ha fallback para um processo sem sandbox.
 
+CONTRATO DE ARQUIVOS (medido em `artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/`, apontado pela pre-revisao do Codex):
+o AppContainer NEGA o que a ACL nao concede a ele — arquivos, pastas e credenciais do usuario (perfil, checkout, config do `gh`) —,
+mas LE tudo o que a ACL concede a `ALL APPLICATION PACKAGES` ou ao proprio SID: `C:\\Windows`, `Program Files` e qualquer arquivo que
+alguem tenha aberto a todos os AppContainers. A sonda prova a negacao de UM canario, que e um arquivo do usuario; NAO prova que
+nenhum arquivo fora do workspace e legivel. Este rotulo nao e garantia de que o codigo testado nao le um arquivo especifico: para isso,
+confira a ACL dele.
+
 O que isto NAO garante:
   - integridade do resultado: o codigo testado roda no mesmo processo do pytest e controla exit code e saida. O sandbox
-    contem o que esse codigo alcanca (arquivos, rede), nao o que ele declara;
+    restringe o que esse codigo alcanca (contrato de arquivos acima, e a rede), nao o que ele declara;
   - limpeza se o coordenador morrer no meio: o Job Object mata o processo, mas o perfil e a pasta `sandbox-*` ficam orfaos
     (perfis existentes nunca sao reutilizados nem apagados por nome);
   - limites de CPU, memoria ou disco dentro do workspace."""
@@ -88,7 +95,8 @@ class SandboxRun:
 
 
 def proves_isolation(facts: object) -> bool:
-    """As duas provas de uma execucao: token AppContainer sem capacidades E canario fora do workspace inalcancavel."""
+    """As duas provas de uma execucao: token AppContainer sem capacidades E canario fora do workspace inalcancavel. Prova o token e a
+    negacao do canario (um arquivo do usuario); NAO e prova de confinamento geral do sistema de arquivos — ver o contrato do modulo."""
     return (isinstance(facts, dict) and facts.get("is_appcontainer") is True and facts.get("capabilities") == 0
             and facts.get("canary") == {"read_outside": "denied", "write_outside": "denied"})
 

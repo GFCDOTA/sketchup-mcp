@@ -14,7 +14,7 @@ cópia da árvore dentro de um AppContainer do Windows **sem capacidades**, num 
 Cada rodada de testes carrega duas provas feitas nela mesma, antes de o pytest começar:
 
 1. o token do processo criado, lido do kernel: é AppContainer e tem zero capacidades;
-2. uma sonda no mesmo perfil e workspace não lê nem escreve um canário fora do workspace, e escreve dentro dele.
+2. uma sonda no mesmo perfil e workspace não lê nem escreve um canário (um arquivo do usuário) fora do workspace, e escreve dentro dele.
 
 O critério novo do relatório, `coordinator_tests_ran_in_os_sandbox`, é derivado da evidência gravada nos eventos concluídos
 do SQLite: só passa se **toda** entrega e **todo** parecer tiverem o rótulo do AppContainer **e** as duas provas.
@@ -50,7 +50,9 @@ escrita e `workspace_removed = true`. Depois da execução não sobrou workspace
 ## O que NÃO é
 
 - **Não garante a integridade do resultado.** O código testado roda no mesmo processo do pytest e controla exit code e
-  saída. O sandbox contém o que esse código alcança (arquivos, rede); não o impede de declarar sucesso.
+  saída. O sandbox restringe o que esse código alcança, mas **não o confina em todo o sistema de arquivos**: ele lê o que a ACL abre a todo
+  AppContainer (Windows, Program Files, qualquer arquivo concedido a `ALL APPLICATION PACKAGES`), como medido em
+  `../2026-11-15_fs_boundary/` depois de a pré-revisão do Codex apontar isso. Não o impede de declarar sucesso.
 - **Não há controle com CLIs reais nesta pasta.** O contraste "com e sem sandbox" está nos testes determinísticos: a mesma
   árvore que tenta ler fora, escrever fora e conectar em `127.0.0.1` falha nas três tentativas dentro do AppContainer e
   consegue as três fora dele; e um laboratório com `--test-isolation env` reprova o critério do relatório.
