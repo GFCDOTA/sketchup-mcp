@@ -171,7 +171,7 @@ def copy_runtime(dst: Path, base: Path | None = None, dists: tuple[str, ...] = (
 
 
 def _copy_tree(src: Path, dst: Path) -> int:
-    """Copia so arquivos regulares e devolve quantos. Link simbolico, juncao ou qualquer outro reparse point recusa a arvore
+    """Copia so arquivos regulares e devolve quantos. Link simbolico, juncao, qualquer outro reparse point ou hard link recusa a arvore
     inteira: copiar seguindo o link traria para dentro do sandbox, pela mao do coordenador, um arquivo de fora."""
     dst.mkdir()
     count = 0
@@ -183,6 +183,10 @@ def _copy_tree(src: Path, dst: Path) -> int:
             if entry.is_dir(follow_symlinks=False):
                 count += _copy_tree(Path(entry.path), dst / entry.name)
             elif entry.is_file(follow_symlinks=False):
+                # `DirEntry.stat()` no Windows devolve st_nlink = 0; so `lstat` diz a verdade. Um hard link para um arquivo privado
+                # que o coordenador le seria copiado para dentro do sandbox como se fosse um arquivo comum da arvore.
+                if os.lstat(entry.path).st_nlink > 1:
+                    raise SandboxError(f"arquivo com mais de um link (hard link) na arvore de testes: {entry.name}")
                 shutil.copyfile(entry.path, dst / entry.name)
                 count += 1
             else:
