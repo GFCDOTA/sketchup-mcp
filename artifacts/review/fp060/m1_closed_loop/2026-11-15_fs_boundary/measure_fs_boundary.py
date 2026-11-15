@@ -69,11 +69,9 @@ if run.exit_code != 0:
 if not sb.proves_isolation(run.facts):
     problems.append("isolamento nao provado")
 results: dict[str, list[str]] = {}
-for line in run.output.splitlines():
-    found = re.match(r"RESULT (\{.*\})\s*$", line)
-    if found:
-        item = json.loads(found.group(1))
-        results.setdefault(item["alvo"], []).append(item["resultado"])
+for found in re.finditer(r"RESULT (\{[^\n]*?\})(?=\s|$)", run.output):          # o pytest imprime pontos no mesmo descritor: sem ancora de linha
+    item = json.loads(found.group(1))
+    results.setdefault(item["alvo"], []).append(item["resultado"])
 for name in targets:
     seen = results.get(name, [])
     if len(seen) != 1:
