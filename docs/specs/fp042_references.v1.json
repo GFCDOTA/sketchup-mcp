@@ -9102,8 +9102,8 @@
     },
     {
       "path": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/README.md",
-      "blob_sha": "f46a8d98e79bf7983dc1d114d312ba12e1444eb8",
-      "blob_size": 4115,
+      "blob_sha": "eb9f38b8611f1eca3c62f15e24d81344971c607a",
+      "blob_size": 5319,
       "owner_group": "artifacts"
     },
     {
@@ -9114,14 +9114,20 @@
     },
     {
       "path": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/evidence.json",
-      "blob_sha": "3ea523c9c9d0a0c4bf3b3cec569bd2cd4ffe14e0",
-      "blob_size": 357,
+      "blob_sha": "6141173a5115a4e9c0caf097cb995981730e9147",
+      "blob_size": 355,
       "owner_group": "artifacts"
     },
     {
       "path": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/measure_fs_boundary.py",
-      "blob_sha": "31b4116eeffde3642ec64a2ac032e870b2ca41c9",
-      "blob_size": 2226,
+      "blob_sha": "e8295cdbd2acb40efda8719ee481c51055176698",
+      "blob_size": 4190,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/codex_prereview_617_verdict_2.json",
+      "blob_sha": "9399488cd6c38d119791b9c63694466607a3d3a7",
+      "blob_size": 4576,
       "owner_group": "artifacts"
     },
     {
