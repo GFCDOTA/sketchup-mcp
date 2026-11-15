@@ -30,6 +30,7 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "store.db"))
     monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
     monkeypatch.setenv(sq.SOURCE_ENV, "sqlite")
+    monkeypatch.setattr(ex, "WATCH_PID", None)                                  # `main(--watch-pid)` deixa o global setado em outros testes
     monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("PUSHED", "fake"))
     monkeypatch.setattr(ex, "comment_pr", lambda *a, **k: None)
     sf.reset_store()
