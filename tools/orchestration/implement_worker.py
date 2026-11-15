@@ -145,18 +145,19 @@ def ensure_remote_branch(wt: Path, branch: str, base: str, run=ex.git) -> tuple[
     return "RESUMABLE", f"commit {sha[:12]} do executor ja publicado na branch; so falta o PR"
 
 
-def create_pr(branch: str, title: str, issue: int, repo: str, base_branch: str = "develop", runner=subprocess.run) -> tuple[int | None, str]:
+def create_pr(branch: str, title: str, issue: int, repo: str, base_branch: str = "develop", runner=subprocess.run,
+              extra_labels: tuple[str, ...] = ()) -> tuple[int | None, str]:
     """Abre o PR com a identidade do executor (keyring); `Refs #N` e a label de autorizacao das correcoes. (numero | None, mensagem).
     Tenta ate 3 vezes (rede/limite): o PR e o ultimo passo e a branch ja esta publicada."""
     body = (f"Refs #{int(issue)}\n\nImplementacao automatica pelo executor (FP-060 intake). O diff passou pelas guardas do executor e "
             "pelos testes no AppContainer; a revisao independente e o merge seguem os gates do repositorio.\n\n"
             "SKP-proof: N/A — infraestrutura de orquestracao; nenhum caminho que gera `.skp` foi tocado.")
-    label = ex.guards.load_config().label
+    labels = [ex.guards.load_config().label, *extra_labels]
     last = "sem tentativa"
     for attempt in range(PR_TRIES):
         try:
             done = runner(["gh", "pr", "create", "--repo", repo, "--base", base_branch, "--head", branch, "--title", title[:200], "--body", body,
-                           "--label", label], env=ex.executor_env(), capture_output=True, text=True, timeout=120)
+                           *[a for lab in labels for a in ("--label", lab)]], env=ex.executor_env(), capture_output=True, text=True, timeout=120)
         except (OSError, subprocess.SubprocessError) as exc:
             last = f"gh pr create falhou: {type(exc).__name__}: {exc}"[:300]
             continue
@@ -172,6 +173,10 @@ def create_pr(branch: str, title: str, issue: int, repo: str, base_branch: str =
 # ------------------------------------------------------------------------------------------------------------------ handler
 PARKED = {"SUPERSEDED": "SUPERSEDED", "REFUSED": "REFUSED"}
 PR_TRIES = 3
+# A opt-in de merge automatico e do HUMANO, na Issue: `executor-automerge` (Issue) -> `automerge-ok` (PR). Os nomes sao os de `auto_merge`
+# (que decide se o merge acontece); sem a label na Issue o PR NAO nasce com a chave e o merge segue humano.
+AUTOMERGE_ISSUE_LABEL = "executor-automerge"
+AUTOMERGE_PR_LABEL = "automerge-ok"
 PR_PAUSE_S = 2.0
 
 
@@ -262,7 +267,9 @@ def handle(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, runner, c
 def _open_pr(item: dict, owner: str, issue: dict, branch: str, repo: str, t: dt.datetime, base: str, log: str, key: str) -> dict:
     """Ultimo passo: abre o PR. DONE so quando o PR existe; falha devolve `action=FAILED` SEM gravar o estado (o chamador decide o retry)."""
     n = int(item["issue"])
-    number, detail = create_pr(branch, issue.get("title") or f"Issue #{n}", n, repo)
+    names = {(x.get("name") if isinstance(x, dict) else x) for x in issue.get("labels") or []}
+    extra = (AUTOMERGE_PR_LABEL,) if AUTOMERGE_ISSUE_LABEL in names else ()
+    number, detail = create_pr(branch, issue.get("title") or f"Issue #{n}", n, repo, extra_labels=extra)
     if number is None:
         return {"action": "FAILED", "item": key, "reason": f"branch publicada, mas o PR nao abriu: {detail}"}
 

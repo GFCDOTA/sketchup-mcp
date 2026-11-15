@@ -87,7 +87,7 @@ def world(tmp_path, monkeypatch, clock):
     w.wt = tmp_path / "wt" / f"bridge-issue{N}"
     monkeypatch.setattr(iw, "prepare_worktree", lambda n, branch, root: (True, "", w.wt, BASE))
     monkeypatch.setattr(iw, "ensure_remote_branch", lambda wt, branch, base: ("CREATED", ""))
-    monkeypatch.setattr(iw, "create_pr", lambda branch, title, issue, repo: (w.prs.append((branch, title, issue)) or 77, "https://x/pull/77"))
+    monkeypatch.setattr(iw, "create_pr", lambda branch, title, issue, repo, extra_labels=(): (w.prs.append((branch, title, issue, tuple(extra_labels))) or 77, "https://x/pull/77"))
     monkeypatch.setattr(iw, "_comment_issue", lambda issue, repo, body: w.comments.append(body))
     monkeypatch.setattr(ex, "deliver", lambda wt, branch, base, py, item, **kw: (w.delivered.append({"branch": branch, "base": base, **kw}) or ("PUSHED", "1 arquivo")))
     yield w
@@ -113,7 +113,7 @@ def test_an_authorized_request_runs_claude_once_delivers_one_commit_and_opens_th
     assert len(child.calls) == 1 and child.calls[0]["cwd"] == world.wt
     d = world.delivered[0]
     assert d["branch"] == BRANCH and d["base"] == BASE and d["message"] == f"feat: {TITLE} (executor, Refs #{N})"
-    assert world.prs == [(BRANCH, TITLE, N)]
+    assert world.prs == [(BRANCH, TITLE, N, ())]                                                 # sem `executor-automerge` na Issue: merge segue humano
     ev = event(world)
     assert ev["status"] == "DONE" and json.loads(ev["result"])["pr"] == 77
 
@@ -197,7 +197,7 @@ def test_a_resumable_branch_opens_the_pr_without_running_claude_or_delivering_ag
 
 def test_a_resumable_branch_whose_pr_still_fails_is_retried_not_lost(world, monkeypatch):
     monkeypatch.setattr(iw, "ensure_remote_branch", lambda wt, branch, base: ("RESUMABLE", "ja publicada"))
-    monkeypatch.setattr(iw, "create_pr", lambda *a: (None, "gh pr create recusado: 502"))
+    monkeypatch.setattr(iw, "create_pr", lambda *a, **k: (None, "gh pr create recusado: 502"))
     res, _gh, _child = run(world)
     assert res["action"] == "FAILED" and "PR nao abriu" in res["reason"]
     assert event(world)["status"] == "PENDING" and event(world)["attempt"] == 1
@@ -215,7 +215,7 @@ def test_a_delivery_that_does_not_publish_fails_the_attempt_and_opens_no_pr(worl
 
 
 def test_a_pushed_branch_whose_pr_does_not_open_is_a_failure_not_a_success(world, monkeypatch):
-    monkeypatch.setattr(iw, "create_pr", lambda *a: (None, "gh pr create recusado: 502"))
+    monkeypatch.setattr(iw, "create_pr", lambda *a, **k: (None, "gh pr create recusado: 502"))
     res, _gh, _child = run(world)
     assert res["action"] == "FAILED" and "branch publicada" in res["reason"] and event(world)["status"] == "PENDING"
 
@@ -407,3 +407,21 @@ def test_item_from_event_accepts_only_an_implement_event_whose_key_matches_its_p
     for bad in ({"idempotency_key": f"implement:issue:{N}:outro"}, {"payload": json.dumps({"issue": N})},
                 {"payload": json.dumps({"issue": True, "spec_hash": HASH})}, {"payload": "nao e json"}):
         assert sq.item_from_event({**ev, **bad}) is None
+
+
+def test_the_pr_carries_the_automerge_opt_in_only_when_the_issue_has_it(world):
+    gh = Gh(issue={"number": N, "state": "open", "title": TITLE, "body": BODY,
+                   "labels": labels(intake.AUTH_LABEL, "spec:FP-060", iw.AUTOMERGE_ISSUE_LABEL)})
+    run(world, gh)
+    assert world.prs[0][3] == (iw.AUTOMERGE_PR_LABEL,)
+
+
+def test_create_pr_applies_every_label_it_is_given(monkeypatch):
+    seen = []
+
+    def runner(argv, **kw):
+        seen.append(argv)
+        return Proc(0, "https://github.com/o/r/pull/9\n")
+    iw.create_pr(BRANCH, TITLE, N, REPO, runner=runner, extra_labels=("automerge-ok",))
+    got = [seen[0][i + 1] for i, a in enumerate(seen[0]) if a == "--label"]
+    assert got == [ex.guards.load_config().label, "automerge-ok"]
