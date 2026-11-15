@@ -24,6 +24,13 @@ SCHEMA = ROOT / "core/schemas/external_doc_evidence.v1.schema.json"
 LOCK_SOURCES = ("uv.lock", "pyproject.toml")
 
 
+def mask_tokens(text: str) -> str:
+    """Substitui por [REDACTED] tokens GitHub PAT (ghp_ / github_pat_ + >=20 chars [A-Za-z0-9_])."""
+    if not isinstance(text, str):
+        raise TypeError(f"expected str, got {type(text).__name__}")
+    return re.sub(r"(?:ghp_|github_pat_)[A-Za-z0-9_]{20,}", "[REDACTED]", text)
+
+
 def parse_lock(text: str) -> dict[str, str]:
     """{nome normalizado: versao} dos blocos [[package]] do uv.lock (sem dependencia de toml para manter 3.11 sem extras)."""
     out: dict[str, str] = {}

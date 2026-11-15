@@ -73,6 +73,37 @@ def test_repository_evidence_is_valid_offline():
     assert report["files"] >= 1
 
 
+def test_mask_tokens_ghp_prefix():
+    token = "ghp_" + "A" * 20
+    assert ede.mask_tokens(f"token is {token} here") == "token is [REDACTED] here"
+
+
+def test_mask_tokens_github_pat_prefix():
+    token = "github_pat_" + "B" * 20
+    assert ede.mask_tokens(f"use {token}") == "use [REDACTED]"
+
+
+def test_mask_tokens_multiple_tokens():
+    t1 = "ghp_" + "A" * 20
+    t2 = "github_pat_" + "B" * 20
+    assert ede.mask_tokens(f"{t1} and {t2}") == "[REDACTED] and [REDACTED]"
+
+
+def test_mask_tokens_no_token():
+    text = "sem nenhum token aqui"
+    assert ede.mask_tokens(text) == text
+
+
+def test_mask_tokens_short_token_not_replaced():
+    short = "ghp_" + "A" * 19
+    assert ede.mask_tokens(short) == short
+
+
+def test_mask_tokens_non_str_raises_type_error():
+    with pytest.raises(TypeError):
+        ede.mask_tokens(12345)
+
+
 @pytest.mark.parametrize("bad", ["", "abc"])
 def test_lock_parser_ignores_garbage(bad):
     assert ede.parse_lock(bad) == {}
