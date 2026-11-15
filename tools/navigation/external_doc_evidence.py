@@ -71,7 +71,10 @@ def normalize_source_label(text: str) -> str:
     """Rotulo de fonte normalizado: minusculas, espacos internos colapsados e sem espacos nas pontas.
 
     Levanta `ValueError` se o texto for vazio ou so tiver espacos."""
-    return " ".join(text.lower().split())
+    normalized = " ".join(text.lower().split())
+    if not normalized:
+        raise ValueError("text must not be empty or consist solely of whitespace")
+    return normalized
 
 
 def run(root: Path = ROOT) -> dict:
