@@ -436,7 +436,7 @@ def test_the_documented_file_boundary_hides_user_files_but_not_what_every_appcon
 
 
 def test_user_file_without_an_appcontainer_grant_is_denied():
-    with pytest.raises(OSError):
+    with pytest.raises(PermissionError):                       # NAO OSError: um arquivo inexistente tambem e OSError e nao prova negacao
         open({str(plain)!r}, "rb").read(1)
 
 
@@ -451,3 +451,58 @@ def test_windows_binaries_are_readable():
     run = sandboxed(tmp_path, tree, ["tests/test_boundary.py"])
 
     assert run.exit_code == 0 and "3 passed" in run.output, run.output[-800:]
+
+
+@windows_only
+def test_a_missing_file_is_not_mistaken_for_a_denied_one(tmp_path):
+    """Controle negativo do contrato de fronteira: "negado" e PermissionError; um caminho inexistente (FileNotFoundError) nao passa."""
+    missing = tmp_path / "nao_existe.txt"
+    tree = tree_with(tmp_path, test_missing=f"""import pytest
+
+
+def test_denied_means_permission_error_not_a_missing_file():
+    with pytest.raises(PermissionError):
+        open({str(missing)!r}, "rb")
+""")
+
+    run = sandboxed(tmp_path, tree, ["tests/test_missing.py"])
+
+    assert run.exit_code == 1 and "1 failed" in run.output, run.output[-600:]
+
+
+def _hard_link_or_skip(private: Path, link: Path) -> None:
+    try:
+        os.link(private, link)
+    except (OSError, NotImplementedError, AttributeError):
+        pytest.skip("este ambiente nao cria hard links")
+
+
+def test_a_hard_link_in_the_tree_is_refused_and_its_content_is_never_copied(tmp_path):
+    private = tmp_path / "private_outside_the_tree.txt"
+    private.write_text("segredo sintetico do coordenador", encoding="utf-8")
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    _hard_link_or_skip(private, tree / "linked.txt")
+
+    with pytest.raises(SandboxError, match="hard link"):
+        sb._copy_tree(tree, tmp_path / "copy")
+
+    assert not (tmp_path / "copy" / "linked.txt").exists()
+
+
+def test_a_tree_without_hard_links_is_copied_normally_and_counts_its_files(tmp_path):
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    (tree / "other.txt").write_text("x", encoding="utf-8")
+    assert sb._copy_tree(tree, tmp_path / "copy") == 2
+
+
+@windows_only
+def test_run_pytest_refuses_a_tree_that_contains_a_hard_link_before_running_any_test(tmp_path):
+    private = tmp_path / "private_outside_the_tree.txt"
+    private.write_text("segredo sintetico do coordenador", encoding="utf-8")
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    _hard_link_or_skip(private, tree / "linked.txt")
+
+    with pytest.raises(SandboxError, match="hard link"):
+        sandboxed(tmp_path, tree, ["tests/test_ok.py"])
+
+    assert not (tmp_path / "logs" / "sandbox_t_tests.out").exists()

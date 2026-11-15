@@ -1,0 +1,79 @@
+{
+  "pr": 617,
+  "head_sha": "ac717cb9813295ba56e809d87ab7468f3bf1ad4d",
+  "verdict": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "file": "tools/orchestration/sandboxed_tests.py",
+      "line": 185,
+      "reason": "A cópia rejeita reparse points, mas aceita hard links como arquivos regulares. Uma árvore de entrada contendo um hard link para um arquivo privado legível pelo coordenador faz shutil.copyfile copiar seu conteúdo para o workspace do AppContainer, onde o código testado pode lê-lo e imprimi-lo nos logs. A sonda do canário continua passando, embora um arquivo protegido tenha sido introduzido no sandbox.",
+      "required_change": "Rejeitar arquivos com múltiplos hard links ou copiar somente entradas obtidas de uma fonte confiável que não possa conter hard links externos. Acrescentar teste no Windows com um arquivo privado sintético vinculado à árvore."
+    },
+    {
+      "severity": "MEDIUM",
+      "file": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/measure_fs_boundary.py",
+      "line": 37,
+      "reason": "A medição classifica todo alvo ausente da lista de falhas como PERMITIDA. Se o pytest expirar, falhar na coleta ou não executar algum teste, o relatório pode afirmar que a leitura foi permitida sem que ela tenha ocorrido. Além disso, qualquer falha de leitura, inclusive arquivo inexistente, é classificada como NEGADA. A execução fornecida pelo coordenador também não ficou verde: 23 falhas e 42 erros.",
+      "required_change": "Registrar explicitamente o resultado de cada tentativa de leitura, distinguir permissão negada de outras falhas e rejeitar evidência incompleta, timeout ou erro de coleta. Acrescentar testes para esses casos."
+    }
+  ],
+  "tests_reviewed": [
+    "tests/test_appcontainer_isolation.py",
+    "tests/test_closed_loop_lab.py",
+    "tests/test_sandboxed_tests.py"
+  ],
+  "confidence": "HIGH",
+  "files_reviewed": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "f10db24b595cf8ef15a93283c1831a25314d689520795abbf1191abc07f2eb37",
+      "code_excerpt": "        run: uv run --no-sync python -m pytest --noconftest tests/test_process_supervisor.py tests/test_appcontainer_isolation.py tests/test_sandboxed_tests.py tests/test_closed_loop_lab.py -q"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/measure_fs_boundary.py",
+      "sha256": "e305f280a6e62b7ce312e4bffb54babeae0529271aaec14c997f82da745aa585",
+      "code_excerpt": "          \"leitura\": {name: (\"NEGADA\" if name in failed else \"PERMITIDA\") for name in targets}}"
+    },
+    {
+      "path": "docs/specs/fp042_inventory.v1.json",
+      "sha256": "2868b6369a6acf1019e8cc4eb8c69600f9aaf4c12635c3e5af23bdfa17a68f30",
+      "code_excerpt": "      \"path\": \"tools/orchestration/sandboxed_tests.py\","
+    },
+    {
+      "path": "docs/specs/fp042_references.v1.json",
+      "sha256": "da6e6dfe8ffc671355f6793919885834709f8d89f1b994b2732ffc72f0672c09",
+      "code_excerpt": "  \"preservation_policy\": \"CANONICAL_LOCATION_AND_BYTES_PINNED\","
+    },
+    {
+      "path": "tests/test_appcontainer_isolation.py",
+      "sha256": "81f1684df0ed0dba09bf4b12794999540fa805983305a001ad17563e886dca12",
+      "code_excerpt": "def test_token_facts_tell_a_contained_process_from_an_ordinary_one():"
+    },
+    {
+      "path": "tests/test_closed_loop_lab.py",
+      "sha256": "ac6930a2bb02de35950e446e49cea084829f4f03659df358e3d1edab13b9f4a8",
+      "code_excerpt": "def test_sandboxed_evidence_is_recorded_in_the_event_and_reaches_the_reviewer(env, fake_sandbox):"
+    },
+    {
+      "path": "tests/test_sandboxed_tests.py",
+      "sha256": "6df1d5117c9f8c26c91c5e08b4d856f3b36d90d750e55b3e1c28a32bc3c2ec5b",
+      "code_excerpt": "def test_tree_copy_keeps_only_regular_files_and_counts_them(tmp_path):"
+    },
+    {
+      "path": "tools/orchestration/appcontainer.py",
+      "sha256": "83249ca705d2fb0675ab28fcc32da24e5c2b56a0f7b6b7be4cfa224c519e02d4",
+      "code_excerpt": "    from the arguments used to create it. It says nothing about file ACLs."
+    },
+    {
+      "path": "tools/orchestration/closed_loop_lab.py",
+      "sha256": "91fdcd5a97e4395a2c27f26a21f17af205ad32556dd45c84c2e4a640716fc3a2",
+      "code_excerpt": "        evidence = run_trusted_tests(lab, wt, changed)"
+    },
+    {
+      "path": "tools/orchestration/sandboxed_tests.py",
+      "sha256": "9a8beb171075d2c6d1bf43b2520ca13a7295c1dfee83f806444783322f0efa91",
+      "code_excerpt": "                shutil.copyfile(entry.path, dst / entry.name)"
+    }
+  ]
+}
