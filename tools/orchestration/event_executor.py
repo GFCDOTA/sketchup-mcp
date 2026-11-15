@@ -796,7 +796,7 @@ def run_cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fals
             shadow_diag = shadow_diagnostics()
         except Exception:  # noqa: BLE001
             pass
-    return {"poll": counts, **out, "reconcile": _reconcile_summary(gh, policy, repo, now),
+    return {"poll": counts, **out, "intake": _intake_summary(gh, store, execute), "reconcile": _reconcile_summary(gh, policy, repo, now, execute),
             "store_reconcile": _store_reconcile_summary(gh, repo, store),
             "auto_merge": _auto_merge_summary(gh, policy, repo, execute),
             "store": "primary" if _sqlite_primary() else ("shadow" if store else "unavailable"), "shadow_diagnostics": shadow_diag}
@@ -851,11 +851,52 @@ def _sqlite_primary() -> bool:
         return False
 
 
-def _reconcile_summary(gh: eb.Gh, policy: dict, repo: str, now: dt.datetime | None) -> dict:
-    """Reconciliador duravel (FP-059/F4) dentro do MESMO ciclo do listener. Somente observa e planeja (execute=False): nunca derruba o ciclo."""
+INTAKE_ENV = "INTAKE_ENABLED"
+REVIEW_PUBLISH_ENV = "REVIEW_AUTOPUBLISH"
+STEP_EVERY_S["intake"] = 300.0
+
+
+def _flag(name: str) -> bool:
+    return os.environ.get(name) == "1"
+
+
+def _intake_summary(gh: eb.Gh, store, execute: bool) -> dict:
+    """Intake (MT-11/MT-16): Issue AUTORIZADA (label humana) vira `IMPLEMENT_REQUESTED`. DESLIGADO por padrao: so com `INTAKE_ENABLED=1`, fonte SQLite e
+    `--execute` (o worker so existe nesse modo); desligado, nem le o backlog. Idempotente (a chave do evento inclui o hash da spec)."""
+    if not _flag(INTAKE_ENV):
+        return {"enabled": False}
+    if not (execute and _sqlite_primary() and store is not None):
+        return {"enabled": True, "skipped": "exige --execute, EXECUTOR_SOURCE=sqlite e o EventStore"}
+    if not _due("intake"):
+        return {"skipped": "intervalo"}
+    try:
+        from tools.orchestration import intake
+        from tools.validation import backlog_discovery as bd
+        issues, statuses, prs = bd.load(statuses=False)
+        path = es.state_path()
+        with es.locked(path):
+            state = es.load(path)
+        plan = intake.plan(issues, prs, state, statuses, bd.load_readiness())
+        if plan.candidate is None:
+            return {"candidate": None, "skipped": len(plan.skipped)}
+        event_id, created = intake.publish(store, plan.candidate, issues)
+        return {"candidate": plan.candidate.node.number, "event": event_id, "created": created}
+    except Exception as exc:                                                 # noqa: BLE001 — o intake nunca interrompe o executor
+        return {"errors": [f"{type(exc).__name__}: {exc}"[:200]]}
+
+
+def _reconcile_summary(gh: eb.Gh, policy: dict, repo: str, now: dt.datetime | None, execute: bool = False) -> dict:
+    """Reconciliador duravel (FP-059/F4) dentro do MESMO ciclo do listener. Por padrao so observa e planeja. Com `--execute` E `REVIEW_AUTOPUBLISH=1` aciona
+    o revisor Codex independente nos PRs com a label de autorizacao, CI verde e sem review no HEAD (idempotente por HEAD) e PUBLICA o review pelo outbox;
+    sem a flag `lifecycle` chamaria o revisor sem publicar. Nunca derruba o ciclo."""
     try:
         from tools.orchestration import lifecycle
-        r = lifecycle.reconcile(gh, policy, repo, execute=False, now=now)
+        publish = execute and _flag(REVIEW_PUBLISH_ENV)
+        codex_review = None
+        if publish:
+            from tools.orchestration import codex_reviewer
+            codex_review = lambda n, g, pol, rp: codex_reviewer.review_pr(n, g, pol, rp, do_publish=True)  # noqa: E731
+        r = lifecycle.reconcile(gh, policy, repo, execute=publish, now=now, codex_review=codex_review)
         return {"tracked": r["tracked"], "transitions": [f"#{t['pr']} {t['from']}->{t['to']}" for t in r["transitions"]],
                 "actions": [f"#{a['pr']} {a['action']}" for a in r["actions"]], "errors": r["errors"][:3]}
     except Exception as exc:                                                 # noqa: BLE001 — o reconciliador nunca interrompe o executor
