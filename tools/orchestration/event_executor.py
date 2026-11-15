@@ -33,6 +33,7 @@ import json
 import os
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 import threading
@@ -43,6 +44,7 @@ from typing import Callable
 
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import execution_guards as guards
+from tools.orchestration import sqlite_source as sq
 from tools.orchestration.executor_delivery import (  # noqa: F401  (run_checks reexportado)
     deliver,
     run_checks,
@@ -362,7 +364,10 @@ def pick(bstate: dict, now: dt.datetime | None = None) -> dict | None:
 # ------------------------------------------------------------------------------- claim/lease duravel (trava SO curta)
 def claim_next(owner: str, now: dt.datetime | None = None) -> dict | None:
     """Sob trava CURTA: reconcilia leases vencidos, escolhe o proximo item e grava RUNNING + dono + lease no disco. A trava e
-    solta ANTES de qualquer trabalho longo; a exclusao mutua da execucao e o lease (estado), nao o lockfile."""
+    solta ANTES de qualquer trabalho longo; a exclusao mutua da execucao e o lease (estado), nao o lockfile.
+    Com `EXECUTOR_SOURCE=sqlite` o claim e do EventStore (ver `sqlite_source`) e a fila JSON nao escolhe nada."""
+    if sq.is_sqlite():
+        return sq.claim_next(owner, now, lease_s=LEASE_S, daily_cap=DAILY_CAP)
     with es.locked(eb.bridge_path()):
         b = eb.load()
         recovered = recover(b, now)
@@ -386,6 +391,8 @@ def _owned(b: dict, key: str, owner: str) -> dict | None:
 def update_owned(key: str, owner: str, mutate: Callable[[dict, dict], None], release: bool = False,
                  now: dt.datetime | None = None) -> bool:
     """Altera o item SO se este processo ainda e o dono (RUNNING + owner). Perdeu o lease => descarta o resultado e diagnostica."""
+    if sq.is_sqlite():
+        return sq.update_owned(key, owner, mutate, release, now, lease_s=LEASE_S, retry_s=RETRY_S)
     with es.locked(eb.bridge_path()):
         b = eb.load()
         it = _owned(b, key, owner)
@@ -421,6 +428,12 @@ class Heartbeat(threading.Thread):
                 if WATCH_PID is not None and not pid_alive(WATCH_PID):          # launcher/tarefa encerrado: nao deixa o filho orfao
                     self.cancel.set()
                     return
+                if sq.is_sqlite():
+                    if not sq.renew(self.key, self.owner, LEASE_S):
+                        self.cancel.set()                                     # lease perdido no SQLite: o filho nao pode mais publicar
+                        return
+                    self.valid_until = time.monotonic() + LEASE_S
+                    continue
                 with es.locked(eb.bridge_path()):
                     b = eb.load()
                     it = _owned(b, self.key, self.owner)
@@ -432,7 +445,7 @@ class Heartbeat(threading.Thread):
                     it["lease_expires"] = es.now_iso(t + dt.timedelta(seconds=LEASE_S))
                     eb.save(b)
                     self.valid_until = time.monotonic() + LEASE_S
-            except (TimeoutError, OSError, ValueError):
+            except (TimeoutError, OSError, ValueError, sqlite3.Error):
                 if time.monotonic() >= self.valid_until - self.interval:      # sem como provar posse ate o fim do lease
                     self.cancel.set()
                     return
@@ -654,8 +667,19 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
     trabalho longo sem trava com heartbeat renovando o lease, e cada gravacao final so vale se o dono ainda e este processo."""
     if disabled_flag().exists():
         return {"action": "DISABLED", "reason": f"interruptor {disabled_flag().name} presente"}
+    try:
+        sqlite_mode = sq.is_sqlite()
+        if sqlite_mode and not execute:
+            return _dry_run_sqlite(gh, policy, repo, claude_bin, python)
+    except sq.SourceError as exc:
+        return {"action": "BLOCKED_SOURCE", "reason": str(exc)}
+    except (OSError, sqlite3.Error) as exc:                                  # SQLite indisponivel e a fonte da verdade: nao cai para a fila JSON
+        return {"action": "BLOCKED_STORE", "reason": f"EventStore indisponivel ({type(exc).__name__}): {exc}"[:300]}
     owner = uuid.uuid4().hex
-    item = claim_next(owner, now)
+    try:
+        item = claim_next(owner, now)
+    except (OSError, sqlite3.Error) as exc:
+        return {"action": "BLOCKED_STORE", "reason": f"EventStore indisponivel ({type(exc).__name__}): {exc}"[:300]}
     if item is None:
         return {"action": "IDLE"}
     hb = Heartbeat(item["key"], owner, heartbeat_s)
@@ -674,6 +698,19 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
         return {"action": "FAILED", "item": item["key"], "reason": reason}
     finally:
         hb.stop()
+
+
+def _dry_run_sqlite(gh: eb.Gh, policy: dict, repo: str, claude_bin: str, python: str | None) -> dict:
+    """DRY_RUN com o SQLite como fonte: olha o proximo candidato e roda o preflight, mas NAO reivindica (um claim gasta uma tentativa)."""
+    item = sq.peek_next()
+    if item is None:
+        return {"action": "IDLE"}
+    verdict, why, pr = preflight(item, gh, policy, repo)
+    if verdict != "OK":
+        return {"action": verdict, "item": item["key"], "reason": why, "dry_run": True}
+    branch = pr["head"]["ref"]
+    return {"action": "DRY_RUN", "item": item["key"], "reason": "dry-run: nao executa", "pr": item["pr"], "branch": branch,
+            "command": build_command(claude_bin, worktree_path(item["pr"]), branch, python)[:6]}
 
 
 def _get_store():
@@ -735,7 +772,7 @@ def run_cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fals
     store = _get_store()
     counts = eb.run_cycle(gh, policy, repo=repo, now=now, store=store)
     out = process_one(gh, policy, repo, execute, runner, claude_bin, wt_prep, now, python)
-    if out.get("item"):
+    if out.get("item") and not _sqlite_primary():
         with es.locked(eb.bridge_path()):
             b = eb.load()
             item = next((t for t in b["queue"] if t["key"] == out["item"]), None)
@@ -749,7 +786,14 @@ def run_cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fals
         except Exception:  # noqa: BLE001
             pass
     return {"poll": counts, **out, "reconcile": _reconcile_summary(gh, policy, repo, now),
-            "store": "shadow" if store else "unavailable", "shadow_diagnostics": shadow_diag}
+            "store": "primary" if _sqlite_primary() else ("shadow" if store else "unavailable"), "shadow_diagnostics": shadow_diag}
+
+
+def _sqlite_primary() -> bool:
+    try:
+        return sq.is_sqlite()
+    except sq.SourceError:
+        return False
 
 
 def _reconcile_summary(gh: eb.Gh, policy: dict, repo: str, now: dt.datetime | None) -> dict:
@@ -803,6 +847,11 @@ def main(argv: list[str] | None = None) -> int:
                                       if t["state"].startswith(("BLOCKED", "FAILED", "PARKED", "REFUSED"))],
                           "diagnostics": b["diagnostics"][-5:]}, indent=1, ensure_ascii=False))
         return 0
+    try:
+        sq.source()
+    except sq.SourceError as exc:
+        print(json.dumps({"at": es.now_iso(), "fatal": str(exc)}), flush=True)
+        return 6
     policy = eb.load_policy()
     try:
         eb.check_identity(eb.gh_json, policy)
