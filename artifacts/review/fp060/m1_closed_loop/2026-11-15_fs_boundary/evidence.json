@@ -1,8 +1,8 @@
 {
- "commit": "5ac5dfddcedb93fcba457a38bd12ae195ac5db2a",
- "icacls_ok": true,
+ "commit": "1eaa0fc88eda6f050843d7850585e546195d1454",
  "isolamento_provado": true,
- "exit_code": 1,
+ "exit_code": 0,
+ "tentativas": 5,
  "leitura": {
   "arquivo_comum_do_usuario": "NEGADA",
   "arquivo_do_usuario_com_ACL_ALL_APPLICATION_PACKAGES": "PERMITIDA",
