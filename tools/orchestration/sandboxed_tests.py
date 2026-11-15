@@ -52,6 +52,18 @@ BOOT_SOURCE = """import os
 import sys
 
 sys.path[:0] = [os.getcwd(), sys.argv[1]]
+
+# Python 3.12 no Windows trata `mkdir(mode=0o700)` como "so o usuario": a ACL do diretorio novo omite o perfil do AppContainer e
+# o proprio processo isolado perde acesso ao que acabou de criar (medido: `tmp_path` do pytest e `tempfile.mkdtemp` falham com
+# WinError 5). Sem o `mode`, o diretorio herda a ACL do workspace, que ja so concede acesso ao usuario, ao SYSTEM e a este perfil.
+_mkdir = os.mkdir
+
+
+def _mkdir_inheriting_acl(path, mode=0o777, *args, **kwargs):
+    return _mkdir(path, 0o777, *args, **kwargs)
+
+
+os.mkdir = _mkdir_inheriting_acl
 import pytest
 
 sys.exit(pytest.main(sys.argv[2:]))
@@ -145,6 +157,20 @@ def _copy_distributions(site: Path, names: tuple[str, ...]) -> list[str]:
     return sorted(f"{key}=={version}" for key, version in done.items())
 
 
+def project_distributions(pyproject: Path) -> tuple[str, ...]:
+    """Distribuicoes (runtime + extra `dev`) que o projeto declara, lidas do pyproject do COORDENADOR e nunca do codigo sob
+    revisao: o PR nao escolhe o que e copiado para o sandbox. `pytest` entra sempre."""
+    import tomllib
+
+    from packaging.requirements import Requirement
+    try:
+        data = tomllib.loads(Path(pyproject).read_text(encoding="utf-8"))["project"]
+        declared = [*data.get("dependencies", []), *data.get("optional-dependencies", {}).get("dev", [])]
+        return tuple(sorted({"pytest", *(Requirement(raw).name for raw in declared)}))
+    except (OSError, KeyError, ValueError) as exc:
+        raise SandboxError(f"pyproject do coordenador ilegivel ({type(exc).__name__})") from exc
+
+
 def copy_runtime(dst: Path, base: Path | None = None, dists: tuple[str, ...] = ("pytest",)) -> dict:
     """Copia para `dst` (novo) o interpretador base, a stdlib e `dists` com as dependencias obrigatorias em `dst/site`.
     `copyfile` nao leva atributo somente-leitura nem ACL: os arquivos herdam a DACL do diretorio de destino."""
@@ -162,13 +188,17 @@ def copy_runtime(dst: Path, base: Path | None = None, dists: tuple[str, ...] = (
     return {"python": sys.version.split()[0], "distributions": _copy_distributions(dst / "site", dists)}
 
 
-def _copy_tree(src: Path, dst: Path) -> int:
+def _copy_tree(src: Path, dst: Path, skip: tuple[str, ...] = ()) -> int:
     """Copia so arquivos regulares e devolve quantos. Link simbolico, juncao ou qualquer outro reparse point recusa a arvore
-    inteira: copiar seguindo o link traria para dentro do sandbox, pela mao do coordenador, um arquivo de fora."""
+    inteira: copiar seguindo o link traria para dentro do sandbox, pela mao do coordenador, um arquivo de fora.
+    `skip` nomeia entradas do NIVEL DE CIMA que nao sao copiadas (nem inspecionadas): nao entram no sandbox, entao nao oferecem risco."""
     dst.mkdir()
     count = 0
+    omitted = {name.lower() for name in skip}
     with os.scandir(src) as entries:
         for entry in entries:
+            if entry.name.lower() in omitted:
+                continue
             info = entry.stat(follow_symlinks=False)
             if entry.is_symlink() or getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT:
                 raise SandboxError(f"link ou reparse point na arvore de testes: {entry.name}")
@@ -220,14 +250,20 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
 
 
-def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeout: float, log_dir: Path, tag: str) -> SandboxRun:
+def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeout: float, log_dir: Path, tag: str,
+               dists: tuple[str, ...] = ("pytest",), skip: tuple[str, ...] = ()) -> SandboxRun:
     """Roda `tests` (caminhos relativos a `tree`) sobre uma COPIA de `tree` dentro de um AppContainer sem capacidades.
+    `dists` sao as distribuicoes (com as dependencias obrigatorias) levadas para o runtime; `skip`, entradas do nivel de cima
+    da arvore que ficam de fora da copia.
 
     `root` recebe o workspace temporario e o canario (ambos removidos ao final); `log_dir` recebe stdout/stderr da sonda e
     dos testes, abertos pelo coordenador e herdados pelo processo — ficam fora do workspace. A arvore original nao e tocada.
     """
     if not tests:
         raise ValueError("nenhum teste selecionado para o sandbox")
+    if Path(root).resolve() == Path(tree).resolve() or Path(tree).resolve() in Path(root).resolve().parents:
+        # o workspace nasce dentro de `root`: copiar a arvore entraria em recursao sobre a propria copia (medido: travou a suite)
+        raise SandboxError("raiz do sandbox dentro da arvore de testes: a copia entraria em recursao")
     if not _WINDOWS:
         raise SandboxError("AppContainer exige Windows; nenhum teste foi executado")
     root, log_dir = Path(root), Path(log_dir)
@@ -238,7 +274,7 @@ def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeo
     canary, intruder = root / f"canary-{secret[:12]}.txt", root / f"canary-{secret[:12]}.written"
     canary.write_text(secret, encoding="ascii")
     try:
-        return _run(Path(tree), tests, root, ini_text, timeout, log_dir, tag, secret, canary, intruder)
+        return _run(Path(tree), tests, root, ini_text, timeout, log_dir, tag, secret, canary, intruder, dists, skip)
     except (AppContainerError, ps.ProcessSupervisorError) as exc:
         raise SandboxError(f"{type(exc).__name__}: {exc}") from exc
     except OSError as exc:                                   # sem o caminho: o motivo vai para evento, log e relatorio
@@ -250,14 +286,14 @@ def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeo
 
 
 def _run(tree: Path, tests: list[str], root: Path, ini_text: str, timeout: float, log_dir: Path, tag: str, secret: str,
-         canary: Path, intruder: Path) -> SandboxRun:
+         canary: Path, intruder: Path, dists: tuple[str, ...], skip: tuple[str, ...]) -> SandboxRun:
     facts: dict = {}
     with AppContainerProfile() as profile:
         ws = create_workspace(profile, root)
         try:
             runtime, work, coordinator = ws / "runtime", ws / "work", ws / "coordinator"
-            facts["runtime"] = copy_runtime(runtime)
-            facts["tree_files"] = _copy_tree(tree, work)
+            facts["runtime"] = copy_runtime(runtime, dists=dists)
+            facts["tree_files"] = _copy_tree(tree, work, skip)
             coordinator.mkdir()
             ini, boot, probe = coordinator / "pytest.ini", coordinator / "boot.py", coordinator / "probe.py"
             ini.write_text(ini_text, encoding="utf-8")
@@ -276,8 +312,10 @@ def _run(tree: Path, tests: list[str], root: Path, ini_text: str, timeout: float
             # No Windows Server 2025 o AppContainer nao pode abrir o dispositivo nulo (medido no runner do CI; no Windows 11
             # pode), e o pytest o abre em dois pontos. `--capture=sys` evita a captura por descritor, que o abre para o stdin
             # (a saida do teste segue capturada); `--log-file` da ao plugin de logging um arquivo do workspace no lugar dele.
+            # `--basetemp`: o `tmp_path` do pytest falha no diretorio temporario do AppContainer (WinError 5, medido na MT-04);
+            # dentro do workspace ele funciona, e quase todo teste do repositorio usa `tmp_path`.
             code = _contained(profile, [python, "-I", "-B", str(boot), str(runtime / "site"), *tests, "-q", "-p", "no:cacheprovider",
-                                        "--capture=sys", "--log-file", str(coordinator / "pytest.log"), "-c", str(ini),
+                                        "--capture=sys", "--log-file", str(coordinator / "pytest.log"), "--basetemp", str(ws / "basetemp"), "-c", str(ini),
                                         "--rootdir", ".", "--confcutdir", "."],
                               work, env, tests_out, tests_err, timeout)
             output = (_read(tests_out) + _read(tests_err)).strip()

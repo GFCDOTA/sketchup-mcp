@@ -305,3 +305,118 @@ def test_pytest_runs_where_the_null_device_is_denied_to_the_appcontainer(tmp_pat
 
     assert run.exit_code == 1 and "1 failed, 1 passed" in run.output
     assert "Captured stdout call" in run.output and "saida do teste" in run.output     # a saida do teste continua capturada
+
+
+# -- MT-04: testes de um repositorio real dentro do sandbox -----------------------------------------------------------------
+USES_TEMP_DIRS = '''import tempfile
+
+
+def test_tmp_path_is_usable(tmp_path):
+    target = tmp_path / "a" / "b.txt"
+    target.parent.mkdir(parents=True)
+    target.write_text("ok", encoding="utf-8")
+    assert target.read_text(encoding="utf-8") == "ok"
+
+
+def test_tmp_path_factory_hands_out_distinct_directories(tmp_path_factory):
+    assert tmp_path_factory.mktemp("x") != tmp_path_factory.mktemp("x")
+
+
+def test_tempfile_is_usable():
+    with tempfile.TemporaryDirectory() as directory:
+        assert directory
+'''
+
+
+@windows_only
+def test_tests_that_use_tmp_path_and_tempfile_run_inside_the_sandbox(tmp_path):
+    tree = tree_with(tmp_path, test_temp=USES_TEMP_DIRS)
+
+    run = sandboxed(tmp_path, tree, ["tests/test_temp.py"])
+
+    assert run.exit_code == 0 and "3 passed" in run.output, run.output[-800:]
+
+
+@windows_only
+def test_the_requested_dependencies_reach_the_runtime_copy(tmp_path, monkeypatch):
+    seen = []
+    original = sb.copy_runtime
+
+    def spy(dst, base=None, dists=("pytest",)):
+        seen.append(tuple(dists))
+        return original(dst, base, dists)
+
+    monkeypatch.setattr(sb, "copy_runtime", spy)
+    tree = tree_with(tmp_path, test_ok=PASSING)
+
+    sb.run_pytest(tree, ["tests/test_ok.py"], root=tmp_path / "sandbox", ini_text="[pytest]\n", timeout=120.0,
+                  log_dir=tmp_path / "logs", tag="t", dists=("pytest", "hypothesis"))
+
+    assert seen == [("pytest", "hypothesis")]
+
+
+def test_copy_tree_skips_named_top_level_directories_only(tmp_path):
+    src = tmp_path / "src"
+    for rel in ("keep/a.py", "artifacts/big.bin", "tests/artifacts/small.txt", "top.py"):
+        (src / rel).parent.mkdir(parents=True, exist_ok=True)
+        (src / rel).write_text("x", encoding="utf-8")
+
+    count = sb._copy_tree(src, tmp_path / "dst", skip=("artifacts",))
+
+    assert count == 3 and not (tmp_path / "dst" / "artifacts").exists()
+    assert (tmp_path / "dst" / "tests" / "artifacts" / "small.txt").exists()          # so o nivel de cima
+
+
+def test_a_skipped_directory_is_not_inspected_even_if_it_is_a_reparse_point(tmp_path):
+    src = tmp_path / "src"
+    (src / "keep").mkdir(parents=True)
+    (src / "keep" / "a.py").write_text("x", encoding="utf-8")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    made = subprocess.run(["cmd", "/d", "/c", "mklink", "/J", str(src / "artifacts"), str(outside)], capture_output=True) \
+        if os.name == "nt" else None
+    if made is None or made.returncode != 0:
+        pytest.skip("sem juncao neste ambiente")
+
+    assert sb._copy_tree(src, tmp_path / "dst", skip=("artifacts",)) == 1
+    with pytest.raises(SandboxError, match="reparse point"):
+        sb._copy_tree(src, tmp_path / "dst2")                                          # sem `skip`, a juncao continua recusada
+
+
+# -- MT-04: dependencias do projeto lidas do pyproject do coordenador ------------------------------------------------------
+def test_project_distributions_reads_runtime_and_dev_dependencies_and_always_includes_pytest(tmp_path):
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "x"\ndependencies = ["numpy>=1.2", "Pillow; sys_platform == \'win32\'"]\n'
+        '[project.optional-dependencies]\ndev = ["hypothesis>=6", "ruff"]\nmcp = ["mcp"]\n', encoding="utf-8")
+
+    assert sb.project_distributions(tmp_path / "pyproject.toml") == ("Pillow", "hypothesis", "numpy", "pytest", "ruff")
+
+
+@pytest.mark.parametrize("content", [None, "nao e toml [", "[tool.x]\na = 1\n", '[project]\ndependencies = ["???"]\n'])
+def test_project_distributions_that_cannot_be_read_stop_the_run(tmp_path, content):
+    path = tmp_path / "pyproject.toml"
+    if content is not None:
+        path.write_text(content, encoding="utf-8")
+    with pytest.raises(SandboxError, match="pyproject do coordenador ilegivel"):
+        sb.project_distributions(path)
+
+def test_a_sandbox_root_inside_the_tree_is_refused_before_anything_is_created(tmp_path):
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    for root in (tree / "sandbox", tree):
+        with pytest.raises(SandboxError, match="dentro da arvore de testes"):
+            sb.run_pytest(tree, ["tests/test_ok.py"], root=root, ini_text="[pytest]\n", timeout=60.0, log_dir=tmp_path / "logs", tag="t")
+    assert not (tree / "sandbox").exists() and not (tmp_path / "logs").exists()
+
+
+@windows_only
+def test_run_pytest_leaves_the_skipped_entries_out_of_the_sandbox_copy(tmp_path):
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    (tree / "artifacts").mkdir()
+    (tree / "artifacts" / "big.bin").write_bytes(b"x" * 1000)
+
+    full = sb.run_pytest(tree, ["tests/test_ok.py"], root=tmp_path / "sandbox_a", ini_text="[pytest]\n", timeout=120.0,
+                         log_dir=tmp_path / "logs_a", tag="a")
+    skipped = sb.run_pytest(tree, ["tests/test_ok.py"], root=tmp_path / "sandbox_b", ini_text="[pytest]\n", timeout=120.0,
+                            log_dir=tmp_path / "logs_b", tag="b", skip=("artifacts",))
+
+    assert (full.facts["tree_files"], skipped.facts["tree_files"]) == (2, 1) and skipped.exit_code == 0

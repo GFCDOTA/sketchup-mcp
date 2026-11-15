@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from tools.orchestration import codex_reviewer as cr
+from tools.orchestration.sandboxed_tests import SandboxError, SandboxRun
 
 SHA = "a" * 40
 POLICY = {"reviewers": ["fmmodesto"], "executor_logins": ["fmodesto30"]}
@@ -319,11 +320,20 @@ def test_check_untouched_blocks_on_dirty_tree_or_moved_head():
     check(Path("."), SHA, "after_codex", run=lambda a, c: (0, "") if a[0] == "status" else (0, SHA))
 
 
+PROVEN = {"is_appcontainer": True, "capabilities": 0, "canary": {"read_outside": "denied", "write_outside": "denied"},
+          "runtime": {"python": "3.12", "distributions": ["pytest==8"]}, "tree_files": 3, "workspace_removed": True}
+
+
+def no_sandbox(*args, **kwargs):
+    raise SandboxError("sem AppContainer neste teste")
+
+
 def test_coordinator_runner_never_calls_subprocess(tmp_path, monkeypatch):
-    """run_coordinator_tests NUNCA executa subprocess — toda execucao de codigo removida ate P2."""
+    """Sem sandbox comprovado, run_coordinator_tests nao executa NADA — nem subprocess."""
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests" / "test_x.py").write_text("", encoding="utf-8")
     monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("subprocess.run called — bypass!")))
+    monkeypatch.setattr(cr.sb, "run_pytest", no_sandbox)
     ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/y.py"], python="py")
     assert ev["tests_passed"] is None and ev["isolation"] == cr.ISOLATION_SKIPPED
     assert ev["selected"] == ["tests/test_x.py"] and ev["uncovered"] == ["tools/y.py"]
@@ -334,7 +344,8 @@ def test_coordinator_runner_blocks_even_with_monkeypatched_flags(tmp_path, monke
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests" / "test_x.py").write_text("", encoding="utf-8")
     monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("subprocess.run called — bypass!")))
-    for attr in ("SANDBOX_AVAILABLE", "SANDBOX_RUNNER", "SANDBOX_ENABLED", "_SANDBOX_OVERRIDE"):
+    monkeypatch.setattr(cr.sb, "run_pytest", no_sandbox)
+    for attr in ("SANDBOX_AVAILABLE", "SANDBOX_RUNNER", "SANDBOX_ENABLED", "_SANDBOX_OVERRIDE", "ISOLATION_PROVEN"):
         monkeypatch.setattr(cr, attr, True, raising=False)
     ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py"])
     assert ev["tests_passed"] is None and ev["isolation"] == cr.ISOLATION_SKIPPED
@@ -422,12 +433,19 @@ def test_head_moving_right_after_publish_is_reconciled_and_reported(tmp_path, mo
 
 
 # ------------------------------------------------- FP-060 #603: fail-closed — sem execucao de codigo nao confiavel ate P2
-def test_run_coordinator_tests_always_skips_without_real_sandbox(tmp_path, monkeypatch):
-    """run_coordinator_tests e incondicionalmente ISOLATION_SKIPPED — nenhuma flag habilita subprocess."""
+@pytest.mark.parametrize("how", ["sandbox_error", "unproven_facts", "not_windows"])
+def test_run_coordinator_tests_skips_whenever_the_sandbox_cannot_be_proven(tmp_path, monkeypatch, how):
+    """Sem token AppContainer + canario provados NA execucao, o resultado e ISOLATION_SKIPPED — nenhuma flag habilita subprocess."""
     monkeypatch.setattr(cr.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("subprocess.run called — bypass!")))
+    if how == "sandbox_error":
+        monkeypatch.setattr(cr.sb, "run_pytest", no_sandbox)
+    elif how == "unproven_facts":
+        monkeypatch.setattr(cr.sb, "run_pytest", lambda *a, **k: SandboxRun(0, False, "1 passed", {**PROVEN, "canary": {"read_outside": "allowed"}}))
+    else:
+        monkeypatch.setattr(cr.sb, "_WINDOWS", False)                       # o run_pytest REAL recusa fora do Windows
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests" / "test_x.py").write_text("def test_a(): pass\n", encoding="utf-8")
-    ev = REAL["run_coordinator_tests"](tmp_path, ["tests/test_x.py", "tools/orphan.py"])
+    ev = REAL["run_coordinator_tests"](_tree_with_a_test(tmp_path), ["tests/test_x.py", "tools/orphan.py"])
     assert ev["tests_passed"] is None
     assert ev["isolation"] == cr.ISOLATION_SKIPPED
     assert "sandbox" in ev["summary"].lower()
@@ -477,6 +495,85 @@ def test_run_coordinator_tests_has_no_bypass_parameters():
     forbidden = {"sandbox_mode", "sandbox", "isolation", "enable_tests", "force_run", "unsafe"}
     found = forbidden & set(sig.parameters)
     assert not found, f"bypass parameter(s) reintroduced: {found}"
+
+
+def _tree_with_a_test(tmp_path):
+    """A arvore revisada e um diretorio SEPARADO: o workspace do sandbox nasce em `codex_dir()`, dentro de `tmp_path`."""
+    tree = tmp_path / "tree"
+    (tree / "tests").mkdir(parents=True, exist_ok=True)
+    (tree / "tests" / "test_x.py").write_text("def test_a(): pass\n", encoding="utf-8")
+    return tree
+
+
+@pytest.mark.parametrize("exit_code, timed_out, passed", [(0, False, True), (1, False, False), (None, True, False), (5, False, False)])
+def test_isolation_is_os_sandbox_only_with_proofs_and_pass_follows_the_exit_code(tmp_path, monkeypatch, exit_code, timed_out, passed):
+    seen = {}
+
+    def fake(tree, tests, **kw):
+        seen.update(tree=tree, tests=tests, **kw)
+        return SandboxRun(exit_code, timed_out, "1 passed" if passed else "1 failed", dict(PROVEN))
+
+    monkeypatch.setattr(cr.sb, "run_pytest", fake)
+    ev = REAL["run_coordinator_tests"](_tree_with_a_test(tmp_path), ["tests/test_x.py", "tools/orphan.py"], timeout=77)
+
+    assert ev["isolation"] == cr.ISOLATION_OS == "os_sandbox" and ev["tests_passed"] is passed and ev["sandbox"] == PROVEN
+    assert ev["selected"] == ["tests/test_x.py"] and ev["uncovered"] == ["tools/orphan.py"] and ev["source"] == cr.RUNNER_SOURCE
+    assert seen["tests"] == ["tests/test_x.py"] and seen["timeout"] == 77 and seen["skip"] == cr.SANDBOX_SKIP
+    assert "artifacts" in cr.SANDBOX_SKIP and "pytest" in seen["dists"]
+
+
+def test_dependencies_come_from_the_coordinators_pyproject_never_from_the_reviewed_tree(tmp_path, monkeypatch):
+    seen = []
+    monkeypatch.setattr(cr.sb, "project_distributions", lambda path: seen.append(Path(path)) or ("pytest",))
+    monkeypatch.setattr(cr.sb, "run_pytest", lambda *a, **k: SandboxRun(0, False, "ok", dict(PROVEN)))
+    (tmp_path / "pyproject.toml").write_text('[project]\nname = "x"\ndependencies = ["intruso"]\n', encoding="utf-8")
+
+    REAL["run_coordinator_tests"](_tree_with_a_test(tmp_path), ["tests/test_x.py"])
+
+    assert seen == [cr.ex.repo_root() / "pyproject.toml"] and seen[0] != tmp_path / "pyproject.toml"
+
+
+def test_nothing_runs_when_no_test_is_selected(tmp_path, monkeypatch):
+    monkeypatch.setattr(cr.sb, "run_pytest", lambda *a, **k: pytest.fail("sandbox acionado sem teste selecionado"))
+    ev = REAL["run_coordinator_tests"](tmp_path, ["tools/orphan.py"])
+    assert ev["isolation"] == cr.ISOLATION_SKIPPED and ev["tests_passed"] is None and "sandbox" in ev["summary"].lower()
+
+
+windows_only = pytest.mark.skipif(os.name != "nt", reason="requires real Windows AppContainer")
+
+
+@windows_only
+def test_real_sandbox_runs_the_selected_tests_and_proves_the_isolation(tmp_path):
+    ev = REAL["run_coordinator_tests"](_tree_with_a_test(tmp_path), ["tests/test_x.py"], timeout=180)
+    assert ev["isolation"] == cr.ISOLATION_OS and ev["tests_passed"] is True and "1 passed" in ev["summary"]
+    assert ev["sandbox"]["is_appcontainer"] is True and ev["sandbox"]["capabilities"] == 0 and ev["sandbox"]["workspace_removed"] is True
+
+
+@windows_only
+def test_real_sandbox_reports_a_failing_test_as_failed_not_as_skipped(tmp_path):
+    tree = _tree_with_a_test(tmp_path)
+    (tree / "tests" / "test_x.py").write_text("def test_a():\n    assert False\n", encoding="utf-8")
+    ev = REAL["run_coordinator_tests"](tree, ["tests/test_x.py"], timeout=180)
+    assert ev["isolation"] == cr.ISOLATION_OS and ev["tests_passed"] is False and "1 failed" in ev["summary"]
+
+
+def test_a_valid_approve_with_proven_os_sandbox_evidence_is_published_exactly_once(tmp_path, monkeypatch):
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {**GREEN, "isolation": cr.ISOLATION_OS})
+    monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
+    published = []
+    res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])), do_publish=True,
+                 gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a) or "https://x/r/1")
+    assert res["action"] == "DONE" and res["published"] == "https://x/r/1" and len(published) == 1
+
+
+@pytest.mark.parametrize("isolation", [cr.ISOLATION_ENV, cr.ISOLATION_SKIPPED, "os_sandbox_claimed", None])
+def test_only_the_exact_os_sandbox_label_unlocks_the_publication_of_an_approve(tmp_path, monkeypatch, isolation):
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {**GREEN, "isolation": isolation})
+    monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
+    published = []
+    res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])), do_publish=True,
+                 gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a))
+    assert res["action"] == "REVIEW_BLOCKED" and "sandbox de SO" in res["reason"] and not published
 
 
 def test_child_env_is_the_only_env_used_by_codex_runner():

@@ -7,7 +7,7 @@ Fluxo (fail-closed): confere o HEAD do PR no GitHub -> worktree SEPARADO em HEAD
 --output-last-message` (prompt por stdin, sem shell) -> parecer JSON VALIDADO (pr/head_sha batem; APPROVE exige testes revistos e zero achados; REQUEST_CHANGES
 exige achados) -> PROVA DE INSPECAO (FP-060 D-060-02: o pacote do diff vai no prompt com o sha256 de cada blob no HEAD; o parecer cita
 `files_reviewed[{path, sha256, code_excerpt}]` conferidos byte a byte, achado so em arquivo inspecionado) -> TESTES DO COORDENADOR (D-060-03: roda
-os testes relevantes do diff ANTES do Codex, env por allowlist, SEM sandbox de SO; APPROVE exige verde + cobertura + inspecao de todo codigo do
+os testes relevantes do diff ANTES do Codex, SO dentro de AppContainer sem capacidades, com token e canario provados NA execucao (`sandboxed_tests`; sem a prova nada roda); APPROVE exige verde + cobertura + inspecao de todo codigo do
 diff, e APPROVE so e PUBLICADO com runner em sandbox de SO, FP-060 P2) -> revalida HEAD imediatamente antes do POST ->
 worktree intacta e no HEAD apos o Codex (sujo = parecer invalido) -> reconfere o HEAD (mudou = STALE) -> registra `runs/governance/codex/last_review.json` (a barra le) -> publica SO com identidade independente:
 `CODEX_REVIEWER_GH_TOKEN` cujo login esteja em `review_policy.reviewers` e nao seja o executor. Sem isso: `REVIEW_BLOCKED` (o parecer fica salvo, nada e publicado,
@@ -19,6 +19,7 @@ import datetime as dt
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -27,6 +28,7 @@ from typing import Callable
 
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import event_executor as ex
+from tools.orchestration import sandboxed_tests as sb
 
 VERDICTS = ("APPROVE", "REQUEST_CHANGES", "NEEDS_HUMAN")
 SEVERITIES = ("LOW", "MEDIUM", "HIGH", "CRITICAL")
@@ -54,9 +56,10 @@ REVIEW_SCHEMA = {
 EMBED_LIMIT = 120_000                 # bytes de conteudo embutidos no prompt; o resto fica so com o hash (Codex le na worktree)
 MIN_EXCERPT = 12                      # trecho curto demais ("a", "}") nao prova leitura
 TEST_TIMEOUT_S = 10 * 60
-RUNNER_SOURCE = "coordinator_test_runner"   # NAO e "trusted": roda codigo do PR; isolamento em ISOLATION_ENV ou ISOLATION_SKIPPED
-SANDBOX_RUNNER = None                      # Sem sandbox de SO verificado; Job Object sozinho nao isola.
+RUNNER_SOURCE = "coordinator_test_runner"   # NAO e "trusted": roda codigo do PR; so em ISOLATION_OS (provado na execucao) ou nao roda
 ISOLATION_SKIPPED = "tests_skipped_no_sandbox"
+ISOLATION_OS = "os_sandbox"                # AppContainer sem capacidades, com token e canario provados NA execucao dos testes
+SANDBOX_SKIP = ("artifacts", "assets", "ops", "runs", ".git")   # nao e codigo: 351 dos 429 MB rastreados sao `artifacts/` (medido, MT-04)
 ISOLATION_ENV = "env_allowlist_only"
 CODE_EXT = (".py", ".rb", ".ps1", ".psm1", ".sh", ".js", ".ts", ".yml", ".yaml", ".toml", ".cfg", ".ini")
 ENV_KEEP = {k.upper() for k in (
@@ -74,7 +77,7 @@ PROVA DE INSPECAO (obrigatoria, conferida byte a byte): em `files_reviewed` list
 `sha256` EXATO informado no pacote e em `code_excerpt` uma linha copiada LITERALMENTE desse arquivo e central para o parecer. Todo
 achado deve estar num arquivo de `files_reviewed`. Nao conseguiu ler? Responda NEEDS_HUMAN e diga isso; nunca invente trecho.
 TESTES: voce NAO precisa rodar Python (o sandbox pode nao permitir); o resultado REAL abaixo foi executado pelo coordenador nesta worktree
-(fonte `coordinator_test_runner`, sem sandbox de SO). APPROVE exige: testes do coordenador verdes, todo modulo alterado coberto por teste
+(fonte `coordinator_test_runner`; `isolation` so e `os_sandbox` quando rodou em AppContainer sem capacidades, provado na execucao). APPROVE exige: testes do coordenador verdes, todo modulo alterado coberto por teste
 selecionado, `tests_reviewed` contido nos testes executados e todo arquivo de codigo do diff em `files_reviewed`; senao, NEEDS_HUMAN."""
 
 PACKAGE_PROMPT = """
@@ -254,11 +257,31 @@ def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
 
 
 def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S) -> dict:
-    """Fail-closed: testes nao confiaveis exigem isolamento de SO verificavel.
-    Job Objects gerenciam processos, mas nao sao sandbox de seguranca. Nao ha fallback via subprocess.run."""
+    """Fail-closed: os testes do PR so rodam dentro de um AppContainer sem capacidades, com o token do processo e um canario
+    provados NESTA execucao (`sandboxed_tests.run_pytest`). Qualquer falha — fora do Windows, sandbox que nao sobe, sonda
+    reprovada, prova ausente — devolve ISOLATION_SKIPPED com `tests_passed=None` e nada roda fora do sandbox. Nao ha parametro
+    nem fallback de contorno. Dependencias e timeout vem do coordenador; as dependencias, do pyproject do PROPRIO coordenador,
+    nunca do codigo sob revisao."""
     sel, uncovered = select_tests(wt, files)
-    return {"source": RUNNER_SOURCE, "isolation": ISOLATION_SKIPPED, "selected": sel, "uncovered": uncovered,
-            "tests_passed": None, "summary": "testes NAO executados: sem sandbox de SO real (FP-060 P2); escalar ao proprietario"}
+    base = {"source": RUNNER_SOURCE, "selected": sel, "uncovered": uncovered}
+
+    def skipped(why: str) -> dict:
+        return {**base, "isolation": ISOLATION_SKIPPED, "tests_passed": None, "summary": f"testes NAO executados: {why}"}
+
+    if not sel:
+        return skipped("nenhum teste selecionado, nada a rodar em sandbox de SO")
+    root = codex_dir() / "tests_sandbox"
+    try:
+        run = sb.run_pytest(wt, sel, root=root, ini_text="[pytest]\n", timeout=timeout, log_dir=root / "logs",
+                            tag=re.sub(r"[^A-Za-z0-9_.-]", "_", wt.name)[:40],
+                            dists=sb.project_distributions(ex.repo_root() / "pyproject.toml"), skip=SANDBOX_SKIP)
+    except sb.SandboxError as exc:
+        return skipped(f"sandbox de SO indisponivel ({str(exc)[:200]}); escalar ao proprietario")
+    if not sb.proves_isolation(run.facts):
+        return skipped("isolamento de SO nao comprovado nesta execucao do sandbox; escalar ao proprietario")
+    summary = f"timeout de {timeout}s" if run.timed_out else run.output[-1500:]
+    return {**base, "isolation": ISOLATION_OS, "tests_passed": (not run.timed_out) and run.exit_code == 0, "exit_code": run.exit_code,
+            "summary": summary, "sandbox": run.facts}
 
 
 def check_untouched(wt: Path, sha: str, stage: str, run=ex.git) -> None:
@@ -416,7 +439,7 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
         published = ""
         blocked = ""
         moved_after = ""
-        if do_publish and verdict["verdict"] == "APPROVE" and evidence.get("isolation") != "os_sandbox":
+        if do_publish and verdict["verdict"] == "APPROVE" and evidence.get("isolation") != ISOLATION_OS:
             blocked = (f"APPROVE automatico exige runner de testes em sandbox de SO (isolamento atual: {evidence.get('isolation')}; FP-060 P2): "
                        "parecer salvo, escalar ao proprietario")
         elif do_publish and verdict["verdict"] != "NEEDS_HUMAN":
