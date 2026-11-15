@@ -1,0 +1,60 @@
+{
+ "pr": 631,
+ "head_sha": "0baf373edcbfb4e621cc8ba894ce77d283b72590",
+ "autor_do_pr": "fmodesto30",
+ "revisor": "fmmodesto",
+ "chave": "review:GFCDOTA/sketchup-mcp#631:0baf373edcbfb4e621cc8ba894ce77d283b72590:REQUEST_CHANGES",
+ "steps": [
+  {
+   "step": "processo morto depois do POST e antes do ACK",
+   "outbox": [
+    {
+     "status": "RUNNING",
+     "attempts": 1
+    }
+   ],
+   "reviews_com_a_chave": 1
+  },
+  {
+   "step": "nova chamada com o lease do morto ainda valido",
+   "outbox": [
+    {
+     "status": "RUNNING",
+     "attempts": 1
+    }
+   ],
+   "reviews_com_a_chave": 1,
+   "devolveu_url": true
+  },
+  {
+   "step": "nova chamada depois do lease expirar",
+   "outbox": [
+    {
+     "status": "DONE",
+     "attempts": 2
+    }
+   ],
+   "reviews_com_a_chave": 1
+  }
+ ],
+ "reviews_com_a_chave": 1,
+ "url": "https://github.com/GFCDOTA/sketchup-mcp/pull/631#pullrequestreview-5912160819",
+ "review": {
+  "id": 5912160819,
+  "state": "CHANGES_REQUESTED",
+  "commit_id": "0baf373edcbfb4e621cc8ba894ce77d283b72590"
+ },
+ "evento_de_publicacao": [
+  {
+   "status": "DONE",
+   "producer": "codex_reviewer"
+  }
+ ],
+ "outbox_final": [
+  {
+   "status": "DONE",
+   "attempts": 2
+  }
+ ],
+ "verdict": "PASS"
+}

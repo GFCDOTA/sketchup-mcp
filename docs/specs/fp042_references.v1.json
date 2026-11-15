@@ -9255,6 +9255,24 @@
       "blob_sha": "0643c3270e8b6b54537b4d3079282266cf8b2d6f",
       "blob_size": 2398,
       "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/mt05_review_outbox/2026-11-15/README.md",
+      "blob_sha": "104e5aee81ff7fee4627dbfe8b4696d9dbecff78",
+      "blob_size": 4520,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/mt05_review_outbox/2026-11-15/evidence.json",
+      "blob_sha": "92de12412bbda71db1cf6d11a121d8e41866057e",
+      "blob_size": 1206,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/mt05_review_outbox/2026-11-15/mt05_real_run.py",
+      "blob_sha": "1885611e244bffae91d2b8cfa4c5138d838c0199",
+      "blob_size": 4448,
+      "owner_group": "artifacts"
     }
   ]
 }
