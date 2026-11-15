@@ -58,7 +58,8 @@ MIN_EXCERPT = 12                      # trecho curto demais ("a", "}") nao prova
 TEST_TIMEOUT_S = 10 * 60
 RUNNER_SOURCE = "coordinator_test_runner"   # NAO e "trusted": roda codigo do PR; so em ISOLATION_OS (provado na execucao) ou nao roda
 ISOLATION_SKIPPED = "tests_skipped_no_sandbox"
-ISOLATION_OS = "os_sandbox"                # AppContainer sem capacidades, com token e canario provados NA execucao dos testes
+ISOLATION_OS = "os_sandbox"                # AppContainer sem capacidades, token e canario provados NA execucao; NAO e confinamento geral
+                                           # de arquivos: le o que a ACL abre a todo AppContainer (contrato em `sandboxed_tests`)
 SANDBOX_SKIP = ("artifacts", "assets", "ops", "runs", ".git")   # nao e codigo: 351 dos 429 MB rastreados sao `artifacts/` (medido, MT-04)
 ISOLATION_ENV = "env_allowlist_only"
 CODE_EXT = (".py", ".rb", ".ps1", ".psm1", ".sh", ".js", ".ts", ".yml", ".yaml", ".toml", ".cfg", ".ini")

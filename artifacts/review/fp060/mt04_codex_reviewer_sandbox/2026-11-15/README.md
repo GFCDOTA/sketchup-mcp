@@ -46,8 +46,13 @@ esses testes para "ficar verde" seria alterar a prova, então não foi feito.
 ## O que NÃO é
 
 - **Não é o M2 completo.** Não há Codex, nem GitHub, nem publicação nesta evidência: só a camada de execução dos testes.
-- **Não garante integridade do resultado**: o código testado roda no mesmo processo do pytest e controla o exit code. O
-  sandbox contém o que esse código alcança (arquivos, rede), não o que ele declara.
+- **O rótulo `os_sandbox` não é confinamento geral de arquivos.** O sandbox nega o que a ACL não concede a um AppContainer
+  (arquivos e credenciais do usuário) e a rede, mas o código testado lê o que a ACL abre a todo AppContainer (Windows,
+  Program Files, qualquer arquivo concedido a `ALL APPLICATION PACKAGES`); medido em
+  `../../m1_closed_loop/2026-11-15_fs_boundary/` depois de uma pré-revisão do Codex apontar isso no #617. Ele é a condição para
+  publicar um APPROVE, não uma garantia de que um arquivo específico não foi lido.
+- **Não garante integridade do resultado**: o código testado roda no mesmo processo do pytest e controla o exit code; o
+  sandbox restringe o que ele alcança, não o que ele declara.
 - **Não há limite de CPU, memória ou disco** dentro do workspace; o timeout é do coordenador (10 min).
 - **Perfil e workspace ficam órfãos** se o coordenador morrer no meio dos testes (sem reaper); uma interrupção forçada
   durante o desenvolvimento deixou 2 perfis, removidos à mão.
