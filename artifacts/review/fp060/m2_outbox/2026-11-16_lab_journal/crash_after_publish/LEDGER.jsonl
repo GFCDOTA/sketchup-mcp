@@ -1,0 +1,2 @@
+{"key": "lab:slug:review:618fc164802fb36514b0339be4513336bd3bd324:REQUEST_CHANGES", "operation": "publish_review", "payload": {"findings": 1, "head_sha": "618fc164802fb36514b0339be4513336bd3bd324", "round": 1, "verdict": "REQUEST_CHANGES"}}
+{"key": "lab:slug:review:56bb00b15fda36127a01f09eeebec72cbe49208a:APPROVE", "operation": "publish_review", "payload": {"findings": 0, "head_sha": "56bb00b15fda36127a01f09eeebec72cbe49208a", "round": 2, "verdict": "APPROVE"}}

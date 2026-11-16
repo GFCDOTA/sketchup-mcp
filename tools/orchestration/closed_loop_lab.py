@@ -600,23 +600,64 @@ def _publications_file(lab: Lab) -> Path:
     return lab.root / "PUBLICATIONS.jsonl"
 
 
+class JournalCorrupt(ValueError):
+    """PUBLICATIONS.jsonl tem linha incompleta ou malformada: a prova de reconciliacao nao vale (fail-closed)."""
+
+
 def _record_publication(lab: Lab, row: dict) -> None:
-    with _publications_file(lab).open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(row, sort_keys=True) + "\n")
+    """Append DURAVEL (flush + fsync). Se uma gravacao anterior morreu no meio (arquivo sem `\\n` final), o fragmento fica isolado na propria linha — o registro novo
+    nunca e colado nele — e a leitura o acusa como corrompido."""
+    p = _publications_file(lab)
+    with p.open("a+b") as fh:
+        fh.seek(0, os.SEEK_END)
+        if fh.tell():
+            fh.seek(-1, os.SEEK_END)
+            torn = fh.read(1) != b"\n"
+            fh.seek(0, os.SEEK_END)
+            if torn:
+                fh.write(b"\n")
+        fh.write((json.dumps(row, sort_keys=True) + "\n").encode("utf-8"))
+        fh.flush()
+        os.fsync(fh.fileno())
 
 
 def publications(lab: Lab) -> list[dict]:
+    """Registros do diario. Linha incompleta/malformada ou sem os campos do contrato levanta `JournalCorrupt` (nunca e ignorada em silencio)."""
     p = _publications_file(lab)
     if not p.exists():
         return []
-    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+    rows = []
+    for n, line in enumerate(p.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError as exc:
+            raise JournalCorrupt(f"PUBLICATIONS.jsonl linha {n} incompleta ou malformada (gravacao interrompida?)") from exc
+        if not isinstance(row, dict) or not isinstance(row.get("key"), str) or not isinstance(row.get("event"), str) or "attempt" not in row:
+            raise JournalCorrupt(f"PUBLICATIONS.jsonl linha {n} sem key/event/attempt")
+        rows.append(row)
+    return rows
+
+
+def reconciliation_proof(lab: Lab) -> tuple[bool, str | None]:
+    """(prova valida?, motivo da reprovacao). Diario ausente, vazio ou corrompido REPROVA o criterio com o motivo — o relatorio nunca quebra por causa dele."""
+    try:
+        rows = publications(lab)
+    except (JournalCorrupt, OSError) as exc:
+        return False, str(exc)
+    if not rows:
+        return False, "PUBLICATIONS.jsonl ausente ou vazio"
+    if not interrupted_then_reconciled(rows):
+        return False, "o diario nao mostra EFFECT_APPLIED sem desfecho seguido de RECONCILED numa tentativa posterior"
+    return True, None
 
 
 def interrupted_then_reconciled(rows: list[dict]) -> bool:
     """Prova ESPECIFICA do cenario: para uma mesma chave, uma tentativa aplicou o efeito (EFFECT_APPLIED) e NUNCA registrou o desfecho (morreu antes do ACK) E uma
-    tentativa POSTERIOR terminou RECONCILED. Duas tentativas por outro motivo (ex.: falha antes do envio) nao contam."""
+    tentativa POSTERIOR terminou RECONCILED. Duas tentativas por outro motivo (ex.: falha antes do envio) nao contam. Tentativa sem numero inteiro nao conta."""
     for key in {r["key"] for r in rows}:
-        mine = [r for r in rows if r["key"] == key]
+        mine = [r for r in rows if r["key"] == key and isinstance(r.get("attempt"), int) and not isinstance(r.get("attempt"), bool)]
         applied = {r["attempt"] for r in mine if r["event"] == "EFFECT_APPLIED"}
         concluded = {r["attempt"] for r in mine if r["event"] != "EFFECT_APPLIED"}
         interrupted = sorted(applied - concluded)
@@ -892,7 +933,8 @@ def report(lab: Lab, store: EventStore) -> dict:
     outbox, expected, in_ledger = store.outbox_entries(), expected_publications(events), ledger_keys(lab)
     all_published = bool(expected) and in_ledger is not None and sorted(in_ledger) == sorted(expected) and all(
         o["status"] == "DONE" for o in outbox)
-    consumed = [e for e in events if fault and e["event_type"] in AGENT_EVENTS[FAULTS[fault][0]]]
+    journal_ok, journal_error = reconciliation_proof(lab)
+    consumed =[e for e in events if fault and e["event_type"] in AGENT_EVENTS[FAULTS[fault][0]]]
     faulted_runs = [r for r in runs if fault and r["agent"] == FAULTS[fault][0]]
     negative = {
         "faulted_cli_really_started": bool(faulted_runs) and all((r["pid"] or 0) > 0 and r["ended_at"] is not None for r in faulted_runs),
@@ -918,12 +960,13 @@ def report(lab: Lab, store: EventStore) -> dict:
             r["id"] in checks and not checks[r["id"]]["alive"] for r in interrupted),
         "coordinator_tests_ran_in_os_sandbox": sandboxed,
         "verdicts_published_once_via_outbox": all_published,
-        "interrupted_publication_was_reconciled": all_published and interrupted_then_reconciled(publications(lab)),
+        "interrupted_publication_was_reconciled": all_published and journal_ok,
     }
     return {
         "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado", "lab": lab.root.name, "job_id": JOB_ID,
         "mode": f"negative:{fault}" if fault else "closed_loop",
         "failure_reasons": [e["error"] for e in events if e["error"]],
+        "publications_journal_error": None if fault else journal_error,
         "verdict": "PASS" if all(criteria.values()) else "FAIL", "criteria": criteria,
         "final_head": final, "approved_head": approved_head, "rounds": max((json.loads(e["payload"]).get("round", 0) for e in events), default=0),
         "coordinator_owners": owners,
