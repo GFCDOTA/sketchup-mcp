@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import datetime as dt
 import threading
+from pathlib import Path
 
 import pytest
 
@@ -86,7 +87,7 @@ def test_two_executors_racing_for_the_same_task_only_one_wins(path):
     assert len(winners) == 1 and len(errors) == 2 and es.load(path)["claims"]["7"]["agent"] == winners[0]
 
 
-def test_a_stale_lock_from_a_dead_execution_is_broken(path):
+def test_an_old_lock_file_never_blocks_the_next_holder(path):
     import os
     import time
     lock = path.with_suffix(".lock")
@@ -96,7 +97,7 @@ def test_a_stale_lock_from_a_dead_execution_is_broken(path):
     os.utime(lock, (old, old))
     with es.locked(path, wait_s=1.0):
         pass
-    assert not lock.exists()
+    assert lock.exists()                                                       # o arquivo persiste; o SO e a fonte de verdade (conteudo/idade sao ignorados)
 
 
 # --------------------------------------------------------------------------------------------------- scheduler
@@ -205,148 +206,112 @@ def test_restart_after_an_interruption_never_duplicates_or_loses_work(path, die_
     assert len(gh.prs) == 1 and gh.merges == ["feat/x"] and gh.board == {7: "Done"} and gh.branches == {"feat/x"}
 
 
-# ------------------------------------------------------------------------- trava de arquivo no Windows (FP-060, concorrencia autonoma)
-def test_many_threads_acquiring_the_state_lock_repeatedly_all_get_it(path):
-    """Regressao: no Windows o `unlink` da trava falhava com WinError 32 quando outro thread acabava de abri-la/inspeciona-la; a trava ficava presa
-    e todos os demais estouravam o timeout (2 de 180 aquisicoes davam certo)."""
-    errors, wins = [], []
+# --------------------------------------------- trava por LOCK DO SO (achados HIGH do Codex no #643: corridas de quebra/liberacao do arquivo)
+LOCK_CHILD = """
+import sys, time
+from pathlib import Path
+from tools.validation import execution_state as es
+with es.locked(Path(sys.argv[1]), wait_s=10):
+    print("held", flush=True)
+    time.sleep(120)
+"""
+
+
+def spawn_holder(path):
+    import os
+    import subprocess
+    import sys
+    root = Path(__file__).resolve().parents[1]
+    return subprocess.Popen([sys.executable, "-c", LOCK_CHILD, str(path)], cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                            env={**os.environ, "PYTHONPATH": str(root), "PYTHONUTF8": "1"})
+
+
+def test_many_threads_acquiring_the_state_lock_repeatedly_all_get_it_one_at_a_time(path):
+    inside, peak, errors, wins, guard = [], [0], [], [], threading.Lock()
 
     def run(i):
         try:
-            with es.locked(path, wait_s=3):
-                wins.append(i)
+            with es.locked(path, wait_s=10):
+                with guard:
+                    inside.append(1)
+                    peak[0] = max(peak[0], len(inside))
+                    wins.append(i)
+                import time
+                time.sleep(0.002)
+                with guard:
+                    inside.pop()
         except BaseException as exc:                                                       # noqa: BLE001 — o teste quer ver qualquer falha
             errors.append(f"{type(exc).__name__}: {exc}")
     for _ in range(25):
         ts_ = [threading.Thread(target=run, args=(i,)) for i in range(4)]
         [t.start() for t in ts_]
         [t.join() for t in ts_]
-    assert errors == [] and len(wins) == 100
+    assert errors == [] and len(wins) == 100 and peak[0] == 1                               # ninguem falhou e nunca dois dentro ao mesmo tempo
 
 
-def test_releasing_the_lock_retries_a_transient_permission_error(path, monkeypatch):
-    from pathlib import Path
-    real, calls = Path.unlink, []
-
-    def flaky(self, missing_ok=False):
-        calls.append(1)
-        if len(calls) <= 3:
-            raise PermissionError(13, "em uso", None, 32)
-        return real(self, missing_ok=missing_ok)
-    monkeypatch.setattr(Path, "unlink", flaky)
-    with es.locked(path):
-        pass
-    monkeypatch.undo()
-    assert len(calls) == 4 and not path.with_suffix(".lock").exists()
+def test_a_live_holder_in_another_real_process_is_respected(path):
+    holder = spawn_holder(path)
+    try:
+        assert holder.stdout.readline().strip() == "held"
+        with pytest.raises(TimeoutError):
+            with es.locked(path, wait_s=0.4):
+                pytest.fail("entrou na secao critica de outro processo vivo")
+    finally:
+        holder.kill()
+        holder.wait(timeout=10)
 
 
-def test_a_permission_error_creating_the_lock_means_busy_and_is_retried(path, monkeypatch):
-    real_open, calls = es.os.open, []
-
-    def flaky(p, flags, *a, **k):
-        calls.append(1)
-        if len(calls) <= 2:
-            raise PermissionError(13, "exclusao pendente", None, 5)
-        return real_open(p, flags, *a, **k)
-    monkeypatch.setattr(es.os, "open", flaky)
+def test_a_holder_killed_hard_frees_the_lock_immediately_without_any_stale_rule(path):
+    import time
+    holder = spawn_holder(path)
+    assert holder.stdout.readline().strip() == "held"
+    holder.kill()                                                                            # morte dura durante a secao critica
+    holder.wait(timeout=10)
+    t0 = time.time()
     with es.locked(path, wait_s=5):
         pass
-    assert len(calls) >= 3
+    assert time.time() - t0 < 2.0                                                            # o SO soltou o lock: nao ha espera de 60 s nem trava orfa
 
 
-# ------------------------------------------- quebra de trava orfa sem corrida (achado HIGH da revisao independente do Codex no #643)
-def _dead_pid() -> int:
-    import subprocess
-    import sys
-    proc = subprocess.Popen([sys.executable, "-c", "pass"])
-    proc.wait()
-    return proc.pid
+@pytest.mark.parametrize("content", [b"", b"\x00" * 64, b"123456", b"999999:token-de-um-formato-antigo", b"qualquer coisa"])
+def test_the_content_of_an_old_lock_file_never_blocks_anyone(path, content):
+    lock = path.with_suffix(".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    lock.write_bytes(content)
+    with es.locked(path, wait_s=1):
+        pass
 
 
-def test_an_old_owner_never_removes_the_lock_that_replaced_its_own(path):
+def test_the_lock_file_is_never_removed_so_nobody_races_on_its_creation_or_deletion(path):
     lock = path.with_suffix(".lock")
     with es.locked(path):
-        lock.write_text("424242:token-do-novo-dono", encoding="utf-8")                      # a trava foi quebrada e outro dono criou a dele
-    assert lock.read_text(encoding="utf-8") == "424242:token-do-novo-dono"                  # sair da secao nao pode derrubar a trava do outro
-
-
-def test_break_stale_removes_a_dead_owners_lock_only_if_it_is_still_the_one_that_was_judged(path):
-    lock = path.with_suffix(".lock")
-    lock.parent.mkdir(parents=True, exist_ok=True)
-    lock.write_text(f"{_dead_pid()}:abc", encoding="utf-8")
-    observed = lock.read_text(encoding="utf-8")
-    lock.write_text(f"{_dead_pid()}:outro", encoding="utf-8")                              # outro quebrador trocou a trava depois do julgamento
-    assert es._break_stale(lock, observed) is False and lock.exists()
-    assert es._break_stale(lock, lock.read_text(encoding="utf-8")) is True and not lock.exists()
-    assert not lock.with_name(lock.name + ".break").exists()                                 # a guarda sempre e solta
-
-
-def test_break_stale_does_not_break_a_lock_that_is_no_longer_orphaned(path):
-    lock = path.with_suffix(".lock")
-    lock.parent.mkdir(parents=True, exist_ok=True)
-    import os
-    lock.write_text(f"{os.getpid() + 1_000_000_000}:abc", encoding="utf-8")
-    lock.write_text(f"{os.getpid()}:vivo", encoding="utf-8")                                 # o dono voltou a estar vivo (este processo) entre o julgamento e a guarda
-    assert es._break_stale(lock, "999999999:abc") is False and lock.exists()
-
-
-def test_only_one_breaker_works_on_a_stale_lock_at_a_time(path):
-    lock = path.with_suffix(".lock")
-    lock.parent.mkdir(parents=True, exist_ok=True)
-    lock.write_text(f"{_dead_pid()}:abc", encoding="utf-8")
-    guard = lock.with_name(lock.name + ".break")
-    guard.write_text("outro quebrador", encoding="utf-8")                                    # ja ha um quebrador em curso
-    assert es._break_stale(lock, lock.read_text(encoding="utf-8")) is False and lock.exists() and guard.exists()
-
-
-def test_an_abandoned_break_guard_is_cleared_after_a_minute(path):
-    import os
-    import time
-    lock = path.with_suffix(".lock")
-    lock.parent.mkdir(parents=True, exist_ok=True)
-    guard = lock.with_name(lock.name + ".break")
-    guard.write_text("quebrador morto", encoding="utf-8")
-    old = time.time() - 120
-    os.utime(guard, (old, old))
-    assert es._break_stale(lock, None) is False and not guard.exists()
-
-
-def test_threads_recovering_the_same_orphan_lock_never_share_the_critical_section(path):
-    lock = path.with_suffix(".lock")
-    lock.parent.mkdir(parents=True, exist_ok=True)
-    inside, peak, errors, guard = [], [0], [], threading.Lock()
-
-    def run():
-        try:
-            with es.locked(path, wait_s=10):
-                with guard:
-                    inside.append(1)
-                    peak[0] = max(peak[0], len(inside))
-                import time
-                time.sleep(0.005)
-                with guard:
-                    inside.pop()
-        except BaseException as exc:                                                         # noqa: BLE001
-            errors.append(f"{type(exc).__name__}: {exc}")
-    for _ in range(12):
-        lock.write_text(f"{_dead_pid()}:orfa", encoding="utf-8")                              # cada rodada comeca com uma trava orfa
-        ts_ = [threading.Thread(target=run) for _ in range(6)]
-        [t.start() for t in ts_]
-        [t.join() for t in ts_]
-    assert errors == [] and peak[0] == 1                                                      # nunca dois dentro ao mesmo tempo
-
-
-def test_locked_breaks_a_stale_lock_only_through_the_serialized_breaker(path, monkeypatch):
-    lock = path.with_suffix(".lock")
-    lock.parent.mkdir(parents=True, exist_ok=True)
-    content = f"{_dead_pid()}:orfa"
-    lock.write_text(content, encoding="utf-8")
-    seen = []
-    real = es._break_stale
-    monkeypatch.setattr(es, "_break_stale", lambda p, observed: (seen.append(observed), real(p, observed))[1])
-    removed = []
-    real_unlink = es._unlink_retry
-    monkeypatch.setattr(es, "_unlink_retry", lambda p, *a, **k: (removed.append(p.name), real_unlink(p, *a, **k))[1])
+        assert lock.exists()
+    assert lock.exists()
     with es.locked(path):
         pass
-    assert seen == [content] and removed[0] == lock.name and removed.count(lock.name) >= 1
+    assert lock.exists()
+
+
+def test_a_failure_to_open_the_lock_file_raises_at_once_instead_of_looping(path, monkeypatch):
+    import time
+    monkeypatch.setattr(es.os, "open", lambda *a, **k: (_ for _ in ()).throw(PermissionError(13, "sem permissao no diretorio")))
+    t0 = time.time()
+    with pytest.raises(PermissionError):
+        with es.locked(path, wait_s=5):
+            pass
+    assert time.time() - t0 < 1.0
+
+
+def test_the_os_lock_is_released_even_when_the_body_raises(path):
+    with pytest.raises(RuntimeError):
+        with es.locked(path):
+            raise RuntimeError("falha dentro da secao critica")
+    with es.locked(path, wait_s=1):
+        pass
+
+
+def test_a_second_holder_in_the_same_process_waits_and_times_out(path):
+    with es.locked(path):
+        with pytest.raises(TimeoutError):
+            with es.locked(path, wait_s=0.2):
+                pass

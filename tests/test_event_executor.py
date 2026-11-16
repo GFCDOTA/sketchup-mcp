@@ -344,7 +344,7 @@ def test_run_cycle_polls_then_executes_end_to_end_with_fakes(tmp_path):
 
 # ------------------------------------------------- exclusao mutua: claim/lease duravel, SEM segurar a trava durante o Claude
 def test_the_state_lock_is_not_held_while_claude_runs_and_a_second_process_never_runs_the_same_item(tmp_path):
-    """O lockfile de es.locked e quebrado apos 60 s; segurar 45 min o tornaria inutil. Aqui o runner bloqueia: a trava tem de
+    """A trava curta de es.locked nao pode ficar segura durante os 45 min de trabalho do filho. Aqui o runner bloqueia: a trava tem de
     estar LIVRE, o item RUNNING com dono+lease no disco, e um segundo processo nao pode executar o mesmo item."""
     import threading
     gh = FakeGh()
@@ -363,7 +363,8 @@ def test_the_state_lock_is_not_held_while_claude_runs_and_a_second_process_never
     th.start()
     assert started.wait(10)
     try:
-        assert not (tmp_path / "bridge.lock").exists()                       # trava livre durante o trabalho longo
+        with ex.es.locked(eb.bridge_path(), wait_s=1.0):                     # trava LIVRE durante o trabalho longo (o `.lock` persiste; vale o lock do SO)
+            pass
         disk = eb.load()["queue"][0]
         inside.update(state=disk["state"], owner=disk.get("owner"), lease=disk.get("lease_expires"))
         second = Runner(gh)
