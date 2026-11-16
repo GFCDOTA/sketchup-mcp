@@ -921,11 +921,13 @@ def test_a_pending_publish_whose_remote_never_got_the_push_is_retried_not_marked
     monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, HEAD))     # a ponta remota ainda e o HEAD revisado
     ex.settle_pending(gh, REPO, NOW)
     assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"                    # UMA leitura ainda no HEAD revisado nao prova que o push nao entrou (pode estar sendo aplicado)
-    ex.settle_pending(gh, REPO, NOW + dt.timedelta(seconds=ex.PENDING_GRACE_S - 5))
+    real = dt.datetime.now(dt.timezone.utc)                                           # `pending_since` e o instante REAL em que ficou pendente
+    ex.settle_pending(gh, REPO, real + dt.timedelta(seconds=ex.PENDING_GRACE_S - 30))
     assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"                    # ainda dentro da janela de graca
-    ex.settle_pending(gh, REPO, NOW + dt.timedelta(seconds=ex.PENDING_GRACE_S + 5))
+    ex.settle_pending(gh, REPO, real + dt.timedelta(seconds=ex.PENDING_GRACE_S + 30))
     row = eb.load()["queue"][0]
-    assert row["state"] == "FAILED" and row["attempts"] == 1 and "published_sha" not in row and row["retry_after"] > ex.es.now_iso(NOW)
+    assert row["state"] == "PUBLISH_MANUAL" and "MANUAL" in row["last_error"] and row["published_sha"] == NEWHEAD    # depois da graca: NUNCA volta sozinho a ser elegivel
+    assert ex.pick(eb.load(), NOW + dt.timedelta(days=30)) is None
 
 
 def test_a_pending_publish_with_another_remote_tip_is_superseded(monkeypatch):
@@ -1128,3 +1130,60 @@ def test_recover_stamps_the_pending_window_so_the_grace_period_counts_from_the_r
     b = bstate(expired)
     ex.recover(b, NOW)
     assert b["queue"][0]["state"] == "PUBLISH_PENDING" and b["queue"][0]["pending_since"] == ex.es.now_iso(NOW)
+
+
+# -- 7a revisao do Codex (#652): graca nao e prova; pending_since = agora; push confirmado --------------------------------------------------------------
+def test_pending_since_is_the_moment_the_publication_became_pending_not_the_start_of_a_long_run(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    long_ago = NOW - dt.timedelta(minutes=40)                                                      # o item comecou a executar ha 40 min (agente demorado)
+    before = ex.es.now_iso()
+    go(gh, bstate(item()), Runner(gh, push=False), now=long_ago)
+    row = eb.load()["queue"][0]
+    assert row["pending_since"] >= before and row["pending_since"] > ex.es.now_iso(long_ago + dt.timedelta(minutes=30))   # o relogio REAL do momento, nao o `t` do inicio
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, HEAD))
+    ex.settle_pending(gh, REPO, ex.dt.datetime.now(ex.dt.timezone.utc))                           # reconciliacao IMEDIATA: dentro da graca contada de agora
+    assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"
+
+
+def test_a_late_remote_application_after_the_grace_window_is_still_recognized_as_done(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, HEAD))
+    ex.settle_pending(gh, REPO, dt.datetime.now(dt.timezone.utc) + dt.timedelta(seconds=ex.PENDING_GRACE_S * 3))
+    assert eb.load()["queue"][0]["state"] == "PUBLISH_MANUAL"
+    # o item ficou em PUBLISH_MANUAL: o push tardio nao o reabre sozinho, mas o operador consegue reconciliar
+    assert ex.retry_publish(eb.load()["queue"][0]["key"], NOW) is True
+    row = eb.load()["queue"][0]
+    assert row["state"] == "FAILED" and "published_sha" not in row and "pending_since" not in row
+
+
+def test_retry_publish_only_releases_a_manual_item(monkeypatch):
+    gh = FakeGh()
+    go(gh, bstate(item()), Runner(gh))
+    assert ex.retry_publish("review:9:7:" + HEAD) is False and ex.retry_publish("nao-existe") is False
+
+
+def test_the_retry_publish_command_exists(monkeypatch, capsys):
+    assert ex.main(["retry-publish", "nao-existe"]) == 1 and json.loads(capsys.readouterr().out) == {"released": False}
+
+
+def test_a_confirmed_push_whose_remote_was_restored_to_the_reviewed_sha_is_superseded_never_retried(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (False, ""))                       # o push TERMINOU, mas a consulta ao remoto falha
+    b = bstate(item())
+    go(gh, b, Runner(gh, push=False))
+    assert b["queue"][0]["state"] == "PUBLISH_PENDING" and b["queue"][0]["push_confirmed"] is True
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, HEAD))                       # a branch foi RESTAURADA ao SHA revisado antes da reconciliacao
+    ex.settle_pending(gh, REPO, NOW + dt.timedelta(seconds=ex.PENDING_GRACE_S * 3))
+    row = eb.load()["queue"][0]
+    assert row["state"] == "SUPERSEDED" and row["new_head"] == HEAD and "restauracao" in row["last_error"]
+    assert ex.pick(eb.load(), NOW + dt.timedelta(days=30)) is None
+
+
+def test_an_unconfirmed_timeout_push_is_not_marked_as_confirmed(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    assert "push_confirmed" not in eb.load()["queue"][0]

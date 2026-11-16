@@ -582,6 +582,10 @@ def settle_pending(gh: eb.Gh, repo: str = eb.REPO, now: dt.datetime | None = Non
             if tip == sha:
                 item_["state"], item_["new_head"], item_["last_error"] = "DONE_AWAITING_REREVIEW", sha, ""
                 item_["attempts"] = item_.get("attempts", 0) + 1
+            elif item_.get("push_confirmed"):
+                # o push TERMINOU com sucesso: uma ponta diferente do commit registrado (inclusive o SHA revisado, restaurado) e avanco externo, NUNCA "nao entrou"
+                item_["state"], item_["new_head"] = "SUPERSEDED", tip
+                item_["last_error"] = f"o push foi confirmado e a ponta remota ({tip[:12] or 'ausente'}) nao e o commit registrado ({sha[:12]}): avanco/restauracao externa; sem nova execucao"
             elif tip == str(item_.get("head_sha") or "").lower():
                 since = item_.get("pending_since")
                 if not since or es.now_iso(_utc(now) - dt.timedelta(seconds=PENDING_GRACE_S)) < since:
@@ -590,10 +594,11 @@ def settle_pending(gh: eb.Gh, repo: str = eb.REPO, now: dt.datetime | None = Non
                     item_.setdefault("pending_since", es.now_iso(_utc(now)))
                     eb.diagnose(b, f"{key}: publicacao pendente: remoto ainda no HEAD revisado; aguardando a janela de {PENDING_GRACE_S}s antes de concluir que o push nao entrou", now)
                     return
-                item_["state"], item_["last_error"] = "FAILED", "o push nao entrou no remoto (ponta ainda no HEAD revisado depois da janela de graca)"
-                item_["attempts"] = item_.get("attempts", 0) + 1
-                item_["retry_after"] = es.now_iso(_utc(now) + dt.timedelta(seconds=RETRY_S * item_["attempts"]))
-                item_.pop("published_sha", None)
+                # A janela de graca NAO prova que o `receive-pack` abandonado terminou (hooks/processamento remoto podem passar dela): o item NUNCA volta sozinho a ser
+                # elegivel. Vai para PUBLISH_MANUAL: o proprietario confere o remoto e decide (`retry-publish <key>` o devolve a fila).
+                item_["state"] = "PUBLISH_MANUAL"
+                item_["last_error"] = (f"o remoto segue no HEAD revisado {PENDING_GRACE_S}s depois do push sem confirmacao: nao ha PROVA de que ele nao sera aplicado; "
+                                       "reconciliacao MANUAL (confira a branch no GitHub; `event_executor retry-publish <key>` so se tiver certeza)")
             else:
                 item_["state"], item_["new_head"] = "SUPERSEDED", tip
                 item_["last_error"] = f"a ponta remota ({tip[:12] or 'ausente'}) nao e o commit registrado ({sha[:12]}): avanco externo"
@@ -606,6 +611,22 @@ def settle_pending(gh: eb.Gh, repo: str = eb.REPO, now: dt.datetime | None = Non
                 eb.save(b)
         out.append({"item": key, "action": "SETTLED", "remote": tip[:12]})
     return out
+
+
+def retry_publish(key: str, now: dt.datetime | None = None) -> bool:
+    """DECISAO DO PROPRIETARIO: devolve um item PUBLISH_MANUAL a fila (FAILED com retry) depois de conferir que o push abandonado nao sera aplicado."""
+    with es.locked(eb.bridge_path()):
+        b = eb.load()
+        it = next((i for i in b["queue"] if i.get("key") == key and i.get("state") == "PUBLISH_MANUAL"), None)
+        if it is None:
+            return False
+        it["state"], it["attempts"] = "FAILED", it.get("attempts", 0) + 1
+        it["retry_after"] = es.now_iso(_utc(now) + dt.timedelta(seconds=RETRY_S))
+        for k in ("published_sha", "pending_since", "push_confirmed"):
+            it.pop(k, None)
+        eb.diagnose(b, f"{key}: PUBLISH_MANUAL liberado pelo operador", now)
+        eb.save(b)
+        return True
 
 
 def _confirm(item: dict, gh: eb.Gh, repo: str, pushed: bool, published: str = "", tries: int | None = None, pause: float | None = None) -> tuple[str, bool]:
@@ -633,10 +654,12 @@ def confirm_head(item: dict, gh: eb.Gh, repo: str, pushed: bool, published: str 
     return _confirm(item, gh, repo, pushed, published, tries, pause)[0]
 
 
-def _to_publish_pending(key: str, owner: str, reason: str, log: str, t: dt.datetime) -> bool:
+def _to_publish_pending(key: str, owner: str, reason: str, log: str, t: dt.datetime, push_confirmed: bool = False) -> bool:
     def pend(it, b):
         it["state"], it["last_error"], it["log"] = "PUBLISH_PENDING", reason, log
-        it["pending_since"] = es.now_iso(t)
+        it["pending_since"] = es.now_iso()                               # o instante EM QUE a publicacao ficou pendente (o `t` e do inicio da execucao, que dura ate 45 min)
+        if push_confirmed:
+            it["push_confirmed"] = True                                  # o `git push` terminou com sucesso: a ponta remota diferente depois disso e avanco externo, nunca "nao entrou"
         eb.diagnose(b, f"{key}: PUBLISH_PENDING {reason}", t)
     return update_owned(key, owner, pend, release=True, now=t)
 
@@ -729,7 +752,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
             consulted, tip = False, ""
         if not consulted:
             reason = f"o push saiu ({published[:12]}), a API segue velha e a ponta remota nao pode ser consultada: publicacao pendente"
-            _to_publish_pending(key, owner, reason, log, t)
+            _to_publish_pending(key, owner, reason, log, t, push_confirmed=True)
             return {"action": "PUBLISH_PENDING", "item": key, "reason": reason}
         if tip != published.lower():
             new_head = tip or "(ausente)"                                   # a ponta remota NAO e o commit do executor: avanco externo
@@ -949,7 +972,13 @@ def main(argv: list[str] | None = None) -> int:
     rp.add_argument("--execute", action="store_true", help="executa o Claude; sem isto e dry-run")
     rp.add_argument("--watch-pid", type=int, default=None, help="encerra se este PID (o launcher) morrer")
     sub.add_parser("status")
+    rpub = sub.add_parser("retry-publish")
+    rpub.add_argument("key")
     a = ap.parse_args(argv)
+    if a.cmd == "retry-publish":
+        ok = retry_publish(a.key)
+        print(json.dumps({"released": ok}))
+        return 0 if ok else 1
     if a.cmd == "status":
         b = eb.load()
         by_state: dict = {}
