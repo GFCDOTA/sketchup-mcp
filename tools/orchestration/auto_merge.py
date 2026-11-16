@@ -30,6 +30,7 @@ import json
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -43,13 +44,27 @@ GPT_LABEL = "gpt-review-required"
 REINFORCED_BODY = re.compile(r"confianca\s+HIGH", re.I)
 
 
-def reinforced(review: dict | None, repo: str, number: int, head: str) -> bool:
-    """Aprovacao REFORCADA: o review e do revisor independente (ja filtrado por `latest_review`), diz `confianca HIGH` e carrega o marcador do outbox do
-    `codex_reviewer` com EXATAMENTE este repositorio, PR, HEAD e veredito APPROVE (o `codex_reviewer` so publica APPROVE com a prova de isolamento dos testes).
-    Marcador de outro PR/HEAD/veredito, ou so texto parecido, nao vale."""
+def outbox_provenance(store) -> Callable[[str, int, str], bool]:
+    """Prova de PROVENIENCIA que o texto de um review nao consegue forjar: o EventStore LOCAL registra, com producer `codex_reviewer` e status DONE, a publicacao do
+    APPROVE deste repositorio, PR e HEAD (o `codex_reviewer` so conclui esse evento depois de gravar o parecer com a prova de isolamento dos testes). O marcador no
+    corpo do review e publico; este registro nao."""
+    def check(repo: str, number: int, head: str) -> bool:
+        key = f"review:{repo}#{int(number)}:{head}:APPROVE"
+        try:
+            return any(e["idempotency_key"] == key and e["producer"] == "codex_reviewer" and e["status"] == "DONE" for e in store.events(job_id=f"review:{repo}#{int(number)}"))
+        except Exception:  # noqa: BLE001 — sem como consultar o registro local = sem prova (fail-closed)
+            return False
+    return check
+
+
+def reinforced(review: dict | None, repo: str, number: int, head: str, provenance: Callable[[str, int, str], bool] | None = None) -> bool:
+    """Aprovacao REFORCADA: o review e do revisor independente (ja filtrado por `latest_review`), diz `confianca HIGH`, carrega o marcador do outbox com EXATAMENTE este
+    repositorio, PR, HEAD e veredito APPROVE E tem PROVENIENCIA no registro local do publicador (`provenance`; sem ela, nunca e reforcada: o texto de um review manual
+    pode copiar o marcador). Marcador de outro PR/HEAD/veredito, ou so texto parecido, nao vale."""
     body = (review or {}).get("body") or ""
     marker = f"<!-- fp060-outbox-key:review:{repo}#{int(number)}:{head}:APPROVE -->"
-    return bool(REINFORCED_BODY.search(body)) and marker in body and str((review or {}).get("commit_id", "")).lower() == head.lower()
+    textual = bool(REINFORCED_BODY.search(body)) and marker in body and str((review or {}).get("commit_id", "")).lower() == head.lower()
+    return textual and provenance is not None and bool(provenance(repo, int(number), head))
 HUMAN_LABELS = frozenset({"aprovação-humana-pendente", "aprovacao-humana-pendente", "needs-human", "human-decision", "bloqueio:human-decision",
                           "visual-review", "security", "governance", "blocked", "do-not-merge"})
 ALLOWED_SUFFIXES = (".py", ".md", ".txt", ".json")
@@ -89,7 +104,7 @@ def numstat_from_files(files: list[dict]) -> str:
     rows = []
     for f in files:
         add, rem = f.get("additions"), f.get("deletions")
-        binary = f.get("patch") is None and not add and not rem and f.get("changes", 0) == 0 and f.get("status") != "removed"
+        binary = f.get("patch") is None and not add and not rem and f.get("changes", 0) == 0          # sem patch e sem linhas, em QUALQUER status (inclusive `removed`): ambiguo = binario
         rows.append(f"{'-' if binary else add}\t{'-' if binary else rem}\t{f.get('filename')}")
         if f.get("previous_filename"):                                       # renomeacao: o caminho de ORIGEM tambem conta
             rows.append(f"0\t0\t{f['previous_filename']}")
@@ -97,7 +112,7 @@ def numstat_from_files(files: list[dict]) -> str:
 
 
 def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], issues: dict[int, dict], policy: dict, cfg: guards.Config,
-           is_enabled: tuple[bool, str] = (True, "")) -> Decision:
+           is_enabled: tuple[bool, str] = (True, ""), provenance: Callable[[str, int, str], bool] | None = None) -> Decision:
     """Puro. `issues` mapeia numero -> Issue (REST) para cada `Refs #N` do PR; ausente = inexistente."""
     ok, why = is_enabled
     if not ok:
@@ -175,8 +190,9 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
         if no_gpt:
             wait.append(f"caminho critico: Issue(s) {', '.join('#%d' % n for n in no_gpt)} sem a label `{GPT_LABEL}` (revisao reforcada)")
         repo = ((pr.get("base") or {}).get("repo") or {}).get("full_name") or ""
-        if review is not None and not reinforced(review, repo, pr.get("number") or 0, head):
-            wait.append("caminho critico: a aprovacao nao e a reforcada (confianca HIGH + marcador do outbox deste repositorio, PR, HEAD e veredito APPROVE)")
+        if review is not None and not reinforced(review, repo, pr.get("number") or 0, head, provenance):
+            wait.append("caminho critico: a aprovacao nao e a reforcada (confianca HIGH + marcador do outbox deste repositorio, PR, HEAD e veredito APPROVE + registro "
+                        "local do publicador)")
     if state != "passed":
         wait.append(f"checks obrigatorios {state}")
     if review is None:
@@ -332,12 +348,50 @@ def confirm_merged(gh: eb.Gh, repo: str, number: int, head: str) -> tuple[bool, 
     return False, "o GitHub aceitou o comando mas o PR NAO esta mesclado (fila de merge/agendamento): nao conto como mesclado"
 
 
-def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, runner=subprocess.run, is_enabled: tuple[bool, str] | None = None) -> dict:
+def default_provenance() -> Callable[[str, int, str], bool]:
+    """O registro LOCAL do publicador (EventStore): so abre quando a decisao realmente precisa dele (caminho critico)."""
+    def check(repo: str, number: int, head: str) -> bool:
+        try:
+            from tools.orchestration.store_factory import get_store
+            return outbox_provenance(get_store())(repo, number, head)
+        except Exception:  # noqa: BLE001 — sem registro local = sem prova
+            return False
+    return check
+
+
+MUTABLE_FIELDS = ("state", "draft", "merged")
+
+
+def mutable_facts(pr: dict) -> dict:
+    """Os fatos mutaveis do PR que autorizam o merge e que `--match-head-commit` NAO cobre: base, labels, estado, rascunho."""
+    return {"base": (pr.get("base") or {}).get("ref"), "labels": sorted(str(n).casefold() for n in _names(pr.get("labels"))),
+            "head": (pr.get("head") or {}).get("sha"), **{k: pr.get(k) for k in MUTABLE_FIELDS}, "auto_merge": bool(pr.get("auto_merge"))}
+
+
+def cancel_scheduled(gh: eb.Gh, repo: str, number: int, policy: dict, runner=subprocess.run) -> tuple[bool, str]:
+    """O comando foi aceito mas o PR so foi AGENDADO (auto-merge/fila): desliga o agendamento e CONFIRMA que sumiu. Se nao der para confirmar, e erro que exige
+    intervencao humana (nunca deixa um merge futuro sem revalidacao)."""
+    from tools.orchestration import event_executor as ex
+    try:
+        done = runner([gh_bin(), "pr", "merge", str(int(number)), "--repo", repo, "--disable-auto"], env=ex.executor_env(), capture_output=True, text=True, timeout=120)
+        after = gh(f"repos/{repo}/pulls/{number}")
+    except (OSError, subprocess.SubprocessError, RuntimeError, ValueError) as exc:
+        return False, f"agendamento NAO cancelado ({type(exc).__name__}): REQUER INTERVENCAO do proprietario no PR #{number}"
+    if done.returncode == 0 and isinstance(after, dict) and not after.get("auto_merge") and after.get("merged") is not True:
+        return True, "agendamento cancelado e confirmado (sem auto-merge no PR)"
+    if isinstance(after, dict) and after.get("merged") is True:
+        return True, "o PR acabou mesclado enquanto o agendamento era cancelado"
+    return False, f"agendamento NAO confirmado como cancelado no PR #{number}: REQUER INTERVENCAO do proprietario"
+
+
+def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, runner=subprocess.run, is_enabled: tuple[bool, str] | None = None,
+          provenance: Callable[[str, int, str], bool] | None = None) -> dict:
     """Um ciclo: para cada PR aberto com a label `automerge-ok`, decide com fatos frescos e, so com `apply` e decisao MERGE, mescla (rechecando o HEAD)."""
     on = enabled() if is_enabled is None else is_enabled
     if not on[0]:
         return {"enabled": False, "reason": on[1], "prs": []}
     cfg = guards.load_config()
+    provenance = provenance or default_provenance()
     out = []
     try:
         executors = set(policy.get("executor_logins", []))
@@ -350,7 +404,7 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
         row: dict = {"pr": number}
         try:
             pr, files, runs, reviews, issues = gather(gh, repo, number)
-            decision = decide(pr, files, runs, reviews, issues, policy, cfg, on)
+            decision = decide(pr, files, runs, reviews, issues, policy, cfg, on, provenance)
             if decision.code == "MERGE":
                 gaps = protection_gaps(gh, repo)
                 if gaps:                                                                       # CI verde + aprovacao nao bastam se a protecao permitir merge sem revisao
@@ -366,7 +420,7 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                     row.update(code="REFUSE", reasons=[who])
                 else:
                     pr2, files2, runs2, reviews2, issues2 = gather(gh, repo, number)
-                    again = decide(pr2, files2, runs2, reviews2, issues2, policy, cfg, on)
+                    again = decide(pr2, files2, runs2, reviews2, issues2, policy, cfg, on, provenance)
                     gaps2 = protection_gaps(gh, repo) if again.code == "MERGE" else []
                     if gaps2:
                         again = Decision("WAIT", ["a protecao da branch deixou de garantir o merge so com aprovacao: " + "; ".join(gaps2)[:200]])
@@ -378,10 +432,19 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                     elif again.code != "MERGE" or (pr2.get("head") or {}).get("sha") != row["head"]:
                         row.update(code="WAIT", reasons=[f"os fatos mudaram entre a decisao e o merge ({again.code}: {'; '.join(again.reasons)[:160]})"])
                     else:
-                        done, msg = merge(number, row["head"], repo, runner)
-                        if done:
-                            done, msg = confirm_merged(gh, repo, number, row["head"])
-                        row.update(merged=done, merge_message=msg)
+                        pr3 = gh(f"repos/{repo}/pulls/{number}")                              # ULTIMA leitura do PR, a uma ida ao servidor do merge: base/labels/estado iguais?
+                        if not isinstance(pr3, dict) or mutable_facts(pr3) != mutable_facts(pr2):
+                            row.update(code="WAIT", reasons=["base, labels ou estado do PR mudaram na ultima leitura antes do merge: nada e mesclado nesta rodada"])
+                        else:
+                            done, msg = merge(number, row["head"], repo, runner)
+                            if done:
+                                done, msg = confirm_merged(gh, repo, number, row["head"])
+                                if not done:                                                  # exit 0 sem merge: foi agendado; cancela e confirma
+                                    cancelled, why = cancel_scheduled(gh, repo, number, policy, runner)
+                                    msg = f"{msg}; {why}"
+                                    if not cancelled:
+                                        row.update(code="ERROR", reasons=[why])
+                            row.update(merged=done, merge_message=msg)
         except (RuntimeError, OSError, ValueError, KeyError, TypeError) as exc:
             row.update(code="ERROR", reasons=[f"{type(exc).__name__}: {exc}"[:200]])
         out.append(row)
