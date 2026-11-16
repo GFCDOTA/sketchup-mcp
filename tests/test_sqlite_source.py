@@ -634,3 +634,34 @@ def test_the_dry_run_sees_a_live_lease_of_any_event_type_on_the_same_aggregate(c
     other = store.claim(("IMPLEMENT_REQUESTED",), "w", 600, job_id="pr:7")
     assert other is not None
     assert sq.peek_next() is None and sq.claim_next("o", None, lease_s=60, daily_cap=50) is None  # o claim real tambem nao escolhe o agregado ocupado
+
+
+def test_the_full_run_cycle_with_a_missing_primary_database_creates_nothing_and_blocks(tmp_path, monkeypatch):
+    sf.reset_store()
+    missing = tmp_path / "perdido" / "store.db"
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(missing))
+    monkeypatch.delenv(sq.BOOTSTRAP_ENV, raising=False)
+    seed_json(item())
+    gh = FakeGh()
+    runner = Runner(gh)
+    out = ex.run_cycle(gh, POLICY, REPO, True, runner, "claude", wt_ok, NOW)
+    assert out["action"] == "BLOCKED_STORE" and runner.calls == []                                  # nada executou
+    assert not missing.parent.exists() and not missing.exists()                                     # e o banco NAO foi criado pelo caminho normal do ciclo
+    assert json_item(KEY)["state"] == "QUEUED"
+
+
+@pytest.mark.parametrize("action", ["BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_WORKTREE", "BLOCKED_REVIEW_FETCH"])
+def test_repeated_environment_blocks_in_shadow_mode_never_exhaust_the_mirror_event(clock, action):
+    store = seed_both(item())
+    it = json_item(KEY)
+    for _ in range(6):                                                                             # bem alem de max_attempts (3)
+        ex._sync_result_to_store(store, it, {"action": action, "reason": "ambiente indisponivel"})
+        clock.t += 10
+    e = ev_of(store, KEY)
+    assert e["status"] == "PENDING" and e["attempt"] == 0                                           # nunca DLQ: o item JSON segue elegivel e o espelho tambem
+
+
+def test_a_real_failure_in_shadow_mode_still_spends_the_attempt(clock):
+    store = seed_both(item())
+    ex._sync_result_to_store(store, json_item(KEY), {"action": "FAILED", "reason": "falhou"})
+    assert ev_of(store, KEY)["attempt"] == 1
