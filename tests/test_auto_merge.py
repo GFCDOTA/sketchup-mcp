@@ -52,6 +52,7 @@ def issues(labels=(), state="open"):
 def decide(**kw):
     args = {"pr": pr(), "files": files(), "runs": runs(), "reviews": [approval()], "issues": issues(), "policy": POLICY, "cfg": CFG, "is_enabled": ON}
     args.update(kw)
+    args["pr"] = {"changed_files": len(args["files"]), **args["pr"]}                       # a API declara quantos arquivos o PR tem; o helper acompanha a lista
     return am.decide(args.pop("pr"), args.pop("files"), args.pop("runs"), args.pop("reviews"), args.pop("issues"), args.pop("policy"), args.pop("cfg"), **args)
 
 
@@ -191,7 +192,7 @@ class Gh:
         if path == f"repos/{REPO}/pulls/7":
             self.pulls += 1
             sha = self.fresh_head if (self.fresh_head and self.pulls > 1) else self.head
-            return pr(head={"sha": sha, "repo": {"full_name": REPO}}, **self.overrides)
+            return pr(head={"sha": sha, "repo": {"full_name": REPO}}, **{"changed_files": 1, **self.overrides})
         if path.startswith(f"repos/{REPO}/pulls/7/files"):
             return files()
         if path.startswith(f"repos/{REPO}/pulls/7/reviews"):
@@ -204,10 +205,17 @@ class Gh:
 
 
 class Runner:
-    def __init__(self, rc=0, err=""):
+    """`calls` = so as chamadas de MERGE; `who_calls` = a consulta de identidade (`gh api user`), que responde `login` com o MESMO ambiente do merge."""
+    def __init__(self, rc=0, err="", login="fmodesto30", who_rc=0, on_who=None):
         self.rc, self.err, self.calls = rc, err, []
+        self.login, self.who_rc, self.who_calls, self.on_who = login, who_rc, [], on_who
 
     def __call__(self, argv, **kw):
+        if argv[1:3] == ["api", "user"]:
+            self.who_calls.append((argv, kw))
+            if self.on_who:
+                self.on_who()
+            return type("P", (), {"returncode": self.who_rc, "stdout": self.login + "\n", "stderr": ""})()
         self.calls.append((argv, kw))
         return type("P", (), {"returncode": self.rc, "stdout": "", "stderr": self.err})()
 
@@ -383,3 +391,109 @@ def test_the_production_client_merges_every_page_of_lists_and_check_runs():
 def test_the_production_client_fails_closed_on_errors_and_odd_shapes(proc):
     with pytest.raises((RuntimeError, ValueError)):
         am.slurp_client("repos/o/r/pulls", runner=lambda a, **k: proc, gh_bin="gh")
+
+
+# -- achados da 3a revisao do Codex: lista de arquivos completa, identidade do gh no ambiente do merge, interruptor relido, marcador real ----------
+@pytest.mark.parametrize("declared", [None, 0, 2, 3001, "1", True])
+def test_a_file_list_that_is_not_proven_complete_is_refused(declared):
+    target = pr(changed_files=declared) if declared is not None else pr()                       # None: o PR NAO traz `changed_files`
+    d = am.decide(target, files(), runs(), [approval()], issues(), POLICY, CFG, ON)
+    assert d.code == "REFUSE" and any("nao comprovada completa" in r for r in d.reasons)
+
+
+def test_a_pr_above_the_api_cap_cannot_hide_a_governance_path_behind_a_truncated_list():
+    listed = files(*[f"docs/a{n}.md" for n in range(am.FILES_API_CAP)])                          # a API devolve no maximo 3000 e omite o resto
+    big = pr(changed_files=am.FILES_API_CAP + 40)                                                 # o PR de verdade tem 3040 (os 40 ocultos incluem .github/)
+    d = am.decide(big, listed, runs(), [approval(body=STRONG)], issues(labels=(am.GPT_LABEL,)), POLICY, CFG, ON)
+    assert d.code == "REFUSE" and any("nao comprovada completa" in r for r in d.reasons)
+    exact = am.decide(pr(changed_files=am.FILES_API_CAP), listed, runs(), [approval(body=STRONG)], issues(labels=(am.GPT_LABEL,)), POLICY, CFG, ON)
+    assert not any("nao comprovada completa" in r for r in exact.reasons)                         # declarado == recebido == 3000: o PR tem exatamente isso
+
+
+def test_the_merge_runs_only_after_the_gh_identity_is_verified_in_the_same_environment(monkeypatch):
+    monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
+    runner = Runner()
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["merged"] is True and len(runner.who_calls) == 1 and len(runner.calls) == 1
+    who_argv, who_kw = runner.who_calls[0]
+    assert who_argv[1:4] == ["api", "user", "--jq"] and "GH_TOKEN" not in who_kw["env"]               # consulta com o ambiente do executor (sem token de env)
+    assert who_kw["env"] == runner.calls[0][1]["env"]                                                # exatamente o mesmo ambiente do merge
+
+
+@pytest.mark.parametrize("login", ["fmmodesto", "FMMODESTO", "alguem-com-bypass", ""])
+def test_a_gh_authenticated_as_a_reviewer_or_anyone_else_never_merges(login):
+    runner = Runner(login=login)
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "REFUSE" and runner.calls == [] and "merged" not in out["prs"][0]
+
+
+def test_a_failed_identity_lookup_never_merges():
+    runner = Runner(who_rc=1)
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "REFUSE" and "nao verificada" in out["prs"][0]["reasons"][0] and runner.calls == []
+
+
+def test_an_executor_login_that_is_also_a_reviewer_is_refused():
+    ok, why = am.merge_identity({"reviewers": ["fmodesto30"], "executor_logins": ["fmodesto30"]}, Runner())
+    assert ok is False and "revisor" in why
+
+
+def test_the_identity_lookup_raising_is_a_refusal_not_a_crash():
+    def boom(argv, **kw):
+        raise OSError("gh sumiu")
+    ok, why = am.merge_identity(POLICY, boom)
+    assert ok is False and "nao verificada" in why
+
+
+def test_the_kill_switch_is_read_again_before_each_merge_not_only_at_the_start(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "gov" / "bridge.json"))
+    monkeypatch.setenv(am.ENABLE_ENV, "1")
+    class TwoPrs(Gh):
+        def __call__(self, path):
+            if path.startswith(f"repos/{REPO}/pulls?state=open"):
+                return [{"number": 7, "draft": False, "user": {"login": "fmodesto30"}, "labels": []}, {"number": 8, "draft": False, "user": {"login": "fmodesto30"}, "labels": []}]
+            return super().__call__(path.replace("pulls/8", "pulls/7").replace("issues/5", "issues/5"))
+    runner = Runner(on_who=lambda: (am.kill_switch().parent.mkdir(parents=True, exist_ok=True), am.kill_switch().write_text("x", encoding="utf-8")))
+    out = am.cycle(TwoPrs(), POLICY, REPO, apply=True, runner=runner)                               # interruptor criado DEPOIS da primeira decisao, durante o ciclo
+    first, second = out["prs"]
+    assert first["merged"] is True and second["code"] == "DISABLED" and "durante o ciclo" in second["reasons"][0]
+    assert len(runner.calls) == 1                                                                    # so o merge ja autorizado antes do interruptor; o seguinte e barrado
+
+
+def test_the_kill_switch_created_between_the_second_decision_and_the_merge_blocks_that_merge(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "gov" / "bridge.json"))
+    monkeypatch.setenv(am.ENABLE_ENV, "1")
+
+    class Flip(Gh):
+        def __call__(self, path):
+            out = super().__call__(path)
+            if path == f"repos/{REPO}/pulls/7" and self.pulls == 2:                                  # a releitura de fatos: logo depois, o interruptor aparece
+                am.kill_switch().parent.mkdir(parents=True, exist_ok=True)
+                am.kill_switch().write_text("x", encoding="utf-8")
+            return out
+    runner = Runner()
+    out = am.cycle(Flip(), POLICY, REPO, apply=True, runner=runner)
+    assert out["prs"][0]["code"] == "DISABLED" and "durante o ciclo" in out["prs"][0]["reasons"][0] and runner.calls == [] and runner.who_calls == []
+
+
+# O corpo REAL de um APPROVE publicado pelo fluxo de producao (PR #654, revisor fmmodesto): texto do parecer + marcador do outbox acrescentado na publicacao
+REAL_PUBLISHED_APPROVE = (
+    "Codex CLI (revisor independente) — HEAD 998f91cdd16675a6c305dee10b39ad07254c3d99 — confianca HIGH\n"
+    "Testes revistos: tests/test_event_bridge.py\n\n"
+    "<!-- fp060-outbox-key:review:GFCDOTA/sketchup-mcp#654:998f91cdd16675a6c305dee10b39ad07254c3d99:APPROVE -->")
+
+
+def test_the_reinforced_check_accepts_the_real_body_that_the_production_publisher_posts():
+    head = "998f91cdd16675a6c305dee10b39ad07254c3d99"
+    review = approval(commit=head, body=REAL_PUBLISHED_APPROVE)
+    assert am.reinforced(review, "GFCDOTA/sketchup-mcp", 654, head) is True
+    assert am.reinforced(review, "GFCDOTA/sketchup-mcp", 655, head) is False                       # outro PR
+    assert am.reinforced(review, "GFCDOTA/other", 654, head) is False                              # outro repositorio
+
+
+def test_the_marker_is_what_the_outbox_target_appends_to_the_review_body():
+    target = pytest.importorskip("tools.orchestration.github_review_target", reason="o publicador do outbox ainda nao esta nesta base (pilha #617)")
+    head = "a" * 40
+    key = f"review:{REPO}#7:{head}:APPROVE"
+    body = f"Codex CLI (revisor independente) — HEAD {head} — confianca HIGH\n\n{target.marker(key)}"
+    assert am.reinforced(approval(commit=head, body=body), REPO, 7, head) is True

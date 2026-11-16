@@ -53,6 +53,7 @@ def reinforced(review: dict | None, repo: str, number: int, head: str) -> bool:
 HUMAN_LABELS = frozenset({"aprovação-humana-pendente", "aprovacao-humana-pendente", "needs-human", "human-decision", "bloqueio:human-decision",
                           "visual-review", "security", "governance", "blocked", "do-not-merge"})
 ALLOWED_SUFFIXES = (".py", ".md", ".txt", ".json")
+FILES_API_CAP = 3000                                            # `GET /pulls/{n}/files` nunca devolve mais que isto, nem paginando
 BASE_BRANCH = "develop"
 
 
@@ -134,6 +135,11 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
             refuse.append(f"Issue #{n} tem decisao humana pendente ({', '.join(sorted(il & {x.casefold() for x in HUMAN_LABELS}))})")
     if not files:
         refuse.append("PR sem arquivos")
+    declared = pr.get("changed_files")
+    if not isinstance(declared, int) or isinstance(declared, bool) or declared != len(files) or declared > FILES_API_CAP:
+        # A API lista no maximo 3000 arquivos mesmo paginando; sem `changed_files` igual ao recebido nao ha como provar que nenhum caminho de governanca,
+        # binario ou tipo proibido ficou de fora: fail-closed.
+        refuse.append(f"lista de arquivos nao comprovada completa (recebidos {len(files)}, `changed_files`={declared!r}, teto da API {FILES_API_CAP})")
     paths = [f.get("filename") for f in files] + [f["previous_filename"] for f in files if f.get("previous_filename")]
     hard = tuple(x.casefold() for x in HARD_HUMAN_PREFIXES)
     for p in paths:
@@ -243,13 +249,36 @@ def gather(gh: eb.Gh, repo: str, number: int) -> tuple[dict, list[dict], list[di
     return pr, files, runs, reviews, {k: v for k, v in issues.items() if v}
 
 
+def gh_bin() -> str:
+    import os
+    return os.environ.get("GH_BIN", "gh")
+
+
+def merge_identity(policy: dict, runner=subprocess.run) -> tuple[bool, str]:
+    """Quem o `gh` e, NO MESMO AMBIENTE do merge (`executor_env`: sem tokens de env, so o keyring): tem de ser um login executor autorizado e nunca um revisor.
+    Remover o token do ambiente nao prova qual conta o keyring ativa; falha na consulta = recusa."""
+    from tools.orchestration import event_executor as ex
+    try:
+        done = runner([gh_bin(), "api", "user", "--jq", ".login"], env=ex.executor_env(), capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError) as exc:
+        return False, f"identidade do gh nao verificada: {type(exc).__name__}"
+    login = (done.stdout or "").strip()
+    if done.returncode != 0 or not login:
+        return False, "identidade do gh nao verificada: a consulta falhou"
+    executors = {x.lower() for x in policy.get("executor_logins", [])}
+    reviewers = {x.lower() for x in policy.get("reviewers", [])}
+    if login.lower() in reviewers or login.lower() not in executors:
+        return False, f"o gh esta autenticado como {login!r}, que nao e um executor autorizado (ou e revisor): o merge nao e feito com esta conta"
+    return True, login
+
+
 def merge(number: int, head: str, repo: str, runner=subprocess.run) -> tuple[bool, str]:
     """`gh pr merge --merge --match-head-commit <sha>` com a identidade do executor: o GitHub recusa se o HEAD mudou ou se a protecao nao vale."""
     from tools.orchestration import event_executor as ex
     if not re.fullmatch(r"[0-9a-f]{40}", head or ""):
         return False, f"HEAD invalido: {head!r}"
     try:
-        done = runner(["gh", "pr", "merge", str(int(number)), "--repo", repo, "--merge", "--match-head-commit", head],
+        done = runner([gh_bin(), "pr", "merge", str(int(number)), "--repo", repo, "--merge", "--match-head-commit", head],
                       env=ex.executor_env(), capture_output=True, text=True, timeout=120)
     except (OSError, subprocess.SubprocessError) as exc:
         return False, f"gh pr merge falhou: {type(exc).__name__}: {exc}"[:300]
@@ -283,11 +312,18 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                 # so protege o HEAD. A janela que sobra (entre esta releitura e o merge no servidor) e a do proprio GitHub e e coberta pela protecao da branch.
                 pr2, files2, runs2, reviews2, issues2 = gather(gh, repo, number)
                 again = decide(pr2, files2, runs2, reviews2, issues2, policy, cfg, on)
-                if again.code != "MERGE" or (pr2.get("head") or {}).get("sha") != row["head"]:
+                still_on = enabled() if is_enabled is None else is_enabled                    # o interruptor e RELIDO a cada tentativa, nao so no inicio do ciclo
+                if not still_on[0]:
+                    row.update(code="DISABLED", reasons=[f"desligado durante o ciclo: {still_on[1]}"])
+                elif again.code != "MERGE" or (pr2.get("head") or {}).get("sha") != row["head"]:
                     row.update(code="WAIT", reasons=[f"os fatos mudaram entre a decisao e o merge ({again.code}: {'; '.join(again.reasons)[:160]})"])
                 else:
-                    done, msg = merge(number, row["head"], repo, runner)
-                    row.update(merged=done, merge_message=msg)
+                    who_ok, who = merge_identity(policy, runner)
+                    if not who_ok:
+                        row.update(code="REFUSE", reasons=[who])
+                    else:
+                        done, msg = merge(number, row["head"], repo, runner)
+                        row.update(merged=done, merge_message=msg)
         except (RuntimeError, OSError, ValueError, KeyError, TypeError) as exc:
             row.update(code="ERROR", reasons=[f"{type(exc).__name__}: {exc}"[:200]])
         out.append(row)
