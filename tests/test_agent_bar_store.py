@@ -445,3 +445,24 @@ def test_the_failure_query_is_a_single_grouped_pass_without_a_correlated_subquer
     col.collect_store(tmp_path, NOW)
     q = [s for s in seen if "transitions" in s]
     assert q and all("GROUP BY event_id" in s and s.count("FROM transitions") == 1 for s in q)
+
+
+
+@pytest.mark.parametrize("raw", ["Authorization: Basic dXNlcjpwYXNzd29yZA==", "authorization: basic dXNlcjpwYXNzd29yZA==", "auth=Basic dXNlcjpwYXNzd29yZA=="])
+def test_basic_credentials_are_redacted_through_the_persisted_failure_to_the_panel_and_the_copied_diagnostic(store, tmp_path, raw):
+    store.publish("CORRECTION_REQUESTED", "k", "pr:1", {"x": 1})
+    ev = store.claim(("CORRECTION_REQUESTED",), "w", 60, job_id="pr:1")
+    store.fail(ev, f"gh falhou: {raw}", retry_delay=900)
+    out = col.collect_store(tmp_path, NOW)
+    s = snap(out)
+    assert "dXNlcjpwYXNzd29yZA" not in s.store_line() and "dXNlcjpwYXNzd29yZA" not in str(out.get("last_error"))
+    assert "dXNlcjpwYXNzd29yZA" not in col.redact_secrets(raw)
+
+
+def test_a_configured_store_path_with_a_credential_never_reaches_the_panel(tmp_path, monkeypatch):
+    secret_dir = tmp_path / ("ghp_" + "z" * 30)
+    secret_dir.mkdir()
+    out = col.collect_store(secret_dir, NOW)
+    assert out["state"] == "ausente"
+    line = snap(out).store_line()
+    assert "ghp_" not in line and "NAO e saudavel" in line

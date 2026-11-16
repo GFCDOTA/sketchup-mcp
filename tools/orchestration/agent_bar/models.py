@@ -82,10 +82,10 @@ class Snapshot:
     def store_line(self) -> str:
         """Uma linha honesta do EventStore. So `ok` sem DLQ nem lease morto e saudavel; ausente/indisponivel NUNCA parece saudavel."""
         st = self.store or {}
-        if st.get("state") != "ok":
-            return f"EventStore {st.get('state', 'indisponivel')}: {st.get('error') or 'sem leitura'} (NAO e saudavel)"
-        c = st["counts"]
         from tools.orchestration.agent_bar.collectors import redact_secrets
+        if st.get("state") != "ok":                                        # o erro cita nomes de arquivo/diretorio configurados: tambem passa pela redacao
+            return f"EventStore {redact_secrets(st.get('state', 'indisponivel'))}: {redact_secrets(st.get('error') or 'sem leitura')} (NAO e saudavel)"
+        c = st["counts"]
         live = ", ".join(f"{redact_secrets(x['owner'])} ({x['seconds_left']}s)" for x in st["live_leases"]) or "nenhum"
         line = (f"EventStore: {c.get('PENDING', 0)} pendente(s) ({st['backoff']} em backoff), {c.get('RUNNING', 0)} rodando, "
                 f"DLQ {c.get('DLQ', 0)}, retries {st['retries']}; leases vivos: {live}")

@@ -504,10 +504,10 @@ def collect_backlog(gh: Callable[[list[str]], tuple[int, str]] = run_gh, owner: 
 
 _SECRET = re.compile(
     r"(gh[pousr]_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}|sk-[A-Za-z0-9][A-Za-z0-9_-]{15,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|AKIA[0-9A-Z]{12,}"
-    r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|(?i:bearer)\s+[A-Za-z0-9._~+/=-]{8,}"
+    r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|(?i:bearer)\s+[A-Za-z0-9._~+/=-]{8,}|(?i:basic)\s+[A-Za-z0-9+/=]{8,}"
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"
     r"|(?i:(?<![A-Za-z0-9])[A-Za-z0-9_-]*(?:api[_-]?key|secret|password|passwd|token|credential)[A-Za-z0-9_-]*)[\"']?\s*[:=]\s*"
-    r"(?:(?i:bearer|basic|token)\s+)?"                                    # `token=Bearer abc...`: o esquema nao encerra o valor, o valor opaco tambem sai
+    r"(?:(?i:bearer|basic|token)\s+)?"                                    # `Authorization: Basic <b64>` e `token=Bearer abc`: o esquema nao encerra o valor                                    # `token=Bearer abc...`: o esquema nao encerra o valor, o valor opaco tambem sai
     r"(?:\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'|[^\s;}\"']{1,}))")        # valor ENTRE ASPAS inteiro (virgulas, espacos, escapes) ou sem aspas ate o delimitador; inclui JSON
 
 
