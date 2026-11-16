@@ -506,7 +506,8 @@ _SECRET = re.compile(
     r"(gh[pousr]_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}|sk-[A-Za-z0-9][A-Za-z0-9_-]{15,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|AKIA[0-9A-Z]{12,}"
     r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|Bearer\s+[A-Za-z0-9._~+/-]{10,}"
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"
-    r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token|token)\b)[\"']?\s*[:=]\s*[\"']?[^\s\"',;}]{4,}[\"']?)")                 # inclui JSON: {"password":"..."}
+    r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token|token)\b)[\"']?\s*[:=]\s*"
+    r"(?:\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'|[^\s;}\"']{1,}))")        # valor ENTRE ASPAS inteiro (virgulas, espacos, escapes) ou sem aspas ate o delimitador; inclui JSON
 
 
 def redact_secrets(text: object) -> str:

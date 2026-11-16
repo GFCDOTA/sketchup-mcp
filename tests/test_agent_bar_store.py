@@ -315,7 +315,7 @@ def test_a_lost_publication_in_the_outbox_dlq_is_not_hidden_by_a_done_event(stor
     assert out["dlq"] == [] and out["counts"].get("DLQ", 0) == 0                                      # a fila de EVENTOS esta limpa...
     assert [d["key"] for d in out["outbox"]["dlq"]] == ["k-ob:out"] and out["outbox"]["counts"] == {"DLQ": 1}
     s = snap(out)
-    assert s.store_ok() is False and "PUBLICACAO PERDIDA" in s.store_line() and "k-ob:out" in s.store_line()
+    assert s.store_ok() is False and "DLQ DA OUTBOX" in s.store_line() and "reconciliar" in s.store_line() and "k-ob:out" in s.store_line()
 
 
 def test_an_outbox_entry_with_an_expired_lease_is_flagged_and_a_clean_outbox_is_healthy(store, tmp_path):
@@ -373,13 +373,27 @@ def test_an_outbox_dlq_after_an_expired_final_lease_is_reported_as_unknown_remot
     out = col.collect_store(tmp_path, dt.datetime.fromtimestamp(store.clock_handle.t, dt.timezone.utc))
     assert out["outbox"]["dlq"][0]["unknown_outcome"] is True
     line = snap(out).store_line()
-    assert snap(out).store_ok() is False and "RESULTADO REMOTO DESCONHECIDO" in line and "reconciliar" in line and "PUBLICACAO PERDIDA" not in line
+    assert snap(out).store_ok() is False and "reconciliar" in line and "PUBLICACAO PERDIDA" not in line
 
 
-def test_a_confirmed_publication_failure_keeps_the_lost_wording(store, tmp_path):
+def test_a_free_text_publication_failure_never_claims_the_publication_was_lost(store, tmp_path):
     _event_with_outbox(store, key="k-lost", max_attempts=1)
     entry = store.claim_outbox("pub", 30)
     store.fail_outbox(entry, "401 do GitHub", retry_delay=0)
     out = col.collect_store(tmp_path, dt.datetime.fromtimestamp(store.clock_handle.t, dt.timezone.utc))
     line = snap(out).store_line()
-    assert out["outbox"]["dlq"][0]["unknown_outcome"] is False and "PUBLICACAO PERDIDA" in line and "DESCONHECIDO" not in line
+    assert snap(out).store_ok() is False and "PUBLICACAO PERDIDA" not in line and "reconciliar" in line      # falha livre (ex.: 401 ou timeout): sem prova de que o remoto NAO aplicou
+
+
+@pytest.mark.parametrize("raw", ['{"password":"abc,def"}', '{"password": "abc def, ghi"}', "password='a,b;c d'", '{"token":"x\\"y,z"}', 'api_key=abc,def', '{"secret":"s3,cr3t"}',
+                                  'Authorization failed: {"access_token": "a b,c"} fim'])
+def test_structured_credential_values_with_delimiters_never_reach_the_panel(raw):
+    out = col.redact_secrets(raw)
+    for leaked in ("abc", "def", "ghi", "a,b", "s3", "cr3t", "y,z", "a b"):
+        assert leaked not in out.replace("<segredo>", ""), (leaked, out)
+    assert "<segredo>" in out
+
+
+def test_an_unrelated_text_with_the_word_token_in_prose_is_left_alone():
+    assert col.redact_secrets("o token expirou") == "o token expirou"
+    assert col.redact_secrets("sem segredo aqui, so virgulas e: dois pontos") == "sem segredo aqui, so virgulas e: dois pontos"

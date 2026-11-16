@@ -100,13 +100,10 @@ class Snapshot:
         line += f"; outbox: {oc.get('PENDING', 0)} pendente(s), {oc.get('RUNNING', 0)} rodando, DLQ {oc.get('DLQ', 0)}"
         if ob.get("zombies"):
             line += f"; ATENCAO {ob['zombies']} publicacao(oes) da outbox com lease vencido"
-        lost = [x for x in ob.get("dlq", []) if not x.get("unknown_outcome")]
-        unknown = [x for x in ob.get("dlq", []) if x.get("unknown_outcome")]
-        if lost:
-            line += "; PUBLICACAO PERDIDA na outbox (falha confirmada): " + "; ".join(f"#{x['id']} {redact_secrets(x['target'])[:20]} {redact_secrets(x['key'])[:40]}" for x in lost[:3])
-        if unknown:                                                                      # o lease venceu apos a ultima tentativa: o remoto pode ter recebido; reconciliar ANTES de republicar
-            line += "; RESULTADO REMOTO DESCONHECIDO na outbox (reconciliar com o GitHub antes de republicar): " + "; ".join(
-                f"#{x['id']} {redact_secrets(x['target'])[:20]} {redact_secrets(x['key'])[:40]}" for x in unknown[:3])
+        dead = ob.get("dlq", [])
+        if dead:                                                                          # SEM evidencia persistida de falha remota DEFINITIVA, nunca afirmar perda: o remoto pode ter aplicado
+            line += "; PUBLICACAO NA DLQ DA OUTBOX (resultado remoto possivelmente desconhecido: reconciliar com o GitHub ANTES de republicar): " + "; ".join(
+                f"#{x['id']} {redact_secrets(x['target'])[:20]} {redact_secrets(x['key'])[:40]}" for x in dead[:3])
         return line
 
     def store_ok(self) -> bool:
