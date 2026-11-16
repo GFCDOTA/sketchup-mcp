@@ -112,6 +112,10 @@ def test_a_pr_that_touches_the_policy_the_workflow_the_collector_or_github_loses
     {"node_id": "tests/", "case": "diretorio"},
     {"node_id": "tools/x.py::test_a", "case": "fora de tests/"},
     {"node_id": "../tests/x.py::test_a", "case": "travessia"},
+    {"node_id": "tests/../tools/x.py::test_a", "case": "travessia depois de tests/"},
+    {"node_id": "tests/./x.py::test_a", "case": "segmento ."},
+    {"node_id": "tests//x.py::test_a", "case": "segmento vazio"},
+    {"node_id": "tests/sub/../../x.py::test_a", "case": "travessia aninhada"},
     {"node_id": "tests/x.py::A::B::test_a", "case": "classe aninhada"},
     {"node_id": "tests/x.py::TestClass::", "case": "metodo vazio"},
     {"node_id": "tests/x.py::TestClass::test_*", "case": "curinga no metodo"},
@@ -519,11 +523,31 @@ def test_the_collector_reports_a_missing_test_as_missing(tmp_path, monkeypatch):
     assert {r["node_id"]: r["outcome"] for r in json.loads(out.read_text(encoding="utf-8"))["results"]}[IDS[1]] == "missing"
 
 
+def git_blob_sha(data: bytes) -> str:
+    """Blob que o git GUARDA para o arquivo (o repositorio normaliza texto para LF), independente do checkout CRLF do Windows e sem precisar do binario `git`."""
+    data = data.replace(b"\r\n", b"\n")
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def test_the_pinned_blob_check_is_the_same_in_lf_and_crlf_checkouts():
+    lf = b"name: x\non: push\n"
+    assert git_blob_sha(lf) == git_blob_sha(lf.replace(b"\n", b"\r\n")) == hashlib.sha1(b"blob 17\0" + lf).hexdigest()
+
+
+def test_a_failed_fetch_never_falls_back_to_a_stale_local_base(base):
+    root, sha, _ = base
+    def git(args, cwd):
+        if args[:1] == ["fetch"]:
+            return 128, "fatal: unable to access origin"
+        return run_git(args, cwd)
+    with pytest.raises(dt.DelegationError, match="fetch"):
+        dt.trusted_base_sha(root, git)                                                       # origin/develop local existe e resolveria; mesmo assim nada vale
+
+
 def test_the_repository_policy_matches_the_workflow_it_pins_and_names_only_exact_ids():
     root = Path(__file__).resolve().parents[1]
     pol = dt.validate_policy(json.loads((root / POLICY_FILE).read_text(encoding="utf-8")), "b" * 40)
-    blob = subprocess.run(["git", "hash-object", str(root / dt.WORKFLOW_PATH)], capture_output=True, text=True, check=True).stdout.strip()
-    assert pol.workflow_blob_sha == blob                                                      # workflow e politica andam juntos
+    assert pol.workflow_blob_sha == git_blob_sha((root / dt.WORKFLOW_PATH).read_bytes())    # workflow e politica andam juntos (blob do COMMIT, nao da worktree)
     # 28 do executor + 53 do laboratorio (git) + 7 TestRealProcesses do event_store (pipe nomeado do multiprocessing negado no AppContainer) — 2026-11-16
     files = {"tests/test_event_executor_deliver.py": 28, "tests/test_closed_loop_lab.py": 53, "tests/test_event_store.py": 7}
     assert len(pol.ids) == sum(files.values()) <= dt.MAX_DELEGATED

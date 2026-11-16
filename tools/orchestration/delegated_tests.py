@@ -74,7 +74,8 @@ def validate_policy(raw: object, base_sha: str) -> Policy:
     ids, reasons = [], {}
     for entry in items:
         nid = entry.get("node_id") if isinstance(entry, dict) else None
-        if not isinstance(nid, str) or not NODE_ID.fullmatch(nid) or any(ch in nid.split("::", 1)[1].split("[")[0] for ch in "*?"):
+        if (not isinstance(nid, str) or not NODE_ID.fullmatch(nid) or any(ch in nid.split("::", 1)[1].split("[")[0] for ch in "*?")
+                or any(part in ("", ".", "..") for part in nid.split("::", 1)[0].split("/"))):     # sem travessia/segmento vazio: o arquivo fica SOB tests/
             raise DelegationError(f"node id invalido (so ids EXATOS; sem curinga, arquivo inteiro ou categoria): {str(nid)[:120]!r}")
         if nid in reasons:
             raise DelegationError(f"node id duplicado: {nid}")
@@ -89,7 +90,9 @@ def validate_policy(raw: object, base_sha: str) -> Policy:
 
 def trusted_base_sha(root: Path, run_git: Callable[[list, Path], tuple[int, str]], ref: str = "origin/develop") -> str:
     """Resolve a referencia confiavel para um SHA (imutavel durante a revisao). Atualiza `origin/develop` antes; sem resolucao, nada vale."""
-    run_git(["fetch", "-q", "origin", "develop"], root)
+    rc, out = run_git(["fetch", "-q", "origin", "develop"], root)
+    if rc != 0:                                                       # sem atualizar, `origin/develop` local pode guardar uma politica VELHA: nada vale
+        raise DelegationError(f"git fetch de origin/develop falhou (rc={rc}): {out.strip()[:120]}")
     rc, out = run_git(["rev-parse", "--verify", f"{ref}^{{commit}}"], root)
     sha = out.strip().lower()
     if rc != 0 or not re.fullmatch(r"[0-9a-f]{40}", sha):
