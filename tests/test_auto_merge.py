@@ -34,7 +34,11 @@ def runs(bad=None, missing=None):
     return out
 
 
-STRONG = "Codex CLI (revisor independente) — HEAD x — confianca HIGH\n<!-- fp060-outbox-key:review:o/r#7:x:APPROVE -->"
+def strong(head=HEAD, pr_number=7, repo=REPO, verdict="APPROVE"):
+    return f"Codex CLI (revisor independente) — HEAD {head} — confianca HIGH\n<!-- fp060-outbox-key:review:{repo}#{pr_number}:{head}:{verdict} -->"
+
+
+STRONG = strong()
 
 
 def approval(state="APPROVED", user="fmmodesto", commit=HEAD, body="ok"):
@@ -191,7 +195,7 @@ class Gh:
         if path.startswith(f"repos/{REPO}/pulls/7/files"):
             return files()
         if path.startswith(f"repos/{REPO}/pulls/7/reviews"):
-            return [approval(commit=self.head, body=STRONG)]
+            return [approval(commit=self.head, body=strong(self.head))]
         if "check-runs" in path:
             return {"total_count": len(lifecycle.MANDATORY_CHECKS), "check_runs": runs()}
         if path == f"repos/{REPO}/issues/5":
@@ -274,3 +278,108 @@ def test_the_merge_command_has_no_admin_bypass_flags():
     import inspect
     src = inspect.getsource(am.merge)
     assert "--admin" not in src and "--auto" not in src and "--squash" not in src
+
+
+# --------------------------------------------- revisao independente do #648 (Codex): marcador, TOCTOU, caminhos, paginacao
+@pytest.mark.parametrize("name,body", [
+    ("other_pr", strong(pr_number=8)), ("other_head", strong(head="c" * 40)), ("other_repo", strong(repo="x/y")),
+    ("other_verdict", strong(verdict="REQUEST_CHANGES")), ("only_text", "confianca HIGH fp060-outbox-key:review: copiado"),
+    ("no_confidence", f"<!-- fp060-outbox-key:review:{REPO}#7:{HEAD}:APPROVE -->"),
+    ("marker_without_comment_syntax", f"confianca HIGH fp060-outbox-key:review:{REPO}#7:{HEAD}:APPROVE")])
+def test_the_reinforced_marker_must_bind_repo_pr_head_and_verdict_exactly(name, body):
+    d = decide(files=files(CRITICAL[0]), reviews=[approval(body=body)], issues=issues(labels=(am.GPT_LABEL,)))
+    assert d.code == "WAIT" and any("reforcada" in r for r in d.reasons), (name, d)
+
+
+def test_the_reinforced_review_must_be_on_the_exact_head_too():
+    stale = approval(commit="c" * 40, body=strong())                                           # marcador certo, review em outro commit
+    assert am.reinforced(stale, REPO, 7, HEAD) is False and am.reinforced(approval(body=strong()), REPO, 7, HEAD) is True
+
+
+@pytest.mark.parametrize("path", ["Docs/governance/review_policy.json", "DOCS/GOVERNANCE/x.json", "docs\\governance\\x.json", "./docs/governance/x.json",
+                                   ".GitHub/workflows/ci.yml", "docs/governance./x.json", ".Claude/CLAUDE.md", "docs/ADR/0001.md"])
+def test_governance_prefixes_are_compared_after_the_same_normalization_as_the_executor_guards(path):
+    d = decide(files=files("docs/x.md", path), reviews=[approval(body=strong())], issues=issues(labels=(am.GPT_LABEL,)))
+    assert d.code == "REFUSE" and any("governanca" in r for r in d.reasons), (path, d)
+
+
+@pytest.mark.parametrize("path", ["../x.py", "/etc/x.py", "C:/x.py"])
+def test_an_unsafe_path_is_refused_not_normalized_away(path):
+    d = decide(files=files(path))
+    assert d.code == "REFUSE" and any("caminho invalido" in r for r in d.reasons)
+
+
+class MovingGh(Gh):
+    """Os fatos mudam DEPOIS da primeira decisao, com o HEAD constante."""
+    def __init__(self, change, **kw):
+        super().__init__(**kw)
+        self.change, self.reads = change, 0
+
+    def __call__(self, path):
+        if path == f"repos/{REPO}/pulls/7":
+            self.reads += 1
+            if self.reads > 1 and self.change == "base":
+                self.overrides = {**self.overrides, "base": {"ref": "release", "repo": {"full_name": REPO}}}
+            if self.reads > 1 and self.change == "label":
+                self.overrides = {**self.overrides, "labels": [{"name": "security"}]}
+        if path == f"repos/{REPO}/issues/5" and self.reads > 1 and self.change == "issue":
+            return issues(labels=(am.GPT_LABEL, "aprovação-humana-pendente"))[5]
+        if path == f"repos/{REPO}/issues/5" and self.reads > 1 and self.change == "closed":
+            return issues(state="closed")[5]
+        return super().__call__(path)
+
+
+@pytest.mark.parametrize("change", ["base", "label", "issue", "closed"])
+def test_every_fact_is_decided_again_right_before_the_merge_not_only_the_head(change):
+    gh, runner = MovingGh(change), Runner()
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "WAIT" and "mudaram" in out["prs"][0]["reasons"][0] and runner.calls == []
+
+
+def test_an_unchanged_world_still_merges_after_the_second_decision():
+    runner = Runner()
+    assert am.cycle(MovingGh("nada"), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)["prs"][0]["merged"] is True and len(runner.calls) == 1
+
+
+def test_complete_check_runs_refuses_a_partial_answer():
+    def partial(path):
+        return {"total_count": 9, "check_runs": runs()[:3]}
+    with pytest.raises(RuntimeError, match="incompletos"):
+        am.complete_check_runs(partial, REPO, HEAD)
+    with pytest.raises(RuntimeError, match="malformada"):
+        am.complete_check_runs(lambda p: {"check_runs": "x"}, REPO, HEAD)
+    assert len(am.complete_check_runs(lambda p: {"total_count": 9, "check_runs": runs()}, REPO, HEAD)) == 9
+
+
+def test_complete_list_refuses_a_non_list_answer():
+    for bad in ({"a": 1}, None, ["texto"], "x"):
+        with pytest.raises(RuntimeError):
+            am.complete_list(lambda p, b=bad: b, "repos/o/r/pulls/7/files?per_page=100")
+
+
+class Proc:
+    def __init__(self, rc=0, out="", err=""):
+        self.returncode, self.stdout, self.stderr = rc, out, err
+
+
+def test_the_production_client_merges_every_page_of_lists_and_check_runs():
+    import json as _json
+    seen = []
+
+    def runner(argv, **kw):
+        seen.append(argv)
+        return Proc(0, _json.dumps([[{"n": 1}, {"n": 2}], [{"n": 3}]]))
+    assert am.slurp_client("repos/o/r/pulls/7/files?per_page=100", runner=runner, gh_bin="gh") == [{"n": 1}, {"n": 2}, {"n": 3}]
+    assert "--slurp" in seen[0] and "--paginate" in seen[0]
+
+    def cr(argv, **kw):
+        return Proc(0, _json.dumps([{"total_count": 3, "check_runs": [{"name": "a"}, {"name": "b"}]}, {"total_count": 3, "check_runs": [{"name": "c"}]}]))
+    merged = am.slurp_client("repos/o/r/commits/x/check-runs?per_page=100", runner=cr, gh_bin="gh")
+    assert merged["total_count"] == 3 and [r["name"] for r in merged["check_runs"]] == ["a", "b", "c"]
+    assert am.slurp_client("repos/o/r/pulls/7", runner=lambda a, **k: Proc(0, _json.dumps([{"number": 7}])), gh_bin="gh") == {"number": 7}
+
+
+@pytest.mark.parametrize("proc", [Proc(1, "", "boom"), Proc(0, "[]"), Proc(0, "nao json"), Proc(0, '[[1], {"a": 1}]')])
+def test_the_production_client_fails_closed_on_errors_and_odd_shapes(proc):
+    with pytest.raises((RuntimeError, ValueError)):
+        am.slurp_client("repos/o/r/pulls", runner=lambda a, **k: proc, gh_bin="gh")

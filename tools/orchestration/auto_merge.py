@@ -41,7 +41,15 @@ ENABLE_ENV = "AUTOMERGE_ENABLED"
 HARD_HUMAN_PREFIXES = (".github/", "docs/governance/", ".claude/", "docs/adr/")          # governanca: nunca automatico
 GPT_LABEL = "gpt-review-required"
 REINFORCED_BODY = re.compile(r"confianca\s+HIGH", re.I)
-OUTBOX_MARKER = re.compile(r"fp060-outbox-key:review:")
+
+
+def reinforced(review: dict | None, repo: str, number: int, head: str) -> bool:
+    """Aprovacao REFORCADA: o review e do revisor independente (ja filtrado por `latest_review`), diz `confianca HIGH` e carrega o marcador do outbox do
+    `codex_reviewer` com EXATAMENTE este repositorio, PR, HEAD e veredito APPROVE (o `codex_reviewer` so publica APPROVE com a prova de isolamento dos testes).
+    Marcador de outro PR/HEAD/veredito, ou so texto parecido, nao vale."""
+    body = (review or {}).get("body") or ""
+    marker = f"<!-- fp060-outbox-key:review:{repo}#{int(number)}:{head}:APPROVE -->"
+    return bool(REINFORCED_BODY.search(body)) and marker in body and str((review or {}).get("commit_id", "")).lower() == head.lower()
 HUMAN_LABELS = frozenset({"aprovação-humana-pendente", "aprovacao-humana-pendente", "needs-human", "human-decision", "bloqueio:human-decision",
                           "visual-review", "security", "governance", "blocked", "do-not-merge"})
 ALLOWED_SUFFIXES = (".py", ".md", ".txt", ".json")
@@ -127,7 +135,15 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
     if not files:
         refuse.append("PR sem arquivos")
     paths = [f.get("filename") for f in files] + [f["previous_filename"] for f in files if f.get("previous_filename")]
-    refuse += [f"governanca: {p} (decisao humana)" for p in paths if str(p).startswith(HARD_HUMAN_PREFIXES)]
+    hard = tuple(x.casefold() for x in HARD_HUMAN_PREFIXES)
+    for p in paths:
+        try:
+            normalized = guards.norm(str(p))                                       # mesma normalizacao do executor: caixa, barras, `./`, `..`, NTFS
+        except ValueError:
+            refuse.append(f"caminho invalido: {p!r} (decisao humana)")
+            continue
+        if normalized.startswith(hard):
+            refuse.append(f"governanca: {p} (decisao humana)")
     verdict = guards.evaluate_diff(numstat_from_files(files), cfg)
     critical = [v for v in verdict.violations if v["rule"] == "path_critico"]
     # PR autonomo: tetos e caminhos criticos valem integralmente. PR tecnico: so binario/ilegivel/invalido recusam; o caminho critico exige revisao reforcada.
@@ -149,9 +165,9 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
         no_gpt = [n for n in refs if GPT_LABEL not in issue_labels.get(n, set())]
         if no_gpt:
             wait.append(f"caminho critico: Issue(s) {', '.join('#%d' % n for n in no_gpt)} sem a label `{GPT_LABEL}` (revisao reforcada)")
-        body = (review or {}).get("body") or ""
-        if review is not None and not (REINFORCED_BODY.search(body) and OUTBOX_MARKER.search(body)):
-            wait.append("caminho critico: a aprovacao nao e a reforcada (confianca HIGH do codex_reviewer com marcador do outbox)")
+        repo = ((pr.get("base") or {}).get("repo") or {}).get("full_name") or ""
+        if review is not None and not reinforced(review, repo, pr.get("number") or 0, head):
+            wait.append("caminho critico: a aprovacao nao e a reforcada (confianca HIGH + marcador do outbox deste repositorio, PR, HEAD e veredito APPROVE)")
     if state != "passed":
         wait.append(f"checks obrigatorios {state}")
     if review is None:
@@ -166,15 +182,56 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
 
 
 # --------------------------------------------------------------------------------------------------------------- facts / effect
+# Contrato do cliente `gh(path)` DESTE modulo: devolve o resultado COMPLETO (todas as paginas ja reunidas). O `eb.gh_json` do bridge (`--paginate`) nao serve para
+# check-runs (objetos concatenados) e os helpers de `lifecycle` pedem pagina a pagina por cima dele (duplicaria): por isso o cliente de producao e `slurp_client`.
+def slurp_client(path: str, runner=subprocess.run, gh_bin: str | None = None):
+    """`gh api --paginate --slurp`: cada pagina vira um item de um array; reune as paginas (listas concatenadas; objetos com uma lista, como `check_runs`,
+    concatenam a lista e mantem o `total_count`). Falha do `gh` levanta RuntimeError."""
+    import os
+    done = runner([gh_bin or os.environ.get("GH_BIN", "gh"), "api", "--paginate", "--slurp", path], capture_output=True, text=True, encoding="utf-8",
+                  errors="replace", timeout=120)
+    if done.returncode != 0:
+        raise RuntimeError((done.stderr or done.stdout or "").strip()[:300] or f"gh api falhou ({done.returncode})")
+    pages = json.loads(done.stdout or "[]")
+    if not isinstance(pages, list) or not pages:
+        raise RuntimeError("resposta paginada vazia ou malformada")
+    if all(isinstance(p, list) for p in pages):
+        return [x for p in pages for x in p]
+    if all(isinstance(p, dict) for p in pages):
+        merged = dict(pages[0])
+        for key, value in pages[0].items():
+            if isinstance(value, list):
+                merged[key] = [x for p in pages for x in (p.get(key) or [])]
+        return merged
+    raise RuntimeError("paginas de tipos diferentes")
+
+
+def complete_list(gh: eb.Gh, path: str) -> list[dict]:
+    data = gh(path)
+    if not isinstance(data, list) or any(not isinstance(x, dict) for x in data):
+        raise RuntimeError(f"resposta de {path.split('?')[0]} nao e uma lista de objetos")
+    return data
+
+
+def complete_check_runs(gh: eb.Gh, repo: str, head: str) -> list[dict]:
+    """Check-runs do HEAD COMPLETOS: `total_count` precisa bater com o que veio (fail-closed; parcial nunca vira `passed`)."""
+    data = gh(f"repos/{repo}/commits/{head}/check-runs?per_page=100")
+    if not isinstance(data, dict) or not isinstance(data.get("check_runs"), list):
+        raise RuntimeError("resposta de check-runs malformada")
+    if data.get("total_count") != len(data["check_runs"]):
+        raise RuntimeError(f"check-runs incompletos: {len(data['check_runs'])} de {data.get('total_count')}")
+    return data["check_runs"]
+
+
 def gather(gh: eb.Gh, repo: str, number: int) -> tuple[dict, list[dict], list[dict], list[dict], dict[int, dict]]:
     """Fatos FRESCOS do GitHub para um PR (paginados e fail-closed: `lifecycle` levanta em resposta incompleta/malformada)."""
     pr = gh(f"repos/{repo}/pulls/{number}")
     if not isinstance(pr, dict):
         raise RuntimeError("resposta do PR nao e um objeto")
     head = (pr.get("head") or {}).get("sha") or ""
-    files = lifecycle._paginated_list(gh, f"repos/{repo}/pulls/{number}/files")
-    runs = lifecycle._check_runs(gh, repo, head)
-    reviews = lifecycle._paginated_list(gh, f"repos/{repo}/pulls/{number}/reviews")
+    files = complete_list(gh, f"repos/{repo}/pulls/{number}/files?per_page=100")
+    runs = complete_check_runs(gh, repo, head)
+    reviews = complete_list(gh, f"repos/{repo}/pulls/{number}/reviews?per_page=100")
     refs = sorted({int(n) for n in re.findall(r"\brefs?\s*:?\s*#(\d+)", pr.get("body") or "", re.I)})
     issues = {}
     for n in refs:
@@ -210,7 +267,7 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
     out = []
     try:
         executors = set(policy.get("executor_logins", []))
-        candidates = [p for p in lifecycle._paginated_list(gh, f"repos/{repo}/pulls?state=open")
+        candidates = [p for p in complete_list(gh, f"repos/{repo}/pulls?state=open&per_page=100")
                       if not p.get("draft") and (p.get("user") or {}).get("login") in executors]
     except (RuntimeError, OSError, ValueError, KeyError, TypeError) as exc:
         return {"enabled": True, "applied": apply, "prs": [{"pr": None, "code": "ERROR", "reasons": [f"listagem de PRs falhou: {type(exc).__name__}: {exc}"[:200]]}]}
@@ -222,9 +279,12 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
             decision = decide(pr, files, runs, reviews, issues, policy, cfg, on)
             row.update(head=(pr.get("head") or {}).get("sha"), **decision.as_dict())
             if apply and decision.code == "MERGE":
-                fresh = gh(f"repos/{repo}/pulls/{number}")                    # TOCTOU: o que vai ser mesclado e o HEAD que foi decidido
-                if (fresh.get("head") or {}).get("sha") != row["head"] or fresh.get("state") != "open":
-                    row.update(code="WAIT", reasons=["HEAD ou estado mudou entre a decisao e o merge"])
+                # TOCTOU: TODOS os fatos que autorizam o merge (base, labels, Issues, arquivos, checks, reviews) sao lidos e decididos DE NOVO agora; `--match-head-commit`
+                # so protege o HEAD. A janela que sobra (entre esta releitura e o merge no servidor) e a do proprio GitHub e e coberta pela protecao da branch.
+                pr2, files2, runs2, reviews2, issues2 = gather(gh, repo, number)
+                again = decide(pr2, files2, runs2, reviews2, issues2, policy, cfg, on)
+                if again.code != "MERGE" or (pr2.get("head") or {}).get("sha") != row["head"]:
+                    row.update(code="WAIT", reasons=[f"os fatos mudaram entre a decisao e o merge ({again.code}: {'; '.join(again.reasons)[:160]})"])
                 else:
                     done, msg = merge(number, row["head"], repo, runner)
                     row.update(merged=done, merge_message=msg)
@@ -239,7 +299,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--apply", action="store_true", help="mescla o que for autorizado (exige AUTOMERGE_ENABLED=1); sem isto so planeja")
     ap.add_argument("--repo", default=eb.REPO)
     a = ap.parse_args(argv)
-    report = cycle(eb.gh_json, eb.load_policy(), a.repo, a.apply)
+    report = cycle(slurp_client, eb.load_policy(), a.repo, a.apply)
     print(json.dumps(report, indent=1, ensure_ascii=False))
     return 1 if any(p.get("code") == "ERROR" for p in report["prs"]) else 0
 
