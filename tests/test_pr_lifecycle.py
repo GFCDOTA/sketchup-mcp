@@ -881,3 +881,28 @@ def test_the_reconcile_step_requeues_a_legacy_dlq_by_usage_limit_and_reports_the
     assert out["quota"]["requeued"][0]["action"] == "REQUEUED_QUOTA_DLQ"
     assert ev_of(qstore)["status"] == "PENDING" and ev_of(qstore)["attempt"] == 0
     assert "quota" not in pl.reconcile_step(w, POLICY, REPO, True, qstore, Writes())                      # segundo ciclo: nada a fazer, o log nao muda
+
+
+def test_a_review_already_published_on_the_head_reconciles_the_event_instead_of_reviewing_again_even_after_a_quota_requeue(qstore, clock):
+    w, rv = World().add(7), Reviewer()
+    enq(w, qstore)
+    w.reviews[7] = [{"id": 99, "user": {"login": "fmmodesto"}, "state": "CHANGES_REQUESTED", "commit_id": HEAD, "body": ""}]      # outro caminho ja publicou neste HEAD
+    out = pl.work(w, qstore, POLICY, REPO, rv)
+    assert out["action"] == "RECONCILED" and out["verdict"] == "REQUEST_CHANGES" and out["review_id"] == 99
+    assert rv.calls == [] and ev_of(qstore)["status"] == "DONE" and ev_of(qstore)["attempt"] == 1
+    assert rl.RateLimitGate(qstore).status() == []                                                      # nem sondou a conta
+
+
+def test_an_approved_review_already_on_the_head_reconciles_as_approve_for_the_merge_step(qstore, clock):
+    w = World().add(7)
+    enq(w, qstore)
+    w.reviews[7] = [{"id": 5, "user": {"login": "fmmodesto"}, "state": "APPROVED", "commit_id": HEAD, "body": ""}]
+    assert pl.work(w, qstore, POLICY, REPO, Reviewer())["verdict"] == "APPROVE"
+    assert pl.approved_candidates(qstore, REPO) == {7}
+
+
+def test_a_review_on_an_older_head_does_not_reconcile_the_new_head(qstore, clock):
+    w, rv = World().add(7), Reviewer()
+    enq(w, qstore)
+    w.reviews[7] = [{"id": 1, "user": {"login": "fmmodesto"}, "state": "CHANGES_REQUESTED", "commit_id": NEW, "body": ""}]
+    assert pl.work(w, qstore, POLICY, REPO, rv)["action"] == "DONE" and len(rv.calls) == 1

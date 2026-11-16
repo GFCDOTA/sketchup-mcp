@@ -339,6 +339,21 @@ def work(gh: eb.Gh, store: EventStore, policy: dict, repo: str = eb.REPO, review
             waiting.append({"event": ev["id"], "pr": n, "action": "WAIT_CHECKS", "reason": f"checks obrigatorios {state}"})
             _RECHECK_AT[ev["id"]] = time.monotonic() + RECHECK_S
             continue
+        try:                                                                                            # RECONCILIA antes de gastar a conta: parecer ja publicado neste HEAD => nao revisa de novo
+            fresh = am.complete_list(gh, f"repos/{repo}/pulls/{n}/reviews?per_page=100")                   # leitura nova (sem cache): o review pode ter saido ha segundos
+            done = lifecycle.latest_review(fresh, head, policy)
+        except (RuntimeError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as exc:
+            waiting.append({"event": ev["id"], "pr": n, "action": "ERROR", "reason": f"reviews: {type(exc).__name__}: {exc}"[:200]})
+            _RECHECK_AT[ev["id"]] = time.monotonic() + RECHECK_S
+            continue                                                                                    # sem conseguir verificar, nao arrisca um parecer duplicado
+        if done is not None:
+            owned = store.claim_by_id(ev["id"], owner, 30.0)
+            if owned is not None:
+                verdict = "APPROVE" if done.get("state") == "APPROVED" else "REQUEST_CHANGES"
+                store.complete(owned, {"action": "DONE", "verdict": verdict, "reconciled": True, "review_id": done.get("id"),
+                                       "reason": "parecer do revisor ja publicado neste HEAD: nenhuma revisao duplicada"})
+                return {"action": "RECONCILED", "event": ev["id"], "pr": n, "verdict": verdict, "review_id": done.get("id")}
+            continue
         admission = gate.admit(account, owner, now)                                                     # HEAD e checks JA revalidados acima: so entao a conta pode ser sondada
         if not admission.allowed:
             return {"action": "IDLE", "suspended": admission.block.as_dict() if admission.block else {}}
