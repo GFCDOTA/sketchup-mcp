@@ -83,9 +83,14 @@ def linked_issues(body: str | None) -> set[int]:
     return {int(n) for grp in _LINK.findall(body or "") for n in re.findall(r"#(\d+)", grp)}
 
 
+def _ui_links(pr: dict) -> set[int]:
+    """Vinculos feitos pela interface do GitHub (barra lateral "Development"): nao aparecem no corpo, vem em `closingIssuesReferences`."""
+    return {int(r["number"]) for r in (pr.get("closingIssuesReferences") or []) if isinstance(r, dict) and isinstance(r.get("number"), int)}
+
+
 def open_pr_for(prs: list[dict], number: int) -> int | None:
-    """Um PR ABERTO ja vinculado a Issue (qualquer forma aceita pelo GitHub): nunca um pedido novo por cima."""
-    return next((int(p["number"]) for p in prs if number in linked_issues(p.get("body"))), None)
+    """Um PR ABERTO ja vinculado a Issue (palavra no corpo OU vinculo manual na interface): nunca um pedido novo por cima."""
+    return next((int(p["number"]) for p in prs if number in linked_issues(p.get("body")) | _ui_links(p)), None)
 
 
 def plan(issues: list[dict], prs: list[dict], state: dict, statuses: dict[int, str] | None = None,
@@ -139,31 +144,42 @@ def main(argv: list[str] | None = None) -> int:
     readiness = bd.load_readiness()                                                 # so para recusar o que a auditoria marcou como SketchUp
     # a trava do estado de execucao vale da LEITURA dos claims ate a GRAVACAO do pedido: um claim concorrente (executor reivindicando a Issue ou o componente) nao pode
     # entrar entre a decisao e a publicacao. A trava e curta (le um JSON, grava uma linha SQLite); o que e lento (gh) ja foi lido antes.
+    # A trava do estado de execucao e CURTA (espera 5 s; uma trava com mais de 60 s e tida como abandonada): NADA lento (gh) roda dentro dela. Ordem:
+    #   1) le os claims sob a trava e planeja; 2) RELE o GitHub FORA da trava; 3) sob a trava: rele os claims, decide de novo com os fatos novos e grava;
+    #   4) pos-checagem: um PR vinculado que abriu entre a releitura e a gravacao descarta o pedido (supersede). Janela residual: entre (2) e (4), coberta por (4).
     with es.locked(path):
         state = es.load(path)
-        result = plan(issues, prs, state, statuses, readiness)
-        out: dict = {"candidate": None if result.candidate is None else {
-            "issue": result.candidate.node.number, "title": result.candidate.node.title}, "skipped": result.skipped}
-        if a.cmd == "publish" and a.apply and result.candidate is not None:
-            # REVALIDA sob a trava: o que foi lido antes dela (Issues, PRs) pode ter mudado - outro executor pode ter aberto um PR e soltado o claim nesse meio-tempo
-            fresh_issues, fresh_statuses, fresh_prs = bd.load(statuses=a.project)          # o status do Project tambem e RELIDO: Ready pode ter saido no meio
-            if len(fresh_issues) >= bd.LOAD_LIMIT or len(fresh_prs) >= bd.LOAD_LIMIT:
-                out.update(published=None, note=f"a revalidacao atingiu o limite de {bd.LOAD_LIMIT} (lista possivelmente truncada): nada foi publicado")
-                print(json.dumps(out, indent=1, ensure_ascii=False))
-                return 2
+    result = plan(issues, prs, state, statuses, readiness)
+    out: dict = {"candidate": None if result.candidate is None else {
+        "issue": result.candidate.node.number, "title": result.candidate.node.title}, "skipped": result.skipped}
+    if a.cmd == "publish" and a.apply and result.candidate is not None:
+        fresh_issues, fresh_statuses, fresh_prs = bd.load(statuses=a.project)              # o status do Project tambem e RELIDO: Ready pode ter saido no meio
+        if len(fresh_issues) >= bd.LOAD_LIMIT or len(fresh_prs) >= bd.LOAD_LIMIT:
+            out.update(published=None, note=f"a revalidacao atingiu o limite de {bd.LOAD_LIMIT} (lista possivelmente truncada): nada foi publicado")
+            print(json.dumps(out, indent=1, ensure_ascii=False))
+            return 2
+        from tools.orchestration.store_factory import get_store
+        with es.locked(path):
             again = plan(fresh_issues, fresh_prs, es.load(path), fresh_statuses if a.project else None, readiness)
             if again.candidate is None or again.candidate.node.number != result.candidate.node.number:
                 out["published"] = None
-                out["note"] = "a revalidacao sob a trava mudou o candidato (PR novo, claim ou Issue alterada): nada foi publicado"
+                out["note"] = "a revalidacao mudou o candidato (PR novo, claim ou Issue alterada): nada foi publicado"
                 out["revalidated_skipped"] = again.skipped
                 print(json.dumps(out, indent=1, ensure_ascii=False))
                 return 1
-            from tools.orchestration.store_factory import get_store
-            event_id, created = publish(get_store(), again.candidate, fresh_issues)
-            out["published"] = {"event_id": event_id, "created": created}
-        elif a.cmd == "publish":
-            out["published"] = None
-            out["note"] = "sem --apply (ou sem candidato): nada foi gravado"
+            store = get_store()
+            event_id, created = publish(store, again.candidate, fresh_issues)
+        out["published"] = {"event_id": event_id, "created": created}
+        _i, _s, after_prs = bd.load(statuses=False)
+        linked = open_pr_for(after_prs, again.candidate.node.number)
+        if linked is not None and created:
+            owned = store.claim_by_id(event_id, "intake:post-check", 30.0)
+            if owned is not None:
+                store.supersede(owned, f"o PR #{linked} foi vinculado a Issue enquanto o pedido era gravado: descartado")
+                out["superseded"] = {"event_id": event_id, "pr": linked}
+    elif a.cmd == "publish":
+        out["published"] = None
+        out["note"] = "sem --apply (ou sem candidato): nada foi gravado"
     print(json.dumps(out, indent=1, ensure_ascii=False))
     return 0 if result.candidate is not None else 1
 

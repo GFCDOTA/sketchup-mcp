@@ -203,7 +203,7 @@ def load(statuses: bool = False) -> tuple[list[dict], dict[int, str] | None, lis
     from tools.validation.backlog_gate import OWNER, PROJECT, REPO, _gh
     issues = json.loads(_gh("issue", "list", "--repo", REPO, "--state", "all", "--limit", str(LOAD_LIMIT),
                             "--json", "number,title,state,stateReason,labels,body"))
-    prs = json.loads(_gh("pr", "list", "--repo", REPO, "--state", "open", "--limit", str(LOAD_LIMIT), "--json", "number,body,headRefName"))
+    prs = json.loads(_gh("pr", "list", "--repo", REPO, "--state", "open", "--limit", str(LOAD_LIMIT), "--json", "number,body,headRefName,closingIssuesReferences"))
     st = None
     if statuses:
         rows = json.loads(_gh("project", "item-list", PROJECT, "--owner", OWNER, "--limit", "1000", "--format", "json"))["items"]

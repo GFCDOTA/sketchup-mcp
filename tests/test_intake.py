@@ -352,3 +352,40 @@ def test_backlog_load_reads_issues_prs_and_the_project_through_gh_with_explicit_
     assert "--state" in calls[1] and "open" in calls[1]
     _i, st, _p = bd.load(statuses=False)
     assert st is None and not any(a[:2] == ("project", "item-list") for a in calls[3:])                  # sem --project, o Project nao e consultado
+
+
+# -- 10a revisao do Codex (#641): trava curta fora do gh; vinculo pela interface; pos-checagem ------------------------------------------------------------
+def test_a_slow_github_reread_does_not_hold_the_lock_and_a_concurrent_claim_wins(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    calls = []
+
+    def load(statuses=False):
+        calls.append(1)
+        if len(calls) == 2:                                                                               # a releitura lenta: enquanto isso o executor reivindica
+            with es.locked(es.state_path(), wait_s=0.5):                                                 # a trava esta LIVRE (antes ficaria presa ate 5 s)
+                st = es.load(es.state_path())
+                es.claim(st, 1, "claude", "feat/x", "a" * 40, ["comp-a"])
+                es.save(st, es.state_path())
+        return [issue(1)], None, []
+    monkeypatch.setattr(bd, "load", load)
+    assert intake.main(["publish", "--apply"]) == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["published"] is None and "revalidacao" in out["note"]                                          # o claim feito durante a releitura vence
+    assert not cli.exists() or EventStore(cli).events() == []
+
+
+def test_a_pr_linked_through_the_github_interface_without_any_body_keyword_blocks_the_request():
+    pr = {"number": 61, "body": "sem referencia no texto", "headRefName": "x", "closingIssuesReferences": [{"number": 1}]}
+    res = plan([issue(1)], prs=[pr])
+    assert res.candidate is None and all("PR #61" in x for x in res.skipped)
+
+
+def test_a_pr_linked_between_the_reread_and_the_write_supersedes_the_just_published_request(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, [{"number": 88, "body": "", "headRefName": "x",
+                                                                                         "closingIssuesReferences": [{"number": 1}]}])])
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["superseded"]["pr"] == 88
+    assert [e["status"] for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER] == ["SUPERSEDED"]
