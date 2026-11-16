@@ -164,6 +164,9 @@ def remote_head(wt: Path, branch: str, run: Run) -> str | None:
     return out.split()[0] if rc == 0 and out else None
 
 
+DEFINITIVE_REFUSAL = re.compile(r"\[rejected\]|\[remote rejected\]|non-fast-forward|fetch first|hook declined|protected branch|GH006|GH013", re.I)
+
+
 def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _git, check=run_checks,
             cfg: "guards.Config | None" = None, revalidate: Revalidate | None = None, record: Callable[[str], bool] | None = None) -> tuple[str, str]:
     """('NOOP'|'PUSHED'|'PUBLISH_UNCONFIRMED'|'STALE'|'BLOCKED_GUARDS'|'FAILED_CHECKS'|'ERROR', msg). Nunca publica sem as duas barreiras de autorizacao.
@@ -276,9 +279,12 @@ def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _g
         consulted, tip = remote_tip(wt, branch, run)
         if consulted and tip == local_head:
             rc = 0
-        elif not consulted or rc == 124:                                   # prazo estourado: o servidor ainda pode estar aplicando o push que o cliente abandonou
-            return "PUBLISH_UNCONFIRMED", (f"git push terminou com codigo {rc} e a ponta remota {'nao pode ser consultada' if not consulted else 'ainda nao mostra o commit'}: "
-                                           "o remoto pode ter aceito o commit; o item fica com publicacao pendente ate o remoto ser reconciliado")
+        elif not consulted or rc == 124 or not DEFINITIVE_REFUSAL.search(out or ""):
+            # so uma RECUSA EXPLICITA do servidor (rejected/non-fast-forward/hook declined) e definitiva. Conexao caida, reset, timeout ou saida desconhecida deixam o
+            # resultado em aberto: o servidor pode ainda estar aplicando o push, e uma ponta diferente agora nao prova que o commit nao chegou antes de um avanco posterior.
+            return "PUBLISH_UNCONFIRMED", (f"git push terminou com codigo {rc} sem uma recusa explicita do servidor e a ponta remota "
+                                           f"{'nao pode ser consultada' if not consulted else 'ainda nao mostra o commit'}: o remoto pode ter aceito o commit; "
+                                           "o item fica com publicacao pendente ate o remoto ser reconciliado")
         else:
             return "ERROR", f"git push recusado: {out[:200]}"
     return "PUSHED", f"{len(files)} arquivo(s), {verdict.lines} linha(s); publicado em {branch}"

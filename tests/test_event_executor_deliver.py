@@ -497,12 +497,12 @@ def test_remote_tip_distinguishes_a_missing_branch_from_an_unreachable_remote(re
 
 
 # -- 5a revisao do Codex (#652): QUALQUER falha do push so e decidida pela ponta remota -------------------------------------------------------------------
-def failing_push(code, real_push):
+def failing_push(code, real_push, message="fatal: conexao encerrada"):
     def run_git(args, cwd):
         if args and args[0] == "push":
             if real_push:
                 dl._git(args, cwd)
-            return code, "fatal: conexao encerrada"
+            return code, message
         return dl._git(args, cwd)
     return run_git
 
@@ -515,12 +515,22 @@ def test_a_connection_lost_after_the_server_accepted_the_push_is_still_a_publica
     assert action == "PUSHED" and item["published_sha"] == sh(remote, "rev-parse", "feat/x"), msg
 
 
-@pytest.mark.parametrize("code", [1, 128])
-def test_a_failed_push_that_did_not_reach_a_reachable_remote_is_a_definitive_refusal(repo, code):
+@pytest.mark.parametrize("message", [" ! [rejected]        HEAD -> feat/x (non-fast-forward)", " ! [remote rejected] HEAD -> feat/x (pre-receive hook declined)",
+                                     "remote: error: GH006: Protected branch update failed", "hint: Updates were rejected because the tip is behind (fetch first)"])
+def test_an_explicit_server_refusal_is_definitive_when_the_remote_tip_is_untouched(repo, message):
     wt, remote, base = repo
     edit_test(wt)
-    action, msg, _item = run_with_item(wt, base, run=failing_push(code, real_push=False))
+    action, msg, _item = run_with_item(wt, base, run=failing_push(1, real_push=False, message=message))
     assert action == "ERROR" and "recusado" in msg and untouched(remote, base)
+
+
+@pytest.mark.parametrize("code,message", [(1, "fatal: conexao encerrada"), (128, "fatal: unable to access: Connection reset by peer"), (255, ""), (1, "error: RPC failed; HTTP 502"),
+                                          (128, "fatal: the remote end hung up unexpectedly")])
+def test_a_failure_without_an_explicit_server_refusal_stays_unconfirmed_even_if_the_tip_differs(repo, code, message):
+    wt, remote, base = repo
+    edit_test(wt)
+    action, msg, item = run_with_item(wt, base, run=failing_push(code, real_push=False, message=message))
+    assert action == "PUBLISH_UNCONFIRMED" and item["published_sha"] and untouched(remote, base)         # o SHA registrado e preservado; nada reexecuta sozinho
 
 
 def test_a_failed_push_whose_remote_cannot_be_read_afterwards_is_unconfirmed_not_an_error(repo):
