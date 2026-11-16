@@ -1,0 +1,77 @@
+{
+  "pr": 617,
+  "head_sha": "3b9efef5ab65ea6947cf26d1ddcfc9c724803115",
+  "verdict": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "file": "tools/orchestration/sandboxed_tests.py",
+      "line": 270,
+      "reason": "A sonda comprova apenas que o AppContainer não acessa o canário específico sob a raiz escolhida. Um AppContainer sem capacidades ainda pode acessar recursos externos cujas ACLs concedam acesso a ALL APPLICATION PACKAGES ou ao seu SID; portanto, a negação do canário não prova que todo arquivo fora do workspace está protegido. O código testado pode ler um arquivo externo acessível e imprimi-lo nos logs herdados, enquanto a execução recebe a prova e o rótulo de isolamento.",
+      "required_change": "Não trate a sonda de um único caminho como prova de confinamento geral do sistema de arquivos. Execute código não confiável em um ambiente que imponha esse limite para todos os recursos externos, ou reduza explicitamente o contrato e impeça seu uso como garantia de proteção de arquivos e credenciais. Acrescente um teste com um arquivo externo que conceda acesso a ALL APPLICATION PACKAGES."
+    }
+  ],
+  "tests_reviewed": [
+    "tests/test_appcontainer_isolation.py",
+    "tests/test_closed_loop_lab.py",
+    "tests/test_sandboxed_tests.py"
+  ],
+  "confidence": "HIGH",
+  "files_reviewed": [
+    {
+      "path": "tools/orchestration/sandboxed_tests.py",
+      "sha256": "38e4935134116d21ce073e2d1a2e9def3a57c3ffbd28a146c9a89f34144979b4",
+      "code_excerpt": "            gaps = canary_gaps(code, _read(probe_out), secret, intruder.exists())"
+    },
+    {
+      "path": "tools/orchestration/closed_loop_lab.py",
+      "sha256": "259b54c598972cfc3544e26228d8135a25b9b78160464d9bb0bf7c64e535a1d6",
+      "code_excerpt": "        \"coordinator_tests_ran_in_os_sandbox\": sandboxed,"
+    },
+    {
+      "path": "tools/orchestration/appcontainer.py",
+      "sha256": "83249ca705d2fb0675ab28fcc32da24e5c2b56a0f7b6b7be4cfa224c519e02d4",
+      "code_excerpt": "    from the arguments used to create it. It says nothing about file ACLs."
+    },
+    {
+      "path": "tests/test_sandboxed_tests.py",
+      "sha256": "01c65df30402a04cc1486a2fa63c066bcdf837ecb8df734dcaac72653edc0b62",
+      "code_excerpt": "def test_tested_code_cannot_read_write_outside_or_reach_the_network_and_the_control_can(tmp_path):"
+    },
+    {
+      "path": "tests/test_closed_loop_lab.py",
+      "sha256": "ac6930a2bb02de35950e446e49cea084829f4f03659df358e3d1edab13b9f4a8",
+      "code_excerpt": "def test_evidence_that_names_the_sandbox_without_its_proofs_does_not_pass(env, fake_sandbox):"
+    },
+    {
+      "path": "tests/test_appcontainer_isolation.py",
+      "sha256": "81f1684df0ed0dba09bf4b12794999540fa805983305a001ad17563e886dca12",
+      "code_excerpt": "def test_token_facts_tell_a_contained_process_from_an_ordinary_one():"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "f10db24b595cf8ef15a93283c1831a25314d689520795abbf1191abc07f2eb37",
+      "code_excerpt": "        run: uv run --no-sync python -m pytest --noconftest tests/test_process_supervisor.py tests/test_appcontainer_isolation.py tests/test_sandboxed_tests.py tests/test_closed_loop_lab.py -q"
+    },
+    {
+      "path": "docs/specs/fp042_inventory.v1.json",
+      "sha256": "c71a54a68f2e92d99db9cc99b3886932b9a1cb6a4572930ca5bbac423526123f",
+      "code_excerpt": "      \"path\": \"tools/orchestration/sandboxed_tests.py\","
+    },
+    {
+      "path": "docs/specs/fp042_references.v1.json",
+      "sha256": "f6233464ce30b47d0d6f83f8fcd192ba5b8b18e762f6178d2604d88a20cad81a",
+      "code_excerpt": "  \"preservation_policy\": \"CANONICAL_LOCATION_AND_BYTES_PINNED\","
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/README.md",
+      "sha256": "fd2c8b1b8e477bb5146ac5dbcdf1d82061082d369bc15534f34e088d3b397d93",
+      "code_excerpt": "2. uma sonda no mesmo perfil e workspace não lê nem escreve um canário fora do workspace, e escreve dentro dele."
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-14_m1_acceptance/README.md",
+      "sha256": "18d180cb0eb78b05bfdebeb324006968387c15b3c731803d51aed8929f648108",
+      "code_excerpt": "**Este documento não declara o M1 concluído.** Ele mostra onde está a prova de cada critério. O PR que traz o isolamento de"
+    }
+  ]
+}
