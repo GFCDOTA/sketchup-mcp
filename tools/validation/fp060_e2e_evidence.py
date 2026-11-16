@@ -29,7 +29,8 @@ EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 WIN_PATH = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\"'<>|\r\n]*")
 UNC_PATH = re.compile(r"(?:\\\\|(?<![:\w/.])//)[A-Za-z0-9_.$-]+[\\/][^\"'<>|\r\n]*")                   # \\servidor\compartilhamento\... (e //servidor/compartilhamento/...)                    # ate o fim da linha/aspas: cobre espacos no caminho
 UNIX_PATH = re.compile(r"(?<![\w.:#/-])/(?:[\w.@+~-]+/)+[\w.@+~-]*")                           # qualquer caminho absoluto Unix (2+ segmentos); URL e `a/b` sem barra inicial ficam
-FORBIDDEN = (TOKEN, EMAIL, WIN_PATH, UNC_PATH, UNIX_PATH)
+UNIX_SPACED = re.compile(r"(?<![\w.:#/-])/(?:home|Users|users|root|mnt|srv|opt|var|tmp|Volumes|workspace|data|media)/[^\"'<>|\r\n]*")     # raiz de usuario/maquina: ate o fim da linha (cobre espacos)
+FORBIDDEN = (TOKEN, EMAIL, WIN_PATH, UNC_PATH, UNIX_SPACED, UNIX_PATH)
 
 
 def scrub(text: str) -> str:
@@ -37,6 +38,7 @@ def scrub(text: str) -> str:
     text = EMAIL.sub("<email>", text)
     text = UNC_PATH.sub("<caminho>", text)
     text = WIN_PATH.sub("<caminho>", text)
+    text = UNIX_SPACED.sub("<caminho>", text)
     return UNIX_PATH.sub("<caminho>", text)
 
 

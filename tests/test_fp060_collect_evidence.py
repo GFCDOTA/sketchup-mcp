@@ -261,3 +261,29 @@ def test_the_versioned_wrapper_is_a_thin_cli_over_the_same_module():
     import sys
     done = subprocess.run([sys.executable, str(WRAPPER)], capture_output=True, text=True, timeout=60)
     assert done.returncode != 0 and "Uso:" in (done.stderr + done.stdout)                                         # sem argumentos mostra o uso do modulo
+
+
+# -- 8a revisao do Codex (#660): caminho Unix com espacos ---------------------------------------------------------------------------------------------
+@pytest.mark.parametrize("path", ["/home/Joao Silva/projeto/segredo.txt", "/Users/Maria Souza/Documents/x y.db", "/mnt/dados da empresa/a b/c.txt", "/workspace/meu time/projeto/s.txt"])
+def test_a_unix_path_with_spaces_is_removed_whole_not_cut_at_the_first_space(path):
+    out = ce.scrub(f"erro em {path}")
+    for part in ("Silva", "Souza", "empresa", "meu time", "segredo", "projeto"):
+        assert part not in out, (part, out)
+    assert "<caminho>" in out
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(f"x {path}")
+
+
+def test_a_unix_path_with_spaces_never_reaches_the_written_report(tmp_path, monkeypatch):
+    path = "/home/Joao Silva/projeto/segredo.txt"
+    monkeypatch.setattr(ce, "collect_flow", lambda n, i: {"pr": n, "issue": i, "head_final": "a" * 40, "reviews": [], "commits": [{"mensagem": f"x {path}"}]})
+    monkeypatch.setattr(ce, "read_store", lambda p: {"eventos": [{"error": path}], "transicoes": []})
+    out = tmp_path / "out"
+    assert ce.main([str(out), "A=1:2:" + (tmp_path / "s.db").as_posix()]) == 0
+    written = (out / "evidence.json").read_text(encoding="utf-8")
+    assert "Silva" not in written and "segredo" not in written
+
+
+def test_urls_and_plain_prose_after_a_slash_are_not_swallowed_by_the_spaced_pattern():
+    text = "veja https://github.com/o/r/pull/7 e refs/heads/feat/x; docs/a/b.md tambem"
+    assert ce.scrub(text) == text
