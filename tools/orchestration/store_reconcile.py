@@ -11,6 +11,11 @@ Regras (cada uma tem teste):
 - So age sobre eventos PENDING (ou RUNNING com lease vencido): um evento com lease vivo e de outro executor e nunca e tocado;
 - A unica correcao automatica e `supersede` (descartar um pedido OBSOLETO), cercada pelo token: o evento e reivindicado antes (`claim_by_id`) e o
   resultado e descartado se outro dono apareceu. Nada e reexecutado, republicado, reaberto nem apagado;
+- Cada evento e VINCULADO ao repositorio de origem (`payload.repo`, gravado pelo bridge): o numero do PR so vale dentro do seu repositorio. Evento de OUTRO
+  repositorio (`OTHER_REPO`) ou antigo, sem identidade comprovavel (`UNKNOWN_REPO`), e preservado e reportado, nunca consultado nem aplicado;
+- Com o executor JSON consumindo a fila (modo sombra, o padrao), a fila JSON e a dona do trabalho e o SQLite so e atualizado DEPOIS da execucao: um evento
+  PENDING cujo item JSON ainda esta ativo (QUEUED/RUNNING/FAILED/BLOCKED_*) NAO e descartado (`JSON_ACTIVE`), e uma fila JSON ilegivel nao autoriza aplicar nada.
+  So com `EXECUTOR_SOURCE=sqlite` (o SQLite autoritativo, protegido pelo lease do claim) a aplicacao decide sozinha;
 - Falha ao ler o GitHub (rede, 5xx, resposta malformada) vira `ERROR` no relatorio e NAO muda o evento: na duvida o pedido segue como esta;
 - Divergencia que nao e segura corrigir sozinha (PR aberto no mesmo HEAD, mas com CI reprovado, por exemplo) e so REPORTADA com codigo;
 - Sem `--apply` nada e gravado, nunca."""
@@ -18,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -28,6 +34,18 @@ from tools.orchestration.event_store import EventStore
 
 EVENT_TYPE = "CORRECTION_REQUESTED"
 SHA = re.compile(r"[0-9a-f]{40}")
+FINISHED_JSON = frozenset({"DONE_AWAITING_REREVIEW", "SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"})      # estados em que o item JSON nao tem mais trabalho
+
+
+def sqlite_is_authoritative() -> bool:
+    return os.environ.get("EXECUTOR_SOURCE", "json").strip().lower() == "sqlite"
+
+
+def json_item_active(queue: list[dict], payload: dict) -> bool:
+    """O executor JSON ainda e dono deste pedido? Mesmo PR + mesmo HEAD, em um item de review que nao terminou."""
+    head = str(payload.get("head_sha") or "").lower()
+    return any(isinstance(i, dict) and i.get("kind") == "review" and i.get("pr") == payload.get("pr") and str(i.get("head_sha") or "").lower() == head
+               and i.get("state") not in FINISHED_JSON for i in queue)
 
 
 def _payload(ev: dict) -> dict:
@@ -67,12 +85,28 @@ def judge(ev: dict, pr: dict) -> tuple[str, str]:
     return "CURRENT", "PR aberto no mesmo HEAD do pedido"
 
 
-def reconcile(store: EventStore, gh: eb.Gh, repo: str = eb.REPO, apply: bool = False) -> dict:
-    """Relatorio por evento aberto. Com `apply`, supersede os obsoletos (HEAD_MOVED / PR_NOT_OPEN); o resto so e reportado."""
+def reconcile(store: EventStore, gh: eb.Gh, repo: str = eb.REPO, apply: bool = False, json_queue: list[dict] | None = None,
+              sqlite_authoritative: bool | None = None) -> dict:
+    """Relatorio por evento aberto. Com `apply`, supersede os obsoletos (HEAD_MOVED / PR_NOT_OPEN) cujo dono nao e o executor JSON; o resto so e reportado.
+    `json_queue`: a fila JSON consumida (lida do disco se nao for dada). `sqlite_authoritative`: padrao pelo `EXECUTOR_SOURCE`."""
+    authoritative = sqlite_is_authoritative() if sqlite_authoritative is None else sqlite_authoritative
+    queue, queue_error = json_queue, ""
+    if apply and not authoritative and queue is None:
+        try:
+            queue = eb.load()["queue"]
+        except (ValueError, OSError, KeyError, TypeError) as exc:                                              # ilegivel: fail-closed, nada e aplicado
+            queue, queue_error = [], f"fila JSON ilegivel ({type(exc).__name__}): nada e aplicado"
     rows = []
     for ev in open_events(store):
         p = _payload(ev)
         row = {"event": ev["id"], "key": ev["idempotency_key"], "pr": p.get("pr")}
+        event_repo = p.get("repo")
+        if not isinstance(event_repo, str) or not event_repo:
+            rows.append({**row, "code": "UNKNOWN_REPO", "detail": "evento sem identidade de repositorio (anterior ao vinculo): preservado, nao consultado"})
+            continue
+        if event_repo.lower() != repo.lower():
+            rows.append({**row, "code": "OTHER_REPO", "detail": f"evento do repositorio {event_repo!r}, nao de {repo!r}: preservado, nao consultado"})
+            continue
         if not isinstance(p.get("pr"), int) or isinstance(p.get("pr"), bool) or not isinstance(p.get("head_sha"), str) \
                 or not SHA.fullmatch(p["head_sha"].lower()):
             rows.append({**row, "code": "MALFORMED", "detail": "payload sem PR inteiro ou sem head_sha valido: obsolescencia nao comprovavel; fica como esta"})
@@ -94,7 +128,12 @@ def reconcile(store: EventStore, gh: eb.Gh, repo: str = eb.REPO, apply: bool = F
             if ci == "failed":
                 row["code"], row["detail"] = "CURRENT_CI_FAILED", "PR aberto no mesmo HEAD, com checks reprovados: so reportado (corrigir e do executor/humano)"
         if apply and code in ("HEAD_MOVED", "PR_NOT_OPEN"):
-            row["applied"] = _supersede(store, ev, detail)
+            if queue_error:
+                row["applied"], row["skipped_because"] = "SKIPPED", queue_error
+            elif not authoritative and json_item_active(queue or [], p):
+                row["applied"], row["skipped_because"] = "SKIPPED", "JSON_ACTIVE: o executor JSON ainda e dono do item; o resultado sera sincronizado depois da execucao"
+            else:
+                row["applied"] = _supersede(store, ev, detail)
         rows.append(row)
     counts: dict[str, int] = {}
     for r in rows:

@@ -39,6 +39,12 @@ class FakeGh:
         return {"number": 7, "state": self.state, "merged": self.merged, "head": {"sha": self.head}}
 
 
+@pytest.fixture(autouse=True)
+def isolated_bridge(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "bridge-empty.json"))      # fila JSON vazia por padrao: nunca le a do workspace
+    monkeypatch.delenv("EXECUTOR_SOURCE", raising=False)
+
+
 @pytest.fixture()
 def clock():
     return Clock()
@@ -49,8 +55,10 @@ def store(tmp_path, clock):
     return EventStore(tmp_path / "s.db", clock=clock)
 
 
-def publish(store, key=KEY, payload=None, event_type="CORRECTION_REQUESTED"):
+def publish(store, key=KEY, payload=None, event_type="CORRECTION_REQUESTED", repo=sr.eb.REPO):
     payload = {"pr": 7, "head_sha": HEAD, "review_id": "9"} if payload is None else payload
+    if repo is not None:
+        payload = {"repo": repo, **payload}                                         # o bridge grava o repositorio de origem em todo evento
     return store.publish(event_type, key, "pr:7", payload, producer="event_bridge")[0]
 
 
@@ -233,7 +241,7 @@ def test_the_plan_opens_an_existing_database_read_only(tmp_path, monkeypatch, ca
     from tools.orchestration import store_factory
     db = tmp_path / "store.db"
     store = EventStore(db)
-    store.publish("CORRECTION_REQUESTED", KEY, "pr:7", {"pr": 7, "head_sha": HEAD, "review_id": "9"})
+    store.publish("CORRECTION_REQUESTED", KEY, "pr:7", {"repo": sr.eb.REPO, "pr": 7, "head_sha": HEAD, "review_id": "9"})
     before = db.read_bytes() if not db.with_name("store.db-wal").exists() else None
     monkeypatch.setenv("EVENT_STORE_DB_PATH", str(db))
     store_factory.reset_store()
@@ -250,12 +258,107 @@ def test_the_cli_applies_only_with_apply_and_returns_1_only_when_a_github_read_f
     from tools.orchestration import store_factory
     db = tmp_path / "store.db"
     store = EventStore(db)
-    store.publish("CORRECTION_REQUESTED", KEY, "pr:7", {"pr": 7, "head_sha": HEAD, "review_id": "9"})
+    store.publish("CORRECTION_REQUESTED", KEY, "pr:7", {"repo": sr.eb.REPO, "pr": 7, "head_sha": HEAD, "review_id": "9"})
     monkeypatch.setenv("EVENT_STORE_DB_PATH", str(db))
     store_factory.reset_store()
     monkeypatch.setattr(sr.eb, "gh_json", FakeGh(head=NEW))
     assert sr.main(["--apply"]) == 0 and status(store) == "SUPERSEDED"
     capsys.readouterr()
-    store.publish("CORRECTION_REQUESTED", f"review:10:7:{HEAD}", "pr:7", {"pr": 7, "head_sha": HEAD, "review_id": "10"})
+    store.publish("CORRECTION_REQUESTED", f"review:10:7:{HEAD}", "pr:7", {"repo": sr.eb.REPO, "pr": 7, "head_sha": HEAD, "review_id": "10"})
     monkeypatch.setattr(sr.eb, "gh_json", FakeGh(boom=RuntimeError("rede")))
     assert sr.main([]) == 1
+
+
+# -- achados da 2a revisao do Codex: identidade do repositorio e dono do trabalho (executor JSON) ---------------------------------
+OTHER = "outra-org/outro-repo"
+
+
+def test_the_bridge_binds_every_event_to_its_repository():
+    from tools.orchestration.store_factory import bridge_to_store_args
+    args = bridge_to_store_args({"event_id": "review:9", "kind": "review", "state": "CHANGES_REQUESTED", "pr": 7, "repo": sr.eb.REPO, "author": "r"}, {"head_sha": HEAD, "refs": [1]})
+    assert args["payload"]["repo"] == sr.eb.REPO
+
+
+def test_the_same_pr_number_in_another_repository_is_never_consulted_nor_discarded(store):
+    publish(store, repo=OTHER)                                                   # PR #7 de OUTRO repositorio, com HEAD diferente do #7 consultado
+    gh = FakeGh(head=NEW)                                                        # o #7 deste repositorio andou: se fosse confundido, o pedido seria descartado
+    report = sr.reconcile(store, gh, apply=True)
+    assert report["counts"] == {"OTHER_REPO": 1} and gh.calls == [] and status(store) == "PENDING"
+
+
+def test_a_legacy_event_without_a_provable_repository_is_preserved_and_reported(store):
+    publish(store, repo=None)
+    gh = FakeGh(state="closed")
+    report = sr.reconcile(store, gh, apply=True)
+    assert report["counts"] == {"UNKNOWN_REPO": 1} and gh.calls == [] and status(store) == "PENDING"
+
+
+def test_the_repository_comparison_ignores_case(store):
+    publish(store, repo=sr.eb.REPO.upper())
+    assert sr.reconcile(store, FakeGh(head=NEW), apply=True)["counts"] == {"HEAD_MOVED": 1} and status(store) == "SUPERSEDED"
+
+
+def json_item(state, **kw):
+    return {"kind": "review", "key": "k1", "pr": 7, "head_sha": HEAD, "state": state, "event_id": "review:9", **kw}
+
+
+@pytest.mark.parametrize("state", ["QUEUED", "RUNNING", "FAILED", "BLOCKED_CLI", "BLOCKED_WORKTREE"])
+def test_an_event_whose_json_item_is_still_active_is_not_discarded_while_the_json_executor_owns_it(store, state):
+    publish(store)
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=[json_item(state)], sqlite_authoritative=False)
+    row = report["events"][0]
+    assert row["code"] == "HEAD_MOVED" and row["applied"] == "SKIPPED" and "JSON_ACTIVE" in row["skipped_because"] and status(store) == "PENDING"
+
+
+@pytest.mark.parametrize("state", ["DONE_AWAITING_REREVIEW", "SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"])
+def test_an_event_whose_json_item_finished_can_be_reconciled(store, state):
+    publish(store)
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=[json_item(state)], sqlite_authoritative=False)
+    assert report["events"][0]["applied"] == "SUPERSEDED" and status(store) == "SUPERSEDED"
+
+
+def test_an_active_item_of_another_head_or_pr_does_not_protect_the_event(store):
+    publish(store)
+    other = [json_item("RUNNING", pr=8), json_item("RUNNING", head_sha=NEW)]
+    assert sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=other, sqlite_authoritative=False)["events"][0]["applied"] == "SUPERSEDED"
+
+
+def test_when_sqlite_is_authoritative_the_json_queue_is_not_consulted(store):
+    publish(store)
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=[json_item("RUNNING")], sqlite_authoritative=True)
+    assert report["events"][0]["applied"] == "SUPERSEDED"
+
+
+def test_an_unreadable_json_queue_applies_nothing(store, tmp_path, monkeypatch):
+    publish(store)
+    bad = tmp_path / "bridge.json"
+    bad.write_bytes(b"\x00" * 32)
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(bad))
+    monkeypatch.delenv("EXECUTOR_SOURCE", raising=False)
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True)
+    assert report["events"][0]["applied"] == "SKIPPED" and "ilegivel" in report["events"][0]["skipped_because"] and status(store) == "PENDING"
+
+
+def test_the_default_reads_the_real_json_queue_and_respects_an_active_item(store, tmp_path, monkeypatch):
+    from tools.orchestration import event_bridge as eb
+    publish(store)
+    path = tmp_path / "bridge.json"
+    eb.save({**eb.default_bridge_state(), "queue": [json_item("RUNNING")]}, path)
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(path))
+    monkeypatch.delenv("EXECUTOR_SOURCE", raising=False)
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True)
+    assert report["events"][0]["applied"] == "SKIPPED" and status(store) == "PENDING"
+    monkeypatch.setenv("EXECUTOR_SOURCE", "sqlite")
+    assert sr.reconcile(store, FakeGh(head=NEW), apply=True)["events"][0]["applied"] == "SUPERSEDED"
+
+
+def test_a_running_json_executor_still_syncs_its_result_after_a_reconcile_attempt(store, tmp_path, monkeypatch):
+    """Integracao com o executor JSON ativo: o reconciliador nao rouba o evento; ao terminar, o sync do executor o conclui como DONE."""
+    from tools.orchestration import event_executor as ex
+    publish(store, key=f"review:9:7:{HEAD}")
+    running = json_item("RUNNING", event_id="review:9")
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=[running], sqlite_authoritative=False)
+    assert report["events"][0]["applied"] == "SKIPPED" and status(store) == "PENDING"
+    monkeypatch.setattr("tools.orchestration.store_factory._inc", lambda *a, **k: None, raising=False)
+    ex._sync_result_to_store(store, running, {"action": "DONE", "new_head": NEW})
+    assert status(store) == "DONE"                                                # o historico do SQLite ficou correto (sem o reconciliador ter descartado)

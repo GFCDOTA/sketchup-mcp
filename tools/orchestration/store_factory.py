@@ -99,6 +99,7 @@ def bridge_to_store_args(event: dict, pr_facts: dict) -> dict | None:
         job_id=job_id,
         payload={
             "pr": event.get("pr"),
+            "repo": event.get("repo"),                       # o numero do PR so identifica o PR DENTRO de um repositorio: quem reconcilia valida esta identidade
             "issue": sorted(pr_facts.get("refs", []))[0] if pr_facts.get("refs") else None,
             "head_sha": head_sha,
             "review_id": event.get("event_id", "").replace("review:", ""),
