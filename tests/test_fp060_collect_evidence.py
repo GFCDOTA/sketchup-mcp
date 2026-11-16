@@ -287,3 +287,18 @@ def test_a_unix_path_with_spaces_never_reaches_the_written_report(tmp_path, monk
 def test_urls_and_plain_prose_after_a_slash_are_not_swallowed_by_the_spaced_pattern():
     text = "veja https://github.com/o/r/pull/7 e refs/heads/feat/x; docs/a/b.md tambem"
     assert ce.scrub(text) == text
+
+
+@pytest.mark.parametrize("path", ["/custom/Joao Silva/projeto/segredo.txt", "/clientes/Maria de Souza/Meus Documentos/a/b.txt", "/srv2/Equipe Alfa Beta/repo/x.py"])
+def test_a_unix_path_with_spaces_under_an_arbitrary_root_is_removed_whole(path):
+    out = ce.scrub(f"erro em {path}")
+    for part in ("Silva", "Souza", "Alfa", "projeto", "segredo", "Meus"):
+        assert part not in out, (part, out)
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(f"x {path}")
+
+
+def test_plain_words_and_urls_around_a_path_are_not_swallowed():
+    text = "falha em /a/b e depois https://github.com/o/r/pull/7 e texto livre com barra a/b"
+    out = ce.scrub(text)
+    assert out.startswith("falha em <caminho> e depois https://github.com/o/r/pull/7") and out.endswith("e texto livre com barra a/b")
