@@ -57,6 +57,9 @@ def mirror_key(item: dict) -> str:
     return f"review:{str(item.get('event_id', '')).split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
 
 
+LATE_TOLERANCE_S = 60                  # atraso do evento em relacao ao JSON que ainda nao e divergencia (relogio/jitter de backoff)
+
+
 def _epoch(iso: object) -> float | None:
     """`retry_after` do item JSON (ISO UTC, `%Y-%m-%dT%H:%M:%SZ`) em epoch; ausente/ilegivel = None (sem espera conhecida)."""
     import datetime as dt
@@ -104,9 +107,15 @@ def compare(queue: list[dict], events: list[dict], now: float | None = None) -> 
                     found.append(Divergence("STATE_MISMATCH", key, f"orcamento de tentativas divergente: o JSON ainda tem {json_left}, o evento so {event_left}: uma falha apos o "
                                                                   "cutover levaria o item a DLQ antes da hora"))
                 retry_at, t_now = _epoch(item.get("retry_after")), (time.time() if now is None else now)
-                if retry_at is not None and retry_at > t_now and float(event.get("available_at") or 0) < retry_at - 1:
+                json_ready = max(retry_at or 0.0, t_now)                      # quando o executor JSON volta a poder escolher o item
+                event_ready = max(float(event.get("available_at") or 0), t_now)    # quando o store passa a poder reivindicar o evento
+                if event_ready < json_ready - 1:
                     # o JSON espera ate `retry_after`; o store ja poderia executar ANTES (disponivel agora OU num instante futuro anterior ao do JSON)
                     found.append(Divergence("STATE_MISMATCH", key, "o JSON aguarda `retry_after` mas o evento fica disponivel (`available_at`) antes dele: o store executaria antes do JSON"))
+                elif event_ready > json_ready + LATE_TOLERANCE_S:
+                    # o inverso: o JSON ja pode (ou poderia bem antes) executar o item e o evento so fica disponivel muito depois: o cutover ATRASA o trabalho
+                    found.append(Divergence("STATE_MISMATCH", key, f"o evento so fica disponivel (`available_at`) {int(event_ready - json_ready)}s depois de o JSON poder executar o item "
+                                                                  f"(tolerancia {LATE_TOLERANCE_S}s): o cutover atrasaria o trabalho"))
             elif event["status"] == "PENDING" and not pickable:
                 # o inverso: o JSON NAO volta a escolher o item (tentativas esgotadas ou estado nao escolhido), mas o store ainda pode reivindicar o evento
                 found.append(Divergence("STATE_MISMATCH", key, f"item {state} com {item.get('attempts') or 0}/{MAX_ATTEMPTS} tentativas que o executor JSON nao escolhe mais, "
@@ -172,6 +181,9 @@ def invalid_item(item: dict) -> str:
             return f"review sem `{field}` (texto nao vazio)"
     if not isinstance(item.get("pr"), int) or isinstance(item.get("pr"), bool):
         return "review com `pr` que nao e inteiro"
+    retry_after = item.get("retry_after")
+    if retry_after not in (None, "") and _epoch(retry_after) is None:
+        return "review com `retry_after` que nao e um instante ISO UTC (AAAA-MM-DDTHH:MM:SSZ)"       # o JSON compara como texto: um valor ilegivel tem semantica propria, nunca "sem espera"
     attempts = item.get("attempts")
     if attempts is not None and (not isinstance(attempts, int) or isinstance(attempts, bool) or attempts < 0):
         return "review com `attempts` que nao e inteiro >= 0"

@@ -336,10 +336,16 @@ def test_a_json_retry_after_in_the_future_with_an_event_already_available_is_a_d
     assert passed == [] and now > 0                                                                                         # retry_after ja passou: ambos disponiveis
 
 
-@pytest.mark.parametrize("bad", [None, "", "ontem", "2026-13-45T99:00:00Z"])
-def test_an_unreadable_retry_after_is_not_treated_as_a_wait(bad):
+@pytest.mark.parametrize("bad", [None, ""])
+def test_an_absent_retry_after_is_not_a_wait(bad):
     assert sd._epoch(bad) is None
     assert sd.compare([item(state="FAILED", attempts=1, retry_after=bad)], [event(status="PENDING", attempt=1)], now=1000.0) == []
+
+
+@pytest.mark.parametrize("bad", ["ontem", "2026-13-45T99:00:00Z", 12345, "2026-11-16 00:00:00"])
+def test_an_unreadable_retry_after_is_a_structured_error_never_a_silent_ok(bad):
+    with pytest.raises(ValueError, match="retry_after"):
+        sd.compare([item(state="FAILED", attempts=1, retry_after=bad)], [event(status="PENDING", attempt=1)], now=1000.0)
 
 
 # -- 7a revisao do Codex (#634): QUEUED tambem e orcamento/janela; janelas futuras ----------------------------------------------------------------------
@@ -364,3 +370,17 @@ def test_when_both_wait_in_the_future_but_the_event_becomes_available_earlier_it
     assert codes(found) == [("STATE_MISMATCH", "k1")] and "antes" in found[0].detail                       # ambos no futuro, mas available_at antecede retry_after
     later = sd.compare([item(state="FAILED", attempts=1, retry_after="2026-11-16T00:00:00Z")], [event(status="PENDING", attempt=1, available_at=retry + 5)], now=retry - 1000)
     assert later == [] and now > 0                                                                          # o store espera MAIS que o JSON: nao e risco
+
+
+# -- 8a revisao do Codex (#634): atraso do evento tambem e divergencia -------------------------------------------------------------------------------
+def test_an_event_that_becomes_available_much_later_than_a_json_item_that_can_run_now_is_a_divergence():
+    found = sd.compare([item(state="FAILED", attempts=1)], [event(status="PENDING", attempt=1, available_at=1000.0 + 900)], now=1000.0)
+    assert codes(found) == [("STATE_MISMATCH", "k1")] and "atrasaria" in found[0].detail
+
+
+def test_an_event_waiting_much_longer_than_the_json_retry_after_is_a_divergence_but_a_small_skew_is_not():
+    retry = sd._epoch("2026-11-16T00:00:00Z")
+    late = sd.compare([item(state="FAILED", attempts=1, retry_after="2026-11-16T00:00:00Z")], [event(status="PENDING", attempt=1, available_at=retry + 3600)], now=retry - 1000)
+    assert codes(late) == [("STATE_MISMATCH", "k1")] and "atrasaria" in late[0].detail
+    skew = sd.compare([item(state="FAILED", attempts=1, retry_after="2026-11-16T00:00:00Z")], [event(status="PENDING", attempt=1, available_at=retry + 30)], now=retry - 1000)
+    assert skew == []
