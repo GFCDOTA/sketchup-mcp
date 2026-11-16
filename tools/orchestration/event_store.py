@@ -173,6 +173,14 @@ class EventStore:
                 db.execute("ROLLBACK")
                 raise
 
+    def connection(self):
+        """Conexao do mesmo banco para tabelas auxiliares de outros modulos (ex.: `rate_limit`)."""
+        return self._conn()
+
+    def transaction(self):
+        """Transacao `BEGIN IMMEDIATE` do mesmo banco (atomica entre threads e processos)."""
+        return self._tx()
+
     @staticmethod
     def _log(db, event_id, frm, to, actor, detail, now):
         db.execute(
@@ -395,6 +403,25 @@ class EventStore:
             if to == "DLQ":
                 self._record_dlq_fact(db, ev, reason, now)
             return to
+
+    def defer(self, ev: dict, reason: str, available_at: float) -> None:
+        """Devolve um evento reivindicado a PENDING SEM consumir a tentativa e libera o lease (espera externa comprovada, ex.: limite de uso da conta do revisor).
+        Nunca vai para a DLQ: a espera nao e uma falha do trabalho. O dono do lease e conferido como em qualquer escrita (LeaseLost)."""
+        with self._tx() as db:
+            now = self.clock()
+            self._owned_update(db, ev, "UPDATE events SET status='PENDING', attempt=MAX(attempt-1, 0), error=?, available_at=?, lease_until=0, updated_at=?",
+                               (reason[:2000], max(available_at, now), now), "PENDING", f"deferred (attempt not consumed) until {max(available_at, now):.0f}: {reason[:300]}", now)
+
+    def requeue_dlq(self, event_id: int, reason: str, available_at: float | None = None) -> bool:
+        """DLQ -> PENDING com 0 tentativas (idempotente: so age em DLQ; erro e historico ficam nas transicoes). False = nao estava em DLQ."""
+        with self._tx() as db:
+            now = self.clock()
+            cur = db.execute("UPDATE events SET status='PENDING', attempt=0, available_at=?, lease_owner=NULL, lease_token=NULL, lease_until=0, updated_at=? WHERE id=? AND status='DLQ'",
+                             (available_at if available_at is not None else now, now, event_id))
+            if cur.rowcount != 1:
+                return False
+            self._log(db, event_id, "DLQ", "PENDING", "maintenance", f"requeued: {reason[:300]}", now)
+            return True
 
     def supersede(self, ev: dict, reason: str) -> None:
         """Discard a claimed event that refers to an outdated artifact version."""

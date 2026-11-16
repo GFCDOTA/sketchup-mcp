@@ -11,6 +11,7 @@ import pytest
 from tools.orchestration import auto_merge as am
 from tools.orchestration import lifecycle
 from tools.orchestration import pr_lifecycle as pl
+from tools.orchestration import rate_limit as rl
 from tools.orchestration.event_store import EventStore
 
 REPO = "o/r"
@@ -658,3 +659,225 @@ def test_a_new_head_invalidates_the_reviews_cache_by_key(monkeypatch):
     assert len(w.calls) == n
     pl.reviews_of(w, REPO, 7, NEW)
     assert len(w.calls) == n + 1
+
+
+
+# -- limite de USO da conta do revisor: estado persistente, nao falha tecnica (autorizacao do proprietario, 2026-11-16) --------------------------------------
+ACC = rl.account_key(POLICY)
+HOUR = 3600.0
+
+
+class Clock:
+    def __init__(self, t=1_800_000_000.0):
+        self.t = t
+
+    def __call__(self):
+        return self.t
+
+
+@pytest.fixture()
+def clock():
+    return Clock()
+
+
+@pytest.fixture()
+def qstore(tmp_path, clock):
+    return EventStore(tmp_path / "quota.db", clock=clock)
+
+
+def limited(reset_at, ambiguous=False):
+    return {"action": "RATE_LIMITED", "kind": rl.USAGE_LIMIT, "reset_at": reset_at, "ambiguous": ambiguous, "reason": "limite de uso: try again", "codex_ran": False}
+
+
+def ev_of(store):
+    return pending(store)[0]
+
+
+def test_a_usage_limit_defers_the_event_without_spending_an_attempt_and_suspends_the_account_before_any_call(qstore, clock):
+    w, rv = World().add(7), Reviewer(limited(clock.t + 3 * HOUR))
+    enq(w, qstore)
+    out = pl.work(w, qstore, POLICY, REPO, rv)
+    assert out["action"] == "RATE_LIMITED" and out["suspended"]["reset_known"] is True
+    e = ev_of(qstore)
+    assert e["status"] == "PENDING" and e["attempt"] == 0 and e["lease_until"] == 0 and e["available_at"] == clock.t + 3 * HOUR + rl.MARGIN_S
+    calls_before, review_calls = len(w.calls), len(rv.calls)
+    for _ in range(10):                                                                                 # 10 ciclos durante o bloqueio
+        clock.t += 60
+        again = pl.work(w, qstore, POLICY, REPO, rv)
+        assert again["action"] == "IDLE" and again["suspended"]["account"] == ACC
+    assert len(w.calls) == calls_before and len(rv.calls) == review_calls                               # NENHUMA chamada ao GitHub nem ao Codex
+    assert ev_of(qstore)["attempt"] == 0 and ev_of(qstore)["status"] == "PENDING"
+
+
+def test_a_quota_wait_never_sends_the_event_to_the_dlq_even_after_many_limits(qstore, clock):
+    w, rv = World().add(7), Reviewer(limited(None, ambiguous=True))
+    enq(w, qstore)
+    for _ in range(6):                                                                                  # supera MAX_ATTEMPTS (5) varias vezes se contasse como falha
+        clock.t = max(clock.t, ev_of(qstore)["available_at"]) + 1
+        pl.work(w, qstore, POLICY, REPO, rv)
+    e = ev_of(qstore)
+    assert e["status"] == "PENDING" and e["attempt"] == 0 and not [x for x in qstore.events() if x["event_type"] == "JOB_FAILED"]
+    assert len(rv.calls) == 6
+
+
+def test_after_the_reset_the_head_is_revalidated_before_the_probe_and_a_stale_request_is_superseded_without_spending_the_probe(qstore, clock):
+    w, rv = World().add(7), Reviewer(limited(clock.t + HOUR))
+    enq(w, qstore)
+    pl.work(w, qstore, POLICY, REPO, rv)
+    clock.t += HOUR + rl.MARGIN_S + 1
+    w.prs[7]["head"]["sha"] = NEW                                                                       # o Claude publicou uma correcao enquanto a conta esperava
+    w.commits[7] = [{"sha": NEW}]
+    out = pl.work(w, qstore, POLICY, REPO, rv)
+    assert out["action"] == "IDLE" and ev_of(qstore)["status"] == "SUPERSEDED" and len(rv.calls) == 1
+    assert rl.RateLimitGate(qstore).admit(ACC, "outro").probe                                           # a vaga da sonda continua livre para o HEAD novo
+
+
+def test_after_the_reset_a_successful_review_clears_the_account_and_the_event_completes_with_a_single_attempt(qstore, clock):
+    w = World().add(7)
+    enq(w, qstore)
+    pl.work(w, qstore, POLICY, REPO, Reviewer(limited(clock.t + HOUR)))
+    clock.t += HOUR + rl.MARGIN_S + 1
+    ok = Reviewer({"action": "DONE", "verdict": "APPROVE", "url": "u", "codex_ran": True})
+    assert pl.work(w, qstore, POLICY, REPO, ok)["action"] == "DONE"
+    e = ev_of(qstore)
+    assert e["status"] == "DONE" and e["attempt"] == 1
+    assert rl.RateLimitGate(qstore).status() == [] and rl.RateLimitGate(qstore).peek(ACC) is None
+
+
+def test_a_probe_that_hits_the_limit_again_without_forecast_waits_the_escalating_backoff_and_still_spends_no_attempt(qstore, clock):
+    w, rv = World().add(7), Reviewer(limited(clock.t + HOUR))
+    enq(w, qstore)
+    pl.work(w, qstore, POLICY, REPO, rv)
+    clock.t += HOUR + rl.MARGIN_S + 1
+    rv.result = limited(None, ambiguous=True)                                                           # o texto nao trouxe previsao
+    out = pl.work(w, qstore, POLICY, REPO, rv)
+    assert out["action"] == "RATE_LIMITED" and out["suspended"]["episodes"] == 2 and out["suspended"]["reset_known"] is False
+    assert out["suspended"]["until"] == clock.t + rl.BACKOFF_S[1]
+    assert ev_of(qstore)["attempt"] == 0 and ev_of(qstore)["status"] == "PENDING"
+
+
+def test_after_the_reset_only_one_of_three_workers_probes_and_the_others_release_their_leases_and_wait(qstore, clock):
+    w = World().add(7).add(8).add(9)
+    enq(w, qstore)
+    pl.work(w, qstore, POLICY, REPO, Reviewer(limited(clock.t + HOUR)))
+    clock.t += HOUR + rl.MARGIN_S + 1
+    inside, release, results = threading.Event(), threading.Event(), {}
+
+    def slow(pr, gh, policy, repo, do_publish=False, **kw):
+        inside.set()
+        release.wait(20)
+        return {"action": "DONE", "verdict": "APPROVE", "url": "u", "codex_ran": True}
+
+    def worker(name):
+        results[name] = pl.work(w, qstore, POLICY, REPO, slow)
+
+    t1 = threading.Thread(target=worker, args=("probe",))
+    t1.start()
+    assert inside.wait(10)
+    others = []
+    for i in range(2):                                                                                  # os outros workers chegam com a sonda em andamento
+        t = threading.Thread(target=worker, args=(f"w{i}",))
+        t.start()
+        others.append(t)
+    for t in others:
+        t.join(10)
+    assert all(results[f"w{i}"]["action"] == "IDLE" and results[f"w{i}"]["suspended"]["probing"] for i in range(2))
+    assert [e["status"] for e in pending(qstore)].count("RUNNING") == 1                                 # so UM evento (a sonda) segura lease
+    release.set()
+    t1.join(20)
+    assert results["probe"]["action"] == "DONE"
+    assert rl.RateLimitGate(qstore).peek(ACC) is None                                                   # a sonda provou: todos voltam a trabalhar
+
+
+def test_the_suspension_survives_a_restart_of_the_supervisor_and_resumes_by_itself_at_the_reset(tmp_path, clock):
+    db = tmp_path / "restart.db"
+    s1 = EventStore(db, clock=clock)
+    w = World().add(7)
+    enq(w, s1)
+    pl.work(w, s1, POLICY, REPO, Reviewer(limited(clock.t + 2 * HOUR)))
+    del s1                                                                                              # o processo morreu (ou o Windows reiniciou)
+    s2 = EventStore(db, clock=clock)
+    rv = Reviewer({"action": "DONE", "verdict": "APPROVE", "url": "u", "codex_ran": True})
+    n = len(w.calls)
+    assert pl.work(w, s2, POLICY, REPO, rv)["action"] == "IDLE" and len(w.calls) == n and rv.calls == []
+    clock.t += 2 * HOUR + rl.MARGIN_S + 1
+    assert pl.work(w, s2, POLICY, REPO, rv)["action"] == "DONE" and len(rv.calls) == 1                  # retoma sem nenhuma acao humana
+
+
+def test_a_review_in_flight_when_the_supervisor_dies_returns_to_the_pool_and_a_quota_block_still_applies(tmp_path, clock):
+    s1 = EventStore(tmp_path / "crash.db", clock=clock)
+    w = World().add(7)
+    enq(w, s1)
+    claimed = s1.claim_by_id(ev_of(s1)["id"], "morreu", pl.LEASE_S)
+    assert claimed["attempt"] == 1
+    rl.RateLimitGate(s1).record_block(ACC, rl.Failure(rl.USAGE_LIMIT, "x", clock.t + HOUR))             # outro worker bateu o limite no mesmo instante
+    clock.t += pl.LEASE_S + 1                                                                           # lease vencido, bloqueio vigente
+    s2 = EventStore(tmp_path / "crash.db", clock=clock)
+    rv = Reviewer()
+    assert pl.work(w, s2, POLICY, REPO, rv)["action"] == "IDLE" and rv.calls == []                      # o evento orfao espera o reset em vez de martelar a conta
+
+
+def test_too_many_consecutive_limits_escalate_the_account_without_dead_lettering_and_the_owner_can_resume(qstore, clock):
+    w, rv = World().add(7), Reviewer(limited(None, ambiguous=True))
+    enq(w, qstore)
+    for _ in range(rl.MAX_EPISODES + 1):
+        clock.t = max(clock.t, ev_of(qstore)["available_at"], rl.RateLimitGate(qstore).status()[0]["until"] if rl.RateLimitGate(qstore).status() else 0) + 1
+        pl.work(w, qstore, POLICY, REPO, rv)
+    gate = rl.RateLimitGate(qstore)
+    assert gate.peek(ACC).escalated
+    n = len(rv.calls)
+    clock.t += 30 * 86400
+    assert pl.work(w, qstore, POLICY, REPO, rv)["action"] == "IDLE" and len(rv.calls) == n              # sem retry infinito: nenhuma chamada mais
+    assert ev_of(qstore)["status"] == "PENDING"
+    gate.clear(ACC)
+    rv.result = {"action": "DONE", "verdict": "APPROVE", "url": "u", "codex_ran": True}
+    assert pl.work(w, qstore, POLICY, REPO, rv)["action"] == "DONE"
+
+
+def test_an_authentication_failure_spends_the_attempt_and_pauses_the_account_but_a_transient_one_does_not_suspend_it(qstore, clock):
+    w = World().add(7)
+    enq(w, qstore)
+    transient = Reviewer({"action": "REVIEW_BLOCKED", "reason": "falha transitoria do Codex", "kind": rl.TRANSIENT, "codex_ran": False})
+    assert pl.work(w, qstore, POLICY, REPO, transient)["action"] == "REVIEW_BLOCKED"
+    assert ev_of(qstore)["attempt"] == 1 and rl.RateLimitGate(qstore).peek(ACC) is None                 # erro transitorio: tentativa gasta, conta livre
+    clock.t += pl.RETRY_S + 1
+    auth = Reviewer({"action": "REVIEW_BLOCKED", "reason": "falha de autenticacao", "kind": rl.AUTH, "codex_ran": False})
+    assert pl.work(w, qstore, POLICY, REPO, auth)["action"] == "REVIEW_BLOCKED"
+    blk = rl.RateLimitGate(qstore).peek(ACC)
+    assert blk is not None and blk.state == rl.AUTH_FAILED and ev_of(qstore)["attempt"] == 2
+    assert pl.work(w, qstore, POLICY, REPO, auth)["action"] == "IDLE"                                    # nao martela o login quebrado
+
+
+def test_a_definitive_error_still_ends_in_the_dlq_when_the_attempts_run_out(qstore, clock):
+    w = World().add(7)
+    enq(w, qstore)
+    boom = Reviewer({"action": "REVIEW_BLOCKED", "reason": "codex saiu com codigo 2", "kind": rl.FATAL, "codex_ran": True})
+    for _ in range(pl.MAX_ATTEMPTS):
+        clock.t += pl.RETRY_S + 1
+        pl.work(w, qstore, POLICY, REPO, boom)
+    assert ev_of(qstore)["status"] == "DLQ"                                                              # so a cota nao leva a DLQ; erro definitivo continua levando
+
+
+def test_a_review_that_proves_nothing_does_not_clear_the_block_and_gives_the_probe_slot_back(qstore, clock):
+    w = World().add(7)
+    enq(w, qstore)
+    pl.work(w, qstore, POLICY, REPO, Reviewer(limited(clock.t + HOUR)))
+    clock.t += HOUR + rl.MARGIN_S + 1
+    stale = Reviewer({"action": "STALE", "reason": "HEAD mudou"})                                         # nao chegou a rodar o Codex
+    pl.work(w, qstore, POLICY, REPO, stale)
+    assert rl.RateLimitGate(qstore).status() != []                                                        # continua LIMITED: so execucao concluida limpa
+    assert rl.RateLimitGate(qstore).admit(ACC, "w9").probe
+
+
+def test_the_reconcile_step_requeues_a_legacy_dlq_by_usage_limit_and_reports_the_suspended_account(gov, qstore, clock):
+    w = World().add(7)
+    enq(w, qstore)
+    ev = qstore.claim_by_id(ev_of(qstore)["id"], "w", pl.LEASE_S)
+    for _ in range(ev["max_attempts"] - 1):                                                               # leva ao ultimo ciclo como o incidente de 2026-11-16
+        qstore.fail(ev, "REVIEW_BLOCKED: auth/limite de uso: usage limit, try again later", retry_delay=0)
+        ev = qstore.claim_by_id(ev["id"], "w", pl.LEASE_S)
+    assert qstore.fail(ev, "REVIEW_BLOCKED: auth/limite de uso: usage limit, try again later", retry_delay=0) == "DLQ"
+    out = pl.reconcile_step(w, POLICY, REPO, True, qstore, Writes())
+    assert out["quota"]["requeued"][0]["action"] == "REQUEUED_QUOTA_DLQ"
+    assert ev_of(qstore)["status"] == "PENDING" and ev_of(qstore)["attempt"] == 0
+    assert "quota" not in pl.reconcile_step(w, POLICY, REPO, True, qstore, Writes())                      # segundo ciclo: nada a fazer, o log nao muda

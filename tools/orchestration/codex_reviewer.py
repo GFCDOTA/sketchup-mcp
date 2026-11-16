@@ -27,6 +27,7 @@ from typing import Callable
 
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import event_executor as ex
+from tools.orchestration import rate_limit as rl
 
 VERDICTS = ("APPROVE", "REQUEST_CHANGES", "NEEDS_HUMAN")
 SEVERITIES = ("LOW", "MEDIUM", "HIGH", "CRITICAL")
@@ -85,7 +86,17 @@ PACKAGE_PROMPT = """
 
 
 class ReviewError(Exception):
-    """Falha do revisor (vira REVIEW_BLOCKED / FAILED, nunca aprovacao)."""
+    """Falha do revisor (vira REVIEW_BLOCKED / FAILED, nunca aprovacao). `kind` (rate_limit.*) diz se foi autenticacao, transitoria ou definitiva."""
+    kind: str | None = None
+
+
+class ReviewQuotaError(ReviewError):
+    """Limite de USO da conta do Codex: nao e falha do trabalho. Vira `RATE_LIMITED` (a conta fica suspensa ate o reset; o evento espera sem gastar tentativa)."""
+    kind = rl.USAGE_LIMIT
+
+    def __init__(self, failure: rl.Failure, detail: str):
+        super().__init__(f"{failure.reason}: {detail}")
+        self.failure = failure
 
 
 def codex_dir() -> Path:
@@ -372,6 +383,7 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
               gh_user: Callable[[str], str | None] = gh_user_with, publisher=publish, tmp: Path | None = None) -> dict:
     """('DONE'|'REVIEW_BLOCKED'|'STALE'|'FAILED', ...). Nunca lanca; o estado vai para `last_review.json`."""
     sha = ""
+    ran = False                                                  # o Codex chegou a terminar uma execucao (prova que a cota da conta voltou)
     try:
         eb.check_identity(gh, policy)
         meta = gh(f"repos/{repo}/pulls/{pr}")
@@ -394,12 +406,20 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
             out.unlink()
         rc, so, se, timed_out = runner(build_command(codex_bin or resolve_codex(), wt, schema, out), wt,
                                        PROMPT.format(repo=repo, pr=pr, sha=sha, base=base or "origin/develop") + package_prompt(pkg, evidence))
-        text = (se + so).lower()
+        # So uma execucao que FALHOU e classificada (um parecer valido de um PR sobre limites/quotas cita essas palavras com rc 0). stderr inteiro + so a CAUDA do stdout.
+        failure = rl.classify(rc, f"{se}\n{so[-1500:]}", timed_out) if (rc != 0 or timed_out) else None
+        detail = (se or so).strip()[-200:]
+        if failure is not None and failure.kind == rl.USAGE_LIMIT:   # esgotamento TEMPORARIO de cota: estado da conta, nunca falha tecnica do PR
+            raise ReviewQuotaError(failure, detail)
         if timed_out:
-            raise ReviewError("timeout do codex")
-        if rc != 0:
-            hint = "auth/limite de uso" if any(h in text for h in AUTH_HINTS) else f"codex saiu com codigo {rc}"
-            raise ReviewError(f"{hint}: {(se or so).strip()[-200:]}")
+            err = ReviewError("timeout do codex")
+            err.kind = rl.TRANSIENT
+            raise err
+        if rc != 0 and failure is not None:
+            err = ReviewError({rl.AUTH:"falha de autenticacao do Codex (auth/login)", rl.TRANSIENT: "falha transitoria do Codex"}.get(failure.kind, f"codex saiu com codigo {rc}") + f": {detail}")
+            err.kind = failure.kind
+            raise err
+        ran = True
         if not out.exists():
             raise ReviewError("codex nao gerou o parecer (--output-last-message vazio)")
         check_untouched(wt, sha, "after_codex")
@@ -441,13 +461,16 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
         reason = blocked or (f"review publicado em {sha[:8]}, mas o HEAD avancou para {moved_after[:8]} logo depois: vale so para {sha[:8]}"
                              if moved_after else "")
         return {"action": "REVIEW_BLOCKED" if blocked else "DONE", "verdict": verdict, "published": published, "reason": reason,
-                "head_moved_after_publish": moved_after}
+                "head_moved_after_publish": moved_after, "codex_ran": True}
+    except ReviewQuotaError as exc:
+        record("failed", pr=pr, sha=sha, error=f"RATE_LIMITED: {exc}"[:300])
+        return {"action": "RATE_LIMITED", "kind": rl.USAGE_LIMIT, "reset_at": exc.failure.reset_at, "ambiguous": exc.failure.ambiguous, "reason": str(exc), "codex_ran": False}
     except ReviewError as exc:
         record("failed", pr=pr, sha=sha, error=str(exc)[:300])
-        return {"action": "REVIEW_BLOCKED", "reason": str(exc)}
+        return {"action": "REVIEW_BLOCKED", "reason": str(exc), "kind": exc.kind, "codex_ran": ran}
     except (PermissionError, RuntimeError, KeyError, AttributeError, ValueError, OSError) as exc:
         record("failed", pr=pr, sha=sha, error=f"{type(exc).__name__}: {exc}"[:300])
-        return {"action": "FAILED", "reason": f"{type(exc).__name__}: {exc}"}
+        return {"action": "FAILED", "reason": f"{type(exc).__name__}: {exc}", "codex_ran": ran}
 
 
 def main(argv: list[str] | None = None) -> int:

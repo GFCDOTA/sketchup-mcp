@@ -37,6 +37,7 @@ from tools.orchestration import auto_merge as am
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import execution_guards as guards
 from tools.orchestration import lifecycle
+from tools.orchestration import rate_limit as rl
 from tools.orchestration.event_store import EventStore, LeaseLost
 
 EVENT_TYPE = "REVIEW_REQUESTED"
@@ -303,6 +304,10 @@ def work(gh: eb.Gh, store: EventStore, policy: dict, repo: str = eb.REPO, review
         return {"action": "IDLE", "disabled": f"interruptor {kill_switch().name} presente"}
     owner = owner or f"review-worker:{os.getpid()}:{uuid.uuid4().hex[:6]}"
     now = store.clock()
+    gate, account = rl.RateLimitGate(store), rl.account_key(policy)
+    blocked = gate.peek(account, owner, now)
+    if blocked is not None:                                                                             # conta do revisor suspensa (limite de uso/autenticacao): nenhuma chamada, nenhum lease
+        return {"action": "IDLE", "suspended": blocked.as_dict()}
     # PENDING, ou RUNNING com o lease VENCIDO (o worker morreu no meio da revisao: o evento volta ao pool; o EventStore cerca o resultado do dono antigo)
     pending = [e for e in store.events() if e["producer"] == PRODUCER and e["event_type"] == EVENT_TYPE
                and (e["status"] == "PENDING" or (e["status"] == "RUNNING" and e["lease_until"] <= now))]
@@ -334,15 +339,23 @@ def work(gh: eb.Gh, store: EventStore, policy: dict, repo: str = eb.REPO, review
             waiting.append({"event": ev["id"], "pr": n, "action": "WAIT_CHECKS", "reason": f"checks obrigatorios {state}"})
             _RECHECK_AT[ev["id"]] = time.monotonic() + RECHECK_S
             continue
+        admission = gate.admit(account, owner, now)                                                     # HEAD e checks JA revalidados acima: so entao a conta pode ser sondada
+        if not admission.allowed:
+            return {"action": "IDLE", "suspended": admission.block.as_dict() if admission.block else {}}
         claimed = store.claim_by_id(ev["id"], owner, LEASE_S)
         if claimed is None:
+            if admission.probe:
+                gate.release_probe(account, owner)
             continue                                                                                    # outro worker (ou lease vivo): nao toca
-        return _review(store, claimed, gh, policy, repo, review, heartbeat_s)
+        return _review(store, claimed, gh, policy, repo, review, heartbeat_s, gate, account, owner, admission.probe)
     return {"action": "IDLE", "waiting": waiting}
 
 
-def _review(store: EventStore, ev: dict, gh: eb.Gh, policy: dict, repo: str, review: Callable[..., dict] | None, heartbeat_s: float) -> dict:
+def _review(store: EventStore, ev: dict, gh: eb.Gh, policy: dict, repo: str, review: Callable[..., dict] | None, heartbeat_s: float,
+            gate: rl.RateLimitGate | None = None, account: str = "", owner: str = "", probe: bool = False) -> dict:
     n = _payload(ev).get("pr")
+    gate = gate or rl.RateLimitGate(store)
+    account = account or rl.account_key(policy)
     if review is None:
         from tools.orchestration import codex_reviewer
         review = codex_reviewer.review_pr
@@ -356,6 +369,19 @@ def _review(store: EventStore, ev: dict, gh: eb.Gh, policy: dict, repo: str, rev
         hb.stop()
     action = result.get("action")
     try:
+        # estado da CONTA antes do estado do evento: um limite de uso suspende a conta e o evento ESPERA sem gastar tentativa; so uma execucao terminada prova que a cota voltou
+        if action == "RATE_LIMITED":
+            failure = rl.Failure(rl.USAGE_LIMIT, "limite de uso da conta do revisor", result.get("reset_at"), bool(result.get("ambiguous")))
+            block = gate.record_block(account, failure)
+            store.defer(ev, f"RATE_LIMITED: {str(result.get('reason') or '')[:240]}", block.until)
+            row = {"action": "RATE_LIMITED", "event": ev["id"], "pr": n, "suspended": block.as_dict()}
+            return row
+        if result.get("codex_ran"):
+            gate.record_success(account)
+        elif result.get("kind") == rl.AUTH:
+            gate.record_block(account, rl.Failure(rl.AUTH, "falha de autenticacao do revisor"))
+        elif probe:
+            gate.release_probe(account, owner)
         if action == "DONE":
             v = result.get("verdict")
             store.complete(ev, {"action": "DONE", "verdict": v.get("verdict") if isinstance(v, dict) else v, "url": result.get("url"),
@@ -401,13 +427,32 @@ def reconcile_step(gh: eb.Gh, policy: dict, repo: str, execute: bool, store: Eve
     if kill_switch().exists():
         return {**out, "disabled": f"interruptor {kill_switch().name} presente: nada e escrito nem enfileirado"}
     steps = [("prepare", lambda: prepare(gh, policy, repo, execute, runner, now)), ("enqueue", lambda: enqueue(gh, store, policy, repo, execute))]
+    if execute and store is not None:
+        steps.insert(0, ("quota", lambda: quota_step(store, policy)))
     if execute and store is not None and os.environ.get(am.ENABLE_ENV) == "1":
         steps.append(("merge", lambda: merge_step(gh, store, policy, repo, runner)))
     for name, step in steps:
         try:
-            out[name] = step()
+            res = step()
+            if name == "quota" and not res:
+                continue                                                                              # conta saudavel e nada a recuperar: o log nao muda
+            out[name] = res
         except Exception as exc:  # noqa: BLE001
             out[name] = {"error": f"{type(exc).__name__}: {exc}"[:200]}
+    return out
+
+
+def quota_step(store: EventStore, policy: dict) -> dict:
+    """Recuperacao automatica por limite de uso, a cada ciclo (e portanto apos QUALQUER reinicio do supervisor ou do Windows): reenfileira o que foi para a DLQ so por cota e
+    MOSTRA a conta suspensa (estado, reset, episodios). Idempotente e barato: so leituras quando nao ha nada a fazer."""
+    gate, account = rl.RateLimitGate(store), rl.account_key(policy)
+    out: dict = {}
+    requeued = rl.requeue_quota_dlq(store, gate, account, PRODUCER)
+    if requeued:
+        out["requeued"] = requeued
+    suspended = gate.status()
+    if suspended:
+        out["suspended"] = suspended
     return out
 
 

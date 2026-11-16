@@ -141,8 +141,7 @@ def test_stale_head_during_the_review_discards_the_verdict(tmp_path):
 
 
 @pytest.mark.parametrize("run,needle", [
-    (Run(text=None, rc=1, err="Not logged in, please login"), "auth/limite"),
-    (Run(text=None, rc=1, err="usage limit reached"), "auth/limite"),
+    (Run(text=None, rc=1, err="Not logged in, please login"), "autenticacao"),
     (Run(text=None, rc=2, err="boom"), "codigo 2"),
     (Run(text=None, timed_out=True), "timeout"),
     (Run(text=None), "nao gerou o parecer"),
@@ -496,3 +495,35 @@ def test_child_env_is_the_only_env_used_by_codex_runner():
                 if isinstance(kw.value, ast.Attribute) and isinstance(kw.value.value, ast.Name):
                     assert not (kw.value.value.id == "os" and kw.value.attr == "environ"), \
                         f"{node.name}: subprocess.run na linha {child.lineno} passa os.environ diretamente"
+
+
+# -- limite de uso da conta: estado da conta, nao falha do PR (FP-060, resiliencia) ----------------------------------------------------------------------
+def test_a_usage_limit_is_rate_limited_with_the_reset_never_review_blocked_and_never_an_approval(tmp_path):
+    msg = "ERROR: You've hit your usage limit. Upgrade to Pro or try again at 3:05 PM."
+    res = review(tmp_path, run=Run(text=None, rc=1, err=msg))
+    assert res["action"] == "RATE_LIMITED" and res["kind"] == "USAGE_LIMIT" and res["codex_ran"] is False and "verdict" not in res
+    assert res["reset_at"] is None or res["reset_at"] > 0                                       # previsao so quando inequivoca (depende da hora local em que o teste roda)
+    assert rec(tmp_path)["status"] == "failed" and "RATE_LIMITED" in rec(tmp_path)["error"]
+
+
+def test_a_usage_limit_without_a_forecast_is_marked_ambiguous_for_the_conservative_backoff(tmp_path):
+    res = review(tmp_path, run=Run(text=None, rc=1, err="429 Too Many Requests"))
+    assert res["action"] == "RATE_LIMITED" and res["reset_at"] is None and res["ambiguous"] is True
+
+
+def test_a_valid_verdict_that_talks_about_rate_limits_with_exit_zero_is_not_a_quota_failure(tmp_path):
+    res = review(tmp_path, run=Run(verdict(), out="discutindo usage limit, rate limit e quota exceeded no codigo", err="warn: quota helper 429 mencionado"))
+    assert res["action"] == "DONE" and res["codex_ran"] is True
+
+
+def test_auth_timeout_and_definitive_failures_keep_their_kind_and_are_not_quota(tmp_path):
+    assert review(tmp_path, run=Run(text=None, rc=1, err="Not logged in"))["kind"] == "AUTH"
+    t = review(tmp_path, run=Run(text=None, timed_out=True))
+    assert t["action"] == "REVIEW_BLOCKED" and t["kind"] == "TRANSIENT" and t["codex_ran"] is False
+    d = review(tmp_path, run=Run(text=None, rc=2, err="boom"))
+    assert d["action"] == "REVIEW_BLOCKED" and d["kind"] == "FATAL"
+
+
+def test_a_failure_after_codex_finished_still_proves_the_account_works(tmp_path):
+    res = review(tmp_path, run=Run(text="isto nao e json"))
+    assert res["action"] == "REVIEW_BLOCKED" and res["codex_ran"] is True
