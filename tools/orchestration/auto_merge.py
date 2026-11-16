@@ -363,9 +363,13 @@ MUTABLE_FIELDS = ("state", "draft", "merged")
 
 
 def mutable_facts(pr: dict) -> dict:
-    """Os fatos mutaveis do PR que autorizam o merge e que `--match-head-commit` NAO cobre: base, labels, estado, rascunho."""
+    """Os fatos mutaveis do PR que autorizam o merge e que `--match-head-commit` NAO cobre: base, labels, estado, rascunho e o CORPO (dele saem as Issues obrigatorias:
+    acrescentar uma Issue de decisao humana ou remover as referencias depois da avaliacao muda a autorizacao sem mudar o HEAD)."""
+    import hashlib
+    body = pr.get("body")
     return {"base": (pr.get("base") or {}).get("ref"), "labels": sorted(str(n).casefold() for n in _names(pr.get("labels"))),
-            "head": (pr.get("head") or {}).get("sha"), **{k: pr.get(k) for k in MUTABLE_FIELDS}, "auto_merge": bool(pr.get("auto_merge"))}
+            "head": (pr.get("head") or {}).get("sha"), **{k: pr.get(k) for k in MUTABLE_FIELDS}, "auto_merge": bool(pr.get("auto_merge")),
+            "body_sha": hashlib.sha256((body if isinstance(body, str) else "").encode("utf-8")).hexdigest()}
 
 
 def cancel_scheduled(gh: eb.Gh, repo: str, number: int, policy: dict, runner=subprocess.run) -> tuple[bool, str]:
@@ -434,7 +438,7 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                     else:
                         pr3 = gh(f"repos/{repo}/pulls/{number}")                              # ULTIMA leitura do PR, a uma ida ao servidor do merge: base/labels/estado iguais?
                         if not isinstance(pr3, dict) or mutable_facts(pr3) != mutable_facts(pr2):
-                            row.update(code="WAIT", reasons=["base, labels ou estado do PR mudaram na ultima leitura antes do merge: nada e mesclado nesta rodada"])
+                            row.update(code="WAIT", reasons=["base, labels, estado ou corpo (Issues) do PR mudaram na ultima leitura antes do merge: nada e mesclado nesta rodada"])
                         else:
                             done, msg = merge(number, row["head"], repo, runner)
                             if done:

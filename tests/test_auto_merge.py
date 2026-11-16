@@ -693,8 +693,9 @@ def test_an_unreadable_provenance_store_is_no_proof():
     assert am.outbox_provenance(Broken())(REPO, 7, HEAD) is False
 
 
-@pytest.mark.parametrize("mutation", [{"labels": [{"name": "security"}]}, {"base": {"ref": "release", "repo": {"full_name": REPO}}}, {"draft": True}])
-def test_the_last_read_of_the_pr_before_the_merge_blocks_a_change_of_base_labels_or_draft(mutation):
+@pytest.mark.parametrize("mutation", [{"labels": [{"name": "security"}]}, {"base": {"ref": "release", "repo": {"full_name": REPO}}}, {"draft": True},
+                                      {"body": "Refs #1\n\nRefs #999"}, {"body": ""}, {"body": None}])
+def test_the_last_read_of_the_pr_before_the_merge_blocks_a_change_of_base_labels_draft_or_body(mutation):
     runner = Runner()
     out = am.cycle(Gh(mutate_last=mutation), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and "ultima leitura" in out["prs"][0]["reasons"][0] and runner.calls == []
