@@ -733,3 +733,25 @@ def test_review_fetch_failure_blocks_without_launching_the_child():
     b = bstate(item())
     res = go(gh, b, r)
     assert res["action"] == "BLOCKED_REVIEW_FETCH" and r.calls == [] and b["queue"][0]["state"] == "BLOCKED_REVIEW_FETCH"
+
+
+# -- contencao NAO confirmada: o item nao volta sozinho para a fila (revisao do #669, HIGH) ---------------------------------------------------------------
+def test_an_unconfirmed_process_tree_blocks_the_item_and_no_executor_claims_it_again_by_itself():
+    gh = FakeGh()
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, boom=ex.TreeNotConfirmedError("job nao esvaziou")))
+    t = b["queue"][0]
+    assert res["action"] == "BLOCKED_CONTAINMENT" and t["state"] == "BLOCKED_CONTAINMENT" and t.get("attempts", 0) == 0
+    assert "NAO confirmada" in t["last_error"] and "owner" not in t and "retry_after" not in t
+    far = NOW + dt.timedelta(days=30)
+    r2 = Runner(gh)
+    assert ex.pick(b, far) is None and go(gh, b, r2, now=far)["action"] == "IDLE" and r2.calls == []       # nem depois de um mes: so intervencao explicita
+    b["queue"][0]["state"] = "QUEUED"                                                                        # o proprietario confirmou que a arvore acabou e liberou
+    assert go(gh, b, Runner(gh), now=far)["action"] == "DONE"
+
+
+def test_a_plain_containment_setup_failure_is_still_a_retryable_failure_because_the_child_never_ran():
+    gh = FakeGh()
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, boom=ex.ContainmentError("sem Job Object")))
+    assert res["action"] == "FAILED" and b["queue"][0]["state"] == "FAILED" and b["queue"][0]["attempts"] == 1

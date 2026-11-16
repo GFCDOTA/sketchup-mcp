@@ -249,6 +249,11 @@ class ContainmentError(OSError):
     """Nao foi possivel conter o filho num Job Object: ele NAO executa (fail-closed). Sem contencao nao ha como garantir o encerramento de todas as geracoes de descendentes."""
 
 
+class TreeNotConfirmedError(ContainmentError):
+    """O Job Object foi terminado/fechado mas NAO foi possivel confirmar que a arvore do filho acabou: pode haver descendentes tocando a worktree. O item NUNCA volta
+    sozinho para a fila (`BLOCKED_CONTAINMENT`): outro executor so reutiliza a worktree depois de intervencao explicita do proprietario."""
+
+
 def _contain(p: subprocess.Popen) -> None:
     """Coloca o filho (criado SUSPENSO) num Job Object kill-on-close e so entao o retoma. Falhou em qualquer passo: o filho NUNCA executou (continua suspenso), e morto, e
     levanta `ContainmentError`. Nao ha caminho sem contencao: um snapshot de processos nao alcanca o neto criado e extinto entre duas varreduras, nem distingue com seguranca um
@@ -326,7 +331,7 @@ def _end_job(p: subprocess.Popen, job) -> None:
             p.kill()
         except OSError:
             pass
-        raise ContainmentError("encerramento do job nao confirmado: " + "; ".join(problems))
+        raise TreeNotConfirmedError("encerramento do job nao confirmado: " + "; ".join(problems))
 
 
 def kill_tree(p: subprocess.Popen) -> None:
@@ -350,6 +355,28 @@ def kill_tree(p: subprocess.Popen) -> None:
         pass
 
 
+CONTAINMENT_HOLD_S = 7 * 86400.0                                             # espelho no EventStore: nao volta a PENDING durante a semana
+SETTLE_S = 2.0                                                                 # folga para os descendentes de um filho que terminou bem acabarem sozinhos
+
+
+def _settle_after_exit(p: subprocess.Popen) -> str:
+    """O filho saiu. So devolve 'sem nota' quando o job esta CONFIRMADAMENTE vazio; com descendentes ainda vivos encerra a arvore (e confirma, senao
+    `TreeNotConfirmedError`) e devolve a nota que transforma o resultado em falha: nada que ainda mexia na worktree pode ter a entrega publicada."""
+    job = getattr(p, "_fp060_job", None)
+    if job is None:
+        return ""
+    try:
+        empty = job.wait_empty(SETTLE_S)
+    except Exception:  # noqa: BLE001 — nao consegui nem consultar: trata como nao vazio
+        empty = False
+    if empty:
+        job.close()
+        p._fp060_job = None
+        return ""
+    _end_job(p, job)                                                           # levanta TreeNotConfirmedError se a arvore nao for confirmada
+    return "\n[executor] descendentes do filho ainda estavam vivos quando ele terminou: arvore encerrada; entrega bloqueada (fail-closed)"
+
+
 def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, cancel: threading.Event | None = None,
                    poll_s: float = 0.5) -> tuple:
     """(rc, stdout, stderr, timed_out). Sem shell. Derruba o filho no timeout OU quando `cancel` e acionado (lease perdido/nao
@@ -362,7 +389,8 @@ def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, c
         while True:
             try:
                 out, err = p.communicate(stdin if first else None, timeout=poll_s)
-                return p.returncode, out, err, False
+                note = _settle_after_exit(p)                                   # descendentes ainda vivos? derruba, confirma e BLOQUEIA a entrega (rc != 0)
+                return (p.returncode if not note else -3), out, (err or "") + note, False
             except subprocess.TimeoutExpired:
                 first = False
             if cancel is not None and cancel.is_set():
@@ -664,6 +692,16 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
             eb.diagnose(b, reason, t)
         update_owned(key, owner, nocli, release=True, now=t)
         return {"action": "BLOCKED_CLI", "item": key, "reason": reason}
+    except TreeNotConfirmedError as exc:
+        release_issue(item)
+        reason = f"arvore do filho NAO confirmada como encerrada ({exc}): item bloqueado ate intervencao explicita; a worktree nao pode ser reutilizada"[:600]
+
+        def contained(it, b):
+            it["state"], it["last_error"] = "BLOCKED_CONTAINMENT", reason          # fora do `pick`: nenhum executor reivindica de novo sozinho
+            it.pop("retry_after", None)
+            eb.diagnose(b, f"{key}: {reason}", t)
+        update_owned(key, owner, contained, release=True, now=t)
+        return {"action": "BLOCKED_CONTAINMENT", "item": key, "reason": reason}
     except OSError as exc:
         rc, out, err, timed_out = -1, "", f"{type(exc).__name__}: {exc}", False
     release_issue(item)
@@ -819,6 +857,8 @@ def _sync_result_to_store(store, item: dict, result: dict) -> None:
         elif action in ("FAILED", "BLOCKED_WORKTREE", "BLOCKED_CLI", "BLOCKED_CREDENTIALS",
                          "BLOCKED_REVIEW_FETCH", "LOST_LEASE"):
             store.fail(claimed, result.get("reason", action)[:2000])
+        elif action == "BLOCKED_CONTAINMENT":
+            store.fail(claimed, result.get("reason", action)[:2000], retry_delay=CONTAINMENT_HOLD_S)
         elif action == "DRY_RUN":
             store.fail(claimed, "dry-run: executor did not run", retry_delay=0)
         _inc("sync_ok")

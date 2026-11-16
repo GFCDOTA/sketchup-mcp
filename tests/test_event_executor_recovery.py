@@ -333,12 +333,9 @@ def test_closing_the_job_after_the_run_removes_any_leftover_descendant(tmp_path)
     code = ("import subprocess, sys; g = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(120)'], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); "
             f"open(r'{pidfile}', 'w').write(str(g.pid)); print('pai saiu')")
     rc, out, _err, _t = ex.default_runner([sys.executable, "-c", code], tmp_path, dict(os.environ), "", 30)
-    assert rc == 0 and "pai saiu" in out
+    assert rc == -3 and "pai saiu" in out                                                              # o filho saiu 0, mas deixou descendente: entrega bloqueada
     leftover = int(pidfile.read_text())
-    deadline = time.monotonic() + 10
-    while time.monotonic() < deadline and alive(leftover):
-        time.sleep(0.1)
-    assert not alive(leftover)                                                                         # o neto nao sobrevive ao filho
+    assert not alive(leftover)                                                                         # o neto nao sobrevive ao filho, JA no retorno (sem espera)
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
@@ -444,3 +441,33 @@ def test_default_runner_cancel_propagates_an_unconfirmed_termination_so_nobody_t
     threading.Timer(0.3, cancel.set).start()
     with pytest.raises(ex.ContainmentError):
         ex.default_runner([sys.executable, "-c", "import time; time.sleep(60)"], Path.cwd(), dict(os.environ), "", 120, cancel, poll_s=0.1)
+
+
+# -- saida normal do filho: o job precisa estar CONFIRMADAMENTE vazio antes de devolver sucesso (revisao do #669, MEDIUM) -----------------------------------
+LEFTOVER = (
+    "import subprocess, sys\n"
+    "g = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n"
+    "print(g.pid, flush=True)\n"
+)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_a_child_that_exits_leaving_a_descendant_has_the_tree_ended_before_the_runner_returns_and_the_delivery_is_blocked(tmp_path):
+    rc, out, err, timed_out = ex.default_runner([sys.executable, "-c", LEFTOVER], tmp_path, dict(os.environ), "", 60, threading.Event())
+    grand = int(out.split()[0])
+    assert not alive(grand)                                                                             # IMEDIATAMENTE ao retorno, sem esperar
+    assert rc == -3 and "entrega bloqueada" in err and timed_out is False                               # rc != 0: o executor nao entrega
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_a_clean_child_returns_its_own_exit_code_with_no_blocking_note(tmp_path):
+    rc, out, err, timed_out = ex.default_runner([sys.executable, "-c", "print('ok')"], tmp_path, dict(os.environ), "", 60, threading.Event())
+    assert rc == 0 and out.strip() == "ok" and "bloqueada" not in err and timed_out is False
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_if_the_tree_cannot_be_confirmed_after_a_normal_exit_the_runner_raises_instead_of_reporting_success(tmp_path, monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    monkeypatch.setattr(ps.ProcessJob, "wait_empty", lambda self, timeout=5.0: False)                   # nunca confirma vazio
+    with pytest.raises(ex.TreeNotConfirmedError):
+        ex.default_runner([sys.executable, "-c", "print('ok')"], tmp_path, dict(os.environ), "", 60, threading.Event())
