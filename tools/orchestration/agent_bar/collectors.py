@@ -502,6 +502,37 @@ def collect_backlog(gh: Callable[[list[str]], tuple[int, str]] = run_gh, owner: 
     return {k: counts.get(k, 0) for k in BACKLOG_COLUMNS}, None, _now(now).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str = "event_store.db") -> dict:
+    """O EventStore (FP-060) lido SOMENTE LEITURA (`mode=ro`, URI codificada): contagem por status, backoff, leases vivos, DLQ, retries e o ultimo erro.
+    Banco ausente ou ilegivel devolve estado explicito (`ausente`/`indisponivel`), nunca um zero que pareca saudavel; nada e criado nem alterado."""
+    import sqlite3
+    path = Path(gov) / db_name
+    if not path.is_file():
+        return {"state": "ausente", "error": f"{db_name} nao existe em {path.parent.name}"}
+    ts = _now(now).timestamp()
+    try:
+        db = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True, timeout=5)
+        try:
+            db.row_factory = sqlite3.Row
+            rows = [dict(r) for r in db.execute(
+                "SELECT id,event_type,idempotency_key,status,attempt,available_at,lease_owner,lease_until,error,updated_at FROM events ORDER BY id")]
+        finally:
+            db.close()
+    except sqlite3.Error as exc:
+        return {"state": "indisponivel", "error": f"{type(exc).__name__}: {exc}"[:160]}
+    counts: dict[str, int] = {}
+    for r in rows:
+        counts[r["status"]] = counts.get(r["status"], 0) + 1
+    live = [{"key": r["idempotency_key"], "owner": r["lease_owner"] or "?", "seconds_left": int(r["lease_until"] - ts)}
+            for r in rows if r["status"] == "RUNNING" and r["lease_until"] > ts]
+    errored = sorted((r for r in rows if r["error"]), key=lambda r: r["updated_at"] or 0)
+    return {"state": "ok", "counts": counts, "backoff": sum(1 for r in rows if r["status"] == "PENDING" and r["available_at"] > ts),
+            "live_leases": live, "zombies": sum(1 for r in rows if r["status"] == "RUNNING" and r["lease_until"] <= ts),
+            "dlq": [{"id": r["id"], "key": r["idempotency_key"], "error": (r["error"] or "")[:160]} for r in rows if r["status"] == "DLQ"],
+            "retries": sum(1 for r in rows if r["attempt"] > 1),
+            "last_error": ({"key": errored[-1]["idempotency_key"], "error": errored[-1]["error"]} if errored else None)}
+
+
 def collect_snapshot(gov: Path | None = None, procs_fn=list_processes, task_fn=task_state, gh=run_gh, cache: GithubCache | None = None,
                      backlog_cache: GithubCache | None = None, now: dt.datetime | None = None) -> Snapshot:
     """Uma coleta completa. Chamar FORA da thread de UI."""
@@ -530,7 +561,7 @@ def collect_snapshot(gov: Path | None = None, procs_fn=list_processes, task_fn=t
                     lock_status=lock_status(ex["lock_holder"], procs, ex["roots"]), last_error=ex["last_error"],
                     events=group_events(recent_events(g)), backlog=counts, backlog_error=berr, backlog_synced=bsync,
                     github_checks=gx.get("checks", "indisponivel"), executor_summary=summary, work=work, review_ref=ref,
-                    log_path=str(log) if log else None)
+                    log_path=str(log) if log else None, store=collect_store(g, n))
 
 
 def _latest_log(gov: Path) -> Path | None:

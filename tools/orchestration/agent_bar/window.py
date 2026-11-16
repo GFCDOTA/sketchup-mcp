@@ -323,7 +323,8 @@ class Details(QWidget):
         err = f"<br><span style='color:#ff9a9b'>último erro: {esc(s.last_error)}</span>" if s.last_error else ""
         self.health.setText(f"<b>Saúde</b> heartbeat {hb} &middot; kill switch {ks} &middot; instâncias "
                             f"{'?' if s.concurrent_instances is None else s.concurrent_instances}<br>lock: {esc(s.lock_status)}<br>"
-                            f"executor: {esc(s.executor_summary)}{err}")
+                            f"executor: {esc(s.executor_summary)}<br>"
+                            f"<span style='color:{'#6d6d75' if s.store_ok() else '#ff9a9b'}'>{esc(s.store_line())}</span>{err}")
         known = any(v is not None for v in s.backlog.values())
         cols = " &middot; ".join(f"{k} <b>{'?' if v is None else v}</b>" for k, v in s.backlog.items())
         if s.backlog_error and known:

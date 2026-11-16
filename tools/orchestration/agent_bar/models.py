@@ -77,6 +77,28 @@ class Snapshot:
     work: str = "indisponivel"                         # "monitorando" | "trabalhando" | ...
     review_ref: str = ""                               # review/SHA atual da fila
     log_path: str | None = None
+    store: dict = field(default_factory=lambda: {"state": "indisponivel", "error": "nao coletado"})   # EventStore (SQLite) lido somente leitura
+
+    def store_line(self) -> str:
+        """Uma linha honesta do EventStore. So `ok` sem DLQ nem lease morto e saudavel; ausente/indisponivel NUNCA parece saudavel."""
+        st = self.store or {}
+        if st.get("state") != "ok":
+            return f"EventStore {st.get('state', 'indisponivel')}: {st.get('error') or 'sem leitura'} (NAO e saudavel)"
+        c = st["counts"]
+        live = ", ".join(f"{x['owner']} ({x['seconds_left']}s)" for x in st["live_leases"]) or "nenhum"
+        line = (f"EventStore: {c.get('PENDING', 0)} pendente(s) ({st['backoff']} em backoff), {c.get('RUNNING', 0)} rodando, "
+                f"DLQ {c.get('DLQ', 0)}, retries {st['retries']}; leases vivos: {live}")
+        if st["zombies"]:
+            line += f"; ATENCAO {st['zombies']} RUNNING com lease vencido (worker morto?)"
+        if st["dlq"]:
+            line += "; DLQ: " + "; ".join(f"#{x['id']} {x['key'][:40]}" for x in st["dlq"][:3])
+        if st["last_error"]:
+            line += f"; ultimo erro: {st['last_error']['error'][:120]}"
+        return line
+
+    def store_ok(self) -> bool:
+        st = self.store or {}
+        return st.get("state") == "ok" and not st["dlq"] and not st["zombies"]
 
     def agents(self) -> list[AgentStatus]:
         return [self.claude, self.codex, self.listener, self.github]
@@ -102,6 +124,6 @@ class Snapshot:
                  f"executor: {self.executor_summary}",
                  "backlog: " + (", ".join(f"{k}={n(v)}" for k, v in self.backlog.items()) if self.backlog else "indisponivel")
                  + (f" (erro: {self.backlog_error})" if self.backlog_error else f" (sync {self.backlog_synced or 'nunca'})"),
-                 f"ultimo erro: {self.last_error or 'nenhum observado'}", f"log: {self.log_path or 'indisponivel'}"]
+                 f"ultimo erro: {self.last_error or 'nenhum observado'}", f"log: {self.log_path or 'indisponivel'}", self.store_line()]
         rows += [f"  {e.last_at} {e.action} {e.pr_label()} x{e.count} {e.reason}".rstrip() for e in self.events[:10]]
         return "\n".join(rows)
