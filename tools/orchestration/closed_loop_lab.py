@@ -596,16 +596,60 @@ def _verdict_outbox(rnd: int, sha: str, v: dict) -> dict:
             "payload": {"round": rnd, "head_sha": sha, "verdict": v["verdict"], "findings": len(v["findings"])}}
 
 
+def _publications_file(lab: Lab) -> Path:
+    return lab.root / "PUBLICATIONS.jsonl"
+
+
+def _record_publication(lab: Lab, row: dict) -> None:
+    with _publications_file(lab).open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(row, sort_keys=True) + "\n")
+
+
+def publications(lab: Lab) -> list[dict]:
+    p = _publications_file(lab)
+    if not p.exists():
+        return []
+    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+
+
+def interrupted_then_reconciled(rows: list[dict]) -> bool:
+    """Prova ESPECIFICA do cenario: para uma mesma chave, uma tentativa aplicou o efeito (EFFECT_APPLIED) e NUNCA registrou o desfecho (morreu antes do ACK) E uma
+    tentativa POSTERIOR terminou RECONCILED. Duas tentativas por outro motivo (ex.: falha antes do envio) nao contam."""
+    for key in {r["key"] for r in rows}:
+        mine = [r for r in rows if r["key"] == key]
+        applied = {r["attempt"] for r in mine if r["event"] == "EFFECT_APPLIED"}
+        concluded = {r["attempt"] for r in mine if r["event"] != "EFFECT_APPLIED"}
+        interrupted = sorted(applied - concluded)
+        if interrupted and any(r["event"] == "RECONCILED" and r["attempt"] > interrupted[0] for r in mine):
+            return True
+    return False
+
+
 def publish_outbox(lab: Lab, store: EventStore, owner: str,
                    on_published: Callable[[dict, str], None] | None = None) -> list[dict]:
-    """Publica as entradas disponiveis do outbox no ledger do laboratorio (reconcilia pela chave antes de cada envio)."""
-    return op.drain(store, {OUTBOX_TARGET: op.LedgerTarget(lab.ledger)}, owner, lease_seconds=OUTBOX_LEASE_S,
-                    target=OUTBOX_TARGET, after_send=on_published)
+    """Publica as entradas disponiveis do outbox no ledger do laboratorio (reconcilia pela chave antes de cada envio). Cada efeito aplicado e cada desfecho ficam em
+    PUBLICATIONS.jsonl: e dali que o relatorio prova a morte entre o efeito e o ACK e a reconciliacao seguinte."""
+    def after(entry: dict, reference: str) -> None:
+        _record_publication(lab, {"key": entry["idempotency_key"], "event": "EFFECT_APPLIED", "attempt": entry["attempts"], "reference": reference})
+        if on_published:
+            on_published(entry, reference)
+    results = op.drain(store, {OUTBOX_TARGET: op.LedgerTarget(lab.ledger)}, owner, lease_seconds=OUTBOX_LEASE_S,
+                       target=OUTBOX_TARGET, after_send=after)
+    for r in results:
+        if r.get("key"):
+            _record_publication(lab, {"key": r["key"], "event": r["action"], "attempt": r.get("attempt")})
+    return results
 
 
 def outbox_unfinished(store: EventStore) -> bool:
     """Ha efeito externo ainda sem desfecho (na fila, em retry ou com um publicador que pode ter morrido)."""
     return any(o["status"] in ("PENDING", "RUNNING") for o in store.outbox_entries())
+
+
+def outbox_dead(store: EventStore) -> list[dict]:
+    """Publicacoes que esgotaram as tentativas (falha do alvo ou lease vencido na ultima, com resultado remoto desconhecido): o workflow fica BLOQUEADO ate
+    reconciliacao/intervencao. Nunca contam como publicadas nem liberam correcao ou estado terminal."""
+    return [o for o in store.outbox_entries() if o["status"] == "DLQ"]
 
 
 def _blocked(store: EventStore, ev: dict, reason: str) -> dict:
@@ -710,10 +754,14 @@ def step(lab: Lab, store: EventStore, owner: str, *, claude_runner: Runner | Non
 
     if outbox_unfinished(store):
         return done({"action": "IDLE", "waiting": "outbox"})
+    dead = outbox_dead(store)
+    if dead:
+        return done({"action": "BLOCKED", "waiting": "outbox_dlq", "reason": f"publicacao em DLQ (entradas {[o['id'] for o in dead]}): reconciliacao ou intervencao "
+                     "obrigatoria antes de qualquer correcao ou estado terminal"})
     state = terminal(store)
     if state:
         return done({"action": "TERMINAL", "state": state})
-    ev = store.claim(CONSUMED, owner, CLAIM_LEASE_S)
+    ev = store.claim(CONSUMED, owner, CLAIM_LEASE_S, outbox_barrier=True)     # barreira e claim ATOMICOS: entre a checagem acima e o claim outro coordenador pode concluir
     if ev is None:
         return done({"action": "IDLE"})
     if on_claimed:
@@ -870,7 +918,7 @@ def report(lab: Lab, store: EventStore) -> dict:
             r["id"] in checks and not checks[r["id"]]["alive"] for r in interrupted),
         "coordinator_tests_ran_in_os_sandbox": sandboxed,
         "verdicts_published_once_via_outbox": all_published,
-        "interrupted_publication_was_reconciled": all_published and any(o["attempts"] >= 2 for o in outbox),
+        "interrupted_publication_was_reconciled": all_published and interrupted_then_reconciled(publications(lab)),
     }
     return {
         "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado", "lab": lab.root.name, "job_id": JOB_ID,

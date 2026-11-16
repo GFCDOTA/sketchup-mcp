@@ -1306,3 +1306,36 @@ def test_missing_or_unreadable_results_count_as_missing_evidence_not_as_absent_e
     found = lab_mod.recorded_test_evidence(events)
 
     assert found == [valid, None, None] and lab_mod.tests_sandboxed(found) is False and lab_mod.tests_sandboxed([valid]) is True
+
+
+# -- revisao do Codex (#618): DLQ do outbox bloqueia; prova especifica da interrupcao depois do efeito ---------------------------------------------------
+@pytest.mark.parametrize("how", ["target_failure", "lease_expired_on_last_attempt"])
+def test_a_publication_in_dlq_blocks_the_workflow_instead_of_counting_as_finished(env, how):
+    lab, store = env
+    claude, codex = FakeClaude(writes(UNICODE_FIX)), FakeCodex(verdict("REQUEST_CHANGES", [FINDING]))
+    run(lab, store, claude, codex)
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(lab_mod, "publish_outbox", lambda *a, **k: [])                                        # a revisao conclui, a publicacao fica na fila
+        run(lab, store, claude, codex)
+    (entry,) = store.outbox_entries()
+    with store._tx() as db:
+        db.execute("UPDATE outbox SET max_attempts=1 WHERE id=?", (entry["id"],))
+    claimed = store.claim_outbox("pub", 5)
+    if how == "target_failure":
+        assert store.fail_outbox(claimed, "alvo recusou", 0) == "DLQ"
+    else:
+        store.clock.advance(10)                                                                            # o publicador morreu na ULTIMA tentativa
+        store.claim_outbox("outro", 5)                                                                      # o proximo claim reaproveita e move para DLQ
+    assert [o["status"] for o in store.outbox_entries()] == ["DLQ"]
+    calls = len(claude.calls)
+    res = run(lab, store, claude, codex)
+    assert res["action"] == "BLOCKED" and res["waiting"] == "outbox_dlq" and len(claude.calls) == calls    # nenhuma correcao despachada
+    assert run(lab, store, claude, codex)["action"] == "BLOCKED"                                           # nem estado terminal
+
+
+def test_two_attempts_from_a_failure_before_the_send_do_not_prove_an_interruption_after_the_effect():
+    control = [{"key": "k", "event": "FAILED", "attempt": 1}, {"key": "k", "event": "EFFECT_APPLIED", "attempt": 2}, {"key": "k", "event": "SENT", "attempt": 2}]
+    assert lab_mod.interrupted_then_reconciled(control) is False
+    proof = [{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}, {"key": "k", "event": "RECONCILED", "attempt": 2}]
+    assert lab_mod.interrupted_then_reconciled(proof) is True
+    assert lab_mod.interrupted_then_reconciled([{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}]) is False      # sem reconciliacao posterior

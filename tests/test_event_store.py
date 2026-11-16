@@ -840,3 +840,45 @@ class TestCanonicalJson:
         assert store.get(eid)["result"] == '{"y": 2, "z": 1}'
         assert store.get(fids[0])["payload"] == '{"a": 2, "b": 1}'
         assert store.pending_outbox()[0]["payload"] == '{"a": 2, "b": 1}'
+
+
+# -- barreira do outbox ATOMICA com o claim (revisao do Codex no #618) -----------------------------------------------------------------------------------
+def test_claim_with_the_outbox_barrier_refuses_while_any_publication_is_pending_running_or_dead(tmp_path):
+    s = EventStore(tmp_path / "b.db")
+    s.publish("REVIEW_REQUESTED", "rev", "job:1", {})
+    ev = s.claim("REVIEW_REQUESTED", "w", 60)
+    s.complete(ev, {}, follow_ups=[{"event_type": "REVIEW_CHANGES_REQUESTED", "idempotency_key": "fix", "payload": {}}],
+               outbox_entries=[{"target": "t", "operation": "o", "payload": {}, "idempotency_key": "pub", "max_attempts": 1}])
+    assert s.claim("REVIEW_CHANGES_REQUESTED", "w2", 60, outbox_barrier=True) is None                       # a correcao espera a publicacao
+    entry = s.claim_outbox("p", 60)
+    assert s.claim("REVIEW_CHANGES_REQUESTED", "w2", 60, outbox_barrier=True) is None                       # RUNNING tambem barra
+    assert s.fail_outbox(entry, "alvo fora", 0) == "DLQ"
+    assert s.claim("REVIEW_CHANGES_REQUESTED", "w2", 60, outbox_barrier=True) is None                       # DLQ barra ate intervencao
+    assert s.claim("REVIEW_CHANGES_REQUESTED", "w2", 60) is not None                                        # sem a barreira o claim seguiria
+
+
+def test_a_review_completing_concurrently_never_lets_its_follow_up_be_claimed_before_the_publication(tmp_path):
+    import threading
+    for i in range(25):
+        s = EventStore(tmp_path / f"race{i}.db")
+        s.publish("REVIEW_REQUESTED", "rev", "job:1", {})
+        ev = s.claim("REVIEW_REQUESTED", "w", 60)
+        got, go = [], threading.Barrier(2)
+
+        def completer():
+            go.wait()
+            s.complete(ev, {}, follow_ups=[{"event_type": "REVIEW_CHANGES_REQUESTED", "idempotency_key": "fix", "payload": {}}],
+                       outbox_entries=[{"target": "t", "operation": "o", "payload": {}, "idempotency_key": "pub"}])
+
+        def claimer():
+            go.wait()
+            for _ in range(50):
+                c = EventStore(tmp_path / f"race{i}.db").claim("REVIEW_CHANGES_REQUESTED", "w2", 60, outbox_barrier=True)
+                if c is not None:
+                    got.append(c)
+        ts = [threading.Thread(target=completer), threading.Thread(target=claimer)]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join(30)
+        assert got == []                                                                                     # nunca reivindicada com a publicacao pendente

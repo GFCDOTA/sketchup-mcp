@@ -224,7 +224,7 @@ class EventStore:
 
     # -- consuming ----------------------------------------------------------
     def claim(self, event_types, owner: str, lease_seconds: float,
-              *, job_id: str | None = None) -> dict | None:
+              *, job_id: str | None = None, outbox_barrier: bool = False) -> dict | None:
         """Atomically claim the oldest eligible event (PENDING & available, or
         RUNNING with an expired lease), excluding any live aggregate owner.
 
@@ -252,6 +252,8 @@ class EventStore:
                 )
                 self._log(db, ev["id"], "RUNNING", "DLQ", owner, reason, now)
                 self._record_dlq_fact(db, ev, reason, now)
+            if outbox_barrier and db.execute("SELECT 1 FROM outbox WHERE status IN ('PENDING','RUNNING','DLQ') LIMIT 1").fetchone():
+                return None                                                    # barreira NA MESMA transacao do claim: nada novo antes de publicar
             job_filter = " AND e.job_id=?" if job_id else ""
             job_params = (job_id,) if job_id else ()
             job = db.execute(
