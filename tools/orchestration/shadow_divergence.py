@@ -106,6 +106,9 @@ def compare(queue: list[dict], events: list[dict], now: float | None = None) -> 
                 if event_left < json_left:
                     found.append(Divergence("STATE_MISMATCH", key, f"orcamento de tentativas divergente: o JSON ainda tem {json_left}, o evento so {event_left}: uma falha apos o "
                                                                   "cutover levaria o item a DLQ antes da hora"))
+                elif event_left > json_left:
+                    found.append(Divergence("STATE_MISMATCH", key, f"orcamento de tentativas divergente: o JSON ainda tem {json_left}, o evento {event_left}: apos o cutover o item "
+                                                                  "executaria mais vezes do que o limite anterior permitia (custo e publicacoes extras)"))
                 retry_at, t_now = _epoch(item.get("retry_after")), (time.time() if now is None else now)
                 json_ready = max(retry_at or 0.0, t_now)                      # quando o executor JSON volta a poder escolher o item
                 event_ready = max(float(event.get("available_at") or 0), t_now)    # quando o store passa a poder reivindicar o evento

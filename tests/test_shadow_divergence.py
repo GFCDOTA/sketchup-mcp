@@ -33,7 +33,7 @@ def codes(found):
 def test_a_json_state_and_the_mirror_status_that_the_shadow_sync_produces_agree(state, status):
     # DLQ so concorda com o JSON esgotado; PENDING so concorda com um item que o JSON ainda pode escolher (menos de MAX_ATTEMPTS e estado pickable)
     attempts = sd.MAX_ATTEMPTS if status == "DLQ" else 1
-    assert sd.compare([item(state=state, attempts=attempts)], [event(status=status)]) == []
+    assert sd.compare([item(state=state, attempts=attempts)], [event(status=status, attempt=attempts)]) == []
 
 
 def test_items_that_are_not_mirrored_by_design_are_ignored():
@@ -250,7 +250,7 @@ def test_an_exhausted_json_item_with_a_still_claimable_pending_event_is_a_diverg
 
 @pytest.mark.parametrize("attempts", [0, 1, 2])
 def test_a_failed_json_item_with_attempts_left_and_a_pending_event_agree(attempts):
-    assert sd.compare([item(state="FAILED", attempts=attempts)], [event(status="PENDING")]) == []
+    assert sd.compare([item(state="FAILED", attempts=attempts)], [event(status="PENDING", attempt=attempts)]) == []
 
 
 @pytest.mark.parametrize("attempts", [0, 1, sd.MAX_ATTEMPTS])
@@ -319,9 +319,10 @@ def test_an_event_that_spent_more_attempts_than_the_json_item_is_a_budget_diverg
     assert codes(found) == [("STATE_MISMATCH", "k1")] and "orcamento" in found[0].detail
 
 
-def test_an_event_with_the_same_or_a_larger_budget_than_the_json_item_agrees():
+def test_an_event_with_the_same_budget_agrees_and_a_larger_one_is_a_divergence():
     assert sd.compare([item(state="FAILED", attempts=2)], [event(status="PENDING", attempt=2, max_attempts=3)], now=1000.0) == []
-    assert sd.compare([item(state="FAILED", attempts=2)], [event(status="PENDING", attempt=0, max_attempts=3)], now=1000.0) == []        # o evento tem MAIS folga: nao e divergencia
+    found = sd.compare([item(state="FAILED", attempts=2)], [event(status="PENDING", attempt=0, max_attempts=3)], now=1000.0)               # o evento tem MAIS folga: custo extra apos o cutover
+    assert codes(found) == [("STATE_MISMATCH", "k1")] and "mais vezes" in found[0].detail
 
 
 def test_a_json_retry_after_in_the_future_with_an_event_already_available_is_a_divergence():
