@@ -157,7 +157,10 @@ def next_backoff(current: int, base: int = 30) -> int:
 
 def gh_json(path: str):
     """`gh api` com o login ja existente (keyring). Sem shell, sem token no processo filho alem do que o proprio gh resolve."""
-    out = subprocess.run([os.environ.get("GH_BIN", "gh"), "api", "--paginate", path], capture_output=True, text=True, timeout=120)
+    # `gh` escreve UTF-8; sem `encoding` o Python decodifica pelo locale (cp1252 no Windows) e uma resposta com byte invalido nele (ex.: um PR com
+    # emoji ou travessao) derruba a thread de leitura e devolve `stdout=None`. O launcher setava PYTHONUTF8; nao dependa disso.
+    out = subprocess.run([os.environ.get("GH_BIN", "gh"), "api", "--paginate", path], capture_output=True, text=True, encoding="utf-8",
+                         errors="replace", timeout=120)
     if out.returncode != 0:
         raise RuntimeError((out.stderr or out.stdout).strip()[:300] or f"gh api falhou ({out.returncode})")
     text = out.stdout.strip()
