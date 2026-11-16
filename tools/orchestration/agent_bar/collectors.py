@@ -550,7 +550,7 @@ def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str | None
             for r in rows if r["status"] == "RUNNING" and r["lease_until"] > ts]
     # o ultimo erro e o da FALHA mais recente (transicao RUNNING -> PENDING/DLQ), nao o do evento tocado por ultimo: claim, renovacao e conclusao tambem mexem em
     # `updated_at`. Evento ja concluido (DONE) nao e erro corrente.
-    errored = sorted((r for r in rows if r["error"] and r["status"] != "DONE" and r["id"] in failed_at), key=lambda r: failed_at[r["id"]])
+    errored = sorted((r for r in rows if r["error"] and r["status"] not in ("DONE", "SUPERSEDED") and r["id"] in failed_at), key=lambda r: failed_at[r["id"]])
     return {"state": "ok", "counts": counts, "backoff": sum(1 for r in rows if r["status"] == "PENDING" and r["available_at"] > ts),
             "live_leases": live, "zombies": sum(1 for r in rows if r["status"] == "RUNNING" and r["lease_until"] <= ts),
             "dlq": [{"id": r["id"], "key": redact_secrets(r["idempotency_key"]), "error": redact_secrets(r["error"])[:160]} for r in rows if r["status"] == "DLQ"],

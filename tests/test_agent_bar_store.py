@@ -269,3 +269,31 @@ def test_only_execution_state_path_configured_still_follows_the_producer_contrac
         monkeypatch.delenv(var, raising=False)
     monkeypatch.setenv("EXECUTION_STATE_PATH", str(tmp_path / "estado" / "execution_state.json"))
     assert col.collect_store(tmp_path / "gov", NOW)["counts"] == {"PENDING": 1}                           # le o banco do PRODUTOR (1), nao o do diretorio da barra (3)
+
+
+def test_an_event_that_failed_and_was_then_superseded_is_not_the_current_error(store, tmp_path):
+    clock = store.clock_handle
+    store.publish("CORRECTION_REQUESTED", "k-sup", "pr:1", {"x": 1})
+    ev = store.claim(("CORRECTION_REQUESTED",), "w1", 60)
+    clock.t += 5
+    store.fail(ev, "falha antiga", retry_delay=0)
+    again = store.claim(("CORRECTION_REQUESTED",), "w2", 60)
+    clock.t += 5
+    store.supersede(again, "HEAD mudou: pedido obsoleto")                                         # o motivo da supersessao NAO e um erro de falha
+    assert col.collect_store(tmp_path, NOW)["last_error"] is None
+
+
+def test_a_real_failure_elsewhere_is_still_reported_when_another_event_was_superseded(store, tmp_path):
+    clock = store.clock_handle
+    store.publish("CORRECTION_REQUESTED", "k-a", "pr:1", {"x": 1})
+    store.publish("CORRECTION_REQUESTED", "k-b", "pr:2", {"x": 1})
+    a = store.claim(("CORRECTION_REQUESTED",), "w1", 60)
+    clock.t += 5
+    store.fail(a, "erro real", retry_delay=1000)
+    b = store.claim(("CORRECTION_REQUESTED",), "w2", 60)
+    clock.t += 5
+    store.fail(b, "outro erro", retry_delay=1000)
+    clock.t += 1500
+    again = store.claim(("CORRECTION_REQUESTED",), "w3", 60)
+    store.supersede(again, "obsoleto")
+    assert col.collect_store(tmp_path, NOW)["last_error"]["error"] == "outro erro"
