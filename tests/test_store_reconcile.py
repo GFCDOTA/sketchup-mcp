@@ -351,7 +351,17 @@ def test_the_default_reads_the_real_json_queue_and_respects_an_active_item(store
     report = sr.reconcile(store, FakeGh(head=NEW), apply=True)
     assert report["events"][0]["applied"] == "SKIPPED" and status(store) == "PENDING"
     monkeypatch.setenv("EXECUTOR_SOURCE", "sqlite")
+    assert sr.reconcile(store, FakeGh(head=NEW), apply=True)["events"][0]["applied"] == "SKIPPED"          # so a variavel NAO basta: o executor real nao consome do SQLite aqui
+    from tools.orchestration import event_executor as executor
+    fake = type("Sq", (), {"is_sqlite": staticmethod(lambda: True)})
+    monkeypatch.setattr(executor, "sq", fake, raising=False)                                              # executor que sabe consumir do SQLite (cutover efetivo)
     assert sr.reconcile(store, FakeGh(head=NEW), apply=True)["events"][0]["applied"] == "SUPERSEDED"
+
+
+@pytest.mark.parametrize("sha", ["", "abc123", "g" * 40, "a" * 39, "a" * 41])
+def test_a_review_item_with_an_empty_truncated_or_non_hex_head_sha_is_an_untrusted_queue(sha):
+    bad = [{**json_item("RUNNING"), "head_sha": sha}]
+    assert "SHA" in sr.queue_problem(bad)
 
 
 def test_a_running_json_executor_still_syncs_its_result_after_a_reconcile_attempt(store, tmp_path, monkeypatch):

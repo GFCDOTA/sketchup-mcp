@@ -41,7 +41,16 @@ FINISHED_JSON = frozenset({"SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"})      
 
 
 def sqlite_is_authoritative() -> bool:
-    return os.environ.get("EXECUTOR_SOURCE", "json").strip().lower() == "sqlite"
+    """O SQLite so e a fonte do executor se a variavel pede E o executor REAL sabe consumir dela (`event_executor.sq`, o modulo de claim do SQLite). So a variavel nao basta:
+    um executor sem esse caminho continua consumindo a fila JSON, e desligar a protecao dela deixaria descartar um evento enquanto o executor JSON trabalha nele."""
+    if os.environ.get("EXECUTOR_SOURCE", "json").strip().lower() != "sqlite":
+        return False
+    try:
+        from tools.orchestration import event_executor as executor
+    except Exception:  # noqa: BLE001 — sem como verificar o executor: a protecao da fila JSON fica LIGADA
+        return False
+    source = getattr(executor, "sq", None)
+    return source is not None and callable(getattr(source, "is_sqlite", None)) and bool(source.is_sqlite())
 
 
 def queue_problem(queue: object) -> str:
@@ -55,6 +64,8 @@ def queue_problem(queue: object) -> str:
         if i.get("kind") == "review" and (not isinstance(i.get("state"), str) or not isinstance(i.get("head_sha"), str)
                                            or not isinstance(i.get("pr"), int) or isinstance(i.get("pr"), bool)):
             return f"item de review #{n} sem `state`/`head_sha` de texto ou `pr` inteiro"
+        if i.get("kind") == "review" and not SHA.fullmatch(i["head_sha"].lower()):
+            return f"item de review #{n} com `head_sha` que nao e um SHA completo de 40 hex (identidade do trabalho nao comprovavel)"
         if not isinstance(i.get("kind"), str):
             return f"item #{n} sem `kind`"
     return ""
