@@ -277,8 +277,15 @@ def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, c
             return -1, out or "", err or "", True
 
 
-def git(args: list, cwd: Path) -> tuple[int, str]:
-    r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+def git(args: list, cwd: Path, timeout: float | None = None) -> tuple[int, str]:
+    """`git` sem prompt interativo e COM prazo: um helper de credenciais ou uma conexao travada nao pode manter o item RUNNING e o heartbeat vivos para sempre.
+    Estourou o prazo => (124, mensagem), nunca excecao."""
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never"}
+    try:
+        r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", env=env,
+                           timeout=GIT_TIMEOUT_S if timeout is None else timeout)
+    except subprocess.TimeoutExpired:
+        return 124, f"git {args[0] if args else ''}: prazo de {GIT_TIMEOUT_S if timeout is None else timeout}s estourado"
     return r.returncode, (r.stdout + r.stderr).strip()
 
 
@@ -520,35 +527,38 @@ def _revalidate(item: dict, gh: eb.Gh, policy: dict, repo: str) -> tuple[bool, s
 
 CONFIRM_TRIES = 6
 CONFIRM_PAUSE_S = 2.0
+GIT_TIMEOUT_S = 120
 
 
-def confirm_head(item: dict, gh: eb.Gh, repo: str, pushed: bool, wt: Path, branch: str, run=git, tries: int | None = None,
-                 pause: float | None = None) -> str:
-    """HEAD atual do PR. Logo depois de um push que deu certo, a API REST do GitHub pode devolver o HEAD ANTIGO por alguns segundos: tratar isso como
-    "sem commit novo" marcava FAILED uma entrega que tinha publicado (visto no E2E real da MT-06). Depois de `pushed`, repete a leitura e, se o GitHub ainda
-    mostrar o HEAD antigo, so aceita o commit local se o proprio remoto (`ls-remote`, nao o cache da API) o tem como ponta da branch."""
+def published_sha(item: dict, wt: Path, run=git) -> str:
+    """O commit que o `deliver` acabou de publicar: o HEAD local da worktree, que o `git push` (codigo de saida 0) deixou no remoto. '' se nao der para saber
+    (git indisponivel/travado ou nada de novo em relacao ao HEAD revisado)."""
+    try:
+        rc, out = run(["rev-parse", "HEAD"], wt)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    sha = out.strip().lower()
+    return sha if rc == 0 and re.fullmatch(r"[0-9a-f]{40}", sha) and sha != item["head_sha"].lower() else ""
+
+
+def confirm_head(item: dict, gh: eb.Gh, repo: str, pushed: bool, published: str = "", tries: int | None = None, pause: float | None = None) -> str:
+    """HEAD atual do PR. Logo depois de um push que deu certo, a API REST do GitHub pode devolver o HEAD ANTIGO por alguns segundos: tratar isso como "sem commit
+    novo" marcava FAILED uma entrega que tinha publicado (visto no E2E real da MT-06). Depois de `pushed`, repete a leitura ate a API mostrar OUTRO HEAD (o publicado,
+    ou um avanco externo: o chamador compara com `published`). Se a API seguir velha, devolve `published`: o `git push` com saida 0 e a prova, e nada mais e consultado
+    na rede (sem `ls-remote`, que podia travar o item). Erro/timeout da API vira leitura vazia, nunca excecao."""
     tries = CONFIRM_TRIES if tries is None else tries
     pause = CONFIRM_PAUSE_S if pause is None else pause
     head = ""
     for attempt in range(tries if pushed else 1):
         try:
             head = ((gh(f"repos/{repo}/pulls/{item['pr']}").get("head") or {}).get("sha") or "")
-        except (RuntimeError, OSError, ValueError):
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError):
             head = ""
         if not pushed or (head and head.lower() != item["head_sha"].lower()):
             return head
         if attempt + 1 < tries:
             time.sleep(pause)
-    try:
-        rc, local = run(["rev-parse", "HEAD"], wt)
-        rc2, remote = run(["ls-remote", "origin", f"refs/heads/{branch}"], wt)
-    except OSError:                                                          # worktree some / git indisponivel: nao ha como provar, mantem o HEAD lido
-        return head
-    local = local.strip().lower()
-    if rc == 0 and rc2 == 0 and re.fullmatch(r"[0-9a-f]{40}", local) and local != item["head_sha"].lower() \
-            and (remote.split() or [""])[0].lower() == local:
-        return local
-    return head
+    return published or head
 
 
 def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runner, claude_bin: str, wt_prep, t: dt.datetime,
@@ -619,11 +629,14 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
         except (OSError, ValueError, subprocess.SubprocessError) as exc:
             delivery = ("ERROR", f"{type(exc).__name__}: {exc}"[:300])
         write_log(key, f"delivery: {delivery}", "", {"delivery": delivery[0], "at": es.now_iso(t)})
-    new_head = confirm_head(item, gh, repo, delivery[0] == "PUSHED", wt, branch)
+    pushed = delivery[0] == "PUSHED"
+    published = published_sha(item, wt) if pushed else ""
+    new_head = confirm_head(item, gh, repo, pushed, published)
     if question and delivery[0] in ("SKIPPED", "NOOP") and not child_error:
         comment_pr(item["pr"], repo, f"Executor local: o agente parou com uma duvida e nao editou nada.\n\n> {question}")
     head_moved = bool(new_head) and new_head.lower() != item["head_sha"].lower()
-    if delivery[0] == "PUSHED" and head_moved:                              # DONE so quando QUEM publicou foi o executor
+    external = bool(published) and head_moved and new_head.lower() != published      # a API mostra um HEAD que NAO e o que o executor publicou
+    if pushed and head_moved and not external:                              # DONE so quando QUEM publicou foi o executor
         def done(it, b):
             it["state"], it["new_head"], it["last_error"], it["log"] = "DONE_AWAITING_REREVIEW", new_head, "", log
             it["attempts"] = it.get("attempts", 0) + 1

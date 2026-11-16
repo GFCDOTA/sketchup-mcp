@@ -373,3 +373,16 @@ def test_run_checks_has_no_bypass_parameters():
 
 def test_prompt_tells_the_model_a_denied_command_does_not_block_the_allowed_ones():
     assert "tente-os" in ex.PROMPT and "o executor valida" in ex.PROMPT
+
+
+def test_delivery_git_calls_have_a_deadline_and_never_prompt(monkeypatch, tmp_path):
+    seen = []
+
+    def fake_run(argv, **kw):
+        seen.append(kw)
+        raise subprocess.TimeoutExpired(argv, kw["timeout"])
+    monkeypatch.setattr(dl.subprocess, "run", fake_run)
+    rc, msg = dl._git(["push", "origin", "HEAD"], tmp_path)
+    rc_raw, out_raw = dl._git_raw(["diff", "--numstat"], tmp_path)
+    assert rc == 124 and "prazo" in msg and rc_raw == 124 and out_raw == b""
+    assert all(kw["timeout"] == dl.GIT_TIMEOUT_S and kw["env"]["GIT_TERMINAL_PROMPT"] == "0" for kw in seen) and len(seen) == 2

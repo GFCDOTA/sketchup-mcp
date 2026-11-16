@@ -31,13 +31,28 @@ Run = Callable[[list, Path], "tuple[int, str]"]
 Revalidate = Callable[[], "tuple[bool, str]"]
 
 
+GIT_TIMEOUT_S = 300
+
+
+def _noninteractive_env() -> dict:
+    return {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never"}
+
+
 def _git(args: list, cwd: Path) -> tuple[int, str]:
-    r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    """`git` sem prompt e COM prazo (push/ls-remote/fetch): conexao ou helper de credenciais travado nao pode prender o executor. Estouro => (124, msg)."""
+    try:
+        r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", env=_noninteractive_env(),
+                           timeout=GIT_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        return 124, f"git {args[0] if args else ''}: prazo de {GIT_TIMEOUT_S}s estourado"
     return r.returncode, (r.stdout + r.stderr).strip()
 
 
 def _git_raw(args: list, cwd: Path) -> tuple[int, bytes]:
-    r = subprocess.run(["git", *args], cwd=cwd, capture_output=True)
+    try:
+        r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, env=_noninteractive_env(), timeout=GIT_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        return 124, b""
     return r.returncode, r.stdout
 
 

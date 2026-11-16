@@ -735,9 +735,14 @@ def test_review_fetch_failure_blocks_without_launching_the_child():
 
 
 # ------------------------------------------------------------- HEAD confirmado depois do push (visto no E2E real da MT-06)
+import subprocess  # noqa: E402
+
+PUBLISHED = "e" * 40
+
+
 class StaleGh:
-    """O GitHub devolve o HEAD antigo por `stale` leituras e so depois o novo."""
-    def __init__(self, stale, new=NEWHEAD, boom=None):
+    """O GitHub devolve o HEAD antigo por `stale` leituras e so depois `new`."""
+    def __init__(self, stale, new=PUBLISHED, boom=None):
         self.stale, self.new, self.boom, self.calls = stale, new, boom, 0
 
     def __call__(self, path):
@@ -747,53 +752,94 @@ class StaleGh:
         return {"head": {"sha": HEAD if self.calls <= self.stale else self.new}}
 
 
-def fake_git(local=NEWHEAD, remote=NEWHEAD):
+def head_git(local=PUBLISHED, rc=0, boom=None):
     def run(args, cwd):
-        if args[0] == "rev-parse":
-            return 0, local
-        if args[0] == "ls-remote":
-            return 0, f"{remote}\trefs/heads/feat/589-x"
-        raise AssertionError(args)
+        assert args == ["rev-parse", "HEAD"], args
+        if boom:
+            raise boom
+        return rc, local
     return run
+
+
+def test_published_sha_is_the_local_head_the_push_left_on_the_remote():
+    assert ex.published_sha(item(), Path("."), head_git()) == PUBLISHED
+
+
+@pytest.mark.parametrize("run", [head_git(local=HEAD), head_git(local="nao-e-sha"), head_git(rc=1), head_git(boom=OSError("sem worktree")),
+                                 head_git(boom=subprocess.TimeoutExpired("git", 1))])
+def test_published_sha_is_empty_when_git_cannot_prove_a_new_commit(run):
+    assert ex.published_sha(item(), Path("."), run) == ""
 
 
 def test_confirm_head_does_not_wait_when_nothing_was_pushed(monkeypatch):
     slept = []
     monkeypatch.setattr(ex.time, "sleep", slept.append)
     gh = StaleGh(stale=99)
-    assert ex.confirm_head(item(), gh, REPO, False, Path("."), "b", fake_git()) == HEAD and gh.calls == 1 and slept == []
+    assert ex.confirm_head(item(), gh, REPO, False) == HEAD and gh.calls == 1 and slept == []
 
 
 def test_confirm_head_waits_for_github_to_show_the_pushed_commit(monkeypatch):
     slept = []
     monkeypatch.setattr(ex.time, "sleep", slept.append)
     gh = StaleGh(stale=2)
-    assert ex.confirm_head(item(), gh, REPO, True, Path("."), "b", fake_git(), tries=6, pause=2.0) == NEWHEAD
-    assert gh.calls == 3 and slept == [2.0, 2.0]
+    assert ex.confirm_head(item(), gh, REPO, True, PUBLISHED, tries=6, pause=2.0) == PUBLISHED and gh.calls == 3 and slept == [2.0, 2.0]
 
 
-def test_confirm_head_trusts_the_remote_ref_when_the_api_stays_stale_after_a_push(monkeypatch):
+def test_confirm_head_trusts_the_push_exit_status_when_the_api_stays_stale(monkeypatch):
     monkeypatch.setattr(ex.time, "sleep", lambda s: None)
-    assert ex.confirm_head(item(), StaleGh(stale=99), REPO, True, Path("."), "b", fake_git(), tries=3) == NEWHEAD
+    gh = StaleGh(stale=99)
+    assert ex.confirm_head(item(), gh, REPO, True, PUBLISHED, tries=3) == PUBLISHED and gh.calls == 3     # sem ls-remote: nada mais na rede
 
 
-@pytest.mark.parametrize("name,run", [("remote_differs", fake_git(remote="e" * 40)), ("local_is_the_old_head", fake_git(local=HEAD, remote=HEAD)),
-                                      ("local_is_not_a_sha", fake_git(local="nao-e-sha", remote="nao-e-sha"))])
-def test_confirm_head_never_invents_a_new_head_the_remote_does_not_have(monkeypatch, name, run):
+def test_confirm_head_returns_an_external_advance_so_the_caller_can_tell_it_from_the_published_commit(monkeypatch):
     monkeypatch.setattr(ex.time, "sleep", lambda s: None)
-    assert ex.confirm_head(item(), StaleGh(stale=99), REPO, True, Path("."), "b", run, tries=2) == HEAD
+    assert ex.confirm_head(item(), StaleGh(stale=0, new="f" * 40), REPO, True, PUBLISHED, tries=2) == "f" * 40
 
 
-def test_confirm_head_survives_github_errors_and_falls_back_to_the_remote(monkeypatch):
+@pytest.mark.parametrize("boom", [RuntimeError("502"), OSError("rede"), ValueError("json"), subprocess.TimeoutExpired("gh", 120)])
+def test_confirm_head_survives_any_github_error_including_a_timeout(monkeypatch, boom):
     monkeypatch.setattr(ex.time, "sleep", lambda s: None)
-    assert ex.confirm_head(item(), StaleGh(stale=0, boom=RuntimeError("502")), REPO, True, Path("."), "b", fake_git(), tries=2) == NEWHEAD
-    assert ex.confirm_head(item(), StaleGh(stale=0, boom=RuntimeError("502")), REPO, False, Path("."), "b", fake_git()) == ""
+    assert ex.confirm_head(item(), StaleGh(stale=0, boom=boom), REPO, True, PUBLISHED, tries=2) == PUBLISHED
+    assert ex.confirm_head(item(), StaleGh(stale=0, boom=boom), REPO, False) == ""
 
 
-def test_a_push_that_github_shows_late_is_recorded_as_done_not_failed(monkeypatch):
+def test_a_push_that_github_shows_late_is_recorded_as_done_with_the_published_commit(monkeypatch):
+    gh = FakeGh()                                                                 # a API segue mostrando o HEAD antigo
+    monkeypatch.setattr(ex, "published_sha", lambda item, wt, run=None: PUBLISHED)
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))
+    assert res["action"] == "DONE" and res["new_head"] == PUBLISHED and b["queue"][0]["state"] == "DONE_AWAITING_REREVIEW"
+    assert b["queue"][0]["new_head"] == PUBLISHED
+
+
+def test_an_external_advance_right_after_the_push_is_superseded_not_credited_to_the_executor(monkeypatch):
     gh = FakeGh()
-    r = Runner(gh, push=False)                                                    # o runner nao move o HEAD que o FakeGh devolve
-    monkeypatch.setattr(ex, "confirm_head", lambda item, gh, repo, pushed, wt, branch: NEWHEAD if pushed else HEAD)
+    monkeypatch.setattr(ex, "published_sha", lambda item, wt, run=None: PUBLISHED)
+    r = Runner(gh, push=False)
+
+    def other_person_pushes(*a, **k):                                             # a API passa a mostrar um SHA que NAO e o publicado
+        gh.head = "f" * 40
+        return ("PUSHED", "fake")
+    monkeypatch.setattr(ex, "deliver", other_person_pushes)
     b = bstate(item())
     res = go(gh, b, r)
-    assert res["action"] == "DONE" and res["new_head"] == NEWHEAD and b["queue"][0]["state"] == "DONE_AWAITING_REREVIEW"
+    assert res["action"] == "SUPERSEDED" and b["queue"][0]["state"] == "SUPERSEDED" and b["queue"][0]["new_head"] == "f" * 40
+
+
+def test_without_a_provable_published_commit_a_moved_head_still_counts_as_done(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "published_sha", lambda item, wt, run=None: "")
+    b = bstate(item())
+    assert go(gh, b, Runner(gh))["action"] == "DONE"                              # Runner empurra o HEAD do FakeGh (comportamento anterior)
+
+
+def test_git_has_a_deadline_and_never_prompts(monkeypatch):
+    seen = {}
+
+    def fake_run(argv, **kw):
+        seen.update(kw)
+        raise subprocess.TimeoutExpired(argv, kw["timeout"])
+    monkeypatch.setattr(ex.subprocess, "run", fake_run)
+    rc, msg = ex.git(["ls-remote", "origin"], Path("."))
+    assert rc == 124 and "prazo" in msg and seen["timeout"] == ex.GIT_TIMEOUT_S
+    assert seen["env"]["GIT_TERMINAL_PROMPT"] == "0" and seen["env"]["GCM_INTERACTIVE"] == "never"
