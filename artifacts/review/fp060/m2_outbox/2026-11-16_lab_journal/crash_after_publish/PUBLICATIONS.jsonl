@@ -1,0 +1,4 @@
+{"attempt": 1, "event": "EFFECT_APPLIED", "key": "lab:slug:review:618fc164802fb36514b0339be4513336bd3bd324:REQUEST_CHANGES", "reference": "ledger:1"}
+{"attempt": 2, "event": "RECONCILED", "key": "lab:slug:review:618fc164802fb36514b0339be4513336bd3bd324:REQUEST_CHANGES"}
+{"attempt": 1, "event": "EFFECT_APPLIED", "key": "lab:slug:review:56bb00b15fda36127a01f09eeebec72cbe49208a:APPROVE", "reference": "ledger:2"}
+{"attempt": 1, "event": "SENT", "key": "lab:slug:review:56bb00b15fda36127a01f09eeebec72cbe49208a:APPROVE"}

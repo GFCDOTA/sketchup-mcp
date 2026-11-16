@@ -72,3 +72,11 @@ $PY -m tools.orchestration.closed_loop_lab drive --lab <dir novo fora de qualque
 | `ORPHAN_CHECKS.jsonl` | PIDs vivos na árvore do CLI interrompido |
 | `verdict_e*.json` | pareceres brutos do Codex |
 | `CLI_VERSIONS.json` | versões dos CLIs e do Python, sem caminho de binário |
+
+## Adendo (2026-11-16) — o critério mudou depois desta execução
+
+Esta execução (`fa8e9cf`) é anterior ao diário `PUBLICATIONS.jsonl`. A tabela acima descreve
+`interrupted_publication_was_reconciled` como "alguma entrada precisou de 2 ou mais tentativas", o que **não** é mais o critério:
+hoje ele exige, no diário, `EFFECT_APPLIED` sem desfecho seguido de `RECONCILED` numa tentativa posterior, e reprova diário ausente,
+vazio ou malformado. Esta pasta não tem o diário e por isso **não comprova o critério atual**. A prova do critério atual, no
+commit `7a8afa1c`, está em `../2026-11-16_lab_journal/`.

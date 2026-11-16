@@ -1,0 +1,239 @@
+{
+ "title": "FP-060-A01 M1 — closed-loop minimo em laboratorio isolado",
+ "lab": "fp060_lab_618_7a8afa1c",
+ "job_id": "lab:slug",
+ "mode": "closed_loop",
+ "failure_reasons": [],
+ "publications_journal_error": null,
+ "verdict": "PASS",
+ "criteria": {
+  "claude_cli_observed": true,
+  "codex_cli_observed": true,
+  "request_changes_then_correction": true,
+  "approved_after_correction": true,
+  "approval_bound_to_final_head": true,
+  "workflow_completed": true,
+  "no_pending_or_running_event": true,
+  "one_delivery_per_implement_event": true,
+  "survived_coordinator_restart": true,
+  "finished_cli_runs_job_contained": true,
+  "orphan_cli_tree_dead_after_coordinator_kill": true,
+  "coordinator_tests_ran_in_os_sandbox": true,
+  "verdicts_published_once_via_outbox": true,
+  "interrupted_publication_was_reconciled": true
+ },
+ "final_head": "56bb00b15fda36127a01f09eeebec72cbe49208a",
+ "approved_head": "56bb00b15fda36127a01f09eeebec72cbe49208a",
+ "rounds": 2,
+ "coordinator_owners": [
+  "lab-coordinator:13696",
+  "lab-coordinator:20036",
+  "lab-coordinator:20436",
+  "lab-coordinator:24704",
+  "lab-coordinator:34616",
+  "lab-coordinator:40180",
+  "lab-coordinator:6712"
+ ],
+ "reclaims": [
+  "reclaimed expired lease of lab-coordinator:20436; attempt 2",
+  "reclaimed expired lease of lab-coordinator:6712; attempt 2"
+ ],
+ "blocked_reviews": [],
+ "events": [
+  {
+   "id": 1,
+   "type": "IMPLEMENT_REQUESTED",
+   "status": "DONE",
+   "attempt": 2,
+   "parent": null,
+   "key": "lab:slug:r1:implement",
+   "error": null
+  },
+  {
+   "id": 2,
+   "type": "IMPLEMENT_COMPLETED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 1,
+   "key": "lab:slug:r1:implement_completed:618fc164802fb365",
+   "error": null
+  },
+  {
+   "id": 3,
+   "type": "REVIEW_REQUESTED",
+   "status": "DONE",
+   "attempt": 2,
+   "parent": 1,
+   "key": "lab:slug:r1:review:618fc164802fb365",
+   "error": null
+  },
+  {
+   "id": 4,
+   "type": "REVIEW_CHANGES_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": 3,
+   "key": "lab:slug:r1:changes_requested:618fc164802fb365",
+   "error": null
+  },
+  {
+   "id": 5,
+   "type": "CORRECTION_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": 4,
+   "key": "lab:slug:r2:implement",
+   "error": null
+  },
+  {
+   "id": 6,
+   "type": "IMPLEMENT_COMPLETED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 5,
+   "key": "lab:slug:r2:implement_completed:56bb00b15fda3612",
+   "error": null
+  },
+  {
+   "id": 7,
+   "type": "REVIEW_REQUESTED",
+   "status": "DONE",
+   "attempt": 1,
+   "parent": 5,
+   "key": "lab:slug:r2:review:56bb00b15fda3612",
+   "error": null
+  },
+  {
+   "id": 8,
+   "type": "REVIEW_APPROVED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 7,
+   "key": "lab:slug:r2:approved:56bb00b15fda3612",
+   "error": null
+  },
+  {
+   "id": 9,
+   "type": "WORKFLOW_COMPLETED",
+   "status": "RECORDED",
+   "attempt": 0,
+   "parent": 7,
+   "key": "lab:slug:workflow_completed",
+   "error": null
+  }
+ ],
+ "runs": [
+  {
+   "id": 1,
+   "event": 1,
+   "agent": "claude",
+   "pid": 33632,
+   "exit_code": null,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": false,
+   "seconds": null,
+   "stdout": "claude_e001_a1.stdout.txt",
+   "containment": null
+  },
+  {
+   "id": 2,
+   "event": 1,
+   "agent": "claude",
+   "pid": 35208,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 9.4,
+   "stdout": "claude_e001_a2.stdout.txt",
+   "containment": "job_object"
+  },
+  {
+   "id": 3,
+   "event": 3,
+   "agent": "codex",
+   "pid": 48008,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 31.2,
+   "stdout": "codex_e003_a2.stdout.txt",
+   "containment": "job_object"
+  },
+  {
+   "id": 4,
+   "event": 5,
+   "agent": "claude",
+   "pid": 18496,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "claude.exe",
+   "finished": true,
+   "seconds": 14.5,
+   "stdout": "claude_e005_a1.stdout.txt",
+   "containment": "job_object"
+  },
+  {
+   "id": 5,
+   "event": 7,
+   "agent": "codex",
+   "pid": 31344,
+   "exit_code": 0,
+   "timed_out": false,
+   "binary": "codex.exe",
+   "finished": true,
+   "seconds": 35.9,
+   "stdout": "codex_e007_a1.stdout.txt",
+   "containment": "job_object"
+  }
+ ],
+ "interrupted_runs": [
+  1
+ ],
+ "orphan_checks": [
+  {
+   "run": 1,
+   "agent": "claude",
+   "pid": 33632,
+   "grace_s": 2.0,
+   "alive": []
+  }
+ ],
+ "commits": [
+  "3883994dd9855c3a4098efecad60eef191f5519d lab: semente com defeito conhecido",
+  "618fc164802fb36514b0339be4513336bd3bd324 lab: rodada 1 (IMPLEMENT_REQUESTED)",
+  "56bb00b15fda36127a01f09eeebec72cbe49208a lab: rodada 2 (CORRECTION_REQUESTED)"
+ ],
+ "transitions": 21,
+ "test_isolation": [
+  "appcontainer_no_capabilities"
+ ],
+ "outbox": [
+  {
+   "id": 1,
+   "event": 3,
+   "key": "lab:slug:review:618fc164802fb36514b0339be4513336bd3bd324:REQUEST_CHANGES",
+   "status": "DONE",
+   "attempts": 2
+  },
+  {
+   "id": 2,
+   "event": 7,
+   "key": "lab:slug:review:56bb00b15fda36127a01f09eeebec72cbe49208a:APPROVE",
+   "status": "DONE",
+   "attempts": 1
+  }
+ ],
+ "ledger": [
+  "lab:slug:review:618fc164802fb36514b0339be4513336bd3bd324:REQUEST_CHANGES",
+  "lab:slug:review:56bb00b15fda36127a01f09eeebec72cbe49208a:APPROVE"
+ ],
+ "limits": [
+  "testes em AppContainer sem capacidades: nega arquivos e credenciais do usuario e a rede, mas le o que a ACL abre a todo AppContainer (Windows, Program Files), e NAO garante a integridade do resultado (o codigo testado controla o exit code)",
+  "APPROVE tecnico de laboratorio != review independente no GitHub (M2)",
+  "sem GitHub, sem --execute; o alvo do outbox e um arquivo local que faz o papel de sistema externo",
+  "Job Object nao e sandbox: so prende a vida da arvore do CLI ao coordenador e ao lease"
+ ]
+}
