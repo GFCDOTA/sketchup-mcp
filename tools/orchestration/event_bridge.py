@@ -87,12 +87,28 @@ def load(path: Path | None = None) -> dict:
     """Le o estado SEM efeito colateral: arquivo ausente = estado padrao; arquivo corrompido (zerado, vazio, truncado, nao-UTF-8, raiz que nao e objeto)
     levanta `BridgeStateCorrupt` e fica como estava. Quem pode recuperar e so `recover_state`, sob a trava; leitores sem trava (ex.: `status`) nunca mexem."""
     p = path or bridge_path()
-    if not p.exists():
-        return default_bridge_state()
     try:
-        return {**default_bridge_state(), **_read_state(p)}
+        if p.exists():
+            return {**default_bridge_state(), **_read_state(p)}
+    except FileNotFoundError:
+        pass                                                     # `recover_state` moveu o arquivo entre exists() e a leitura: vale o contrato de "ausente"
     except ValueError as exc:
         raise BridgeStateCorrupt(f"estado do bridge corrompido ({exc}): {p.name}") from exc
+    return _pending_state(p) or default_bridge_state()
+
+
+def _pending_path(p: Path) -> Path:
+    return p.with_name(p.name + ".recovered")
+
+
+def _pending_state(p: Path) -> dict | None:
+    """Estado limpo (com o diagnostico) que uma recuperacao INTERROMPIDA deixou pronto ao lado: o arquivo corrompido ja foi para a quarentena mas o novo
+    ainda nao tomou o lugar. Lido no lugar do padrao, o diagnostico nao se perde; `None` se nao ha pendencia legivel."""
+    q = _pending_path(p)
+    try:
+        return {**default_bridge_state(), **_read_state(q)} if q.exists() else None
+    except (ValueError, OSError):
+        return None
 
 
 def recover_state(path: Path | None = None) -> dict:
@@ -105,24 +121,32 @@ def recover_state(path: Path | None = None) -> dict:
     import uuid
     p = path or bridge_path()
     try:
-        return load(p)                                           # relido sob a trava: ja recuperado por outro?
+        state = load(p)                                          # relido sob a trava: ja recuperado por outro?
+        if not p.exists() and _pending_state(p) is not None:
+            es.replace_retry(_pending_path(p), p)                # recuperacao interrompida entre a quarentena e a gravacao: CONCLUI (o diagnostico ja esta no pendente)
+        return state
     except BridgeStateCorrupt as exc:
         reason = str(exc)
-    kept = None
-    if p.exists():
-        stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d%H%M%S")
-        kept = p.with_name(f"{p.name}.corrupt-{stamp}-{os.getpid()}-{uuid.uuid4().hex[:6]}")
-        try:
-            es.replace_retry(p, kept)                            # atomico (com retry de leitor aberto no Windows); nome unico: nunca sobrescreve outra quarentena
-        except FileNotFoundError:
-            kept = None
-        except OSError as os_exc:
-            raise BridgeStateCorrupt(f"{reason} e nao foi possivel preserva-lo: {os_exc}") from os_exc
+    # Duas fases, retomaveis: (1) o estado limpo COM o diagnostico vai para `<estado>.recovered` de forma duravel; (2) o corrompido vai para a quarentena;
+    # (3) o pendente toma o lugar do estado. Parar entre (2) e (3) nao perde nada: `load` le o pendente e a proxima recuperacao conclui o passo (3).
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d%H%M%S")
+    candidate = p.with_name(f"{p.name}.corrupt-{stamp}-{os.getpid()}-{uuid.uuid4().hex[:6]}")
     state = default_bridge_state()
-    where = f"preservado em {kept.name}" if kept else "ja removido por outro processo"
-    diagnose(state, f"{reason}; {where}; estado limpo, reviews relidos do GitHub no proximo poll (cursor e vistos zerados)")
-    save(state, p)
+    diagnose(state, f"{reason}; preservado em {candidate.name}; estado limpo, reviews relidos do GitHub no proximo poll (cursor e vistos zerados)")
+    _write_state(_pending_path(p), state)
+    try:
+        es.replace_retry(p, candidate)                           # atomico (com retry de leitor aberto no Windows); nome unico: nunca sobrescreve outra quarentena
+    except FileNotFoundError:
+        diagnose(state, "o arquivo corrompido ja havia sido removido por outro processo")
+        _write_state(_pending_path(p), state)
+    except OSError as os_exc:
+        raise BridgeStateCorrupt(f"{reason} e nao foi possivel preserva-lo: {os_exc}") from os_exc
+    es.replace_retry(_pending_path(p), p)                        # passo (3): o estado limpo toma o lugar
     return state
+
+
+def _write_state(p: Path, state: dict) -> None:
+    es.write_durable(p, json.dumps(state, indent=1, ensure_ascii=False, sort_keys=True) + "\n")
 
 
 def save(state: dict, path: Path | None = None) -> None:
@@ -131,7 +155,11 @@ def save(state: dict, path: Path | None = None) -> None:
         raise ValueError("o estado do bridge nao guarda segredos")
     p = path or bridge_path()
     p.parent.mkdir(parents=True, exist_ok=True)
-    es.write_durable(p, json.dumps(state, indent=1, ensure_ascii=False, sort_keys=True) + "\n")
+    _write_state(p, state)
+    try:
+        _pending_path(p).unlink()                                # o estado oficial existe: uma pendencia antiga nao pode ressuscitar depois
+    except OSError:
+        pass
 
 
 def load_policy(path: Path | None = None) -> dict:

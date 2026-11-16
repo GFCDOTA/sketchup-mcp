@@ -23,6 +23,17 @@ def state(n=1, **kw):
     return {**eb.default_bridge_state(), "queue": [{"key": f"k{n}"}], "backoff_s": n, **kw}
 
 
+def fail_on_corrupt(monkeypatch, p: Path, exc: Exception) -> None:
+    """Faz so a troca que move o arquivo CORROMPIDO para a quarentena falhar; as demais gravacoes (estado pendente) seguem reais."""
+    real = os.replace
+
+    def replace(src, dst):
+        if Path(src) == p:
+            raise exc
+        return real(src, dst)
+    monkeypatch.setattr(os, "replace", replace)
+
+
 def quarantined(p: Path) -> list[Path]:
     return sorted(p.parent.glob(p.name + ".corrupt-*"))
 
@@ -111,8 +122,7 @@ def test_recovering_a_file_another_process_already_moved_is_not_an_error(tmp_pat
 def test_losing_the_race_to_quarantine_the_file_is_not_an_error(tmp_path, monkeypatch):
     p = tmp_path / "event_bridge.json"
     p.write_bytes(b"\x00" * 10)
-    monkeypatch.setattr(os, "replace", lambda a, b: (_ for _ in ()).throw(FileNotFoundError()))     # outro processo ja o moveu
-    monkeypatch.setattr(eb, "save", lambda state, path=None: None)
+    fail_on_corrupt(monkeypatch, p, FileNotFoundError())                                           # outro processo ja o moveu
 
     recovered = eb.recover_state(p)
 
@@ -122,7 +132,7 @@ def test_losing_the_race_to_quarantine_the_file_is_not_an_error(tmp_path, monkey
 def test_if_the_corrupt_file_cannot_be_preserved_nothing_is_recreated_and_the_error_is_explicit(tmp_path, monkeypatch):
     p = tmp_path / "event_bridge.json"
     p.write_bytes(b"\x00" * 10)
-    monkeypatch.setattr(os, "replace", lambda a, b: (_ for _ in ()).throw(PermissionError("em uso")))
+    fail_on_corrupt(monkeypatch, p, PermissionError("em uso"))
 
     with es.locked(p), pytest.raises(eb.BridgeStateCorrupt, match="preserva"):
         eb.recover_state(p)
@@ -306,3 +316,79 @@ def test_a_persistent_permission_error_is_not_swallowed_by_the_reader(tmp_path, 
     monkeypatch.setattr(Path, "read_bytes", lambda self: (_ for _ in ()).throw(PermissionError(13, "negado", None, 5)))
     with pytest.raises(PermissionError):
         eb.load(p)
+
+
+# -- achados da 2a revisao do Codex: recuperacao retomavel, leitor sem trava, dedup nao reexecuta ------------------------------------
+def test_a_recovery_interrupted_after_quarantine_loses_nothing_and_the_next_run_completes_it(tmp_path, monkeypatch):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)
+    real = os.replace
+
+    def crash_on_final_swap(src, dst):                                                             # morre depois da quarentena, antes do estado novo tomar o lugar
+        if Path(src).name.endswith(".recovered"):
+            raise KeyboardInterrupt("processo morto")
+        return real(src, dst)
+    monkeypatch.setattr(os, "replace", crash_on_final_swap)
+    with es.locked(p), pytest.raises(KeyboardInterrupt):
+        eb.recover_state(p)
+    monkeypatch.undo()
+
+    assert not p.exists() and len(quarantined(p)) == 1                                              # o corrompido esta preservado, o estado oficial ainda nao existe
+    seen = eb.load(p)                                                                               # nao e o estado padrao mudo: o diagnostico NAO se perdeu
+    assert any("preservado em" in d["message"] for d in seen["diagnostics"])
+    with es.locked(p):
+        done = eb.recover_state(p)                                                                  # a proxima recuperacao conclui o passo que faltou
+    assert p.exists() and eb.load(p)["diagnostics"] == done["diagnostics"] and len(quarantined(p)) == 1
+    assert not eb._pending_path(p).exists()
+
+
+def test_a_stale_pending_file_never_overrides_an_official_state(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "queue": [{"key": "antigo"}]})
+    eb.save(state(3), p)
+    assert eb.load(p)["queue"] == [{"key": "k3"}] and not eb._pending_path(p).exists()
+
+
+def test_a_reader_whose_file_is_moved_between_exists_and_open_sees_it_as_missing(tmp_path, monkeypatch):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)
+    real = eb._read_bytes
+
+    def moved_first(path, *a, **k):                                                                 # recover_state move o arquivo depois do exists() do leitor
+        if Path(path) == p:
+            os.replace(p, tmp_path / "quarentena")
+        return real(path, *a, **k)
+    monkeypatch.setattr(eb, "_read_bytes", moved_first)
+    assert eb.load(p) == eb.default_bridge_state()                                                  # contrato de ausente, sem FileNotFoundError
+
+
+def test_after_a_recovery_a_review_whose_head_moved_is_stale_and_is_not_requeued(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)                                                                    # o estado que sabia do review ja atendido foi perdido
+    policy = {"reviewers": ["rev"], "executor_logins": ["exe"]}
+    review = {"kind": "review", "author": "rev", "repo": "o/r", "state": "CHANGES_REQUESTED", "commit_id": "a" * 40, "id": 1}
+    served_pr = {"head_sha": "b" * 40, "refs": [1]}                                                 # o executor JA publicou: o HEAD do PR andou
+    with es.locked(p):
+        eb.recover_state(p)
+    assert eb.classify(review, served_pr, policy, "o/r")[0] == "STALE"                              # o HEAD e a prova duravel: nao ha reexecucao
+
+
+def test_after_a_recovery_an_unserved_review_is_requeued_exactly_once_not_every_poll(tmp_path):
+    from tests.test_event_bridge import NOW, POLICY, fake_gh, review
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)                                                                    # estado perdido: o review pendente ainda e valido no GitHub
+    gh = fake_gh(reviews=[review(9)])
+    eb.run_cycle(gh, POLICY, p, now=NOW)
+    first = eb.load(p)["queue"]
+    eb.run_cycle(gh, POLICY, p, now=NOW)
+    second = eb.load(p)["queue"]
+    assert len(first) == 1 and second == first                                                     # reenfileirado UMA vez (o HEAD nao andou: nada foi publicado) e nao duplica
+
+
+def test_a_review_that_the_executor_already_served_is_never_requeued_after_a_recovery(tmp_path):
+    from tests.test_event_bridge import HEAD, NOW, POLICY, fake_gh, review
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)
+    served = fake_gh(reviews=[review(9)], head="b" * 40)                                           # o executor ja publicou: o HEAD do PR andou
+    counts = eb.run_cycle(served, POLICY, p, now=NOW)
+    assert eb.load(p)["queue"] == [] and counts["STALE"] == 1 and review(9)["commit_id"] == HEAD
