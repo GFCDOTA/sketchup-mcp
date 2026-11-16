@@ -553,8 +553,10 @@ def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str | None
             db.row_factory = sqlite3.Row
             rows = [dict(r) for r in db.execute(
                 "SELECT id,event_type,idempotency_key,status,attempt,available_at,lease_owner,lease_until,error,updated_at FROM events ORDER BY id")]
-            failed_at = {r["event_id"]: r["at"] for r in db.execute(
-                "SELECT event_id, MAX(at) AS at FROM transitions WHERE from_status='RUNNING' AND to_status IN ('PENDING','DLQ') GROUP BY event_id")}
+            # (instante, id da transicao): em empate de timestamp vale a ORDEM PERSISTIDA das transicoes (id crescente), nunca a ordem dos ids dos eventos
+            failed_at = {r["event_id"]: (r["at"], r["tid"]) for r in db.execute(
+                "SELECT t.event_id AS event_id, t.at AS at, t.id AS tid FROM transitions t WHERE t.from_status='RUNNING' AND t.to_status IN ('PENDING','DLQ') "
+                "AND t.id = (SELECT MAX(u.id) FROM transitions u WHERE u.event_id = t.event_id AND u.from_status='RUNNING' AND u.to_status IN ('PENDING','DLQ'))")}
             # a OUTBOX persistente (publicacao no GitHub etc.) tem fila, lease, retries e DLQ proprios: um evento DONE cuja publicacao foi para a DLQ da outbox e PERDA real
             orows = [dict(r) for r in db.execute(
                 "SELECT id,event_id,target,operation,idempotency_key,status,attempts,available_at,lease_until,error FROM outbox ORDER BY id")]

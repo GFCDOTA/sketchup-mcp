@@ -397,3 +397,15 @@ def test_structured_credential_values_with_delimiters_never_reach_the_panel(raw)
 def test_an_unrelated_text_with_the_word_token_in_prose_is_left_alone():
     assert col.redact_secrets("o token expirou") == "o token expirou"
     assert col.redact_secrets("sem segredo aqui, so virgulas e: dois pontos") == "sem segredo aqui, so virgulas e: dois pontos"
+
+
+def test_two_failures_at_the_same_instant_are_ordered_by_the_persisted_transitions_not_by_event_ids(store, tmp_path):
+    clock = store.clock_handle
+    store.publish("CORRECTION_REQUESTED", "k-low", "pr:1", {"x": 1})
+    store.publish("CORRECTION_REQUESTED", "k-high", "pr:2", {"x": 1})
+    high = store.claim(("CORRECTION_REQUESTED",), "w", 60, job_id="pr:2")                         # o evento de id MAIOR falha primeiro...
+    low = store.claim(("CORRECTION_REQUESTED",), "w", 60, job_id="pr:1")
+    store.fail(high, "falha do evento de id maior", retry_delay=900)
+    store.fail(low, "falha do evento de id menor (a mais recente)", retry_delay=900)               # ...e o de id MENOR falha depois, no MESMO instante (relogio fixo)
+    out = col.collect_store(tmp_path, dt.datetime.fromtimestamp(clock.t, dt.timezone.utc))
+    assert out["last_error"]["key"] == "k-low" and "id menor" in out["last_error"]["error"]
