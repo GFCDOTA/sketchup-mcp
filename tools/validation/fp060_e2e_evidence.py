@@ -28,7 +28,7 @@ TOKEN = re.compile(
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 WIN_PATH = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\"'<>|\r\n]*")
 UNC_PATH = re.compile(r"(?:\\\\|(?<![:\w/.])//)[A-Za-z0-9_.$-]+[\\/][^\"'<>|\r\n]*")                   # \\servidor\compartilhamento\... (e //servidor/compartilhamento/...)                    # ate o fim da linha/aspas: cobre espacos no caminho
-UNIX_PATH = re.compile(r"(?<![\w.:#/-])/(?:[\w.@+~-]+(?: [\w.@+~-]+)*/)+[\w.@+~-]+(?: [\w.@+~-]+)*|(?<![\w.:#/-])/(?:[\w.@+~-]+(?: [\w.@+~-]+)*/)+")      # caminho absoluto Unix (2+ segmentos) de QUALQUER raiz; segmentos E o ultimo componente podem ter espacos (palavras de nome ate a primeira pontuacao); prefere redigir demais a vazar
+UNIX_PATH = re.compile(r"(?<![\w.:#/-])/(?:[\w.@+~()\[\]&=!%-]+(?: [\w.@+~()\[\]&=!%-]+)*/)+[\w.@+~()\[\]&=!%-]+(?: [\w.@+~()\[\]&=!%-]+)*|(?<![\w.:#/-])/(?:[\w.@+~()\[\]&=!%-]+(?: [\w.@+~()\[\]&=!%-]+)*/)+")      # caminho absoluto Unix (2+ segmentos) de QUALQUER raiz; componentes (e o ultimo) podem ter espacos e parenteses/colchetes/& = ! %; prefere redigir demais a vazar
 UNIX_SPACED = re.compile(r"(?<![\w.:#/-])/(?:home|Users|users|root|mnt|srv|opt|var|tmp|Volumes|workspace|data|media)/[^\"'<>|\r\n]*")     # raiz de usuario/maquina: ate o fim da linha (cobre espacos)
 FORBIDDEN = (TOKEN, EMAIL, WIN_PATH, UNC_PATH, UNIX_SPACED, UNIX_PATH)
 
@@ -132,7 +132,7 @@ def collect_flow(number: int, issue: int) -> dict:
         "reviews": [{"id": r["id"], "revisor": r["user"]["login"], "estado": r["state"], "commit": r["commit_id"], "em": r["submitted_at"],
                      "marcador_outbox": (re.search(r"fp060-outbox-key:(\S+)", r["body"] or "") or [None, None])[1]}
                     for r in gh(f"repos/{REPO}/pulls/{number}/reviews")],
-        "checks_no_head_final": checks_of(gh(f"repos/{REPO}/commits/{head}/check-runs")["check_runs"]),
+        "checks_no_head_final": checks_of(gh(f"repos/{REPO}/commits/{head}/check-runs?filter=all&per_page=100")["check_runs"]),
         "issue_estado": gh(f"repos/{REPO}/issues/{issue}")["state"],
     }
 

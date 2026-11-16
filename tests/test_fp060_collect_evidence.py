@@ -313,3 +313,32 @@ def test_the_whole_last_component_with_spaces_is_removed_under_any_root(path):
         assert "<caminho>" in out
     with pytest.raises(SystemExit, match="RECUSADA"):
         ce.assert_clean(f"x {path}")
+
+
+@pytest.mark.parametrize("path", ["/custom/client/Finance (2026)/secret.txt", "/custom/client/Reports [draft]/a & b/x=1.txt", "/srv2/Cliente (Matriz)/Relatorio (v2) final.pdf"])
+def test_parentheses_brackets_and_symbols_in_path_components_are_removed_whole(path):
+    out = ce.scrub(f"erro em {path}")
+    for part in ("Finance", "2026", "secret", "draft", "Matriz", "Relatorio", "final", "x=1"):
+        assert part not in out, (part, out)
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(f"x {path}")
+
+
+def test_the_check_runs_request_asks_for_every_run_not_only_the_latest_per_name(monkeypatch):
+    asked = []
+
+    def fake_gh(path):
+        asked.append(path)
+        if "check-runs" in path:
+            return {"check_runs": [{"id": 1, "name": "x", "status": "completed", "conclusion": "failure", "app": None},
+                                   {"id": 2, "name": "x", "status": "completed", "conclusion": "success", "app": None}]}
+        if path.endswith("/files") or path.endswith("/commits") or path.endswith("/reviews"):
+            return []
+        if "/issues/" in path:
+            return {"state": "open"}
+        return {"head": {"sha": "a" * 40}, "state": "open", "merged": False, "user": {"login": "u"}, "created_at": "t", "labels": [], "base": {"ref": "develop"}}
+    monkeypatch.setattr(ce, "gh", fake_gh)
+    flow = ce.collect_flow(7, 3)
+    check_path = next(p for p in asked if "check-runs" in p)
+    assert "filter=all" in check_path and "per_page=100" in check_path
+    assert [c["id"] for c in flow["checks_no_head_final"]] == [1, 2]                                    # a falha anterior NAO some atras da execucao posterior
