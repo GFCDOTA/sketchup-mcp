@@ -575,7 +575,8 @@ def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str | None
     outbox = {"counts": ocounts, "zombies": sum(1 for r in orows if r["status"] == "RUNNING" and r["lease_until"] <= ts),
               "retries": sum(1 for r in orows if r["attempts"] > 1),
               "dlq": [{"id": r["id"], "event_id": r["event_id"], "target": redact_secrets(r["target"]), "key": redact_secrets(r["idempotency_key"]),
-                       "error": redact_secrets(r["error"] or "")[:160]} for r in orows if r["status"] == "DLQ"]}
+                       "error": redact_secrets(r["error"] or "")[:160],
+                       "unknown_outcome": "remote outcome requires reconciliation" in (r["error"] or "")} for r in orows if r["status"] == "DLQ"]}
     return {"state": "ok", "outbox": outbox, "counts": counts, "backoff": sum(1 for r in rows if r["status"] == "PENDING" and r["available_at"] > ts),
             "live_leases": live, "zombies": sum(1 for r in rows if r["status"] == "RUNNING" and r["lease_until"] <= ts),
             "dlq": [{"id": r["id"], "key": redact_secrets(r["idempotency_key"]), "error": redact_secrets(r["error"])[:160]} for r in rows if r["status"] == "DLQ"],

@@ -363,3 +363,23 @@ def test_the_effective_relative_variable_is_refused_even_if_a_lower_one_is_absol
     monkeypatch.setenv("EVENT_STORE_DB_PATH", "relativo/event_store.db")
     monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "event_bridge.json"))
     assert col.collect_store(tmp_path, NOW)["state"] == "indisponivel"
+
+
+def test_an_outbox_dlq_after_an_expired_final_lease_is_reported_as_unknown_remote_outcome_not_as_lost(store, tmp_path):
+    _event_with_outbox(store, key="k-unk", max_attempts=1)
+    store.claim_outbox("pub", 5)
+    store.clock_handle.t += 60                                                                    # o lease venceu na ultima tentativa: a chamada remota pode ter acontecido
+    assert store.claim_outbox("outro", 5) is None                                                 # o claim move o evento para a DLQ com o aviso de reconciliacao
+    out = col.collect_store(tmp_path, dt.datetime.fromtimestamp(store.clock_handle.t, dt.timezone.utc))
+    assert out["outbox"]["dlq"][0]["unknown_outcome"] is True
+    line = snap(out).store_line()
+    assert snap(out).store_ok() is False and "RESULTADO REMOTO DESCONHECIDO" in line and "reconciliar" in line and "PUBLICACAO PERDIDA" not in line
+
+
+def test_a_confirmed_publication_failure_keeps_the_lost_wording(store, tmp_path):
+    _event_with_outbox(store, key="k-lost", max_attempts=1)
+    entry = store.claim_outbox("pub", 30)
+    store.fail_outbox(entry, "401 do GitHub", retry_delay=0)
+    out = col.collect_store(tmp_path, dt.datetime.fromtimestamp(store.clock_handle.t, dt.timezone.utc))
+    line = snap(out).store_line()
+    assert out["outbox"]["dlq"][0]["unknown_outcome"] is False and "PUBLICACAO PERDIDA" in line and "DESCONHECIDO" not in line
