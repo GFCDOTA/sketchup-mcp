@@ -340,3 +340,27 @@ def test_a_json_retry_after_in_the_future_with_an_event_already_available_is_a_d
 def test_an_unreadable_retry_after_is_not_treated_as_a_wait(bad):
     assert sd._epoch(bad) is None
     assert sd.compare([item(state="FAILED", attempts=1, retry_after=bad)], [event(status="PENDING", attempt=1)], now=1000.0) == []
+
+
+# -- 7a revisao do Codex (#634): QUEUED tambem e orcamento/janela; janelas futuras ----------------------------------------------------------------------
+def test_a_queued_item_returned_by_a_dry_run_with_fewer_attempts_in_the_event_is_a_budget_divergence():
+    found = sd.compare([item(state="QUEUED", attempts=0)], [event(status="PENDING", attempt=2, max_attempts=3)], now=1000.0)
+    assert codes(found) == [("STATE_MISMATCH", "k1")] and "orcamento" in found[0].detail
+
+
+def test_a_queued_item_with_an_exhausted_budget_and_a_pending_event_is_a_divergence():
+    found = sd.compare([item(state="QUEUED", attempts=sd.MAX_ATTEMPTS)], [event(status="PENDING", attempt=0)], now=1000.0)
+    assert codes(found) == [("STATE_MISMATCH", "k1")]
+
+
+def test_a_queued_item_in_step_with_its_event_agrees():
+    assert sd.compare([item(state="QUEUED", attempts=1)], [event(status="PENDING", attempt=1, max_attempts=3)], now=1000.0) == []
+
+
+def test_when_both_wait_in_the_future_but_the_event_becomes_available_earlier_it_is_a_divergence():
+    now = 1000.0
+    retry = sd._epoch("2026-11-16T00:00:00Z")
+    found = sd.compare([item(state="FAILED", attempts=1, retry_after="2026-11-16T00:00:00Z")], [event(status="PENDING", attempt=1, available_at=retry - 900)], now=retry - 1000)
+    assert codes(found) == [("STATE_MISMATCH", "k1")] and "antes" in found[0].detail                       # ambos no futuro, mas available_at antecede retry_after
+    later = sd.compare([item(state="FAILED", attempts=1, retry_after="2026-11-16T00:00:00Z")], [event(status="PENDING", attempt=1, available_at=retry + 5)], now=retry - 1000)
+    assert later == [] and now > 0                                                                          # o store espera MAIS que o JSON: nao e risco

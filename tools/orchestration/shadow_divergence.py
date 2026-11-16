@@ -91,7 +91,7 @@ def compare(queue: list[dict], events: list[dict], now: float | None = None) -> 
         elif event["status"] not in allowed:
             code = "STALE_PENDING" if event["status"] == "PENDING" and state in FINISHED else "STATE_MISMATCH"
             found.append(Divergence(code, key, f"item {state} mas evento {event['status']} (esperado {'/'.join(sorted(allowed))})"))
-        elif state in RETRYABLE:
+        elif state in RETRYABLE or state == "QUEUED":                       # QUEUED tambem: um dry-run devolve o item a QUEUED e consome tentativa so no espelho
             pickable = state in PICKABLE and int(item.get("attempts") or 0) < MAX_ATTEMPTS               # o JSON ainda pode escolher este item?
             if event["status"] == "DLQ" and pickable:
                 # o evento esgotou as tentativas (DLQ nao e reivindicavel), mas a fila JSON ainda pode escolher o item: trabalho retomavel seria abandonado no cutover
@@ -104,8 +104,9 @@ def compare(queue: list[dict], events: list[dict], now: float | None = None) -> 
                     found.append(Divergence("STATE_MISMATCH", key, f"orcamento de tentativas divergente: o JSON ainda tem {json_left}, o evento so {event_left}: uma falha apos o "
                                                                   "cutover levaria o item a DLQ antes da hora"))
                 retry_at, t_now = _epoch(item.get("retry_after")), (time.time() if now is None else now)
-                if retry_at is not None and retry_at > t_now and float(event.get("available_at") or 0) <= t_now:
-                    found.append(Divergence("STATE_MISMATCH", key, "o JSON aguarda `retry_after` futuro mas o evento ja esta disponivel (`available_at` atingido): o store o executaria antes"))
+                if retry_at is not None and retry_at > t_now and float(event.get("available_at") or 0) < retry_at - 1:
+                    # o JSON espera ate `retry_after`; o store ja poderia executar ANTES (disponivel agora OU num instante futuro anterior ao do JSON)
+                    found.append(Divergence("STATE_MISMATCH", key, "o JSON aguarda `retry_after` mas o evento fica disponivel (`available_at`) antes dele: o store executaria antes do JSON"))
             elif event["status"] == "PENDING" and not pickable:
                 # o inverso: o JSON NAO volta a escolher o item (tentativas esgotadas ou estado nao escolhido), mas o store ainda pode reivindicar o evento
                 found.append(Divergence("STATE_MISMATCH", key, f"item {state} com {item.get('attempts') or 0}/{MAX_ATTEMPTS} tentativas que o executor JSON nao escolhe mais, "
