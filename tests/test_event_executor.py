@@ -1192,22 +1192,24 @@ def test_an_unconfirmed_timeout_push_is_not_marked_as_confirmed(monkeypatch):
 
 # -- 8a revisao do Codex (#652): API divergente nunca decide; falha ao iniciar o git na reconciliacao nao derruba o ciclo -------------------------------------
 def test_an_api_answer_that_is_neither_the_reviewed_nor_the_published_sha_is_checked_against_the_remote(monkeypatch):
-    gh = FakeGh()
-    gh_calls = {"n": 0}
-    real_call = gh.__call__
-
     class CachedOther(FakeGh):
+        armed = False
+
         def __call__(self, path):
             out = super().__call__(path)
-            if path == f"repos/{REPO}/pulls/7" and gh_calls["n"] > 0:
+            if self.armed and path == f"repos/{REPO}/pulls/7":
                 out["head"]["sha"] = "7" * 40                                                           # cache da API: SHA que nao e o revisado nem o publicado
-            gh_calls["n"] += 1
             return out
-    gh2 = CachedOther()
+    gh = CachedOther()
+
+    def publish_then_arm(wt, branch, base, py, it, **kw):
+        it["published_sha"] = NEWHEAD
+        gh.armed = True                                                                                 # a partir de agora a API responde o SHA divergente
+        return ("PUSHED", "fake")
+    monkeypatch.setattr(ex, "deliver", publish_then_arm)
     b = bstate(item())
-    res = go(gh2, b, Runner(gh2, push=False))                                                         # o remoto confirma que a ponta E o commit publicado
+    res = go(gh, b, Runner(gh, push=False))                                                           # o remoto (fixture) confirma que a ponta E o commit publicado
     assert res["action"] == "DONE" and b["queue"][0]["state"] == "DONE_AWAITING_REREVIEW" and b["queue"][0]["new_head"] == NEWHEAD
-    assert real_call is not None
 
 
 def test_a_remote_that_differs_from_the_published_commit_is_superseded_whatever_the_api_says(monkeypatch):
