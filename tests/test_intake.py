@@ -303,3 +303,52 @@ def test_a_pr_opened_between_the_first_read_and_the_lock_is_seen_by_the_revalida
     out = json.loads(capsys.readouterr().out)
     assert out["published"] is None and "revalidacao" in out["note"] and any("PR #77" in s for s in out["revalidated_skipped"])
     assert not cli.exists() or EventStore(cli).events() == []
+
+
+
+# -- 9a revisao do Codex (#641): a revalidacao tambem checa a truncagem e o status do Project; `bd.load` testado com o gh simulado ---------------------------
+def test_a_truncated_second_read_publishes_nothing(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, [{"number": n, "body": "", "headRefName": "x"} for n in range(bd.LOAD_LIMIT)])])
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["published"] is None and "truncada" in out["note"] and (not cli.exists() or EventStore(cli).events() == [])
+
+
+def test_a_card_that_leaves_ready_between_the_reads_is_not_published(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], {1: "Ready"}, []), ([issue(1)], {1: "In Progress"}, [])])
+    seen = []
+
+    def load(statuses=False):
+        seen.append(statuses)
+        return next(reads)
+    monkeypatch.setattr(bd, "load", load)
+    assert intake.main(["publish", "--apply", "--project"]) == 1
+    out = json.loads(capsys.readouterr().out)
+    assert seen == [True, True] and out["published"] is None and (not cli.exists() or EventStore(cli).events() == [])
+
+
+def test_backlog_load_reads_issues_prs_and_the_project_through_gh_with_explicit_limits(monkeypatch):
+    from tools.validation import backlog_discovery as bd
+    from tools.validation import backlog_gate as bg
+    calls = []
+    rows = {"items": [{"content": {"number": 1, "type": "Issue", "repository": "https://github.com/" + bg.REPO}, "status": "Ready"}]}
+
+    def fake_gh(*argv):
+        calls.append(argv)
+        if argv[:2] == ("issue", "list"):
+            return json.dumps([issue(1)])
+        if argv[:2] == ("pr", "list"):
+            return json.dumps([{"number": 9, "body": "Closes #1", "headRefName": "x"}])
+        if argv[:2] == ("project", "item-list"):
+            return json.dumps(rows)
+        raise AssertionError(argv)
+    monkeypatch.setattr(bg, "_gh", fake_gh)
+    issues, statuses, prs = bd.load(statuses=True)
+    assert [i["number"] for i in issues] == [1] and prs[0]["number"] == 9 and statuses == {1: "Ready"}
+    assert all(str(bd.LOAD_LIMIT) in a for a in calls if a[:2] in (("issue", "list"), ("pr", "list")))      # nunca o limite padrao de 30 do gh
+    assert "--state" in calls[1] and "open" in calls[1]
+    _i, st, _p = bd.load(statuses=False)
+    assert st is None and not any(a[:2] == ("project", "item-list") for a in calls[3:])                  # sem --project, o Project nao e consultado

@@ -146,8 +146,12 @@ def main(argv: list[str] | None = None) -> int:
             "issue": result.candidate.node.number, "title": result.candidate.node.title}, "skipped": result.skipped}
         if a.cmd == "publish" and a.apply and result.candidate is not None:
             # REVALIDA sob a trava: o que foi lido antes dela (Issues, PRs) pode ter mudado - outro executor pode ter aberto um PR e soltado o claim nesse meio-tempo
-            fresh_issues, _st, fresh_prs = bd.load(statuses=False)
-            again = plan(fresh_issues, fresh_prs, es.load(path), statuses, readiness)
+            fresh_issues, fresh_statuses, fresh_prs = bd.load(statuses=a.project)          # o status do Project tambem e RELIDO: Ready pode ter saido no meio
+            if len(fresh_issues) >= bd.LOAD_LIMIT or len(fresh_prs) >= bd.LOAD_LIMIT:
+                out.update(published=None, note=f"a revalidacao atingiu o limite de {bd.LOAD_LIMIT} (lista possivelmente truncada): nada foi publicado")
+                print(json.dumps(out, indent=1, ensure_ascii=False))
+                return 2
+            again = plan(fresh_issues, fresh_prs, es.load(path), fresh_statuses if a.project else None, readiness)
             if again.candidate is None or again.candidate.node.number != result.candidate.node.number:
                 out["published"] = None
                 out["note"] = "a revalidacao sob a trava mudou o candidato (PR novo, claim ou Issue alterada): nada foi publicado"
