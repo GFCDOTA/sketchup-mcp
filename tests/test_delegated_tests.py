@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from tools.ci import delegated_results as dr
 from tools.orchestration import codex_reviewer as cr
+from tools.orchestration import delegated_results as dr
 from tools.orchestration import delegated_tests as dt
 
 REPO = "GFCDOTA/sketchup-mcp"

@@ -31,7 +31,7 @@ from typing import Callable
 
 POLICY_PATH = "docs/governance/sandbox_delegated_tests.v1.json"
 WORKFLOW_PATH = ".github/workflows/delegated-tests.yml"
-COLLECTOR_PATH = "tools/ci/delegated_results.py"
+COLLECTOR_PATH = "tools/orchestration/delegated_results.py"
 ARTIFACT_NAME = "delegated-test-results"
 RESULT_FILE = "results.json"
 SCHEMA = 1

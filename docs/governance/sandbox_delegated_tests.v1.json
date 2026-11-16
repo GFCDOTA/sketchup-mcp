@@ -3,7 +3,7 @@
  "note": "Politica de delegacao sandbox->CI (FP-060 MT-03). SO node ids exatos; lida pelo revisor da BASE (origin/develop resolvido para SHA), nunca do PR. Alterar exige PR proprio com aprovacao humana (docs/governance).",
  "ci": {
   "workflow_path": ".github/workflows/delegated-tests.yml",
-  "workflow_blob_sha": "1462b0dfa58baaccb6f3c7e058b090abe2e8bf78",
+  "workflow_blob_sha": "3f0466a671b6975f8ef1c4ae51ebef44fb1ffb68",
   "artifact_name": "delegated-test-results"
  },
  "delegated": [

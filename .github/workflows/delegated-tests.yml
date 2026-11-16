@@ -50,7 +50,7 @@ jobs:
           MPLBACKEND: Agg
         run: |
           cd pr
-          uv run --no-sync python ../base/tools/ci/delegated_results.py --policy ../base/docs/governance/sandbox_delegated_tests.v1.json --tree . --out ../results.json
+          uv run --no-sync python ../base/tools/orchestration/delegated_results.py --policy ../base/docs/governance/sandbox_delegated_tests.v1.json --tree . --out ../results.json
       - name: Publish the evidence (artifact digest is computed by GitHub)
         uses: actions/upload-artifact@v4
         with:
