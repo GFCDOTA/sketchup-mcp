@@ -441,13 +441,18 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                             row.update(code="WAIT", reasons=["base, labels, estado ou corpo (Issues) do PR mudaram na ultima leitura antes do merge: nada e mesclado nesta rodada"])
                         else:
                             done, msg = merge(number, row["head"], repo, runner)
-                            if done:
-                                done, msg = confirm_merged(gh, repo, number, row["head"])
-                                if not done:                                                  # exit 0 sem merge: foi agendado; cancela e confirma
-                                    cancelled, why = cancel_scheduled(gh, repo, number, policy, runner)
-                                    msg = f"{msg}; {why}"
-                                    if not cancelled:
-                                        row.update(code="ERROR", reasons=[why])
+                            # QUALQUER desfecho do comando (aceito, recusado, timeout, erro de comunicacao) deixa o resultado REMOTO a provar: o GitHub pode ter aceito o comando e a
+                            # resposta se perdeu. Sempre consulta o PR: mesclado => confirmado; senao desliga qualquer agendamento e CONFIRMA que sumiu; se nao for possivel
+                            # reconciliar, ERROR com intervencao do proprietario (nunca um merge futuro sem revalidacao).
+                            confirmed, cmsg = confirm_merged(gh, repo, number, row["head"])
+                            if confirmed:
+                                done, msg = True, cmsg
+                            else:
+                                cancelled, why = cancel_scheduled(gh, repo, number, policy, runner)
+                                msg = f"{msg}; {cmsg}; {why}" if not done else f"{cmsg}; {why}"
+                                done = False
+                                if not cancelled:
+                                    row.update(code="ERROR", reasons=[why])
                             row.update(merged=done, merge_message=msg)
         except (RuntimeError, OSError, ValueError, KeyError, TypeError) as exc:
             row.update(code="ERROR", reasons=[f"{type(exc).__name__}: {exc}"[:200]])

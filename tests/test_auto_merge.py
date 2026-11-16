@@ -191,7 +191,8 @@ GOOD_PROTECTION = {"required_pull_request_reviews": {"required_approving_review_
 
 class Gh:
     def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, draft=False, protection=None, protection_boom=None, rules=None, rules_boom=None,
-                 scheduled_only=False, mutate_last=None, cancel_works=True, **overrides):
+                 scheduled_only=False, mutate_last=None, cancel_works=True, merge_lands=True, **overrides):
+        self.merge_lands = merge_lands                                                       # False: o comando NAO produziu merge nenhum (recusa/queda antes de aplicar)
         self.head, self.fresh_head, self.boom, self.labelled, self.overrides, self.calls = head, fresh_head, boom, labelled, overrides, []
         self.draft = draft
         self.pulls = 0
@@ -215,7 +216,9 @@ class Gh:
                 if self.scheduled_only:
                     cancelled = self.pulls >= 5 and self.cancel_works
                     return pr(head={"sha": sha, "repo": {"full_name": REPO}}, auto_merge=None if cancelled else {"enabled_by": "x"}, changed_files=1)
-                return pr(head={"sha": sha, "repo": {"full_name": REPO}}, merged=True, state="closed", merge_commit_sha="c" * 40, changed_files=1)
+                if self.merge_lands:
+                    return pr(head={"sha": sha, "repo": {"full_name": REPO}}, merged=True, state="closed", merge_commit_sha="c" * 40, changed_files=1)
+                return pr(head={"sha": sha, "repo": {"full_name": REPO}}, changed_files=1)
             return pr(head={"sha": sha, "repo": {"full_name": REPO}}, **{"changed_files": 1, **self.overrides})
         if path.startswith(f"repos/{REPO}/pulls/7/files"):
             return files()
@@ -281,7 +284,7 @@ def test_a_head_that_moves_between_the_decision_and_the_merge_is_not_merged():
 
 
 def test_a_refused_merge_from_github_is_reported_not_hidden():
-    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=Runner(rc=1, err="not mergeable: protecao"), is_enabled=ON, provenance=ALWAYS)
+    out = am.cycle(Gh(merge_lands=False), POLICY, REPO, apply=True, runner=Runner(rc=1, err="not mergeable: protecao"), is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["merged"] is False and "recusado" in out["prs"][0]["merge_message"]
 
 
@@ -720,3 +723,44 @@ def test_a_file_without_patch_and_without_counts_is_ambiguous_in_every_status_an
     f = {"filename": "scripts/run.py", "status": status, "additions": 0, "deletions": 0, "changes": 0}          # sem `patch`: pode ser binario com extensao permitida
     d = decide(files=[f])
     assert d.code == "REFUSE" and any("binario" in r for r in d.reasons)
+
+
+# -- 9a revisao do Codex (#648): o comando pode ter sido aceito mesmo quando a resposta se perdeu ------------------------------------------------------
+class TimingOutRunner(Runner):
+    def __call__(self, argv, **kw):
+        if argv[1:3] == ["api", "user"] or "--disable-auto" in argv:
+            return super().__call__(argv, **kw)
+        self.calls.append((argv, kw))
+        raise __import__("subprocess").TimeoutExpired(argv, 120)
+
+
+@pytest.mark.parametrize("error", [TimeoutError("sem resposta"), OSError("conexao perdida")])
+def test_a_merge_command_that_times_out_after_github_applied_it_is_reconciled_as_merged(error):
+    class Boom(Runner):
+        def __call__(self, argv, **kw):
+            if argv[1:3] == ["api", "user"] or "--disable-auto" in argv:
+                return super().__call__(argv, **kw)
+            self.calls.append((argv, kw))
+            raise error
+    out = am.cycle(Gh(merge_lands=True), POLICY, REPO, apply=True, runner=Boom(), is_enabled=ON, provenance=ALWAYS)
+    row = out["prs"][0]
+    assert row["merged"] is True and row["code"] != "ERROR"                                         # o PR foi mesclado de fato: confirmado pelo remoto, nao dado como falha
+
+
+def test_a_merge_command_that_times_out_and_left_the_pr_scheduled_cancels_and_confirms_it():
+    runner = TimingOutRunner()
+    out = am.cycle(Gh(scheduled_only=True), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
+    row = out["prs"][0]
+    assert row["merged"] is False and row["code"] != "ERROR" and "cancelado" in row["merge_message"]
+
+
+def test_a_merge_command_that_times_out_and_cannot_be_reconciled_demands_owner_intervention():
+    out = am.cycle(Gh(scheduled_only=True, cancel_works=False), POLICY, REPO, apply=True, runner=TimingOutRunner(), is_enabled=ON, provenance=ALWAYS)
+    row = out["prs"][0]
+    assert row["merged"] is False and row["code"] == "ERROR" and "INTERVENCAO" in row["reasons"][0]
+
+
+def test_a_merge_command_that_did_nothing_leaves_the_pr_untouched_without_an_error():
+    out = am.cycle(Gh(merge_lands=False), POLICY, REPO, apply=True, runner=TimingOutRunner(), is_enabled=ON, provenance=ALWAYS)
+    row = out["prs"][0]
+    assert row["merged"] is False and row["code"] != "ERROR"
