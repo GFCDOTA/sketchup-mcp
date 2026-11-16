@@ -7,17 +7,62 @@
    ],
    "autor": "fmodesto30",
    "base": "develop",
-   "checks_no_head_final": {
-    "deterministic fidelity gates": "success",
-    "mcp server (smoke + stdio handshake)": "success",
-    "pytest (py3.11)": "success",
-    "pytest (py3.12)": "success",
-    "qg: PR policy": "success",
-    "qg: backlog, issues and specs": "success",
-    "qg: geometry, program and integration": "success",
-    "uv lock is current": "success",
-    "windows process supervisor": "success"
-   },
+   "checks_no_head_final": [
+    {
+     "estado": "success",
+     "id": 132998405934,
+     "nome": "deterministic fidelity gates",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 132998405612,
+     "nome": "mcp server (smoke + stdio handshake)",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 132998406062,
+     "nome": "pytest (py3.11)",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 132998405963,
+     "nome": "pytest (py3.12)",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 132997663369,
+     "nome": "qg: PR policy",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 132997663175,
+     "nome": "qg: backlog, issues and specs",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 132997663378,
+     "nome": "qg: geometry, program and integration",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 132998405810,
+     "nome": "uv lock is current",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 132998405975,
+     "nome": "windows process supervisor",
+     "origem": "github-actions"
+    }
+   ],
    "commits": [
     {
      "autor": "fmodesto30",
@@ -69,17 +114,62 @@
    ],
    "autor": "fmodesto30",
    "base": "develop",
-   "checks_no_head_final": {
-    "deterministic fidelity gates": "success",
-    "mcp server (smoke + stdio handshake)": "success",
-    "pytest (py3.11)": "success",
-    "pytest (py3.12)": "success",
-    "qg: PR policy": "success",
-    "qg: backlog, issues and specs": "success",
-    "qg: geometry, program and integration": "success",
-    "uv lock is current": "success",
-    "windows process supervisor": "success"
-   },
+   "checks_no_head_final": [
+    {
+     "estado": "success",
+     "id": 133000008006,
+     "nome": "deterministic fidelity gates",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133000008164,
+     "nome": "mcp server (smoke + stdio handshake)",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133000008053,
+     "nome": "pytest (py3.11)",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133000008122,
+     "nome": "pytest (py3.12)",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133000008110,
+     "nome": "qg: PR policy",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133000007844,
+     "nome": "qg: backlog, issues and specs",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133000008063,
+     "nome": "qg: geometry, program and integration",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133000007834,
+     "nome": "uv lock is current",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133000008090,
+     "nome": "windows process supervisor",
+     "origem": "github-actions"
+    }
+   ],
    "commits": [
     {
      "autor": "fmodesto30",
@@ -116,17 +206,62 @@
    ],
    "autor": "fmodesto30",
    "base": "develop",
-   "checks_no_head_final": {
-    "deterministic fidelity gates": "success",
-    "mcp server (smoke + stdio handshake)": "success",
-    "pytest (py3.11)": "success",
-    "pytest (py3.12)": "success",
-    "qg: PR policy": "success",
-    "qg: backlog, issues and specs": "success",
-    "qg: geometry, program and integration": "success",
-    "uv lock is current": "success",
-    "windows process supervisor": "success"
-   },
+   "checks_no_head_final": [
+    {
+     "estado": "success",
+     "id": 133005000300,
+     "nome": "deterministic fidelity gates",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133005000202,
+     "nome": "mcp server (smoke + stdio handshake)",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133005000501,
+     "nome": "pytest (py3.11)",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133005000308,
+     "nome": "pytest (py3.12)",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133004999605,
+     "nome": "qg: PR policy",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133004999377,
+     "nome": "qg: backlog, issues and specs",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133004999628,
+     "nome": "qg: geometry, program and integration",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133005000323,
+     "nome": "uv lock is current",
+     "origem": "github-actions"
+    },
+    {
+     "estado": "success",
+     "id": 133005000523,
+     "nome": "windows process supervisor",
+     "origem": "github-actions"
+    }
+   ],
    "commits": [
     {
      "autor": "fmodesto30",

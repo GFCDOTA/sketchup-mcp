@@ -22,12 +22,12 @@ TOKEN = re.compile(
     r"|sk-[A-Za-z0-9][A-Za-z0-9_-]{15,}"                                                        # Anthropic (sk-ant-) e OpenAI (sk-, sk-proj-, sk-svcacct-)
     r"|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|AKIA[0-9A-Z]{12,}"                    # Slack, Google, AWS
     r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"                           # JWT
-    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----"                                                      # chave privada PEM
+    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|\Z)"          # chave privada PEM COMPLETA (cabecalho, corpo e rodape; sem rodape, ate o fim)
     r"|Bearer\s+[A-Za-z0-9._~+/-]{10,}"
     r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token)\b)\s*[:=]\s*\S{8,})")
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 WIN_PATH = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\"'<>|\r\n]*")                    # ate o fim da linha/aspas: cobre espacos no caminho
-UNIX_PATH = re.compile(r"(?<![\w.:-])/(?:home|Users|users|root|var|tmp|mnt|opt|usr|etc|c|d|e)/[^\s\"'<>|]+")
+UNIX_PATH = re.compile(r"(?<![\w.:#/-])/(?:[\w.@+~-]+/)+[\w.@+~-]*")                           # qualquer caminho absoluto Unix (2+ segmentos); URL e `a/b` sem barra inicial ficam
 FORBIDDEN = (TOKEN, EMAIL, WIN_PATH, UNIX_PATH)
 
 
@@ -110,6 +110,12 @@ def read_store(db_path: Path) -> dict:
         }
 
 
+def checks_of(runs: list[dict]) -> list[dict]:
+    """TODO check run, cada um com id, nome, origem e conclusao: dois checks de mesmo nome (ex.: reexecucao) aparecem os dois, nunca um sobrescreve o outro."""
+    return sorted(({"id": c.get("id"), "nome": c.get("name"), "origem": (c.get("app") or {}).get("slug"), "estado": c.get("conclusion") or c.get("status")} for c in runs),
+                  key=lambda c: (str(c["nome"]), c["id"] or 0))
+
+
 def collect_flow(number: int, issue: int) -> dict:
     pr = gh(f"repos/{REPO}/pulls/{number}")
     head = pr["head"]["sha"]
@@ -122,7 +128,7 @@ def collect_flow(number: int, issue: int) -> dict:
         "reviews": [{"id": r["id"], "revisor": r["user"]["login"], "estado": r["state"], "commit": r["commit_id"], "em": r["submitted_at"],
                      "marcador_outbox": (re.search(r"fp060-outbox-key:(\S+)", r["body"] or "") or [None, None])[1]}
                     for r in gh(f"repos/{REPO}/pulls/{number}/reviews")],
-        "checks_no_head_final": {c["name"]: c["conclusion"] or c["status"] for c in gh(f"repos/{REPO}/commits/{head}/check-runs")["check_runs"]},
+        "checks_no_head_final": checks_of(gh(f"repos/{REPO}/commits/{head}/check-runs")["check_runs"]),
         "issue_estado": gh(f"repos/{REPO}/issues/{issue}")["state"],
     }
 

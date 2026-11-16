@@ -174,3 +174,47 @@ def test_gh_parses_the_slurped_output_without_touching_the_text(monkeypatch):
     monkeypatch.setattr(ce.subprocess, "run", fake_run)
     assert ce.gh("repos/o/r/pulls/1/commits") == [{"mensagem": "antes][depois"}]
     assert "--slurp" in seen["cmd"] and "--paginate" in seen["cmd"]
+
+
+# -- 4a revisao do Codex (#660): PEM completo, caminhos Unix quaisquer, check runs de mesmo nome ---------------------------------------------------------
+PEM = "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA7Zx0aQ1b\nQmFzZTY0Q29ycG8=\n-----END RSA PRIVATE KEY-----"
+
+
+def test_a_whole_multiline_pem_key_is_removed_not_just_its_header():
+    out = ce.scrub(f"antes {PEM} depois")
+    assert "MIIEow" not in out and "QmFzZTY0" not in out and "END RSA" not in out and out.startswith("antes <token>") and out.endswith("depois")
+    assert "MIIEow" not in ce.scrub("-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASC")                 # sem rodape: ate o fim do texto
+
+
+def test_a_pem_key_in_a_collected_field_never_reaches_the_written_report(tmp_path, monkeypatch):
+    monkeypatch.setattr(ce, "collect_flow", lambda n, i: {"pr": n, "issue": i, "head_final": "a" * 40, "reviews": [], "commits": [{"mensagem": f"x {PEM} y"}]})
+    monkeypatch.setattr(ce, "read_store", lambda p: {"eventos": [{"error": PEM}], "transicoes": []})
+    out = tmp_path / "out"
+    assert ce.main([str(out), "A=1:2:" + (tmp_path / "s.db").as_posix()]) == 0
+    written = (out / "evidence.json").read_text(encoding="utf-8")
+    assert "MIIEow" not in written and "QmFzZTY0" not in written and "PRIVATE KEY" not in written
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(PEM)
+
+
+@pytest.mark.parametrize("path", ["/workspace/empresa/projeto/segredo.txt", "/data/runs/a.db", "/srv/app/config.yml", "/Volumes/Disco/x/y.json", "/proc/1/environ"])
+def test_any_absolute_unix_path_is_removed_even_outside_the_old_root_list(path):
+    out = ce.scrub(f"erro em {path} fim")
+    assert path not in out and "<caminho>" in out
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(f"x {path} y")
+
+
+def test_urls_relative_paths_and_review_keys_are_not_mistaken_for_machine_paths():
+    text = "https://github.com/o/r/pull/7#pullrequestreview-9 review:GFCDOTA/x#7:abc refs/heads/feat/x docs/a/b.md a/b"
+    assert ce.scrub(text) == text
+    ce.assert_clean(text)
+
+
+def test_check_runs_with_the_same_name_are_both_preserved_with_id_origin_and_result():
+    runs = [{"id": 2, "name": "pytest (py3.12)", "status": "completed", "conclusion": "success", "app": {"slug": "github-actions"}},
+            {"id": 1, "name": "pytest (py3.12)", "status": "completed", "conclusion": "failure", "app": {"slug": "github-actions"}},
+            {"id": 3, "name": "qg", "status": "in_progress", "conclusion": None, "app": None}]
+    out = ce.checks_of(runs)
+    assert [(c["id"], c["nome"], c["estado"]) for c in out] == [(1, "pytest (py3.12)", "failure"), (2, "pytest (py3.12)", "success"), (3, "qg", "in_progress")]
+    assert out[0]["origem"] == "github-actions" and out[2]["origem"] is None                                       # a falha NAO some atras do sucesso de mesmo nome
