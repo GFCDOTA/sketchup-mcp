@@ -49,6 +49,8 @@ def refusal(verdict: bd.Verdict, readiness: dict[int, dict] | None = None, proje
     """Motivo da barreira do intake para uma Issue ja elegivel pelo agendador, ou None. `project_known`: o Project FOI consultado (entao a Issue ausente do resultado ou
     sem status NAO esta em `Ready`). `known`: numeros das Issues carregadas (dependencia fora dela = nao comprovada)."""
     node = verdict.node
+    if node.number in node.deps:
+        return f"a Issue #{node.number} depende dela mesma: dependencia reflexiva nunca e concluida"
     if known is not None:
         missing = sorted(d for d in node.deps if d != node.number and d not in known)
         if missing:
@@ -115,18 +117,21 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"candidate": None, "skipped": [], "error": f"lista de Issues/PRs atingiu o limite de {bd.LOAD_LIMIT}: possivelmente truncada, nada e publicado"}))
         return 2
     path = es.state_path()
+    readiness = bd.load_readiness()                                                 # so para recusar o que a auditoria marcou como SketchUp
+    # a trava do estado de execucao vale da LEITURA dos claims ate a GRAVACAO do pedido: um claim concorrente (executor reivindicando a Issue ou o componente) nao pode
+    # entrar entre a decisao e a publicacao. A trava e curta (le um JSON, grava uma linha SQLite); o que e lento (gh) ja foi lido antes.
     with es.locked(path):
         state = es.load(path)
-    result = plan(issues, prs, state, statuses, bd.load_readiness())               # so para recusar o que a auditoria marcou como SketchUp
-    out: dict = {"candidate": None if result.candidate is None else {
-        "issue": result.candidate.node.number, "title": result.candidate.node.title}, "skipped": result.skipped}
-    if a.cmd == "publish" and a.apply and result.candidate is not None:
-        from tools.orchestration.store_factory import get_store
-        event_id, created = publish(get_store(), result.candidate, issues)
-        out["published"] = {"event_id": event_id, "created": created}
-    elif a.cmd == "publish":
-        out["published"] = None
-        out["note"] = "sem --apply (ou sem candidato): nada foi gravado"
+        result = plan(issues, prs, state, statuses, readiness)
+        out: dict = {"candidate": None if result.candidate is None else {
+            "issue": result.candidate.node.number, "title": result.candidate.node.title}, "skipped": result.skipped}
+        if a.cmd == "publish" and a.apply and result.candidate is not None:
+            from tools.orchestration.store_factory import get_store
+            event_id, created = publish(get_store(), result.candidate, issues)
+            out["published"] = {"event_id": event_id, "created": created}
+        elif a.cmd == "publish":
+            out["published"] = None
+            out["note"] = "sem --apply (ou sem candidato): nada foi gravado"
     print(json.dumps(out, indent=1, ensure_ascii=False))
     return 0 if result.candidate is not None else 1
 

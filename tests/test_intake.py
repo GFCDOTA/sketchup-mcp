@@ -194,3 +194,29 @@ def test_a_possibly_truncated_issue_or_pr_list_publishes_nothing(cli, monkeypatc
     assert intake.main(["publish", "--apply"]) == 2
     out = json.loads(capsys.readouterr().out)
     assert out["candidate"] is None and "truncada" in out["error"] and not cli.exists() or EventStore(cli).events() == []
+
+
+# -- 7a revisao do Codex (#641): dependencia reflexiva; trava do estado ate a publicacao ----------------------------------------------------------------
+def test_a_self_dependency_refuses_the_candidate_and_publishes_nothing(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    res = plan([issue(1, deps=(1,))])
+    assert res.candidate is None and "depende dela mesma" in res.skipped[0]
+    monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1, deps=(1,))], None, []))
+    assert intake.main(["publish", "--apply"]) == 1
+    assert json.loads(capsys.readouterr().out)["candidate"] is None and not cli.exists() or EventStore(cli).events() == []
+
+
+def test_the_execution_state_lock_is_held_from_reading_the_claims_until_the_request_is_written(cli, monkeypatch):
+    held = []
+    real_publish = intake.publish
+
+    def publish_while_checking_the_lock(store, verdict, issues):
+        try:
+            with es.locked(es.state_path(), wait_s=0.2):                                 # outro processo tentando reivindicar nesta janela
+                held.append(False)
+        except TimeoutError:
+            held.append(True)
+        return real_publish(store, verdict, issues)
+    monkeypatch.setattr(intake, "publish", publish_while_checking_the_lock)
+    assert intake.main(["publish", "--apply"]) == 0
+    assert held == [True]
