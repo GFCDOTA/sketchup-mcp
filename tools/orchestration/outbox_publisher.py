@@ -13,9 +13,12 @@ Regras:
     publicador reconcilia.
   - Falha do alvo volta para a fila com atraso e vai para DLQ no limite de tentativas da entrada.
 
-O que isto NAO garante: exactly-once no sistema externo. A entrega e "pelo menos uma tentativa + reconciliacao": depende de
-o alvo conseguir achar o efeito pela chave. Dois envios simultaneos da mesma chave por processos que nao compartilham este
-`EventStore` nao sao evitados aqui.
+Envios sobrepostos: antes de enviar, o lease e estendido para cobrir o `send_timeout_s` do alvo (+ folga); outro publicador do MESMO
+`EventStore` so reivindica depois disso, quando o envio anterior ja nao pode produzir efeito (o alvo garante esse teto). O `LedgerTarget`
+ainda reconfere a chave sob trava (idempotencia atomica no alvo).
+
+O que isto NAO garante: exactly-once em alvo que nao respeite o proprio teto nem tenha idempotencia atomica; processos que nao compartilham
+este `EventStore` nao sao coordenados aqui.
 
 Nenhum alvo deste modulo fala com o GitHub: `LedgerTarget` e um arquivo local que faz o papel de sistema externo no
 laboratorio e nos testes."""
@@ -23,7 +26,9 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from collections.abc import Callable, Mapping
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Protocol
 
@@ -34,7 +39,14 @@ class TargetError(RuntimeError):
     """O alvo nao conseguiu reconciliar ou aplicar o efeito. A entrada volta para a fila (ou DLQ no limite)."""
 
 
+SEND_MARGIN_S = 10.0
+
+
 class Target(Protocol):
+    """`send_timeout_s` (obrigatorio para alvo SEM idempotencia atomica): teto DURO do `send` (o alvo garante que nao produz efeito depois dele, ex.: timeout do subprocesso). O publicador estende o lease
+    para cobrir esse teto ANTES de enviar: enquanto um envio ainda pode produzir efeito, nenhum outro publicador reivindica a entrada."""
+    send_timeout_s: float
+
     def find(self, entry: dict) -> str | None:
         """Referencia do efeito ja aplicado para `entry["idempotency_key"]`, ou None. Nunca aplica efeito."""
 
@@ -42,8 +54,46 @@ class Target(Protocol):
         """Aplica o efeito e devolve a referencia dele. So e chamado depois de um `find` que devolveu None."""
 
 
+@contextmanager
+def _file_lock(path: Path, timeout: float = 30.0):
+    """Trava exclusiva entre processos (arquivo `.lock` ao lado do ledger)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fh = open(path, "a+b")
+    deadline = time.monotonic() + timeout
+    try:
+        while True:
+            try:
+                if os.name == "nt":
+                    import msvcrt
+                    fh.seek(0)
+                    msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    import fcntl
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError as exc:
+                if time.monotonic() >= deadline:
+                    raise TargetError("trava do ledger indisponivel") from exc
+                time.sleep(0.02)
+        yield
+    finally:
+        try:
+            if os.name == "nt":
+                import msvcrt
+                fh.seek(0)
+                msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        except OSError:
+            pass
+        fh.close()
+
+
 class LedgerTarget:
-    """Arquivo JSONL, uma linha por efeito: o "sistema externo" do laboratorio. O estado e o arquivo, nao a instancia."""
+    """Arquivo JSONL, uma linha por efeito: o "sistema externo" do laboratorio. O estado e o arquivo, nao a instancia.
+    Idempotencia ATOMICA no alvo: `send` reconfere a chave e grava sob a mesma trava; dois envios sobrepostos da mesma chave geram UM efeito (por isso nao precisa
+    declarar `send_timeout_s`)."""
 
     def __init__(self, path: str | Path):
         self.path = Path(path)
@@ -66,6 +116,13 @@ class LedgerTarget:
         return None
 
     def send(self, entry: dict) -> str:
+        with _file_lock(self.path.with_name(self.path.name + ".lock")):
+            for number, row in enumerate(self.lines(), 1):                    # outro envio da MESMA chave ja aplicou: devolve a referencia dele
+                if row["key"] == entry["idempotency_key"]:
+                    return f"ledger:{number}"
+            return self._append(entry)
+
+    def _append(self, entry: dict) -> str:
         count = len(self.lines())
         line = json.dumps({"key": entry["idempotency_key"], "operation": entry["operation"], "payload": entry["payload"]},
                           sort_keys=True, ensure_ascii=True)
@@ -95,7 +152,9 @@ def publish_one(store: EventStore, targets: Mapping[str, Target], owner: str, *,
             raise TargetError(f"alvo desconhecido: {claimed['target']}")
         reference, action = handler.find(entry), "RECONCILED"
         if reference is None:
-            if not store.renew_outbox(claimed, lease_seconds):               # fencing: quem perdeu o lease nao envia
+            ceiling = getattr(handler, "send_timeout_s", None)
+            window = max(lease_seconds, float(ceiling) + SEND_MARGIN_S) if ceiling else lease_seconds
+            if not store.renew_outbox(claimed, window):                      # fencing + o lease cobre o teto do envio: ninguem reivindica enquanto ele pode ter efeito
                 raise LeaseLost(f"outbox {claimed['id']}: lease perdido antes do envio; nada enviado")
             reference, action = handler.send(entry), "SENT"
             if after_send:

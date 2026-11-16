@@ -273,3 +273,61 @@ def test_outbox_entries_lists_every_entry_whatever_its_status(store):
 
     assert [(e["id"], e["status"], e["attempts"]) for e in entries] == [(ids[0], "DONE", 1), (ids[1], "PENDING", 0)]
     assert json.loads(entries[0]["payload"]) == {"pr": 7}
+
+
+# -- revisao do Codex (#618): envio sobreposto depois do lease; idempotencia atomica no alvo -------------------------------------------------------------
+def test_while_a_send_can_still_have_effect_no_other_publisher_reclaims_the_entry(store, clock):
+    import threading
+    target = FakeTarget()
+    target.send_timeout_s = 120.0                                                                         # o alvo garante: nenhum efeito depois de 120 s
+    (oid,) = queue(store, "k1")
+    entered, release, results = threading.Event(), threading.Event(), {}
+    real_send = target.send
+
+    def blocked_send(entry):
+        entered.set()
+        release.wait(10)                                                                                  # bloqueado ANTES do efeito
+        return real_send(entry)
+    target.send = blocked_send
+    t = threading.Thread(target=lambda: results.update(first=publish(store, target, owner="pub-1")))
+    t.start()
+    assert entered.wait(10)
+    clock.advance(LEASE + 5)                                                                              # o lease ORIGINAL (30 s) ja venceu
+    second = FakeTarget()
+    assert publish(store, second, owner="pub-2") == {"action": "IDLE"} and second.seen == []              # ninguem reivindica: o envio ainda pode ter efeito
+    release.set()
+    t.join(10)
+    assert results["first"]["action"] == "SENT" and target.effects == ["k1"] and status(store, oid) == "DONE"
+
+
+def test_after_the_send_ceiling_a_new_publisher_reclaims_and_reconciles_first(store, clock):
+    target = FakeTarget()
+    target.send_timeout_s = 60.0
+    (oid,) = queue(store, "k1")
+
+    def crash_after_effect(entry, ref):
+        raise Crash
+    with pytest.raises(Crash):
+        publish(store, target, after_send=crash_after_effect)
+    clock.advance(LEASE + 5)
+    assert publish(store, target, owner="pub-2") == {"action": "IDLE"}                                    # ainda dentro do teto do envio
+    clock.advance(60.0 + op.SEND_MARGIN_S)
+    res = publish(store, target, owner="pub-2")
+    assert res["action"] == "RECONCILED" and target.effects == ["k1"] and status(store, oid) == "DONE"
+
+
+def test_two_overlapping_ledger_sends_of_the_same_key_produce_one_effect(tmp_path):
+    import threading
+    ledger = LedgerTarget(tmp_path / "ledger.jsonl")
+    entry = {"idempotency_key": "k1", "operation": "publish_review", "payload": {"pr": 7}}
+    refs, barrier = [], threading.Barrier(6)
+
+    def go():
+        barrier.wait()
+        refs.append(ledger.send(entry))
+    ts = [threading.Thread(target=go) for _ in range(6)]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join(20)
+    assert len(ledger.lines()) == 1 and set(refs) == {"ledger:1"}
