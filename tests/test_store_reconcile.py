@@ -7,9 +7,11 @@ import subprocess
 
 import pytest
 
+from tools.orchestration import event_bridge as eb
 from tools.orchestration import lifecycle
 from tools.orchestration import store_reconcile as sr
 from tools.orchestration.event_store import EventStore, LeaseLost
+from tools.validation import execution_state as es
 
 HEAD, NEW = "a" * 40, "b" * 40
 KEY = f"review:9:7:{HEAD}"
@@ -439,3 +441,36 @@ def test_an_explicitly_empty_json_queue_still_allows_superseding_a_stale_event(s
     monkeypatch.delenv("EXECUTOR_SOURCE", raising=False)
     report = sr.reconcile(store, FakeGh(head=NEW), apply=True)
     assert report["events"][0]["applied"] == "SUPERSEDED"
+
+
+# -- 9a revisao do Codex (#642): decisao e transicao sob a trava do bridge, com a fila relida -----------------------------------------------------------
+def test_the_json_queue_is_reread_under_the_bridge_lock_so_an_item_saved_after_the_first_read_protects_the_event(store, tmp_path, monkeypatch):
+    publish(store)
+    path = tmp_path / "bridge.json"
+    path.write_bytes(b'{"queue": []}')                                                                 # a fila ANTIGA, vazia
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(path))
+
+    class RacingGh(FakeGh):
+        def __call__(self, p):
+            out = super().__call__(p)
+            if "pulls/" in p:                                                                            # durante a consulta ao GitHub o bridge salva o item e o executor comeca
+                eb.save({**eb.default_bridge_state(), "queue": [json_item("RUNNING")]}, path)
+            return out
+    report = sr.reconcile(store, RacingGh(head=NEW), apply=True)
+    assert report["events"][0]["applied"] == "SKIPPED" and "JSON_ACTIVE" in report["events"][0]["skipped_because"] and status(store) == "PENDING"
+
+
+def test_the_supersede_runs_while_the_bridge_lock_is_held(store, tmp_path, monkeypatch):
+    publish(store)
+    held = []
+    real = sr._supersede
+
+    def checking(st, ev, why):
+        try:
+            with es.locked(eb.bridge_path(), wait_s=0.2):
+                held.append(False)
+        except TimeoutError:
+            held.append(True)
+        return real(st, ev, why)
+    monkeypatch.setattr(sr, "_supersede", checking)
+    assert sr.reconcile(store, FakeGh(head=NEW), apply=True)["events"][0]["applied"] == "SUPERSEDED" and held == [True]

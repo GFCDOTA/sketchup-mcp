@@ -32,6 +32,7 @@ from pathlib import Path
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import lifecycle
 from tools.orchestration.event_store import EventStore
+from tools.validation import execution_state as es
 
 EVENT_TYPE = "CORRECTION_REQUESTED"
 SHA = re.compile(r"[0-9a-f]{40}")
@@ -177,6 +178,21 @@ def reconcile(store: EventStore, gh: eb.Gh, repo: str = eb.REPO, apply: bool = F
         if apply and code in ("HEAD_MOVED", "PR_NOT_OPEN"):
             if queue_error:
                 row["applied"], row["skipped_because"] = "SKIPPED", queue_error
+            elif not authoritative and json_queue is None:
+                # a fila foi lida ANTES da consulta ao GitHub e sem a trava do bridge: o bridge publica no SQLite antes de salvar a fila JSON, entao uma copia velha pode nao ter
+                # o item que o executor JSON ja comecou. A decisao e a transicao no SQLite acontecem SOB a trava compartilhada, com a fila RELIDA e validada.
+                try:
+                    with es.locked(eb.bridge_path()):
+                        fresh = read_json_queue()
+                        problem = queue_problem(fresh)
+                        if problem:
+                            raise ValueError(problem)
+                        if json_item_active(fresh, p):
+                            row["applied"], row["skipped_because"] = "SKIPPED", "JSON_ACTIVE: o executor JSON ainda e dono do item; o resultado sera sincronizado depois da execucao"
+                        else:
+                            row["applied"] = _supersede(store, ev, detail)
+                except (ValueError, OSError, KeyError, TypeError, TimeoutError) as exc:
+                    row["applied"], row["skipped_because"] = "SKIPPED", f"fila JSON ilegivel, invalida ou trava ocupada ({type(exc).__name__}: {str(exc)[:80]}): nada e aplicado"
             elif not authoritative and json_item_active(queue or [], p):
                 row["applied"], row["skipped_because"] = "SKIPPED", "JSON_ACTIVE: o executor JSON ainda e dono do item; o resultado sera sincronizado depois da execucao"
             else:
