@@ -398,7 +398,9 @@ def test_heartbeat_renews_the_lease_while_the_child_runs(monkeypatch):
     th.start()
     assert started.wait(10)
     import time
-    time.sleep(0.4)
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline and eb.load()["queue"][0]["lease_expires"] == seen["before"]:
+        time.sleep(0.02)                                                     # espera a RENOVACAO acontecer (sem janela fixa: em maquina carregada 0.4 s nao bastava)
     release.set()
     th.join(15)
     assert seen["after"] > seen["before"]                                    # renovado pelo relogio real (NOW fixo e antigo)

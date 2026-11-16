@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -158,6 +159,8 @@ def test_instance_lock_is_exclusive_across_real_processes_and_released_by_the_os
 
 
 def test_main_refuses_to_start_a_second_executor_and_never_polls(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "bridge.json"))                     # estado ISOLADO: sem isto o caminho vem de `git rev-parse` e toca a governanca real
+    monkeypatch.setenv("EXECUTION_STATE_PATH", str(tmp_path / "exec.json"))
     monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: "fmodesto30")
     monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: pytest.fail("a 2a instancia nao pode consumir a fila"))
     first = ex.InstanceLock(ex.instance_lock_path())
@@ -169,7 +172,10 @@ def test_main_refuses_to_start_a_second_executor_and_never_polls(tmp_path, monke
     assert "outra instancia" in capsys.readouterr().out
 
 
-def test_main_exits_when_the_launcher_pid_is_gone_and_heartbeat_cancels_the_child(monkeypatch, capsys):
+def test_main_exits_when_the_launcher_pid_is_gone_and_heartbeat_cancels_the_child(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(ex, "WATCH_PID", None)                                                         # `main(--watch-pid)` deixa o global setado: monkeypatch o restaura ao fim (antes vazava p/ outros testes)
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "bridge.json"))
+    monkeypatch.setenv("EXECUTION_STATE_PATH", str(tmp_path / "exec.json"))
     monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: "fmodesto30")
     monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: pytest.fail("sem launcher vivo nao roda ciclo"))
     gone = dead_pid()
@@ -224,3 +230,52 @@ def test_a_legacy_lock_without_pid_still_waits_for_the_60s_rule(tmp_path):
     with pytest.raises(TimeoutError):
         with es.locked(tmp_path / "s.json", wait_s=0.3):
             pass
+
+
+# -- MT-02 (sandbox do revisor): `kill_tree` nao pode depender de `taskkill`, que falha dentro do AppContainer -------------------------------------------
+GRANDCHILD = (
+    "import subprocess, sys, time\n"
+    "g = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(120)'])\n"
+    "print(g.pid, flush=True)\n"
+    "time.sleep(120)\n"
+)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="arvore de processos do Windows")
+def test_kill_tree_ends_the_child_and_its_grandchild_without_ever_calling_taskkill(monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    real_run = subprocess.run
+
+    def no_taskkill(argv, *a, **k):
+        assert str(argv[0]).lower() != "taskkill", "kill_tree nao pode depender de taskkill"
+        return real_run(argv, *a, **k)
+    monkeypatch.setattr(subprocess, "run", no_taskkill)
+    child = subprocess.Popen([sys.executable, "-c", GRANDCHILD], stdout=subprocess.PIPE, text=True)
+    grand = int(child.stdout.readline())
+    assert grand in ps.tree_pids(child.pid)                                                          # a arvore tem mesmo o neto
+    ex.kill_tree(child)
+    child.wait(timeout=15)
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline and grand in ps.tree_pids(child.pid):
+        time.sleep(0.1)
+    assert grand not in ps.tree_pids(child.pid) and child.poll() is not None
+
+
+@pytest.mark.skipif(os.name != "nt", reason="arvore de processos do Windows")
+def test_kill_tree_falls_back_to_taskkill_only_when_the_native_snapshot_is_unavailable(monkeypatch):
+    calls = []
+    monkeypatch.setattr(ex, "_kill_descendants_native", lambda pid: (_ for _ in ()).throw(OSError("sem snapshot")))
+    monkeypatch.setattr(subprocess, "run", lambda argv, *a, **k: calls.append(argv) or type("R", (), {"returncode": 0})())
+    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    ex.kill_tree(child)
+    child.wait(timeout=15)
+    assert calls == [["taskkill", "/T", "/F", "/PID", str(child.pid)]] and child.poll() is not None     # reserva so quando o caminho nativo falha; o filho morre de qualquer jeito
+
+
+@pytest.mark.skipif(os.name != "nt", reason="arvore de processos do Windows")
+def test_default_runner_cancel_returns_promptly_for_a_sleeping_child():
+    cancel = threading.Event()
+    threading.Timer(0.5, cancel.set).start()
+    t0 = time.monotonic()
+    rc, _, _, timed_out = ex.default_runner([sys.executable, "-c", "import time; time.sleep(60)"], Path.cwd(), dict(os.environ), "", 120, cancel, poll_s=0.1)
+    assert rc == -2 and not timed_out and time.monotonic() - t0 < 15

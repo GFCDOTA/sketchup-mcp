@@ -245,12 +245,33 @@ def sleep_watching(seconds: float, pid: int | None, step: float = 2.0) -> bool:
         time.sleep(min(step, left))
 
 
+def _kill_descendants_native(root_pid: int) -> None:
+    """Termina os DESCENDENTES do PID dado SEM executavel externo: snapshot de processos (Toolhelp) + TerminateProcess (`os.kill`) em cada um, do mais fundo para o mais raso.
+    Usa so o PID do proprio filho (nunca nome de imagem). `since` = criacao do filho: um PID reaproveitado com `parent` igual ao dele nao entra."""
+    from tools.orchestration import process_supervisor as ps
+    since = ps._creation_time(root_pid)
+    for pid in reversed(ps.tree_pids(root_pid, since=since)):
+        if pid != root_pid:
+            try:
+                os.kill(pid, 15)                                           # no Windows `os.kill` chama TerminateProcess
+            except OSError:
+                pass                                                       # ja terminou (ou nao e nosso): o proximo passo confirma
+
+
 def kill_tree(p: subprocess.Popen) -> None:
-    """Derruba a arvore do PROPRIO processo filho (taskkill /T no PID dele; nunca por nome de imagem)."""
-    if os.name == "nt":
-        subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)], capture_output=True)
-    else:
+    """Derruba a arvore do PROPRIO processo filho, nunca por nome de imagem. No Windows: descendentes por snapshot + `TerminateProcess` (sem depender de `taskkill`, que FALHA
+    dentro de um AppContainer com 'usuario ou senha incorretos' e deixava o filho vivo), depois o proprio filho; `taskkill /T` fica so de reserva se o snapshot falhar."""
+    if os.name != "nt":
         p.kill()
+        return
+    try:
+        _kill_descendants_native(p.pid)
+    except Exception:  # noqa: BLE001 — sem snapshot: tenta o caminho antigo
+        subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)], capture_output=True)
+    try:
+        p.kill()
+    except OSError:
+        pass
 
 
 def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, cancel: threading.Event | None = None,
