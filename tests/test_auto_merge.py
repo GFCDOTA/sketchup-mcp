@@ -1,6 +1,8 @@
 """FP-060 MT-15 (#647): merge automatico PROTEGIDO. Desligado por padrao; cada recusa e cada espera tem teste; o GitHub e injetado."""
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from tools.orchestration import auto_merge as am
@@ -177,11 +179,17 @@ def test_an_approval_followed_by_a_change_request_on_the_same_head_does_not_merg
 
 
 # ------------------------------------------------------------------------------------------------------------------------ ciclo
+GOOD_PROTECTION = {"required_pull_request_reviews": {"required_approving_review_count": 1, "dismiss_stale_reviews": True},
+                   "enforce_admins": {"enabled": True}, "required_status_checks": {"contexts": []}}
+
+
 class Gh:
-    def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, draft=False, **overrides):
+    def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, draft=False, protection=None, protection_boom=None, **overrides):
         self.head, self.fresh_head, self.boom, self.labelled, self.overrides, self.calls = head, fresh_head, boom, labelled, overrides, []
         self.draft = draft
         self.pulls = 0
+        self.protection = GOOD_PROTECTION if protection is None else protection
+        self.protection_boom = protection_boom
 
     def __call__(self, path):
         self.calls.append(path)
@@ -201,6 +209,10 @@ class Gh:
             return {"total_count": len(lifecycle.MANDATORY_CHECKS), "check_runs": runs()}
         if path == f"repos/{REPO}/issues/5":
             return issues(labels=(am.GPT_LABEL,))[5]
+        if path == f"repos/{REPO}/branches/develop/protection":
+            if self.protection_boom:
+                raise self.protection_boom
+            return self.protection
         raise AssertionError(path)
 
 
@@ -497,3 +509,53 @@ def test_the_marker_is_what_the_outbox_target_appends_to_the_review_body():
     key = f"review:{REPO}#7:{head}:APPROVE"
     body = f"Codex CLI (revisor independente) — HEAD {head} — confianca HIGH\n\n{target.marker(key)}"
     assert am.reinforced(approval(commit=head, body=body), REPO, 7, head) is True
+
+
+# -- a protecao da branch precisa EXIGIR aprovacao independente antes de qualquer merge automatico (diretriz do proprietario) -----------------------------
+def test_with_a_protection_that_requires_approval_the_merge_goes_ahead():
+    runner = Runner()
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["merged"] is True and am.protection_gaps(Gh(), REPO) == []
+
+
+@pytest.mark.parametrize("protection, needle", [
+    ({"enforce_admins": {"enabled": True}}, "nao exige aprovacao"),                                                   # a configuracao REAL de hoje: so checks
+    ({"required_pull_request_reviews": {"required_approving_review_count": 0, "dismiss_stale_reviews": True}, "enforce_admins": {"enabled": True}}, "nao exige aprovacao"),
+    ({"required_pull_request_reviews": {"required_approving_review_count": True, "dismiss_stale_reviews": True}, "enforce_admins": {"enabled": True}}, "nao exige aprovacao"),
+    ({"required_pull_request_reviews": {"required_approving_review_count": 1}, "enforce_admins": {"enabled": True}}, "dismiss_stale_reviews"),
+    ({"required_pull_request_reviews": {"required_approving_review_count": 1, "dismiss_stale_reviews": True}, "enforce_admins": {"enabled": False}}, "administradores"),
+    ({"required_pull_request_reviews": {"required_approving_review_count": 1, "dismiss_stale_reviews": True}}, "administradores"),
+])
+def test_a_protection_that_would_allow_a_merge_without_independent_review_blocks_the_automatic_merge(protection, needle):
+    runner = Runner()
+    plan = am.cycle(Gh(protection=protection), POLICY, REPO, apply=False, runner=runner, is_enabled=ON)
+    assert plan["prs"][0]["code"] == "WAIT" and any(needle in r for r in plan["prs"][0]["reasons"])                    # o plano ja mostra o motivo
+    out = am.cycle(Gh(protection=protection), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "WAIT" and runner.calls == [] and runner.who_calls == []                           # e o merge nao acontece, mesmo com CI verde e aprovacao
+
+
+@pytest.mark.parametrize("boom", [RuntimeError("403 sem permissao"), OSError("rede"), ValueError("json")])
+def test_an_unreadable_protection_is_fail_closed(boom):
+    runner = Runner()
+    out = am.cycle(Gh(protection_boom=boom), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "WAIT" and "nao pode ser lida" in out["prs"][0]["reasons"][0] and runner.calls == []
+
+
+def test_a_protection_in_an_unexpected_shape_is_fail_closed():
+    assert any("formato inesperado" in g for g in am.protection_gaps(lambda p: ["x"], REPO))
+
+
+def test_a_protection_removed_between_the_decision_and_the_merge_blocks_that_merge():
+    class Drops(Gh):
+        def __call__(self, path):
+            if path.endswith("/protection") and self.pulls >= 2:
+                return {"enforce_admins": {"enabled": True}}                                                          # a exigencia de aprovacao sumiu depois da 1a decisao
+            return super().__call__(path)
+    runner = Runner()
+    out = am.cycle(Drops(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "WAIT" and "deixou de exigir" in out["prs"][0]["reasons"][0] and runner.calls == []
+
+
+def test_the_module_never_writes_branch_protection():
+    source = Path(am.__file__).read_text(encoding="utf-8")
+    assert "branches/{base}/protection" in source and "-X" not in source and "PUT" not in source and "PATCH" not in source

@@ -249,6 +249,28 @@ def gather(gh: eb.Gh, repo: str, number: int) -> tuple[dict, list[dict], list[di
     return pr, files, runs, reviews, {k: v for k, v in issues.items() if v}
 
 
+def protection_gaps(gh: eb.Gh, repo: str, base: str = BASE_BRANCH) -> list[str]:
+    """O que a protecao da branch ainda NAO garante. So LE (nunca altera a protecao: ela e configuracao do proprietario). Merge sem aprovacao independente nao pode
+    acontecer nem com CI verde: a protecao precisa EXIGIR >= 1 aprovacao, descartar aprovacoes velhas quando o codigo muda e valer tambem para administradores.
+    Protecao ilegivel (sem permissao, erro) = fail-closed."""
+    try:
+        prot = gh(f"repos/{repo}/branches/{base}/protection")
+    except (RuntimeError, OSError, ValueError) as exc:
+        return [f"protecao de {base} nao pode ser lida ({type(exc).__name__}): sem prova de que exige aprovacao, nao mescla"]
+    if not isinstance(prot, dict):
+        return [f"protecao de {base} em formato inesperado: nao mescla"]
+    gaps = []
+    reviews = prot.get("required_pull_request_reviews")
+    count = reviews.get("required_approving_review_count") if isinstance(reviews, dict) else None
+    if not isinstance(count, int) or isinstance(count, bool) or count < 1:
+        gaps.append(f"a protecao de {base} nao exige aprovacao de PR (required_approving_review_count >= 1)")
+    elif not reviews.get("dismiss_stale_reviews"):
+        gaps.append(f"a protecao de {base} nao descarta aprovacoes velhas quando o codigo muda (dismiss_stale_reviews)")
+    if not (prot.get("enforce_admins") or {}).get("enabled"):
+        gaps.append(f"a protecao de {base} nao vale para administradores (enforce_admins)")
+    return gaps
+
+
 def gh_bin() -> str:
     import os
     return os.environ.get("GH_BIN", "gh")
@@ -306,12 +328,18 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
         try:
             pr, files, runs, reviews, issues = gather(gh, repo, number)
             decision = decide(pr, files, runs, reviews, issues, policy, cfg, on)
+            if decision.code == "MERGE":
+                gaps = protection_gaps(gh, repo)
+                if gaps:                                                                       # CI verde + aprovacao nao bastam se a protecao permitir merge sem revisao
+                    decision = Decision("WAIT", [*gaps, "configuracao do proprietario: a protecao da branch precisa exigir aprovacao independente antes de qualquer merge automatico"])
             row.update(head=(pr.get("head") or {}).get("sha"), **decision.as_dict())
             if apply and decision.code == "MERGE":
                 # TOCTOU: TODOS os fatos que autorizam o merge (base, labels, Issues, arquivos, checks, reviews) sao lidos e decididos DE NOVO agora; `--match-head-commit`
                 # so protege o HEAD. A janela que sobra (entre esta releitura e o merge no servidor) e a do proprio GitHub e e coberta pela protecao da branch.
                 pr2, files2, runs2, reviews2, issues2 = gather(gh, repo, number)
                 again = decide(pr2, files2, runs2, reviews2, issues2, policy, cfg, on)
+                if again.code == "MERGE" and protection_gaps(gh, repo):                        # relida junto com os demais fatos (TOCTOU)
+                    again = Decision("WAIT", ["a protecao da branch deixou de exigir aprovacao independente"])
                 still_on = enabled() if is_enabled is None else is_enabled                    # o interruptor e RELIDO a cada tentativa, nao so no inicio do ciclo
                 if not still_on[0]:
                     row.update(code="DISABLED", reasons=[f"desligado durante o ciclo: {still_on[1]}"])
