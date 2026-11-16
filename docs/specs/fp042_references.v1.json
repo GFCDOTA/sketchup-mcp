@@ -8880,20 +8880,20 @@
     },
     {
       "path": "artifacts/review/fp060/mt06_e2e/2026-11-15/README.md",
-      "blob_sha": "f0b4604993f7d9ad0083fe8c200d314f03c532f3",
-      "blob_size": 5621,
+      "blob_sha": "d83379f0341652f05863aa12d22ba0d6b187eb3e",
+      "blob_size": 5994,
       "owner_group": "artifacts"
     },
     {
       "path": "artifacts/review/fp060/mt06_e2e/2026-11-15/collect_evidence.py",
-      "blob_sha": "23dae5af9152bc26d60e190e423966908d712668",
-      "blob_size": 3924,
+      "blob_sha": "6f84f0ac711cbf2f4ef7f1857539c5cd62544e18",
+      "blob_size": 6026,
       "owner_group": "artifacts"
     },
     {
       "path": "artifacts/review/fp060/mt06_e2e/2026-11-15/data/evidence.json",
-      "blob_sha": "e601783baf021f1f5800843898217fa5955a342a",
-      "blob_size": 11874,
+      "blob_sha": "d1ec347ef583648abf62948631cf96b073bb39f6",
+      "blob_size": 11891,
       "owner_group": "artifacts"
     }
   ]

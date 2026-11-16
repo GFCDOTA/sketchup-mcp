@@ -156,7 +156,7 @@
  },
  "repo": "GFCDOTA/sketchup-mcp",
  "stores": {
-  "AB": {
+  "fp060_e2e": {
    "eventos": [
     {
      "attempt": 1,
@@ -347,7 +347,7 @@
     }
    ]
   },
-  "C": {
+  "fp060_e2e_c": {
    "eventos": [
     {
      "attempt": 1,

@@ -49,7 +49,8 @@ PY=<venv do repositório>/Scripts/python.exe
 $PY -m tools.orchestration.event_executor run --interval 45 --execute
 # 2) cadastrar uma Issue descartavel (spec:FP-060) e aplicar a label `executor-intake`
 # 3) coletar a evidencia (somente leitura):
-$PY artifacts/review/fp060/mt06_e2e/2026-11-15/collect_evidence.py <diretorio novo> AB=<store do fluxo A/B> C=<store do fluxo C>
+$PY artifacts/review/fp060/mt06_e2e/2026-11-15/collect_evidence.py <diretorio novo> NOME=<PR>:<Issue>:<store.db> [...]   # os numeros sao SEMPRE informados
+#    ex.: A_correcao=<PR>:<Issue>:<store A/B>  C_continua=<PR>:<Issue>:<store C>   (caminhos do Windows com letra de unidade: E:/pasta/store.db)
 ```
 
 ## Arquivos
@@ -57,4 +58,4 @@ $PY artifacts/review/fp060/mt06_e2e/2026-11-15/collect_evidence.py <diretorio no
 | Arquivo | Conteúdo |
 |---|---|
 | `data/evidence.json` | por fluxo: PR, HEAD final, commits (autor e mensagem), reviews (id, revisor, estado, commit, horário, marcador do outbox), checks no HEAD final; eventos e transições dos dois stores SQLite |
-| `collect_evidence.py` | o coletor (somente leitura; sem token, caminho de máquina ou e-mail na saída) |
+| `collect_evidence.py` | o coletor: somente leitura (SQLite em `mode=ro` por URI codificada); PR/Issue informados na linha de comando; toda string passa por `clean` e uma verificação final **recusa gravar** se achar token, e-mail ou caminho de máquina (testes em `tests/test_fp060_collect_evidence.py`) |
