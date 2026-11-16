@@ -785,7 +785,8 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
             it["state"], it["new_head"], it["last_error"], it["log"] = "SUPERSEDED", new_head, why, log
             eb.diagnose(b, f"{key}: {why}", t)
         update_owned(key, owner, superseded, release=True, now=t)
-        comment_pr(item["pr"], repo, f"Executor local: {why}. Edicoes preservadas na worktree; nada publicado.")
+        tail = "Edicoes preservadas na worktree; o commit do executor chegou ao remoto." if pushed else "Edicoes preservadas na worktree; nada publicado."
+        comment_pr(item["pr"], repo, f"Executor local: {why}. {tail}")
         return {"action": "SUPERSEDED", "item": key, "new_head": new_head, "delivery": delivery[0], "reason": why}
     if delivery[0] in ("BLOCKED_GUARDS", "FAILED_CHECKS", "ERROR", "STALE"):
         comment_pr(item["pr"], repo, f"Executor local: entrega NAO publicada ({delivery[0]}): {delivery[1]}. Edicoes preservadas na worktree.")

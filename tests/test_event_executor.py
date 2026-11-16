@@ -1235,3 +1235,25 @@ def test_a_git_that_cannot_start_during_reconciliation_leaves_items_pending_and_
     assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"
     res = ex.process_one(gh, POLICY, REPO, True, Runner(gh), "claude", wt_ok, NOW)                    # e o ciclo segue com os outros itens
     assert res["action"] in ("IDLE", "DONE", "FAILED", "PARKED_UNSUPPORTED", "REFUSED", "STALE", "SUPERSEDED") or "action" in res
+
+
+def test_the_superseded_comment_does_not_say_nothing_was_published_when_the_executor_pushed(monkeypatch):
+    gh = FakeGh()
+    comments = []
+    monkeypatch.setattr(ex, "comment_pr", lambda pr, repo, body: comments.append(body))
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, "8" * 40))
+    res = go(gh, bstate(item()), Runner(gh, push=True))
+    assert res["action"] == "SUPERSEDED" and comments
+    assert "nada publicado" not in comments[-1] and "chegou ao remoto" in comments[-1]
+
+
+def test_the_superseded_comment_says_nothing_was_published_when_there_was_no_push(monkeypatch):
+    gh = FakeGh()
+    comments = []
+    monkeypatch.setattr(ex, "comment_pr", lambda pr, repo, body: comments.append(body))
+    def head_moves(*a, **k):
+        gh.head = "9" * 40                                                                             # o HEAD muda DURANTE a execucao, sem o executor publicar
+        return ("SKIPPED", "nada a publicar")
+    monkeypatch.setattr(ex, "deliver", head_moves)
+    res = go(gh, bstate(item()), Runner(gh, push=False))
+    assert res["action"] == "SUPERSEDED" and comments and "nada publicado" in comments[-1]
