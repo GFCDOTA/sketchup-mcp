@@ -772,6 +772,17 @@ def cycle_backoff(interval: int, consecutive: int) -> float:
     return float(max(base, min(MAX_CYCLE_BACKOFF_S, base * 2 ** max(consecutive, 0))))
 
 
+def loop_wait(interval: int, failures: int) -> float:
+    """Espera ate o proximo ciclo: o MAIOR entre o intervalo/backoff de ciclo e o backoff persistido do bridge (limitacao da API, mesmo apos reinicio).
+    Estado ilegivel nao mata o laco que ja esta se recuperando: cai no backoff de ciclo."""
+    own = cycle_backoff(interval, failures) if failures else float(max(interval, 1))
+    try:
+        persisted = float(eb.load().get("backoff_s", 0) or 0)
+    except (ValueError, OSError, TypeError):
+        return cycle_backoff(interval, max(failures, 1))
+    return max(own, persisted)
+
+
 def guarded_cycle(cycle: Callable[[], dict], consecutive: int) -> tuple[dict, int]:
     """Roda UM ciclo sem deixar uma excecao derrubar o processo. Devolve (resultado, falhas seguidas): o resultado de um ciclo com erro e
     um registro (`cycle_error`) e o contador sobe; um ciclo sem erro zera o contador. `KeyboardInterrupt`/`SystemExit` sao `BaseException`: passam (nao sao falha de ciclo)."""
@@ -850,10 +861,7 @@ def main(argv: list[str] | None = None) -> int:
                 return 7
             if a.once:
                 return 1 if failures else 0
-            try:
-                wait = cycle_backoff(a.interval, failures) if failures else max(a.interval, eb.load()["backoff_s"])
-            except (ValueError, OSError):                                    # estado ilegivel nao pode matar o laco que ja esta se recuperando
-                wait = cycle_backoff(a.interval, max(failures, 1))
+            wait = loop_wait(a.interval, failures)
             if not sleep_watching(wait, WATCH_PID):
                 print(json.dumps({"at": es.now_iso(), "fatal": f"processo pai {WATCH_PID} encerrou: saindo"}), flush=True)
                 return 5

@@ -158,3 +158,32 @@ def test_an_unreadable_state_file_while_computing_the_wait_does_not_kill_a_loop_
     assert ex.main(["run", "--interval", "10"]) == 5                             # chegou ao sleep: nao morreu no eb.load
     assert waits == [ex.cycle_backoff(10, 1)]
     capsys.readouterr()
+
+
+def test_after_a_failure_the_wait_also_respects_the_persisted_bridge_backoff(monkeypatch):
+    monkeypatch.setattr(ex.eb, "load", lambda *a, **k: {"backoff_s": 30})
+    assert ex.loop_wait(1, 1) == 30.0                                            # ciclo pediria 2 s; o bridge pediu 30
+    monkeypatch.setattr(ex.eb, "load", lambda *a, **k: {"backoff_s": 3600})
+    assert ex.loop_wait(1, 1) == 3600.0                                          # backoff acumulado antes de um reinicio
+    assert ex.loop_wait(1, 0) == 3600.0                                          # sem falha de ciclo tambem
+
+
+def test_a_small_persisted_backoff_never_shortens_the_cycle_backoff(monkeypatch):
+    monkeypatch.setattr(ex.eb, "load", lambda *a, **k: {"backoff_s": 5})
+    assert ex.loop_wait(600, 1) == 900.0 and ex.loop_wait(600, 0) == 600.0
+
+
+@pytest.mark.parametrize("bad", [ValueError("zerado"), OSError("disco"), TypeError("x")])
+def test_unreadable_bridge_state_falls_back_to_the_cycle_backoff(monkeypatch, bad):
+    monkeypatch.setattr(ex.eb, "load", lambda *a, **k: (_ for _ in ()).throw(bad))
+    assert ex.loop_wait(10, 0) == ex.cycle_backoff(10, 1) and ex.loop_wait(10, 3) == ex.cycle_backoff(10, 3)
+
+
+def test_the_loop_really_waits_the_persisted_backoff_after_a_poll_failure(monkeypatch, capsys):
+    scripted(monkeypatch, [{"poll": {"ERROR": 1}}])
+    monkeypatch.setattr(ex.eb, "load", lambda *a, **k: {"backoff_s": 30})
+    waits = []
+    monkeypatch.setattr(ex, "sleep_watching", lambda seconds, pid, step=2.0: waits.append(seconds) and False)
+    assert ex.main(["run", "--interval", "1"]) == 5
+    assert waits == [30.0]
+    capsys.readouterr()
