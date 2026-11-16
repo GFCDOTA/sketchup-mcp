@@ -331,3 +331,17 @@ def test_an_outbox_entry_with_an_expired_lease_is_flagged_and_a_clean_outbox_is_
 def test_a_store_dict_without_the_outbox_reading_is_never_reported_healthy():
     legacy = {"state": "ok", "counts": {}, "backoff": 0, "live_leases": [], "zombies": 0, "dlq": [], "retries": 0, "last_error": None}
     assert snap(legacy).store_ok() is False
+
+
+@pytest.mark.parametrize("var", ["EVENT_STORE_DB_PATH", "EVENT_BRIDGE_STATE_PATH", "EXECUTION_STATE_PATH"])
+def test_a_relative_store_path_variable_is_indeterminate_and_never_healthy(tmp_path, monkeypatch, var):
+    (tmp_path / "event_store.db").write_bytes(b"")                                                    # mesmo existindo um banco no cwd/gov: nao e lido
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv(var, "relativo/event_store.db")
+    out = col.collect_store(tmp_path, NOW)
+    assert out["state"] == "indisponivel" and "relativo" in out["error"] and snap(out).store_ok() is False and "NAO e saudavel" in snap(out).store_line()
+
+
+def test_an_absolute_store_path_variable_is_read_normally(store, tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "event_store.db"))
+    assert col.collect_store(tmp_path, NOW)["state"] == "ok"
