@@ -10,8 +10,9 @@ $py = Join-Path $repo ".venv\Scripts\python.exe"
 if (-not (Test-Path $py)) { [Console]::Error.WriteLine("venv canonico ausente: $py (rode uv sync --locked --extra dev)"); exit 2 }
 $gh = (Get-Command gh -ErrorAction SilentlyContinue).Source
 if (-not $gh) { $gh = "C:\Program Files\GitHub CLI\gh.exe" }
-if (-not (Test-Path $gh)) { [Console]::Error.WriteLine("gh CLI nao encontrado"); exit 2 }
-$env:GH_BIN = $gh
+# `gh` ausente/indisponivel NAO encerra o launcher: o loop Python trata isso como falha transitoria (backoff) e volta sozinho quando o executavel reaparecer; sair aqui
+# gastaria os 3 reinicios da tarefa agendada sem nunca chegar a recuperacao.
+if (Test-Path $gh) { $env:GH_BIN = $gh } else { [Console]::Error.WriteLine("gh CLI nao encontrado agora: o loop tentara de novo com backoff") }
 Remove-Item Env:GH_TOKEN -ErrorAction SilentlyContinue
 # A IDENTIDADE (login = executor, nunca o revisor) e verificada pelo PROCESSO PYTHON, fail-closed e com recuperacao: `event_executor run` espera o backoff persistido ANTES de
 # qualquer chamada ao GitHub e, se o GitHub/`gh` estiver indisponivel no logon ou no reinicio, repete com backoff em vez de sair (a tarefa agendada tem so 3 reinicios).

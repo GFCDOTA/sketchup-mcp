@@ -218,6 +218,8 @@ def test_main_exits_3_and_never_polls_when_gh_is_the_wrong_account(monkeypatch, 
 def test_launcher_contract_leaves_the_identity_check_to_the_python_loop_so_a_github_outage_at_logon_cannot_kill_it_early():
     ps1 = (Path(__file__).resolve().parents[1] / "tools/orchestration/run_event_bridge.ps1").read_text(encoding="utf-8")
     assert "api user" not in ps1 and "auth status" not in ps1               # a verificacao (fail-closed) e do `event_executor`, com espera persistida e recuperacao
+    gh_lines = [ln for ln in ps1.splitlines() if "gh CLI nao encontrado" in ln]
+    assert gh_lines and not any("exit" in ln for ln in gh_lines)            # gh ausente no logon nao encerra o launcher: o loop Python repete com backoff
     assert "ExpectedLogin" in ps1                                           # o parametro continua aceito (tarefas agendadas existentes), mas quem decide e a politica
     assert "--execute" in ps1 and "if ($Execute)" in ps1                    # executar so com -Execute explicito
     import inspect
