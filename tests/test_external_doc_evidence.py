@@ -88,3 +88,9 @@ def test_gate_never_imports_network_clients():
 
 def test_normalize_source_label_lowercases_and_collapses_spaces():
     assert ede.normalize_source_label("  Doc   OFICIAL 	 do  Shapely ") == "doc oficial do shapely"
+
+
+@pytest.mark.parametrize("bad", ["", "   ", "\t\n"])
+def test_normalize_source_label_raises_for_empty_or_whitespace(bad):
+    with pytest.raises(ValueError):
+        ede.normalize_source_label(bad)
