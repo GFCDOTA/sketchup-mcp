@@ -917,3 +917,20 @@ def test_a_reviewer_that_reconciles_at_the_publish_step_completes_the_event_with
     e = ev_of(qstore)
     assert e["status"] == "DONE" and '"verdict": "APPROVE"' in e["result"] and '"reconciled": true' in e["result"]
     assert rl.RateLimitGate(qstore).status() == []
+
+
+def test_needs_human_is_retried_once_then_escalated_with_its_findings_instead_of_burning_every_attempt(qstore, clock):
+    w = World().add(7)
+    enq(w, qstore)
+    finding = {"severity": "MEDIUM", "file": "a.py", "line": 3, "reason": "canal pipe herdado", "required_change": "detectar a saida do processo"}
+    nh = Reviewer({"action": "REVIEW_BLOCKED", "reason": "veredito NEEDS_HUMAN: escalar", "verdict": {"verdict": "NEEDS_HUMAN", "confidence": "MEDIUM", "findings": [finding]}, "codex_ran": True})
+    assert pl.work(w, qstore, POLICY, REPO, nh)["action"] == "REVIEW_BLOCKED"                                  # 1a: retry normal (o Codex e nao deterministico)
+    assert ev_of(qstore)["status"] == "PENDING" and ev_of(qstore)["attempt"] == 1
+    clock.t += pl.RETRY_S + 1
+    out = pl.work(w, qstore, POLICY, REPO, nh)
+    assert out["action"] == "NEEDS_HUMAN" and out["escalated"] is True and out["findings"] == 1                # 2a: escala
+    e = ev_of(qstore)
+    assert e["status"] == "DONE" and e["attempt"] == 2 and "canal pipe herdado" in e["result"] and "a.py:3" in e["result"]
+    clock.t += 10 * pl.RETRY_S
+    assert pl.work(w, qstore, POLICY, REPO, nh)["action"] == "IDLE" and len(nh.calls) == 2                      # nada de 3a, 4a, 5a tentativa
+    assert pl.approved_candidates(qstore, REPO) == set()

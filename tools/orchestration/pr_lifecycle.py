@@ -45,6 +45,7 @@ PRODUCER = "review_dispatch"                              # os eventos de PUBLIC
 LEASE_S = 300.0
 HEARTBEAT_S = 60.0
 MAX_ATTEMPTS = 5
+NEEDS_HUMAN_TRIES = 2                                     # NEEDS_HUMAN e um VEREDITO, nao uma falha: uma repeticao (o Codex e nao deterministico), depois escala sem gastar o resto
 RETRY_S = 120.0
 FACTS_TTL_S = 600.0
 RECHECK_S = 90.0                                          # um evento que esperou os checks (ou deu erro) so e consultado de novo depois disto: poupa a cota da API (5000/h)
@@ -404,6 +405,12 @@ def _review(store: EventStore, ev: dict, gh: eb.Gh, policy: dict, repo: str, rev
         elif action == "RECONCILED":                                                                   # alguem publicou neste HEAD entre o inicio e a escrita: conclui com ESSE parecer
             store.complete(ev, {"action": "DONE", "verdict": "APPROVE" if result.get("state") == "APPROVED" else "REQUEST_CHANGES", "reconciled": True,
                                 "review_id": result.get("review_id"), "reason": str(result.get("reason") or "")[:200]})
+        elif action == "REVIEW_BLOCKED" and isinstance(result.get("verdict"), dict) and result["verdict"].get("verdict") == "NEEDS_HUMAN" and ev["attempt"] >= NEEDS_HUMAN_TRIES:
+            v = result["verdict"]                                                                       # escala: guarda os achados no evento (o arquivo do veredito e sobrescrito a cada tentativa)
+            store.complete(ev, {"action": "NEEDS_HUMAN", "verdict": "NEEDS_HUMAN", "escalated": True, "attempts_used": ev["attempt"], "confidence": v.get("confidence"),
+                                "findings": [{"severity": f.get("severity"), "where": f"{f.get('file')}:{f.get('line')}", "reason": str(f.get("reason") or "")[:400],
+                                              "required_change": str(f.get("required_change") or "")[:300]} for f in (v.get("findings") or [])[:10]]})
+            return {"action": "NEEDS_HUMAN", "event": ev["id"], "pr": n, "escalated": True, "findings": len(v.get("findings") or [])}
         elif action in ("SKIPPED", "STALE"):
             store.supersede(ev, str(result.get("reason") or action)[:300])
         else:
