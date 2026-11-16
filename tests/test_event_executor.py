@@ -1008,3 +1008,54 @@ def test_the_next_executor_cycle_reconciles_a_pending_publish_before_picking_new
     monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, NEWHEAD))     # o push TINHA entrado
     res = ex.process_one(gh, POLICY, REPO, True, runner, "claude", wt_ok, NOW)
     assert eb.load()["queue"][0]["state"] == "DONE_AWAITING_REREVIEW" and res["action"] == "IDLE" and len(runner.calls) == 1
+
+
+# -- 5a revisao do Codex (#652) ---------------------------------------------------------------------------------------------------------------------------
+def test_a_remote_restored_to_the_reviewed_sha_after_the_push_is_superseded_not_rerun(monkeypatch):
+    gh = FakeGh()                                                                          # a API segue velha (HEAD revisado)
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, HEAD))             # alguem devolveu a branch ao SHA revisado: tip != commit publicado
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))
+    row = b["queue"][0]
+    assert res["action"] == "SUPERSEDED" and row["state"] == "SUPERSEDED" and row["state"] != "FAILED"
+    assert ex.pick(eb.load(), NOW + dt.timedelta(days=2)) is None                        # nunca volta a ser elegivel
+
+
+def test_an_exception_while_reading_the_remote_after_a_recorded_push_keeps_the_item_pending(monkeypatch):
+    gh = FakeGh()
+
+    def boom(wt, branch):
+        raise OSError("git nao iniciou")
+    monkeypatch.setattr(ex, "remote_tip_of", boom)
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))
+    assert res["action"] == "PUBLISH_PENDING" and b["queue"][0]["state"] == "PUBLISH_PENDING"
+    assert ex.pick(eb.load(), NOW + dt.timedelta(days=2)) is None
+
+
+def test_any_unexpected_crash_after_the_commit_was_recorded_goes_to_publish_pending_not_failed(monkeypatch):
+    gh = FakeGh()
+
+    def deliver_then_crash(wt, branch, base, py, it, **kw):
+        it["published_sha"] = NEWHEAD
+        assert kw["record"](NEWHEAD) is True                                             # gravado de forma duravel...
+        raise KeyError("falha inesperada depois do registro")                           # ...e o executor quebra de um jeito que nao previu
+    monkeypatch.setattr(ex, "deliver", deliver_then_crash)
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))
+    row = b["queue"][0]
+    assert res["action"] == "FAILED" and row["state"] == "PUBLISH_PENDING" and row["published_sha"] == NEWHEAD and "reconciliar" in row["last_error"]
+    assert ex.pick(eb.load(), NOW + dt.timedelta(days=2)) is None
+
+
+def test_a_definitive_failure_drops_the_recorded_commit_so_a_restart_does_not_mistake_it_for_a_publication(monkeypatch):
+    gh = FakeGh()
+
+    def refused(wt, branch, base, py, it, **kw):
+        it["published_sha"] = NEWHEAD
+        kw["record"](NEWHEAD)
+        return ("ERROR", "git push recusado")
+    monkeypatch.setattr(ex, "deliver", refused)
+    b = bstate(item())
+    go(gh, b, Runner(gh, push=False))
+    assert b["queue"][0]["state"] == "FAILED" and "published_sha" not in b["queue"][0]

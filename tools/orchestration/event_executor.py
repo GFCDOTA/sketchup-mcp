@@ -708,18 +708,23 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
     pushed = delivery[0] == "PUSHED"
     published = published_sha(item, wt) if pushed else ""
     new_head, api_confirmed = _confirm(item, gh, repo, pushed, published)
+    remote_mismatch = False                                                 # a ponta remota consultada NAO e o commit publicado (mesmo que seja o SHA revisado: restaurada)
     if pushed and published and not api_confirmed:                         # a API seguiu velha: so o REMOTO prova qual e a ponta (nunca atribuir DONE no escuro)
-        consulted, tip = remote_tip_of(wt, branch)
+        try:
+            consulted, tip = remote_tip_of(wt, branch)
+        except Exception:  # noqa: BLE001 — git ausente/travado DEPOIS do push registrado: o resultado e incerto, nunca FAILED
+            consulted, tip = False, ""
         if not consulted:
             reason = f"o push saiu ({published[:12]}), a API segue velha e a ponta remota nao pode ser consultada: publicacao pendente"
             _to_publish_pending(key, owner, reason, log, t)
             return {"action": "PUBLISH_PENDING", "item": key, "reason": reason}
         if tip != published.lower():
             new_head = tip or "(ausente)"                                   # a ponta remota NAO e o commit do executor: avanco externo
+            remote_mismatch = True
     if question and delivery[0] in ("SKIPPED", "NOOP") and not child_error:
         comment_pr(item["pr"], repo, f"Executor local: o agente parou com uma duvida e nao editou nada.\n\n> {question}")
     head_moved = bool(new_head) and new_head.lower() != item["head_sha"].lower()
-    external = bool(published) and head_moved and new_head.lower() != published      # a API mostra um HEAD que NAO e o que o executor publicou
+    external = remote_mismatch or (bool(published) and head_moved and new_head.lower() != published)      # a API/o remoto mostram um HEAD que NAO e o que o executor publicou
     unconfirmed = pushed and not published                                  # publicou, mas nao ha como provar QUAL commit: nunca atribuir ao executor
     if pushed and head_moved and not external and not unconfirmed:          # DONE so quando QUEM publicou foi o executor
         def done(it, b):
@@ -728,7 +733,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
         update_owned(key, owner, done, release=True, now=t)
         comment_pr(item["pr"], repo, f"Executor local: correcao publicada pelo executor no HEAD {new_head} ({delivery[1]}). Pedido de nova revisao.")
         return {"action": "DONE", "item": key, "new_head": new_head, "delivery": delivery[0]}
-    if head_moved or unconfirmed:                                           # HEAD externo ou publicacao nao provada: nunca sucesso do executor
+    if head_moved or unconfirmed or external:                               # HEAD externo (inclusive restaurado ao SHA revisado) ou publicacao nao provada: nunca sucesso
         if pushed:
             why = (f"o executor publicou {published[:12] or '(commit nao confirmado)'}, mas o HEAD do PR e {new_head[:12] or '(ilegivel)'}: avanco externo ou publicacao "
                    "nao confirmada; SUPERSEDED (o proximo HEAD reconcilia, o review nao e reexecutado)")
@@ -752,6 +757,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
     def failed(it, b):
         it["attempts"] = it.get("attempts", 0) + 1
         it["state"], it["last_error"], it["log"] = "FAILED", reason, log
+        it.pop("published_sha", None)                                       # a entrega foi DEFINITIVAMENTE nao publicada: o registro do commit a publicar nao vale mais
         it["retry_after"] = es.now_iso(t + dt.timedelta(seconds=RETRY_S * it["attempts"]))
         eb.diagnose(b, f"{key}: FAILED {reason} (tentativa {it['attempts']}/{MAX_ATTEMPTS})", t)
     update_owned(key, owner, failed, release=True, now=t)
@@ -799,6 +805,10 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
         reason = f"erro inesperado no executor ({type(exc).__name__}): {exc}"[:300]
 
         def crashed(it, b):
+            if it.get("published_sha"):                                     # o commit a publicar ja foi registrado: a publicacao pode ter acontecido; nunca volta a ser elegivel
+                it["state"], it["last_error"] = "PUBLISH_PENDING", f"{reason} (apos registrar o commit a publicar: reconciliar com o remoto)"
+                eb.diagnose(b, f"{item['key']}: {it['last_error']}", now)
+                return
             it["state"], it["last_error"] = "FAILED", reason
             it["attempts"] = it.get("attempts", 0) + 1
             it["retry_after"] = es.now_iso(_utc(now) + dt.timedelta(seconds=RETRY_S))

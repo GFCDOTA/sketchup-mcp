@@ -426,7 +426,7 @@ def test_a_push_that_times_out_without_reaching_the_remote_is_an_error_that_is_n
     wt, remote, base = repo
     edit_test(wt)
     action, msg, item = run_with_item(wt, base, run=pushing_through(real_push=False))
-    assert action == "PUBLISH_UNCONFIRMED" and "sem confirmacao" in msg and "pendente" in msg and untouched(remote, base) and item["published_sha"]
+    assert action == "PUBLISH_UNCONFIRMED" and "codigo 124" in msg and "pendente" in msg and untouched(remote, base) and item["published_sha"]
 
 
 def test_a_plain_push_refusal_is_still_reported_as_a_refusal(repo):
@@ -494,3 +494,53 @@ def test_remote_tip_distinguishes_a_missing_branch_from_an_unreachable_remote(re
     assert dl.remote_tip(wt, "main", dl._git)[0] is True or dl.remote_tip(wt, "master", dl._git)[0] is True
     assert dl.remote_tip(wt, "nao-existe-xyz", dl._git) == (True, "")                              # consultou: a branch nao existe
     assert dl.remote_tip(wt, "feat/x", lambda a, c: (124, "prazo")) == (False, "")                   # nao consultou: sem prova
+
+
+# -- 5a revisao do Codex (#652): QUALQUER falha do push so e decidida pela ponta remota -------------------------------------------------------------------
+def failing_push(code, real_push):
+    def run_git(args, cwd):
+        if args and args[0] == "push":
+            if real_push:
+                dl._git(args, cwd)
+            return code, "fatal: conexao encerrada"
+        return dl._git(args, cwd)
+    return run_git
+
+
+@pytest.mark.parametrize("code", [1, 128, 255])
+def test_a_connection_lost_after_the_server_accepted_the_push_is_still_a_publication(repo, code):
+    wt, remote, base = repo
+    edit_test(wt)
+    action, msg, item = run_with_item(wt, base, run=failing_push(code, real_push=True))
+    assert action == "PUSHED" and item["published_sha"] == sh(remote, "rev-parse", "feat/x"), msg
+
+
+@pytest.mark.parametrize("code", [1, 128])
+def test_a_failed_push_that_did_not_reach_a_reachable_remote_is_a_definitive_refusal(repo, code):
+    wt, remote, base = repo
+    edit_test(wt)
+    action, msg, _item = run_with_item(wt, base, run=failing_push(code, real_push=False))
+    assert action == "ERROR" and "recusado" in msg and untouched(remote, base)
+
+
+def test_a_failed_push_whose_remote_cannot_be_read_afterwards_is_unconfirmed_not_an_error(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+    state = {"pushed": False}
+
+    def run_git(args, cwd):
+        if args and args[0] == "push":
+            state["pushed"] = True
+            return 128, "fatal: conexao encerrada"
+        if args and args[0] == "ls-remote" and state["pushed"]:
+            return 128, "fatal: sem rede"
+        return dl._git(args, cwd)
+    action, msg, item = run_with_item(wt, base, run=run_git)
+    assert action == "PUBLISH_UNCONFIRMED" and item["published_sha"]
+
+
+def test_a_timeout_where_the_remote_does_not_show_the_commit_yet_stays_pending_not_refused(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+    action, msg, _item = run_with_item(wt, base, run=failing_push(124, real_push=False))
+    assert action == "PUBLISH_UNCONFIRMED" and "ainda nao mostra" in msg

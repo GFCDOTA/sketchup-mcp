@@ -270,10 +270,15 @@ def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _g
     if record is not None and not record(local_head):                       # duravel ANTES do push: um crash/timeout depois dele nao perde a identidade do commit
         return "ERROR", "nao consegui registrar de forma duravel o commit a publicar: nao publico"
     rc, out = run(["push", "origin", f"HEAD:refs/heads/{branch}"], wt)      # push normal: git recusa nao-fast-forward
-    if rc == 124 and remote_head(wt, branch, run) == local_head:
-        rc = 0                                                              # estourou o prazo, mas o remoto ja tem o commit: a publicacao aconteceu
-    if rc == 124:
-        return "PUBLISH_UNCONFIRMED", "git push sem confirmacao (prazo estourado): o remoto pode ter aceito o commit; o item fica com publicacao pendente ate o remoto ser reconciliado"
     if rc != 0:
-        return "ERROR", f"git push recusado: {out[:200]}"
+        # QUALQUER falha do push (prazo, conexao caida depois do servidor aceitar...) pode ter publicado: so a ponta REMOTA decide. Igual ao commit => publicado;
+        # consultada e diferente => recusa DEFINITIVA (nada publicado); nao consultavel => publicacao PENDENTE (nunca reexecuta no escuro).
+        consulted, tip = remote_tip(wt, branch, run)
+        if consulted and tip == local_head:
+            rc = 0
+        elif not consulted or rc == 124:                                   # prazo estourado: o servidor ainda pode estar aplicando o push que o cliente abandonou
+            return "PUBLISH_UNCONFIRMED", (f"git push terminou com codigo {rc} e a ponta remota {'nao pode ser consultada' if not consulted else 'ainda nao mostra o commit'}: "
+                                           "o remoto pode ter aceito o commit; o item fica com publicacao pendente ate o remoto ser reconciliado")
+        else:
+            return "ERROR", f"git push recusado: {out[:200]}"
     return "PUSHED", f"{len(files)} arquivo(s), {verdict.lines} linha(s); publicado em {branch}"
