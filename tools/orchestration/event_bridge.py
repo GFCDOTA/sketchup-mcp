@@ -245,11 +245,16 @@ def run_cycle(gh: Gh, policy: dict, bpath: Path | None = None, repo: str = REPO,
     return counts
 
 
+class IdentityError(PermissionError):
+    """O `gh` esta autenticado como a conta ERRADA (nao e o executor ou e um revisor). E o unico PermissionError que significa "conta errada": um `PermissionError` do
+    SO (ex.: o executavel `gh` nao pode ser iniciado) NAO e esta classe e e transitorio."""
+
+
 def check_identity(gh: Gh, policy: dict) -> str:
     """Fail-closed: o `gh` em uso tem de ser o EXECUTOR (`executor_logins`) e nunca um revisor. Devolve o login ou levanta."""
     login = (gh("user") or {}).get("login", "")
     if login.lower() not in [x.lower() for x in policy.get("executor_logins", [])] or             login.lower() in [x.lower() for x in policy.get("reviewers", [])]:
-        raise PermissionError(f"gh autenticado como {login!r}: o bridge so roda como executor {policy.get('executor_logins')}")
+        raise IdentityError(f"gh autenticado como {login!r}: o bridge so roda como executor {policy.get('executor_logins')}")
     return login
 
 

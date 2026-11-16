@@ -270,7 +270,7 @@ def test_a_gh_outage_at_start_does_not_kill_the_process_it_waits_and_retries_the
 
 
 def test_a_wrong_account_at_start_is_still_fatal_not_retried(monkeypatch, capsys):
-    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: (_ for _ in ()).throw(PermissionError("gh autenticado como fmmodesto")))
+    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: (_ for _ in ()).throw(ex.eb.IdentityError("gh autenticado como fmmodesto")))
     monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: pytest.fail("conta errada nao roda ciclo"))
     assert ex.main(["run", "--interval", "1"]) == 3 and "fatal" in lines(capsys)[-1]
 
@@ -301,7 +301,7 @@ def test_a_hung_or_missing_gh_at_start_is_retried_not_fatal(monkeypatch, capsys,
 
 
 def test_a_wrong_account_is_still_fatal_even_though_permission_error_is_an_oserror(monkeypatch, capsys):
-    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: (_ for _ in ()).throw(PermissionError("conta errada")))
+    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: (_ for _ in ()).throw(ex.eb.IdentityError("conta errada")))
     monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: pytest.fail("nao roda ciclo"))
     assert ex.main(["run", "--interval", "1"]) == 3
     capsys.readouterr()
@@ -348,3 +348,68 @@ def test_a_credential_in_a_fatal_once_identity_error_is_redacted_too(monkeypatch
     secret = "ghp_" + "z" * 36
     monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: (_ for _ in ()).throw(RuntimeError(f"falhou {secret}")))
     assert ex.main(["run", "--once"]) == 3 and secret not in capsys.readouterr().out
+
+
+# -- 7a revisao do Codex (#640): trava de instancia primeiro, so a conta errada e fatal, resposta truncada e transitoria ----------------------------------
+def test_a_second_instance_is_refused_at_once_before_any_wait_or_github_call(monkeypatch, capsys):
+    holder = ex.InstanceLock(ex.instance_lock_path())
+    assert holder.acquire()
+    try:
+        monkeypatch.setattr(ex, "initial_wait", lambda now=None: pytest.fail("a 2a instancia nao pode esperar backoff"))
+        monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: pytest.fail("nem chamar o GitHub"))
+        monkeypatch.setattr(ex, "sleep_watching", lambda *a, **k: pytest.fail("nem dormir"))
+        assert ex.main(["run", "--interval", "1"]) == 4
+        assert "outra instancia" in lines(capsys)[-1]["fatal"]
+    finally:
+        holder.release()
+
+
+def test_the_lock_is_released_when_the_loop_ends_during_the_initial_wait(monkeypatch):
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: 600.0)
+    monkeypatch.setattr(ex, "sleep_watching", lambda *a, **k: False)                                    # o launcher morre durante a espera
+    assert ex.main(["run", "--interval", "1"]) == 5
+    again = ex.InstanceLock(ex.instance_lock_path())
+    assert again.acquire()
+    again.release()
+
+
+def test_only_the_identity_error_is_fatal_a_system_permission_error_is_retried(monkeypatch, capsys):
+    attempts = []
+
+    def starting_gh_denied(gh, policy):
+        attempts.append(1)
+        if len(attempts) < 3:
+            raise PermissionError(13, "O acesso ao executavel do gh foi negado")                       # do SO: corrigivel, transitorio
+        return "fmodesto30"
+    monkeypatch.setattr(ex.eb, "check_identity", starting_gh_denied)
+    calls = scripted(monkeypatch, [{"action": "IDLE"}])
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: 0.0)
+    monkeypatch.setattr(ex, "sleep_watching", lambda seconds, pid, step=2.0: len(calls) < 1)
+    assert ex.main(["run", "--interval", "1"]) == 5 and len(attempts) == 3 and len(calls) == 1
+    capsys.readouterr()
+
+
+def test_the_wrong_account_error_is_the_identity_error_class(monkeypatch, capsys):
+    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: (_ for _ in ()).throw(ex.eb.IdentityError("gh autenticado como fmmodesto")))
+    monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: pytest.fail("conta errada nao roda ciclo"))
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: 0.0)
+    assert issubclass(ex.eb.IdentityError, PermissionError)
+    assert ex.main(["run", "--interval", "1"]) == 3
+    capsys.readouterr()
+
+
+@pytest.mark.parametrize("exc", [json.JSONDecodeError("Expecting value", "", 0), ValueError("resposta truncada")])
+def test_a_truncated_or_invalid_gh_answer_at_start_is_retried(monkeypatch, capsys, exc):
+    attempts = []
+
+    def flaky(gh, policy):
+        attempts.append(1)
+        if len(attempts) < 2:
+            raise exc
+        return "fmodesto30"
+    monkeypatch.setattr(ex.eb, "check_identity", flaky)
+    calls = scripted(monkeypatch, [{"action": "IDLE"}])
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: 0.0)
+    monkeypatch.setattr(ex, "sleep_watching", lambda seconds, pid, step=2.0: len(calls) < 1)
+    assert ex.main(["run", "--interval", "1"]) == 5 and len(attempts) == 2
+    capsys.readouterr()

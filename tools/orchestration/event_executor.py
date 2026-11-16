@@ -806,10 +806,10 @@ def wait_for_identity(policy: dict, interval: int) -> int | None:
         try:
             eb.check_identity(eb.gh_json, policy)
             return None
-        except PermissionError as exc:
+        except eb.IdentityError as exc:                                         # SO a conta errada e fatal: esperar nao conserta
             print(json.dumps({"at": es.now_iso(), "fatal": str(exc)[:300]}), flush=True)
             return 3
-        except (RuntimeError, OSError, subprocess.SubprocessError) as exc:      # inclui TimeoutExpired (gh travado) e falha ao iniciar o gh: transitorios
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as exc:      # TimeoutExpired, gh ausente, PermissionError DO SO e resposta invalida/truncada (JSONDecodeError): transitorios
             attempt += 1
             print(json.dumps({"at": es.now_iso(), "degraded": f"identidade do gh nao verificada ({redact(str(exc))[:160]}): tentativa {attempt}, nenhuma acao ate verificar"}), flush=True)
             if not sleep_watching(cycle_backoff(interval, attempt), WATCH_PID):
@@ -873,26 +873,26 @@ def main(argv: list[str] | None = None) -> int:
     policy = eb.load_policy()
     global WATCH_PID
     WATCH_PID = a.watch_pid
-    first_wait = 0.0 if a.once else initial_wait()
-    if first_wait > 0 and not sleep_watching(first_wait, WATCH_PID):         # o backoff persistido vale ANTES de qualquer chamada ao GitHub, inclusive a da identidade
-        return 5
-    if a.once:                                                               # execucao unica: qualquer falha de identidade e fatal
-        try:
-            eb.check_identity(eb.gh_json, policy)
-        except (PermissionError, RuntimeError, OSError, subprocess.SubprocessError) as exc:
-            print(json.dumps({"at": es.now_iso(), "fatal": redact(str(exc))[:300]}), flush=True)
-            return 3
-    else:
-        code = wait_for_identity(policy, a.interval)
-        if code is not None:
-            return code
-    lock = InstanceLock(instance_lock_path())
-    if not lock.acquire():
+    lock = InstanceLock(instance_lock_path())                                # PRIMEIRO a trava de instancia: uma 2a instancia e recusada na hora, nunca fica esperando
+    if not lock.acquire():                                                   # backoff/identidade para entrar depois que a 1a terminar
         print(json.dumps({"at": es.now_iso(), "fatal": f"outra instancia do executor ja consome a fila (pid {lock.holder()}): nao inicia"}), flush=True)
         return 4
     claude_bin = resolve_claude()
     failures = 0
     try:
+        first_wait = 0.0 if a.once else initial_wait()
+        if first_wait > 0 and not sleep_watching(first_wait, WATCH_PID):     # o backoff persistido vale ANTES de qualquer chamada ao GitHub, inclusive a da identidade
+            return 5
+        if a.once:                                                           # execucao unica: qualquer falha de identidade e fatal
+            try:
+                eb.check_identity(eb.gh_json, policy)
+            except (PermissionError, RuntimeError, OSError, ValueError, subprocess.SubprocessError) as exc:
+                print(json.dumps({"at": es.now_iso(), "fatal": redact(str(exc))[:300]}), flush=True)
+                return 3
+        else:
+            code = wait_for_identity(policy, a.interval)
+            if code is not None:
+                return code
         while True:
             if WATCH_PID is not None and not pid_alive(WATCH_PID):
                 print(json.dumps({"at": es.now_iso(), "fatal": f"processo pai {WATCH_PID} encerrou: saindo"}), flush=True)
