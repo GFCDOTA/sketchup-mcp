@@ -539,6 +539,9 @@ def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str | None
                 "SELECT id,event_type,idempotency_key,status,attempt,available_at,lease_owner,lease_until,error,updated_at FROM events ORDER BY id")]
             failed_at = {r["event_id"]: r["at"] for r in db.execute(
                 "SELECT event_id, MAX(at) AS at FROM transitions WHERE from_status='RUNNING' AND to_status IN ('PENDING','DLQ') GROUP BY event_id")}
+            # a OUTBOX persistente (publicacao no GitHub etc.) tem fila, lease, retries e DLQ proprios: um evento DONE cuja publicacao foi para a DLQ da outbox e PERDA real
+            orows = [dict(r) for r in db.execute(
+                "SELECT id,event_id,target,operation,idempotency_key,status,attempts,available_at,lease_until,error FROM outbox ORDER BY id")]
         finally:
             db.close()
     except sqlite3.Error as exc:
@@ -551,7 +554,14 @@ def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str | None
     # o ultimo erro e o da FALHA mais recente (transicao RUNNING -> PENDING/DLQ), nao o do evento tocado por ultimo: claim, renovacao e conclusao tambem mexem em
     # `updated_at`. Evento ja concluido (DONE) nao e erro corrente.
     errored = sorted((r for r in rows if r["error"] and r["status"] not in ("DONE", "SUPERSEDED") and r["id"] in failed_at), key=lambda r: failed_at[r["id"]])
-    return {"state": "ok", "counts": counts, "backoff": sum(1 for r in rows if r["status"] == "PENDING" and r["available_at"] > ts),
+    ocounts: dict[str, int] = {}
+    for r in orows:
+        ocounts[r["status"]] = ocounts.get(r["status"], 0) + 1
+    outbox = {"counts": ocounts, "zombies": sum(1 for r in orows if r["status"] == "RUNNING" and r["lease_until"] <= ts),
+              "retries": sum(1 for r in orows if r["attempts"] > 1),
+              "dlq": [{"id": r["id"], "event_id": r["event_id"], "target": redact_secrets(r["target"]), "key": redact_secrets(r["idempotency_key"]),
+                       "error": redact_secrets(r["error"] or "")[:160]} for r in orows if r["status"] == "DLQ"]}
+    return {"state": "ok", "outbox": outbox, "counts": counts, "backoff": sum(1 for r in rows if r["status"] == "PENDING" and r["available_at"] > ts),
             "live_leases": live, "zombies": sum(1 for r in rows if r["status"] == "RUNNING" and r["lease_until"] <= ts),
             "dlq": [{"id": r["id"], "key": redact_secrets(r["idempotency_key"]), "error": redact_secrets(r["error"])[:160]} for r in rows if r["status"] == "DLQ"],
             "retries": sum(1 for r in rows if r["attempt"] > 1),

@@ -109,7 +109,8 @@ def test_a_directory_with_uri_special_characters_is_still_opened_read_only(tmp_p
 
 
 def test_the_snapshot_diagnostic_carries_the_store_line_and_the_default_is_never_healthy():
-    s = snap({"state": "ok", "counts": {"PENDING": 2}, "backoff": 1, "live_leases": [], "zombies": 0, "dlq": [], "retries": 0, "last_error": None})
+    s = snap({"state": "ok", "counts": {"PENDING": 2}, "backoff": 1, "live_leases": [], "zombies": 0, "dlq": [], "retries": 0, "last_error": None,
+                "outbox": {"counts": {}, "zombies": 0, "retries": 0, "dlq": []}})
     assert s.store_line() in s.diagnostic() and s.store_ok() is True
     default = Snapshot(at="t", claude=s.claude, codex=s.codex, listener=s.listener, github=s.github)
     assert default.store_ok() is False and "NAO e saudavel" in default.store_line()
@@ -297,3 +298,36 @@ def test_a_real_failure_elsewhere_is_still_reported_when_another_event_was_super
     again = store.claim(("CORRECTION_REQUESTED",), "w3", 60)
     store.supersede(again, "obsoleto")
     assert col.collect_store(tmp_path, NOW)["last_error"]["error"] == "outro erro"
+
+
+def _event_with_outbox(store, key="k-ob", max_attempts=1):
+    store.publish("CORRECTION_REQUESTED", key, "pr:9", {"x": 1})
+    ev = store.claim(("CORRECTION_REQUESTED",), "w", 60, job_id="pr:9")
+    store.complete(ev, {"ok": True}, outbox_entries=[{"target": "github", "operation": "review", "payload": {"b": 1}, "idempotency_key": key + ":out",
+                                                      "max_attempts": max_attempts}])
+
+
+def test_a_lost_publication_in_the_outbox_dlq_is_not_hidden_by_a_done_event(store, tmp_path):
+    _event_with_outbox(store)
+    entry = store.claim_outbox("pub", 30)
+    assert store.fail_outbox(entry, "401 do GitHub", retry_delay=0) == "DLQ"
+    out = col.collect_store(tmp_path, dt.datetime.fromtimestamp(store.clock_handle.t, dt.timezone.utc))
+    assert out["dlq"] == [] and out["counts"].get("DLQ", 0) == 0                                      # a fila de EVENTOS esta limpa...
+    assert [d["key"] for d in out["outbox"]["dlq"]] == ["k-ob:out"] and out["outbox"]["counts"] == {"DLQ": 1}
+    s = snap(out)
+    assert s.store_ok() is False and "PUBLICACAO PERDIDA" in s.store_line() and "k-ob:out" in s.store_line()
+
+
+def test_an_outbox_entry_with_an_expired_lease_is_flagged_and_a_clean_outbox_is_healthy(store, tmp_path):
+    _event_with_outbox(store, max_attempts=3)
+    clean = col.collect_store(tmp_path, dt.datetime.fromtimestamp(store.clock_handle.t, dt.timezone.utc))
+    assert clean["outbox"]["counts"] == {"PENDING": 1} and snap(clean).store_ok() is True and "outbox: 1 pendente(s)" in snap(clean).store_line()
+    store.claim_outbox("morto", 5)
+    store.clock_handle.t += 60
+    out = col.collect_store(tmp_path, dt.datetime.fromtimestamp(store.clock_handle.t, dt.timezone.utc))
+    assert out["outbox"]["zombies"] == 1 and snap(out).store_ok() is False and "lease vencido" in snap(out).store_line()
+
+
+def test_a_store_dict_without_the_outbox_reading_is_never_reported_healthy():
+    legacy = {"state": "ok", "counts": {}, "backoff": 0, "live_leases": [], "zombies": 0, "dlq": [], "retries": 0, "last_error": None}
+    assert snap(legacy).store_ok() is False

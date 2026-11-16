@@ -95,11 +95,19 @@ class Snapshot:
             line += "; DLQ: " + "; ".join(f"#{x['id']} {redact_secrets(x['key'])[:40]}" for x in st["dlq"][:3])
         if st["last_error"]:
             line += f"; ultimo erro: {redact_secrets(st['last_error']['error'])[:120]}"
+        ob = st.get("outbox") or {}
+        oc = ob.get("counts", {})
+        line += f"; outbox: {oc.get('PENDING', 0)} pendente(s), {oc.get('RUNNING', 0)} rodando, DLQ {oc.get('DLQ', 0)}"
+        if ob.get("zombies"):
+            line += f"; ATENCAO {ob['zombies']} publicacao(oes) da outbox com lease vencido"
+        if ob.get("dlq"):
+            line += "; PUBLICACAO PERDIDA na outbox: " + "; ".join(f"#{x['id']} {redact_secrets(x['target'])[:20]} {redact_secrets(x['key'])[:40]}" for x in ob["dlq"][:3])
         return line
 
     def store_ok(self) -> bool:
         st = self.store or {}
-        return st.get("state") == "ok" and not st["dlq"] and not st["zombies"]
+        ob = st.get("outbox")
+        return st.get("state") == "ok" and not st["dlq"] and not st["zombies"] and isinstance(ob, dict) and not ob.get("dlq") and not ob.get("zombies")      # sem leitura da outbox: nao e saudavel
 
     def agents(self) -> list[AgentStatus]:
         return [self.claude, self.codex, self.listener, self.github]
