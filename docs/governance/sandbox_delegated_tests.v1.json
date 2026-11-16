@@ -8,6 +8,536 @@
  },
  "delegated": [
   {
+   "node_id": "tests/test_closed_loop_lab.py::test_a_completed_event_without_test_evidence_fails_the_sandbox_criterion_even_if_others_are_valid[IMPLEMENT_REQUESTED-tests]",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_a_completed_event_without_test_evidence_fails_the_sandbox_criterion_even_if_others_are_valid[REVIEW_REQUESTED-evidence]",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_approve_without_reviewing_the_executed_tests_is_blocked",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_change_outside_the_allowed_artifact_is_rejected",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_check_orphans_ignores_runs_that_finished",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_check_orphans_records_each_unfinished_run_once",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_cli_seed_report_and_paused_step_speak_json",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_cli_started_hook_sees_agent_event_and_pid_after_the_audit_row_exists",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_coordinator_crash_after_claim_is_recovered_by_a_new_owner_after_lease_expiry",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_correction_may_add_a_regression_test_that_is_run_delivered_and_reviewed",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_correction_prompt_carries_the_reviewer_findings_and_the_spec",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_crash_between_delivery_and_ack_is_reconciled_without_a_second_commit",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_drive_checks_the_tree_after_a_crash_and_spends_each_chaos_switch_once",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_drive_does_not_die_on_a_reason_outside_the_console_code_page",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_drive_passes_the_lab_test_isolation_to_every_step",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_drive_restarts_the_idle_budget_after_a_step_that_did_work",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_drive_resumes_a_seeded_lab_without_seeding_again",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_drive_seeds_runs_steps_until_terminal_and_writes_log_and_reports",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_drive_stops_after_idling_longer_than_the_limit",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_drive_stops_at_a_step_that_neither_crashed_nor_answered",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_duplicate_seed_event_does_not_create_a_second_job",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_evidence_that_names_the_sandbox_without_its_proofs_does_not_pass",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_failing_trusted_tests_block_delivery_and_feed_the_retry",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_failure_reason_keeps_the_cause_but_drops_network_identifiers",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_is_error_true_with_exit_zero_is_a_failure_not_a_delivery",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_needs_human_verdict_escalates_once_and_never_approves",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_negative_report_fails_when_the_faulted_cli_still_completes_work",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_negative_report_for_codex_auth_keeps_the_delivery_and_blocks_every_review",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_negative_report_passes_when_claude_auth_failure_dead_letters_with_nothing_delivered",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_new_file_planted_by_the_agent_is_rejected_before_tests_run",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_nothing_is_sent_to_the_sandbox_when_no_test_covers_the_change",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_pause_flag_blocks_claims_and_cli_launch",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_real_claude_not_logged_in_signature_is_classified_as_credential_failure",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_report_fails_m1_when_the_correction_loop_was_not_exercised",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_report_fails_the_isolation_criterion_when_the_tests_ran_without_an_os_sandbox",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_report_fails_when_a_finished_cli_ran_outside_a_job_object",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_report_fails_when_an_orphan_cli_tree_is_still_alive",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_report_fails_when_no_cli_was_killed_with_its_coordinator",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_report_passes_only_when_every_m1_criterion_is_derived_from_the_store",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_report_shows_a_run_without_recorded_end_as_interrupted",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_request_changes_then_correction_then_approve_completes_the_workflow",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_review_with_a_broken_sandbox_is_blocked_and_codex_is_never_called",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_review_without_literal_inspection_proof_is_blocked_never_approved",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_reviewer_auth_failure_is_blocked_and_retried_never_success",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_reviewer_is_not_told_about_a_sandbox_when_there_was_none",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_reviewer_that_alters_the_workspace_invalidates_its_own_verdict",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_round_limit_ends_in_job_failed_without_completion",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_sandbox_that_cannot_start_fails_the_event_and_no_test_runs_outside_it",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_sandboxed_evidence_is_recorded_in_the_event_and_reaches_the_reviewer",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_sandboxed_run_that_times_out_is_a_failed_test_run_with_its_facts",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_seed_publishes_one_implement_request_for_a_failing_artifact",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_two_coordinators_racing_launch_a_single_cli",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_closed_loop_lab.py::test_worker_that_lost_its_lease_cannot_deliver_a_late_result",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (o laboratorio executa o git do coordenador; git ausente no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
    "node_id": "tests/test_event_executor_deliver.py::test_a_local_head_that_does_not_descend_from_the_reviewed_sha_is_blocked",
    "reason": "git_unavailable_in_appcontainer",
    "sandbox_proof": {

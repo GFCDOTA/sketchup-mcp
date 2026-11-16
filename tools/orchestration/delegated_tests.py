@@ -38,7 +38,7 @@ SCHEMA = 1
 # Arquivos que o PR nunca pode alterar para manter a delegacao: a politica, o workflow que gera a evidencia e o coletor.
 PROTECTED = (POLICY_PATH, WORKFLOW_PATH, COLLECTOR_PATH)
 NODE_ID = re.compile(r"tests/[A-Za-z0-9_./-]+\.py::[A-Za-z0-9_]+(?:\[[^\]\r\n]+\])?")
-MAX_DELEGATED = 64                                                   # teto duro: ampliar alem disto exige mudar o codigo (e revisar), nao so a lista
+MAX_DELEGATED = 96                                                   # teto duro: ampliar alem disto exige mudar o codigo (e revisar), nao so a lista. 64 -> 96 por decisao do proprietario em 2026-11-16 (28 do executor + 53 do laboratorio = 81)
 
 
 class DelegationError(RuntimeError):

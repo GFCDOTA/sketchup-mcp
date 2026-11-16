@@ -464,4 +464,9 @@ def test_the_repository_policy_matches_the_workflow_it_pins_and_names_only_exact
     pol = dt.validate_policy(json.loads((root / POLICY_FILE).read_text(encoding="utf-8")), "b" * 40)
     blob = subprocess.run(["git", "hash-object", str(root / dt.WORKFLOW_PATH)], capture_output=True, text=True, check=True).stdout.strip()
     assert pol.workflow_blob_sha == blob                                                      # workflow e politica andam juntos
-    assert len(pol.ids) == 28 and all(i.startswith("tests/test_event_executor_deliver.py::") for i in pol.ids)
+    files = {"tests/test_event_executor_deliver.py": 28, "tests/test_closed_loop_lab.py": 53}                  # 28 do executor + 53 do laboratorio (decisao de 2026-11-16)
+    assert len(pol.ids) == sum(files.values()) <= dt.MAX_DELEGATED
+    assert {f: sum(1 for i in pol.ids if i.startswith(f + "::")) for f in files} == files
+    raw = json.loads((root / POLICY_FILE).read_text(encoding="utf-8"))["delegated"]
+    assert all(d["reason"] == "git_unavailable_in_appcontainer" and d["sandbox_proof"]["run_alone"] is True for d in raw)   # prova individual de cada um
+    assert not any("real_appcontainer" in i for i in pol.ids)                                                 # o teste @windows_only seria PULADO no CI Linux
