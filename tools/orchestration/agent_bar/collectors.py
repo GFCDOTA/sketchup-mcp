@@ -502,13 +502,34 @@ def collect_backlog(gh: Callable[[list[str]], tuple[int, str]] = run_gh, owner: 
     return {k: counts.get(k, 0) for k in BACKLOG_COLUMNS}, None, _now(now).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str = "event_store.db") -> dict:
+_SECRET = re.compile(
+    r"(gh[pousr]_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}|sk-[A-Za-z0-9][A-Za-z0-9_-]{15,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|AKIA[0-9A-Z]{12,}"
+    r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|Bearer\s+[A-Za-z0-9._~+/-]{10,}"
+    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"
+    r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token)\b)\s*[:=]\s*\S{8,})")
+
+
+def redact_secrets(text: object) -> str:
+    """Credenciais saem de todo texto que vem do banco ANTES de ir para o painel ou para o diagnostico copiado (a razao de `EventStore.fail` e livre)."""
+    return _SECRET.sub("<segredo>", str(text or ""))
+
+
+def store_db_path(gov: Path, db_name: str | None = None) -> Path:
+    """O MESMO caminho que o produtor usa (`store_factory.store_path`: `EVENT_STORE_DB_PATH`, senao ao lado do estado do bridge). Sem nenhuma dessas variaveis a
+    barra le o `event_store.db` do diretorio de governanca dela. `db_name` explicito fixa o arquivo dentro de `gov` (testes)."""
+    if db_name is None and (os.environ.get("EVENT_STORE_DB_PATH") or os.environ.get("EVENT_BRIDGE_STATE_PATH")):
+        from tools.orchestration.store_factory import store_path
+        return store_path()
+    return Path(gov) / (db_name or "event_store.db")
+
+
+def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str | None = None) -> dict:
     """O EventStore (FP-060) lido SOMENTE LEITURA (`mode=ro`, URI codificada): contagem por status, backoff, leases vivos, DLQ, retries e o ultimo erro.
     Banco ausente ou ilegivel devolve estado explicito (`ausente`/`indisponivel`), nunca um zero que pareca saudavel; nada e criado nem alterado."""
     import sqlite3
-    path = Path(gov) / db_name
+    path = store_db_path(gov, db_name)
     if not path.is_file():
-        return {"state": "ausente", "error": f"{db_name} nao existe em {path.parent.name}"}
+        return {"state": "ausente", "error": f"{path.name} nao existe em {path.parent.name}"}
     ts = _now(now).timestamp()
     try:
         db = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True, timeout=5)
@@ -516,6 +537,8 @@ def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str = "eve
             db.row_factory = sqlite3.Row
             rows = [dict(r) for r in db.execute(
                 "SELECT id,event_type,idempotency_key,status,attempt,available_at,lease_owner,lease_until,error,updated_at FROM events ORDER BY id")]
+            failed_at = {r["event_id"]: r["at"] for r in db.execute(
+                "SELECT event_id, MAX(at) AS at FROM transitions WHERE from_status='RUNNING' AND to_status IN ('PENDING','DLQ') GROUP BY event_id")}
         finally:
             db.close()
     except sqlite3.Error as exc:
@@ -525,12 +548,14 @@ def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str = "eve
         counts[r["status"]] = counts.get(r["status"], 0) + 1
     live = [{"key": r["idempotency_key"], "owner": r["lease_owner"] or "?", "seconds_left": int(r["lease_until"] - ts)}
             for r in rows if r["status"] == "RUNNING" and r["lease_until"] > ts]
-    errored = sorted((r for r in rows if r["error"]), key=lambda r: r["updated_at"] or 0)
+    # o ultimo erro e o da FALHA mais recente (transicao RUNNING -> PENDING/DLQ), nao o do evento tocado por ultimo: claim, renovacao e conclusao tambem mexem em
+    # `updated_at`. Evento ja concluido (DONE) nao e erro corrente.
+    errored = sorted((r for r in rows if r["error"] and r["status"] != "DONE" and r["id"] in failed_at), key=lambda r: failed_at[r["id"]])
     return {"state": "ok", "counts": counts, "backoff": sum(1 for r in rows if r["status"] == "PENDING" and r["available_at"] > ts),
             "live_leases": live, "zombies": sum(1 for r in rows if r["status"] == "RUNNING" and r["lease_until"] <= ts),
-            "dlq": [{"id": r["id"], "key": r["idempotency_key"], "error": (r["error"] or "")[:160]} for r in rows if r["status"] == "DLQ"],
+            "dlq": [{"id": r["id"], "key": r["idempotency_key"], "error": redact_secrets(r["error"])[:160]} for r in rows if r["status"] == "DLQ"],
             "retries": sum(1 for r in rows if r["attempt"] > 1),
-            "last_error": ({"key": errored[-1]["idempotency_key"], "error": errored[-1]["error"]} if errored else None)}
+            "last_error": ({"key": errored[-1]["idempotency_key"], "error": redact_secrets(errored[-1]["error"])} if errored else None)}
 
 
 def collect_snapshot(gov: Path | None = None, procs_fn=list_processes, task_fn=task_state, gh=run_gh, cache: GithubCache | None = None,

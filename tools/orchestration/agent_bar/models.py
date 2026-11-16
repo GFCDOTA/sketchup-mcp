@@ -93,7 +93,8 @@ class Snapshot:
         if st["dlq"]:
             line += "; DLQ: " + "; ".join(f"#{x['id']} {x['key'][:40]}" for x in st["dlq"][:3])
         if st["last_error"]:
-            line += f"; ultimo erro: {st['last_error']['error'][:120]}"
+            from tools.orchestration.agent_bar.collectors import redact_secrets
+            line += f"; ultimo erro: {redact_secrets(st['last_error']['error'])[:120]}"
         return line
 
     def store_ok(self) -> bool:

@@ -141,3 +141,85 @@ def test_the_database_is_always_opened_with_the_sqlite_read_only_uri(store, tmp_
     monkeypatch.setattr(col.__dict__.get("sqlite3", sqlite3), "connect", lambda target, *a, **k: (seen.append((target, k.get("uri"))), real(target, *a, **k))[1])
     col.collect_store(tmp_path, NOW)
     assert len(seen) == 1 and seen[0][0].endswith("?mode=ro") and seen[0][1] is True
+
+
+# -- 3a revisao do Codex (#663): mesmo caminho do produtor, credenciais fora do painel, ultimo erro pela FALHA mais recente ---------------------------------
+def test_the_store_path_follows_the_producer_contract_not_just_the_bar_directory(tmp_path, monkeypatch):
+    other = tmp_path / "outro" / "real.db"
+    other.parent.mkdir()
+    (tmp_path / "gov").mkdir()
+    producer = EventStore(other, clock=Clock())
+    producer.publish("CORRECTION_REQUESTED", "k-real", "pr:1", {"x": 1})
+    decoy = EventStore(tmp_path / "gov" / "event_store.db", clock=Clock())                           # outro banco no diretorio padrao da barra
+    for n in range(3):
+        decoy.publish("CORRECTION_REQUESTED", f"k-decoy{n}", f"pr:{n}", {"x": 1})
+    monkeypatch.delenv("EVENT_BRIDGE_STATE_PATH", raising=False)
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(other))
+    assert col.collect_store(tmp_path / "gov", NOW)["counts"] == {"PENDING": 1}                       # le o banco DO PRODUTOR (1 evento), nao o do diretorio da barra (3)
+    monkeypatch.delenv("EVENT_STORE_DB_PATH")
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "outro" / "bridge.json"))           # sem a variavel do banco: ao lado do estado do bridge, como o produtor
+    other.rename(other.with_name("event_store.db"))
+    assert col.collect_store(tmp_path / "gov", NOW)["counts"] == {"PENDING": 1}
+    monkeypatch.delenv("EVENT_BRIDGE_STATE_PATH")
+    assert col.collect_store(tmp_path / "gov", NOW)["counts"] == {"PENDING": 3}                       # nada configurado: o diretorio de governanca da barra
+
+
+def test_a_configured_but_missing_database_is_absent_even_if_another_exists_in_the_default_directory(tmp_path, monkeypatch):
+    (tmp_path / "gov").mkdir()
+    EventStore(tmp_path / "gov" / "event_store.db", clock=Clock())
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "configurado" / "nao-existe.db"))
+    out = col.collect_store(tmp_path / "gov", NOW)
+    assert out["state"] == "ausente" and snap(out).store_ok() is False
+
+
+SECRETS = ["ghp_" + "a" * 36, "github_pat_" + "B" * 40, "sk-proj-" + "d" * 40, "Bearer " + "x" * 30, "xoxb-" + "1" * 12 + "-" + "g" * 12, "api_key=" + "z" * 20]
+
+
+@pytest.mark.parametrize("secret", SECRETS)
+def test_a_credential_in_an_error_never_reaches_the_panel_or_the_copied_diagnostic(store, tmp_path, secret):
+    store.publish("CORRECTION_REQUESTED", "k1", "pr:1", {"x": 1}, max_attempts=1)
+    ev = store.claim(("CORRECTION_REQUESTED",), "w", 60)
+    store.fail(ev, f"falhou autenticando com {secret} no GitHub")
+    out = col.collect_store(tmp_path, NOW)
+    text = str(out) + snap(out).store_line()
+    assert secret not in text and "<segredo>" in text
+    assert out["dlq"][0]["error"].count("<segredo>") == 1 and "<segredo>" in out["last_error"]["error"]
+
+
+def test_the_model_redacts_again_even_if_a_raw_error_reaches_it():
+    raw = {"state": "ok", "counts": {}, "backoff": 0, "live_leases": [], "zombies": 0, "dlq": [], "retries": 0,
+           "last_error": {"key": "k", "error": "token " + "ghp_" + "q" * 30}}
+    line = snap(raw).store_line()
+    assert "ghp_" not in line and "<segredo>" in line
+
+
+def test_the_last_error_is_the_most_recent_FAILURE_not_the_most_recently_touched_event(store, tmp_path):
+    clock = store.clock_handle
+    store.publish("CORRECTION_REQUESTED", "k-old", "pr:1", {"x": 1})
+    store.publish("CORRECTION_REQUESTED", "k-new", "pr:2", {"x": 1})
+    old = store.claim(("CORRECTION_REQUESTED",), "w1", 60)
+    clock.t += 10
+    store.fail(old, "erro ANTIGO", retry_delay=1000)                                                   # falha do k-old em T0+10
+    new = store.claim(("CORRECTION_REQUESTED",), "w2", 60)
+    assert new["idempotency_key"] == "k-new"
+    clock.t += 10
+    store.fail(new, "erro RECENTE", retry_delay=100000)                                                # falha do k-new em T0+20 (a mais recente)
+    clock.t += 1500
+    again = store.claim(("CORRECTION_REQUESTED",), "w3", 60)                                           # o k-old e reivindicado de novo: updated_at dele passa a ser o MAIOR
+    assert again["idempotency_key"] == "k-old"
+    clock.t += 5
+    assert store.renew(again, 60) is True                                                              # e a renovacao do lease tambem o "toca"
+    out = col.collect_store(tmp_path, NOW)
+    assert out["last_error"] == {"key": "k-new", "error": "erro RECENTE"}
+
+
+def test_an_event_that_later_completed_is_not_the_current_error(store, tmp_path):
+    clock = store.clock_handle
+    store.publish("CORRECTION_REQUESTED", "k-ok", "pr:1", {"x": 1})
+    ev = store.claim(("CORRECTION_REQUESTED",), "w1", 60)
+    clock.t += 5
+    store.fail(ev, "falha transitoria", retry_delay=0)
+    again = store.claim(("CORRECTION_REQUESTED",), "w2", 60)
+    clock.t += 5
+    store.complete(again, {"ok": True})
+    assert col.collect_store(tmp_path, NOW)["last_error"] is None
