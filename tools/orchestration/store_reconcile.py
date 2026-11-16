@@ -27,6 +27,7 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import lifecycle
@@ -103,6 +104,18 @@ def judge(ev: dict, pr: dict) -> tuple[str, str]:
     return "CURRENT", "PR aberto no mesmo HEAD do pedido"
 
 
+def read_json_queue(path: Path | None = None) -> list[dict]:
+    """A fila JSON REAL, sem os padroes de `eb.load()`: arquivo ausente ou objeto sem a chave `queue` viram uma lista vazia la, e uma fila vazia INVENTADA autorizaria
+    SUPERSEDED sem prova de que o executor JSON nao tem o trabalho. Aqui o arquivo tem de existir e ter `queue` (lista) explicita; senao e erro (fail-closed)."""
+    p = path or eb.bridge_path()
+    if not p.is_file():
+        raise FileNotFoundError(f"fila JSON ausente: {p.name}")
+    data = json.loads(p.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or not isinstance(data.get("queue"), list):
+        raise ValueError(f"fila JSON sem a chave `queue` (lista): {p.name}")
+    return data["queue"]
+
+
 def reconcile(store: EventStore, gh: eb.Gh, repo: str = eb.REPO, apply: bool = False, json_queue: list[dict] | None = None,
               sqlite_authoritative: bool | None = None) -> dict:
     """Relatorio por evento aberto. Com `apply`, supersede os obsoletos (HEAD_MOVED / PR_NOT_OPEN) cujo dono nao e o executor JSON; o resto so e reportado.
@@ -111,7 +124,7 @@ def reconcile(store: EventStore, gh: eb.Gh, repo: str = eb.REPO, apply: bool = F
     queue, queue_error = json_queue, ""
     if apply and not authoritative and queue is None:
         try:
-            queue = eb.load()["queue"]
+            queue = read_json_queue()
             problem = queue_problem(queue)
             if problem:
                 raise ValueError(problem)

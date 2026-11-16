@@ -41,7 +41,9 @@ class FakeGh:
 
 @pytest.fixture(autouse=True)
 def isolated_bridge(tmp_path, monkeypatch):
-    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "bridge-empty.json"))      # fila JSON vazia por padrao: nunca le a do workspace
+    empty = tmp_path / "bridge-empty.json"
+    empty.write_bytes(b'{"queue": []}')                                                       # fila JSON EXPLICITAMENTE vazia por padrao: nunca le a do workspace
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(empty))
     monkeypatch.delenv("EXECUTOR_SOURCE", raising=False)
 
 
@@ -404,3 +406,26 @@ def test_a_null_queue_on_disk_is_not_an_empty_queue(store, tmp_path, monkeypatch
 def test_a_valid_empty_queue_still_lets_an_obsolete_event_be_reconciled(store):
     publish(store)
     assert sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=[], sqlite_authoritative=False)["events"][0]["applied"] == "SUPERSEDED"
+
+
+# -- 8a revisao do Codex (#642): fila JSON ausente ou sem `queue` NAO e fila vazia ---------------------------------------------------------------------
+@pytest.mark.parametrize("content", [None, b"{}", b'{"outro": 1}', b'{"queue": null}', b'{"queue": {"a": 1}}', b"[]"])
+def test_a_missing_json_queue_file_or_one_without_the_queue_key_applies_nothing(store, tmp_path, monkeypatch, content):
+    publish(store)
+    path = tmp_path / "bridge.json"
+    if content is not None:
+        path.write_bytes(content)
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(path))
+    monkeypatch.delenv("EXECUTOR_SOURCE", raising=False)
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True)
+    assert report["events"][0]["applied"] == "SKIPPED" and "fila JSON" in report["events"][0]["skipped_because"] and status(store) == "PENDING"
+
+
+def test_an_explicitly_empty_json_queue_still_allows_superseding_a_stale_event(store, tmp_path, monkeypatch):
+    publish(store)
+    path = tmp_path / "bridge.json"
+    path.write_bytes(b'{"queue": []}')
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(path))
+    monkeypatch.delenv("EXECUTOR_SOURCE", raising=False)
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True)
+    assert report["events"][0]["applied"] == "SUPERSEDED"
