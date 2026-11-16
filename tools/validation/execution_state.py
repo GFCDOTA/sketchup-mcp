@@ -56,7 +56,21 @@ def write_durable(p: Path, text: str) -> None:
         handle.write(text)
         handle.flush()
         os.fsync(handle.fileno())
-    os.replace(tmp, p)
+    replace_retry(tmp, p)
+
+
+def replace_retry(src: Path, dst: Path, tries: int = 100, pause: float = 0.02) -> None:
+    """`os.replace` atomico, repetido enquanto o Windows recusa por instantes (PermissionError/WinError 32 e 5): um leitor sem trava que tem o arquivo aberto
+    (ex.: `status`) impede a troca ate fechar. Passado o prazo (~2 s) o erro sobe: nunca se grava por cima de outro jeito."""
+    import time
+    for attempt in range(tries):
+        try:
+            os.replace(src, dst)
+            return
+        except PermissionError:
+            if attempt + 1 == tries:
+                raise
+            time.sleep(pause)
 
 
 def save(state: dict, path: Path | None = None) -> None:

@@ -27,71 +27,157 @@ def quarantined(p: Path) -> list[Path]:
     return sorted(p.parent.glob(p.name + ".corrupt-*"))
 
 
-# -- corrupcao: explicita, preservada, sem traceback ----------------------------------------------------------------------------
-@pytest.mark.parametrize("content", [
+# -- leitura: sem efeito colateral, explicita --------------------------------------------------------------------------------------
+CORRUPT = [
     b"\x00" * 20888,                           # o caso real de producao
     b"", b"  \n\t", b"\x00\x00\x00\x00",      # vazio e quase vazio
     b'{"queue": [{"key": "k1"', b'{"schema_version": 1, "queue": [',        # truncado no meio do JSON
     b"[]", b'"texto"', b"42",                  # JSON valido que nao e um objeto
     b"\xff\xfe\x00\x00 nao e utf-8",           # codificacao invalida
-], ids=["zeros-producao", "vazio", "espacos", "quatro-nulos", "truncado-a", "truncado-b", "array", "string", "numero", "utf8-invalido"])
-def test_a_corrupt_state_file_is_preserved_and_replaced_by_a_clean_state_with_a_diagnostic(tmp_path, content):
+]
+IDS = ["zeros-producao", "vazio", "espacos", "quatro-nulos", "truncado-a", "truncado-b", "array", "string", "numero", "utf8-invalido"]
+
+
+@pytest.mark.parametrize("content", CORRUPT, ids=IDS)
+def test_reading_a_corrupt_state_raises_explicitly_and_never_touches_the_file(tmp_path, content):
     p = tmp_path / "event_bridge.json"
     p.write_bytes(content)
 
-    loaded = eb.load(p)
+    with pytest.raises(eb.BridgeStateCorrupt, match="corrompido"):
+        eb.load(p)
 
-    assert loaded["queue"] == [] and loaded["cursor_comments"] is None and loaded["seen"] == []     # sera reconstruido do GitHub
-    (kept,) = quarantined(p)
-    assert kept.read_bytes() == content and not p.exists()                                        # nada foi apagado
-    assert any("corrompido" in d["message"] and kept.name in d["message"] and "GitHub" in d["message"] for d in loaded["diagnostics"])
-    assert eb.load(p)["queue"] == [] and len(quarantined(p)) == 1                                  # a 2a leitura nao quarentena de novo
+    assert p.read_bytes() == content and quarantined(p) == []                                      # leitor sem trava (status) nunca recupera
 
 
-def test_the_previous_good_version_is_restored_when_the_main_file_is_corrupt(tmp_path):
-    p = tmp_path / "event_bridge.json"
-    eb.save(state(1), p)
-    eb.save(state(2), p)                                                                            # .bak guarda a versao 1
-    p.write_bytes(b"\x00" * 500)
-
-    loaded = eb.load(p)
-
-    assert loaded["queue"] == [{"key": "k1"}] and any("restaurado" in d["message"] for d in loaded["diagnostics"])
-    assert eb.load(p, recover=False)["queue"] == [{"key": "k1"}]                                    # o principal voltou a ser valido
-    assert quarantined(p)[0].read_bytes() == b"\x00" * 500
-
-
-def test_a_corrupt_backup_is_not_used_and_the_queue_is_rebuilt(tmp_path):
-    p = tmp_path / "event_bridge.json"
-    p.write_bytes(b"\x00" * 10)
-    p.with_name(p.name + ".bak").write_bytes(b"{ quebrado")
-
-    loaded = eb.load(p)
-
-    assert loaded["queue"] == [] and any("GitHub" in d["message"] for d in loaded["diagnostics"])
-
-
-def test_a_reader_that_must_not_touch_anything_gets_an_explicit_error_and_the_file_stays_as_it_was(tmp_path):
-    p = tmp_path / "event_bridge.json"
-    p.write_bytes(b"\x00" * 100)
-
-    with pytest.raises(eb.BridgeStateCorrupt, match="zero|nulos|vazio"):
-        eb.load(p, recover=False)
-
-    assert p.read_bytes() == b"\x00" * 100 and quarantined(p) == []
-
-
-def test_recovering_a_file_another_process_already_moved_is_not_an_error(tmp_path):
-    p = tmp_path / "event_bridge.json"                                                              # ja nao existe: outro processo quarentenou
-    loaded = eb._recover(p, ValueError("arquivo vazio"))
-    assert loaded["queue"] == [] and any("corrompido" in d["message"] for d in loaded["diagnostics"])
+def test_a_corrupt_state_error_is_a_value_error_so_existing_guards_contain_it():
+    assert issubclass(eb.BridgeStateCorrupt, ValueError)
 
 
 def test_a_healthy_state_round_trips_and_a_missing_file_is_a_default_state(tmp_path):
     p = tmp_path / "event_bridge.json"
     assert eb.load(p) == eb.default_bridge_state()
     eb.save(state(7), p)
-    assert eb.load(p, recover=False)["queue"] == [{"key": "k7"}] and quarantined(p) == []
+    assert eb.load(p)["queue"] == [{"key": "k7"}] and quarantined(p) == []
+
+
+# -- recuperacao: so sob a trava, preservada, com diagnostico persistido, sem restaurar copia velha ---------------------------------------
+@pytest.mark.parametrize("content", CORRUPT, ids=IDS)
+def test_recovery_preserves_the_corrupt_file_and_persists_a_clean_state_with_the_diagnostic(tmp_path, content):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(content)
+
+    with es.locked(p):
+        recovered = eb.recover_state(p)
+
+    assert recovered["queue"] == [] and recovered["seen"] == [] and recovered["cursor_comments"] is None
+    (kept,) = quarantined(p)
+    assert kept.read_bytes() == content                                                            # nada foi apagado
+    assert any("corrompido" in d["message"] and kept.name in d["message"] for d in recovered["diagnostics"])
+    again = eb.load(p)                                                                             # o diagnostico foi GRAVADO: leituras seguintes ainda o veem
+    assert again["diagnostics"] == recovered["diagnostics"] and len(quarantined(p)) == 1
+    assert not p.with_name(p.name + ".bak").exists()                                               # nao existe copia anterior para restaurar
+
+
+def test_recovery_never_restores_an_older_copy_that_could_resurrect_a_claimed_task(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    eb.save(state(1, queue=[{"key": "k1", "state": "QUEUED"}]), p)
+    eb.save(state(2, queue=[{"key": "k1", "state": "RUNNING", "owner": "w"}]), p)                 # claim gravado
+    p.write_bytes(b"\x00" * 64)
+
+    with es.locked(p):
+        recovered = eb.recover_state(p)
+
+    assert recovered["queue"] == [] and not any("QUEUED" in json.dumps(recovered) for _ in [0])    # nunca volta a versao em que a tarefa estava QUEUED
+    assert [f for f in p.parent.iterdir() if f.name.endswith(".bak")] == []
+
+
+def test_recovery_rereads_under_the_lock_and_does_not_quarantine_a_state_that_is_already_valid(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    eb.save(state(5), p)                                                                           # outro processo ja recuperou/gravou
+
+    with es.locked(p):
+        recovered = eb.recover_state(p)
+
+    assert recovered["queue"] == [{"key": "k5"}] and quarantined(p) == []
+
+
+def test_recovering_a_file_another_process_already_moved_is_not_an_error(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    with es.locked(p):
+        recovered = eb.recover_state(p)                                                            # ausente = estado padrao valido
+    assert recovered["queue"] == [] and quarantined(p) == []
+
+
+def test_losing_the_race_to_quarantine_the_file_is_not_an_error(tmp_path, monkeypatch):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 10)
+    monkeypatch.setattr(os, "replace", lambda a, b: (_ for _ in ()).throw(FileNotFoundError()))     # outro processo ja o moveu
+    monkeypatch.setattr(eb, "save", lambda state, path=None: None)
+
+    recovered = eb.recover_state(p)
+
+    assert recovered["queue"] == [] and any("outro processo" in d["message"] for d in recovered["diagnostics"])
+
+
+def test_if_the_corrupt_file_cannot_be_preserved_nothing_is_recreated_and_the_error_is_explicit(tmp_path, monkeypatch):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 10)
+    monkeypatch.setattr(os, "replace", lambda a, b: (_ for _ in ()).throw(PermissionError("em uso")))
+
+    with es.locked(p), pytest.raises(eb.BridgeStateCorrupt, match="preserva"):
+        eb.recover_state(p)
+
+    monkeypatch.undo()
+    assert p.read_bytes() == b"\x00" * 10 and quarantined(p) == []
+
+
+def test_quarantine_names_are_unique_so_two_recoveries_never_overwrite_each_other(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    names = set()
+    for n in range(3):
+        p.write_bytes(b"\x00" * (n + 1))
+        with es.locked(p):
+            eb.recover_state(p)
+        names |= {k.name for k in quarantined(p)}
+    assert len(names) == 3 and sorted(k.read_bytes() for k in quarantined(p)) == [b"\x00", b"\x00\x00", b"\x00\x00\x00"]
+
+
+def test_run_cycle_is_the_locked_entry_point_that_heals_a_corrupt_state_and_persists_it(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 2048)
+
+    counts = eb.run_cycle(lambda path: [], {"reviewers": ["r"], "executor_logins": ["e"]}, bpath=p, repo="o/r")
+
+    assert isinstance(counts, dict) and len(quarantined(p)) == 1
+    healed = eb.load(p)                                                                            # valido de novo e com o diagnostico gravado
+    assert any("corrompido" in d["message"] for d in healed["diagnostics"])
+
+
+def test_status_readers_racing_with_a_recovery_never_move_or_corrupt_anything(tmp_path):
+    import threading
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 4096)
+    seen, errors = [], []
+
+    def reader():
+        for _ in range(40):
+            try:
+                seen.append(eb.load(p)["queue"])                                                   # leitor sem trava: valido ou erro explicito, nunca mexe
+            except eb.BridgeStateCorrupt:
+                seen.append("corrupt")
+            except BaseException as exc:                                                           # noqa: BLE001
+                errors.append(repr(exc))
+
+    def healer():
+        for _ in range(5):
+            with es.locked(p):
+                eb.recover_state(p)
+
+    ts_ = [threading.Thread(target=reader) for _ in range(3)] + [threading.Thread(target=healer)]
+    [t.start() for t in ts_]
+    [t.join() for t in ts_]
+    assert errors == [] and len(quarantined(p)) == 1                                               # exatamente uma quarentena, apesar das 5 recuperacoes
+    assert set(map(str, seen)) <= {"corrupt", "[]"} and eb.load(p)["queue"] == []
 
 
 # -- gravacao duravel ---------------------------------------------------------------------------------------------------------------
@@ -127,19 +213,7 @@ def test_a_failed_replace_leaves_the_previous_file_intact(tmp_path, monkeypatch)
         eb.save(state(2), p)
 
     monkeypatch.undo()
-    assert p.read_bytes() == before and eb.load(p, recover=False)["queue"] == [{"key": "k1"}]
-
-
-def test_the_backup_is_never_overwritten_by_a_corrupt_main_file(tmp_path):
-    p = tmp_path / "event_bridge.json"
-    eb.save(state(1), p)
-    eb.save(state(2), p)                                                                            # .bak = versao 1
-    p.write_bytes(b"\x00" * 64)
-
-    eb.save(state(3), p)                                                                            # grava sem recuperar antes
-
-    assert json.loads(p.with_name(p.name + ".bak").read_text(encoding="utf-8"))["queue"] == [{"key": "k1"}]
-    assert eb.load(p, recover=False)["queue"] == [{"key": "k3"}]
+    assert p.read_bytes() == before and eb.load(p)["queue"] == [{"key": "k1"}]
 
 
 def test_secrets_are_still_refused_and_nothing_is_written(tmp_path):
@@ -173,27 +247,62 @@ def test_a_writer_killed_at_a_random_moment_never_leaves_an_unreadable_state_fil
         time.sleep(delay)
         child.kill()
         child.wait(timeout=30)
-        loaded = eb.load(p, recover=False)                                                           # nao pode levantar
+        loaded = eb.load(p)                                                                          # nao pode levantar
         assert isinstance(loaded["backoff_s"], int) and quarantined(p) == []
 
 
-def test_losing_the_race_to_quarantine_the_file_is_not_an_error(tmp_path, monkeypatch):
+def test_a_transient_sharing_violation_on_the_atomic_replace_is_retried(tmp_path, monkeypatch):
     p = tmp_path / "event_bridge.json"
-    p.write_bytes(b"\x00" * 10)
-    monkeypatch.setattr(os, "replace", lambda a, b: (_ for _ in ()).throw(FileNotFoundError()))     # outro processo ja o moveu
+    real, calls = os.replace, []
 
-    loaded = eb._recover(p, ValueError("arquivo vazio"))
-
-    assert loaded["queue"] == [] and any("outro processo" in d["message"] for d in loaded["diagnostics"])
-
-
-def test_if_the_corrupt_file_cannot_be_preserved_nothing_is_recreated_and_the_error_is_explicit(tmp_path, monkeypatch):
-    p = tmp_path / "event_bridge.json"
-    p.write_bytes(b"\x00" * 10)
-    monkeypatch.setattr(os, "replace", lambda a, b: (_ for _ in ()).throw(PermissionError("em uso")))
-
-    with pytest.raises(eb.BridgeStateCorrupt, match="preserva"):
-        eb.load(p)
-
+    def flaky(a, b):
+        calls.append(1)
+        if len(calls) <= 3:
+            raise PermissionError(13, "em uso", None, 32)
+        return real(a, b)
+    monkeypatch.setattr(os, "replace", flaky)
+    eb.save(state(4), p)
     monkeypatch.undo()
-    assert p.read_bytes() == b"\x00" * 10 and quarantined(p) == []
+    assert len(calls) == 4 and eb.load(p)["queue"] == [{"key": "k4"}]
+
+
+def test_a_status_reader_holding_the_file_open_does_not_make_the_writer_fail(tmp_path):
+    import threading
+    p = tmp_path / "event_bridge.json"
+    eb.save(state(1), p)
+    opened, release = threading.Event(), threading.Event()
+
+    def reader():
+        with open(p, "rb") as handle:                                                              # leitor sem trava com o arquivo aberto
+            handle.read(1)
+            opened.set()
+            release.wait(5)
+    t = threading.Thread(target=reader)
+    t.start()
+    opened.wait(5)
+    threading.Timer(0.3, release.set).start()
+    eb.save(state(2), p)                                                                           # no Windows o replace recusa ate o leitor fechar
+    t.join()
+    assert eb.load(p)["queue"] == [{"key": "k2"}]
+
+
+def test_a_transient_permission_error_while_another_process_swaps_the_file_is_retried_by_the_reader(tmp_path, monkeypatch):
+    p = tmp_path / "event_bridge.json"
+    eb.save(state(3), p)
+    real, calls = Path.read_bytes, []
+
+    def flaky(self):
+        calls.append(1)
+        if len(calls) <= 3:
+            raise PermissionError(13, "negado", None, 5)
+        return real(self)
+    monkeypatch.setattr(Path, "read_bytes", flaky)
+    assert eb.load(p)["queue"] == [{"key": "k3"}] and len(calls) == 4
+
+
+def test_a_persistent_permission_error_is_not_swallowed_by_the_reader(tmp_path, monkeypatch):
+    p = tmp_path / "event_bridge.json"
+    eb.save(state(3), p)
+    monkeypatch.setattr(Path, "read_bytes", lambda self: (_ for _ in ()).throw(PermissionError(13, "negado", None, 5)))
+    with pytest.raises(PermissionError):
+        eb.load(p)
