@@ -1,0 +1,60 @@
+name: delegated-tests
+
+# FP-060 MT-03 — evidencia, por teste, do CI para os testes que NAO rodam no AppContainer do revisor (precisam do `git`).
+#
+# Por que `workflow_run`: este workflow e disparado pela conclusao do `ci`, mas sua DEFINICAO e o coletor vem da branch padrao (develop), nunca do PR. Um PR nao consegue
+# alterar a regra que gera a propria evidencia. O codigo do PR so e baixado (em `pr/`) para ser testado; nenhum segredo existe neste job (`contents: read`, `actions: read`).
+# A politica (quais node ids) tambem e lida da base. O revisor confere: repositorio, este workflow (blob fixado na politica), HEAD exato, execucao, tentativa, digest do
+# artefato e que CADA node id da politica esta `passed`.
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  delegated:
+    name: delegated tests (git) for the exact PR head
+    # so PRs deste repositorio (nunca forks) cujo `ci` terminou; o resultado do `ci` em si nao importa aqui — este job so produz evidencia dos testes delegados.
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout the BASE (trusted collector and policy)
+        uses: actions/checkout@v4
+        with:
+          path: base
+          persist-credentials: false
+      - name: Checkout the exact PR head (code under test, no credentials)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          path: pr
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: false
+      - name: Sync the PR's locked environment (core + dev)
+        run: cd pr && uv sync --locked --extra dev
+      - name: Run EXACTLY the delegated node ids and write the per-test report
+        env:
+          DELEGATED_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          DELEGATED_POLICY_BASE_SHA: ${{ github.sha }}
+          MPLBACKEND: Agg
+        run: |
+          cd pr
+          uv run --no-sync python ../base/tools/orchestration/delegated_results.py --policy ../base/docs/governance/sandbox_delegated_tests.v1.json --tree . --out ../results.json
+      - name: Publish the evidence (artifact digest is computed by GitHub)
+        uses: actions/upload-artifact@v4
+        with:
+          name: delegated-test-results
+          path: results.json
+          if-no-files-found: error
+          retention-days: 14
