@@ -24,7 +24,8 @@ TOKEN = re.compile(
     r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"                           # JWT
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|\Z)"          # chave privada PEM COMPLETA (cabecalho, corpo e rodape; sem rodape, ate o fim)
     r"|Bearer\s+[A-Za-z0-9._~+/-]{10,}"
-    r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token)\b)\s*[:=]\s*\S{8,})")
+    r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token|token)\b)[\"']?\s*[:=]\s*"
+    r"(?:\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'|[^\s;}\"']{4,}))")                 # inclui JSON ({"password": "..."}) e valores entre aspas inteiros (virgulas, espacos, escapes)
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 WIN_PATH = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\"'<>|\r\n]*")
 UNC_PATH = re.compile(r"(?:\\\\|(?<![:\w/.])//)[A-Za-z0-9_.$-]+[\\/][^\"'<>|\r\n]*")                   # \\servidor\compartilhamento\... (e //servidor/compartilhamento/...)                    # ate o fim da linha/aspas: cobre espacos no caminho

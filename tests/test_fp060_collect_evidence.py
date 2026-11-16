@@ -342,3 +342,21 @@ def test_the_check_runs_request_asks_for_every_run_not_only_the_latest_per_name(
     check_path = next(p for p in asked if "check-runs" in p)
     assert "filter=all" in check_path and "per_page=100" in check_path
     assert [c["id"] for c in flow["checks_no_head_final"]] == [1, 2]                                    # a falha anterior NAO some atras da execucao posterior
+
+
+@pytest.mark.parametrize("raw", ['{"password": "abcdEFGH12345678"}', '{"password":"abc,def ghi"}', "{'secret': 'a b,c;d'}", 'api_key = "x y z 123"', '{"access_token":"tok_1234,5678"}',
+                                  '{"token": "abcd1234"}', "password=abcdEFGH12345678"])
+def test_credentials_in_json_or_quoted_form_are_removed_or_refused_in_the_whole_report(raw):
+    out = ce.scrub(f"erro {raw} fim")
+    for leaked in ("abcdEFGH", "def ghi", "a b,c", "x y z", "tok_1234", "abcd1234"):
+        assert leaked not in out, (leaked, out)
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(f"x {raw}")
+    cleaned = ce.clean({"mensagem": raw, "aninhado": [{"erro": raw}]})
+    ce.assert_clean(json.dumps(cleaned, ensure_ascii=False))                                       # o relatorio completo limpo passa na verificacao final
+    assert "abcdEFGH" not in json.dumps(cleaned)
+
+
+def test_prose_with_the_word_token_or_secret_is_not_over_redacted():
+    text = "o token expirou e o secret nao foi lido"
+    assert ce.scrub(text) == text
