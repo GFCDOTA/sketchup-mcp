@@ -377,30 +377,63 @@ def _settle_after_exit(p: subprocess.Popen) -> str:
     return "\n[executor] descendentes do filho ainda estavam vivos quando ele terminou: arvore encerrada; entrega bloqueada (fail-closed)"
 
 
+DRAIN_S = 5.0                                                                  # depois de a arvore terminar, os pipes fecham: espera curta pela drenagem final
+
+
+def _pump(stream, sink: list) -> None:
+    try:
+        for chunk in iter(stream.readline, ""):                                # linha a linha: o que ja chegou nao se perde se o pipe nunca fechar
+            sink.append(chunk)
+    except (OSError, ValueError):
+        pass
+
+
+def _feed(stream, text: str) -> None:
+    try:
+        if text:
+            stream.write(text)
+        stream.close()
+    except (OSError, ValueError):                                              # o filho saiu antes de ler tudo: nada a fazer
+        pass
+
+
 def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, cancel: threading.Event | None = None,
                    poll_s: float = 0.5) -> tuple:
     """(rc, stdout, stderr, timed_out). Sem shell. Derruba o filho no timeout OU quando `cancel` e acionado (lease perdido/nao
-    renovado: o filho nao pode continuar apto a dar push enquanto outro executor reivindica o item)."""
+    renovado: o filho nao pode continuar apto a dar push enquanto outro executor reivindica o item).
+    A SAIDA do processo raiz e detectada pelo processo (nao pelo EOF dos pipes): um descendente que herdou stdout/stderr nao mantem o runner preso ate o timeout; a
+    arvore e encerrada e CONFIRMADA antes de a saida ser drenada e do sucesso ser devolvido."""
     p = spawn_contained(argv, cwd=cwd, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                         text=True, encoding="utf-8", errors="replace")        # contido desde a primeira instrucao; sem Job Object o filho nao executa (ContainmentError)
+    out_b: list = []
+    err_b: list = []
+    readers = [threading.Thread(target=_pump, args=(p.stdout, out_b), daemon=True), threading.Thread(target=_pump, args=(p.stderr, err_b), daemon=True)]
+    for t in (*readers, threading.Thread(target=_feed, args=(p.stdin, stdin), daemon=True)):
+        t.start()
     deadline = time.monotonic() + timeout
-    first = True
+    rc: int | None = None
+    timed_out = False
+    note = ""
     try:
-        while True:
-            try:
-                out, err = p.communicate(stdin if first else None, timeout=poll_s)
-                note = _settle_after_exit(p)                                   # descendentes ainda vivos? derruba, confirma e BLOQUEIA a entrega (rc != 0)
-                return (p.returncode if not note else -3), out, (err or "") + note, False
-            except subprocess.TimeoutExpired:
-                first = False
+        while p.poll() is None:
             if cancel is not None and cancel.is_set():
                 kill_tree(p)
-                out, err = p.communicate()
-                return -2, out or "", err or "", False
+                rc = -2
+                break
             if time.monotonic() >= deadline:
                 kill_tree(p)
-                out, err = p.communicate()
-                return -1, out or "", err or "", True
+                rc, timed_out = -1, True
+                break
+            try:
+                p.wait(timeout=poll_s)
+            except subprocess.TimeoutExpired:
+                pass
+        if rc is None:
+            note = _settle_after_exit(p)                                       # descendentes ainda vivos? derruba, confirma e BLOQUEIA a entrega (rc != 0)
+            rc = p.returncode if not note else -3
+        for t in readers:
+            t.join(DRAIN_S)
+        return rc, "".join(out_b), "".join(err_b) + note, timed_out
     finally:
         job = getattr(p, "_fp060_job", None)
         if job is not None:

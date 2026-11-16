@@ -471,3 +471,37 @@ def test_if_the_tree_cannot_be_confirmed_after_a_normal_exit_the_runner_raises_i
     monkeypatch.setattr(ps.ProcessJob, "wait_empty", lambda self, timeout=5.0: False)                   # nunca confirma vazio
     with pytest.raises(ex.TreeNotConfirmedError):
         ex.default_runner([sys.executable, "-c", "print('ok')"], tmp_path, dict(os.environ), "", 60, threading.Event())
+
+
+INHERIT = (
+    "import subprocess, sys\n"
+    "g = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'], stdout=sys.stdout, stderr=sys.stderr)\n"      # o neto HERDA os pipes do runner
+    "print(g.pid, flush=True)\n"
+)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_a_descendant_that_inherits_stdout_and_stderr_does_not_keep_the_runner_waiting_until_the_timeout(tmp_path):
+    started = time.monotonic()
+    rc, out, err, timed_out = ex.default_runner([sys.executable, "-c", INHERIT], tmp_path, dict(os.environ), "", 120, threading.Event())
+    assert time.monotonic() - started < 30                                                              # sem a correcao esperaria os 120 s do timeout (EOF so com o neto morto)
+    grand = int(out.split()[0])
+    assert not alive(grand) and rc == -3 and "entrega bloqueada" in err and timed_out is False
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_the_runner_still_returns_the_full_output_stdin_and_exit_code_of_a_normal_child(tmp_path):
+    code = "import sys; data = sys.stdin.read(); print(len(data)); print('e', file=sys.stderr); sys.exit(3)"
+    rc, out, err, timed_out = ex.default_runner([sys.executable, "-c", code], tmp_path, dict(os.environ), "x" * 200_000, 60, threading.Event())
+    assert rc == 3 and out.strip() == "200000" and err.strip() == "e" and timed_out is False            # prompt grande (200 KB) entregue sem travar
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_timeout_and_cancel_still_kill_the_tree_and_keep_the_partial_output(tmp_path):
+    code = "import time; print('parcial', flush=True); time.sleep(60)"
+    rc, out, _err, timed_out = ex.default_runner([sys.executable, "-c", code], tmp_path, dict(os.environ), "", 2, threading.Event(), poll_s=0.1)
+    assert rc == -1 and timed_out is True and "parcial" in out
+    cancel = threading.Event()
+    threading.Timer(1.0, cancel.set).start()
+    rc, out, _err, timed_out = ex.default_runner([sys.executable, "-c", code], tmp_path, dict(os.environ), "", 60, cancel, poll_s=0.1)
+    assert rc == -2 and timed_out is False and "parcial" in out
