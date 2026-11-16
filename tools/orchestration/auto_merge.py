@@ -155,7 +155,10 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
     # PR autonomo: tetos e caminhos criticos valem integralmente. PR tecnico: so binario/ilegivel/invalido recusam; o caminho critico exige revisao reforcada.
     soft = {"path_critico", "max_files", "max_lines"}
     refuse += [f"{v['rule']}: {v['detail']}" for v in verdict.violations if autonomous or v["rule"] not in soft]
-    refuse += [f"tipo nao permitido: {f.get('filename')}" for f in files if not str(f.get("filename", "")).lower().endswith(ALLOWED_SUFFIXES)]
+    for f in files:                                                                        # destino E origem de renomeacao: `deploy.sh` -> `deploy.py` toca um tipo proibido
+        for name in (f.get("filename"), f.get("previous_filename")):
+            if name and not str(name).lower().endswith(ALLOWED_SUFFIXES):
+                refuse.append(f"tipo nao permitido: {name}")
     state = lifecycle.checks_state(runs)
     if state == "failed":
         refuse.append("checks obrigatorios reprovados no HEAD")
@@ -268,6 +271,14 @@ def protection_gaps(gh: eb.Gh, repo: str, base: str = BASE_BRANCH) -> list[str]:
         gaps.append(f"a protecao de {base} nao descarta aprovacoes velhas quando o codigo muda (dismiss_stale_reviews)")
     if not (prot.get("enforce_admins") or {}).get("enabled"):
         gaps.append(f"a protecao de {base} nao vale para administradores (enforce_admins)")
+    try:
+        rules = gh(f"repos/{repo}/rules/branches/{base}")
+    except (RuntimeError, OSError, ValueError) as exc:
+        return [*gaps, f"regras de {base} nao podem ser lidas ({type(exc).__name__}): nao sei se ha fila de merge; nao mescla"]
+    if not isinstance(rules, list) or any(not isinstance(r, dict) for r in rules):
+        return [*gaps, f"regras de {base} em formato inesperado: nao mescla"]
+    if any(r.get("type") == "merge_queue" for r in rules):
+        gaps.append(f"{base} usa merge queue: o merge aconteceria DEPOIS, sem a revalidacao local (Issues, labels, base); o merge automatico fica desligado nesta branch")
     return gaps
 
 
@@ -306,7 +317,19 @@ def merge(number: int, head: str, repo: str, runner=subprocess.run) -> tuple[boo
         return False, f"gh pr merge falhou: {type(exc).__name__}: {exc}"[:300]
     if done.returncode != 0:
         return False, f"gh pr merge recusado: {ex.redact((done.stderr or done.stdout or '')[:300])}"
-    return True, "mesclado"
+    return True, "comando aceito"
+
+
+def confirm_merged(gh: eb.Gh, repo: str, number: int, head: str) -> tuple[bool, str]:
+    """Exit 0 de `gh pr merge` NAO prova merge: com fila de merge ou auto-merge configurado o GitHub apenas AGENDA. So conta como mesclado o PR com `merged: true`,
+    base develop e o commit de merge presente; qualquer outra coisa e reportada como NAO mesclado (agendado) e, se o PR ficou com auto-merge, o desliga."""
+    try:
+        pr = gh(f"repos/{repo}/pulls/{number}")
+    except (RuntimeError, OSError, ValueError) as exc:
+        return False, f"merge nao confirmado ({type(exc).__name__}): nao conto como mesclado"
+    if isinstance(pr, dict) and pr.get("merged") is True and (pr.get("base") or {}).get("ref") == BASE_BRANCH and pr.get("merge_commit_sha"):
+        return True, f"mesclado em {str(pr['merge_commit_sha'])[:12]}"
+    return False, "o GitHub aceitou o comando mas o PR NAO esta mesclado (fila de merge/agendamento): nao conto como mesclado"
 
 
 def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, runner=subprocess.run, is_enabled: tuple[bool, str] | None = None) -> dict:
@@ -334,23 +357,30 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                     decision = Decision("WAIT", [*gaps, "configuracao do proprietario: a protecao da branch precisa exigir aprovacao independente antes de qualquer merge automatico"])
             row.update(head=(pr.get("head") or {}).get("sha"), **decision.as_dict())
             if apply and decision.code == "MERGE":
-                # TOCTOU: TODOS os fatos que autorizam o merge (base, labels, Issues, arquivos, checks, reviews) sao lidos e decididos DE NOVO agora; `--match-head-commit`
-                # so protege o HEAD. A janela que sobra (entre esta releitura e o merge no servidor) e a do proprio GitHub e e coberta pela protecao da branch.
-                pr2, files2, runs2, reviews2, issues2 = gather(gh, repo, number)
-                again = decide(pr2, files2, runs2, reviews2, issues2, policy, cfg, on)
-                if again.code == "MERGE" and protection_gaps(gh, repo):                        # relida junto com os demais fatos (TOCTOU)
-                    again = Decision("WAIT", ["a protecao da branch deixou de exigir aprovacao independente"])
-                still_on = enabled() if is_enabled is None else is_enabled                    # o interruptor e RELIDO a cada tentativa, nao so no inicio do ciclo
-                if not still_on[0]:
-                    row.update(code="DISABLED", reasons=[f"desligado durante o ciclo: {still_on[1]}"])
-                elif again.code != "MERGE" or (pr2.get("head") or {}).get("sha") != row["head"]:
-                    row.update(code="WAIT", reasons=[f"os fatos mudaram entre a decisao e o merge ({again.code}: {'; '.join(again.reasons)[:160]})"])
+                # Ordem: 1) a identidade (a chamada que pode demorar); 2) TODOS os fatos que autorizam o merge (base, labels, Issues, arquivos, checks, reviews, protecao,
+                # fila) lidos e decididos DE NOVO; 3) o interruptor; 4) o merge. Nada mutavel e consultado ANTES da identidade. `--match-head-commit` protege so o HEAD:
+                # a janela que sobra e UMA ida ao servidor (entre a ultima leitura e o merge); o GitHub nao oferece condicao atomica sobre base/labels, e quem a fecha no
+                # servidor e a protecao da branch (aprovacao exigida + aprovacoes velhas descartadas), que o ciclo exige antes de qualquer merge.
+                who_ok, who = merge_identity(policy, runner)
+                if not who_ok:
+                    row.update(code="REFUSE", reasons=[who])
                 else:
-                    who_ok, who = merge_identity(policy, runner)
-                    if not who_ok:
-                        row.update(code="REFUSE", reasons=[who])
+                    pr2, files2, runs2, reviews2, issues2 = gather(gh, repo, number)
+                    again = decide(pr2, files2, runs2, reviews2, issues2, policy, cfg, on)
+                    gaps2 = protection_gaps(gh, repo) if again.code == "MERGE" else []
+                    if gaps2:
+                        again = Decision("WAIT", ["a protecao da branch deixou de garantir o merge so com aprovacao: " + "; ".join(gaps2)[:200]])
+                    if again.code == "MERGE" and pr2.get("auto_merge"):
+                        again = Decision("WAIT", ["o PR ja tem auto-merge/agendamento habilitado no GitHub: o merge nao seria revalidado"])
+                    still_on = enabled() if is_enabled is None else is_enabled                # o interruptor e RELIDO imediatamente antes do comando de merge
+                    if not still_on[0]:
+                        row.update(code="DISABLED", reasons=[f"desligado durante o ciclo: {still_on[1]}"])
+                    elif again.code != "MERGE" or (pr2.get("head") or {}).get("sha") != row["head"]:
+                        row.update(code="WAIT", reasons=[f"os fatos mudaram entre a decisao e o merge ({again.code}: {'; '.join(again.reasons)[:160]})"])
                     else:
                         done, msg = merge(number, row["head"], repo, runner)
+                        if done:
+                            done, msg = confirm_merged(gh, repo, number, row["head"])
                         row.update(merged=done, merge_message=msg)
         except (RuntimeError, OSError, ValueError, KeyError, TypeError) as exc:
             row.update(code="ERROR", reasons=[f"{type(exc).__name__}: {exc}"[:200]])

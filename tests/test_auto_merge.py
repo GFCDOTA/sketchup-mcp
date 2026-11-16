@@ -184,12 +184,14 @@ GOOD_PROTECTION = {"required_pull_request_reviews": {"required_approving_review_
 
 
 class Gh:
-    def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, draft=False, protection=None, protection_boom=None, **overrides):
+    def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, draft=False, protection=None, protection_boom=None, rules=None, rules_boom=None,
+                 scheduled_only=False, **overrides):
         self.head, self.fresh_head, self.boom, self.labelled, self.overrides, self.calls = head, fresh_head, boom, labelled, overrides, []
         self.draft = draft
         self.pulls = 0
         self.protection = GOOD_PROTECTION if protection is None else protection
         self.protection_boom = protection_boom
+        self.rules, self.rules_boom, self.scheduled_only = [] if rules is None else rules, rules_boom, scheduled_only
 
     def __call__(self, path):
         self.calls.append(path)
@@ -200,6 +202,10 @@ class Gh:
         if path == f"repos/{REPO}/pulls/7":
             self.pulls += 1
             sha = self.fresh_head if (self.fresh_head and self.pulls > 1) else self.head
+            if self.pulls >= 3:                                                                    # a 3a leitura e a CONFIRMACAO depois do comando de merge
+                if self.scheduled_only:
+                    return pr(head={"sha": sha, "repo": {"full_name": REPO}}, auto_merge={"enabled_by": "x"}, changed_files=1)
+                return pr(head={"sha": sha, "repo": {"full_name": REPO}}, merged=True, state="closed", merge_commit_sha="c" * 40, changed_files=1)
             return pr(head={"sha": sha, "repo": {"full_name": REPO}}, **{"changed_files": 1, **self.overrides})
         if path.startswith(f"repos/{REPO}/pulls/7/files"):
             return files()
@@ -209,6 +215,10 @@ class Gh:
             return {"total_count": len(lifecycle.MANDATORY_CHECKS), "check_runs": runs()}
         if path == f"repos/{REPO}/issues/5":
             return issues(labels=(am.GPT_LABEL,))[5]
+        if path == f"repos/{REPO}/rules/branches/develop":
+            if self.rules_boom:
+                raise self.rules_boom
+            return self.rules
         if path == f"repos/{REPO}/branches/develop/protection":
             if self.protection_boom:
                 raise self.protection_boom
@@ -460,16 +470,9 @@ def test_the_identity_lookup_raising_is_a_refusal_not_a_crash():
 def test_the_kill_switch_is_read_again_before_each_merge_not_only_at_the_start(tmp_path, monkeypatch):
     monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "gov" / "bridge.json"))
     monkeypatch.setenv(am.ENABLE_ENV, "1")
-    class TwoPrs(Gh):
-        def __call__(self, path):
-            if path.startswith(f"repos/{REPO}/pulls?state=open"):
-                return [{"number": 7, "draft": False, "user": {"login": "fmodesto30"}, "labels": []}, {"number": 8, "draft": False, "user": {"login": "fmodesto30"}, "labels": []}]
-            return super().__call__(path.replace("pulls/8", "pulls/7").replace("issues/5", "issues/5"))
     runner = Runner(on_who=lambda: (am.kill_switch().parent.mkdir(parents=True, exist_ok=True), am.kill_switch().write_text("x", encoding="utf-8")))
-    out = am.cycle(TwoPrs(), POLICY, REPO, apply=True, runner=runner)                               # interruptor criado DEPOIS da primeira decisao, durante o ciclo
-    first, second = out["prs"]
-    assert first["merged"] is True and second["code"] == "DISABLED" and "durante o ciclo" in second["reasons"][0]
-    assert len(runner.calls) == 1                                                                    # so o merge ja autorizado antes do interruptor; o seguinte e barrado
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner)                               # interruptor criado DURANTE a consulta de identidade (ate 60 s)
+    assert all(r["code"] == "DISABLED" and "durante o ciclo" in r["reasons"][0] for r in out["prs"]) and runner.calls == []   # nenhum merge: o interruptor e relido depois dela
 
 
 def test_the_kill_switch_created_between_the_second_decision_and_the_merge_blocks_that_merge(tmp_path, monkeypatch):
@@ -485,7 +488,7 @@ def test_the_kill_switch_created_between_the_second_decision_and_the_merge_block
             return out
     runner = Runner()
     out = am.cycle(Flip(), POLICY, REPO, apply=True, runner=runner)
-    assert out["prs"][0]["code"] == "DISABLED" and "durante o ciclo" in out["prs"][0]["reasons"][0] and runner.calls == [] and runner.who_calls == []
+    assert out["prs"][0]["code"] == "DISABLED" and "durante o ciclo" in out["prs"][0]["reasons"][0] and runner.calls == []
 
 
 # O corpo REAL de um APPROVE publicado pelo fluxo de producao (PR #654, revisor fmmodesto): texto do parecer + marcador do outbox acrescentado na publicacao
@@ -553,9 +556,86 @@ def test_a_protection_removed_between_the_decision_and_the_merge_blocks_that_mer
             return super().__call__(path)
     runner = Runner()
     out = am.cycle(Drops(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
-    assert out["prs"][0]["code"] == "WAIT" and "deixou de exigir" in out["prs"][0]["reasons"][0] and runner.calls == []
+    assert out["prs"][0]["code"] == "WAIT" and "nao exige aprovacao" in out["prs"][0]["reasons"][0] and runner.calls == []
 
 
 def test_the_module_never_writes_branch_protection():
     source = Path(am.__file__).read_text(encoding="utf-8")
     assert "branches/{base}/protection" in source and "-X" not in source and "PUT" not in source and "PATCH" not in source
+
+
+# -- 4a revisao do Codex (#648): fila de merge, confirmacao do merge, ordem das leituras e renomeacao -----------------------------------------------
+def test_an_exit_zero_that_only_scheduled_the_merge_is_not_reported_as_merged():
+    runner = Runner()
+    out = am.cycle(Gh(scheduled_only=True), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    row = out["prs"][0]
+    assert len(runner.calls) == 1 and row["merged"] is False and "NAO esta mesclado" in row["merge_message"]
+
+
+def test_a_confirmed_merge_reports_the_merge_commit():
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=Runner(), is_enabled=ON)
+    assert out["prs"][0]["merged"] is True and out["prs"][0]["merge_message"].startswith("mesclado em ccc")
+
+
+@pytest.mark.parametrize("answer", [{"merged": False, "state": "open"}, {"merged": True, "base": {"ref": "release"}, "merge_commit_sha": "c" * 40},
+                                    {"merged": True, "base": {"ref": "develop"}}, "texto",
+                                    {"merged": False, "base": {"ref": "develop"}, "merge_commit_sha": "c" * 40}])
+def test_the_merge_confirmation_needs_merged_true_the_right_base_and_a_merge_commit(answer):
+    ok, msg = am.confirm_merged(lambda p: answer, REPO, 7, HEAD)
+    assert ok is False and "nao conto" in msg or "NAO esta mesclado" in msg
+
+
+def test_a_failure_confirming_the_merge_is_not_a_success():
+    def boom(path):
+        raise RuntimeError("502")
+    assert am.confirm_merged(boom, REPO, 7, HEAD)[0] is False
+
+
+def test_a_branch_with_a_merge_queue_blocks_the_automatic_merge():
+    runner = Runner()
+    out = am.cycle(Gh(rules=[{"type": "merge_queue"}]), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "WAIT" and any("merge queue" in r for r in out["prs"][0]["reasons"]) and runner.calls == []
+
+
+@pytest.mark.parametrize("boom", [RuntimeError("403"), OSError("rede")])
+def test_unreadable_branch_rules_are_fail_closed(boom):
+    runner = Runner()
+    out = am.cycle(Gh(rules_boom=boom), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "WAIT" and any("nao podem ser lidas" in r for r in out["prs"][0]["reasons"]) and runner.calls == []
+
+
+def test_branch_rules_in_an_unexpected_shape_are_fail_closed():
+    assert any("formato inesperado" in g for g in am.protection_gaps(lambda p: GOOD_PROTECTION if "protection" in p else {"x": 1}, REPO))
+
+
+def test_a_pr_that_already_has_auto_merge_enabled_on_github_is_not_merged_by_this_module():
+    runner = Runner()
+    out = am.cycle(Gh(auto_merge={"enabled_by": "alguem"}), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "WAIT" and any("auto-merge" in r for r in out["prs"][0]["reasons"]) and runner.calls == []
+
+
+def test_a_label_added_while_the_identity_is_being_checked_blocks_the_merge():
+    """O merge so e decidido DEPOIS da consulta de identidade (a chamada lenta): uma label humana posta durante ela e vista."""
+    gh = Gh()
+    runner = Runner(on_who=lambda: gh.overrides.update(labels=[{"name": "security"}]))
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "WAIT" and runner.calls == []
+
+
+def test_a_base_changed_while_the_identity_is_being_checked_blocks_the_merge():
+    gh = Gh()
+    runner = Runner(on_who=lambda: gh.overrides.update(base={"ref": "release", "repo": {"full_name": REPO}}))
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    assert out["prs"][0]["code"] == "WAIT" and runner.calls == []
+
+
+@pytest.mark.parametrize("old, new", [("scripts/deploy.sh", "scripts/deploy.py"), ("docs/a.md", "bin/run.exe"), ("tools/x.py", "tools/x.sh")])
+def test_a_rename_between_allowed_and_forbidden_types_is_refused(old, new):
+    f = {"filename": new, "previous_filename": old, "status": "renamed", "additions": 0, "deletions": 0, "changes": 0, "patch": "@@"}
+    d = decide(files=[f])
+    assert d.code == "REFUSE" and any("tipo nao permitido" in r for r in d.reasons)
+
+
+def test_a_rename_between_two_allowed_types_is_not_refused_for_type():
+    f = {"filename": "docs/b.md", "previous_filename": "docs/a.md", "status": "renamed", "additions": 0, "deletions": 0, "changes": 0, "patch": "@@"}
+    assert not any("tipo nao permitido" in r for r in decide(files=[f]).reasons)
