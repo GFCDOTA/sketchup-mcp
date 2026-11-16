@@ -252,7 +252,11 @@ class IdentityError(PermissionError):
 
 def check_identity(gh: Gh, policy: dict) -> str:
     """Fail-closed: o `gh` em uso tem de ser o EXECUTOR (`executor_logins`) e nunca um revisor. Devolve o login ou levanta."""
-    login = (gh("user") or {}).get("login", "")
+    answer = gh("user")
+    login = answer.get("login") if isinstance(answer, dict) else None
+    if not isinstance(login, str) or not login.strip():
+        # resposta vazia/truncada/de outro formato NAO prova conta errada: e falha transitoria do gh (o laco tenta de novo), nunca `IdentityError` (fatal)
+        raise RuntimeError(f"resposta de `gh api user` sem login valido ({type(answer).__name__}): identidade nao verificada")
     if login.lower() not in [x.lower() for x in policy.get("executor_logins", [])] or             login.lower() in [x.lower() for x in policy.get("reviewers", [])]:
         raise IdentityError(f"gh autenticado como {login!r}: o bridge so roda como executor {policy.get('executor_logins')}")
     return login

@@ -196,9 +196,11 @@ def user_gh(login):
 
 def test_identity_check_accepts_only_the_executor_account():
     assert eb.check_identity(user_gh("fmodesto30"), POLICY) == "fmodesto30"
-    for wrong in ("fmmodesto", "outra-conta", ""):
+    for wrong in ("fmmodesto", "outra-conta"):
         with pytest.raises(PermissionError):
             eb.check_identity(user_gh(wrong), POLICY)
+    with pytest.raises(RuntimeError, match="sem login valido"):                                            # resposta sem login nao prova conta errada: transitorio, mas ainda fail-closed
+        eb.check_identity(user_gh(""), POLICY)
 
 
 def test_identity_check_fails_closed_without_executor_in_policy():

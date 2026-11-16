@@ -413,3 +413,37 @@ def test_a_truncated_or_invalid_gh_answer_at_start_is_retried(monkeypatch, capsy
     monkeypatch.setattr(ex, "sleep_watching", lambda seconds, pid, step=2.0: len(calls) < 1)
     assert ex.main(["run", "--interval", "1"]) == 5 and len(attempts) == 2
     capsys.readouterr()
+
+
+REAL_CHECK = ex.eb.check_identity                                                                  # capturada na importacao: a fixture autouse troca `check_identity` por um fake
+
+
+# -- 8a revisao do Codex (#640): resposta incompleta do `gh api user` nao e conta errada -----------------------------------------------------------
+@pytest.mark.parametrize("answer", [[], [{"login": "x"}], {}, {"login": ""}, {"login": "  "}, {"login": None}, {"id": 1}, "texto", None])
+def test_an_empty_or_malformed_user_answer_is_a_transient_error_not_a_wrong_account(answer):
+    with pytest.raises(RuntimeError, match="sem login valido") as err:
+        REAL_CHECK(lambda path: answer, {"executor_logins": ["fmodesto30"], "reviewers": ["fmmodesto"]})
+    assert not isinstance(err.value, ex.eb.IdentityError)
+
+
+@pytest.mark.parametrize("answer", [[], {}, {"login": ""}])
+def test_the_start_loop_retries_an_incomplete_user_answer_instead_of_exiting_3(monkeypatch, capsys, answer):
+    answers = [answer, answer, {"login": "fmodesto30"}]
+    attempts = []
+
+    def gh(path):
+        attempts.append(1)
+        return answers[min(len(attempts) - 1, 2)]
+    monkeypatch.setattr(ex.eb, "check_identity", lambda _gh, policy: REAL_CHECK(gh, policy))              # o `gh` padrao e ligado na definicao: injeta o fake pela propria funcao
+    calls = scripted(monkeypatch, [{"action": "IDLE"}])
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: 0.0)
+    monkeypatch.setattr(ex, "sleep_watching", lambda seconds, pid, step=2.0: len(calls) < 1)
+    assert ex.main(["run", "--interval", "1"]) == 5 and len(attempts) == 3 and len(calls) == 1
+    capsys.readouterr()
+
+
+def test_a_real_wrong_account_with_a_valid_login_is_still_fatal(monkeypatch, capsys):
+    monkeypatch.setattr(ex.eb, "check_identity", lambda _gh, policy: REAL_CHECK(lambda path: {"login": "fmmodesto"}, policy))
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: 0.0)
+    assert ex.main(["run", "--interval", "1"]) == 3
+    capsys.readouterr()
