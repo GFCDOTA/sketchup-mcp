@@ -560,3 +560,15 @@ def test_a_review_on_an_older_head_or_by_a_non_reviewer_does_not_block_publishin
 def test_if_the_reviews_cannot_be_read_right_before_publishing_nothing_is_published(tmp_path, monkeypatch):
     res, published = _publish(tmp_path, monkeypatch, FakeGh(reviews_error=RuntimeError("gh: 502")))
     assert res["action"] == "FAILED" and published == []
+
+
+def test_every_attempt_is_preserved_in_its_own_folder_and_the_history_keeps_every_record(tmp_path, monkeypatch):
+    monkeypatch.setattr(cr, "codex_dir", lambda: tmp_path / "codex")
+    review(tmp_path, run=Run(verdict(), err="aviso 1"))
+    review(tmp_path, run=Run(text=None, rc=2, err="boom"))
+    attempts = sorted((tmp_path / "out" / "attempts").iterdir())
+    assert len(attempts) == 2
+    assert (attempts[0] / "verdict.json").exists() and (attempts[0] / "stderr.txt").read_text(encoding="utf-8") == "aviso 1"
+    assert not (attempts[1] / "verdict.json").exists() and json.loads((attempts[1] / "meta.json").read_text(encoding="utf-8"))["rc"] == 2
+    hist = (tmp_path / "codex" / "review_history.jsonl").read_text(encoding="utf-8").splitlines()
+    assert [json.loads(x)["status"] for x in hist].count("done") == 1 and len(hist) >= 3

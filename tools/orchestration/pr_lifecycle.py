@@ -367,6 +367,23 @@ def work(gh: eb.Gh, store: EventStore, policy: dict, repo: str = eb.REPO, review
     return {"action": "IDLE", "waiting": waiting}
 
 
+def corrections_path() -> Path:
+    return eb.bridge_path().with_name("needs_human_findings.jsonl")
+
+
+def _route_findings(ev: dict, pr, verdict: dict) -> None:
+    """Achados de um NEEDS_HUMAN (que nao vira review publicado) vao para a fila de CORRECAO lida pelo corretor; sem achado, so o proprietario decide."""
+    if not verdict.get("findings"):
+        return
+    row = {"at": dt.datetime.now(dt.timezone.utc).isoformat(), "event": ev["id"], "pr": pr, "head_sha": verdict.get("head_sha"),
+           "confidence": verdict.get("confidence"), "findings": verdict.get("findings")}
+    try:
+        with open(corrections_path(), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
 def _review(store: EventStore, ev: dict, gh: eb.Gh, policy: dict, repo: str, review: Callable[..., dict] | None, heartbeat_s: float,
             gate: rl.RateLimitGate | None = None, account: str = "", owner: str = "", probe: bool = False) -> dict:
     n = _payload(ev).get("pr")
@@ -405,12 +422,16 @@ def _review(store: EventStore, ev: dict, gh: eb.Gh, policy: dict, repo: str, rev
         elif action == "RECONCILED":                                                                   # alguem publicou neste HEAD entre o inicio e a escrita: conclui com ESSE parecer
             store.complete(ev, {"action": "DONE", "verdict": "APPROVE" if result.get("state") == "APPROVED" else "REQUEST_CHANGES", "reconciled": True,
                                 "review_id": result.get("review_id"), "reason": str(result.get("reason") or "")[:200]})
-        elif action == "REVIEW_BLOCKED" and isinstance(result.get("verdict"), dict) and result["verdict"].get("verdict") == "NEEDS_HUMAN" and ev["attempt"] >= NEEDS_HUMAN_TRIES:
+        elif action == "REVIEW_BLOCKED" and isinstance(result.get("verdict"), dict) and result["verdict"].get("verdict") == "NEEDS_HUMAN" \
+                and (result["verdict"].get("findings") or ev["attempt"] >= NEEDS_HUMAN_TRIES):
+            # com achado tecnico concreto NAO repete: o achado vai para correcao; sem achado, uma repeticao (o Codex e nao deterministico) e depois escala
             v = result["verdict"]                                                                       # escala: guarda os achados no evento (o arquivo do veredito e sobrescrito a cada tentativa)
             store.complete(ev, {"action": "NEEDS_HUMAN", "verdict": "NEEDS_HUMAN", "escalated": True, "attempts_used": ev["attempt"], "confidence": v.get("confidence"),
                                 "findings": [{"severity": f.get("severity"), "where": f"{f.get('file')}:{f.get('line')}", "reason": str(f.get("reason") or "")[:400],
                                               "required_change": str(f.get("required_change") or "")[:300]} for f in (v.get("findings") or [])[:10]]})
-            return {"action": "NEEDS_HUMAN", "event": ev["id"], "pr": n, "escalated": True, "findings": len(v.get("findings") or [])}
+            _route_findings(ev, n, v)
+            return {"action": "NEEDS_HUMAN", "event": ev["id"], "pr": n, "escalated": True, "findings": len(v.get("findings") or []),
+                    "route": "correction" if v.get("findings") else "owner"}
         elif action in ("SKIPPED", "STALE"):
             store.supersede(ev, str(result.get("reason") or action)[:300])
         else:

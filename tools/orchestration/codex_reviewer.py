@@ -111,6 +111,23 @@ def record(status: str, **fields: object) -> None:
     tmp = d / "last_review.json.tmp"
     tmp.write_text(json.dumps(body, indent=1, ensure_ascii=False), encoding="utf-8")
     os.replace(tmp, d / "last_review.json")
+    with open(d / "review_history.jsonl", "a", encoding="utf-8") as fh:              # historico: last_review.json e so o ultimo, este nunca e sobrescrito
+        fh.write(json.dumps(body, ensure_ascii=False) + "\n")
+
+
+def archive_attempt(base: Path, pr: int, sha: str, rc: int | None, so: str, se: str, timed_out: bool, verdict_file: Path, evidence: dict) -> Path:
+    """Preserva CADA tentativa em pasta propria (veredito bruto, stdout, stderr, metadados): o arquivo do veredito e reescrito a cada execucao no mesmo HEAD."""
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    d = base / "attempts" / f"pr{pr}_{sha[:8]}_{stamp}"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "stdout.txt").write_text(so or "", encoding="utf-8")
+    (d / "stderr.txt").write_text(se or "", encoding="utf-8")
+    if verdict_file.exists():
+        (d / "verdict.json").write_bytes(verdict_file.read_bytes())
+    meta = {"pr": pr, "sha": sha, "rc": rc, "timed_out": timed_out, "at": stamp, "verdict_present": verdict_file.exists(),
+            "tests_passed": evidence.get("tests_passed"), "isolation": evidence.get("isolation")}
+    (d / "meta.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False), encoding="utf-8")
+    return d
 
 
 def resolve_codex() -> str:
@@ -423,6 +440,10 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
             out.unlink()
         rc, so, se, timed_out = runner(build_command(codex_bin or resolve_codex(), wt, schema, out), wt,
                                        PROMPT.format(repo=repo, pr=pr, sha=sha, base=base or "origin/develop") + package_prompt(pkg, evidence))
+        try:
+            archive_attempt(out_dir, pr, sha, rc, so, se, timed_out, out, evidence)
+        except OSError:
+            pass                                                                # arquivar nunca derruba a revisao
         # So uma execucao que FALHOU e classificada (um parecer valido de um PR sobre limites/quotas cita essas palavras com rc 0). stderr inteiro + so a CAUDA do stdout.
         failure = rl.classify(rc, f"{se}\n{so[-1500:]}", timed_out) if (rc != 0 or timed_out) else None
         detail = (se or so).strip()[-200:]
