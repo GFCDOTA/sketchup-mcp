@@ -239,5 +239,15 @@ def test_an_active_claim_on_another_issue_does_not_block_an_unrelated_candidate(
     assert res.candidate is not None and res.candidate.node.number == 1
 
 
-def test_the_intake_agent_name_never_collides_with_a_real_claim_holder():
-    assert intake.INTAKE_AGENT not in {"claude", "codex", "gpt", "executor"}
+def test_the_intake_agent_is_no_name_at_all_so_no_claim_is_ever_its_own():
+    assert intake.INTAKE_AGENT is None
+
+
+@pytest.mark.parametrize("holder", ["intake", "claude", "None", ""])
+def test_an_active_claim_on_another_issue_of_the_same_component_blocks_the_candidate_whatever_the_agent_name(holder):
+    state = es.default_state()
+    es.claim(state, 9, holder, "feat/x", "a" * 40, ["FP-060|-"])                                      # outra Issue, MESMO componente que a candidata
+    assert plan([issue(1)], state=state).candidate is None
+    other = es.default_state()
+    es.claim(other, 9, holder, "feat/x", "a" * 40, ["FP-043|P1"])                                     # componente diferente: nao bloqueia
+    assert plan([issue(1)], state=other).candidate.node.number == 1

@@ -31,7 +31,7 @@ ALLOWED_SPECS = frozenset({"FP-060"})
 EVENT_TYPE = "IMPLEMENT_REQUESTED"
 AGGREGATE = "issue"
 PRODUCER = "intake"
-INTAKE_AGENT = "intake"                 # nome que NUNCA detem um claim: todo claim ativo (inclusive o de `claude`) e externo ao intake, nos conflitos de Issue e de componente
+INTAKE_AGENT = None                     # SEM nome: `decide` exclui dos conflitos so os claims do agente dado, e nenhum claim tem agente None => todo claim ativo (de qualquer nome, inclusive "intake") e externo
 
 
 @dataclass
@@ -75,7 +75,7 @@ def refusal(verdict: bd.Verdict, readiness: dict[int, dict] | None = None, proje
 
 
 def plan(issues: list[dict], prs: list[dict], state: dict, statuses: dict[int, str] | None = None,
-         readiness: dict[int, dict] | None = None, agent: str = INTAKE_AGENT) -> IntakePlan:
+         readiness: dict[int, dict] | None = None, agent: str | None = INTAKE_AGENT) -> IntakePlan:
     """O candidato do intake: a primeira Issue ELEGIVEL (ordem do agendador) que passa na barreira. Puro."""
     _task, verdicts = ts.decide(issues, prs, state, statuses, None, agent, None)       # readiness=None: ver o docstring do modulo
     skipped, chosen = [], None
