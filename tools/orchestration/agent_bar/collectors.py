@@ -504,9 +504,10 @@ def collect_backlog(gh: Callable[[list[str]], tuple[int, str]] = run_gh, owner: 
 
 _SECRET = re.compile(
     r"(gh[pousr]_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}|sk-[A-Za-z0-9][A-Za-z0-9_-]{15,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|AKIA[0-9A-Z]{12,}"
-    r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|Bearer\s+[A-Za-z0-9._~+/-]{10,}"
+    r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|(?i:bearer)\s+[A-Za-z0-9._~+/=-]{8,}"
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"
-    r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token|token)\b)[\"']?\s*[:=]\s*"
+    r"|(?i:(?<![A-Za-z0-9])[A-Za-z0-9_-]*(?:api[_-]?key|secret|password|passwd|token|credential)[A-Za-z0-9_-]*)[\"']?\s*[:=]\s*"
+    r"(?:(?i:bearer|basic|token)\s+)?"                                    # `token=Bearer abc...`: o esquema nao encerra o valor, o valor opaco tambem sai
     r"(?:\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'|[^\s;}\"']{1,}))")        # valor ENTRE ASPAS inteiro (virgulas, espacos, escapes) ou sem aspas ate o delimitador; inclui JSON
 
 
@@ -553,10 +554,10 @@ def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str | None
             db.row_factory = sqlite3.Row
             rows = [dict(r) for r in db.execute(
                 "SELECT id,event_type,idempotency_key,status,attempt,available_at,lease_owner,lease_until,error,updated_at FROM events ORDER BY id")]
-            # (instante, id da transicao): em empate de timestamp vale a ORDEM PERSISTIDA das transicoes (id crescente), nunca a ordem dos ids dos eventos
-            failed_at = {r["event_id"]: (r["at"], r["tid"]) for r in db.execute(
-                "SELECT t.event_id AS event_id, t.at AS at, t.id AS tid FROM transitions t WHERE t.from_status='RUNNING' AND t.to_status IN ('PENDING','DLQ') "
-                "AND t.id = (SELECT MAX(u.id) FROM transitions u WHERE u.event_id = t.event_id AND u.from_status='RUNNING' AND u.to_status IN ('PENDING','DLQ'))")}
+            # a falha mais recente e a da ORDEM PERSISTIDA das transicoes (id crescente), nunca o relogio de parede (ele pode recuar). UMA passagem agrupada pela tabela
+            # (MAX(id) por evento) + busca pela chave primaria: sem subconsulta correlacionada, que varreria `transitions` inteira para cada falha (sem indice por event_id)
+            failed_at = {r["event_id"]: r["tid"] for r in db.execute(
+                "SELECT event_id, MAX(id) AS tid FROM transitions WHERE from_status='RUNNING' AND to_status IN ('PENDING','DLQ') GROUP BY event_id")}
             # a OUTBOX persistente (publicacao no GitHub etc.) tem fila, lease, retries e DLQ proprios: um evento DONE cuja publicacao foi para a DLQ da outbox e PERDA real
             orows = [dict(r) for r in db.execute(
                 "SELECT id,event_id,target,operation,idempotency_key,status,attempts,available_at,lease_until,error FROM outbox ORDER BY id")]

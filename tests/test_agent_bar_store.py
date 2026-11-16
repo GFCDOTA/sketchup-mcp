@@ -409,3 +409,39 @@ def test_two_failures_at_the_same_instant_are_ordered_by_the_persisted_transitio
     store.fail(low, "falha do evento de id menor (a mais recente)", retry_delay=900)               # ...e o de id MENOR falha depois, no MESMO instante (relogio fixo)
     out = col.collect_store(tmp_path, dt.datetime.fromtimestamp(clock.t, dt.timezone.utc))
     assert out["last_error"]["key"] == "k-low" and "id menor" in out["last_error"]["error"]
+
+
+
+# -- revisao do Codex (#663): Bearer depois de `token=`, relogio que recua, coleta em uma passagem -------------------------------------------------------
+@pytest.mark.parametrize("raw", ["token=Bearer abcdefghijklmnop", "Authorization: bearer abcdefghijklmnop", "TOKEN: BEARER abcdefghijklmnop",
+                                 '{"client_secret": "xyz-123-abc"}', "refresh_token=r3fr3sh-t0k3n"])
+def test_the_whole_credential_is_redacted_including_bearer_after_token_and_any_case(raw):
+    out = col.redact_secrets(raw)
+    assert "abcdefghijklmnop" not in out and "xyz-123-abc" not in out and "r3fr3sh" not in out and "<segredo>" in out
+
+
+def test_the_most_recent_failure_follows_the_persisted_order_even_if_the_wall_clock_goes_back(store, tmp_path):
+    clock = store.clock_handle
+    store.publish("CORRECTION_REQUESTED", "k-old", "pr:1", {"x": 1})
+    store.publish("CORRECTION_REQUESTED", "k-new", "pr:2", {"x": 1})
+    a = store.claim(("CORRECTION_REQUESTED",), "w", 3600 * 2, job_id="pr:1")
+    b = store.claim(("CORRECTION_REQUESTED",), "w", 3600 * 2, job_id="pr:2")
+    store.fail(a, "erro ANTIGO", retry_delay=900)
+    clock.t -= 3600                                                                                  # o relogio recuou uma hora
+    store.fail(b, "erro RECENTE", retry_delay=900)                                                   # persistida DEPOIS, com horario MENOR
+    out = col.collect_store(tmp_path, dt.datetime.fromtimestamp(clock.t, dt.timezone.utc))
+    assert out["last_error"]["error"] == "erro RECENTE"
+
+
+def test_the_failure_query_is_a_single_grouped_pass_without_a_correlated_subquery(store, tmp_path, monkeypatch):
+    seen = []
+    real = sqlite3.connect
+
+    def spy(*a, **k):
+        conn = real(*a, **k)
+        conn.set_trace_callback(seen.append)
+        return conn
+    monkeypatch.setattr(sqlite3, "connect", spy)
+    col.collect_store(tmp_path, NOW)
+    q = [s for s in seen if "transitions" in s]
+    assert q and all("GROUP BY event_id" in s and s.count("FROM transitions") == 1 for s in q)
