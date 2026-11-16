@@ -415,3 +415,44 @@ def test_a_payload_decoded_by_the_store_as_a_dict_is_accepted_too():
     ev = event(status="PENDING")
     ev["payload"] = json.loads(ev["payload"])
     assert sd.compare([item(state="QUEUED")], [ev], now=1000.0) == []
+
+
+# -- 11a revisao do Codex (#634): barreira de executor pausado e RUNNING de qualquer tipo ----------------------------------------------------------------
+def test_a_running_comment_item_blocks_the_json_pick_so_the_queue_is_not_drained():
+    found = sd.compare([item(2, kind="comment", state="RUNNING"), item(1, state="QUEUED")], [event(status="PENDING")], now=1000.0)
+    assert ("JSON_RUNNING", "k2") in codes(found)
+
+
+def test_a_non_running_comment_is_still_ignored():
+    assert sd.compare([item(2, kind="comment", state="DONE_AWAITING_REREVIEW"), item(1, state="QUEUED")], [event(status="PENDING")], now=1000.0) == []
+
+
+def _env(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "bridge.json"))
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "store.db"))
+
+
+def test_the_check_refuses_to_run_while_an_executor_holds_the_instance_lock(tmp_path, monkeypatch, capsys):
+    from tools.orchestration import event_executor as ex
+    _env(tmp_path, monkeypatch)
+    holder = ex.InstanceLock(ex.instance_lock_path())
+    assert holder.acquire()
+    try:
+        assert sd.executor_running() is True
+        assert sd.main(["--json"]) == 2
+        assert "executor JSON ativo" in json.loads(capsys.readouterr().out)["error"]
+    finally:
+        holder.release()
+    assert sd.executor_running() is False                                                          # o probe nao deixa o lock preso
+
+
+def test_the_live_executor_override_exists_for_inspection_only(tmp_path, monkeypatch, capsys):
+    from tools.orchestration import event_executor as ex
+    _env(tmp_path, monkeypatch)
+    holder = ex.InstanceLock(ex.instance_lock_path())
+    assert holder.acquire()
+    try:
+        assert sd.main(["--json", "--allow-live-executor"]) == 2                                   # passa da barreira e para no banco ausente (nada foi criado)
+        assert "EventStore ausente" in json.loads(capsys.readouterr().out)["error"]
+    finally:
+        holder.release()

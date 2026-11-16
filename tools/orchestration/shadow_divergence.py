@@ -100,6 +100,8 @@ def compare(queue: list[dict], events: list[dict], now: float | None = None) -> 
         if problem:
             raise ValueError(f"fila com item invalido #{n}: {problem}")           # nunca ignorar em silencio: um `ok` falso libera o cutover
         if item.get("kind") != "review":
+            if item.get("state") == "RUNNING":                                  # `pick` do executor JSON nao escolhe NADA enquanto QUALQUER item esta RUNNING, inclusive um comentario
+                found.append(Divergence("JSON_RUNNING", str(item.get("key")), "item (nao-review) RUNNING no executor JSON: a fila nao esta drenada; drene antes do cutover"))
             continue
         key, state = item["key"], item.get("state")
         event = mirror.get(mirror_key(item))
@@ -225,6 +227,19 @@ def invalid_item(item: dict) -> str:
     return ""
 
 
+def executor_running() -> bool:
+    """O executor JSON esta VIVO? Probe do lock de instancia (lock do SO mantido pela vida do processo). Sem executor parado nao ha barreira: um item lido como QUEUED pode virar
+    RUNNING logo depois da leitura e o relatorio `ok` seria falso. O probe adquire e solta o lock; se nao adquire, ha um executor segurando a fila."""
+    from tools.orchestration import event_executor as ex
+    if not ex.instance_lock_path().exists():                              # nenhum executor jamais rodou aqui: nada a segurar (e o detector e SOMENTE leitura: nao cria o arquivo)
+        return False
+    lock = ex.InstanceLock(ex.instance_lock_path())
+    if not lock.acquire():
+        return True
+    lock.release()
+    return False
+
+
 def _load():
     """(fila JSON, eventos somente leitura). Nao cria nada: fonte ausente ou invalida e erro, nao divergencia."""
     from tools.orchestration import event_bridge as eb
@@ -239,7 +254,12 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--json", action="store_true", help="relatorio em JSON")
     ap.add_argument("--strict", action="store_true", help="orfao TERMINAL (evento ja concluido sem item JSON) tambem falha; orfao executavel sempre falha")
+    ap.add_argument("--allow-live-executor", action="store_true", help="inspecao com o executor ativo (o resultado NAO autoriza o cutover)")
     ns = ap.parse_args(argv)
+    if not ns.allow_live_executor and executor_running():
+        msg = "executor JSON ativo: pause-o (pare a tarefa agendada) e drene a fila antes de verificar o cutover; --allow-live-executor so para inspecao, nunca para autorizar o cutover"
+        print(json.dumps({"ok": False, "error": msg}) if ns.json else f"erro: {msg}")
+        return 2
     try:
         queue, store = _load()
     except (OSError, ValueError, sqlite3.Error) as exc:
