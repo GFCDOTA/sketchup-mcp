@@ -816,6 +816,76 @@
     "sandbox_exit_code": 1,
     "run_alone": true
    }
+  },
+  {
+   "node_id": "tests/test_event_store.py::TestRealProcesses::test_concurrent_recovery_records_one_dlq_and_claims_successor_once",
+   "reason": "multiprocessing_pipe_denied_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "PermissionError: [WinError 5] Acesso negado (multiprocessing.Pipe -> CreateNamedPipe negado no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_store.py::TestRealProcesses::test_different_aggregates_can_run_concurrently",
+   "reason": "multiprocessing_pipe_denied_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "PermissionError: [WinError 5] Acesso negado (multiprocessing.Pipe -> CreateNamedPipe negado no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_store.py::TestRealProcesses::test_outbox_only_one_concurrent_publisher",
+   "reason": "multiprocessing_pipe_denied_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "PermissionError: [WinError 5] Acesso negado (multiprocessing.Pipe -> CreateNamedPipe negado no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_store.py::TestRealProcesses::test_process_crash_recovery_fences_old_owner[event]",
+   "reason": "multiprocessing_pipe_denied_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "PermissionError: [WinError 5] Acesso negado (multiprocessing.Pipe -> CreateNamedPipe negado no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_store.py::TestRealProcesses::test_process_crash_recovery_fences_old_owner[outbox]",
+   "reason": "multiprocessing_pipe_denied_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "PermissionError: [WinError 5] Acesso negado (multiprocessing.Pipe -> CreateNamedPipe negado no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_store.py::TestRealProcesses::test_same_aggregate_different_events_have_only_one_owner",
+   "reason": "multiprocessing_pipe_denied_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "PermissionError: [WinError 5] Acesso negado (multiprocessing.Pipe -> CreateNamedPipe negado no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_store.py::TestRealProcesses::test_same_event_has_only_one_concurrent_owner",
+   "reason": "multiprocessing_pipe_denied_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "failed",
+    "first_error": "PermissionError: [WinError 5] Acesso negado (multiprocessing.Pipe -> CreateNamedPipe negado no AppContainer)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
   }
  ]
 }

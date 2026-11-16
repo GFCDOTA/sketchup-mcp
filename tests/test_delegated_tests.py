@@ -112,7 +112,9 @@ def test_a_pr_that_touches_the_policy_the_workflow_the_collector_or_github_loses
     {"node_id": "tests/", "case": "diretorio"},
     {"node_id": "tools/x.py::test_a", "case": "fora de tests/"},
     {"node_id": "../tests/x.py::test_a", "case": "travessia"},
-    {"node_id": "tests/x.py::TestClass::test_a", "case": "classe/categoria"},
+    {"node_id": "tests/x.py::A::B::test_a", "case": "classe aninhada"},
+    {"node_id": "tests/x.py::TestClass::", "case": "metodo vazio"},
+    {"node_id": "tests/x.py::TestClass::test_*", "case": "curinga no metodo"},
     {"node_id": "tests/x.py::test_a[", "case": "param malformado"},
     {"node_id": "", "case": "vazio"},
     {"node_id": 5, "case": "tipo"},
@@ -122,6 +124,30 @@ def test_the_policy_refuses_wildcards_whole_files_categories_and_malformed_ids(b
     raw["delegated"] = [{"node_id": bad["node_id"], "reason": "r", "sandbox_proof": {"first_error": "e"}}]
     with pytest.raises(dt.DelegationError, match="node id invalido"):
         dt.validate_policy(raw, "b" * 40)
+
+
+@pytest.mark.parametrize("nid", ["tests/x.py::TestClass::test_a", "tests/x.py::TestClass::test_p[event]"])
+def test_an_exact_class_method_id_is_accepted(nid):
+    raw = policy_json([nid])
+    assert dt.validate_policy(raw, "b" * 40).ids == (nid,)
+
+
+def test_a_class_only_id_never_deselects_its_methods_so_they_still_run_in_the_sandbox(tmp_path):
+    tests = tmp_path / "tests"
+    tests.mkdir()
+    (tests / "test_c.py").write_text(textwrap.dedent('''
+        class TestReal:
+            def test_a(self): pass
+            def test_b(self): pass
+    '''), encoding="utf-8")
+    report = tmp_path / "rep.json"
+    (tmp_path / f"{dt.PLUGIN_NAME}.py").write_text(dt.plugin_source(["tests/test_c.py::TestReal", "tests/test_c.py::TestReal::test_b"], str(report)), encoding="utf-8")
+    r = subprocess.run([sys.executable, "-m", "pytest", "tests", "-p", dt.PLUGIN_NAME, "-v", "-p", "no:cacheprovider"], cwd=tmp_path, capture_output=True, text=True,
+                       env={**__import__("os").environ, "PYTHONPATH": str(tmp_path)})
+    assert r.returncode == 0, r.stdout[-800:]
+    assert "test_a PASSED" in r.stdout and "test_b PASSED" not in r.stdout                        # so o metodo exato saiu
+    data = json.loads(report.read_text(encoding="utf-8"))
+    assert data["deselected"] == ["tests/test_c.py::TestReal::test_b"] and data["not_collected"] == ["tests/test_c.py::TestReal"]
 
 
 @pytest.mark.parametrize("mutate,match", [
@@ -498,9 +524,13 @@ def test_the_repository_policy_matches_the_workflow_it_pins_and_names_only_exact
     pol = dt.validate_policy(json.loads((root / POLICY_FILE).read_text(encoding="utf-8")), "b" * 40)
     blob = subprocess.run(["git", "hash-object", str(root / dt.WORKFLOW_PATH)], capture_output=True, text=True, check=True).stdout.strip()
     assert pol.workflow_blob_sha == blob                                                      # workflow e politica andam juntos
-    files = {"tests/test_event_executor_deliver.py": 28, "tests/test_closed_loop_lab.py": 53}                  # 28 do executor + 53 do laboratorio (decisao de 2026-11-16)
+    # 28 do executor + 53 do laboratorio (git) + 7 TestRealProcesses do event_store (pipe nomeado do multiprocessing negado no AppContainer) — 2026-11-16
+    files = {"tests/test_event_executor_deliver.py": 28, "tests/test_closed_loop_lab.py": 53, "tests/test_event_store.py": 7}
     assert len(pol.ids) == sum(files.values()) <= dt.MAX_DELEGATED
     assert {f: sum(1 for i in pol.ids if i.startswith(f + "::")) for f in files} == files
     raw = json.loads((root / POLICY_FILE).read_text(encoding="utf-8"))["delegated"]
-    assert all(d["reason"] == "git_unavailable_in_appcontainer" and d["sandbox_proof"]["run_alone"] is True for d in raw)   # prova individual de cada um
+    reasons = {"tests/test_event_store.py": "multiprocessing_pipe_denied_in_appcontainer"}
+    assert all(d["reason"] == reasons.get(d["node_id"].split("::")[0], "git_unavailable_in_appcontainer") and d["sandbox_proof"]["run_alone"] is True
+               for d in raw)                                                                                   # prova individual de cada um
+    assert all(i.startswith("tests/test_event_store.py::TestRealProcesses::") for i in pol.ids if i.startswith("tests/test_event_store.py"))
     assert not any("real_appcontainer" in i for i in pol.ids)                                                 # o teste @windows_only seria PULADO no CI Linux
