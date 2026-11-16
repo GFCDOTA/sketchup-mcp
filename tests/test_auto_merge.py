@@ -16,6 +16,11 @@ CFG = guards.load_config()
 ON = (True, "")
 
 
+def ALWAYS(repo, number, head):
+    """Proveniencia concedida (o registro local do publicador confirma): os testes de decisao pura nao constroem um EventStore."""
+    return True
+
+
 def pr(**kw):
     base = {"number": 7, "state": "open", "merged": False, "draft": False, "mergeable_state": "clean", "user": {"login": "fmodesto30"},
             "base": {"ref": "develop", "repo": {"full_name": REPO}}, "head": {"sha": HEAD, "repo": {"full_name": REPO}},
@@ -55,6 +60,7 @@ def decide(**kw):
     args = {"pr": pr(), "files": files(), "runs": runs(), "reviews": [approval()], "issues": issues(), "policy": POLICY, "cfg": CFG, "is_enabled": ON}
     args.update(kw)
     args["pr"] = {"changed_files": len(args["files"]), **args["pr"]}                       # a API declara quantos arquivos o PR tem; o helper acompanha a lista
+    args.setdefault("provenance", ALWAYS)
     return am.decide(args.pop("pr"), args.pop("files"), args.pop("runs"), args.pop("reviews"), args.pop("issues"), args.pop("policy"), args.pop("cfg"), **args)
 
 
@@ -185,13 +191,14 @@ GOOD_PROTECTION = {"required_pull_request_reviews": {"required_approving_review_
 
 class Gh:
     def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, draft=False, protection=None, protection_boom=None, rules=None, rules_boom=None,
-                 scheduled_only=False, **overrides):
+                 scheduled_only=False, mutate_last=None, cancel_works=True, **overrides):
         self.head, self.fresh_head, self.boom, self.labelled, self.overrides, self.calls = head, fresh_head, boom, labelled, overrides, []
         self.draft = draft
         self.pulls = 0
         self.protection = GOOD_PROTECTION if protection is None else protection
         self.protection_boom = protection_boom
         self.rules, self.rules_boom, self.scheduled_only = [] if rules is None else rules, rules_boom, scheduled_only
+        self.mutate_last, self.cancel_works = mutate_last, cancel_works
 
     def __call__(self, path):
         self.calls.append(path)
@@ -202,9 +209,12 @@ class Gh:
         if path == f"repos/{REPO}/pulls/7":
             self.pulls += 1
             sha = self.fresh_head if (self.fresh_head and self.pulls > 1) else self.head
-            if self.pulls >= 3:                                                                    # a 3a leitura e a CONFIRMACAO depois do comando de merge
+            if self.pulls == 3 and self.mutate_last:                                               # a 3a leitura e a ULTIMA antes do merge: algo muda nela
+                return pr(head={"sha": sha, "repo": {"full_name": REPO}}, **{"changed_files": 1, **self.overrides, **self.mutate_last})
+            if self.pulls >= 4:                                                                    # a 4a leitura e a CONFIRMACAO depois do comando de merge; a 5a, a releitura apos cancelar
                 if self.scheduled_only:
-                    return pr(head={"sha": sha, "repo": {"full_name": REPO}}, auto_merge={"enabled_by": "x"}, changed_files=1)
+                    cancelled = self.pulls >= 5 and self.cancel_works
+                    return pr(head={"sha": sha, "repo": {"full_name": REPO}}, auto_merge=None if cancelled else {"enabled_by": "x"}, changed_files=1)
                 return pr(head={"sha": sha, "repo": {"full_name": REPO}}, merged=True, state="closed", merge_commit_sha="c" * 40, changed_files=1)
             return pr(head={"sha": sha, "repo": {"full_name": REPO}}, **{"changed_files": 1, **self.overrides})
         if path.startswith(f"repos/{REPO}/pulls/7/files"):
@@ -250,14 +260,14 @@ def test_a_disabled_cycle_reads_nothing_and_merges_nothing():
 
 def test_the_plan_never_merges_even_when_the_decision_is_merge():
     gh, runner = Gh(), Runner()
-    out = am.cycle(gh, POLICY, REPO, apply=False, runner=runner, is_enabled=ON)
+    out = am.cycle(gh, POLICY, REPO, apply=False, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "MERGE" and runner.calls == [] and "merged" not in out["prs"][0]
 
 
 def test_apply_merges_with_match_head_commit_and_the_executor_environment(monkeypatch):
     monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
     gh, runner = Gh(), Runner()
-    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     argv, kw = runner.calls[0]
     assert out["prs"][0]["merged"] is True and argv[:4] == ["gh", "pr", "merge", "7"]
     assert argv[argv.index("--match-head-commit") + 1] == HEAD and "--merge" in argv and "--admin" not in argv and "--auto" not in argv
@@ -266,18 +276,18 @@ def test_apply_merges_with_match_head_commit_and_the_executor_environment(monkey
 
 def test_a_head_that_moves_between_the_decision_and_the_merge_is_not_merged():
     gh, runner = Gh(fresh_head=OLD), Runner()
-    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and runner.calls == []
 
 
 def test_a_refused_merge_from_github_is_reported_not_hidden():
-    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=Runner(rc=1, err="not mergeable: protecao"), is_enabled=ON)
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=Runner(rc=1, err="not mergeable: protecao"), is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["merged"] is False and "recusado" in out["prs"][0]["merge_message"]
 
 
 def test_a_github_failure_is_an_error_row_and_never_a_merge():
     runner = Runner()
-    out = am.cycle(Gh(boom=RuntimeError("502")), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(boom=RuntimeError("502")), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "ERROR" and "listagem" in out["prs"][0]["reasons"][0]
     assert runner.calls == []
 
@@ -289,14 +299,14 @@ def test_a_failure_while_gathering_the_facts_of_one_pr_is_an_error_row_and_never
                 raise RuntimeError("502 nos arquivos")
             return super().__call__(path)
     runner = Runner()
-    out = am.cycle(Half(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Half(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "ERROR" and runner.calls == []
 
 
 def test_only_open_non_draft_prs_of_the_executor_are_candidates():
     for gh in (Gh(labelled=False), Gh(draft=True)):
         runner = Runner()
-        assert am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)["prs"] == [] and runner.calls == []
+        assert am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)["prs"] == [] and runner.calls == []
 
 
 def test_merge_refuses_a_head_that_is_not_a_full_sha():
@@ -323,7 +333,7 @@ def test_the_reinforced_marker_must_bind_repo_pr_head_and_verdict_exactly(name, 
 
 def test_the_reinforced_review_must_be_on_the_exact_head_too():
     stale = approval(commit="c" * 40, body=strong())                                           # marcador certo, review em outro commit
-    assert am.reinforced(stale, REPO, 7, HEAD) is False and am.reinforced(approval(body=strong()), REPO, 7, HEAD) is True
+    assert am.reinforced(stale, REPO, 7, HEAD, ALWAYS) is False and am.reinforced(approval(body=strong()), REPO, 7, HEAD, ALWAYS) is True
 
 
 @pytest.mark.parametrize("path", ["Docs/governance/review_policy.json", "DOCS/GOVERNANCE/x.json", "docs\\governance\\x.json", "./docs/governance/x.json",
@@ -362,13 +372,13 @@ class MovingGh(Gh):
 @pytest.mark.parametrize("change", ["base", "label", "issue", "closed"])
 def test_every_fact_is_decided_again_right_before_the_merge_not_only_the_head(change):
     gh, runner = MovingGh(change), Runner()
-    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and "mudaram" in out["prs"][0]["reasons"][0] and runner.calls == []
 
 
 def test_an_unchanged_world_still_merges_after_the_second_decision():
     runner = Runner()
-    assert am.cycle(MovingGh("nada"), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)["prs"][0]["merged"] is True and len(runner.calls) == 1
+    assert am.cycle(MovingGh("nada"), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)["prs"][0]["merged"] is True and len(runner.calls) == 1
 
 
 def test_complete_check_runs_refuses_a_partial_answer():
@@ -435,7 +445,7 @@ def test_a_pr_above_the_api_cap_cannot_hide_a_governance_path_behind_a_truncated
 def test_the_merge_runs_only_after_the_gh_identity_is_verified_in_the_same_environment(monkeypatch):
     monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
     runner = Runner()
-    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["merged"] is True and len(runner.who_calls) == 1 and len(runner.calls) == 1
     who_argv, who_kw = runner.who_calls[0]
     assert who_argv[1:4] == ["api", "user", "--jq"] and "GH_TOKEN" not in who_kw["env"]               # consulta com o ambiente do executor (sem token de env)
@@ -445,13 +455,13 @@ def test_the_merge_runs_only_after_the_gh_identity_is_verified_in_the_same_envir
 @pytest.mark.parametrize("login", ["fmmodesto", "FMMODESTO", "alguem-com-bypass", ""])
 def test_a_gh_authenticated_as_a_reviewer_or_anyone_else_never_merges(login):
     runner = Runner(login=login)
-    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "REFUSE" and runner.calls == [] and "merged" not in out["prs"][0]
 
 
 def test_a_failed_identity_lookup_never_merges():
     runner = Runner(who_rc=1)
-    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "REFUSE" and "nao verificada" in out["prs"][0]["reasons"][0] and runner.calls == []
 
 
@@ -501,9 +511,9 @@ REAL_PUBLISHED_APPROVE = (
 def test_the_reinforced_check_accepts_the_real_body_that_the_production_publisher_posts():
     head = "998f91cdd16675a6c305dee10b39ad07254c3d99"
     review = approval(commit=head, body=REAL_PUBLISHED_APPROVE)
-    assert am.reinforced(review, "GFCDOTA/sketchup-mcp", 654, head) is True
-    assert am.reinforced(review, "GFCDOTA/sketchup-mcp", 655, head) is False                       # outro PR
-    assert am.reinforced(review, "GFCDOTA/other", 654, head) is False                              # outro repositorio
+    assert am.reinforced(review, "GFCDOTA/sketchup-mcp", 654, head, ALWAYS) is True
+    assert am.reinforced(review, "GFCDOTA/sketchup-mcp", 655, head, ALWAYS) is False                       # outro PR
+    assert am.reinforced(review, "GFCDOTA/other", 654, head, ALWAYS) is False                              # outro repositorio
 
 
 def test_the_marker_is_what_the_outbox_target_appends_to_the_review_body():
@@ -511,13 +521,13 @@ def test_the_marker_is_what_the_outbox_target_appends_to_the_review_body():
     head = "a" * 40
     key = f"review:{REPO}#7:{head}:APPROVE"
     body = f"Codex CLI (revisor independente) — HEAD {head} — confianca HIGH\n\n{target.marker(key)}"
-    assert am.reinforced(approval(commit=head, body=body), REPO, 7, head) is True
+    assert am.reinforced(approval(commit=head, body=body), REPO, 7, head, ALWAYS) is True
 
 
 # -- a protecao da branch precisa EXIGIR aprovacao independente antes de qualquer merge automatico (diretriz do proprietario) -----------------------------
 def test_with_a_protection_that_requires_approval_the_merge_goes_ahead():
     runner = Runner()
-    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["merged"] is True and am.protection_gaps(Gh(), REPO) == []
 
 
@@ -531,16 +541,16 @@ def test_with_a_protection_that_requires_approval_the_merge_goes_ahead():
 ])
 def test_a_protection_that_would_allow_a_merge_without_independent_review_blocks_the_automatic_merge(protection, needle):
     runner = Runner()
-    plan = am.cycle(Gh(protection=protection), POLICY, REPO, apply=False, runner=runner, is_enabled=ON)
+    plan = am.cycle(Gh(protection=protection), POLICY, REPO, apply=False, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert plan["prs"][0]["code"] == "WAIT" and any(needle in r for r in plan["prs"][0]["reasons"])                    # o plano ja mostra o motivo
-    out = am.cycle(Gh(protection=protection), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(protection=protection), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and runner.calls == [] and runner.who_calls == []                           # e o merge nao acontece, mesmo com CI verde e aprovacao
 
 
 @pytest.mark.parametrize("boom", [RuntimeError("403 sem permissao"), OSError("rede"), ValueError("json")])
 def test_an_unreadable_protection_is_fail_closed(boom):
     runner = Runner()
-    out = am.cycle(Gh(protection_boom=boom), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(protection_boom=boom), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and "nao pode ser lida" in out["prs"][0]["reasons"][0] and runner.calls == []
 
 
@@ -555,7 +565,7 @@ def test_a_protection_removed_between_the_decision_and_the_merge_blocks_that_mer
                 return {"enforce_admins": {"enabled": True}}                                                          # a exigencia de aprovacao sumiu depois da 1a decisao
             return super().__call__(path)
     runner = Runner()
-    out = am.cycle(Drops(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Drops(), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and "nao exige aprovacao" in out["prs"][0]["reasons"][0] and runner.calls == []
 
 
@@ -567,13 +577,15 @@ def test_the_module_never_writes_branch_protection():
 # -- 4a revisao do Codex (#648): fila de merge, confirmacao do merge, ordem das leituras e renomeacao -----------------------------------------------
 def test_an_exit_zero_that_only_scheduled_the_merge_is_not_reported_as_merged():
     runner = Runner()
-    out = am.cycle(Gh(scheduled_only=True), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(scheduled_only=True), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     row = out["prs"][0]
-    assert len(runner.calls) == 1 and row["merged"] is False and "NAO esta mesclado" in row["merge_message"]
+    assert row["merged"] is False and "NAO esta mesclado" in row["merge_message"]
+    assert [c[0][1:3] for c in runner.calls] == [["pr", "merge"], ["pr", "merge"]] and "--disable-auto" in runner.calls[1][0]      # o agendamento foi CANCELADO
+    assert "cancelado e confirmado" in row["merge_message"] and row["code"] == "MERGE"
 
 
 def test_a_confirmed_merge_reports_the_merge_commit():
-    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=Runner(), is_enabled=ON)
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=Runner(), is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["merged"] is True and out["prs"][0]["merge_message"].startswith("mesclado em ccc")
 
 
@@ -593,14 +605,14 @@ def test_a_failure_confirming_the_merge_is_not_a_success():
 
 def test_a_branch_with_a_merge_queue_blocks_the_automatic_merge():
     runner = Runner()
-    out = am.cycle(Gh(rules=[{"type": "merge_queue"}]), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(rules=[{"type": "merge_queue"}]), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and any("merge queue" in r for r in out["prs"][0]["reasons"]) and runner.calls == []
 
 
 @pytest.mark.parametrize("boom", [RuntimeError("403"), OSError("rede")])
 def test_unreadable_branch_rules_are_fail_closed(boom):
     runner = Runner()
-    out = am.cycle(Gh(rules_boom=boom), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(rules_boom=boom), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and any("nao podem ser lidas" in r for r in out["prs"][0]["reasons"]) and runner.calls == []
 
 
@@ -610,7 +622,7 @@ def test_branch_rules_in_an_unexpected_shape_are_fail_closed():
 
 def test_a_pr_that_already_has_auto_merge_enabled_on_github_is_not_merged_by_this_module():
     runner = Runner()
-    out = am.cycle(Gh(auto_merge={"enabled_by": "alguem"}), POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(Gh(auto_merge={"enabled_by": "alguem"}), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and any("auto-merge" in r for r in out["prs"][0]["reasons"]) and runner.calls == []
 
 
@@ -618,14 +630,14 @@ def test_a_label_added_while_the_identity_is_being_checked_blocks_the_merge():
     """O merge so e decidido DEPOIS da consulta de identidade (a chamada lenta): uma label humana posta durante ela e vista."""
     gh = Gh()
     runner = Runner(on_who=lambda: gh.overrides.update(labels=[{"name": "security"}]))
-    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and runner.calls == []
 
 
 def test_a_base_changed_while_the_identity_is_being_checked_blocks_the_merge():
     gh = Gh()
     runner = Runner(on_who=lambda: gh.overrides.update(base={"ref": "release", "repo": {"full_name": REPO}}))
-    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     assert out["prs"][0]["code"] == "WAIT" and runner.calls == []
 
 
@@ -639,3 +651,71 @@ def test_a_rename_between_allowed_and_forbidden_types_is_refused(old, new):
 def test_a_rename_between_two_allowed_types_is_not_refused_for_type():
     f = {"filename": "docs/b.md", "previous_filename": "docs/a.md", "status": "renamed", "additions": 0, "deletions": 0, "changes": 0, "patch": "@@"}
     assert not any("tipo nao permitido" in r for r in decide(files=[f]).reasons)
+
+
+# -- 5a revisao do Codex (#648): proveniencia fora do texto, ultima leitura, cancelamento do agendamento, remocao ambigua -------------------------------
+def test_a_manual_approval_that_copies_the_public_marker_is_not_reinforced_without_provenance():
+    manual = approval(body=strong())                                                                   # texto identico ao do publicador, escrito a mao
+    assert am.reinforced(manual, REPO, 7, HEAD) is False and am.reinforced(manual, REPO, 7, HEAD, lambda *a: False) is False
+    d = decide(files=files("tools/orchestration/x.py"), reviews=[manual], issues=issues(labels=(am.GPT_LABEL,)), provenance=lambda *a: False)
+    assert d.code == "WAIT" and any("registro local" in r for r in d.reasons)
+    assert decide(files=files("tools/orchestration/x.py"), reviews=[manual], issues=issues(labels=(am.GPT_LABEL,))).code == "MERGE"      # com proveniencia (ALWAYS): ok
+
+
+def test_without_any_provenance_callable_a_critical_path_is_never_reinforced():
+    assert am.reinforced(approval(body=strong()), REPO, 7, HEAD) is False
+
+
+def test_the_outbox_provenance_reads_the_local_publisher_record_not_the_review_text(tmp_path):
+    from tools.orchestration.event_store import EventStore
+    store = EventStore(tmp_path / "e.db")
+    key, job = f"review:{REPO}#7:{HEAD}:APPROVE", f"review:{REPO}#7"
+    check = am.outbox_provenance(store)
+    assert check(REPO, 7, HEAD) is False                                                                # sem registro
+    eid, _ = store.publish("REVIEW_REQUESTED", key, job, {"pr": 7}, producer="codex_reviewer")
+    assert check(REPO, 7, HEAD) is False                                                                # registrado mas ainda nao concluido (PENDING/RUNNING)
+    store.complete(store.claim_by_id(eid, "w", 60), {"verdict": "APPROVE"})
+    assert check(REPO, 7, HEAD) is True and check(REPO, 8, HEAD) is False and check(REPO, 7, OLD) is False and check("x/y", 7, HEAD) is False
+
+
+def test_a_provenance_record_from_another_producer_does_not_count(tmp_path):
+    from tools.orchestration.event_store import EventStore
+    store = EventStore(tmp_path / "e.db")
+    eid, _ = store.publish("REVIEW_REQUESTED", f"review:{REPO}#7:{HEAD}:APPROVE", f"review:{REPO}#7", {"pr": 7}, producer="alguem-falso")
+    store.complete(store.claim_by_id(eid, "w", 60), {"verdict": "APPROVE"})
+    assert am.outbox_provenance(store)(REPO, 7, HEAD) is False
+
+
+def test_an_unreadable_provenance_store_is_no_proof():
+    class Broken:
+        def events(self, job_id=None):
+            raise OSError("banco ilegivel")
+    assert am.outbox_provenance(Broken())(REPO, 7, HEAD) is False
+
+
+@pytest.mark.parametrize("mutation", [{"labels": [{"name": "security"}]}, {"base": {"ref": "release", "repo": {"full_name": REPO}}}, {"draft": True}])
+def test_the_last_read_of_the_pr_before_the_merge_blocks_a_change_of_base_labels_or_draft(mutation):
+    runner = Runner()
+    out = am.cycle(Gh(mutate_last=mutation), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
+    assert out["prs"][0]["code"] == "WAIT" and "ultima leitura" in out["prs"][0]["reasons"][0] and runner.calls == []
+
+
+def test_a_scheduled_merge_that_cannot_be_cancelled_requires_intervention():
+    runner = Runner()
+    out = am.cycle(Gh(scheduled_only=True, cancel_works=False), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
+    row = out["prs"][0]
+    assert row["code"] == "ERROR" and "REQUER INTERVENCAO" in row["reasons"][0] and row["merged"] is False
+
+
+def test_cancel_scheduled_reports_a_failure_to_run_the_command():
+    def boom(argv, **kw):
+        raise OSError("gh sumiu")
+    ok, why = am.cancel_scheduled(lambda p: {}, REPO, 7, POLICY, boom)
+    assert ok is False and "REQUER INTERVENCAO" in why
+
+
+@pytest.mark.parametrize("status", ["removed", "added", "modified"])
+def test_a_file_without_patch_and_without_counts_is_ambiguous_in_every_status_and_refused(status):
+    f = {"filename": "scripts/run.py", "status": status, "additions": 0, "deletions": 0, "changes": 0}          # sem `patch`: pode ser binario com extensao permitida
+    d = decide(files=[f])
+    assert d.code == "REFUSE" and any("binario" in r for r in d.reasons)
