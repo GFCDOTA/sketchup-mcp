@@ -42,7 +42,7 @@ def child(argv, cwd, env, stdin, timeout, cancel=None):
     marker.write_text("child-started", encoding="utf-8")
     if mode == "block":
         time.sleep(120)                         # simula o Claude em andamento (sera morto de fora)
-    return 0, "", "", False                     # o filho so edita: quem publica e o executor (R4)
+    return 0, json.dumps({"type": "result", "subtype": "success", "is_error": False, "result": "ok"}), "", False   # o filho so edita; termina com o resultado final, como o CLI real
 def fake_deliver(*a, **k):
     gh.head = "d" * 40                          # o executor "publica" um commit
     return "PUSHED", "fake"
@@ -505,3 +505,51 @@ def test_timeout_and_cancel_still_kill_the_tree_and_keep_the_partial_output(tmp_
     threading.Timer(1.0, cancel.set).start()
     rc, out, _err, timed_out = ex.default_runner([sys.executable, "-c", code], tmp_path, dict(os.environ), "", 60, cancel, poll_s=0.1)
     assert rc == -2 and timed_out is False and "parcial" in out
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_a_descendant_cannot_break_away_from_the_job(tmp_path):
+    code = ("import subprocess, sys\n"
+            "try:\n"
+            "    g = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'], creationflags=0x01000000, "   # CREATE_BREAKAWAY_FROM_JOB
+            "stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n"
+            "    print('PID', g.pid, flush=True)\n"
+            "except OSError:\n"
+            "    print('NEGADO', flush=True)\n")
+    rc, out, _err, _t = ex.default_runner([sys.executable, "-c", code], tmp_path, dict(os.environ), "", 60, threading.Event())
+    if "NEGADO" in out:                                                                                   # no AppContainer o SO recusa a criacao com breakaway
+        assert rc == 0
+    else:                                                                                                 # fora dele o neto nasce PRESO ao job e morre com a arvore
+        grand = int(out.split()[1])
+        assert not alive(grand) and rc == -3
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_a_containment_failure_kills_the_suspended_child_and_closes_its_pipes(monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    made = []
+    real_popen = subprocess.Popen
+
+    def recording(*a, **k):
+        p = real_popen(*a, **k)
+        made.append(p)
+        return p
+    monkeypatch.setattr(subprocess, "Popen", recording)
+    monkeypatch.setattr(ps.ProcessJob, "assign", lambda self, h: (_ for _ in ()).throw(ps.ProcessSupervisorError("assign recusado")))
+    with pytest.raises(ex.ContainmentError):
+        ex.spawn_contained([sys.executable, "-c", "print('nunca')"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = made[0]
+    assert p.poll() is not None and p.stdout.closed and p.stderr.closed and p.stdin.closed
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_an_undrained_output_never_returns_success(tmp_path, monkeypatch):
+    monkeypatch.setattr(ex, "DRAIN_S", 0.0)                                                              # leitura "atrasada": a drenagem nao termina a tempo
+    real_pump = ex._pump
+
+    def slow(stream, sink):
+        time.sleep(1.0)
+        real_pump(stream, sink)
+    monkeypatch.setattr(ex, "_pump", slow)
+    rc, _out, err, _t = ex.default_runner([sys.executable, "-c", "print('ok')"], tmp_path, dict(os.environ), "", 60, threading.Event())
+    assert rc == -4 and "NAO drenada" in err

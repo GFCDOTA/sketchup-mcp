@@ -277,6 +277,16 @@ def _contain(p: subprocess.Popen) -> None:
             p.kill()
         except OSError:
             pass
+        try:
+            p.wait(5)
+        except (subprocess.TimeoutExpired, OSError):
+            pass
+        for stream in (p.stdin, p.stdout, p.stderr):
+            if stream is not None:
+                try:
+                    stream.close()
+                except OSError:
+                    pass
         raise ContainmentError(f"nao foi possivel conter o filho num Job Object ({type(exc).__name__}: {exc}); ele nao executou") from exc
 
 
@@ -433,6 +443,10 @@ def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, c
             rc = p.returncode if not note else -3
         for t in readers:
             t.join(DRAIN_S)
+        if any(t.is_alive() for t in readers):                                 # drenagem incompleta: a saida pode estar truncada => nunca sucesso
+            note += "\n[executor] saida do filho NAO drenada por completo: resultado incerto; entrega bloqueada (fail-closed)"
+            if rc == 0:
+                rc = -4
         return rc, "".join(out_b), "".join(err_b) + note, timed_out
     finally:
         job = getattr(p, "_fp060_job", None)
@@ -516,6 +530,7 @@ def pick(bstate: dict, now: dt.datetime | None = None) -> dict | None:
     if len([r for r in bstate.get("runs", []) if r >= cutoff]) >= DAILY_CAP:
         return None
     contained = {t.get("pr") for t in bstate["queue"] if t["state"] == "BLOCKED_CONTAINMENT"}      # a worktree e do PR: contencao nao confirmada trava TODO o PR
+    contained |= {int(k) for k in (bstate.get("contained_prs") or {})}                           # registrado mesmo quando o lease ja tinha sido perdido
     for t in bstate["queue"]:
         if t["state"] in ("QUEUED", "BLOCKED_CREDENTIALS", "BLOCKED_CLI", "BLOCKED_WORKTREE", "FAILED") and t.get("attempts", 0) < MAX_ATTEMPTS \
                 and (t.get("retry_after") or "") <= t_now and t.get("pr") not in contained:
@@ -540,6 +555,16 @@ def claim_next(owner: str, now: dt.datetime | None = None) -> dict | None:
                     lease_expires=es.now_iso(t + dt.timedelta(seconds=LEASE_S)))
         eb.save(b)
         return dict(item)
+
+
+def mark_contained(pr: int, key: str, reason: str, now: dt.datetime | None = None) -> None:
+    """Trava o PR inteiro (`contained_prs`) contra novos claims: independe de lease e de dono, porque a garantia e sobre a WORKTREE, nao sobre o item. Sai so por
+    remocao explicita da entrada pelo proprietario, depois de confirmar que nenhum descendente esta vivo."""
+    with es.locked(eb.bridge_path()):
+        b = eb.load()
+        b.setdefault("contained_prs", {})[str(pr)] = {"key": key, "reason": reason[:300], "at": es.now_iso(now)}
+        eb.diagnose(b, f"PR #{pr} travado por contencao nao confirmada ({key})", now)
+        eb.save(b)
 
 
 def _owned(b: dict, key: str, owner: str) -> dict | None:
@@ -729,6 +754,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
     except TreeNotConfirmedError as exc:
         release_issue(item)
         reason = f"arvore do filho NAO confirmada como encerrada ({exc}): item bloqueado ate intervencao explicita; a worktree nao pode ser reutilizada"[:600]
+        mark_contained(item["pr"], key, reason, t)                          # SEM exigir dono: com o lease perdido o item voltaria a fila e a worktree seria reusada
 
         def contained(it, b):
             it["state"], it["last_error"] = "BLOCKED_CONTAINMENT", reason          # fora do `pick`: nenhum executor reivindica de novo sozinho
@@ -750,7 +776,8 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
             eb.diagnose(b, reason, t)
         update_owned(key, owner, nocred, release=True, now=t)
         return {"action": "BLOCKED_CREDENTIALS", "item": key, "reason": reason}
-    child_error = bool(result.get("is_error"))                             # D-060-04: exit 0 + subtype success NAO e sucesso
+    missing_result = not result and rc == 0 and not timed_out and not cancel.is_set()   # rc 0 sem o objeto final `type: result`: nada prova que o filho terminou bem
+    child_error = bool(result.get("is_error")) or missing_result          # D-060-04: exit 0 + subtype success NAO e sucesso
     question = child_question(result)
     delivery = ("SKIPPED", "")
     if rc == 0 and not timed_out and not cancel.is_set() and not child_error:
@@ -787,6 +814,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
     if delivery[0] in ("BLOCKED_GUARDS", "FAILED_CHECKS", "ERROR", "STALE"):
         comment_pr(item["pr"], repo, f"Executor local: entrega NAO publicada ({delivery[0]}): {delivery[1]}. Edicoes preservadas na worktree.")
     reason = (f"entrega {delivery[0]}: {delivery[1]}" if delivery[0] in ("BLOCKED_GUARDS", "FAILED_CHECKS", "ERROR", "STALE")
+              else "saida do filho sem o resultado final (`type: result`): falha, nada publicado" if missing_result
               else "claude reportou is_error no resultado (D-060-04): falha, nada publicado" if child_error
               else f"duvida do agente: {question[:200]}" if question
               else "timeout" if timed_out else "lease perdido/nao renovado: filho derrubado (fail-closed)" if cancel.is_set() and rc == -2

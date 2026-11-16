@@ -59,9 +59,12 @@ class FakeGh:
         raise AssertionError(path)
 
 
+RESULT_OK = json.dumps({"type": "result", "subtype": "success", "is_error": False, "result": "ok"})
+
+
 class Runner:
-    """Simula o claude: opcionalmente 'empurra um commit' mudando o head do FakeGh."""
-    def __init__(self, gh, push=True, rc=0, out="", err="", timed_out=False, boom=None):
+    """Simula o claude: opcionalmente 'empurra um commit' mudando o head do FakeGh. Como o CLI real, termina com o objeto `type: result`."""
+    def __init__(self, gh, push=True, rc=0, out=RESULT_OK, err="", timed_out=False, boom=None):
         self.gh, self.push, self.rc, self.out, self.err, self.timed_out, self.boom = gh, push, rc, out, err, timed_out, boom
         self.calls = []
 
@@ -747,6 +750,7 @@ def test_an_unconfirmed_process_tree_blocks_the_item_and_no_executor_claims_it_a
     r2 = Runner(gh)
     assert ex.pick(b, far) is None and go(gh, b, r2, now=far)["action"] == "IDLE" and r2.calls == []       # nem depois de um mes: so intervencao explicita
     b["queue"][0]["state"] = "QUEUED"                                                                        # o proprietario confirmou que a arvore acabou e liberou
+    b["contained_prs"].pop("7")                                                                              # liberacao explicita do PR
     assert go(gh, b, Runner(gh), now=far)["action"] == "DONE"
 
 
@@ -770,3 +774,32 @@ def test_a_plain_containment_setup_failure_is_still_a_retryable_failure_because_
     b = bstate(item())
     res = go(gh, b, Runner(gh, boom=ex.ContainmentError("sem Job Object")))
     assert res["action"] == "FAILED" and b["queue"][0]["state"] == "FAILED" and b["queue"][0]["attempts"] == 1
+
+
+def test_an_unconfirmed_tree_after_the_lease_was_lost_still_locks_the_pr_against_any_new_claim():
+    gh = FakeGh()
+    b = bstate(item())
+
+    class LoseThenBoom:
+        calls = []
+
+        def __call__(self, argv, cwd, env, stdin, timeout, cancel=None):
+            st = eb.load()
+            st["queue"][0]["owner"] = "outro-executor"                                                   # o lease foi perdido no meio
+            eb.save(st)
+            raise ex.TreeNotConfirmedError("job nao esvaziou")
+    go(gh, b, LoseThenBoom())
+    assert "7" in b["contained_prs"]                                                                     # registrado mesmo sem ser o dono
+    b["queue"][0].update(state="QUEUED", owner=None)                                                     # o item voltaria a fila...
+    b["queue"][0].pop("owner")
+    far = NOW + dt.timedelta(days=30)
+    assert ex.pick(b, far) is None                                                                        # ...mas o PR continua travado
+    b["queue"].append(item(key="review:5:8:" + "f" * 40, review_id=5, pr=8))
+    assert ex.pick(b, far)["pr"] == 8                                                                     # outro PR segue
+
+
+def test_exit_zero_without_the_final_result_object_is_a_failure_and_nothing_is_delivered():
+    gh = FakeGh()
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False, out="saida truncada sem o objeto final"))
+    assert res["action"] == "FAILED" and b["queue"][0]["state"] == "FAILED" and "resultado final" in b["queue"][0]["last_error"]
