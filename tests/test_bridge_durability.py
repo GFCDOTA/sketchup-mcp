@@ -509,3 +509,53 @@ def test_every_durable_replace_syncs_the_directory_on_posix(tmp_path, monkeypatc
 def test_fsync_dir_never_raises_even_for_a_missing_directory(tmp_path):
     es.fsync_dir(tmp_path / "nao-existe")
     es.fsync_dir(tmp_path)
+
+
+# -- 8a revisao do Codex (#635): nome de quarentena vindo do pendente; PendingUnreadable no heartbeat ----------------------------------------------------
+@pytest.mark.parametrize("hostile", ["execution_state.json", "event_bridge.json", "event_bridge.json.corrupt-20260101000000-1-abcdef.bak", "event_bridge.json.corrupt-x-1-abcdef",
+                                     "..", "event_bridge.json.corrupt-20260101000000-1-ABCDEF", "outro.json.corrupt-20260101000000-1-abcdef", ""])
+def test_a_hostile_quarantine_name_in_the_pending_is_ignored_and_never_overwrites_anything(tmp_path, hostile):
+    p = tmp_path / "event_bridge.json"
+    bystander = tmp_path / "execution_state.json"
+    bystander.write_bytes(b'{"keep": true}')
+    p.write_bytes(b"\x00" * 64)
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "recovery": {"at": "t", "quarantine": hostile}})
+    with es.locked(p):
+        eb.recover_state(p)
+    assert bystander.read_bytes() == b'{"keep": true}'
+    kept = quarantined(p)
+    assert len(kept) == 1 and kept[0].read_bytes() == b"\x00" * 64 and kept[0].name != hostile        # a evidencia foi preservada sob um nome NOVO gerado aqui
+
+
+def test_an_existing_quarantine_with_the_recorded_name_is_not_overwritten(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    name = "event_bridge.json.corrupt-20260101000000-1-abcdef"
+    (tmp_path / name).write_bytes(b"evidencia antiga")
+    p.write_bytes(b"\x00" * 64)
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "recovery": {"at": "t", "quarantine": name}})
+    with es.locked(p):
+        eb.recover_state(p)
+    assert (tmp_path / name).read_bytes() == b"evidencia antiga" and len(quarantined(p)) == 2
+
+
+def test_the_heartbeat_cancels_the_child_when_the_pending_recovery_is_unreadable(tmp_path, monkeypatch):
+    from tools.orchestration import event_executor as ex
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "event_bridge.json"))
+    monkeypatch.setattr(ex, "WATCH_PID", None)
+    monkeypatch.setattr(ex.eb, "load", lambda *a, **k: (_ for _ in ()).throw(eb.PendingUnreadable("pendente ilegivel")))
+    hb = ex.Heartbeat("review:1:2:" + "a" * 40, "owner", interval=0.01)
+    hb.valid_until = time.monotonic() - 1                                                         # sem folga: nao ha como provar posse
+    hb.start()
+    hb.join(timeout=3)
+    assert hb.cancel.is_set() and not hb.is_alive()
+
+
+def test_the_heartbeat_cancels_the_child_on_an_unexpected_exception_instead_of_dying_silently(tmp_path, monkeypatch):
+    from tools.orchestration import event_executor as ex
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "event_bridge.json"))
+    monkeypatch.setattr(ex, "WATCH_PID", None)
+    monkeypatch.setattr(ex.eb, "load", lambda *a, **k: (_ for _ in ()).throw(KeyError("inesperado")))
+    hb = ex.Heartbeat("review:1:2:" + "a" * 40, "owner", interval=0.01)
+    hb.start()
+    hb.join(timeout=3)
+    assert hb.cancel.is_set() and not hb.is_alive()

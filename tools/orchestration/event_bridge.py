@@ -101,6 +101,9 @@ def _pending_path(p: Path) -> Path:
     return p.with_name(p.name + ".recovered")
 
 
+QUARANTINE_NAME = re.compile(r"@\.corrupt-\d{14}-\d+-[0-9a-f]{6}")
+
+
 class PendingUnreadable(RuntimeError):
     """Ha uma recuperacao interrompida (`.recovered`) mas ela NAO pode ser lida agora. NAO e `ValueError`/`BridgeStateCorrupt`: nenhum chamador a trata como "estado
     corrompido a recuperar", entao nada e regravado por cima e o diagnostico da corrupcao original nao se perde; o ciclo falha, tenta de novo e o operador ve o motivo."""
@@ -145,7 +148,9 @@ def recover_state(path: Path | None = None) -> dict:
     if pending is not None:
         state = pending                                          # pendente legivel (parada antes da quarentena): RETOMA com o diagnostico e o nome de quarentena ja gravados
         named = (state.get("recovery") or {}).get("quarantine")
-        if isinstance(named, str) and named and "/" not in named and "\\" not in named:
+        # o nome vem de um ARQUIVO (pode estar corrompido/alterado) e `os.replace` sobrescreve: so vale o formato EXATO que esta recuperacao gera para ESTE arquivo e um
+        # destino que ainda NAO existe; qualquer outra coisa (outro arquivo, o oficial, uma quarentena existente) e ignorada e o nome novo, unico, e mantido
+        if isinstance(named, str) and QUARANTINE_NAME.fullmatch(named.replace(p.name, "@", 1)) and named.startswith(p.name + ".corrupt-") and not p.with_name(named).exists():
             candidate = p.with_name(named)
     else:
         state = default_bridge_state()

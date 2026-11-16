@@ -432,10 +432,13 @@ class Heartbeat(threading.Thread):
                     it["lease_expires"] = es.now_iso(t + dt.timedelta(seconds=LEASE_S))
                     eb.save(b)
                     self.valid_until = time.monotonic() + LEASE_S
-            except (TimeoutError, OSError, ValueError):
+            except (TimeoutError, OSError, ValueError, eb.PendingUnreadable):         # inclui a recuperacao interrompida ilegivel (RuntimeError, nao ValueError)
                 if time.monotonic() >= self.valid_until - self.interval:      # sem como provar posse ate o fim do lease
                     self.cancel.set()
                     return
+            except Exception:  # noqa: BLE001 — fail-closed: uma excecao inesperada NAO pode matar a thread em silencio e deixar o filho rodar alem do lease
+                self.cancel.set()
+                return
 
     def stop(self) -> None:
         self.stop_evt.set()
