@@ -434,7 +434,7 @@ def test_a_plain_push_refusal_is_still_reported_as_a_refusal(repo):
     edit_test(wt)
 
     def refuse(args, cwd):
-        return (1, "rejected: non-fast-forward") if args and args[0] == "push" else dl._git(args, cwd)
+        return (1, "To origin\n!\tHEAD:refs/heads/feat/x\t[rejected] (non-fast-forward)") if args and args[0] == "push" else dl._git(args, cwd)
     action, msg, _item = run_with_item(wt, base, run=refuse)
     assert action == "ERROR" and "recusado" in msg and "sem confirmacao" not in msg
 
@@ -515,9 +515,10 @@ def test_a_connection_lost_after_the_server_accepted_the_push_is_still_a_publica
     assert action == "PUSHED" and item["published_sha"] == sh(remote, "rev-parse", "feat/x"), msg
 
 
-@pytest.mark.parametrize("message", [" ! [rejected]        HEAD -> feat/x (non-fast-forward)", " ! [remote rejected] HEAD -> feat/x (pre-receive hook declined)",
-                                     "remote: error: GH006: Protected branch update failed", "hint: Updates were rejected because the tip is behind (fetch first)"])
-def test_an_explicit_server_refusal_is_definitive_when_the_remote_tip_is_untouched(repo, message):
+@pytest.mark.parametrize("message", ["To origin\n!\tHEAD:refs/heads/feat/x\t[rejected] (non-fast-forward)\nDone",
+                                     "remote: GH006: Protected branch update failed\nTo origin\n!\tHEAD:refs/heads/feat/x\t[remote rejected] (protected branch hook declined)\nDone",
+                                     "To origin\n!\tHEAD:refs/heads/feat/x\t[rejected] (fetch first)\nDone"])
+def test_a_structured_porcelain_refusal_is_definitive_when_the_remote_tip_is_untouched(repo, message):
     wt, remote, base = repo
     edit_test(wt)
     action, msg, _item = run_with_item(wt, base, run=failing_push(1, real_push=False, message=message))
@@ -554,3 +555,25 @@ def test_a_timeout_where_the_remote_does_not_show_the_commit_yet_stays_pending_n
     edit_test(wt)
     action, msg, _item = run_with_item(wt, base, run=failing_push(124, real_push=False))
     assert action == "PUBLISH_UNCONFIRMED" and "ainda nao mostra" in msg
+
+
+@pytest.mark.parametrize("message", ["remote: error: GH006: Protected branch update failed\nfatal: the remote end hung up unexpectedly", " ! [rejected] HEAD -> feat/x (non-fast-forward)",
+                                     "remote: this is not a protected branch hook declined message\nerror: RPC failed", "hint: Updates were rejected because the tip is behind (fetch first)"])
+def test_loose_words_without_the_structured_porcelain_line_never_make_a_refusal_definitive(repo, message):
+    wt, remote, base = repo
+    edit_test(wt)
+    action, _msg, item = run_with_item(wt, base, run=failing_push(1, real_push=False, message=message))
+    assert action == "PUBLISH_UNCONFIRMED" and item["published_sha"] and untouched(remote, base)
+
+
+def test_the_push_asks_git_for_the_porcelain_status_lines(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+    seen = []
+
+    def spy(args, cwd):
+        if args and args[0] == "push":
+            seen.append(list(args))
+        return dl._git(args, cwd)
+    action, _msg, _item = run_with_item(wt, base, run=spy)
+    assert action == "PUSHED" and seen and "--porcelain" in seen[0]

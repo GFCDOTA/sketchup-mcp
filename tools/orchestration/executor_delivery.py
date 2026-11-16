@@ -164,7 +164,7 @@ def remote_head(wt: Path, branch: str, run: Run) -> str | None:
     return out.split()[0] if rc == 0 and out else None
 
 
-DEFINITIVE_REFUSAL = re.compile(r"\[rejected\]|\[remote rejected\]|non-fast-forward|fetch first|hook declined|protected branch|GH006|GH013", re.I)
+DEFINITIVE_REFUSAL = re.compile(r"^!\t[^\n]*\[(?:remote )?rejected\]", re.M)          # SO a linha ESTRUTURADA de `git push --porcelain` para a ref rejeitada; palavras soltas na saida (ex.: uma mensagem remota) NAO provam recusa
 
 
 def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _git, check=run_checks,
@@ -272,7 +272,7 @@ def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _g
     item["published_sha"] = local_head                                      # o commit que SERA publicado: o executor o usa para provar o que publicou
     if record is not None and not record(local_head):                       # duravel ANTES do push: um crash/timeout depois dele nao perde a identidade do commit
         return "ERROR", "nao consegui registrar de forma duravel o commit a publicar: nao publico"
-    rc, out = run(["push", "origin", f"HEAD:refs/heads/{branch}"], wt)      # push normal: git recusa nao-fast-forward
+    rc, out = run(["push", "--porcelain", "origin", f"HEAD:refs/heads/{branch}"], wt)      # push normal: git recusa nao-fast-forward
     if rc != 0:
         # QUALQUER falha do push (prazo, conexao caida depois do servidor aceitar...) pode ter publicado: so a ponta REMOTA decide. Igual ao commit => publicado;
         # consultada e diferente => recusa DEFINITIVA (nada publicado); nao consultavel => publicacao PENDENTE (nunca reexecuta no escuro).
