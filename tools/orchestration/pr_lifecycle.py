@@ -31,6 +31,7 @@ import threading
 import time
 import uuid
 from collections.abc import Callable
+from pathlib import Path
 
 from tools.orchestration import auto_merge as am
 from tools.orchestration import event_bridge as eb
@@ -49,6 +50,12 @@ REFS = re.compile(r"\brefs?\s*:?\s*#(\d+)", re.I)
 DEP_TEXT = re.compile(r"(?:empilhad[oa]\s+sobre|depends?\s+on|depende\s+de|stacked\s+on)\s+((?:#\d+\s*(?:,|\+|&|\be\b|\band\b)?\s*)+)", re.I)
 Runner = Callable[..., "subprocess.CompletedProcess"]
 _FACTS: dict[tuple, tuple[float, dict]] = {}
+
+
+def kill_switch() -> Path:
+    """O interruptor do ciclo: este arquivo ao lado do estado do bridge para tudo (nenhuma escrita no GitHub, nenhum evento novo, nenhuma revisao nova). Os
+    reviews JA em andamento terminam e publicam (um parecer pela metade nao e melhor que um completo)."""
+    return eb.bridge_path().with_name("PR_LIFECYCLE_DISABLED")
 
 
 def request_key(repo: str, number: int, head: str) -> str:
@@ -263,6 +270,8 @@ class _Heartbeat(threading.Thread):
 def work(gh: eb.Gh, store: EventStore, policy: dict, repo: str = eb.REPO, review: Callable[..., dict] | None = None, owner: str | None = None,
          heartbeat_s: float = HEARTBEAT_S) -> dict:
     """Revisa UM PR: o evento PENDING mais antigo cujo PR esta aberto, no HEAD do pedido e com os checks obrigatorios VERDES. Nunca lanca."""
+    if kill_switch().exists():
+        return {"action": "IDLE", "disabled": f"interruptor {kill_switch().name} presente"}
     owner = owner or f"review-worker:{os.getpid()}:{uuid.uuid4().hex[:6]}"
     now = store.clock()
     # PENDING, ou RUNNING com o lease VENCIDO (o worker morreu no meio da revisao: o evento volta ao pool; o EventStore cerca o resultado do dono antigo)
@@ -356,7 +365,12 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False, s
 def reconcile_step(gh: eb.Gh, policy: dict, repo: str, execute: bool, store: EventStore | None, runner: Runner = subprocess.run, now: float | None = None) -> dict:
     """A parte RAPIDA do ciclo (prepara + enfileira): roda a cada 30 s sem esperar uma revisao de varios minutos. Cada etapa isolada."""
     out: dict = {"execute": execute}
-    for name, step in (("prepare", lambda: prepare(gh, policy, repo, execute, runner, now)), ("enqueue", lambda: enqueue(gh, store, policy, repo, execute))):
+    if kill_switch().exists():
+        return {**out, "disabled": f"interruptor {kill_switch().name} presente: nada e escrito nem enfileirado"}
+    steps = [("prepare", lambda: prepare(gh, policy, repo, execute, runner, now)), ("enqueue", lambda: enqueue(gh, store, policy, repo, execute))]
+    if execute and store is not None and os.environ.get(am.ENABLE_ENV) == "1":
+        steps.append(("merge", lambda: merge_step(gh, store, policy, repo, runner)))
+    for name, step in steps:
         try:
             out[name] = step()
         except Exception as exc:  # noqa: BLE001
@@ -364,11 +378,37 @@ def reconcile_step(gh: eb.Gh, policy: dict, repo: str, execute: bool, store: Eve
     return out
 
 
-class ReviewLoop(threading.Thread):
-    """A parte LENTA: revisa um PR por vez numa thread propria (a sessao do Codex leva minutos), sem atrasar a reconciliacao de 30 s. `emit(dict)` recebe cada resultado."""
+def approved_candidates(store: EventStore, repo: str) -> set[int]:
+    """PRs com um APPROVE concluido no EventStore para o HEAD que o pedido citou (barato: nenhuma chamada ao GitHub). So eles podem estar prontos para o merge."""
+    found = set()
+    for e in store.events():
+        if e["producer"] == PRODUCER and e["event_type"] == EVENT_TYPE and e["status"] == "DONE":
+            p, res = _payload(e), _payload({"payload": e.get("result")})
+            if str(res.get("verdict", "")).upper() == "APPROVE" and p.get("repo") == repo and isinstance(p.get("pr"), int):
+                found.add(p["pr"])
+    return found
 
-    def __init__(self, gh: eb.Gh, store: EventStore, policy: dict, repo: str, emit: Callable[[dict], None], review: Callable[..., dict] | None = None, idle_s: float = 5.0):
-        super().__init__(daemon=True, name="review-loop")
+
+def merge_step(gh: eb.Gh, store: EventStore, policy: dict, repo: str, runner: Runner = subprocess.run) -> dict:
+    """Merge protegido (`auto_merge.cycle`, DESLIGADO sem `AUTOMERGE_ENABLED=1`) restrito aos PRs aprovados pelo Codex: o ciclo de 30 s nao relê o GitHub inteiro por PR.
+    A decisao, a identidade, a protecao da branch exigindo aprovacao independente, o interruptor e a confirmacao do merge sao todos do `auto_merge`."""
+    approved = approved_candidates(store, repo)
+    if not approved:
+        return {"enabled": True, "prs": []}
+
+    def only(path: str):
+        data = gh(path)
+        return [p for p in data if p.get("number") in approved] if path.startswith(f"repos/{repo}/pulls?state=open") and isinstance(data, list) else data
+    return am.cycle(only, policy, repo, apply=True, runner=runner)
+
+
+class ReviewLoop(threading.Thread):
+    """A parte LENTA: revisa um PR por vez NESTA thread (a sessao do Codex leva minutos), sem atrasar a reconciliacao de 30 s. `emit(dict)` recebe cada resultado.
+    `ReviewPool` roda N destas em paralelo: a exclusao entre elas e a do EventStore (claim atomico, lease, e UM PR por vez porque o job do evento e `pr:<N>`)."""
+
+    def __init__(self, gh: eb.Gh, store: EventStore, policy: dict, repo: str, emit: Callable[[dict], None], review: Callable[..., dict] | None = None, idle_s: float = 5.0,
+                 name: str = "review-loop"):
+        super().__init__(daemon=True, name=name)
         self.gh, self.store, self.policy, self.repo, self.emit, self.review, self.idle_s = gh, store, policy, repo, emit, review, idle_s
         self._stop_evt = threading.Event()
 
@@ -387,6 +427,27 @@ class ReviewLoop(threading.Thread):
         self._stop_evt.set()
 
 
+MAX_WORKERS = 3
+
+
+class ReviewPool:
+    """Ate `MAX_WORKERS` revisoes independentes em paralelo (worktree isolada por PR/SHA no `codex_reviewer`, lease + heartbeat por evento). Nunca duas no mesmo PR."""
+
+    def __init__(self, workers: int, *a, **kw):
+        n = max(1, min(int(workers), MAX_WORKERS))
+        self.loops = [ReviewLoop(*a, name=f"review-loop-{i + 1}", **kw) for i in range(n)]
+
+    def start(self) -> None:
+        for i, loop in enumerate(self.loops):
+            loop.start()
+            if i + 1 < len(self.loops):
+                time.sleep(0.2)                                                  # escalona a partida: cada um escolhe um evento diferente sem disputar o mesmo
+
+    def stop(self) -> None:
+        for loop in self.loops:
+            loop.stop()
+
+
 def main(argv: list[str] | None = None) -> int:
     from tools.orchestration import event_executor as ex
     from tools.orchestration.store_factory import get_store
@@ -399,6 +460,7 @@ def main(argv: list[str] | None = None) -> int:
         if name == "run":
             sp.add_argument("--interval", type=int, default=30)
             sp.add_argument("--watch-pid", type=int, default=None)
+            sp.add_argument("--workers", type=int, default=1, help=f"revisoes em paralelo (1..{MAX_WORKERS})")
     a = ap.parse_args(argv)
     policy = eb.load_policy()
     gh = am.slurp_client
@@ -415,7 +477,7 @@ def main(argv: list[str] | None = None) -> int:
     def emit(obj: dict) -> None:
         with print_lock:
             print(json.dumps({"at": dt.datetime.now(dt.timezone.utc).isoformat(), **obj}, ensure_ascii=False, default=str), flush=True)
-    reviewer = ReviewLoop(gh, store, policy, a.repo, emit) if a.execute and store is not None else None
+    reviewer = ReviewPool(a.workers, gh, store, policy, a.repo, emit) if a.execute and store is not None else None
     if reviewer is not None:
         reviewer.start()
     try:

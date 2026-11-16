@@ -472,3 +472,122 @@ def test_a_full_verdict_from_the_reviewer_is_summarized_in_the_result_and_in_the
     assert out["verdict"] == "REQUEST_CHANGES" and out["findings"] == 2 and out["head"] == HEAD[:12] and "files_reviewed" not in out
     done = pending(store)[0]
     assert done["status"] == "DONE" and "files_reviewed" not in (done["result"] or "")
+
+
+# -- interruptor, merge protegido restrito aos aprovados e revisoes em paralelo (autorizacao do proprietario, 2026-11-16) -------------------------------------
+@pytest.fixture()
+def gov(tmp_path, monkeypatch):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "gov" / "bridge.json"))
+    (tmp_path / "gov").mkdir()
+    return tmp_path / "gov"
+
+
+def test_the_kill_switch_stops_every_write_every_new_event_and_every_new_review(gov, store):
+    w, wr, rv = World().add(7, draft=True).add(8, requested=("fmmodesto",)), Writes(), Reviewer()
+    pl.enqueue(w, store, POLICY, REPO, execute=True)
+    pl.kill_switch().write_text("x", encoding="utf-8")
+    out = pl.reconcile_step(w, POLICY, REPO, True, store, wr)
+    assert "PR_LIFECYCLE_DISABLED" in out["disabled"] and "prepare" not in out and wr.calls == []
+    assert pl.work(w, store, POLICY, REPO, rv)["action"] == "IDLE" and rv.calls == []
+    assert pending(store)[0]["status"] == "PENDING"                                                  # o evento ja enfileirado fica quieto, nada se perde
+    pl.kill_switch().unlink()
+    assert pl.work(w, store, POLICY, REPO, rv)["action"] == "DONE"                                  # removido o interruptor, retoma sozinho
+
+
+def test_a_review_already_running_when_the_kill_switch_appears_finishes_and_publishes(gov, store):
+    w, rv = World().add(7), Reviewer(delay=0.3)
+    pl.enqueue(w, store, POLICY, REPO, execute=True)
+    t = threading.Thread(target=lambda: pl.work(w, store, POLICY, REPO, rv))
+    t.start()
+    time.sleep(0.1)
+    pl.kill_switch().write_text("x", encoding="utf-8")
+    t.join(10)
+    assert pending(store)[0]["status"] == "DONE" and len(rv.calls) == 1
+
+
+def test_the_merge_step_does_not_exist_unless_the_owner_enabled_it(gov, store, monkeypatch):
+    monkeypatch.delenv(am.ENABLE_ENV, raising=False)
+    out = pl.reconcile_step(World().add(7), POLICY, REPO, True, store, Writes())
+    assert "merge" not in out
+    monkeypatch.setenv(am.ENABLE_ENV, "1")
+    assert "merge" in pl.reconcile_step(World().add(7), POLICY, REPO, True, store, Writes())
+    assert "merge" not in pl.reconcile_step(World().add(7), POLICY, REPO, False, None, Writes())     # sem --execute nunca
+
+
+def test_the_merge_step_only_looks_at_prs_the_codex_approved_and_costs_nothing_otherwise(gov, store):
+    w = World().add(7).add(8)
+    assert pl.merge_step(w, store, POLICY, REPO) == {"enabled": True, "prs": []} and w.calls == []   # nenhum APPROVE concluido: zero chamadas ao GitHub
+    pl.enqueue(w, store, POLICY, REPO, execute=True)
+    pl.work(w, store, POLICY, REPO, Reviewer(result={"action": "DONE", "verdict": {"verdict": "REQUEST_CHANGES", "findings": [], "head_sha": HEAD}}))
+    assert pl.approved_candidates(store, REPO) == set()                                              # REQUEST_CHANGES nao e candidato
+
+
+def test_a_codex_approve_makes_the_pr_a_merge_candidate_and_the_cycle_is_filtered_to_it(gov, store, monkeypatch):
+    w = World().add(7).add(8)
+    pl.enqueue(w, store, POLICY, REPO, execute=True)
+    pl.work(w, store, POLICY, REPO, Reviewer(result={"action": "DONE", "verdict": {"verdict": "APPROVE", "findings": [], "head_sha": HEAD}}))
+    assert pl.approved_candidates(store, REPO) == {7}
+    seen = {}
+
+    def fake_cycle(gh, policy, repo, apply=False, runner=None, **kw):
+        seen["listed"] = [p["number"] for p in gh(f"repos/{repo}/pulls?state=open&per_page=100")]
+        seen["apply"] = apply
+        return {"enabled": True, "prs": []}
+    monkeypatch.setattr(pl.am, "cycle", fake_cycle)
+    pl.merge_step(w, store, POLICY, REPO)
+    assert seen == {"listed": [7], "apply": True}                                                    # so o #7 (aprovado) chega ao auto_merge; o #8 nem e lido
+
+
+def test_approvals_of_another_repository_are_not_candidates(gov, store):
+    w = World().add(7)
+    pl.enqueue(w, store, POLICY, REPO, execute=True)
+    pl.work(w, store, POLICY, REPO, Reviewer(result={"action": "DONE", "verdict": {"verdict": "APPROVE", "findings": [], "head_sha": HEAD}}))
+    assert pl.approved_candidates(store, "outra/org") == set()
+
+
+def test_the_pool_runs_up_to_three_reviews_in_parallel_and_never_two_on_the_same_pr(gov, store):
+    w = World().add(7).add(8).add(9).add(10)
+    pl.enqueue(w, store, POLICY, REPO, execute=True)
+    lock, running, peak, per_pr, release = threading.Lock(), [], [0], {}, threading.Event()
+
+    def review(pr, gh, policy, repo, do_publish=False, **kw):
+        with lock:
+            running.append(pr)
+            peak[0] = max(peak[0], len(running))
+            per_pr[pr] = per_pr.get(pr, 0) + 1
+        release.wait(10)
+        with lock:
+            running.remove(pr)
+        return {"action": "DONE", "verdict": "APPROVE"}
+    emitted = []
+    pool = pl.ReviewPool(5, w, store, POLICY, REPO, emitted.append, review, idle_s=0.05)              # pede 5: o teto e 3
+    assert len(pool.loops) == pl.MAX_WORKERS == 3
+    pool.start()
+    try:
+        deadline = time.time() + 10
+        while time.time() < deadline and peak[0] < 3:
+            time.sleep(0.02)
+        assert peak[0] == 3 and sorted(running) == sorted(set(running))                              # tres ao mesmo tempo, PRs distintos
+        release.set()
+        deadline = time.time() + 10
+        while time.time() < deadline and len(emitted) < 4:
+            time.sleep(0.05)
+    finally:
+        release.set()
+        pool.stop()
+    assert len(emitted) == 4 and per_pr == {7: 1, 8: 1, 9: 1, 10: 1}                                 # cada PR foi revisado exatamente UMA vez
+
+
+def test_two_events_of_the_same_pr_never_run_at_once_even_with_a_pool(gov, store):
+    w = World().add(7)
+    pl.enqueue(w, store, POLICY, REPO, execute=True)
+    w.prs[7]["head"]["sha"] = NEW
+    w.commits[7] = [{"sha": NEW}]
+    w.prs[7]["requested_reviewers"] = [{"login": "fmmodesto"}]
+    pl.enqueue(w, store, POLICY, REPO, execute=True)                                                 # HEAD novo: o pedido antigo e descartado, o novo fica
+    states = {e["idempotency_key"].rsplit(":", 1)[1][:6]: e["status"] for e in pending(store)}
+    assert sorted(states.values()) == ["PENDING", "SUPERSEDED"]
+
+
+def test_the_pool_size_is_clamped_to_at_least_one():
+    assert len(pl.ReviewPool(0, None, None, POLICY, REPO, lambda x: None).loops) == 1 and len(pl.ReviewPool(-3, None, None, POLICY, REPO, lambda x: None).loops) == 1

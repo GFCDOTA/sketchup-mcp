@@ -3,9 +3,10 @@
 # Uso:
 #   powershell -File tools\orchestration\install_pr_lifecycle_task.ps1             # registra em MODO PLANO (-Execute ausente: nada e escrito)
 #   powershell -File tools\orchestration\install_pr_lifecycle_task.ps1 -Execute    # registra COM execucao (so apos autorizacao do proprietario)
+#   powershell -File tools\orchestration\install_pr_lifecycle_task.ps1 -Execute -AutoMerge -Workers 3   # + merge protegido e ate 3 revisoes em paralelo
 #   powershell -File tools\orchestration\install_pr_lifecycle_task.ps1 -Remove
 # Nada e iniciado aqui: use Start-ScheduledTask -TaskName "sketchup-mcp pr lifecycle" ou faca logoff/logon.
-param([switch]$Execute, [switch]$Remove, [string]$TaskName = "sketchup-mcp pr lifecycle", [int]$IntervalSeconds = 30)
+param([switch]$Execute, [switch]$Remove, [string]$TaskName = "sketchup-mcp pr lifecycle", [int]$IntervalSeconds = 30, [int]$Workers = 3, [switch]$AutoMerge)
 $ErrorActionPreference = "Stop"
 if ($Remove) {
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
@@ -15,8 +16,9 @@ if ($Remove) {
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $launcher = Join-Path $repo "tools\orchestration\run_pr_lifecycle.ps1"
 if (-not (Test-Path $launcher)) { [Console]::Error.WriteLine("launcher ausente: $launcher"); exit 2 }
-$argLine = "-NoProfile -ExecutionPolicy RemoteSigned -File `"$launcher`" -IntervalSeconds $IntervalSeconds"
+$argLine = "-NoProfile -ExecutionPolicy RemoteSigned -File `"$launcher`" -IntervalSeconds $IntervalSeconds -Workers $Workers"
 if ($Execute) { $argLine += " -Execute" }
+if ($AutoMerge) { $argLine += " -AutoMerge" }
 $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $argLine -WorkingDirectory $repo
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `

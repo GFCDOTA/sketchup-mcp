@@ -107,3 +107,33 @@ def test_the_run_loop_holds_an_instance_lock_so_two_loops_never_review_at_once(t
         holder.stdin.write("\n")
         holder.stdin.flush()
         holder.wait(timeout=10)
+
+
+def test_the_launcher_and_installer_expose_workers_automerge_and_the_kill_switch():
+    launcher = (SCRIPTS / "run_pr_lifecycle.ps1").read_text(encoding="ascii")
+    installer = (SCRIPTS / "install_pr_lifecycle_task.ps1").read_text(encoding="ascii")
+    assert "[int]$Workers = 3" in launcher and '"--workers", $Workers' in launcher and "PR_LIFECYCLE_DISABLED" in launcher
+    assert 'if ($AutoMerge -and $Execute) { $env:AUTOMERGE_ENABLED = "1" }' in launcher                    # o merge so liga com -Execute E -AutoMerge
+    assert "[switch]$AutoMerge" in installer and 'if ($AutoMerge) { $argLine += " -AutoMerge" }' in installer and "-Workers $Workers" in installer
+    for name in ("run_pr_lifecycle.ps1", "install_pr_lifecycle_task.ps1"):
+        assert all(b < 128 for b in (SCRIPTS / name).read_bytes())
+
+
+def test_the_branch_protection_script_is_dry_run_by_default_ascii_and_matches_what_auto_merge_requires():
+    text = (SCRIPTS / "configure_branch_protection.ps1").read_text(encoding="ascii")
+    assert "[switch]$Apply" in text and "if (-not $Apply)" in text and "DRY-RUN: nada foi alterado" in text            # nada muda sem -Apply
+    for needed in ("required_approving_review_count = 1", "dismiss_stale_reviews = $true", "enforce_admins = $true", "required_conversation_resolution = $true",
+                   "allow_force_pushes = $false", "restrictions = $null"):
+        assert needed in text
+    assert "bypass" not in text.replace("sem bypass", "").replace("nenhuma lista de bypass", "").lower().replace("# ", "") or "bypass_pull_request_allowances" not in text
+    from tools.orchestration import lifecycle
+    current_required = lifecycle.MANDATORY_CHECKS - {"windows process supervisor"}                                       # o 9o check roda no CI, mas a protecao de hoje exige estes 8
+    for check in sorted(current_required):
+        assert f'"{check}"' in text                                                                                    # o script MANTEM todos os checks obrigatorios atuais
+    assert '"windows process supervisor"' not in text                                                                  # e nao inventa um check novo como obrigatorio
+
+
+def test_what_the_script_applies_satisfies_the_auto_merge_protection_gate():
+    from tools.orchestration import auto_merge as am
+    applied = {"required_pull_request_reviews": {"required_approving_review_count": 1, "dismiss_stale_reviews": True}, "enforce_admins": {"enabled": True}}
+    assert am.protection_gaps(lambda p: applied if "protection" in p else [], "o/r") == []
