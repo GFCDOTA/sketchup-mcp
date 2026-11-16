@@ -214,6 +214,25 @@ PoC #605 reconciliada · Event Store integrado · estados legados migrados · Cl
 
 **Prova final:** um PR real e descartável recebe pedido de correção; Claude corrige e publica pelo executor confiável; Codex revisa o novo HEAD e, se preciso, pede outra alteração; Claude corrige; Codex aprova; tudo como eventos persistidos, sem mensagem manual intermediária e sem sessão de chat aberta.
 
+### 12.1 Critérios de aceite obrigatórios — acionamento automático do Codex por solicitação de revisão (2026-11-15)
+A FP-060 **não está concluída** enquanto o fluxo abaixo não for comprovado com processos reais (sem mocks, sem intervenção humana entre as etapas). Implementação: `tools/orchestration/pr_lifecycle.py` (reutiliza EventStore, `codex_reviewer`/Supervisor, Outbox, `event_bridge`, `lifecycle` e `auto_merge`; nenhuma arquitetura nova).
+
+| # | Critério | Como é comprovado |
+|---|---|---|
+| A1 | Todo PR técnico do executor, **pronto para revisão**, sai do rascunho e solicita o revisor independente (`fmmodesto`) | pronto = `Refs #N` com Issue aberta, sem decisão humana/governança, sem dependência aberta e checks obrigatórios verdes no HEAD; as exceções ficam como estão e são **reportadas com o motivo** |
+| A2 | A solicitação (ou a ausência de review no HEAD) gera `REVIEW_REQUESTED` no EventStore | evento `review-request:<repo>#<PR>:<HEAD>`, idempotente: **deduplica por repositório, PR e HEAD** |
+| A3 | O worker aguarda os checks obrigatórios e dispara uma **sessão real do Codex CLI** | pendente espera; reprovado descarta o pedido; verde reivindica o evento (lease + heartbeat + fencing) e chama o `codex_reviewer` |
+| A4 | O parecer é publicado como `fmmodesto` (APPROVE ou REQUEST_CHANGES) | Outbox + marcador `fp060-outbox-key` no review; publicação reconciliada, nunca duplicada |
+| A5 | `REQUEST_CHANGES` aciona o Claude para corrigir; **novo HEAD gera nova revisão independente** | bridge → `CORRECTION_REQUESTED` → executor → commit; o novo HEAD tem chave nova e o pedido do HEAD antigo é descartado |
+| A6 | `APPROVE` + checks verdes liberam o merge automático **protegido**, quando elegível | `auto_merge`: aprovação independente no HEAD exato, exceções de governança/segurança/visual sempre humanas, e a **proteção da branch precisa exigir aprovação independente** (lida, nunca alterada); sem isso o merge espera |
+| A7 | Reconciliação a cada 30 s recupera pedidos perdidos e PRs sem revisão, **inclusive PRs abertos antes da automação** | o ciclo olha o estado do GitHub (não só eventos novos); PR sem review no HEAD vira evento |
+| A8 | Recuperação após reinicialização do computador | estado em SQLite/JSON duráveis; tarefa agendada de logon; lease vencido volta ao pool; push sem confirmação reconciliado com o remoto |
+| A9 | O Project Board acompanha o ciclo automaticamente | reconciliador do backlog existente |
+| A10 | O ciclo **não depende** de tarefa agendada externa (ChatGPT): ela é só camada complementar de auditoria independente | nenhum passo do ciclo lê nem exige essa tarefa |
+| A11 | Validação por E2E real com processos reais | PR real: abertura → rascunho finalizado → revisão solicitada → Codex real → REQUEST_CHANGES → Claude real corrige → novo HEAD → nova revisão → APPROVE → merge protegido; relatório com PIDs, SHAs, eventos e reviews |
+
+Estado de cada critério e o que ainda depende de decisão do proprietário (proteção da branch, habilitação contínua, governança do #617) fica no relatório de evidência do E2E, nunca no texto desta SPEC.
+
 ## 13. Instruções de execução
 1. Ler esta SPEC, a FP-059 e o relatório do #605. 2. PoC = aprovada experimentalmente, não infraestrutura de produção. 3. Reconciliar repo e PRs antes de codar (§0). 4. Issue #606 vinculada à FP-059; SPEC no inventário. 5. P0–P7 em PRs pequenos e rastreáveis. 6. Reutilizar módulos existentes, nunca outro orquestrador. 7. Contínuo desligado até E2E + autorização específica. 8. Resultados e bloqueios no GitHub com evidência verificável. 9. Não alterar políticas/guards para acelerar. 10. Não declarar conclusão com base só em teste simulado.
 
