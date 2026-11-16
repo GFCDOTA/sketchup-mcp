@@ -378,9 +378,13 @@ def mutable_facts(pr: dict) -> dict:
             "body_sha": hashlib.sha256((body if isinstance(body, str) else "").encode("utf-8")).hexdigest()}
 
 
-def cancel_scheduled(gh: eb.Gh, repo: str, number: int, policy: dict, runner=subprocess.run) -> tuple[bool, str]:
+MERGED_DURING_CANCEL = "MERGED_DURING_CANCEL"
+
+
+def cancel_scheduled(gh: eb.Gh, repo: str, number: int, policy: dict, runner=subprocess.run, head: str | None = None) -> tuple[bool | str, str]:
     """O comando foi aceito mas o PR so foi AGENDADO (auto-merge/fila): desliga o agendamento e CONFIRMA que sumiu. Se nao der para confirmar, e erro que exige
-    intervencao humana (nunca deixa um merge futuro sem revalidacao)."""
+    intervencao humana (nunca deixa um merge futuro sem revalidacao). Se o PR aparecer MESCLADO nessa leitura, o merge e CONFERIDO como qualquer outro
+    (`confirm_merged`: HEAD autorizado, base, commit de merge): confirmado => `MERGED_DURING_CANCEL`; HEAD divergente ou prova insuficiente => False (intervencao)."""
     from tools.orchestration import event_executor as ex
     try:
         done = runner([gh_bin(), "pr", "merge", str(int(number)), "--repo", repo, "--disable-auto"], env=ex.executor_env(), capture_output=True, text=True, timeout=120)
@@ -390,7 +394,12 @@ def cancel_scheduled(gh: eb.Gh, repo: str, number: int, policy: dict, runner=sub
     if done.returncode == 0 and isinstance(after, dict) and not after.get("auto_merge") and after.get("merged") is not True:
         return True, "agendamento cancelado e confirmado (sem auto-merge no PR)"
     if isinstance(after, dict) and after.get("merged") is True:
-        return True, "o PR acabou mesclado enquanto o agendamento era cancelado"
+        if head is None:
+            return False, f"o PR #{number} foi mesclado durante o cancelamento e nao ha HEAD autorizado para conferir: REQUER INTERVENCAO do proprietario"
+        ok, why = confirm_merged(gh, repo, number, head)
+        if ok:
+            return MERGED_DURING_CANCEL, f"mesclado durante o cancelamento, conferido: {why}"
+        return False, f"mesclado durante o cancelamento SEM conferir o HEAD autorizado ({why}): REQUER INTERVENCAO do proprietario"
     return False, f"agendamento NAO confirmado como cancelado no PR #{number}: REQUER INTERVENCAO do proprietario"
 
 
@@ -451,6 +460,11 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                             row.update(code="DISABLED", reasons=[f"desligado durante a ultima leitura: {still_on2[1]}"])
                         elif not isinstance(pr3, dict) or mutable_facts(pr3) != mutable_facts(pr2) or last.code != "MERGE" or (pr3.get("head") or {}).get("sha") != row["head"]:
                             row.update(code="WAIT", reasons=["base, labels, estado, corpo ou Issues do PR mudaram na ultima leitura antes do merge: nada e mesclado nesta rodada"])
+                        elif not isinstance(pr4 := gh(f"repos/{repo}/pulls/{number}"), dict) or mutable_facts(pr4) != mutable_facts(pr2):
+                            # `gather` le o PR ANTES de arquivos/checks/reviews/Issues (consultas demoradas): base ou label podem mudar no meio. Esta releitura do PR e a
+                            # ULTIMA chamada antes do comando. Janela residual (nao fechavel pela API: nao ha merge condicionado a base/labels): o tempo de UMA ida ao servidor
+                            # entre esta leitura e o merge; quem a cobre no servidor e a protecao da branch (aprovacao exigida, aprovacoes velhas descartadas).
+                            row.update(code="WAIT", reasons=["base, labels, estado ou corpo do PR mudaram depois das consultas da ultima leitura: nada e mesclado nesta rodada"])
                         else:
                             done, msg = merge(number, row["head"], repo, runner)
                             # QUALQUER desfecho do comando (aceito, recusado, timeout, erro de comunicacao) deixa o resultado REMOTO a provar: o GitHub pode ter aceito o comando e a
@@ -463,10 +477,10 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                                 done, msg = False, cmsg
                                 row.update(code="ERROR", reasons=[cmsg])
                             else:
-                                cancelled, why = cancel_scheduled(gh, repo, number, policy, runner)
+                                cancelled, why = cancel_scheduled(gh, repo, number, policy, runner, head=row["head"])
                                 msg = f"{msg}; {cmsg}; {why}" if not done else f"{cmsg}; {why}"
-                                done = False
-                                if not cancelled:
+                                done = cancelled == MERGED_DURING_CANCEL                    # mesclado no HEAD AUTORIZADO enquanto cancelava: sucesso confirmado
+                                if cancelled is False:
                                     row.update(code="ERROR", reasons=[why])
                             row.update(merged=done, merge_message=msg)
         except (RuntimeError, OSError, ValueError, KeyError, TypeError) as exc:

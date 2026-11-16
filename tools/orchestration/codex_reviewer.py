@@ -27,6 +27,7 @@ from typing import Callable
 
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import event_executor as ex
+from tools.orchestration import store_factory
 
 VERDICTS = ("APPROVE", "REQUEST_CHANGES", "NEEDS_HUMAN")
 SEVERITIES = ("LOW", "MEDIUM", "HIGH", "CRITICAL")
@@ -359,13 +360,34 @@ def publish(v: dict, token: str, repo: str) -> str:
     if v["tests_reviewed"]:
         lines.append("Testes revistos: " + ", ".join(v["tests_reviewed"]))
     gh = shutil.which("gh") or "gh"
+    key = f"review:{repo}#{int(v['pr'])}:{v['head_sha']}:{event}"
+    lines += ["", f"<!-- fp060-outbox-key:{key} -->"]                         # o MESMO marcador do publicador do outbox (pilha #632): o texto sozinho nunca basta ao gate
     body = "\n".join(lines)
     r = subprocess.run([gh, "api", "-X", "POST", f"repos/{repo}/pulls/{v['pr']}/reviews", "-f", f"event={event}", "-f", f"commit_id={v['head_sha']}",
                         "-f", f"body={body}", "--jq", ".html_url"], capture_output=True, text=True, env={**os.environ, "GH_TOKEN": token}, timeout=60,
                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     if r.returncode != 0:
         raise ReviewError(f"publicacao falhou: {(r.stdout + r.stderr).strip()[:200]}")
+    record_provenance(repo, int(v["pr"]), v["head_sha"], event)
     return r.stdout.strip()
+
+
+def record_provenance(repo: str, pr: int, head: str, verdict: str, store=None) -> bool:
+    """Registro LOCAL de que ESTE publicador postou o parecer (producer `codex_reviewer`, DONE, chave `review:<repo>#<PR>:<HEAD>:<VEREDITO>`): e a prova que o
+    `auto_merge` exige para caminhos criticos e que o texto publico de um review nao forja. Idempotente. Falhar aqui nunca desfaz a publicacao: sem o registro, o gate
+    so fica em WAIT (fail-closed)."""
+    key = f"review:{repo}#{int(pr)}:{head}:{verdict}"
+    try:
+        if store is None:
+            store = store_factory.get_store()
+        eid, _created = store.publish("REVIEW_REQUESTED", key, f"review:{repo}#{int(pr)}", {"repo": repo, "pr": int(pr), "head_sha": head, "verdict": verdict},
+                                      producer="codex_reviewer", aggregate_type="review_publication")
+        claimed = store.claim_by_id(eid, f"codex-reviewer:{os.getpid()}", 30.0)
+        if claimed is not None:
+            store.complete(claimed, {"published": True, "verdict": verdict})
+        return any(e["idempotency_key"] == key and e["status"] == "DONE" for e in store.events(job_id=f"review:{repo}#{int(pr)}"))
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish: bool = False, runner=run_codex, codex_bin: str | None = None,

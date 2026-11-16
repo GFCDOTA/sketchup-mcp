@@ -191,7 +191,7 @@ GOOD_PROTECTION = {"required_pull_request_reviews": {"required_approving_review_
 
 class Gh:
     def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, draft=False, protection=None, protection_boom=None, rules=None, rules_boom=None,
-                 scheduled_only=False, mutate_last=None, cancel_works=True, merge_lands=True, issue_flip_at=None, merged_head=None, **overrides):
+                 scheduled_only=False, mutate_last=None, cancel_works=True, merge_lands=True, issue_flip_at=None, merged_head=None, mutate_pre=None, **overrides):
         self.issue_flip_at, self.issue_reads, self.merged_head = issue_flip_at, 0, merged_head
         self.merge_lands = merge_lands                                                       # False: o comando NAO produziu merge nenhum (recusa/queda antes de aplicar)
         self.head, self.fresh_head, self.boom, self.labelled, self.overrides, self.calls = head, fresh_head, boom, labelled, overrides, []
@@ -200,7 +200,7 @@ class Gh:
         self.protection = GOOD_PROTECTION if protection is None else protection
         self.protection_boom = protection_boom
         self.rules, self.rules_boom, self.scheduled_only = [] if rules is None else rules, rules_boom, scheduled_only
-        self.mutate_last, self.cancel_works = mutate_last, cancel_works
+        self.mutate_last, self.cancel_works, self.mutate_pre = mutate_last, cancel_works, mutate_pre
 
     def __call__(self, path):
         self.calls.append(path)
@@ -213,9 +213,11 @@ class Gh:
             sha = self.fresh_head if (self.fresh_head and self.pulls > 1) else self.head
             if self.pulls == 3 and self.mutate_last:                                               # a 3a leitura e a ULTIMA antes do merge: algo muda nela
                 return pr(head={"sha": sha, "repo": {"full_name": REPO}}, **{"changed_files": 1, **self.overrides, **self.mutate_last})
-            if self.pulls >= 4:                                                                    # a 4a leitura e a CONFIRMACAO depois do comando de merge; a 5a, a releitura apos cancelar
+            if self.pulls == 4:                                                                    # a 4a leitura e a releitura SO do PR imediatamente antes do comando
+                return pr(head={"sha": sha, "repo": {"full_name": REPO}}, **{"changed_files": 1, **self.overrides, **(self.mutate_pre or {})})
+            if self.pulls >= 5:                                                                    # a 5a leitura e a CONFIRMACAO depois do comando de merge; a 6a, a releitura apos cancelar
                 if self.scheduled_only:
-                    cancelled = self.pulls >= 5 and self.cancel_works
+                    cancelled = self.pulls >= 6 and self.cancel_works
                     return pr(head={"sha": sha, "repo": {"full_name": REPO}}, auto_merge=None if cancelled else {"enabled_by": "x"}, changed_files=1)
                 if self.merge_lands:
                     return pr(head={"sha": self.merged_head or sha, "repo": {"full_name": REPO}}, merged=True, state="closed", merge_commit_sha="c" * 40, changed_files=1)
@@ -793,3 +795,54 @@ def test_a_pr_merged_with_a_different_head_than_the_authorized_one_demands_owner
     out = am.cycle(Gh(merged_head="d" * 40), POLICY, REPO, apply=True, runner=Runner(), is_enabled=ON, provenance=ALWAYS)
     row = out["prs"][0]
     assert row["merged"] is False and row["code"] == "ERROR" and "HEAD_DIVERGENTE" in row["reasons"][0] and "INTERVENCAO" in row["reasons"][0]
+
+
+# -- 5a revisao do Codex (#648): releitura do PR antes do comando; merge durante o cancelamento; proveniencia do publicador REAL desta base ----------------
+@pytest.mark.parametrize("change", [{"base": {"ref": "main", "repo": {"full_name": REPO}}}, {"labels": [{"name": "do-not-merge"}]},
+                                    {"labels": [{"name": "aprovação-humana-pendente"}]}, {"body": "Refs #5\nRefs #99\n"}])
+def test_a_base_or_label_change_after_the_slow_queries_of_the_last_read_is_caught_by_the_pre_merge_reread(monkeypatch, change):
+    monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
+    gh, runner = Gh(mutate_pre=change), Runner()
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
+    assert out["prs"][0]["code"] == "WAIT" and "depois das consultas" in out["prs"][0]["reasons"][0] and runner.calls == []
+
+
+class _Done:
+    returncode, stdout, stderr = 0, "", ""
+
+
+def test_a_merge_landing_while_cancelling_is_confirmed_for_the_authorized_head():
+    merged = pr(merged=True, state="closed", merge_commit_sha="c" * 40)
+    ok, why = am.cancel_scheduled(lambda p: merged, REPO, 7, POLICY, lambda *a, **k: _Done(), head=HEAD)
+    assert ok == am.MERGED_DURING_CANCEL and "conferido" in why
+
+
+def test_a_merge_landing_while_cancelling_with_another_head_or_without_proof_requires_intervention():
+    other = pr(merged=True, state="closed", merge_commit_sha="c" * 40, head={"sha": OLD, "repo": {"full_name": REPO}})
+    ok, why = am.cancel_scheduled(lambda p: other, REPO, 7, POLICY, lambda *a, **k: _Done(), head=HEAD)
+    assert ok is False and "INTERVENCAO" in why
+    no_commit = pr(merged=True, state="closed")
+    ok, why = am.cancel_scheduled(lambda p: no_commit, REPO, 7, POLICY, lambda *a, **k: _Done(), head=HEAD)
+    assert ok is False and "INTERVENCAO" in why
+    ok, why = am.cancel_scheduled(lambda p: pr(merged=True, state="closed", merge_commit_sha="c" * 40), REPO, 7, POLICY, lambda *a, **k: _Done())
+    assert ok is False and "INTERVENCAO" in why                                                          # sem HEAD autorizado para conferir
+
+
+def test_the_real_publisher_of_this_base_produces_the_marker_and_the_local_record_that_satisfy_the_reinforced_gate(tmp_path, monkeypatch):
+    from tools.orchestration import codex_reviewer as cr
+    from tools.orchestration.event_store import EventStore
+    store = EventStore(tmp_path / "store.db")
+    monkeypatch.setattr(cr.store_factory, "get_store", lambda: store)
+    posted = {}
+
+    def fake_run(argv, **kw):
+        posted["body"] = next(a[len("body="):] for a in argv if str(a).startswith("body="))
+        return type("P", (), {"returncode": 0, "stdout": "https://github.com/x/y/pull/7#pullrequestreview-1\n", "stderr": ""})()
+    monkeypatch.setattr(cr.subprocess, "run", fake_run)
+    v = {"pr": 7, "head_sha": HEAD, "verdict": "APPROVE", "confidence": "HIGH", "findings": [], "tests_reviewed": ["tests/test_x.py"]}
+    cr.publish(v, "tok", REPO)
+    review = approval(commit=HEAD, body=posted["body"])
+    assert am.reinforced(review, REPO, 7, HEAD, am.outbox_provenance(store)) is True                     # o fluxo REAL (marcador + registro local) satisfaz o gate
+    assert am.reinforced(review, REPO, 7, HEAD, am.outbox_provenance(EventStore(tmp_path / "vazio.db"))) is False   # so o texto copiado nao basta
+    cr.publish(v, "tok", REPO)                                                                            # idempotente
+    assert sum(1 for e in store.events() if e["producer"] == "codex_reviewer") == 1
