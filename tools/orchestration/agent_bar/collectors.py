@@ -522,11 +522,14 @@ def store_db_path(gov: Path, db_name: str | None = None) -> Path:
     """O MESMO caminho que o produtor usa (`store_factory.store_path`: `EVENT_STORE_DB_PATH`, senao ao lado do estado do bridge). Sem nenhuma dessas variaveis a
     barra le o `event_store.db` do diretorio de governanca dela. `db_name` explicito fixa o arquivo dentro de `gov` (testes)."""
     if db_name is None and any(os.environ.get(v) for v in ("EVENT_STORE_DB_PATH", "EVENT_BRIDGE_STATE_PATH", "EXECUTION_STATE_PATH")):
-        for var in ("EVENT_STORE_DB_PATH", "EVENT_BRIDGE_STATE_PATH", "EXECUTION_STATE_PATH"):
+        for var in ("EVENT_STORE_DB_PATH", "EVENT_BRIDGE_STATE_PATH", "EXECUTION_STATE_PATH"):      # a MESMA precedencia do produtor: so a primeira definida vale (as outras sao ignoradas)
             raw = os.environ.get(var)
-            if raw and not Path(raw).is_absolute():
+            if not raw:
+                continue
+            if not Path(raw).is_absolute():
                 # um caminho relativo se resolve contra o cwd de QUEM le: a barra (numa worktree) e a tarefa agendada (no checkout principal) leriam bancos diferentes
                 raise RelativeStorePath(f"{var} e um caminho relativo: indeterminado (depende do diretorio de trabalho de quem le); use um caminho absoluto")
+            break                                                                                     # a variavel efetiva e absoluta: as de menor precedencia nao importam
         from tools.orchestration.store_factory import store_path
         return store_path()
     return Path(gov) / (db_name or "event_store.db")

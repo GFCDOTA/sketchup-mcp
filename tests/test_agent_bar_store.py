@@ -345,3 +345,21 @@ def test_a_relative_store_path_variable_is_indeterminate_and_never_healthy(tmp_p
 def test_an_absolute_store_path_variable_is_read_normally(store, tmp_path, monkeypatch):
     monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "event_store.db"))
     assert col.collect_store(tmp_path, NOW)["state"] == "ok"
+
+
+@pytest.mark.parametrize("effective,ignored", [("EVENT_STORE_DB_PATH", "EVENT_BRIDGE_STATE_PATH"), ("EVENT_STORE_DB_PATH", "EXECUTION_STATE_PATH"),
+                                               ("EVENT_BRIDGE_STATE_PATH", "EXECUTION_STATE_PATH")])
+def test_a_relative_variable_of_lower_precedence_is_ignored_like_the_producer_does(store, tmp_path, monkeypatch, effective, ignored):
+    for var in ("EVENT_STORE_DB_PATH", "EVENT_BRIDGE_STATE_PATH", "EXECUTION_STATE_PATH"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv(effective, str(tmp_path / ("event_store.db" if effective == "EVENT_STORE_DB_PATH" else "event_bridge.json")))
+    monkeypatch.setenv(ignored, "relativo/qualquer.json")
+    assert col.collect_store(tmp_path, NOW)["state"] == "ok"
+
+
+def test_the_effective_relative_variable_is_refused_even_if_a_lower_one_is_absolute(tmp_path, monkeypatch):
+    for var in ("EVENT_STORE_DB_PATH", "EVENT_BRIDGE_STATE_PATH", "EXECUTION_STATE_PATH"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", "relativo/event_store.db")
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "event_bridge.json"))
+    assert col.collect_store(tmp_path, NOW)["state"] == "indisponivel"
