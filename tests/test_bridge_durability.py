@@ -589,3 +589,40 @@ def test_a_complete_pending_still_restores_the_recovery_block_so_new_reviews_sta
     assert eb.load(p)["recovery"]["quarantine"].startswith("event_bridge.json.corrupt-")
     eb.run_cycle(fake_gh(reviews=[review(9)]), POLICY, p, now=NOW)
     assert [i["state"] for i in eb.load(p)["queue"]] == ["BLOCKED_RECOVERY"]                       # sem `release-recovery`, nada executa
+
+
+@pytest.mark.parametrize("registered", ["execution_state.json", "event_bridge.json.corrupt-x-1-abcdef", "event_bridge.json.corrupt-20260101000000-1-abcdef"])
+def test_the_operator_sees_the_effective_quarantine_name_when_the_recorded_one_was_rejected(tmp_path, registered):
+    p = tmp_path / "event_bridge.json"
+    (tmp_path / "event_bridge.json.corrupt-20260101000000-1-abcdef").write_bytes(b"evidencia anterior")        # colisao para o 3o caso
+    (tmp_path / "execution_state.json").write_bytes(b"{}")
+    p.write_bytes(b"\x00" * 64)
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "recovery": {"at": "t", "quarantine": registered}, "diagnostics": [{"at": "t", "message": "d"}]})
+    with es.locked(p):
+        eb.recover_state(p)
+    state = eb.load(p)
+    effective = state["recovery"]["quarantine"]
+    assert effective != registered and (tmp_path / effective).read_bytes() == b"\x00" * 64                  # o nome mostrado e o da evidencia de fato
+    assert any(effective in str(d.get("message", "")) for d in state["diagnostics"])
+    assert (tmp_path / "execution_state.json").read_bytes() == b"{}" and (tmp_path / "event_bridge.json.corrupt-20260101000000-1-abcdef").read_bytes() == b"evidencia anterior"
+
+
+def test_an_interruption_after_the_pending_was_corrected_resumes_with_the_effective_name(tmp_path, monkeypatch):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "recovery": {"at": "t", "quarantine": "execution_state.json"}, "diagnostics": [{"at": "t", "message": "d"}]})
+    real = es.replace_retry
+
+    def die_on_quarantine(src, dst):
+        if Path(src) == p:
+            raise KeyboardInterrupt("queda simulada entre a gravacao do pendente e a quarentena")
+        return real(src, dst)
+    monkeypatch.setattr(es, "replace_retry", die_on_quarantine)
+    with es.locked(p), pytest.raises(KeyboardInterrupt):
+        eb.recover_state(p)
+    monkeypatch.setattr(es, "replace_retry", real)
+    recorded = json.loads(eb._pending_path(p).read_text(encoding="utf-8"))["recovery"]["quarantine"]
+    assert recorded.startswith("event_bridge.json.corrupt-")                                        # o pendente ja carrega o nome EFETIVO
+    with es.locked(p):
+        eb.recover_state(p)
+    assert (tmp_path / recorded).read_bytes() == b"\x00" * 64 and eb.load(p)["recovery"]["quarantine"] == recorded

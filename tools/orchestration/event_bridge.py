@@ -158,6 +158,12 @@ def recover_state(path: Path | None = None) -> dict:
         # destino que ainda NAO existe; qualquer outra coisa (outro arquivo, o oficial, uma quarentena existente) e ignorada e o nome novo, unico, e mantido
         if isinstance(named, str) and QUARANTINE_NAME.fullmatch(named.replace(p.name, "@", 1)) and named.startswith(p.name + ".corrupt-") and not p.with_name(named).exists():
             candidate = p.with_name(named)
+        else:
+            # o nome registrado e invalido ou colide: a evidencia vai para o nome NOVO e o OPERADOR precisa ver ESTE nome (nao o registrado) ao liberar a recuperacao; o nome
+            # efetivo e o diagnostico sao gravados de forma duravel na pendencia ANTES de mover o arquivo corrompido (uma interrupcao depois retoma com o nome certo)
+            state["recovery"] = {**state["recovery"], "quarantine": candidate.name, "registered_name_rejected": str(named)[:120]}
+            diagnose(state, f"nome de quarentena registrado ({str(named)[:80]!r}) invalido ou ja existente: o arquivo corrompido sera preservado em {candidate.name}")
+            _write_state(_pending_path(p), state)
     else:
         state = default_bridge_state()
         diagnose(state, f"{reason}; preservado em {candidate.name}; estado limpo, reviews relidos do GitHub no proximo poll (cursor e vistos zerados); reviews "
