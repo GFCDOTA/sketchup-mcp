@@ -21508,7 +21508,7 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
-      "path": "tests/test_fp060_collect_evidence.py",
+      "path": "tests/test_fp060_e2e_evidence.py",
       "domain": "test",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",

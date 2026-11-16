@@ -395,3 +395,22 @@ def test_a_unix_path_with_a_hash_inside_a_component_is_redacted_whole_also_in_th
 
 def test_a_hash_fragment_outside_a_path_is_kept():
     assert ce.scrub("veja a Issue #641 e o PR #660") == "veja a Issue #641 e o PR #660"
+
+
+@pytest.mark.parametrize("path", ["/custom/client/Finance#/secret.txt", "/custom/client/Joao:/secret.txt", "/a/b#/c:/d.txt"])
+def test_a_hash_or_colon_ending_a_component_does_not_leave_the_rest_of_the_path(path):
+    out = ce.scrub(f"erro em {path} agora")
+    assert "secret" not in out and "d.txt" not in out and "Finance" not in out and "Joao" not in out
+    blob = json.dumps(ce.clean({"error": f"erro em {path}"}), ensure_ascii=False)
+    ce.assert_clean(blob)
+    with pytest.raises(SystemExit):
+        ce.assert_clean(json.dumps({"error": path}))
+
+
+@pytest.mark.parametrize("raw", ["bearer abcdefghijklmnop", "BEARER abcdefghijklmnop", "Authorization: Basic dXNlcjpwYXNzd29yZA=="])
+def test_bearer_and_basic_credentials_in_any_case_are_removed_from_the_report(raw):
+    blob = json.dumps(ce.clean({"error": f"falha: {raw}"}), ensure_ascii=False)
+    assert "abcdefghijklmnop" not in blob and "dXNlcjpwYXNzd29yZA" not in blob
+    ce.assert_clean(blob)
+    with pytest.raises(SystemExit):
+        ce.assert_clean(raw)

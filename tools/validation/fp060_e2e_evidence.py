@@ -23,13 +23,13 @@ TOKEN = re.compile(
     r"|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|AKIA[0-9A-Z]{12,}"                    # Slack, Google, AWS
     r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"                           # JWT
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|\Z)"          # chave privada PEM COMPLETA (cabecalho, corpo e rodape; sem rodape, ate o fim)
-    r"|Bearer\s+[A-Za-z0-9._~+/-]{10,}"
+    r"|(?i:bearer)\s+[A-Za-z0-9._~+/=-]{8,}|(?i:basic)\s+[A-Za-z0-9+/=]{8,}"                             # esquema em qualquer caixa (Bearer e Basic)
     r"|(?i:(?<![A-Za-z0-9])[A-Za-z0-9_-]*(?:api[_-]?key|secret|password|passwd|token|credential|private[_-]?key)[A-Za-z0-9_-]*)[\"']?\s*[:=]\s*"   # client_secret, refresh_token, x-api-key...
     r"(?:\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'|[^\s;}\"']{4,}))")                 # inclui JSON ({"password": "..."}) e valores entre aspas inteiros (virgulas, espacos, escapes)
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 WIN_PATH = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\"'<>|\r\n]*")
 UNC_PATH = re.compile(r"(?:\\\\|(?<![:\w/.])//)[A-Za-z0-9_.$-]+[\\/][^\"'<>|\r\n]*")                   # \\servidor\compartilhamento\... (e //servidor/compartilhamento/...)                    # ate o fim da linha/aspas: cobre espacos no caminho
-UNIX_PATH = re.compile(r"(?<![\w.:#/-])/(?:(?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%-]))+(?: (?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%-]))+)*/)+(?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%-]))+(?: (?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%-]))+)*|(?<![\w.:#/-])/(?:(?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%-]))+(?: (?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%-]))+)*/)+")      # caminho absoluto Unix (2+ segmentos) de QUALQUER raiz; componentes (e o ultimo) podem ter espacos e parenteses/colchetes/& = ! %; dois-pontos DENTRO do componente (valido em nome Unix); prefere redigir demais a vazar
+UNIX_PATH = re.compile(r"(?<![\w.:#/-])/(?:(?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+(?: (?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+)*/)+(?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+(?: (?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+)*|(?<![\w.:#/-])/(?:(?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+(?: (?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+)*/)+")      # caminho absoluto Unix (2+ segmentos) de QUALQUER raiz; componentes (e o ultimo) podem ter espacos e parenteses/colchetes/& = ! %; dois-pontos DENTRO do componente (valido em nome Unix); prefere redigir demais a vazar
 UNIX_SPACED = re.compile(r"(?<![\w.:#/-])/(?:home|Users|users|root|mnt|srv|opt|var|tmp|Volumes|workspace|data|media)/[^\"'<>|\r\n]*")     # raiz de usuario/maquina: ate o fim da linha (cobre espacos)
 FORBIDDEN = (TOKEN, EMAIL, WIN_PATH, UNC_PATH, UNIX_SPACED, UNIX_PATH)
 
