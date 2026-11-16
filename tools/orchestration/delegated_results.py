@@ -34,19 +34,30 @@ def outcome_of(case: ET.Element) -> str:
     return "passed"
 
 
-def node_id_of(case: ET.Element) -> str:
-    cls = case.get("classname", "")
-    return cls.replace(".", "/") + ".py::" + case.get("name", "")
+def junit_key(node_id: str) -> tuple[str, str]:
+    """(classname, name) que o pytest grava no JUnit para um node id EXATO da politica: `tests/a/b.py::T::m[p]` -> (`tests.a.b.T`, `m[p]`).
+    O caminho inverso (classname -> arquivo) e ambiguo (`tests.a.b` pode ser `tests/a/b.py` ou a classe `b` de `tests/a.py`); por isso so se mapeia da politica para o JUnit."""
+    path, _, rest = node_id.partition("::")
+    parts = rest.split("::")
+    module = path[:-3].replace("/", ".")
+    return ".".join([module, *parts[:-1]]), parts[-1]
 
 
-def collect(junit: Path) -> dict[str, str]:
+def collect(junit: Path, ids: list[str] | tuple[str, ...]) -> dict[str, str]:
+    """Resultado de CADA node id da politica: passed | failed | error | skipped | duplicate | ambiguous; ausente = nao executado."""
+    keys: dict[tuple[str, str], list[str]] = {}
+    for nid in ids:
+        keys.setdefault(junit_key(nid), []).append(nid)
     seen: dict[str, str] = {}
+    for key, owners in keys.items():
+        if len(owners) > 1:                                          # dois ids da politica com o mesmo registro no JUnit: nenhum pode ser afirmado
+            seen.update({nid: "ambiguous" for nid in owners})
     for case in ET.parse(junit).getroot().iter("testcase"):
-        nid = node_id_of(case)
-        if nid in seen:                                              # ids duplicados no relatorio: ambiguo => nunca "passed"
-            seen[nid] = "duplicate"
-        else:
-            seen[nid] = outcome_of(case)
+        owners = keys.get((case.get("classname", ""), case.get("name", "")))
+        if not owners or len(owners) > 1:
+            continue
+        nid = owners[0]
+        seen[nid] = "duplicate" if nid in seen else outcome_of(case)  # o mesmo teste duas vezes no relatorio: ambiguo => nunca "passed"
     return seen
 
 
@@ -63,7 +74,7 @@ def main(argv: list[str] | None = None) -> int:
         junit = Path(tmp) / "junit.xml"
         proc = subprocess.run([sys.executable, "-m", "pytest", *policy.ids, "-p", "no:cacheprovider", "-q", f"--junitxml={junit}", "-o", "junit_family=xunit1"],
                               cwd=a.tree, env={**env, "PYTHONDONTWRITEBYTECODE": "1"})
-        seen = collect(junit) if junit.exists() else {}
+        seen = collect(junit, policy.ids) if junit.exists() else {}
     results = [{"node_id": nid, "outcome": seen.get(nid, "missing")} for nid in policy.ids]
     report = {"schema": dt.SCHEMA, "repository": env["GITHUB_REPOSITORY"], "head_sha": env["DELEGATED_HEAD_SHA"].lower(), "run_id": int(env["GITHUB_RUN_ID"]),
               "run_attempt": int(env.get("GITHUB_RUN_ATTEMPT", "1")), "workflow_path": dt.WORKFLOW_PATH, "policy_base_sha": base_sha, "pytest_exit_code": proc.returncode,
