@@ -77,12 +77,17 @@ def test_prompt_pins_the_exact_head_and_forbids_edits():
 
 # ------------------------------------------------------------------------------------------------------ fluxo (mocks)
 class FakeGh:
-    def __init__(self, head=SHA, state="open", login="fmodesto30", moved=None, moved_after=1):
+    def __init__(self, head=SHA, state="open", login="fmodesto30", moved=None, moved_after=1, reviews=(), reviews_error=None):
         self.head, self.state, self.login, self.moved, self.calls, self.moved_after = head, state, login, moved, 0, moved_after
+        self.reviews, self.reviews_error = list(reviews), reviews_error
 
     def __call__(self, path):
         if path == "user":
             return {"login": self.login}
+        if path.startswith(f"repos/{REPO}/pulls/7/reviews"):
+            if self.reviews_error:
+                raise self.reviews_error
+            return self.reviews
         if path == f"repos/{REPO}/pulls/7":
             self.calls += 1
             head = self.moved if (self.moved and self.calls > self.moved_after) else self.head
@@ -527,3 +532,31 @@ def test_auth_timeout_and_definitive_failures_keep_their_kind_and_are_not_quota(
 def test_a_failure_after_codex_finished_still_proves_the_account_works(tmp_path):
     res = review(tmp_path, run=Run(text="isto nao e json"))
     assert res["action"] == "REVIEW_BLOCKED" and res["codex_ran"] is True
+
+
+# -- reconciliacao IMEDIATAMENTE antes de publicar (concorrencia entre revisores; HEAD exato) -------------------------------------------------------------
+def _publish(tmp_path, monkeypatch, gh):
+    monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
+    published = []
+    res = review(tmp_path, gh=gh, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda v, token, repo: published.append(v["verdict"]) or "https://x/r/9")
+    return res, published
+
+
+def test_a_review_published_by_someone_else_on_the_exact_head_is_reconciled_and_nothing_is_published_again(tmp_path, monkeypatch):
+    other = {"id": 77, "user": {"login": "fmmodesto"}, "state": "CHANGES_REQUESTED", "commit_id": SHA}
+    res, published = _publish(tmp_path, monkeypatch, FakeGh(reviews=[other]))
+    assert res["action"] == "RECONCILED" and res["review_id"] == 77 and res["state"] == "CHANGES_REQUESTED" and published == []
+    assert rec(tmp_path)["reconciled_review"] == 77
+
+
+def test_a_review_on_an_older_head_or_by_a_non_reviewer_does_not_block_publishing_the_new_one(tmp_path, monkeypatch):
+    old = {"id": 70, "user": {"login": "fmmodesto"}, "state": "CHANGES_REQUESTED", "commit_id": "9" * 40}
+    stranger = {"id": 71, "user": {"login": "alguem"}, "state": "APPROVED", "commit_id": SHA}
+    comment = {"id": 72, "user": {"login": "fmmodesto"}, "state": "COMMENTED", "commit_id": SHA}
+    res, published = _publish(tmp_path, monkeypatch, FakeGh(reviews=[old, stranger, comment]))
+    assert res["action"] == "DONE" and len(published) == 1
+
+
+def test_if_the_reviews_cannot_be_read_right_before_publishing_nothing_is_published(tmp_path, monkeypatch):
+    res, published = _publish(tmp_path, monkeypatch, FakeGh(reviews_error=RuntimeError("gh: 502")))
+    assert res["action"] == "FAILED" and published == []

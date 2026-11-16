@@ -906,3 +906,14 @@ def test_a_review_on_an_older_head_does_not_reconcile_the_new_head(qstore, clock
     enq(w, qstore)
     w.reviews[7] = [{"id": 1, "user": {"login": "fmmodesto"}, "state": "CHANGES_REQUESTED", "commit_id": NEW, "body": ""}]
     assert pl.work(w, qstore, POLICY, REPO, rv)["action"] == "DONE" and len(rv.calls) == 1
+
+
+def test_a_reviewer_that_reconciles_at_the_publish_step_completes_the_event_with_the_existing_verdict_and_proves_the_account(qstore, clock):
+    w = World().add(7)
+    enq(w, qstore)
+    rv = Reviewer({"action": "RECONCILED", "reason": "ja publicado", "review_id": 12, "state": "APPROVED", "codex_ran": True})
+    out = pl.work(w, qstore, POLICY, REPO, rv)
+    assert out["action"] == "RECONCILED" and out["pr"] == 7
+    e = ev_of(qstore)
+    assert e["status"] == "DONE" and '"verdict": "APPROVE"' in e["result"] and '"reconciled": true' in e["result"]
+    assert rl.RateLimitGate(qstore).status() == []

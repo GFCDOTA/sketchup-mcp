@@ -379,6 +379,23 @@ def publish(v: dict, token: str, repo: str) -> str:
     return r.stdout.strip()
 
 
+def published_on_head(gh: eb.Gh, repo: str, pr: int, sha: str, policy: dict) -> dict | None:
+    """Ultimo parecer (APPROVED/CHANGES_REQUESTED) de um revisor AUTORIZADO (nao-executor) JA publicado neste HEAD exato, lido sem cache e paginado. Erro de leitura
+    PROPAGA (RuntimeError/OSError...): sem conseguir verificar, quem chama nao publica."""
+    found: list[dict] = []
+    for page in range(1, 11):
+        chunk = gh(f"repos/{repo}/pulls/{pr}/reviews?per_page=100&page={page}")
+        if not isinstance(chunk, list):
+            raise RuntimeError("lista de reviews invalida")
+        found.extend(r for r in chunk if isinstance(r, dict))
+        if len(chunk) < 100:
+            break
+    ok = [r for r in found if (r.get("user") or {}).get("login") in policy.get("reviewers", [])
+          and (r.get("user") or {}).get("login") not in policy.get("executor_logins", []) and r.get("state") in ("APPROVED", "CHANGES_REQUESTED")
+          and str(r.get("commit_id", "")).lower() == sha.lower()]
+    return ok[-1] if ok else None
+
+
 def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish: bool = False, runner=run_codex, codex_bin: str | None = None,
               gh_user: Callable[[str], str | None] = gh_user_with, publisher=publish, tmp: Path | None = None) -> dict:
     """('DONE'|'REVIEW_BLOCKED'|'STALE'|'FAILED', ...). Nunca lanca; o estado vai para `last_review.json`."""
@@ -449,6 +466,12 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
                 if live.get("state") != "open" or live_sha != sha:
                     record("failed", pr=pr, sha=sha, error="HEAD/estado mudou antes de publicar (STALE)")
                     return {"action": "STALE", "reason": f"antes de publicar: HEAD {sha[:8]} -> {live_sha[:8]}, estado {live.get('state')}"}
+                prior = published_on_head(gh, repo, pr, sha, policy)                   # RECONCILIA imediatamente antes da escrita: outro revisor/caminho pode ter publicado neste HEAD
+                if prior is not None:
+                    record("done", pr=pr, sha=sha, verdict=verdict["verdict"], findings=len(verdict["findings"]), published="", blocked="",
+                           reconciled_review=prior.get("id"), tests_passed=evidence.get("tests_passed"), isolation=evidence.get("isolation"))
+                    return {"action": "RECONCILED", "reason": f"parecer {prior.get('state')} (review {prior.get('id')}) ja publicado neste HEAD: nada publicado de novo",
+                            "review_id": prior.get("id"), "state": prior.get("state"), "codex_ran": True}
                 published = publisher(verdict, token, repo)
                 after = (gh(f"repos/{repo}/pulls/{pr}").get("head") or {}).get("sha", "").lower()   # reconcilia depois
                 if after != sha:

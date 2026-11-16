@@ -401,6 +401,9 @@ def _review(store: EventStore, ev: dict, gh: eb.Gh, policy: dict, repo: str, rev
             v = result.get("verdict")
             store.complete(ev, {"action": "DONE", "verdict": v.get("verdict") if isinstance(v, dict) else v, "url": result.get("url"),
                                 "findings": len(v.get("findings") or []) if isinstance(v, dict) else None})
+        elif action == "RECONCILED":                                                                   # alguem publicou neste HEAD entre o inicio e a escrita: conclui com ESSE parecer
+            store.complete(ev, {"action": "DONE", "verdict": "APPROVE" if result.get("state") == "APPROVED" else "REQUEST_CHANGES", "reconciled": True,
+                                "review_id": result.get("review_id"), "reason": str(result.get("reason") or "")[:200]})
         elif action in ("SKIPPED", "STALE"):
             store.supersede(ev, str(result.get("reason") or action)[:300])
         else:
