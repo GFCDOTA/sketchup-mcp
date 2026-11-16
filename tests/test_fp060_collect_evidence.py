@@ -360,3 +360,22 @@ def test_credentials_in_json_or_quoted_form_are_removed_or_refused_in_the_whole_
 def test_prose_with_the_word_token_or_secret_is_not_over_redacted():
     text = "o token expirou e o secret nao foi lido"
     assert ce.scrub(text) == text
+
+
+# -- revisao do Codex (#660): campos de credencial com prefixo e caminhos Unix com dois-pontos ---------------------------------------------------------
+@pytest.mark.parametrize("raw", ['{"client_secret":"valor-confidencial"}', '{"refresh_token": "abc def ghi"}', "x-api-key=supersegredo123",
+                                 "SECRET_KEY: \'nao-mostra\'", 'oauth_access_token="tok-123456"'])
+def test_credential_fields_with_a_prefix_are_redacted_and_never_pass_the_final_check(raw):
+    out = ce.scrub(raw)
+    assert "<token>" in out and "confidencial" not in out and "supersegredo" not in out and "nao-mostra" not in out and "tok-123456" not in out
+    with pytest.raises(SystemExit):
+        ce.assert_clean(raw)
+    ce.assert_clean(out)
+
+
+def test_a_unix_path_with_a_colon_in_a_component_is_redacted_whole():
+    out = ce.scrub("erro em /custom/client/Joao:Silva/secret.txt ao ler")
+    assert "Joao" not in out and "Silva" not in out and "secret.txt" not in out and "<caminho>" in out
+    ce.assert_clean(out)
+    with pytest.raises(SystemExit):
+        ce.assert_clean("erro em /custom/client/Joao:Silva/secret.txt")
