@@ -25,7 +25,7 @@ def codes(found):
 
 # -- o que NAO e divergencia ------------------------------------------------------------------------------------------------
 @pytest.mark.parametrize("state, status", [
-    ("QUEUED", "PENDING"), ("RUNNING", "PENDING"),                         # o espelho so e atualizado quando o item JSON termina
+    ("QUEUED", "PENDING"),                                                   # o espelho so e atualizado quando o item JSON termina (RUNNING NAO concorda: ver JSON_RUNNING)
     ("DONE_AWAITING_REREVIEW", "DONE"), ("SUPERSEDED", "SUPERSEDED"), ("REFUSED", "SUPERSEDED"), ("PARKED_UNSUPPORTED", "SUPERSEDED"),
     ("FAILED", "PENDING"), ("FAILED", "DLQ"), ("BLOCKED_CLI", "PENDING"), ("BLOCKED_CREDENTIALS", "DLQ"),
     ("BLOCKED_WORKTREE", "PENDING"), ("BLOCKED_REVIEW_FETCH", "DLQ"),
@@ -50,8 +50,7 @@ def test_a_finished_json_item_whose_event_is_still_pending_means_the_sync_was_lo
     assert codes(sd.compare([item(state=state)], [event(status=status)])) == [("STALE_PENDING", "k1")]
 
 
-@pytest.mark.parametrize("state, status", [("QUEUED", "DONE"), ("RUNNING", "SUPERSEDED"), ("DONE_AWAITING_REREVIEW", "SUPERSEDED"),
-                                           ("SUPERSEDED", "DONE"), ("FAILED", "DONE")])
+@pytest.mark.parametrize("state, status", [("QUEUED", "DONE"), ("DONE_AWAITING_REREVIEW", "SUPERSEDED"), ("SUPERSEDED", "DONE"), ("FAILED", "DONE")])
 def test_any_other_pair_is_a_state_mismatch(state, status):
     assert codes(sd.compare([item(state=state)], [event(status=status)])) == [("STATE_MISMATCH", "k1")]
 
@@ -302,3 +301,42 @@ def test_main_reports_an_invalid_item_as_a_json_error_with_exit_2(tmp_path, monk
     assert sd.main(["--json"]) == 2
     out = json.loads(capsys.readouterr().out)
     assert out["ok"] is False and "kind" in out["error"]
+
+
+# -- 6a revisao do Codex (#634): execucao ativa, orcamento de tentativas e janela de espera ------------------------------------------------------------
+def test_a_json_item_still_running_blocks_the_cutover_even_when_the_mirror_is_pending():
+    found = sd.compare([item(state="RUNNING")], [event(status="PENDING")])
+    assert codes(found) == [("JSON_RUNNING", "k1")] and "drene" in found[0].detail
+
+
+def test_a_drained_queue_with_the_mirror_in_step_is_ok():
+    assert sd.compare([item(state="QUEUED", attempts=1)], [event(status="PENDING", attempt=1, max_attempts=sd.MAX_ATTEMPTS)], now=1000.0) == []
+
+
+@pytest.mark.parametrize("json_attempts, event_attempt", [(0, 2), (1, 2), (0, 1)])
+def test_an_event_that_spent_more_attempts_than_the_json_item_is_a_budget_divergence(json_attempts, event_attempt):
+    found = sd.compare([item(state="BLOCKED_CREDENTIALS", attempts=json_attempts)], [event(status="PENDING", attempt=event_attempt, max_attempts=3)], now=1000.0)
+    assert codes(found) == [("STATE_MISMATCH", "k1")] and "orcamento" in found[0].detail
+
+
+def test_an_event_with_the_same_or_a_larger_budget_than_the_json_item_agrees():
+    assert sd.compare([item(state="FAILED", attempts=2)], [event(status="PENDING", attempt=2, max_attempts=3)], now=1000.0) == []
+    assert sd.compare([item(state="FAILED", attempts=2)], [event(status="PENDING", attempt=0, max_attempts=3)], now=1000.0) == []        # o evento tem MAIS folga: nao e divergencia
+
+
+def test_a_json_retry_after_in_the_future_with_an_event_already_available_is_a_divergence():
+    now = 1_000_000.0
+    soon = "2026-11-16T00:00:00Z"
+    future = sd._epoch(soon)
+    found = sd.compare([item(state="FAILED", attempts=1, retry_after=soon)], [event(status="PENDING", attempt=1, available_at=future - 900)], now=future - 10)
+    assert codes(found) == [("STATE_MISMATCH", "k1")] and "retry_after" in found[0].detail
+    waiting = sd.compare([item(state="FAILED", attempts=1, retry_after=soon)], [event(status="PENDING", attempt=1, available_at=future)], now=future - 10)
+    assert waiting == []                                                                                                    # os dois esperam ate o mesmo instante
+    passed = sd.compare([item(state="FAILED", attempts=1, retry_after=soon)], [event(status="PENDING", attempt=1, available_at=future - 900)], now=future + 10)
+    assert passed == [] and now > 0                                                                                         # retry_after ja passou: ambos disponiveis
+
+
+@pytest.mark.parametrize("bad", [None, "", "ontem", "2026-13-45T99:00:00Z"])
+def test_an_unreadable_retry_after_is_not_treated_as_a_wait(bad):
+    assert sd._epoch(bad) is None
+    assert sd.compare([item(state="FAILED", attempts=1, retry_after=bad)], [event(status="PENDING", attempt=1)], now=1000.0) == []

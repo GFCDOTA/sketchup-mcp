@@ -19,6 +19,7 @@ import argparse
 import json
 import sqlite3
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -56,7 +57,16 @@ def mirror_key(item: dict) -> str:
     return f"review:{str(item.get('event_id', '')).split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
 
 
-def compare(queue: list[dict], events: list[dict]) -> list[Divergence]:
+def _epoch(iso: object) -> float | None:
+    """`retry_after` do item JSON (ISO UTC, `%Y-%m-%dT%H:%M:%SZ`) em epoch; ausente/ilegivel = None (sem espera conhecida)."""
+    import datetime as dt
+    try:
+        return dt.datetime.strptime(str(iso), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc).timestamp()
+    except ValueError:
+        return None
+
+
+def compare(queue: list[dict], events: list[dict], now: float | None = None) -> list[Divergence]:
     mirror = {e["idempotency_key"]: e for e in events if e.get("producer") == MIRROR_PRODUCER and e.get("event_type") == MIRROR_EVENT_TYPE}
     found, matched = [], set()
     for n, item in enumerate(queue):
@@ -71,6 +81,10 @@ def compare(queue: list[dict], events: list[dict]) -> list[Divergence]:
             found.append(Divergence("MISSING_IN_STORE", key, f"item {state} sem evento {mirror_key(item)}"))
             continue
         matched.add(event["idempotency_key"])
+        if state == "RUNNING":
+            # o executor JSON ainda TRABALHA neste item: trocar a fonte agora deixaria o evento PENDING reivindicavel por um segundo executor (mesma correcao em
+            # duplicidade). O cutover so e autorizado com a fila JSON DRENADA (nenhum item RUNNING).
+            found.append(Divergence("JSON_RUNNING", key, "item RUNNING no executor JSON: o evento PENDING seria reivindicavel em paralelo; drene a fila JSON antes do cutover"))
         allowed = EXPECTED.get(state)
         if allowed is None:
             found.append(Divergence("UNKNOWN_STATE", key, f"estado JSON {state!r} fora da tabela; evento {event['status']}"))
@@ -82,6 +96,16 @@ def compare(queue: list[dict], events: list[dict]) -> list[Divergence]:
             if event["status"] == "DLQ" and pickable:
                 # o evento esgotou as tentativas (DLQ nao e reivindicavel), mas a fila JSON ainda pode escolher o item: trabalho retomavel seria abandonado no cutover
                 found.append(Divergence("STATE_MISMATCH", key, f"item {state} com {item.get('attempts') or 0}/{MAX_ATTEMPTS} tentativas ainda executavel no JSON, mas evento DLQ"))
+            elif event["status"] == "PENDING" and pickable:
+                # os DOIS lados ainda executam: confere o ORCAMENTO de tentativas e a janela de espera, senao o cutover muda quantas vezes e quando o item roda
+                json_left = MAX_ATTEMPTS - int(item.get("attempts") or 0)
+                event_left = int(event.get("max_attempts") or MAX_ATTEMPTS) - int(event.get("attempt") or 0)
+                if event_left < json_left:
+                    found.append(Divergence("STATE_MISMATCH", key, f"orcamento de tentativas divergente: o JSON ainda tem {json_left}, o evento so {event_left}: uma falha apos o "
+                                                                  "cutover levaria o item a DLQ antes da hora"))
+                retry_at, t_now = _epoch(item.get("retry_after")), (time.time() if now is None else now)
+                if retry_at is not None and retry_at > t_now and float(event.get("available_at") or 0) <= t_now:
+                    found.append(Divergence("STATE_MISMATCH", key, "o JSON aguarda `retry_after` futuro mas o evento ja esta disponivel (`available_at` atingido): o store o executaria antes"))
             elif event["status"] == "PENDING" and not pickable:
                 # o inverso: o JSON NAO volta a escolher o item (tentativas esgotadas ou estado nao escolhido), mas o store ainda pode reivindicar o evento
                 found.append(Divergence("STATE_MISMATCH", key, f"item {state} com {item.get('attempts') or 0}/{MAX_ATTEMPTS} tentativas que o executor JSON nao escolhe mais, "
