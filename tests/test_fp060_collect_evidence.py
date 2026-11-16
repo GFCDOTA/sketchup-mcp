@@ -379,3 +379,19 @@ def test_a_unix_path_with_a_colon_in_a_component_is_redacted_whole():
     ce.assert_clean(out)
     with pytest.raises(SystemExit):
         ce.assert_clean("erro em /custom/client/Joao:Silva/secret.txt")
+
+
+@pytest.mark.parametrize("path", ["/custom/client/Finance#2026/secret.txt", "/srv2/a#b/c:d/e.txt", "/x/y#z"])
+def test_a_unix_path_with_a_hash_inside_a_component_is_redacted_whole_also_in_the_written_report(path, tmp_path):
+    out = ce.scrub(f"falha ao ler {path} agora")
+    assert "Finance" not in out and "2026" not in out and "secret" not in out and "#" not in out.replace("<caminho>", "")
+    report = ce.clean({"error": f"falha ao ler {path}", path: "chave tambem"})
+    blob = json.dumps(report, ensure_ascii=False)
+    ce.assert_clean(blob)                                                                                # o que iria para evidence.json passa na verificacao final
+    assert "Finance" not in blob and "secret.txt" not in blob
+    with pytest.raises(SystemExit):
+        ce.assert_clean(json.dumps({"error": path}))
+
+
+def test_a_hash_fragment_outside_a_path_is_kept():
+    assert ce.scrub("veja a Issue #641 e o PR #660") == "veja a Issue #641 e o PR #660"
