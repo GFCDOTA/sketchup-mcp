@@ -8886,14 +8886,14 @@
     },
     {
       "path": "artifacts/review/fp060/mt06_e2e/2026-11-15/collect_evidence.py",
-      "blob_sha": "6f84f0ac711cbf2f4ef7f1857539c5cd62544e18",
-      "blob_size": 6026,
+      "blob_sha": "c407d286ca3deaa16bf081c2c7ed59be351c3121",
+      "blob_size": 7998,
       "owner_group": "artifacts"
     },
     {
       "path": "artifacts/review/fp060/mt06_e2e/2026-11-15/data/evidence.json",
-      "blob_sha": "d1ec347ef583648abf62948631cf96b073bb39f6",
-      "blob_size": 11891,
+      "blob_sha": "e7ae191f40a7f3c018968baafb0c73bb006b2b7e",
+      "blob_size": 11989,
       "owner_group": "artifacts"
     }
   ]

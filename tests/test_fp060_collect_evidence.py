@@ -13,7 +13,9 @@ spec = importlib.util.spec_from_file_location("collect_evidence_under_test", SCR
 ce = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ce)
 
-SECRETS = ["ghp_" + "a" * 36, "github_pat_" + "B" * 40, "Bearer " + "x" * 30, "sk-ant-" + "c" * 30]
+SECRETS = ["ghp_" + "a" * 36, "github_pat_" + "B" * 40, "Bearer " + "x" * 30, "sk-ant-" + "c" * 30,
+           "sk-proj-" + "d" * 40, "sk-" + "e" * 48, "sk-svcacct-" + "f" * 30, "xoxb-" + "1" * 12 + "-" + "g" * 12, "AIza" + "h" * 35,
+           "eyJ" + "a" * 12 + "." + "b" * 12 + "." + "c" * 12, "-----BEGIN RSA PRIVATE KEY-----", "api_key=" + "z" * 20, "password: " + "q" * 12]
 WIN_USER_PATH = "C:" + chr(92) + "Users" + chr(92) + "Fulano Silva" + chr(92) + "AppData" + chr(92) + "Local" + chr(92) + "Temp" + chr(92) + "x.json"
 
 
@@ -106,3 +108,69 @@ def test_main_writes_nothing_when_the_final_check_finds_a_leak(tmp_path, monkeyp
 def test_unix_style_machine_paths_are_removed_on_their_own(path):
     out = ce.scrub(f"erro em {path} fim")
     assert path not in out and "<caminho>" in out
+
+
+@pytest.mark.parametrize("secret", SECRETS)
+def test_a_credential_in_a_commit_message_never_reaches_the_written_evidence(secret, tmp_path, monkeypatch):
+    flow = {"pr": 1, "issue": 2, "head_final": "a" * 40, "reviews": [], "commits": [{"mensagem": f"corrige {secret} agora"}]}
+    monkeypatch.setattr(ce, "collect_flow", lambda n, i: dict(flow))
+    monkeypatch.setattr(ce, "read_store", lambda p: {"eventos": [{"error": f"falha com {secret}"}], "transicoes": []})
+    out = tmp_path / "out"
+    assert ce.main([str(out), "A=1:2:" + (tmp_path / "s.db").as_posix()]) == 0
+    written = (out / "evidence.json").read_text(encoding="utf-8")
+    assert secret not in written and "<token>" in written
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(f"texto {secret} texto")                                                   # a verificacao final tambem reconhece o formato
+
+
+def test_two_different_databases_with_the_same_grandparent_name_are_both_reported(tmp_path, monkeypatch):
+    a, b = tmp_path / "runs" / "a" / "store.db", tmp_path / "other" / "b" / "store.db"
+    c = tmp_path / "runs" / "c" / "store.db"
+    d = tmp_path / "x" / "runs" / "d" / "store.db"
+    for db in (a, b, c, d):
+        db.parent.mkdir(parents=True)
+    assert len({ce.store_id(x) for x in (a, b, c, d)}) == 4
+    monkeypatch.setattr(ce, "collect_flow", lambda n, i: {"pr": n, "issue": i, "head_final": "a" * 40, "reviews": []})
+    monkeypatch.setattr(ce, "read_store", lambda p: {"eventos": [{"fonte": Path(p).parent.name}], "transicoes": []})
+    out = tmp_path / "out"
+    ce.main([str(out), f"F1=1:2:{a.as_posix()}", f"F2=3:4:{c.as_posix()}", f"F3=5:6:{a.as_posix()}"])      # F1 e F3 compartilham o banco; F2 e outro com o mesmo avo "runs"
+    rep = json.loads((out / "evidence.json").read_text(encoding="utf-8"))
+    assert len(rep["stores"]) == 2                                                                   # o compartilhado entra uma vez; o distinto NAO e descartado
+    assert rep["fluxos"]["F1"]["store"] == rep["fluxos"]["F3"]["store"] != rep["fluxos"]["F2"]["store"]
+    assert {v["eventos"][0]["fonte"] for v in rep["stores"].values()} == {"a", "c"}
+
+
+def test_the_store_id_does_not_leak_the_machine_path(tmp_path):
+    sid = ce.store_id(tmp_path / "x" / "store.db")
+    assert sid.startswith("store-") and len(sid) == 14 and str(tmp_path) not in sid
+
+
+def test_pages_are_merged_structurally_so_a_bracket_pair_inside_a_value_survives():
+    assert ce.merge_pages([[{"m": "antes][depois"}]]) == [{"m": "antes][depois"}]                  # pagina unica: intacta
+    assert ce.merge_pages([[{"m": "a]["}], [{"m": "[b"}]]) == [{"m": "a]["}, {"m": "[b"}]       # varias paginas: so concatena
+    assert ce.merge_pages([]) == []
+
+
+def test_object_pages_such_as_check_runs_merge_their_lists_and_keep_the_rest():
+    merged = ce.merge_pages([{"total_count": 3, "check_runs": [{"n": 1}, {"n": 2}]}, {"total_count": 3, "check_runs": [{"n": 3}]}])
+    assert merged["check_runs"] == [{"n": 1}, {"n": 2}, {"n": 3}] and merged["total_count"] == 3
+    single = {"state": "open", "labels": [{"name": "x"}]}
+    assert ce.merge_pages([single]) == single
+
+
+@pytest.mark.parametrize("bad", ["texto", {"a": 1}, 3, [[1], {"a": 1}]])
+def test_a_malformed_paginated_answer_is_refused(bad):
+    with pytest.raises(ValueError):
+        ce.merge_pages(bad)
+
+
+def test_gh_parses_the_slurped_output_without_touching_the_text(monkeypatch):
+    payload = json.dumps([[{"mensagem": "antes][depois"}]])
+    seen = {}
+
+    def fake_run(cmd, **kw):
+        seen["cmd"] = cmd
+        return type("R", (), {"returncode": 0, "stdout": payload, "stderr": ""})()
+    monkeypatch.setattr(ce.subprocess, "run", fake_run)
+    assert ce.gh("repos/o/r/pulls/1/commits") == [{"mensagem": "antes][depois"}]
+    assert "--slurp" in seen["cmd"] and "--paginate" in seen["cmd"]

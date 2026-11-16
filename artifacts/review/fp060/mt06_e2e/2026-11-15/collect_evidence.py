@@ -5,7 +5,9 @@ Uso: collect_evidence.py <diretorio novo de saida> <fluxo>=<PR>:<Issue>:<store.d
 Os numeros do PR e da Issue sao SEMPRE informados (nada fixo no codigo): uma nova execucao coleta o que ela mesma criou. Somente leitura: `gh api` com a
 credencial do executor e o SQLite aberto em `mode=ro` por URI com o caminho codificado. A saida nao leva token, e-mail nem caminho de maquina: todo texto
 livre passa por `clean`, e o arquivo SO e gravado se uma verificacao final nao achar nenhum padrao proibido."""
+import hashlib
 import json
+import os
 import re
 import sqlite3
 import subprocess
@@ -15,7 +17,14 @@ from pathlib import Path
 REPO = "GFCDOTA/sketchup-mcp"
 GH = r"C:\Program Files\GitHub CLI\gh.exe"
 
-TOKEN = re.compile(r"(gh[pousr]_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}|sk-ant-[A-Za-z0-9_-]{10,}|Bearer\s+[A-Za-z0-9._~+/-]{10,}|AKIA[0-9A-Z]{12,})")
+TOKEN = re.compile(
+    r"(gh[pousr]_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}"                              # GitHub
+    r"|sk-[A-Za-z0-9][A-Za-z0-9_-]{15,}"                                                        # Anthropic (sk-ant-) e OpenAI (sk-, sk-proj-, sk-svcacct-)
+    r"|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|AKIA[0-9A-Z]{12,}"                    # Slack, Google, AWS
+    r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"                           # JWT
+    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----"                                                      # chave privada PEM
+    r"|Bearer\s+[A-Za-z0-9._~+/-]{10,}"
+    r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token)\b)\s*[:=]\s*\S{8,})")
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 WIN_PATH = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\"'<>|\r\n]*")                    # ate o fim da linha/aspas: cobre espacos no caminho
 UNIX_PATH = re.compile(r"(?<![\w.:-])/(?:home|Users|users|root|var|tmp|mnt|opt|usr|etc|c|d|e)/[^\s\"'<>|]+")
@@ -60,14 +69,35 @@ def parse_flow(arg: str) -> tuple[str, int, int, Path]:
     return name, int(parts[0]), int(parts[1]), Path(parts[2])
 
 
+def merge_pages(pages):
+    """Combina as paginas de `gh api --paginate --slurp` ESTRUTURALMENTE (nunca por substituicao de texto: `][` pode estar dentro de um valor). Listas sao
+    concatenadas; objetos (ex.: `check_runs`) tem cada lista concatenada entre as paginas; uma unica pagina volta como veio."""
+    if not isinstance(pages, list):
+        raise ValueError("resposta paginada nao e uma lista de paginas")
+    if not pages:
+        return []
+    if all(isinstance(p, list) for p in pages):
+        return [item for page in pages for item in page]
+    if all(isinstance(p, dict) for p in pages):
+        merged = dict(pages[0])
+        for key, value in pages[0].items():
+            if isinstance(value, list):
+                merged[key] = [item for page in pages for item in page.get(key, [])]
+        return merged
+    raise ValueError("paginas de tipos misturados")
+
+
 def gh(path: str):
-    out = subprocess.run([GH, "api", "--paginate", path], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+    out = subprocess.run([GH, "api", "--paginate", "--slurp", path], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
     if out.returncode != 0:
         raise SystemExit(f"gh api {path} falhou: {scrub(out.stderr.strip())[:200]}")
-    text = out.stdout.strip()
-    if text.startswith("[") and "][" in text:
-        text = "[" + text.replace("][", ",")[1:-1] + "]"
-    return json.loads(text or "[]")
+    return merge_pages(json.loads(out.stdout.strip() or "[]"))
+
+
+def store_id(db_path: Path) -> str:
+    """Identidade do store pelo caminho CANONICO do banco (dois bancos com o mesmo nome de diretorio sao dois stores; o caminho real nao vai para a saida)."""
+    canonical = os.path.normcase(str(Path(db_path).resolve()))
+    return "store-" + hashlib.sha1(canonical.encode("utf-8")).hexdigest()[:8]
 
 
 def read_store(db_path: Path) -> dict:
@@ -105,8 +135,12 @@ def main(argv: list[str]) -> int:
     out.mkdir(parents=True)
     report: dict = {"repo": REPO, "fluxos": {}, "stores": {}}
     for name, number, issue, db_path in flows:
-        report["fluxos"][name] = collect_flow(number, issue)
-        report["stores"].setdefault(db_path.parent.parent.name or "store", read_store(db_path))      # um store compartilhado entre fluxos entra uma vez
+        flow = collect_flow(number, issue)
+        sid = store_id(db_path)
+        flow["store"] = sid                                                                          # cada fluxo fica associado ao SEU store
+        report["fluxos"][name] = flow
+        if sid not in report["stores"]:
+            report["stores"][sid] = read_store(db_path)                                              # um banco compartilhado entre fluxos entra uma vez
     text = json.dumps(clean(report), indent=1, ensure_ascii=True, sort_keys=True) + "\n"
     assert_clean(text)
     (out / "evidence.json").write_text(text, encoding="utf-8", newline="\n")

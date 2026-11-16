@@ -59,7 +59,8 @@
      "marcador_outbox": "review:GFCDOTA/sketchup-mcp#651:7c3d7bcae61e847cc1646377c97ac6968ab0178a:APPROVE",
      "revisor": "fmmodesto"
     }
-   ]
+   ],
+   "store": "store-b48bbb12"
   },
   "B_implementacao": {
    "arquivos": [
@@ -105,7 +106,8 @@
      "marcador_outbox": "review:GFCDOTA/sketchup-mcp#655:cf31eb4d2fe07b1270a7260d6649326a52c3600b:APPROVE",
      "revisor": "fmmodesto"
     }
-   ]
+   ],
+   "store": "store-b48bbb12"
   },
   "C_continua": {
    "arquivos": [
@@ -151,12 +153,13 @@
      "marcador_outbox": "review:GFCDOTA/sketchup-mcp#659:a6ee910f2385be780906be6ef5f2ba8d1f337235:APPROVE",
      "revisor": "fmmodesto"
     }
-   ]
+   ],
+   "store": "store-fc90352d"
   }
  },
  "repo": "GFCDOTA/sketchup-mcp",
  "stores": {
-  "fp060_e2e": {
+  "store-b48bbb12": {
    "eventos": [
     {
      "attempt": 1,
@@ -347,7 +350,7 @@
     }
    ]
   },
-  "fp060_e2e_c": {
+  "store-fc90352d": {
    "eventos": [
     {
      "attempt": 1,
