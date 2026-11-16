@@ -31,7 +31,8 @@ def codes(found):
     ("BLOCKED_WORKTREE", "PENDING"), ("BLOCKED_REVIEW_FETCH", "PENDING"),
 ])
 def test_a_json_state_and_the_mirror_status_that_the_shadow_sync_produces_agree(state, status):
-    assert sd.compare([item(state=state)], [event(status=status)]) == []
+    exhausted = {"attempts": sd.MAX_ATTEMPTS}                                  # DLQ so concorda quando o JSON tambem esgotou as tentativas
+    assert sd.compare([item(state=state, **exhausted)], [event(status=status)]) == []
 
 
 def test_items_that_are_not_mirrored_by_design_are_ignored():
@@ -58,8 +59,23 @@ def test_an_unknown_json_state_is_reported_never_assumed_equal():
     assert codes(sd.compare([item(state="TELEPORTED")], [event()])) == [("UNKNOWN_STATE", "k1")]
 
 
-def test_a_bridge_event_without_a_json_item_is_an_orphan():
-    assert codes(sd.compare([], [event(3)])) == [("ORPHAN_IN_STORE", "review:1003:7:" + "a" * 40)]
+@pytest.mark.parametrize("status", ["DONE", "SUPERSEDED", "DLQ"])
+def test_a_terminal_bridge_event_without_a_json_item_is_only_an_orphan_warning(status):
+    assert codes(sd.compare([], [event(3, status=status)])) == [("ORPHAN_IN_STORE", "review:1003:7:" + "a" * 40)]
+
+
+@pytest.mark.parametrize("status", ["PENDING", "RUNNING"])
+def test_an_executable_event_without_a_json_item_is_always_a_divergence(status):
+    """O bridge publica no SQLite ANTES de salvar a fila JSON: uma parada entre as duas deixa trabalho executavel so no store."""
+    assert codes(sd.compare([], [event(3, status=status)])) == [("ORPHAN_EXECUTABLE", "review:1003:7:" + "a" * 40)]
+
+
+@pytest.mark.parametrize("state,attempts,diverges", [("FAILED", 1, True), ("BLOCKED_CREDENTIALS", 0, True), ("BLOCKED_CLI", 2, True), ("FAILED", 3, False),
+                                                      ("BLOCKED_WORKTREE", 5, False)])
+def test_a_dlq_event_with_a_json_item_that_can_still_be_picked_is_a_divergence(state, attempts, diverges):
+    """BLOCKED_* nao consome tentativas no JSON e volta a ser escolhido; o evento DLQ nao pode ser reivindicado: o cutover abandonaria trabalho retomavel."""
+    found = sd.compare([item(state=state, attempts=attempts)], [event(status="DLQ")])
+    assert (codes(found) == [("STATE_MISMATCH", "k1")]) is diverges and (found == []) is (not diverges)
 
 
 def test_events_of_other_producers_or_types_are_not_the_mirror_and_are_ignored():
@@ -69,7 +85,7 @@ def test_events_of_other_producers_or_types_are_not_the_mirror_and_are_ignored()
 
 def test_the_same_key_for_a_new_head_is_a_different_item():
     assert codes(sd.compare([item(1, sha="b" * 40)], [event(1, sha="a" * 40)])) == [
-        ("MISSING_IN_STORE", "k1"), ("ORPHAN_IN_STORE", "review:1001:7:" + "a" * 40)]
+        ("MISSING_IN_STORE", "k1"), ("ORPHAN_EXECUTABLE", "review:1001:7:" + "a" * 40)]
 
 
 # -- o mesmo calculo de chave do bridge e do sync -------------------------------------------------------------------------------
@@ -105,16 +121,18 @@ def test_main_prints_the_report_and_exits_nonzero_only_on_real_divergences(tmp_p
     assert sd.main(["--json"]) == 0 and json.loads(capsys.readouterr().out)["ok"] is True
 
 
-def test_an_orphan_alone_is_a_warning_and_fails_only_in_strict_mode(tmp_path, monkeypatch, capsys):
+def test_a_terminal_orphan_is_a_warning_that_fails_only_in_strict_mode_and_an_executable_one_always_fails(tmp_path, monkeypatch, capsys):
     store = EventStore(tmp_path / "events.db")
     args = bridge_to_store_args({"kind": "review", "state": "CHANGES_REQUESTED", "event_id": "review:42", "pr": 7, "author": "x", "url": "u"},
                                 {"head_sha": "a" * 40, "refs": []})
-    store.publish(**args)
+    event_id, _ = store.publish(**args)
     monkeypatch.setattr(sd, "_load", lambda: ([], store))
 
-    assert sd.main(["--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["warnings"] == 1
-    assert sd.main(["--json", "--strict"]) == 1
+    assert sd.main(["--json"]) == 1                                                                # PENDING sem item: executavel so no store
+    assert json.loads(capsys.readouterr().out)["divergences"][0]["code"] == "ORPHAN_EXECUTABLE"
+    store.supersede(store.claim(("CORRECTION_REQUESTED",), "x", 60), "terminal")                   # agora terminal
+    assert sd.main(["--json"]) == 0 and json.loads(capsys.readouterr().out)["warnings"] == 1
+    assert sd.main(["--json", "--strict"]) == 1 and event_id
 
 
 def test_the_detector_never_writes_to_the_store_or_the_queue(tmp_path):
@@ -132,3 +150,92 @@ def test_a_missing_store_is_an_error_not_an_empty_comparison_and_is_not_created(
 
     out = json.loads(capsys.readouterr().out)
     assert out["ok"] is False and "EventStore ausente" in out["error"] and not (tmp_path / "gov").exists()
+
+
+# -- main() de ponta a ponta com arquivos reais (achados do review independente do #634) --------------------------------------------
+def real_world(tmp_path, monkeypatch, queue=None, write_queue=True, make_db=True):
+    from tools.orchestration import store_factory
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "gov" / "bridge.json"))
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "gov" / "store.db"))
+    store_factory.reset_store()
+    (tmp_path / "gov").mkdir(parents=True, exist_ok=True)
+    if write_queue:
+        (tmp_path / "gov" / "bridge.json").write_text(json.dumps({"queue": queue if queue is not None else []}), encoding="utf-8")
+    if make_db:
+        EventStore(tmp_path / "gov" / "store.db")
+    return tmp_path / "gov"
+
+
+def test_main_never_creates_or_modifies_the_database_or_the_queue(tmp_path, monkeypatch, capsys):
+    gov = real_world(tmp_path, monkeypatch, queue=[item(1)])
+    store = EventStore(gov / "store.db")
+    store.publish(**bridge_to_store_args({"kind": "review", "state": "CHANGES_REQUESTED", "event_id": "review:1001", "pr": 7, "author": "x", "url": "u"},
+                                         {"head_sha": "a" * 40, "refs": []}))
+
+    def content():
+        return {f.name: f.read_bytes() for f in sorted(gov.iterdir()) if f.is_file() and not f.name.endswith(("-shm", "-wal"))}
+    before = content()
+    assert sd.main(["--json"]) == 0
+    capsys.readouterr()
+    assert content() == before                                                                     # banco e fila: bytes identicos
+    sidecars = [f for f in gov.iterdir() if f.name.endswith(("-shm", "-wal"))]
+    assert all(f.stat().st_size == 0 or f.name.endswith("-shm") for f in sidecars)                 # no maximo os arquivos auxiliares VAZIOS que o SQLite abre para ler um banco WAL
+
+
+def test_main_opens_the_database_read_only_even_when_the_file_cannot_be_written(tmp_path, monkeypatch, capsys):
+    gov = real_world(tmp_path, monkeypatch, queue=[])
+    import os
+    import stat
+    db = gov / "store.db"
+    os.chmod(db, stat.S_IREAD)
+    try:
+        assert sd.main(["--json"]) == 0
+        capsys.readouterr()
+    finally:
+        os.chmod(db, stat.S_IWRITE | stat.S_IREAD)
+
+
+def test_read_only_store_cannot_write(tmp_path):
+    db = tmp_path / "e.db"
+    EventStore(db).publish("CORRECTION_REQUESTED", "k", "pr:1", {"x": 1})
+    ro = sd.ReadOnlyStore(db)
+    assert len(ro.events()) == 1
+    import sqlite3
+    conn = sqlite3.connect(db.resolve().as_uri() + "?mode=ro", uri=True)
+    with pytest.raises(sqlite3.OperationalError):
+        conn.execute("DELETE FROM events")
+    conn.close()
+
+
+@pytest.mark.parametrize("name,content", [("ausente", None), ("zerado", b"\x00" * 64), ("array", b"[]"), ("sem_queue", b'{"seen": []}'),
+                                          ("queue_nao_lista", b'{"queue": {"a": 1}}'), ("queue_de_strings", b'{"queue": ["x"]}'), ("nao_utf8", b"\xff\xfe{}")])
+def test_main_errors_when_the_json_source_is_absent_or_invalid_instead_of_reporting_success(tmp_path, monkeypatch, capsys, name, content):
+    gov = real_world(tmp_path, monkeypatch, write_queue=False)
+    if content is not None:
+        (gov / "bridge.json").write_bytes(content)
+    EventStore(gov / "store.db").publish("CORRECTION_REQUESTED", "review:1:7:" + "a" * 40, "pr:7", {"x": 1}, producer="event_bridge")
+    assert sd.main(["--json"]) == 2 and json.loads(capsys.readouterr().out)["ok"] is False
+
+
+def test_main_errors_when_the_database_is_absent_and_does_not_create_it(tmp_path, monkeypatch, capsys):
+    gov = real_world(tmp_path, monkeypatch, queue=[], make_db=False)
+    assert sd.main(["--json"]) == 2 and not (gov / "store.db").exists()
+    capsys.readouterr()
+
+
+def test_main_reports_an_interrupted_publish_between_the_store_and_the_queue(tmp_path, monkeypatch, capsys):
+    gov = real_world(tmp_path, monkeypatch, queue=[])                                               # a fila JSON nao chegou a ser salva
+    EventStore(gov / "store.db").publish(**bridge_to_store_args({"kind": "review", "state": "CHANGES_REQUESTED", "event_id": "review:9", "pr": 7,
+                                                                    "author": "x", "url": "u"}, {"head_sha": "a" * 40, "refs": []}))
+    assert sd.main(["--json"]) == 1
+    assert json.loads(capsys.readouterr().out)["divergences"][0]["code"] == "ORPHAN_EXECUTABLE"
+
+
+def test_the_store_is_always_opened_with_the_sqlite_read_only_uri(tmp_path, monkeypatch):
+    db = tmp_path / "e.db"
+    EventStore(db)
+    seen = []
+    real = sd.sqlite3.connect
+    monkeypatch.setattr(sd.sqlite3, "connect", lambda target, *a, **k: (seen.append((target, k.get("uri"))), real(target, *a, **k))[1])
+    sd.ReadOnlyStore(db).events()
+    assert len(seen) == 1 and seen[0][0].endswith("?mode=ro") and seen[0][1] is True

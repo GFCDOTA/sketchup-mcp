@@ -10,18 +10,23 @@ chave `review:<id>:<pr>:<head_sha>` quando aceita o review; o evento fica PENDIN
 quando o item termina (DONE -> DONE; SUPERSEDED/REFUSED/PARKED -> SUPERSEDED; FAILED/BLOCKED -> PENDING com retry, ou DLQ no limite). Os pares
 aceitos abaixo sao exatamente esses. Itens que nao sao review (comentarios) nao sao espelhados por desenho e sao ignorados.
 
-Codigos: MISSING_IN_STORE (item sem evento), STALE_PENDING (item terminou e o evento segue PENDING: o sync se perdeu), STATE_MISMATCH (par fora
+Codigos: ORPHAN_EXECUTABLE (evento PENDING/RUNNING sem item JSON: SEMPRE divergencia), MISSING_IN_STORE (item sem evento), STALE_PENDING (item terminou e o evento segue PENDING: o sync se perdeu), STATE_MISMATCH (par fora
 da tabela), UNKNOWN_STATE (estado JSON desconhecido; nunca presumido igual) e ORPHAN_IN_STORE (evento do bridge sem item JSON: aviso; so falha
 com `--strict`, porque a fila JSON e podada)."""
 from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 
 MIRROR_EVENT_TYPE = "CORRECTION_REQUESTED"
 MIRROR_PRODUCER = "event_bridge"
+MAX_ATTEMPTS = 3                                                    # `event_executor.MAX_ATTEMPTS`: um item JSON FAILED/BLOCKED com menos tentativas ainda pode ser escolhido
+RETRYABLE = frozenset({"FAILED", "BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_WORKTREE", "BLOCKED_REVIEW_FETCH"})
+EXECUTABLE_EVENT = frozenset({"PENDING", "RUNNING"})                 # um evento assim ainda pode ser reivindicado/executado
 FINISHED = frozenset({"DONE_AWAITING_REREVIEW", "SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"})
 EXPECTED: dict[str, frozenset[str]] = {
     "QUEUED": frozenset({"PENDING"}), "RUNNING": frozenset({"PENDING"}),
@@ -66,9 +71,17 @@ def compare(queue: list[dict], events: list[dict]) -> list[Divergence]:
         elif event["status"] not in allowed:
             code = "STALE_PENDING" if event["status"] == "PENDING" and state in FINISHED else "STATE_MISMATCH"
             found.append(Divergence(code, key, f"item {state} mas evento {event['status']} (esperado {'/'.join(sorted(allowed))})"))
+        elif event["status"] == "DLQ" and state in RETRYABLE and int(item.get("attempts") or 0) < MAX_ATTEMPTS:
+            # o evento esgotou as tentativas (DLQ nao e reivindicavel), mas a fila JSON ainda pode escolher o item: trabalho retomavel seria abandonado no cutover
+            found.append(Divergence("STATE_MISMATCH", key, f"item {state} com {item.get('attempts') or 0}/{MAX_ATTEMPTS} tentativas ainda executavel no JSON, mas evento DLQ"))
     for idem, event in mirror.items():
-        if idem not in matched:
-            found.append(Divergence("ORPHAN_IN_STORE", idem, f"evento {event['status']} sem item na fila JSON"))
+        if idem in matched:
+            continue
+        if event["status"] in EXECUTABLE_EVENT:
+            # o bridge publica no SQLite ANTES de salvar a fila JSON: uma parada entre as duas deixa trabalho executavel so no store
+            found.append(Divergence("ORPHAN_EXECUTABLE", idem, f"evento {event['status']} sem item na fila JSON: pode ser executado a partir do store sem existir na fila fonte"))
+        else:
+            found.append(Divergence("ORPHAN_IN_STORE", idem, f"evento {event['status']} sem item na fila JSON (terminal)"))
     return found
 
 
@@ -76,27 +89,60 @@ def collect(queue: list[dict], store) -> list[Divergence]:
     return compare(queue, store.events())
 
 
+class ReadOnlyStore:
+    """Os eventos do SQLite lidos em modo `ro`: nao cria arquivo, esquema nem linha, nao muda o journal. Escrever aqui falha."""
+
+    def __init__(self, path: Path):
+        self.path = path
+
+    def events(self) -> list[dict]:
+        db = sqlite3.connect(Path(self.path).resolve().as_uri() + "?mode=ro", uri=True, timeout=15)
+        try:
+            db.row_factory = sqlite3.Row
+            return [dict(r) for r in db.execute("SELECT * FROM events ORDER BY id")]
+        finally:
+            db.close()
+
+
+def read_queue(path: Path) -> list[dict]:
+    """A fila JSON REAL: o arquivo tem de existir e ter `queue` explicita (lista de objetos). Ausente/ilegivel/sem `queue` e ERRO, nunca "fila vazia"."""
+    if not path.is_file():
+        raise FileNotFoundError(f"fila JSON ausente: {path.name}")
+    try:
+        data = json.loads(path.read_bytes().decode("utf-8"))
+    except (OSError, ValueError) as exc:
+        raise ValueError(f"fila JSON ilegivel ({type(exc).__name__}): {path.name}") from exc
+    queue = data.get("queue") if isinstance(data, dict) else None
+    if not isinstance(queue, list) or any(not isinstance(i, dict) for i in queue):
+        raise ValueError(f"fila JSON sem `queue` (lista de objetos): {path.name}")
+    return queue
+
+
 def _load():
-    """(fila JSON, EventStore). Nao cria o banco: banco ausente e erro, nao divergencia."""
+    """(fila JSON, eventos somente leitura). Nao cria nada: fonte ausente ou invalida e erro, nao divergencia."""
     from tools.orchestration import event_bridge as eb
     from tools.orchestration import store_factory
     path = store_factory.store_path()
-    if not path.exists():
+    if not path.is_file():
         raise FileNotFoundError(f"EventStore ausente: {path.name}")
-    return eb.load()["queue"], store_factory.get_store()
+    return read_queue(eb.bridge_path()), ReadOnlyStore(path)
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--json", action="store_true", help="relatorio em JSON")
-    ap.add_argument("--strict", action="store_true", help="evento do bridge sem item JSON tambem falha")
+    ap.add_argument("--strict", action="store_true", help="orfao TERMINAL (evento ja concluido sem item JSON) tambem falha; orfao executavel sempre falha")
     ns = ap.parse_args(argv)
     try:
         queue, store = _load()
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError, sqlite3.Error) as exc:
         print(json.dumps({"ok": False, "error": str(exc)[:200]}) if ns.json else f"erro: {exc}")
         return 2
-    found = collect(queue, store)
+    try:
+        found = collect(queue, store)
+    except sqlite3.Error as exc:
+        print(json.dumps({"ok": False, "error": f"sqlite: {exc}"[:200]}) if ns.json else f"erro: sqlite: {exc}")
+        return 2
     orphans = [d for d in found if d.code == "ORPHAN_IN_STORE"]
     errors = [d for d in found if d.code != "ORPHAN_IN_STORE"]
     ok = not errors and not (ns.strict and orphans)
