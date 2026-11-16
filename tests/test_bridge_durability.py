@@ -392,3 +392,81 @@ def test_a_review_that_the_executor_already_served_is_never_requeued_after_a_rec
     served = fake_gh(reviews=[review(9)], head="b" * 40)                                           # o executor ja publicou: o HEAD do PR andou
     counts = eb.run_cycle(served, POLICY, p, now=NOW)
     assert eb.load(p)["queue"] == [] and counts["STALE"] == 1 and review(9)["commit_id"] == HEAD
+
+
+# -- 4a revisao do Codex (#635): limites perdidos => fail-closed; pendencia ilegivel nao e ausencia ----------------------------------------------------
+def test_after_a_recovery_a_newly_accepted_review_is_blocked_until_the_operator_releases_it(tmp_path):
+    from tests.test_event_bridge import NOW, POLICY, fake_gh, review
+    from tools.orchestration import event_executor as ex
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)                                                                     # corrupcao: tentativas esgotadas e contador diario foram perdidos
+    eb.run_cycle(fake_gh(reviews=[review(9)]), POLICY, p, now=NOW)
+    state = eb.load(p)
+    assert state["recovery"]["quarantine"].startswith("event_bridge.json.corrupt-")
+    assert [i["state"] for i in state["queue"]] == ["BLOCKED_RECOVERY"] and ex.pick(state, NOW) is None   # o executor NAO escolhe: nada roda sobre limites nao comprovaveis
+    assert any("BLOCKED_RECOVERY" in d["message"] for d in state["diagnostics"])
+
+
+def test_the_operator_release_requeues_the_blocked_items_and_ends_the_recovery_mode(tmp_path):
+    from tests.test_event_bridge import NOW, POLICY, fake_gh, review
+    from tools.orchestration import event_executor as ex
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)
+    eb.run_cycle(fake_gh(reviews=[review(9)]), POLICY, p, now=NOW)
+    assert eb.release_recovery(p, NOW) == 1
+    state = eb.load(p)
+    assert [i["state"] for i in state["queue"]] == ["QUEUED"] and "recovery" not in state and ex.pick(state, NOW)["state"] == "QUEUED"
+    assert any("liberada pelo operador" in d["message"] for d in state["diagnostics"])
+    assert eb.release_recovery(p, NOW) == 0                                                          # idempotente
+    eb.run_cycle(fake_gh(reviews=[review(10)]), POLICY, p, now=NOW)
+    assert [i["state"] for i in eb.load(p)["queue"]][-1] == "QUEUED"                                  # depois de liberar, o fluxo volta ao normal
+
+
+def test_a_healthy_state_never_blocks_anything(tmp_path):
+    from tests.test_event_bridge import NOW, POLICY, fake_gh, review
+    p = tmp_path / "event_bridge.json"
+    eb.run_cycle(fake_gh(reviews=[review(9)]), POLICY, p, now=NOW)
+    assert [i["state"] for i in eb.load(p)["queue"]] == ["QUEUED"] and "recovery" not in eb.load(p)
+
+
+def test_the_release_recovery_command_exists_in_the_cli(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "event_bridge.json"))
+    assert eb.main(["release-recovery"]) == 0 and json.loads(capsys.readouterr().out) == {"released": 0}
+
+
+def test_an_unreadable_pending_recovery_is_never_overwritten_and_the_cycle_fails_instead(tmp_path):
+    from tests.test_event_bridge import NOW, POLICY, fake_gh
+    p = tmp_path / "event_bridge.json"
+    pending_file = eb._pending_path(p)
+    pending_file.write_bytes(b"{ isto nao e json")                                                    # o diagnostico da corrupcao original, agora ilegivel
+    with pytest.raises(eb.PendingUnreadable):
+        eb.load(p)
+    with es.locked(p), pytest.raises(eb.PendingUnreadable):
+        eb.recover_state(p)
+    with pytest.raises(eb.PendingUnreadable):
+        eb.run_cycle(fake_gh(), POLICY, p, now=NOW)
+    assert not p.exists() and pending_file.read_bytes() == b"{ isto nao e json"                        # nenhum estado oficial criado, nada apagado
+
+
+def test_a_persistent_permission_error_on_the_pending_recovery_is_not_treated_as_absent(tmp_path, monkeypatch):
+    p = tmp_path / "event_bridge.json"
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "diagnostics": [{"at": "t", "message": "corrupcao original"}]})
+    monkeypatch.setattr(eb, "_read_bytes", lambda path, *a, **k: (_ for _ in ()).throw(PermissionError(13, "negado")) if Path(path).name.endswith(".recovered") else b"")
+    with pytest.raises(eb.PendingUnreadable):
+        eb.load(p)
+    monkeypatch.undo()
+    assert eb.load(p)["diagnostics"][0]["message"] == "corrupcao original"                              # lido normalmente quando o erro passa
+
+
+def test_a_pending_recovery_that_vanishes_between_exists_and_read_is_just_absent(tmp_path, monkeypatch):
+    p = tmp_path / "event_bridge.json"
+    q = eb._pending_path(p)
+    q.write_text("{}", encoding="utf-8")
+    real = eb._read_bytes
+
+    def vanish(path, *a, **k):
+        if Path(path) == q:
+            q.unlink()
+        return real(path, *a, **k)
+    monkeypatch.setattr(eb, "_read_bytes", vanish)
+    assert eb._pending_state(p) is None

@@ -101,14 +101,24 @@ def _pending_path(p: Path) -> Path:
     return p.with_name(p.name + ".recovered")
 
 
+class PendingUnreadable(RuntimeError):
+    """Ha uma recuperacao interrompida (`.recovered`) mas ela NAO pode ser lida agora. NAO e `ValueError`/`BridgeStateCorrupt`: nenhum chamador a trata como "estado
+    corrompido a recuperar", entao nada e regravado por cima e o diagnostico da corrupcao original nao se perde; o ciclo falha, tenta de novo e o operador ve o motivo."""
+
+
 def _pending_state(p: Path) -> dict | None:
     """Estado limpo (com o diagnostico) que uma recuperacao INTERROMPIDA deixou pronto ao lado: o arquivo corrompido ja foi para a quarentena mas o novo
-    ainda nao tomou o lugar. Lido no lugar do padrao, o diagnostico nao se perde; `None` se nao ha pendencia legivel."""
+    ainda nao tomou o lugar. Lido no lugar do padrao, o diagnostico nao se perde. `None` SO quando nao ha pendencia; pendencia existente e ilegivel levanta
+    `PendingUnreadable` (nunca e tratada como ausencia)."""
     q = _pending_path(p)
-    try:
-        return {**default_bridge_state(), **_read_state(q)} if q.exists() else None
-    except (ValueError, OSError):
+    if not q.exists():
         return None
+    try:
+        return {**default_bridge_state(), **_read_state(q)}
+    except FileNotFoundError:
+        return None                                                  # concluida por outro processo entre exists() e a leitura
+    except (ValueError, OSError) as exc:
+        raise PendingUnreadable(f"recuperacao pendente ilegivel ({type(exc).__name__}): {q.name}; nada e regravado por cima") from exc
 
 
 def recover_state(path: Path | None = None) -> dict:
@@ -132,7 +142,9 @@ def recover_state(path: Path | None = None) -> dict:
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d%H%M%S")
     candidate = p.with_name(f"{p.name}.corrupt-{stamp}-{os.getpid()}-{uuid.uuid4().hex[:6]}")
     state = default_bridge_state()
-    diagnose(state, f"{reason}; preservado em {candidate.name}; estado limpo, reviews relidos do GitHub no proximo poll (cursor e vistos zerados)")
+    diagnose(state, f"{reason}; preservado em {candidate.name}; estado limpo, reviews relidos do GitHub no proximo poll (cursor e vistos zerados); reviews "
+                    "re-aceitos ficam em BLOCKED_RECOVERY ate `release-recovery` (limites e contadores perdidos nao sao reconstituidos)")
+    state["recovery"] = {"at": es.now_iso(), "quarantine": candidate.name}
     _write_state(_pending_path(p), state)
     try:
         es.replace_retry(p, candidate)                           # atomico (com retry de leitor aberto no Windows); nome unico: nunca sobrescreve outra quarentena
@@ -232,10 +244,30 @@ def ingest(event: dict, pr: dict | None, policy: dict, bstate: dict, now: dt.dat
         return "DUPLICATE", "evento ja enfileirado (idempotencia event_id+PR+SHA)"
     bstate["seen"].append(key)                                          # dedupe e fila no MESMO arquivo: uma gravacao so
     issue = event["target_issue"] or sorted(pr["refs"])[0]
+    # Apos uma RECUPERACAO o estado perdeu tentativas esgotadas e o contador diario: um review que ja gastou os limites voltaria a executar. Fail-closed: o que
+    # entra depois da recuperacao fica BLOQUEADO ate o operador liberar (`release-recovery`); nada e executado sobre limites que ninguem consegue comprovar.
+    blocked = bool(bstate.get("recovery"))
     bstate["queue"].append({"key": key, "kind": event["kind"], "event_id": event["event_id"], "pr": event.get("pr"),
                             "issue": issue, "head_sha": (pr or {}).get("head_sha"), "author": event["author"],
-                            "url": event["url"], "state": "QUEUED", "queued_at": es.now_iso(now)})
+                            "url": event["url"], "state": "BLOCKED_RECOVERY" if blocked else "QUEUED", "queued_at": es.now_iso(now)})
     return "ACCEPT", ""
+
+
+def release_recovery(path: Path | None = None, now: dt.datetime | None = None) -> int:
+    """Libera, SOB A TRAVA, os itens BLOCKED_RECOVERY (voltam a QUEUED, sem tentativas contadas) e encerra o modo de recuperacao. Decisao do OPERADOR depois de
+    conferir o que foi preservado em quarentena. Devolve quantos itens foram liberados."""
+    p = path or bridge_path()
+    with es.locked(p):
+        state = load(p)
+        released = 0
+        for item in state["queue"]:
+            if item.get("state") == "BLOCKED_RECOVERY":
+                item["state"] = "QUEUED"
+                released += 1
+        was = state.pop("recovery", None)
+        diagnose(state, f"recuperacao liberada pelo operador ({released} item(ns)); quarentena {(was or {}).get('quarantine', '?')}", now)
+        save(state, p)
+    return released
 
 
 def diagnose(bstate: dict, message: str, now: dt.datetime | None = None, keep: int = 50) -> None:
@@ -352,10 +384,14 @@ def main(argv: list[str] | None = None) -> int:
     pp.add_argument("--interval", type=int, default=120)
     pp.add_argument("--repo", default=REPO)
     sub.add_parser("status")
+    sub.add_parser("release-recovery")
     a = ap.parse_args(argv)
+    if a.cmd == "release-recovery":
+        print(json.dumps({"released": release_recovery()}))
+        return 0
     if a.cmd == "status":
         b = load()
-        print(json.dumps({"mode": b["mode"], "last_poll": b["last_poll"], "queued": len(b["queue"]), "backoff_s": b["backoff_s"],
+        print(json.dumps({"mode": b["mode"], "last_poll": b["last_poll"], "queued": len(b["queue"]), "backoff_s": b["backoff_s"], "recovery": b.get("recovery"),
                           "diagnostics": b["diagnostics"][-5:]}, indent=1, ensure_ascii=False))
         return 0
     policy = load_policy()
