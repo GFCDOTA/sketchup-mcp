@@ -105,10 +105,15 @@ def _os_unlock(fd: int) -> None:
         fcntl.flock(fd, fcntl.LOCK_UN)
 
 
+NEW_PROTOCOL_MARK = ":oslock"
+
+
 def _holder_of(text: str, age: float) -> int | None:
     """PID de um dono do protocolo ANTIGO ainda dentro da secao critica, a partir do conteudo do arquivo e da sua idade; None se nao ha. O protocolo antigo cria o
     arquivo com `O_EXCL`, grava o PID e o APAGA ao sair; PID vivo e idade <= 60 s (a mesma regra de trava velha dele) = dentro da secao. O proprio PID e os de
     donos mortos nao contam."""
+    if text.strip().endswith(NEW_PROTOCOL_MARK):                       # arquivo do protocolo NOVO: o lock do SO e a fonte da verdade; um PID dele pode ter sido REUSADO por outro processo
+        return None
     head = text.strip().split(":")[0]
     if not head.isdigit() or int(head) == os.getpid() or age > LEGACY_STALE_S:
         return None
@@ -205,7 +210,7 @@ def locked(path: Path | None = None, wait_s: float = 5.0):
         try:
             os.lseek(fd, 0, os.SEEK_SET)
             os.ftruncate(fd, 0)
-            os.write(fd, str(os.getpid()).encode("ascii"))       # quem ainda roda o protocolo antigo ve um dono VIVO e espera
+            os.write(fd, f"{os.getpid()}{NEW_PROTOCOL_MARK}".encode("ascii"))       # o protocolo antigo le o PID (antes de ':') e ve um dono VIVO; o novo reconhece a marca e ignora o PID
             yield
         finally:
             try:

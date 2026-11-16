@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import os
 import threading
 import time
 from pathlib import Path
@@ -434,7 +435,7 @@ def test_while_the_new_protocol_holds_the_lock_a_legacy_process_sees_a_live_owne
     state = d / "s.json"
     with es.locked(state):
         lock = state.with_suffix(".lock")
-        assert lock.read_text(encoding="ascii").strip() == str(os.getpid())                         # PID VIVO gravado no inicio, como o protocolo antigo grava
+        assert lock.read_text(encoding="ascii").strip() == f"{os.getpid()}{es.NEW_PROTOCOL_MARK}"                         # PID VIVO gravado no inicio, como o protocolo antigo grava
         with pytest.raises(FileExistsError):
             os.close(os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY))                          # o O_EXCL antigo falha: ele espera
     assert state.with_suffix(".lock").read_bytes() == b""                                           # ao sair, o PID e limpo (nao fica um PID vivo enganando ninguem)
@@ -505,4 +506,45 @@ def test_our_pid_replaces_a_longer_previous_content_exactly(path):
     old = time.time() - (es.LEGACY_STALE_S + 5)
     os.utime(lock, (old, old))                                                                       # velho: nao bloqueia
     with es.locked(path, wait_s=1):
-        assert lock.read_text(encoding="ascii") == str(os.getpid())                                  # sem sobras do conteudo anterior
+        assert lock.read_text(encoding="ascii") == f"{os.getpid()}{es.NEW_PROTOCOL_MARK}"                                  # sem sobras do conteudo anterior
+
+
+# -- 10a revisao do Codex (#643): PID de dono NOVO morto e reusado por outro processo nao pode bloquear -------------------------------------------------
+def test_a_lock_file_left_by_a_dead_new_protocol_owner_whose_pid_is_now_a_live_stranger_does_not_block(tmp_path):
+    import subprocess
+    import sys
+    import time
+    stranger = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    try:
+        path = tmp_path / "state.json"
+        lock_file = path.with_suffix(".lock")
+        lock_file.write_text(f"{stranger.pid}{es.NEW_PROTOCOL_MARK}", encoding="ascii")          # o dono novo morreu; o SO soltou o lock; o PID agora e de OUTRO processo vivo
+        t0 = time.monotonic()
+        with es.locked(path, wait_s=3.0):
+            pass
+        assert time.monotonic() - t0 < 2.0                                                        # imediato: o lock do SO e a verdade
+    finally:
+        stranger.kill()
+        stranger.wait(timeout=10)
+
+
+def test_a_plain_pid_of_a_live_process_is_still_treated_as_a_legacy_owner(tmp_path):
+    import subprocess
+    import sys
+    stranger = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    try:
+        path = tmp_path / "state.json"
+        path.with_suffix(".lock").write_text(str(stranger.pid), encoding="ascii")                 # formato ANTIGO (so o PID): continua protegendo a janela de migracao
+        with pytest.raises(TimeoutError):
+            with es.locked(path, wait_s=0.5):
+                pass
+    finally:
+        stranger.kill()
+        stranger.wait(timeout=10)
+
+
+def test_the_new_owner_writes_its_pid_with_the_protocol_mark_that_the_old_reader_still_parses(tmp_path):
+    path = tmp_path / "state.json"
+    with es.locked(path):
+        text = path.with_suffix(".lock").read_text(encoding="ascii")
+        assert text == f"{os.getpid()}{es.NEW_PROTOCOL_MARK}" and text.split(":")[0].isdigit()
