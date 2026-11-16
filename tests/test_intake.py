@@ -193,7 +193,7 @@ def test_a_possibly_truncated_issue_or_pr_list_publishes_nothing(cli, monkeypatc
     monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1)], None, [{"number": n, "body": "", "headRefName": "x"} for n in range(bd.LOAD_LIMIT)]))
     assert intake.main(["publish", "--apply"]) == 2
     out = json.loads(capsys.readouterr().out)
-    assert out["candidate"] is None and "truncada" in out["error"] and not cli.exists() or EventStore(cli).events() == []
+    assert out["candidate"] is None and "truncada" in out["error"] and (not cli.exists() or EventStore(cli).events() == [])
 
 
 # -- 7a revisao do Codex (#641): dependencia reflexiva; trava do estado ate a publicacao ----------------------------------------------------------------
@@ -203,7 +203,7 @@ def test_a_self_dependency_refuses_the_candidate_and_publishes_nothing(cli, monk
     assert res.candidate is None and "depende dela mesma" in res.skipped[0]
     monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1, deps=(1,))], None, []))
     assert intake.main(["publish", "--apply"]) == 1
-    assert json.loads(capsys.readouterr().out)["candidate"] is None and not cli.exists() or EventStore(cli).events() == []
+    assert json.loads(capsys.readouterr().out)["candidate"] is None and (not cli.exists() or EventStore(cli).events() == [])
 
 
 def test_the_execution_state_lock_is_held_from_reading_the_claims_until_the_request_is_written(cli, monkeypatch):
@@ -280,5 +280,26 @@ def test_a_ready_item_of_another_repository_with_the_same_number_does_not_author
     assert mapped == {}
     monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1)], mapped, []))
     assert intake.main(["publish", "--apply", "--project"]) == 1
-    assert json.loads(capsys.readouterr().out)["candidate"] is None and not cli.exists() or EventStore(cli).events() == []
+    assert json.loads(capsys.readouterr().out)["candidate"] is None and (not cli.exists() or EventStore(cli).events() == [])
 
+
+
+# -- 8a revisao do Codex (#641): vinculos de fechamento do GitHub; revalidacao sob a trava -------------------------------------------------------------
+@pytest.mark.parametrize("body", ["Closes #1", "fixes #1", "Resolves: #1", "Refs #1", "Relates to #1", "Fixed #3, #1", "closes #1 and #2"])
+def test_an_open_pr_linked_by_any_github_keyword_blocks_a_new_request(body):
+    res = plan([issue(1)], prs=[{"number": 50, "body": body, "headRefName": "x"}])
+    assert res.candidate is None and all("PR #50" in x for x in res.skipped)                          # `Refs`/`Relates to` o agendador ja descarta antes
+
+
+def test_a_pr_that_only_mentions_the_number_without_a_link_keyword_does_not_block():
+    assert plan([issue(1)], prs=[{"number": 50, "body": "ver tambem #1 na discussao", "headRefName": "x"}]).candidate.node.number == 1
+
+
+def test_a_pr_opened_between_the_first_read_and_the_lock_is_seen_by_the_revalidation_and_nothing_is_published(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, [{"number": 77, "body": "Closes #1", "headRefName": "feat/x"}])])
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["published"] is None and "revalidacao" in out["note"] and any("PR #77" in s for s in out["revalidated_skipped"])
+    assert not cli.exists() or EventStore(cli).events() == []

@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from dataclasses import dataclass, field
 
@@ -74,6 +75,19 @@ def refusal(verdict: bd.Verdict, readiness: dict[int, dict] | None = None, proje
     return None
 
 
+# todas as formas com que um PR aponta uma Issue no GitHub (palavras de fechamento) e as do projeto (`Refs`, `Relates to`); `#N` em lista conta cada numero
+_LINK = re.compile(r"\b(?:refs?|relates?\s+to|close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s*((?:#\d+(?:\s*(?:,|\band\b|\be\b)\s*)?)+)", re.I)
+
+
+def linked_issues(body: str | None) -> set[int]:
+    return {int(n) for grp in _LINK.findall(body or "") for n in re.findall(r"#(\d+)", grp)}
+
+
+def open_pr_for(prs: list[dict], number: int) -> int | None:
+    """Um PR ABERTO ja vinculado a Issue (qualquer forma aceita pelo GitHub): nunca um pedido novo por cima."""
+    return next((int(p["number"]) for p in prs if number in linked_issues(p.get("body"))), None)
+
+
 def plan(issues: list[dict], prs: list[dict], state: dict, statuses: dict[int, str] | None = None,
          readiness: dict[int, dict] | None = None, agent: str | None = INTAKE_AGENT) -> IntakePlan:
     """O candidato do intake: a primeira Issue ELEGIVEL (ordem do agendador) que passa na barreira. Puro."""
@@ -84,6 +98,8 @@ def plan(issues: list[dict], prs: list[dict], state: dict, statuses: dict[int, s
         if not v.eligible:
             continue
         why = refusal(v, readiness, project_known=statuses is not None, known=known)
+        if why is None and (linked := open_pr_for(prs, v.node.number)) is not None:
+            why = f"o PR #{linked} (aberto) ja esta vinculado a Issue #{v.node.number}: nao e um pedido novo de implementacao"
         if why is None and v.node.number in es.active_claims(state):                 # qualquer claim ATIVO na Issue, de qualquer agente: nunca um pedido novo por cima
             why = f"a Issue #{v.node.number} tem claim ativo de {state['claims'][str(v.node.number)].get('agent')!r}: nao e um pedido novo de implementacao"
         if why is None and chosen is None:
@@ -129,8 +145,17 @@ def main(argv: list[str] | None = None) -> int:
         out: dict = {"candidate": None if result.candidate is None else {
             "issue": result.candidate.node.number, "title": result.candidate.node.title}, "skipped": result.skipped}
         if a.cmd == "publish" and a.apply and result.candidate is not None:
+            # REVALIDA sob a trava: o que foi lido antes dela (Issues, PRs) pode ter mudado - outro executor pode ter aberto um PR e soltado o claim nesse meio-tempo
+            fresh_issues, _st, fresh_prs = bd.load(statuses=False)
+            again = plan(fresh_issues, fresh_prs, es.load(path), statuses, readiness)
+            if again.candidate is None or again.candidate.node.number != result.candidate.node.number:
+                out["published"] = None
+                out["note"] = "a revalidacao sob a trava mudou o candidato (PR novo, claim ou Issue alterada): nada foi publicado"
+                out["revalidated_skipped"] = again.skipped
+                print(json.dumps(out, indent=1, ensure_ascii=False))
+                return 1
             from tools.orchestration.store_factory import get_store
-            event_id, created = publish(get_store(), result.candidate, issues)
+            event_id, created = publish(get_store(), again.candidate, fresh_issues)
             out["published"] = {"event_id": event_id, "created": created}
         elif a.cmd == "publish":
             out["published"] = None
