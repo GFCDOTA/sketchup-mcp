@@ -482,9 +482,10 @@ def pick(bstate: dict, now: dt.datetime | None = None) -> dict | None:
     cutoff = es.now_iso(_utc(now) - dt.timedelta(hours=24))
     if len([r for r in bstate.get("runs", []) if r >= cutoff]) >= DAILY_CAP:
         return None
+    contained = {t.get("pr") for t in bstate["queue"] if t["state"] == "BLOCKED_CONTAINMENT"}      # a worktree e do PR: contencao nao confirmada trava TODO o PR
     for t in bstate["queue"]:
         if t["state"] in ("QUEUED", "BLOCKED_CREDENTIALS", "BLOCKED_CLI", "BLOCKED_WORKTREE", "FAILED") and t.get("attempts", 0) < MAX_ATTEMPTS \
-                and (t.get("retry_after") or "") <= t_now:
+                and (t.get("retry_after") or "") <= t_now and t.get("pr") not in contained:
             return t
     return None
 

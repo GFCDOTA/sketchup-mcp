@@ -750,6 +750,21 @@ def test_an_unconfirmed_process_tree_blocks_the_item_and_no_executor_claims_it_a
     assert go(gh, b, Runner(gh), now=far)["action"] == "DONE"
 
 
+def test_a_second_review_of_the_same_pr_cannot_reuse_the_worktree_while_the_containment_is_unconfirmed_but_another_pr_still_runs():
+    gh = FakeGh()
+    b = bstate(item())
+    go(gh, b, Runner(gh, boom=ex.TreeNotConfirmedError("job nao esvaziou")))
+    pr = b["queue"][0]["pr"]
+    second = item(key=f"review:999:{pr}:{'e' * 40}", review_id=999)                                       # outro review do MESMO PR entra como QUEUED
+    other = item(key="review:998:8:" + "f" * 40, review_id=998, pr=pr + 1)
+    b["queue"].extend([second, other])
+    far = NOW + dt.timedelta(days=30)
+    assert ex.pick(b, far)["key"] == other["key"]                                                          # o PR contido e pulado; o outro PR segue
+    b["queue"].remove(other)
+    r = Runner(gh)
+    assert ex.pick(b, far) is None and go(gh, b, r, now=far)["action"] == "IDLE" and r.calls == []         # nada reutiliza a worktree ate liberacao explicita
+
+
 def test_a_plain_containment_setup_failure_is_still_a_retryable_failure_because_the_child_never_ran():
     gh = FakeGh()
     b = bstate(item())
