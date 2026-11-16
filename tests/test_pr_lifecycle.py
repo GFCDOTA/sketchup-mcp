@@ -462,3 +462,13 @@ def test_the_review_loop_survives_an_unexpected_error_and_keeps_going(store):
     loop.stop()
     loop.join(5)
     assert any(e["review"].get("action") == "DONE" for e in emitted)
+
+
+def test_a_full_verdict_from_the_reviewer_is_summarized_in_the_result_and_in_the_event(store):
+    w = World().add(7)
+    enq(w, store)
+    verdict = {"verdict": "REQUEST_CHANGES", "head_sha": HEAD, "findings": [{"severity": "HIGH"}, {"severity": "MEDIUM"}], "files_reviewed": ["x" * 5000]}
+    out = pl.work(w, store, POLICY, REPO, Reviewer(result={"action": "DONE", "verdict": verdict, "url": "u"}))
+    assert out["verdict"] == "REQUEST_CHANGES" and out["findings"] == 2 and out["head"] == HEAD[:12] and "files_reviewed" not in out
+    done = pending(store)[0]
+    assert done["status"] == "DONE" and "files_reviewed" not in (done["result"] or "")

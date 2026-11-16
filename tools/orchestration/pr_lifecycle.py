@@ -312,14 +312,23 @@ def _review(store: EventStore, ev: dict, gh: eb.Gh, policy: dict, repo: str, rev
     action = result.get("action")
     try:
         if action == "DONE":
-            store.complete(ev, {k: v for k, v in result.items() if k in ("action", "verdict", "url", "findings", "head_sha")})
+            v = result.get("verdict")
+            store.complete(ev, {"action": "DONE", "verdict": v.get("verdict") if isinstance(v, dict) else v, "url": result.get("url"),
+                                "findings": len(v.get("findings") or []) if isinstance(v, dict) else None})
         elif action in ("SKIPPED", "STALE"):
             store.supersede(ev, str(result.get("reason") or action)[:300])
         else:
             store.fail(ev, f"{action}: {str(result.get('reason') or '')[:300]}", retry_delay=RETRY_S)
     except LeaseLost:
         return {"action": "LOST_LEASE", "event": ev["id"], "pr": n}
-    return {"action": action, "event": ev["id"], "pr": n, **{k: result[k] for k in ("verdict", "url", "reason") if k in result}}
+    verdict = result.get("verdict")
+    row = {"action": action, "event": ev["id"], "pr": n}
+    if isinstance(verdict, dict):                                                              # o parecer completo fica no review publicado, nao no log do laco
+        row.update(verdict=verdict.get("verdict"), findings=len(verdict.get("findings") or []), head=str(verdict.get("head_sha", ""))[:12])
+    elif verdict:
+        row["verdict"] = verdict
+    row.update({k: result[k] for k in ("url", "reason") if k in result})
+    return row
 
 
 # --------------------------------------------------------------------------------------------------------------------------- ciclo
