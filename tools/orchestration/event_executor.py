@@ -766,15 +766,20 @@ def _reconcile_summary(gh: eb.Gh, policy: dict, repo: str, now: dt.datetime | No
 
 
 def cycle_backoff(interval: int, consecutive: int) -> float:
-    """Espera apos `consecutive` ciclos seguidos com erro: dobra a cada falha, limitada. Nunca menor que o intervalo normal."""
-    return float(min(MAX_CYCLE_BACKOFF_S, max(interval, 1) * 2 ** max(consecutive, 0)))
+    """Espera apos `consecutive` ciclos seguidos com erro: dobra a cada falha, limitada a 15 min, e NUNCA menor que o intervalo configurado
+    (com `--interval 3600` uma falha nao pode encurtar a espera para 900 s)."""
+    base = max(interval, 1)
+    return float(max(base, min(MAX_CYCLE_BACKOFF_S, base * 2 ** max(consecutive, 0))))
 
 
 def guarded_cycle(cycle: Callable[[], dict], consecutive: int) -> tuple[dict, int]:
     """Roda UM ciclo sem deixar uma excecao derrubar o processo. Devolve (resultado, falhas seguidas): o resultado de um ciclo com erro e
     um registro (`cycle_error`) e o contador sobe; um ciclo sem erro zera o contador. `KeyboardInterrupt`/`SystemExit` sao `BaseException`: passam (nao sao falha de ciclo)."""
     try:
-        return cycle(), 0
+        res = cycle()
+        if isinstance(res, dict) and isinstance(res.get("poll"), dict) and res["poll"].get("ERROR"):
+            return {**res, "consecutive_errors": consecutive + 1}, consecutive + 1      # o poll do bridge engole a falha (diagnostico + backoff proprio): conta como erro de ciclo
+        return res, 0
     except Exception as exc:                                                 # noqa: BLE001 — rede, GitHub, estado ilegivel: o laco sobrevive
         return {"cycle_error": f"{type(exc).__name__}: {redact(str(exc))}"[:300], "consecutive_errors": consecutive + 1}, consecutive + 1
 

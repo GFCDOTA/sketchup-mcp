@@ -29,6 +29,28 @@ def test_backoff_doubles_with_each_consecutive_failure_and_is_capped():
     assert ex.cycle_backoff(0, 1) >= 2.0                                        # intervalo 0 nao vira espera 0
 
 
+def test_the_backoff_never_goes_below_the_configured_interval():
+    assert all(ex.cycle_backoff(3600, n) == 3600.0 for n in range(0, 12))                  # o teto de 15 min nao encurta um intervalo maior
+    assert ex.cycle_backoff(600, 1) == 900.0 and ex.cycle_backoff(600, 0) == 600.0
+
+
+@pytest.mark.parametrize("poll", [{"ERROR": 1}, {"ACCEPT": 2, "ERROR": 3}])
+def test_a_cycle_whose_poll_failed_counts_as_a_failure_even_without_an_exception(poll):
+    res, n = ex.guarded_cycle(lambda: {"poll": poll, "action": "IDLE"}, 4)
+    assert n == 5 and res["consecutive_errors"] == 5 and res["action"] == "IDLE"
+
+
+def test_a_cycle_with_a_clean_poll_resets_the_count():
+    assert ex.guarded_cycle(lambda: {"poll": {"ACCEPT": 1, "ERROR": 0}}, 6)[1] == 0
+
+
+def test_the_loop_exits_for_a_restart_when_the_poll_keeps_failing_without_exceptions(monkeypatch, capsys):
+    calls = scripted(monkeypatch, [{"poll": {"ERROR": 1}, "action": "IDLE"}] * ex.MAX_CONSECUTIVE_CYCLE_ERRORS)
+    monkeypatch.setattr(ex, "sleep_watching", lambda *a, **k: True)
+    assert ex.main(["run", "--interval", "1"]) == 7 and len(calls) == ex.MAX_CONSECUTIVE_CYCLE_ERRORS
+    capsys.readouterr()
+
+
 def test_guarded_cycle_returns_the_result_and_resets_the_failure_count_on_success():
     assert ex.guarded_cycle(lambda: {"poll": {}}, 5) == ({"poll": {}}, 0)
 
