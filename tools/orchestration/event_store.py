@@ -152,8 +152,28 @@ class EventStore:
                 (str(SCHEMA_VERSION),),
             )
 
+    @classmethod
+    def open_existing(cls, path: str | Path, *, clock=time.time, busy_timeout_ms: int = 15000) -> "EventStore":
+        """Abre um banco que JA existe, SOMENTE LEITURA, sem criar arquivo, esquema nem linha: para planos e diagnosticos que prometem nao gravar.
+        Banco ausente => FileNotFoundError. Escrever nesta instancia falha (modo `ro` do SQLite)."""
+        p = Path(path)
+        if not p.is_file():
+            raise FileNotFoundError(str(p))
+        self = object.__new__(cls)
+        self.path, self.clock, self._busy_timeout_ms, self._readonly = str(p), clock, busy_timeout_ms, True
+        return self
+
+    _readonly = False
+
     @contextmanager
     def _conn(self):
+        if self._readonly:
+            db = sqlite3.connect(Path(self.path).resolve().as_uri() + "?mode=ro", uri=True, timeout=self._busy_timeout_ms / 1000, isolation_level=None)
+            db.row_factory = sqlite3.Row
+            db.execute(f"PRAGMA busy_timeout={self._busy_timeout_ms}")
+            with closing(db):
+                yield db
+            return
         db = sqlite3.connect(self.path, timeout=self._busy_timeout_ms / 1000, isolation_level=None)
         db.row_factory = sqlite3.Row
         db.execute(f"PRAGMA busy_timeout={self._busy_timeout_ms}")
@@ -402,6 +422,20 @@ class EventStore:
             now = self.clock()
             self._owned_update(db, ev, "UPDATE events SET status='SUPERSEDED', error=?, lease_until=0, updated_at=?",
                                (reason, now), "SUPERSEDED", reason, now)
+
+    def supersede_obsolete(self, event_id: int, reason: str, actor: str = "reconciler") -> bool:
+        """Descarta UM pedido que a reconciliacao provou obsoleto, sem reivindica-lo e SEM a limpeza global que `claim`/`claim_by_id` fazem (reaping de eventos
+        alheios para o DLQ). So age sobre PENDING (inclusive em backoff de retry) ou RUNNING com lease VENCIDO; evento com lease vivo pertence a outro dono e nao
+        e tocado (False). O dono antigo, se voltar, e recusado: o evento deixou de ser RUNNING com o token dele (`LeaseLost`)."""
+        with self._tx() as db:
+            now = self.clock()
+            ev = db.execute("SELECT * FROM events WHERE id=?", (event_id,)).fetchone()
+            if ev is None or not (ev["status"] == "PENDING" or (ev["status"] == "RUNNING" and ev["lease_until"] <= now)):
+                return False
+            db.execute("UPDATE events SET status='SUPERSEDED', error=?, lease_owner=NULL, lease_token=NULL, lease_until=0, updated_at=? WHERE id=?",
+                       (reason[:2000], now, event_id))
+            self._log(db, event_id, ev["status"], "SUPERSEDED", actor, reason[:300], now)
+            return True
 
     # -- subprocess audit ---------------------------------------------------
     def run_started(self, event_id: int, agent: str, argv: list, cwd: str | Path,

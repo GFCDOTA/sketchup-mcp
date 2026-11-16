@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import json
+import sqlite3
+import subprocess
 
 import pytest
 
@@ -142,45 +144,118 @@ def test_reconciling_twice_is_idempotent(store):
 
 
 # --------------------------------------------------------------------------------------------------------- concorrencia
-class RacingStore:
-    """Entre julgar e reivindicar, outro executor leva o evento."""
-    def __init__(self, inner, mode):
-        self.inner, self.mode = inner, mode
-
-    def __getattr__(self, name):
-        return getattr(self.inner, name)
-
-    def claim_by_id(self, *a, **k):
-        return None if self.mode == "taken" else self.inner.claim_by_id(*a, **k)
-
-    def supersede(self, ev, reason):
-        if self.mode == "lease_lost":
-            raise LeaseLost("outro dono")
-        return self.inner.supersede(ev, reason)
-
-
-def test_an_event_claimed_by_someone_else_in_between_is_skipped_not_forced(store):
+def test_an_event_that_gained_a_live_owner_in_between_is_skipped_not_forced(store, clock):
     publish(store)
-    report = sr.reconcile(RacingStore(store, "taken"), FakeGh(head=NEW), apply=True)
-    assert report["events"][0]["applied"] == "SKIPPED" and status(store) == "PENDING"
+
+    class Racing(FakeGh):
+        def __call__(self, path):
+            out = super().__call__(path)
+            if path.endswith("/pulls/7"):
+                store.claim(("CORRECTION_REQUESTED",), "executor-vivo", 300)               # entre julgar e descartar, um executor reivindica
+            return out
+    report = sr.reconcile(store, Racing(head=NEW), apply=True)
+    assert report["events"][0]["applied"] == "SKIPPED" and status(store) == "RUNNING"
 
 
-def test_a_lease_lost_while_superseding_is_reported_and_never_raises(store):
+def test_a_pending_event_in_retry_backoff_is_also_discarded_when_obsolete(store, clock):
     publish(store)
-    report = sr.reconcile(RacingStore(store, "lease_lost"), FakeGh(head=NEW), apply=True)
-    assert report["events"][0]["applied"] == "LEASE_LOST"
+    store.fail(store.claim(("CORRECTION_REQUESTED",), "x", 60), "falha", retry_delay=900)         # PENDING, mas so disponivel daqui a 15 min
+    assert store.claim(("CORRECTION_REQUESTED",), "y", 60) is None
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True)
+    assert report["events"][0]["applied"] == "SUPERSEDED" and status(store) == "SUPERSEDED"       # no E2E real isto ficava PENDING ate o backoff acabar
+
+
+def test_discarding_one_request_never_touches_unrelated_events_with_an_expired_exhausted_lease(store, clock):
+    publish(store)
+    other = store.publish("REVIEW_REQUESTED", "outro-job", "job:outro", {"x": 1}, max_attempts=1)[0]
+    assert store.claim(("REVIEW_REQUESTED",), "morto", 5)["id"] == other                            # de outro tipo e job; esgotou as tentativas
+    clock.t += 10                                                                                    # o lease dele venceu
+
+    sr.reconcile(store, FakeGh(head=NEW), apply=True)
+
+    now = next(e for e in store.events() if e["id"] == other)
+    assert now["status"] == "RUNNING" and not any(e["event_type"] == "JOB_FAILED" for e in store.events())   # claim_by_id mandaria este para o DLQ
+
+
+def test_supersede_obsolete_is_bounded_audited_and_fences_the_old_owner(store, clock):
+    eid = publish(store)
+    ev = store.claim(("CORRECTION_REQUESTED",), "dono-antigo", 5)
+    assert store.supersede_obsolete(eid, "x") is False                                              # lease vivo: de outro dono
+    clock.t += 6
+    assert store.supersede_obsolete(eid, "HEAD mudou", actor="reconciler") is True
+    assert status(store) == "SUPERSEDED" and any(t["actor"] == "reconciler" and t["to_status"] == "SUPERSEDED" for t in store.transitions())
+    with pytest.raises(LeaseLost):
+        store.complete(ev, {"by": "o dono antigo voltou"})                                           # o resultado atrasado do dono antigo e recusado
+    assert store.supersede_obsolete(eid, "de novo") is False and store.supersede_obsolete(9999, "x") is False
+
+
+@pytest.mark.parametrize("answer", [{}, {"state": "open"}, {"state": "closed"}, {"state": "open", "merged": False},
+                                     {"state": "open", "merged": False, "head": {}}, {"state": "open", "merged": False, "head": {"sha": "curto"}},
+                                     {"state": "weird", "merged": False, "head": {"sha": HEAD}}, {"state": "open", "merged": "no", "head": {"sha": HEAD}}])
+def test_an_incomplete_pr_answer_is_an_error_and_never_discards_the_event(store, answer):
+    publish(store)
+    report = sr.reconcile(store, lambda path: answer, apply=True)
+    assert report["counts"] == {"ERROR": 1} and status(store) == "PENDING"
+
+
+@pytest.mark.parametrize("payload", [{"pr": 7}, {"pr": 7, "head_sha": ""}, {"pr": 7, "head_sha": "xyz"}, {"pr": 7, "head_sha": 123}, {"pr": True, "head_sha": HEAD}])
+def test_a_payload_without_a_valid_head_sha_is_malformed_and_preserved(store, payload):
+    publish(store, payload=payload)
+    gh = FakeGh(state="closed")
+    report = sr.reconcile(store, gh, apply=True)
+    assert report["counts"] == {"MALFORMED": 1} and status(store) == "PENDING" and gh.calls == []
+
+
+def test_a_github_timeout_on_one_event_is_an_error_row_and_the_next_events_are_still_processed(store):
+    publish(store)
+    publish(store, key=f"review:10:8:{HEAD}", payload={"pr": 8, "head_sha": HEAD, "review_id": "10"})
+
+    def gh(path):
+        if "/pulls/7" in path:
+            raise subprocess.TimeoutExpired("gh", 120)
+        return {"number": 8, "state": "closed", "merged": False, "head": {"sha": HEAD}}
+    report = sr.reconcile(store, gh, apply=True)
+    assert report["counts"] == {"ERROR": 1, "PR_NOT_OPEN": 1} and status(store) == "PENDING" and status(store, f"review:10:8:{HEAD}") == "SUPERSEDED"
 
 
 # ------------------------------------------------------------------------------------------------------------------- CLI
-def test_the_cli_plans_by_default_and_returns_1_only_when_a_github_read_failed(tmp_path, monkeypatch, capsys, store):
+def test_the_plan_never_creates_the_database_or_the_schema(tmp_path, monkeypatch, capsys):
     from tools.orchestration import store_factory
-    publish(store)
-    monkeypatch.setattr(store_factory, "get_store", lambda *a, **k: store)
+    missing = tmp_path / "nao" / "existe" / "store.db"
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(missing))
+    store_factory.reset_store()
+    monkeypatch.setattr(sr.eb, "gh_json", lambda path: pytest.fail("sem banco nao ha o que ler do GitHub"))
+    assert sr.main([]) == 0
+    assert json.loads(capsys.readouterr().out)["store"].startswith("ausente") and not missing.parent.exists()
+
+
+def test_the_plan_opens_an_existing_database_read_only(tmp_path, monkeypatch, capsys):
+    from tools.orchestration import store_factory
+    db = tmp_path / "store.db"
+    store = EventStore(db)
+    store.publish("CORRECTION_REQUESTED", KEY, "pr:7", {"pr": 7, "head_sha": HEAD, "review_id": "9"})
+    before = db.read_bytes() if not db.with_name("store.db-wal").exists() else None
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(db))
+    store_factory.reset_store()
     monkeypatch.setattr(sr.eb, "gh_json", FakeGh(head=NEW))
     assert sr.main([]) == 0
-    assert json.loads(capsys.readouterr().out)["applied"] is False and status(store) == "PENDING"
+    assert json.loads(capsys.readouterr().out)["events"][0]["code"] == "HEAD_MOVED" and status(store) == "PENDING"
+    ro = EventStore.open_existing(db)
+    with pytest.raises(sqlite3.OperationalError):
+        ro.publish("CORRECTION_REQUESTED", "k-novo", "pr:9", {"x": 1})                              # a instancia somente leitura nao grava
+    assert before is None or db.read_bytes() == before
+
+
+def test_the_cli_applies_only_with_apply_and_returns_1_only_when_a_github_read_failed(tmp_path, monkeypatch, capsys):
+    from tools.orchestration import store_factory
+    db = tmp_path / "store.db"
+    store = EventStore(db)
+    store.publish("CORRECTION_REQUESTED", KEY, "pr:7", {"pr": 7, "head_sha": HEAD, "review_id": "9"})
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(db))
+    store_factory.reset_store()
+    monkeypatch.setattr(sr.eb, "gh_json", FakeGh(head=NEW))
     assert sr.main(["--apply"]) == 0 and status(store) == "SUPERSEDED"
     capsys.readouterr()
-    publish(store, key=f"review:10:7:{HEAD}", payload={"pr": 7, "head_sha": HEAD, "review_id": "10"})
+    store.publish("CORRECTION_REQUESTED", f"review:10:7:{HEAD}", "pr:7", {"pr": 7, "head_sha": HEAD, "review_id": "10"})
     monkeypatch.setattr(sr.eb, "gh_json", FakeGh(boom=RuntimeError("rede")))
     assert sr.main([]) == 1
