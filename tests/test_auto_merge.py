@@ -191,7 +191,8 @@ GOOD_PROTECTION = {"required_pull_request_reviews": {"required_approving_review_
 
 class Gh:
     def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, draft=False, protection=None, protection_boom=None, rules=None, rules_boom=None,
-                 scheduled_only=False, mutate_last=None, cancel_works=True, merge_lands=True, **overrides):
+                 scheduled_only=False, mutate_last=None, cancel_works=True, merge_lands=True, issue_flip_at=None, merged_head=None, **overrides):
+        self.issue_flip_at, self.issue_reads, self.merged_head = issue_flip_at, 0, merged_head
         self.merge_lands = merge_lands                                                       # False: o comando NAO produziu merge nenhum (recusa/queda antes de aplicar)
         self.head, self.fresh_head, self.boom, self.labelled, self.overrides, self.calls = head, fresh_head, boom, labelled, overrides, []
         self.draft = draft
@@ -217,7 +218,7 @@ class Gh:
                     cancelled = self.pulls >= 5 and self.cancel_works
                     return pr(head={"sha": sha, "repo": {"full_name": REPO}}, auto_merge=None if cancelled else {"enabled_by": "x"}, changed_files=1)
                 if self.merge_lands:
-                    return pr(head={"sha": sha, "repo": {"full_name": REPO}}, merged=True, state="closed", merge_commit_sha="c" * 40, changed_files=1)
+                    return pr(head={"sha": self.merged_head or sha, "repo": {"full_name": REPO}}, merged=True, state="closed", merge_commit_sha="c" * 40, changed_files=1)
                 return pr(head={"sha": sha, "repo": {"full_name": REPO}}, changed_files=1)
             return pr(head={"sha": sha, "repo": {"full_name": REPO}}, **{"changed_files": 1, **self.overrides})
         if path.startswith(f"repos/{REPO}/pulls/7/files"):
@@ -227,6 +228,9 @@ class Gh:
         if "check-runs" in path:
             return {"total_count": len(lifecycle.MANDATORY_CHECKS), "check_runs": runs()}
         if path == f"repos/{REPO}/issues/5":
+            self.issue_reads += 1
+            if self.issue_flip_at and self.issue_reads >= self.issue_flip_at:                       # a Issue ganha label de decisao humana depois de algumas leituras
+                return issues(labels=(am.GPT_LABEL, "aprovação-humana-pendente"))[5]
             return issues(labels=(am.GPT_LABEL,))[5]
         if path == f"repos/{REPO}/rules/branches/develop":
             if self.rules_boom:
@@ -697,7 +701,7 @@ def test_an_unreadable_provenance_store_is_no_proof():
 
 
 @pytest.mark.parametrize("mutation", [{"labels": [{"name": "security"}]}, {"base": {"ref": "release", "repo": {"full_name": REPO}}}, {"draft": True},
-                                      {"body": "Refs #1\n\nRefs #999"}, {"body": ""}, {"body": None}])
+                                      {"body": "Refs #5\n\nRefs #5 (editado)"}, {"body": ""}, {"body": None}])
 def test_the_last_read_of_the_pr_before_the_merge_blocks_a_change_of_base_labels_draft_or_body(mutation):
     runner = Runner()
     out = am.cycle(Gh(mutate_last=mutation), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
@@ -764,3 +768,28 @@ def test_a_merge_command_that_did_nothing_leaves_the_pr_untouched_without_an_err
     out = am.cycle(Gh(merge_lands=False), POLICY, REPO, apply=True, runner=TimingOutRunner(), is_enabled=ON, provenance=ALWAYS)
     row = out["prs"][0]
     assert row["merged"] is False and row["code"] != "ERROR"
+
+
+# -- 10a revisao do Codex (#648): interruptor depois da ultima leitura, Issues na ultima leitura, HEAD efetivamente mesclado ---------------------------
+def test_a_kill_switch_created_during_the_last_remote_read_blocks_the_merge(monkeypatch):
+    reads = {"n": 0}
+
+    def switch():
+        reads["n"] += 1                                                                              # 1: inicio do ciclo; 2: antes da ultima leitura; 3: DEPOIS dela
+        return (False, "AUTOMERGE_DISABLED criado durante a ultima leitura") if reads["n"] >= 3 else (True, "")
+    monkeypatch.setattr(am, "enabled", switch)
+    runner = Runner()
+    out = am.cycle(Gh(), POLICY, REPO, apply=True, runner=runner, provenance=ALWAYS)
+    assert out["prs"][0]["code"] == "DISABLED" and "ultima leitura" in out["prs"][0]["reasons"][0] and runner.calls == [] and reads["n"] == 3
+
+
+def test_an_issue_that_gains_a_human_decision_label_in_the_last_read_blocks_the_merge():
+    runner = Runner()
+    out = am.cycle(Gh(issue_flip_at=3), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
+    assert out["prs"][0]["code"] == "WAIT" and "Issues" in out["prs"][0]["reasons"][0] and runner.calls == []
+
+
+def test_a_pr_merged_with_a_different_head_than_the_authorized_one_demands_owner_intervention():
+    out = am.cycle(Gh(merged_head="d" * 40), POLICY, REPO, apply=True, runner=Runner(), is_enabled=ON, provenance=ALWAYS)
+    row = out["prs"][0]
+    assert row["merged"] is False and row["code"] == "ERROR" and "HEAD_DIVERGENTE" in row["reasons"][0] and "INTERVENCAO" in row["reasons"][0]

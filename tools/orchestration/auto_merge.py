@@ -336,6 +336,9 @@ def merge(number: int, head: str, repo: str, runner=subprocess.run) -> tuple[boo
     return True, "comando aceito"
 
 
+DIVERGENT_HEAD = "HEAD_DIVERGENTE"
+
+
 def confirm_merged(gh: eb.Gh, repo: str, number: int, head: str) -> tuple[bool, str]:
     """Exit 0 de `gh pr merge` NAO prova merge: com fila de merge ou auto-merge configurado o GitHub apenas AGENDA. So conta como mesclado o PR com `merged: true`,
     base develop e o commit de merge presente; qualquer outra coisa e reportada como NAO mesclado (agendado) e, se o PR ficou com auto-merge, o desliga."""
@@ -344,6 +347,9 @@ def confirm_merged(gh: eb.Gh, repo: str, number: int, head: str) -> tuple[bool, 
     except (RuntimeError, OSError, ValueError) as exc:
         return False, f"merge nao confirmado ({type(exc).__name__}): nao conto como mesclado"
     if isinstance(pr, dict) and pr.get("merged") is True and (pr.get("base") or {}).get("ref") == BASE_BRANCH and pr.get("merge_commit_sha"):
+        merged_head = str((pr.get("head") or {}).get("sha") or "").lower()
+        if merged_head != str(head).lower():                                 # outro ator mesclou OUTRO HEAD: sem prova do que foi autorizado, nunca e sucesso
+            return False, f"{DIVERGENT_HEAD}: o PR foi mesclado com o HEAD {merged_head[:12] or '(ilegivel)'}, nao com o autorizado {str(head)[:12]}: REQUER INTERVENCAO do proprietario"
         return True, f"mesclado em {str(pr['merge_commit_sha'])[:12]}"
     return False, "o GitHub aceitou o comando mas o PR NAO esta mesclado (fila de merge/agendamento): nao conto como mesclado"
 
@@ -436,9 +442,15 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                     elif again.code != "MERGE" or (pr2.get("head") or {}).get("sha") != row["head"]:
                         row.update(code="WAIT", reasons=[f"os fatos mudaram entre a decisao e o merge ({again.code}: {'; '.join(again.reasons)[:160]})"])
                     else:
-                        pr3 = gh(f"repos/{repo}/pulls/{number}")                              # ULTIMA leitura do PR, a uma ida ao servidor do merge: base/labels/estado iguais?
-                        if not isinstance(pr3, dict) or mutable_facts(pr3) != mutable_facts(pr2):
-                            row.update(code="WAIT", reasons=["base, labels, estado ou corpo (Issues) do PR mudaram na ultima leitura antes do merge: nada e mesclado nesta rodada"])
+                        # ULTIMA leitura, COMPLETA (PR, arquivos, checks, reviews e as Issues obrigatorias) e decidida de novo, a uma ida ao servidor do merge: Issue fechada ou com
+                        # label de decisao humana depois da leitura anterior tambem impede o merge. O interruptor e relido DEPOIS dela (imediatamente antes do comando).
+                        pr3, files3, runs3, reviews3, issues3 = gather(gh, repo, number)
+                        last = decide(pr3, files3, runs3, reviews3, issues3, policy, cfg, on, provenance)
+                        still_on2 = enabled() if is_enabled is None else is_enabled
+                        if not still_on2[0]:
+                            row.update(code="DISABLED", reasons=[f"desligado durante a ultima leitura: {still_on2[1]}"])
+                        elif not isinstance(pr3, dict) or mutable_facts(pr3) != mutable_facts(pr2) or last.code != "MERGE" or (pr3.get("head") or {}).get("sha") != row["head"]:
+                            row.update(code="WAIT", reasons=["base, labels, estado, corpo ou Issues do PR mudaram na ultima leitura antes do merge: nada e mesclado nesta rodada"])
                         else:
                             done, msg = merge(number, row["head"], repo, runner)
                             # QUALQUER desfecho do comando (aceito, recusado, timeout, erro de comunicacao) deixa o resultado REMOTO a provar: o GitHub pode ter aceito o comando e a
@@ -447,6 +459,9 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                             confirmed, cmsg = confirm_merged(gh, repo, number, row["head"])
                             if confirmed:
                                 done, msg = True, cmsg
+                            elif DIVERGENT_HEAD in cmsg:                                    # mesclado, mas NAO o HEAD autorizado: nada a cancelar, so intervencao
+                                done, msg = False, cmsg
+                                row.update(code="ERROR", reasons=[cmsg])
                             else:
                                 cancelled, why = cancel_scheduled(gh, repo, number, policy, runner)
                                 msg = f"{msg}; {cmsg}; {why}" if not done else f"{cmsg}; {why}"
