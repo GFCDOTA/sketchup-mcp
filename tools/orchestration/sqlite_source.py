@@ -150,16 +150,27 @@ def claim_next(owner: str, now: dt.datetime | None = None, *, lease_s: float, da
 
 
 def peek_next() -> dict | None:
-    """O proximo candidato SEM reivindicar (DRY_RUN): um claim gastaria uma tentativa do evento."""
+    """O proximo candidato SEM reivindicar (DRY_RUN): um claim gastaria uma tentativa do evento. Reflete os candidatos do claim REAL: eventos PENDING disponiveis, eventos
+    RUNNING com lease VENCIDO (o claim os recupera) e itens JSON QUEUED que ainda nao estao no SQLite (o claim os publica antes de reivindicar)."""
     store = _store()
     now = store.clock()
-    live = {e["job_id"] for e in store.events() if e["event_type"] == EVENT_TYPE and e["status"] == "RUNNING" and e["lease_until"] > now}
-    for ev in store.events():
-        if (ev["event_type"] == EVENT_TYPE and ev["status"] == "PENDING" and ev["available_at"] <= now
-                and ev["attempt"] < ev["max_attempts"] and ev["job_id"] not in live):
+    events = [e for e in store.events() if e["event_type"] == EVENT_TYPE]
+    live = {e["job_id"] for e in events if e["status"] == "RUNNING" and e["lease_until"] > now}
+    for ev in events:
+        claimable = ((ev["status"] == "PENDING" and ev["available_at"] <= now) or (ev["status"] == "RUNNING" and ev["lease_until"] <= now)) and ev["attempt"] < ev["max_attempts"]
+        if claimable and ev["job_id"] not in live:
             item = item_from_event(ev, attempts=ev["attempt"])
             if item is not None:
                 return item
+    known = {e["idempotency_key"] for e in events}
+    with es.locked(eb.bridge_path()):
+        queue = eb.load()["queue"]
+    for it in queue:
+        if it.get("state") != "QUEUED":
+            continue
+        args = store_args_from_item(it)
+        if args is not None and args["idempotency_key"] not in known and args["job_id"] not in live:
+            return {**it, "state": "RUNNING", "attempts": int(it.get("attempts") or 0)}                  # o backfill do claim real publicaria este item e o reivindicaria
     return None
 
 

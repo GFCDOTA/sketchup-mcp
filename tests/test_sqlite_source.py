@@ -559,3 +559,31 @@ def test_a_json_row_already_in_step_with_its_pending_event_is_not_touched(clock)
     b["queue"] = [it]
     eb.save(b)
     assert sq.rollback_apply(store)["applied"] == 0
+
+
+# -- 8a revisao do Codex (#636): o dry-run enxerga os mesmos candidatos do claim real -------------------------------------------------------------------
+def test_the_dry_run_sees_a_running_event_whose_lease_expired_like_the_real_claim_does(clock):
+    store = seed_both(item())
+    store.claim((sq.EVENT_TYPE,), "morto", 60)
+    assert sq.peek_next() is None                                                                 # lease vivo: nada a escolher
+    clock.t += 600
+    peeked = sq.peek_next()
+    assert peeked is not None and peeked["key"] == KEY
+    assert ev_of(store, KEY)["attempt"] == 1 and ev_of(store, KEY)["status"] == "RUNNING"           # nao reivindicou nem gastou tentativa
+    assert sq.claim_next("novo", None, lease_s=60, daily_cap=50)["key"] == KEY                      # e o claim real escolhe exatamente esse
+
+
+def test_the_dry_run_sees_a_queued_json_item_that_the_store_does_not_have_yet(clock):
+    seed_json(item())                                                                             # espelho falhou: o SQLite nao tem o evento
+    assert sf.get_store().events() == []
+    peeked = sq.peek_next()
+    assert peeked is not None and peeked["key"] == KEY and sf.get_store().events() == []            # nada foi publicado pelo dry-run
+    assert sq.claim_next("o", None, lease_s=60, daily_cap=50)["key"] == KEY                         # o claim real publica e reivindica
+
+
+def test_the_dry_run_ignores_an_exhausted_running_event_and_a_live_job(clock):
+    store = seed_both(item())
+    for _ in range(3):
+        store.claim((sq.EVENT_TYPE,), "morto", 60)
+        clock.t += 600
+    assert sq.peek_next() is None
