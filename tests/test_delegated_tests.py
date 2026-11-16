@@ -51,7 +51,7 @@ def base(tmp_path):
     sh(root, "init", "-q", "-b", "develop")
     (root / ".github/workflows").mkdir(parents=True)
     (root / ".github/workflows/delegated-tests.yml").write_text(WORKFLOW_TEXT, encoding="utf-8", newline="\n")
-    (root / "tools/ci").mkdir(parents=True)
+    (root / dt.COLLECTOR_PATH).parent.mkdir(parents=True)
     (root / dt.COLLECTOR_PATH).write_text("# coletor\n", encoding="utf-8", newline="\n")
     (root / "docs/governance").mkdir(parents=True)
     pin = sh(root, "hash-object", ".github/workflows/delegated-tests.yml")
