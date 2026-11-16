@@ -72,8 +72,12 @@ def attempt(action, path):
     try:
         with open(path, "rb" if action == "read" else "wb") as handle:
             handle.read() if action == "read" else handle.write(b"x")
-    except OSError:
+    except PermissionError:                  # SO a negacao de acesso e prova de isolamento
         return "denied"
+    except FileNotFoundError:                # alvo inexistente NAO prova nada
+        return "missing"
+    except OSError as exc:                   # qualquer outra falha de E/S tambem nao
+        return "error:%s" % exc.errno
     return "allowed"
 
 
