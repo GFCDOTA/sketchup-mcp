@@ -478,6 +478,9 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                             # ULTIMA chamada antes do comando. Janela residual (nao fechavel pela API: nao ha merge condicionado a base/labels): o tempo de UMA ida ao servidor
                             # entre esta leitura e o merge; quem a cobre no servidor e a protecao da branch (aprovacao exigida, aprovacoes velhas descartadas).
                             row.update(code="WAIT", reasons=["base, labels, estado ou corpo do PR mudaram depois das consultas da ultima leitura: nada e mesclado nesta rodada"])
+                        elif not (still_on3 := enabled() if is_enabled is None else is_enabled)[0]:
+                            # o interruptor e relido DEPOIS da releitura do PR (pr4), a ultima chamada remota: e a leitura local imediatamente anterior ao comando de merge
+                            row.update(code="DISABLED", reasons=[f"desligado durante a releitura final do PR: {still_on3[1]}"])
                         else:
                             done, msg = merge(number, row["head"], repo, runner)
                             # QUALQUER desfecho do comando (aceito, recusado, timeout, erro de comunicacao) deixa o resultado REMOTO a provar: o GitHub pode ter aceito o comando e a

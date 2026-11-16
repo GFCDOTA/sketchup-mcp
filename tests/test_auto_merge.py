@@ -785,6 +785,22 @@ def test_a_kill_switch_created_during_the_last_remote_read_blocks_the_merge(monk
     assert out["prs"][0]["code"] == "DISABLED" and "ultima leitura" in out["prs"][0]["reasons"][0] and runner.calls == [] and reads["n"] == 3
 
 
+# -- 11a revisao do Codex (#648, 64bbc966): interruptor criado durante a releitura FINAL do PR (pr4) ----------------------------------------------------
+def test_a_kill_switch_created_during_the_final_pr_reread_blocks_the_merge(monkeypatch):
+    reads = {"n": 0}
+    gh = Gh()
+
+    def switch():
+        reads["n"] += 1                                                                              # 4: depois da releitura final (pr4), imediatamente antes do merge
+        return (False, "AUTOMERGE_DISABLED criado durante a releitura final") if reads["n"] >= 4 else (True, "")
+    monkeypatch.setattr(am, "enabled", switch)
+    runner = Runner()
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, provenance=ALWAYS)
+    row = out["prs"][0]
+    assert row["code"] == "DISABLED" and "releitura final" in row["reasons"][0] and runner.calls == [] and reads["n"] == 4
+    assert gh.pulls == 4                                                                             # a releitura pr4 aconteceu ANTES da checagem que bloqueou
+
+
 def test_an_issue_that_gains_a_human_decision_label_in_the_last_read_blocks_the_merge():
     runner = Runner()
     out = am.cycle(Gh(issue_flip_at=3), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
