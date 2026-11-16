@@ -571,7 +571,10 @@ def settle_pending(gh: eb.Gh, repo: str = eb.REPO, now: dt.datetime | None = Non
             branch = (gh(f"repos/{repo}/pulls/{it['pr']}").get("head") or {}).get("ref") or ""
         except (RuntimeError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
             branch = ""
-        ok, tip = remote_tip_of(repo_root(), branch) if BRANCH_OK.match(branch or "") else (False, "")
+        try:
+            ok, tip = remote_tip_of(repo_root(), branch) if BRANCH_OK.match(branch or "") else (False, "")
+        except Exception:  # noqa: BLE001 — git ausente/travado (FileNotFoundError, OSError...): remoto indisponivel; este item segue pendente e os demais continuam
+            ok, tip = False, ""
         if not ok:
             out.append({"item": key, "action": "PUBLISH_PENDING", "reason": "nao foi possivel consultar a ponta remota: segue pendente"})
             continue
@@ -745,7 +748,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
     published = published_sha(item, wt) if pushed else ""
     new_head, api_confirmed = _confirm(item, gh, repo, pushed, published)
     remote_mismatch = False                                                 # a ponta remota consultada NAO e o commit publicado (mesmo que seja o SHA revisado: restaurada)
-    if pushed and published and (not api_confirmed or new_head.lower() == published):    # so o REMOTO prova qual e a ponta (API velha OU em cache mostrando o commit publicado)
+    if pushed and published:                                               # so o REMOTO prova qual e a ponta: a resposta da API (velha, em cache ou divergente) nunca decide sozinha
         try:
             consulted, tip = remote_tip_of(wt, branch)
         except Exception:  # noqa: BLE001 — git ausente/travado DEPOIS do push registrado: o resultado e incerto, nunca FAILED
@@ -757,6 +760,8 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
         if tip != published.lower():
             new_head = tip or "(ausente)"                                   # a ponta remota NAO e o commit do executor: avanco externo
             remote_mismatch = True
+        else:
+            new_head = published                                            # o REMOTO e a fonte da verdade: uma API em cache com outro SHA nao a contradiz
     if question and delivery[0] in ("SKIPPED", "NOOP") and not child_error:
         comment_pr(item["pr"], repo, f"Executor local: o agente parou com uma duvida e nao editou nada.\n\n> {question}")
     head_moved = bool(new_head) and new_head.lower() != item["head_sha"].lower()

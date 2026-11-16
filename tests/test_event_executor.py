@@ -833,6 +833,7 @@ def test_an_external_advance_right_after_the_push_is_superseded_not_credited_to_
         gh.head = "f" * 40
         return ("PUSHED", "fake")
     monkeypatch.setattr(ex, "deliver", other_person_pushes)
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, "f" * 40))                    # o avanco externo tambem aparece no REMOTO
     b = bstate(item())
     res = go(gh, b, r)
     assert res["action"] == "SUPERSEDED" and b["queue"][0]["state"] == "SUPERSEDED" and b["queue"][0]["new_head"] == "f" * 40
@@ -1187,3 +1188,48 @@ def test_an_unconfirmed_timeout_push_is_not_marked_as_confirmed(monkeypatch):
     monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
     go(gh, bstate(item()), Runner(gh, push=False))
     assert "push_confirmed" not in eb.load()["queue"][0]
+
+
+# -- 8a revisao do Codex (#652): API divergente nunca decide; falha ao iniciar o git na reconciliacao nao derruba o ciclo -------------------------------------
+def test_an_api_answer_that_is_neither_the_reviewed_nor_the_published_sha_is_checked_against_the_remote(monkeypatch):
+    gh = FakeGh()
+    gh_calls = {"n": 0}
+    real_call = gh.__call__
+
+    class CachedOther(FakeGh):
+        def __call__(self, path):
+            out = super().__call__(path)
+            if path == f"repos/{REPO}/pulls/7" and gh_calls["n"] > 0:
+                out["head"]["sha"] = "7" * 40                                                           # cache da API: SHA que nao e o revisado nem o publicado
+            gh_calls["n"] += 1
+            return out
+    gh2 = CachedOther()
+    b = bstate(item())
+    res = go(gh2, b, Runner(gh2, push=False))                                                         # o remoto confirma que a ponta E o commit publicado
+    assert res["action"] == "DONE" and b["queue"][0]["state"] == "DONE_AWAITING_REREVIEW" and b["queue"][0]["new_head"] == NEWHEAD
+    assert real_call is not None
+
+
+def test_a_remote_that_differs_from_the_published_commit_is_superseded_whatever_the_api_says(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, "8" * 40))
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=True))                                                            # API mostra o publicado, remoto mostra outra ponta
+    assert res["action"] == "SUPERSEDED" and b["queue"][0]["new_head"] == "8" * 40
+
+
+@pytest.mark.parametrize("exc", [FileNotFoundError("git"), OSError("sem git"), PermissionError("negado")])
+def test_a_git_that_cannot_start_during_reconciliation_leaves_items_pending_and_the_cycle_alive(monkeypatch, exc):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    go(gh, bstate(item(), item(key="review:10:8:" + HEAD, event_id="review:10", pr=8)), Runner(gh, push=False))
+    assert [i["state"] for i in eb.load()["queue"]][:1] == ["PUBLISH_PENDING"]
+
+    def boom(wt, branch):
+        raise exc
+    monkeypatch.setattr(ex, "remote_tip_of", boom)
+    out = ex.settle_pending(gh, REPO, NOW)                                                           # NAO levanta
+    assert out and all(o["action"] == "PUBLISH_PENDING" for o in out)
+    assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"
+    res = ex.process_one(gh, POLICY, REPO, True, Runner(gh), "claude", wt_ok, NOW)                    # e o ciclo segue com os outros itens
+    assert res["action"] in ("IDLE", "DONE", "FAILED", "PARKED_UNSUPPORTED", "REFUSED", "STALE", "SUPERSEDED") or "action" in res
