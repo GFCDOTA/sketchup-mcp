@@ -73,3 +73,13 @@ execução contínua autorizada separadamente ABERTO.
 
 **A FP-060 NÃO está concluída.** Pendências que impedem a conclusão: (1) proteção da `develop` (proprietário); (2) merge automático do ciclo completo; (3) registro da
 tarefa agendada e prova de reboot/soak; (4) drenagem dos PRs abertos até aprovação independente e merge.
+
+## 5. Evidências de integração (atualizado após a proteção da `develop`)
+
+| Item | Estado | Evidência verificável |
+|---|---|---|
+| Proteção da `develop` | FEITO (aplicada pelo proprietário) | leitura da API: 8 checks obrigatórios, `enforce_admins: true`, `required_approving_review_count: 1`, `dismiss_stale_reviews: true`, `required_conversation_resolution: true`, sem force-push nem exclusão |
+| Merge automático protegido de ponta a ponta | FEITO | PR #667 (disposable, Issue #666): `REVIEW_REQUESTED` → Codex real `CHANGES_REQUESTED` → correção do Claude real → nova revisão `APPROVED` no HEAD exato `0bfffe9` (9/9 checks) → `auto_merge` decidiu MERGE e mesclou (commit `7ea99dae`), com a proteção exigindo aprovação (lida, nunca alterada) |
+| Independência do revisor | FEITO | todas as revisões publicadas como `fmmodesto`, uma por HEAD; aprovações de SHAs antigos nunca reaproveitadas (`dismiss_stale_reviews`) |
+| Revisão dos PRs que têm testes de processos reais | BLOQUEADO (ambiental, decisão do proprietário) | dentro do AppContainer do revisor os testes que criam processos filhos (`default_runner`, kill duro, dois processos disputando o item, `InstanceLock` entre processos, `main` recusando segunda instância) estouram o prazo (6 falhas: `tests/test_event_executor.py::test_default_runner_kills_a_live_process_tree_as_soon_as_cancel_is_set` e 5 em `tests/test_event_executor_recovery.py`); o veredito vira `NEEDS_HUMAN` (`tests_passed: false`, `findings: 0`) e não é publicado. Os mesmos testes passam localmente e no CI (`pytest (py3.11/3.12)` e `windows process supervisor`). Afeta #643, #652, #640, #642 |
+| Tarefa agendada, reboot real, soak | ABERTO | dependem do #665 (empilhado no #648) |
