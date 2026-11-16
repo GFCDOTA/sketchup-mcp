@@ -8,10 +8,9 @@ from pathlib import Path
 
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[1] / "artifacts/review/fp060/mt06_e2e/2026-11-15/collect_evidence.py"
-spec = importlib.util.spec_from_file_location("collect_evidence_under_test", SCRIPT)
-ce = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(ce)
+SCRIPT = Path(__file__).resolve().parents[1] / "tools/validation/fp060_e2e_evidence.py"
+WRAPPER = Path(__file__).resolve().parents[1] / "artifacts/review/fp060/mt06_e2e/2026-11-15/collect_evidence.py"
+ce = importlib.import_module("tools.validation.fp060_e2e_evidence")
 
 SECRETS = ["ghp_" + "a" * 36, "github_pat_" + "B" * 40, "Bearer " + "x" * 30, "sk-ant-" + "c" * 30,
            "sk-proj-" + "d" * 40, "sk-" + "e" * 48, "sk-svcacct-" + "f" * 30, "xoxb-" + "1" * 12 + "-" + "g" * 12, "AIza" + "h" * 35,
@@ -218,3 +217,47 @@ def test_check_runs_with_the_same_name_are_both_preserved_with_id_origin_and_res
     out = ce.checks_of(runs)
     assert [(c["id"], c["nome"], c["estado"]) for c in out] == [(1, "pytest (py3.12)", "failure"), (2, "pytest (py3.12)", "success"), (3, "qg", "in_progress")]
     assert out[0]["origem"] == "github-actions" and out[2]["origem"] is None                                       # a falha NAO some atras do sucesso de mesmo nome
+
+
+# -- 5a revisao do Codex (#660): caminhos UNC; a logica vive em tools/ (o sandbox do revisor nao copia artifacts/) ------------------------------------------
+UNC = chr(92) * 2 + "servidor" + chr(92) + "compartilhamento" + chr(92) + "projeto" + chr(92) + "segredo.txt"
+
+
+@pytest.mark.parametrize("path", [UNC, "//servidor/compartilhamento/projeto/segredo.txt", chr(92) * 2 + "10.0.0.5" + chr(92) + "c$" + chr(92) + "x.db"])
+def test_unc_paths_are_removed_and_refused_by_the_final_check(path):
+    out = ce.scrub(f"erro em {path} fim")
+    assert "servidor" not in out and "compartilhamento" not in out and "10.0.0.5" not in out and "<caminho>" in out
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(f"x {path} y")
+
+
+def test_a_unc_path_in_a_collected_field_never_reaches_the_written_report(tmp_path, monkeypatch):
+    monkeypatch.setattr(ce, "collect_flow", lambda n, i: {"pr": n, "issue": i, "head_final": "a" * 40, "reviews": [], "commits": [{"mensagem": f"x {UNC} y"}]})
+    monkeypatch.setattr(ce, "read_store", lambda p: {"eventos": [{"error": UNC}], "transicoes": []})
+    out = tmp_path / "out"
+    assert ce.main([str(out), "A=1:2:" + (tmp_path / "s.db").as_posix()]) == 0
+    written = (out / "evidence.json").read_text(encoding="utf-8")
+    assert "servidor" not in written and "segredo.txt" not in written
+
+
+def test_urls_with_double_slashes_are_not_mistaken_for_unc_paths():
+    text = "https://github.com/o/r/pull/7 http://localhost:8080//x file:///dir ssh://git@host/r"
+    assert ce.scrub(text).startswith("https://github.com/o/r/pull/7 http://localhost:8080//x")
+
+
+def test_the_collector_logic_lives_in_tools_so_the_reviewers_sandbox_can_run_its_tests():
+    assert SCRIPT.is_file() and SCRIPT.parts[-3:] == ("tools", "validation", "fp060_e2e_evidence.py")
+    assert "artifacts" not in str(ce.__file__.replace(chr(92), "/")).split("/tools/")[-1]
+    # o sandbox copia a arvore SEM estas pastas: o modulo testado nao pode depender de nenhuma delas
+    for skipped in ("artifacts", "assets", "ops", "runs"):
+        assert f"{skipped}/" not in SCRIPT.read_text(encoding="utf-8").replace("artifacts/review/", "")
+
+
+@pytest.mark.skipif(not WRAPPER.exists(), reason="o sandbox de testes do revisor nao copia artifacts/: o invólucro so existe na arvore completa")
+def test_the_versioned_wrapper_is_a_thin_cli_over_the_same_module():
+    text = WRAPPER.read_text(encoding="utf-8")
+    assert "from tools.validation.fp060_e2e_evidence import main" in text and len(text.splitlines()) < 15
+    import subprocess
+    import sys
+    done = subprocess.run([sys.executable, str(WRAPPER)], capture_output=True, text=True, timeout=60)
+    assert done.returncode != 0 and "Uso:" in (done.stderr + done.stdout)                                         # sem argumentos mostra o uso do modulo
