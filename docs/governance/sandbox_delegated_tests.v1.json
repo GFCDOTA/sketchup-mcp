@@ -1,0 +1,291 @@
+{
+ "schema": 1,
+ "note": "Politica de delegacao sandbox->CI (FP-060 MT-03). SO node ids exatos; lida pelo revisor da BASE (origin/develop resolvido para SHA), nunca do PR. Alterar exige PR proprio com aprovacao humana (docs/governance).",
+ "ci": {
+  "workflow_path": ".github/workflows/delegated-tests.yml",
+  "workflow_blob_sha": "1462b0dfa58baaccb6f3c7e058b090abe2e8bf78",
+  "artifact_name": "delegated-test-results"
+ },
+ "delegated": [
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_a_local_head_that_does_not_descend_from_the_reviewed_sha_is_blocked",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_a_prior_commit_hiding_a_critical_file_is_blocked_by_the_guards",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_a_prior_local_commit_is_revalidated_and_republished_as_one_executor_commit",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_authorization_lost_while_checks_were_running_blocks_the_push",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_critical_path_blocks_before_any_commit_or_push",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_diff_over_the_ceiling_blocks_and_unstages",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_failing_checks_block_the_push",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_missing_revalidation_is_fail_closed",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_new_file_staged_during_tests_blocks_push",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_no_change_is_a_noop_and_pushes_nothing",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_pending_edit_is_committed_and_pushed_only_to_the_pr_branch",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_production_code_with_a_matching_test_runs_that_test_and_is_published",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_production_code_without_a_matching_test_is_blocked_not_published",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_push_refused_by_the_remote_is_an_error_and_a_retry_does_not_duplicate",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_remote_advancing_during_validation_is_caught_by_the_second_barrier",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_remote_head_that_advanced_blocks_even_if_authorization_still_looks_valid",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_run_checks_sanitizes_env_no_gh_token",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_staged_content_changed_during_tests_blocks_push",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_stale_authorization_before_staging_blocks_everything_and_stages_nothing",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_symlink_inside_a_prior_commit_is_blocked_by_the_raw_diff",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_unauthorized_types_and_test_helpers_are_refused_before_staging[dados.skp]",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_unauthorized_types_and_test_helpers_are_refused_before_staging[img.png]",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_unauthorized_types_and_test_helpers_are_refused_before_staging[tests/conftest.py]",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_unauthorized_types_and_test_helpers_are_refused_before_staging[tests/fixtures/x.json]",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_unauthorized_types_and_test_helpers_are_refused_before_staging[tools/ferramenta.exe]",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_unexpected_branch_with_no_remote_ref_is_stale",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_unrelated_untracked_files_are_never_swept_into_the_commit",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_deliver.py::test_what_is_pushed_is_exactly_one_executor_commit_on_top_of_the_reviewed_sha",
+   "reason": "git_unavailable_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  }
+ ]
+}

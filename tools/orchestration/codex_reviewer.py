@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 from typing import Callable
 
+from tools.orchestration import delegated_tests as dtests
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import event_executor as ex
 from tools.orchestration import sandboxed_tests as sb
@@ -209,7 +210,7 @@ def package_prompt(pkg: dict, evidence: dict) -> str:
         else:
             why = "binario" if text is None else "omitido por tamanho: leia na worktree"
             blocks.append(f"----- {path} sha256={meta['sha256']} ({why}) -----")
-    tests = json.dumps({k: evidence.get(k) for k in ("source", "isolation", "tests_passed", "selected", "uncovered", "summary")},
+    tests = json.dumps({k: evidence.get(k) for k in ("source", "isolation", "tests_passed", "selected", "uncovered", "summary", "delegated")},
                        ensure_ascii=False, indent=1)
     return PACKAGE_PROMPT.format(sha=pkg["sha"], base=pkg["base"], files="\n".join(blocks), tests=tests)
 
@@ -257,12 +258,15 @@ def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
     return sorted(sel), sorted(uncovered)
 
 
-def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S) -> dict:
+def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S, delegation: dtests.Delegation | None = None) -> dict:
     """Fail-closed: os testes do PR so rodam dentro de um AppContainer sem capacidades, com o token do processo e um canario
     provados NESTA execucao (`sandboxed_tests.run_pytest`). Qualquer falha — fora do Windows, sandbox que nao sobe, sonda
     reprovada, prova ausente — devolve ISOLATION_SKIPPED com `tests_passed=None` e nada roda fora do sandbox. Nao ha parametro
     nem fallback de contorno. Dependencias e timeout vem do coordenador; as dependencias, do pyproject do PROPRIO coordenador,
-    nunca do codigo sob revisao."""
+    nunca do codigo sob revisao.
+
+    `delegation` (MT-03): testes comprovadamente incompativeis com o AppContainer (git) sao DELEGADOS ao CI por node id EXATO, com a politica lida da BASE e a evidencia do CI
+    individual por teste, ligada ao HEAD exato (`delegated_tests`); todo o resto roda aqui. Sem politica/evidencia nada e dispensado."""
     sel, uncovered = select_tests(wt, files)
     base = {"source": RUNNER_SOURCE, "selected": sel, "uncovered": uncovered}
 
@@ -272,17 +276,27 @@ def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None,
     if not sel:
         return skipped("nenhum teste selecionado, nada a rodar em sandbox de SO")
     root = codex_dir() / "tests_sandbox"
+    planned = dtests.plan(delegation, sel) if delegation is not None else {"active": False, "ids": []}
     try:
         run = sb.run_pytest(wt, sel, root=root, ini_text="[pytest]\n", timeout=timeout, log_dir=root / "logs",
                             tag=re.sub(r"[^A-Za-z0-9_.-]", "_", wt.name)[:40],
-                            dists=sb.project_distributions(ex.repo_root() / "pyproject.toml"), skip=SANDBOX_SKIP)
+                            dists=sb.project_distributions(ex.repo_root() / "pyproject.toml"), skip=SANDBOX_SKIP, delegated=tuple(planned["ids"]))
     except sb.SandboxError as exc:
         return skipped(f"sandbox de SO indisponivel ({str(exc)[:200]}); escalar ao proprietario")
     if not sb.proves_isolation(run.facts):
         return skipped("isolamento de SO nao comprovado nesta execucao do sandbox; escalar ao proprietario")
     summary = f"timeout de {timeout}s" if run.timed_out else run.output[-1500:]
-    return {**base, "isolation": ISOLATION_OS, "tests_passed": (not run.timed_out) and run.exit_code == 0, "exit_code": run.exit_code,
-            "summary": summary, "sandbox": run.facts}
+    passed = (not run.timed_out) and run.exit_code == 0
+    extra: dict = {}
+    if delegation is not None and (planned["ids"] or planned.get("error") or planned.get("note")):
+        settled = dtests.settle(delegation, planned, run.facts) if planned["ids"] else {"ok": True, "reasons": [], "evidence": None}
+        extra["delegated"] = {"ids": planned["ids"], "evidence": settled["evidence"], "reasons": settled["reasons"] + ([planned["error"]] if planned.get("error") else [])
+                              + ([planned["note"]] if planned.get("note") else [])}
+        if planned["ids"] and not settled["ok"]:
+            passed = False                                                              # evidencia ausente/inconsistente: o que foi dispensado NAO fica provado
+            summary = "delegacao ao CI NAO comprovada (fail-closed): " + "; ".join(settled["reasons"]) + "\n" + summary
+    return {**base, "isolation": ISOLATION_OS, "tests_passed": passed, "exit_code": run.exit_code,
+            "summary": summary, "sandbox": run.facts, **extra}
 
 
 def check_untouched(wt: Path, sha: str, stage: str, run=ex.git) -> None:
@@ -408,7 +422,8 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
         record("running", pr=pr, sha=sha)
         wt = review_worktree(pr, sha, ex.repo_root())
         pkg = review_package(wt, base or "origin/develop", sha)
-        evidence = run_coordinator_tests(wt, list(pkg["files"]))
+        evidence = run_coordinator_tests(wt, list(pkg["files"]), delegation=dtests.Delegation(gh=gh, repo=repo, head_sha=sha, changed_files=list(pkg["files"]), root=ex.repo_root(),
+                                                                                         run_git=ex.git))
         check_untouched(wt, sha, "coordinator_tests")
         out_dir = tmp or codex_dir()
         out_dir.mkdir(parents=True, exist_ok=True)

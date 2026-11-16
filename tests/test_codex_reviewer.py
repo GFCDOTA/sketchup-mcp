@@ -110,7 +110,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(cr, "review_worktree", lambda pr, sha, root, run=None: tmp_path / "wt" / f"codex-pr{pr}")
     (tmp_path / "wt" / "codex-pr7").mkdir(parents=True)
     monkeypatch.setattr(cr, "review_package", lambda wt, base, sha: PKG)
-    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: dict(GREEN))
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files, **_kw: dict(GREEN))
     monkeypatch.setattr(cr, "check_untouched", lambda wt, sha, stage: None)
 
 
@@ -277,14 +277,14 @@ def test_excerpt_matches_across_crlf_checkouts():
 
 @pytest.mark.parametrize("evidence", [{"tests_passed": False, "summary": "1 failed"}, {"tests_passed": None, "summary": "nenhum teste"}])
 def test_approve_requires_green_tests_from_the_trusted_runner_not_from_the_model(tmp_path, monkeypatch, evidence):
-    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {"source": "coordinator_test_runner", "selected": [], **evidence})
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files, **_kw: {"source": "coordinator_test_runner", "selected": [], **evidence})
     run = Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"]))
     res = review(tmp_path, run=run)
     assert res["action"] == "REVIEW_BLOCKED" and "testes do coordenador nao verdes" in res["reason"]
 
 
 def test_request_changes_is_still_valid_when_trusted_tests_are_red(tmp_path, monkeypatch):
-    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {"source": "coordinator_test_runner", "selected": [], "tests_passed": False,
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files, **_kw: {"source": "coordinator_test_runner", "selected": [], "tests_passed": False,
                                                                    "summary": "1 failed"})
     assert review(tmp_path)["action"] == "DONE"
 
@@ -389,7 +389,7 @@ def test_select_tests_maps_changed_modules_to_their_tests_and_reports_uncovered_
     ({}, {"tests_reviewed": []}, "tests_reviewed vazio"),
 ])
 def test_approve_without_coverage_or_with_tests_not_actually_run_is_blocked(tmp_path, monkeypatch, evidence, v_kw, needle):
-    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {**GREEN, **evidence})
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files, **_kw: {**GREEN, **evidence})
     kw = {"verdict": "APPROVE", "findings": [], "tests_reviewed": ["tests/test_x.py"], **v_kw}
     if not kw["tests_reviewed"]:
         res = review(tmp_path, run=Run(verdict(**kw)))                              # validate_verdict ja barra APPROVE sem tests_reviewed
@@ -480,7 +480,7 @@ def test_skipped_tests_evidence_blocks_approve_publication_in_full_flow(tmp_path
     """No fluxo completo, APPROVE com testes skippados (sem sandbox) e bloqueado na publicacao."""
     skipped_ev = {"source": cr.RUNNER_SOURCE, "isolation": cr.ISOLATION_SKIPPED, "tests_passed": None,
                   "selected": ["tests/test_x.py"], "uncovered": [], "summary": "testes NAO executados: sem sandbox de SO"}
-    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: skipped_ev)
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files, **_kw: skipped_ev)
     monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
     published = []
     res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])),
@@ -558,7 +558,7 @@ def test_real_sandbox_reports_a_failing_test_as_failed_not_as_skipped(tmp_path):
 
 
 def test_a_valid_approve_with_proven_os_sandbox_evidence_is_published_exactly_once(tmp_path, monkeypatch):
-    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {**GREEN, "isolation": cr.ISOLATION_OS})
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files, **_kw: {**GREEN, "isolation": cr.ISOLATION_OS})
     monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
     published = []
     res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])), do_publish=True,
@@ -568,7 +568,7 @@ def test_a_valid_approve_with_proven_os_sandbox_evidence_is_published_exactly_on
 
 @pytest.mark.parametrize("isolation", [cr.ISOLATION_ENV, cr.ISOLATION_SKIPPED, "os_sandbox_claimed", None])
 def test_only_the_exact_os_sandbox_label_unlocks_the_publication_of_an_approve(tmp_path, monkeypatch, isolation):
-    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files: {**GREEN, "isolation": isolation})
+    monkeypatch.setattr(cr, "run_coordinator_tests", lambda wt, files, **_kw: {**GREEN, "isolation": isolation})
     monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
     published = []
     res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])), do_publish=True,
@@ -593,3 +593,15 @@ def test_child_env_is_the_only_env_used_by_codex_runner():
                 if isinstance(kw.value, ast.Attribute) and isinstance(kw.value.value, ast.Name):
                     assert not (kw.value.value.id == "os" and kw.value.attr == "environ"), \
                         f"{node.name}: subprocess.run na linha {child.lineno} passa os.environ diretamente"
+
+
+def test_the_review_hands_the_delegation_context_from_the_coordinator_never_from_the_pr_tree(tmp_path, monkeypatch):
+    seen = {}
+
+    def spy(wt, files, **kw):
+        seen.update(kw)
+        return dict(GREEN)
+    monkeypatch.setattr(cr, "run_coordinator_tests", spy)
+    review(tmp_path)
+    d = seen["delegation"]
+    assert d.repo == REPO and d.head_sha == SHA and d.changed_files == list(PKG["files"]) and d.root == cr.ex.repo_root()    # raiz = repositorio do COORDENADOR, nao a worktree do PR

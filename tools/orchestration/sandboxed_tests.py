@@ -58,7 +58,8 @@ _WINDOWS = os.name == "nt"
 BOOT_SOURCE = """import os
 import sys
 
-sys.path[:0] = [os.getcwd(), sys.argv[1]]
+# a pasta do COORDENADOR vem PRIMEIRO: o plugin de delegacao (`fp060_delegate`) nao pode ser sombreado por um arquivo de mesmo nome na arvore do PR
+sys.path[:0] = [os.path.dirname(os.path.abspath(__file__)), os.getcwd(), sys.argv[1]]
 
 # Python 3.12 no Windows trata `mkdir(mode=0o700)` como "so o usuario": a ACL do diretorio novo omite o perfil do AppContainer e
 # o proprio processo isolado perde acesso ao que acabou de criar (medido: `tmp_path` do pytest e `tempfile.mkdtemp` falham com
@@ -267,10 +268,12 @@ def _read(path: Path) -> str:
 
 
 def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeout: float, log_dir: Path, tag: str,
-               dists: tuple[str, ...] = ("pytest",), skip: tuple[str, ...] = ()) -> SandboxRun:
+               dists: tuple[str, ...] = ("pytest",), skip: tuple[str, ...] = (), delegated: tuple[str, ...] = ()) -> SandboxRun:
     """Roda `tests` (caminhos relativos a `tree`) sobre uma COPIA de `tree` dentro de um AppContainer sem capacidades.
     `dists` sao as distribuicoes (com as dependencias obrigatorias) levadas para o runtime; `skip`, entradas do nivel de cima
     da arvore que ficam de fora da copia.
+
+    `delegated`: node ids EXATOS (vindos da politica confiavel da base, `delegated_tests`) que um plugin do coordenador deseleciona por igualdade de node id; todo o resto roda.
 
     `root` recebe o workspace temporario e o canario (ambos removidos ao final); `log_dir` recebe stdout/stderr da sonda e
     dos testes, abertos pelo coordenador e herdados pelo processo — ficam fora do workspace. A arvore original nao e tocada.
@@ -290,7 +293,7 @@ def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeo
     canary, intruder = root / f"canary-{secret[:12]}.txt", root / f"canary-{secret[:12]}.written"
     canary.write_text(secret, encoding="ascii")
     try:
-        return _run(Path(tree), tests, root, ini_text, timeout, log_dir, tag, secret, canary, intruder, dists, skip)
+        return _run(Path(tree), tests, root, ini_text, timeout, log_dir, tag, secret, canary, intruder, dists, skip, delegated)
     except (AppContainerError, ps.ProcessSupervisorError) as exc:
         raise SandboxError(f"{type(exc).__name__}: {exc}") from exc
     except OSError as exc:                                   # sem o caminho: o motivo vai para evento, log e relatorio
@@ -302,7 +305,7 @@ def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeo
 
 
 def _run(tree: Path, tests: list[str], root: Path, ini_text: str, timeout: float, log_dir: Path, tag: str, secret: str,
-         canary: Path, intruder: Path, dists: tuple[str, ...], skip: tuple[str, ...]) -> SandboxRun:
+         canary: Path, intruder: Path, dists: tuple[str, ...], skip: tuple[str, ...], delegated: tuple[str, ...] = ()) -> SandboxRun:
     facts: dict = {}
     with AppContainerProfile() as profile:
         ws = create_workspace(profile, root)
@@ -324,17 +327,30 @@ def _run(tree: Path, tests: list[str], root: Path, ini_text: str, timeout: float
                 raise SandboxError("sonda de isolamento reprovada: " + "; ".join(gaps))
             facts.update({"is_appcontainer": True, "capabilities": 0, "canary": {"read_outside": "denied", "write_outside": "denied"}})
             tests_out, tests_err = log_dir / f"sandbox_{tag}_tests.out", log_dir / f"sandbox_{tag}_tests.err"
+            plugin_args: list[str] = []
+            report = coordinator / "delegation.json"
+            if delegated:
+                from tools.orchestration import (
+                    delegated_tests as dt,  # plugin escrito pelo COORDENADOR; a lista vem da politica da base, nunca do PR
+                )
+                (coordinator / f"{dt.PLUGIN_NAME}.py").write_text(dt.plugin_source(list(delegated), str(report)), encoding="utf-8")
+                plugin_args = ["-p", dt.PLUGIN_NAME]
             # `--confcutdir .`: sem ele o pytest faz stat no pai do workspace ao coletar, e o AppContainer nega (medido).
             # No Windows Server 2025 o AppContainer nao pode abrir o dispositivo nulo (medido no runner do CI; no Windows 11
             # pode), e o pytest o abre em dois pontos. `--capture=sys` evita a captura por descritor, que o abre para o stdin
             # (a saida do teste segue capturada); `--log-file` da ao plugin de logging um arquivo do workspace no lugar dele.
             # `--basetemp`: o `tmp_path` do pytest falha no diretorio temporario do AppContainer (WinError 5, medido na MT-04);
             # dentro do workspace ele funciona, e quase todo teste do repositorio usa `tmp_path`.
-            code = _contained(profile, [python, "-I", "-B", str(boot), str(runtime / "site"), *tests, "-q", "-p", "no:cacheprovider",
+            code = _contained(profile, [python, "-I", "-B", str(boot), str(runtime / "site"), *tests, "-q", "-p", "no:cacheprovider", *plugin_args,
                                         "--capture=sys", "--log-file", str(coordinator / "pytest.log"), "--basetemp", str(ws / "basetemp"), "-c", str(ini),
                                         "--rootdir", ".", "--confcutdir", "."],
                               work, env, tests_out, tests_err, timeout)
             output = (_read(tests_out) + _read(tests_err)).strip()
+            if delegated:
+                try:
+                    facts["delegation"] = json.loads(report.read_text(encoding="utf-8")) if report.exists() else None
+                except ValueError:
+                    facts["delegation"] = None                                           # relatorio ilegivel: o chamador trata como ausente (fail-closed)
         finally:
             facts["workspace_removed"] = _remove_workspace(ws, root)
     return SandboxRun(code, code is None, output, facts)
