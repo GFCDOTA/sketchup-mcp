@@ -344,7 +344,7 @@ def test_a_recovery_interrupted_after_quarantine_loses_nothing_and_the_next_run_
 
 def test_a_stale_pending_file_never_overrides_an_official_state(tmp_path):
     p = tmp_path / "event_bridge.json"
-    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "queue": [{"key": "antigo"}]})
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "queue": [{"key": "antigo"}], "recovery": {"at": "t", "quarantine": "event_bridge.json.corrupt-20260101000000-1-abcdef"}, "diagnostics": [{"at": "t", "message": "corrupcao original"}]})
     eb.save(state(3), p)
     assert eb.load(p)["queue"] == [{"key": "k3"}] and not eb._pending_path(p).exists()
 
@@ -450,7 +450,7 @@ def test_an_unreadable_pending_recovery_is_never_overwritten_and_the_cycle_fails
 
 def test_a_persistent_permission_error_on_the_pending_recovery_is_not_treated_as_absent(tmp_path, monkeypatch):
     p = tmp_path / "event_bridge.json"
-    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "diagnostics": [{"at": "t", "message": "corrupcao original"}]})
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "recovery": {"at": "t", "quarantine": "event_bridge.json.corrupt-20260101000000-1-abcdef"}, "diagnostics": [{"at": "t", "message": "corrupcao original"}]})
     monkeypatch.setattr(eb, "_read_bytes", lambda path, *a, **k: (_ for _ in ()).throw(PermissionError(13, "negado")) if Path(path).name.endswith(".recovered") else b"")
     with pytest.raises(eb.PendingUnreadable):
         eb.load(p)
@@ -519,7 +519,7 @@ def test_a_hostile_quarantine_name_in_the_pending_is_ignored_and_never_overwrite
     bystander = tmp_path / "execution_state.json"
     bystander.write_bytes(b'{"keep": true}')
     p.write_bytes(b"\x00" * 64)
-    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "recovery": {"at": "t", "quarantine": hostile}})
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "recovery": {"at": "t", "quarantine": hostile or "x"}, "diagnostics": [{"at": "t", "message": "d"}]})
     with es.locked(p):
         eb.recover_state(p)
     assert bystander.read_bytes() == b'{"keep": true}'
@@ -532,7 +532,7 @@ def test_an_existing_quarantine_with_the_recorded_name_is_not_overwritten(tmp_pa
     name = "event_bridge.json.corrupt-20260101000000-1-abcdef"
     (tmp_path / name).write_bytes(b"evidencia antiga")
     p.write_bytes(b"\x00" * 64)
-    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "recovery": {"at": "t", "quarantine": name}})
+    eb._write_state(eb._pending_path(p), {**eb.default_bridge_state(), "recovery": {"at": "t", "quarantine": name}, "diagnostics": [{"at": "t", "message": "d"}]})
     with es.locked(p):
         eb.recover_state(p)
     assert (tmp_path / name).read_bytes() == b"evidencia antiga" and len(quarantined(p)) == 2
@@ -559,3 +559,33 @@ def test_the_heartbeat_cancels_the_child_on_an_unexpected_exception_instead_of_d
     hb.start()
     hb.join(timeout=3)
     assert hb.cancel.is_set() and not hb.is_alive()
+
+
+@pytest.mark.parametrize("incomplete", [{}, {"queue": []}, {"recovery": {}}, {"recovery": {"quarantine": ""}, "diagnostics": [{"m": 1}]}, {"recovery": {"quarantine": "x"}},
+                                         {"recovery": "texto", "diagnostics": [{"m": 1}]}])
+def test_a_valid_but_incomplete_pending_is_unreadable_and_both_files_are_preserved(tmp_path, incomplete):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)
+    pending_file = eb._pending_path(p)
+    pending_file.write_text(json.dumps(incomplete), encoding="utf-8")
+    before = pending_file.read_bytes()
+    with pytest.raises(eb.BridgeStateCorrupt):                                                     # o oficial corrompido e o que `load` ve primeiro
+        eb.load(p)
+    with es.locked(p), pytest.raises(eb.PendingUnreadable):
+        eb.recover_state(p)
+    assert p.read_bytes() == b"\x00" * 64 and pending_file.read_bytes() == before and quarantined(p) == []
+    p.unlink()                                                                                     # recuperacao interrompida APOS mover o oficial: so o pendente existe
+    with pytest.raises(eb.PendingUnreadable):
+        eb.load(p)
+    assert pending_file.read_bytes() == before
+
+
+def test_a_complete_pending_still_restores_the_recovery_block_so_new_reviews_stay_blocked(tmp_path):
+    from tests.test_event_bridge import NOW, POLICY, fake_gh, review
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)
+    with es.locked(p):
+        eb.recover_state(p)
+    assert eb.load(p)["recovery"]["quarantine"].startswith("event_bridge.json.corrupt-")
+    eb.run_cycle(fake_gh(reviews=[review(9)]), POLICY, p, now=NOW)
+    assert [i["state"] for i in eb.load(p)["queue"]] == ["BLOCKED_RECOVERY"]                       # sem `release-recovery`, nada executa

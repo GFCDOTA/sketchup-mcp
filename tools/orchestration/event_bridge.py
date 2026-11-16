@@ -117,7 +117,13 @@ def _pending_state(p: Path) -> dict | None:
     if not q.exists():
         return None
     try:
-        return {**default_bridge_state(), **_read_state(q)}
+        state = {**default_bridge_state(), **_read_state(q)}
+        # um objeto JSON valido mas INCOMPLETO (ex.: `{}`) NAO e uma recuperacao: sem o marcador `recovery` e o diagnostico, promove-lo apagaria a trava de `BLOCKED_RECOVERY`
+        # (o proximo poll enfileiraria reviews como QUEUED sem `release-recovery`). Pendente de estrutura invalida e tratado como ilegivel: nada e movido nem sobrescrito.
+        recovery = state.get("recovery")
+        if not isinstance(recovery, dict) or not isinstance(recovery.get("quarantine"), str) or not recovery["quarantine"] or not state.get("diagnostics"):
+            raise ValueError("pendencia sem o marcador `recovery` (quarentena) ou sem diagnostico")
+        return state
     except FileNotFoundError:
         return None                                                  # concluida por outro processo entre exists() e a leitura
     except (ValueError, OSError) as exc:
