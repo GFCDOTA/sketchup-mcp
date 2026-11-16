@@ -702,7 +702,7 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
 
 def _dry_run_sqlite(gh: eb.Gh, policy: dict, repo: str, claude_bin: str, python: str | None) -> dict:
     """DRY_RUN com o SQLite como fonte: olha o proximo candidato e roda o preflight, mas NAO reivindica (um claim gasta uma tentativa)."""
-    item = sq.peek_next()
+    item = sq.peek_next(daily_cap=DAILY_CAP)
     if item is None:
         return {"action": "IDLE"}
     verdict, why, pr = preflight(item, gh, policy, repo)

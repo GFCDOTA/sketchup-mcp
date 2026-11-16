@@ -62,9 +62,18 @@ def is_sqlite() -> bool:
     return source() == "sqlite"
 
 
+BOOTSTRAP_ENV = "EXECUTOR_SQLITE_BOOTSTRAP"
+
+
 def _store() -> EventStore:
-    from tools.orchestration.store_factory import get_store
-    return get_store()                                                         # sem try/except: aqui o SQLite e a verdade, falhar e parar
+    """O EventStore PRIMARIO. Aqui o SQLite e a verdade, entao um arquivo AUSENTE (banco perdido ou caminho configurado errado) NUNCA vira um banco novo e vazio: o executor
+    recusaria silenciosamente tudo o que so existia nele e republicaria trabalho cujo resultado nao chegou ao espelho JSON. Criar do zero exige `EXECUTOR_SQLITE_BOOTSTRAP=1`,
+    explicito (primeiro cutover sem modo sombra); falhar aqui e parar (BLOCKED_STORE no executor)."""
+    from tools.orchestration import store_factory
+    if getattr(store_factory, "_STORE", None) is None and not store_factory.store_path().is_file() and os.environ.get(BOOTSTRAP_ENV) != "1":
+        raise FileNotFoundError(f"EventStore primario ausente ({store_factory.store_path().name}): nao crio um banco vazio como fonte da verdade "
+                                f"(restaure o arquivo, corrija o caminho ou defina {BOOTSTRAP_ENV}=1 de forma explicita)")
+    return store_factory.get_store()
 
 
 def _parse_iso(value: str) -> dt.datetime | None:
@@ -149,13 +158,16 @@ def claim_next(owner: str, now: dt.datetime | None = None, *, lease_s: float, da
     return None
 
 
-def peek_next() -> dict | None:
+def peek_next(daily_cap: int | None = None) -> dict | None:
     """O proximo candidato SEM reivindicar (DRY_RUN): um claim gastaria uma tentativa do evento. Reflete os candidatos do claim REAL: eventos PENDING disponiveis, eventos
     RUNNING com lease VENCIDO (o claim os recupera) e itens JSON QUEUED que ainda nao estao no SQLite (o claim os publica antes de reivindicar)."""
     store = _store()
     now = store.clock()
-    events = [e for e in store.events() if e["event_type"] == EVENT_TYPE]
-    live = {e["job_id"] for e in events if e["status"] == "RUNNING" and e["lease_until"] > now}
+    all_events = store.events()
+    events = [e for e in all_events if e["event_type"] == EVENT_TYPE]
+    if daily_cap is not None and _recent_claims(store, now) >= daily_cap:                       # o teto diario vale tambem para o que o claim real faria
+        return None
+    live = {e["job_id"] for e in all_events if e["status"] == "RUNNING" and e["lease_until"] > now}     # QUALQUER tipo: o claim real exclui o agregado com lease ativo
     for ev in events:
         claimable = ((ev["status"] == "PENDING" and ev["available_at"] <= now) or (ev["status"] == "RUNNING" and ev["lease_until"] <= now)) and ev["attempt"] < ev["max_attempts"]
         if claimable and ev["job_id"] not in live:

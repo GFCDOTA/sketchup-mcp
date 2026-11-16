@@ -587,3 +587,50 @@ def test_the_dry_run_ignores_an_exhausted_running_event_and_a_live_job(clock):
         store.claim((sq.EVENT_TYPE,), "morto", 60)
         clock.t += 600
     assert sq.peek_next() is None
+
+
+# -- 9a revisao do Codex (#636): banco primario ausente nunca vira um banco novo; o dry-run respeita teto e leases de qualquer tipo ------------------------
+def test_a_missing_primary_database_is_refused_instead_of_being_created_empty(tmp_path, monkeypatch):
+    sf.reset_store()
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "perdido" / "store.db"))
+    monkeypatch.delenv(sq.BOOTSTRAP_ENV, raising=False)
+    with pytest.raises(FileNotFoundError, match="nao crio um banco vazio"):
+        sq._store()
+    assert not (tmp_path / "perdido").exists()                                                    # nem o diretorio nem o arquivo foram criados
+    seed_json(item())
+    gh = FakeGh()
+    res = run_one(gh, Runner(gh))
+    assert res["action"] == "BLOCKED_STORE" and json_item(KEY)["state"] == "QUEUED"                # o executor para; nao age sobre um banco vazio
+
+
+def test_an_explicit_bootstrap_may_create_the_primary_database(tmp_path, monkeypatch):
+    sf.reset_store()
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "novo" / "store.db"))
+    monkeypatch.setenv(sq.BOOTSTRAP_ENV, "1")
+    assert sq._store().events() == [] and (tmp_path / "novo" / "store.db").is_file()
+
+
+def test_an_existing_primary_database_opens_normally(tmp_path, monkeypatch):
+    sf.reset_store()
+    path = tmp_path / "store.db"
+    sq.EventStore(path)
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(path))
+    assert sq._store().events() == []
+
+
+def test_the_dry_run_honours_the_daily_cap_like_the_real_claim(clock):
+    store = seed_both(item())
+    assert sq.peek_next(daily_cap=1) is not None
+    ev = store.claim((sq.EVENT_TYPE,), "o", 60)
+    store.fail(ev, "falha", retry_delay=0)
+    clock.t += 1
+    assert sq.claim_next("o2", None, lease_s=60, daily_cap=50) is not None                          # uma segunda reivindicacao hoje
+    assert sq.peek_next(daily_cap=2) is None                                                      # 2 claims nas ultimas 24 h: o teto de 2 fecha, como no claim real
+
+
+def test_the_dry_run_sees_a_live_lease_of_any_event_type_on_the_same_aggregate(clock):
+    store = seed_both(item())
+    store.publish("IMPLEMENT_REQUESTED", "implement:issue:1:abc", f"pr:{7}", {"issue": 1}, producer="intake")           # outro tipo, MESMO agregado (job_id pr:7)
+    other = store.claim(("IMPLEMENT_REQUESTED",), "w", 600, job_id="pr:7")
+    assert other is not None
+    assert sq.peek_next() is None and sq.claim_next("o", None, lease_s=60, daily_cap=50) is None  # o claim real tambem nao escolhe o agregado ocupado
