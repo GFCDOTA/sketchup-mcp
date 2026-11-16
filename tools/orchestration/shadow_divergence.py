@@ -227,6 +227,27 @@ def invalid_item(item: dict) -> str:
     return ""
 
 
+def daily_cap_divergence(bridge_path: Path, events: list[dict], now: float | None = None) -> list[Divergence]:
+    """O executor JSON nao escolhe nada apos `DAILY_CAP` execucoes nas ultimas 24 h (`runs` do estado do bridge); o EventStore nao conhece esse historico. Com o limite atingido e
+    um evento PENDING reivindicavel, o cutover deixaria o SQLite executar o que o JSON ainda estava proibido de executar: divergencia (bloqueia a autorizacao)."""
+    import datetime as dt
+
+    from tools.orchestration import event_executor as ex
+    try:
+        runs = json.loads(Path(bridge_path).read_bytes().decode("utf-8")).get("runs") or []
+    except (OSError, ValueError, AttributeError):
+        return []
+    t = time.time() if now is None else now
+    cutoff = dt.datetime.fromtimestamp(t - 24 * 3600, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    recent = [r for r in runs if isinstance(r, str) and r >= cutoff]
+    claimable = [e for e in events if e.get("event_type") == MIRROR_EVENT_TYPE and e.get("status") == "PENDING"
+                 and int(e.get("attempt") or 0) < int(e.get("max_attempts") if e.get("max_attempts") is not None else MAX_ATTEMPTS)]
+    if len(recent) >= ex.DAILY_CAP and claimable:
+        return [Divergence("DAILY_CAP", "queue", f"o JSON ja fez {len(recent)}/{ex.DAILY_CAP} execucoes nas ultimas 24 h (nao escolhe mais nada) e ha {len(claimable)} evento(s) PENDING "
+                                                  "reivindicavel(is): o cutover ultrapassaria o limite vigente")]
+    return []
+
+
 def executor_running() -> bool:
     """O executor JSON esta VIVO? Probe do lock de instancia (lock do SO mantido pela vida do processo). Sem executor parado nao ha barreira: um item lido como QUEUED pode virar
     RUNNING logo depois da leitura e o relatorio `ok` seria falso. O probe adquire e solta o lock; se nao adquire, ha um executor segurando a fila."""
@@ -238,6 +259,11 @@ def executor_running() -> bool:
         return True
     lock.release()
     return False
+
+
+def _bridge_path() -> Path:
+    from tools.orchestration import event_bridge as eb
+    return eb.bridge_path()
 
 
 def _load():
@@ -267,6 +293,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         found = collect(queue, store)
+        found += daily_cap_divergence(_bridge_path(), store.events())
     except (sqlite3.Error, ValueError) as exc:
         kind = "sqlite" if isinstance(exc, sqlite3.Error) else "fila"
         print(json.dumps({"ok": False, "error": f"{kind}: {exc}"[:200]}) if ns.json else f"erro: {kind}: {exc}")
@@ -274,8 +301,17 @@ def main(argv: list[str] | None = None) -> int:
     orphans = [d for d in found if d.code == "ORPHAN_IN_STORE"]
     errors = [d for d in found if d.code != "ORPHAN_IN_STORE"]
     ok = not errors and not (ns.strict and orphans)
+    if ns.allow_live_executor:
+        # inspecao AO VIVO nunca devolve o sinal de autorizacao do cutover: ok=false e exit 3 mesmo com dados concordantes (a automacao nao pode confundir os dois)
+        ok_inspection = ok
+        if ns.json:
+            print(json.dumps({"ok": False, "inspection_ok": ok_inspection, "authorizes_cutover": False, "divergences": [d.as_dict() for d in errors],
+                              "orphans": [d.as_dict() for d in orphans], "note": "executor ativo: este resultado NAO autoriza o cutover"}, ensure_ascii=True, indent=1))
+        else:
+            print(f"inspecao ao vivo: {len(errors)} divergencia(s); NAO autoriza o cutover (executor ativo)")
+        return 3
     if ns.json:
-        print(json.dumps({"ok": ok, "divergences": [d.as_dict() for d in errors], "orphans": [d.as_dict() for d in orphans],
+        print(json.dumps({"ok": ok, "authorizes_cutover": ok, "divergences": [d.as_dict() for d in errors], "orphans": [d.as_dict() for d in orphans],
                           "warnings": len(orphans), "checked": {"queue": len(queue), "events": len(store.events())}},
                          ensure_ascii=True, indent=1))
     else:

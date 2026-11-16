@@ -456,3 +456,38 @@ def test_the_live_executor_override_exists_for_inspection_only(tmp_path, monkeyp
         assert "EventStore ausente" in json.loads(capsys.readouterr().out)["error"]
     finally:
         holder.release()
+
+
+# -- 12a revisao do Codex (#634): inspecao ao vivo nao autoriza; limite diario do JSON ------------------------------------------------------------------
+def test_a_live_inspection_never_returns_the_authorization_signal_even_with_matching_data(tmp_path, monkeypatch, capsys):
+    from tools.orchestration import event_executor as ex
+    _env(tmp_path, monkeypatch)
+    (tmp_path / "bridge.json").write_text(json.dumps({"queue": []}), encoding="utf-8")
+    EventStore(tmp_path / "store.db")
+    holder = ex.InstanceLock(ex.instance_lock_path())
+    assert holder.acquire()
+    try:
+        assert sd.main(["--json", "--allow-live-executor"]) == 3
+        out = json.loads(capsys.readouterr().out)
+        assert out["ok"] is False and out["authorizes_cutover"] is False and out["inspection_ok"] is True
+    finally:
+        holder.release()
+    assert sd.main(["--json"]) == 0 and json.loads(capsys.readouterr().out)["authorizes_cutover"] is True        # sem executor ativo e dados concordantes: autoriza
+
+
+def test_the_json_daily_cap_blocks_the_cutover_while_a_pending_event_could_run_right_away(tmp_path):
+    import datetime as dt
+
+    from tools.orchestration import event_executor as ex
+    now = 2_000_000_000.0
+    stamp = dt.datetime.fromtimestamp(now - 3600, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    bridge = tmp_path / "bridge.json"
+    bridge.write_text(json.dumps({"queue": [], "runs": [stamp] * ex.DAILY_CAP}), encoding="utf-8")
+    found = sd.daily_cap_divergence(bridge, [event(status="PENDING")], now=now)
+    assert codes(found) == [("DAILY_CAP", "queue")]
+    assert sd.daily_cap_divergence(bridge, [event(status="DONE")], now=now) == []                                      # nada reivindicavel: sem divergencia
+    old = dt.datetime.fromtimestamp(now - 25 * 3600, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    bridge.write_text(json.dumps({"queue": [], "runs": [old] * ex.DAILY_CAP}), encoding="utf-8")
+    assert sd.daily_cap_divergence(bridge, [event(status="PENDING")], now=now) == []                                   # execucoes fora da janela de 24 h nao contam
+    bridge.write_text(json.dumps({"queue": [], "runs": [stamp] * (ex.DAILY_CAP - 1)}), encoding="utf-8")
+    assert sd.daily_cap_divergence(bridge, [event(status="PENDING")], now=now) == []                                   # abaixo do limite
