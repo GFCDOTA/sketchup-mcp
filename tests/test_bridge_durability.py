@@ -199,7 +199,7 @@ def test_the_new_content_is_flushed_to_disk_before_it_replaces_the_old_one(tmp_p
 
     eb.save(state(1), tmp_path / "event_bridge.json")
 
-    assert calls == ["fsync", "replace"]
+    assert calls == (["fsync", "replace"] if os.name == "nt" else ["fsync", "replace", "fsync"])      # POSIX: o diretorio tambem e sincronizado depois da troca
 
 
 def test_the_execution_state_file_uses_the_same_durable_write(tmp_path, monkeypatch):
@@ -210,7 +210,7 @@ def test_the_execution_state_file_uses_the_same_durable_write(tmp_path, monkeypa
 
     es.save(es.default_state(), tmp_path / "execution_state.json")
 
-    assert calls == ["fsync", "replace"]
+    assert calls == (["fsync", "replace"] if os.name == "nt" else ["fsync", "replace", "fsync"])      # POSIX: o diretorio tambem e sincronizado depois da troca
 
 
 def test_a_failed_replace_leaves_the_previous_file_intact(tmp_path, monkeypatch):

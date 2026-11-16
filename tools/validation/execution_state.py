@@ -56,8 +56,7 @@ def write_durable(p: Path, text: str) -> None:
         handle.write(text)
         handle.flush()
         os.fsync(handle.fileno())
-    replace_retry(tmp, p)
-    fsync_dir(p.parent)                                                  # a TROCA e uma alteracao do DIRETORIO: sem isto uma queda logo apos retornar pode desfaze-la (POSIX)
+    replace_retry(tmp, p)                                                # a TROCA e uma alteracao do DIRETORIO: `replace_retry` sincroniza o diretorio (POSIX) depois dela
 
 
 def fsync_dir(directory: Path) -> None:
