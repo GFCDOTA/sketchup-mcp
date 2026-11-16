@@ -7,17 +7,22 @@ NAO e um caminho paralelo: o estado dos checks e a aprovacao vem de `lifecycle` 
 criticos vem de `execution_guards` e a politica de revisores vem de `docs/governance/review_policy.json`. Este modulo so DECIDE e executa o merge;
 nao altera protecao de branch, workflow, guarda nem politica, e o GitHub continua recusando o merge se a protecao da branch nao estiver satisfeita.
 
-Decisao (cada linha tem teste; fail-closed: na duvida NAO mescla):
+Politica (autorizada pelo proprietario em 2026-11-15; NENHUMA label manual de autorizacao e exigida para merge tecnico ordinario):
   DISABLED  `AUTOMERGE_ENABLED` != 1, ou o interruptor `AUTOMERGE_DISABLED` existe ao lado do estado do bridge.
-  REFUSE    ha uma decisao que e HUMANA: PR de fork, rascunho, base != develop, autor que nao e o executor, sem as DUAS chaves de autorizacao
-            (label `automerge-ok` no PR e `executor-automerge` em toda Issue citada), label de decisao humana (seguranca, governanca, validacao visual,
-            `aprovação-humana-pendente`), Issue citada fechada/inexistente, PR sem `Refs #N`, diff que toca caminho critico (governanca, workflows,
-            `tools/validation/`, `tools/orchestration/`, geometria...), passa dos tetos, binario ou tipo fora de .py/.md/.txt/.json, checks reprovados,
-            revisor independente pedindo mudancas, conflito de merge.
+  REFUSE    ha uma decisao que e HUMANA ou uma falha dura: PR de fork, rascunho, base != develop, autor que nao e o executor, label de decisao humana
+            (seguranca, governanca, validacao visual, `aprovação-humana-pendente`, `blocked`...), Issue citada fechada/inexistente ou com decisao humana,
+            PR sem `Refs #N`, diff que toca GOVERNANCA (`.github/`, `docs/governance/`, `.claude/`, `docs/adr/`: sempre humano), binario ou tipo fora de
+            .py/.md/.txt/.json, checks reprovados, revisor independente pedindo mudancas, conflito de merge.
+            PR AUTONOMO (label `executor-ok`, entregue pelo executor) mantem os tetos de diff e recusa QUALQUER caminho critico.
+  REFORCADO PR tecnico (sem `executor-ok`) que toca caminho critico (`tools/orchestration/`, `tools/validation/`, geometria...) so e mesclado com
+            revisao REFORCADA: toda Issue citada com `gpt-review-required` e aprovacao do revisor independente com confianca HIGH vinda do
+            `codex_reviewer` (marcador do outbox, que so publica APPROVE com a prova de isolamento dos testes). Sem isso: WAIT.
   WAIT      nada decidido ainda: checks obrigatorios pendentes, sem aprovacao independente NO HEAD ATUAL, branch atrasada/bloqueada.
-  MERGE     todos os checks obrigatorios verdes NO HEAD EXATO, aprovacao de revisor independente (autorizado, nao-executor) vinculada a esse mesmo HEAD,
-            as duas chaves e nenhuma decisao humana pendente. O merge usa `--match-head-commit`: um commit novo entre a decisao e o merge o recusa.
-O que NAO e: nao liga o merge automatico em producao (o padrao e DISABLED), nao aprova nem revisa nada, nao decide visual."""
+  MERGE     todos os checks obrigatorios verdes NO HEAD EXATO, aprovacao de revisor independente (autorizado, nao-executor) vinculada a esse mesmo HEAD
+            e nenhuma decisao humana pendente. O merge usa `--match-head-commit`: um commit novo entre a decisao e o merge o recusa.
+Conversas pendentes: os reviews do Codex nao abrem threads; a exigencia de "conversas resolvidas" e da protecao da branch (configuracao do proprietario).
+O que NAO e: nao liga o merge automatico em producao (o padrao e DISABLED), nao aprova nem revisa nada, nao decide visual, nao usa `--auto`
+(o merge nativo agendado nao verifica a identidade do revisor nem os caminhos; aqui o merge so ocorre depois que tudo isso foi verificado)."""
 from __future__ import annotations
 
 import argparse
@@ -33,8 +38,10 @@ from tools.orchestration import execution_guards as guards
 from tools.orchestration import lifecycle
 
 ENABLE_ENV = "AUTOMERGE_ENABLED"
-PR_LABEL = "automerge-ok"
-ISSUE_LABEL = "executor-automerge"
+HARD_HUMAN_PREFIXES = (".github/", "docs/governance/", ".claude/", "docs/adr/")          # governanca: nunca automatico
+GPT_LABEL = "gpt-review-required"
+REINFORCED_BODY = re.compile(r"confianca\s+HIGH", re.I)
+OUTBOX_MARKER = re.compile(r"fp060-outbox-key:review:")
 HUMAN_LABELS = frozenset({"aprovação-humana-pendente", "aprovacao-humana-pendente", "needs-human", "human-decision", "bloqueio:human-decision",
                           "visual-review", "security", "governance", "blocked", "do-not-merge"})
 ALLOWED_SUFFIXES = (".py", ".md", ".txt", ".json")
@@ -100,14 +107,12 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
     if author not in policy.get("executor_logins", []):
         refuse.append(f"autor {author!r} nao e o executor: so PR do executor e mesclado automaticamente")
     labels = {str(n).casefold() for n in _names(pr.get("labels"))}
-    if PR_LABEL not in labels:
-        refuse.append(f"sem a label `{PR_LABEL}` (autorizacao humana por PR)")
-    if cfg.label not in labels:
-        refuse.append(f"sem a label `{cfg.label}`")
+    autonomous = cfg.label in labels                                           # PR entregue pelo executor: regras estritas
     human = sorted(labels & {x.casefold() for x in HUMAN_LABELS})
     if human:
         refuse.append(f"decisao humana pendente (label {', '.join(human)})")
     refs = sorted({int(n) for n in re.findall(r"\brefs?\s*:?\s*#(\d+)", pr.get("body") or "", re.I)})
+    issue_labels: dict[int, set[str]] = {}
     if not refs:
         refuse.append("PR sem `Refs #N`")
     for n in refs:
@@ -116,14 +121,18 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
             refuse.append(f"Issue #{n} inexistente ou fechada")
             continue
         il = {str(x).casefold() for x in _names(iss.get("labels"))}
-        if ISSUE_LABEL not in il:
-            refuse.append(f"Issue #{n} sem a label `{ISSUE_LABEL}` (autorizacao humana)")
+        issue_labels[n] = il
         if il & {x.casefold() for x in HUMAN_LABELS}:
             refuse.append(f"Issue #{n} tem decisao humana pendente ({', '.join(sorted(il & {x.casefold() for x in HUMAN_LABELS}))})")
     if not files:
         refuse.append("PR sem arquivos")
+    paths = [f.get("filename") for f in files] + [f["previous_filename"] for f in files if f.get("previous_filename")]
+    refuse += [f"governanca: {p} (decisao humana)" for p in paths if str(p).startswith(HARD_HUMAN_PREFIXES)]
     verdict = guards.evaluate_diff(numstat_from_files(files), cfg)
-    refuse += [f"{v['rule']}: {v['detail']}" for v in verdict.violations]
+    critical = [v for v in verdict.violations if v["rule"] == "path_critico"]
+    # PR autonomo: tetos e caminhos criticos valem integralmente. PR tecnico: so binario/ilegivel/invalido recusam; o caminho critico exige revisao reforcada.
+    soft = {"path_critico", "max_files", "max_lines"}
+    refuse += [f"{v['rule']}: {v['detail']}" for v in verdict.violations if autonomous or v["rule"] not in soft]
     refuse += [f"tipo nao permitido: {f.get('filename')}" for f in files if not str(f.get("filename", "")).lower().endswith(ALLOWED_SUFFIXES)]
     state = lifecycle.checks_state(runs)
     if state == "failed":
@@ -136,6 +145,13 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
     if refuse:
         return Decision("REFUSE", refuse)
     wait: list[str] = []
+    if critical and not autonomous:
+        no_gpt = [n for n in refs if GPT_LABEL not in issue_labels.get(n, set())]
+        if no_gpt:
+            wait.append(f"caminho critico: Issue(s) {', '.join('#%d' % n for n in no_gpt)} sem a label `{GPT_LABEL}` (revisao reforcada)")
+        body = (review or {}).get("body") or ""
+        if review is not None and not (REINFORCED_BODY.search(body) and OUTBOX_MARKER.search(body)):
+            wait.append("caminho critico: a aprovacao nao e a reforcada (confianca HIGH do codex_reviewer com marcador do outbox)")
     if state != "passed":
         wait.append(f"checks obrigatorios {state}")
     if review is None:
@@ -193,8 +209,9 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
     cfg = guards.load_config()
     out = []
     try:
+        executors = set(policy.get("executor_logins", []))
         candidates = [p for p in lifecycle._paginated_list(gh, f"repos/{repo}/pulls?state=open")
-                      if PR_LABEL in {str(n).casefold() for n in _names(p.get("labels"))}]
+                      if not p.get("draft") and (p.get("user") or {}).get("login") in executors]
     except (RuntimeError, OSError, ValueError, KeyError, TypeError) as exc:
         return {"enabled": True, "applied": apply, "prs": [{"pr": None, "code": "ERROR", "reasons": [f"listagem de PRs falhou: {type(exc).__name__}: {exc}"[:200]]}]}
     for cand in candidates:

@@ -17,7 +17,7 @@ ON = (True, "")
 def pr(**kw):
     base = {"number": 7, "state": "open", "merged": False, "draft": False, "mergeable_state": "clean", "user": {"login": "fmodesto30"},
             "base": {"ref": "develop", "repo": {"full_name": REPO}}, "head": {"sha": HEAD, "repo": {"full_name": REPO}},
-            "labels": [{"name": am.PR_LABEL}, {"name": CFG.label}], "body": "Refs #5\n"}
+            "labels": [], "body": "Refs #5\n"}
     return {**base, **kw}
 
 
@@ -34,11 +34,14 @@ def runs(bad=None, missing=None):
     return out
 
 
-def approval(state="APPROVED", user="fmmodesto", commit=HEAD):
-    return {"id": 11, "user": {"login": user}, "state": state, "commit_id": commit}
+STRONG = "Codex CLI (revisor independente) — HEAD x — confianca HIGH\n<!-- fp060-outbox-key:review:o/r#7:x:APPROVE -->"
 
 
-def issues(labels=(am.ISSUE_LABEL,), state="open"):
+def approval(state="APPROVED", user="fmmodesto", commit=HEAD, body="ok"):
+    return {"id": 11, "user": {"login": user}, "state": state, "commit_id": commit, "body": body}
+
+
+def issues(labels=(), state="open"):
     return {5: {"number": 5, "state": state, "labels": [{"name": n} for n in labels]}}
 
 
@@ -49,9 +52,10 @@ def decide(**kw):
 
 
 # ----------------------------------------------------------------------------------------------------------------- caminho feliz
-def test_all_gates_green_with_an_independent_approval_on_the_exact_head_merges():
+def test_all_gates_green_with_an_independent_approval_on_the_exact_head_merges_without_any_manual_label():
     d = decide()
     assert d.code == "MERGE" and HEAD[:12] in d.reasons[0]
+    assert decide(pr=pr(labels=[]), issues=issues(labels=())).code == "MERGE"                    # nenhuma label manual de autorizacao
 
 
 # ------------------------------------------------------------------------------------------------------------------- desligado
@@ -73,16 +77,14 @@ def test_it_is_disabled_by_default_and_by_the_kill_switch(tmp_path, monkeypatch)
     ("base", {"pr": pr(base={"ref": "main", "repo": {"full_name": REPO}})}, "base"),
     ("fork", {"pr": pr(head={"sha": HEAD, "repo": {"full_name": "x/fork"}})}, "fork"),
     ("author", {"pr": pr(user={"login": "outro"})}, "nao e o executor"),
-    ("no_pr_label", {"pr": pr(labels=[{"name": CFG.label}])}, am.PR_LABEL),
-    ("no_executor_label", {"pr": pr(labels=[{"name": am.PR_LABEL}])}, CFG.label),
-    ("human_label", {"pr": pr(labels=[{"name": am.PR_LABEL}, {"name": CFG.label}, {"name": "visual-review"}])}, "decisao humana"),
-    ("security_label", {"pr": pr(labels=[{"name": am.PR_LABEL}, {"name": CFG.label}, {"name": "security"}])}, "decisao humana"),
+    ("human_label", {"pr": pr(labels=[{"name": "visual-review"}])}, "decisao humana"),
+    ("security_label", {"pr": pr(labels=[{"name": "security"}])}, "decisao humana"),
+    ("governance_label", {"pr": pr(labels=[{"name": "governance"}])}, "decisao humana"),
     ("no_refs", {"pr": pr(body="sem referencia")}, "Refs"),
     ("issue_missing", {"issues": {}}, "inexistente"),
     ("issue_closed", {"issues": issues(state="closed")}, "inexistente ou fechada"),
-    ("issue_without_key", {"issues": issues(labels=())}, am.ISSUE_LABEL),
-    ("issue_human", {"issues": issues(labels=(am.ISSUE_LABEL, "aprovação-humana-pendente"))}, "decisao humana"),
-    ("issue_blocked", {"issues": issues(labels=(am.ISSUE_LABEL, "blocked"))}, "decisao humana"),
+    ("issue_human", {"issues": issues(labels=("aprovação-humana-pendente",))}, "decisao humana"),
+    ("issue_blocked", {"issues": issues(labels=("blocked",))}, "decisao humana"),
     ("no_files", {"files": []}, "sem arquivos"),
     ("conflict", {"pr": pr(mergeable_state="dirty")}, "conflito"),
     ("ci_failed", {"runs": runs(bad=sorted(lifecycle.MANDATORY_CHECKS)[0])}, "reprovados"),
@@ -93,29 +95,57 @@ def test_a_human_decision_or_a_hard_failure_refuses_the_merge(name, kw, needle):
     assert d.code == "REFUSE" and any(needle in r for r in d.reasons), d
 
 
-@pytest.mark.parametrize("path", [".github/workflows/ci.yml", "docs/governance/review_policy.json", "tools/orchestration/event_executor.py",
-                                   "tools/validation/backlog_gate.py", "core/plan_frame.py", "tools/rooms/capability_catalog.v1.json"])
-def test_a_diff_touching_a_critical_path_always_needs_a_human(path):
-    d = decide(files=files("docs/x.md", path))
+AUTONOMOUS = [{"name": CFG.label}]
+CRITICAL = ["tools/orchestration/event_executor.py", "tools/validation/backlog_gate.py", "core/plan_frame.py", "tools/rooms/capability_catalog.v1.json"]
+
+
+@pytest.mark.parametrize("path", [".github/workflows/ci.yml", "docs/governance/review_policy.json", ".claude/CLAUDE.md", "docs/adr/0001.md"])
+@pytest.mark.parametrize("labels", [[], AUTONOMOUS])
+def test_governance_paths_always_need_a_human_even_with_a_strong_approval(path, labels):
+    d = decide(pr=pr(labels=labels), files=files("docs/x.md", path), reviews=[approval(body=STRONG)], issues=issues(labels=(am.GPT_LABEL,)))
+    assert d.code == "REFUSE" and any("governanca" in r for r in d.reasons)
+
+
+@pytest.mark.parametrize("path", CRITICAL)
+def test_an_autonomous_executor_pr_never_merges_on_a_critical_path(path):
+    d = decide(pr=pr(labels=AUTONOMOUS), files=files("docs/x.md", path), reviews=[approval(body=STRONG)], issues=issues(labels=(am.GPT_LABEL,)))
     assert d.code == "REFUSE" and any("path_critico" in r for r in d.reasons)
 
 
-def test_the_diff_ceilings_binary_files_and_file_types_refuse():
-    assert any("max_files" in r for r in decide(files=files(*[f"docs/f{i}.md" for i in range(CFG.max_files + 1)])).reasons)
-    assert any("max_lines" in r for r in decide(files=files("docs/x.md", add=CFG.max_lines, rem=1)).reasons)
+@pytest.mark.parametrize("path", CRITICAL)
+def test_a_technical_pr_on_a_critical_path_needs_the_reinforced_review(path):
+    ok = decide(files=files("docs/x.md", path), reviews=[approval(body=STRONG)], issues=issues(labels=(am.GPT_LABEL,)))
+    assert ok.code == "MERGE"
+    plain_review = decide(files=files(path), reviews=[approval(body="ok")], issues=issues(labels=(am.GPT_LABEL,)))
+    assert plain_review.code == "WAIT" and any("reforcada" in r for r in plain_review.reasons)
+    only_high = decide(files=files(path), reviews=[approval(body="confianca HIGH sem marcador")], issues=issues(labels=(am.GPT_LABEL,)))
+    assert only_high.code == "WAIT"
+    no_label = decide(files=files(path), reviews=[approval(body=STRONG)], issues=issues(labels=()))
+    assert no_label.code == "WAIT" and any(am.GPT_LABEL in r for r in no_label.reasons)
+
+
+def test_the_diff_ceilings_bind_the_autonomous_pr_but_not_a_technical_one():
+    many = files(*[f"docs/f{i}.md" for i in range(CFG.max_files + 1)])
+    assert any("max_files" in r for r in decide(pr=pr(labels=AUTONOMOUS), files=many).reasons)
+    assert any("max_lines" in r for r in decide(pr=pr(labels=AUTONOMOUS), files=files("docs/x.md", add=CFG.max_lines, rem=1)).reasons)
+    assert decide(files=many).code == "MERGE" and decide(files=files("docs/x.md", add=5000, rem=1)).code == "MERGE"
+
+
+def test_binary_files_and_file_types_refuse_for_every_pr():
     binary = [{"filename": "docs/a.png", "additions": 0, "deletions": 0, "changes": 0, "status": "added"}]
     d = decide(files=binary)
     assert d.code == "REFUSE" and any("binario" in r for r in d.reasons) and any("tipo nao permitido" in r for r in d.reasons)
     assert any("tipo nao permitido" in r for r in decide(files=files("artifacts/x.skp")).reasons)
+    assert any("tipo nao permitido" in r for r in decide(pr=pr(labels=AUTONOMOUS), files=files("artifacts/x.skp")).reasons)
 
 
-def test_a_rename_out_of_a_critical_path_still_counts_the_origin():
+def test_a_rename_out_of_a_governance_path_still_counts_the_origin():
     renamed = [{"filename": "docs/ok.md", "previous_filename": ".github/workflows/ci.yml", "additions": 0, "deletions": 0, "changes": 0, "patch": "", "status": "renamed"}]
-    assert any("path_critico" in r for r in decide(files=renamed).reasons)
+    assert any("governanca" in r for r in decide(files=renamed).reasons)
 
 
 def test_every_reason_is_reported_not_only_the_first():
-    d = decide(pr=pr(draft=True, labels=[]), issues={})
+    d = decide(pr=pr(draft=True, user={"login": "outro"}, labels=[{"name": "security"}]), issues={})
     assert d.code == "REFUSE" and len(d.reasons) >= 4
 
 
@@ -143,8 +173,9 @@ def test_an_approval_followed_by_a_change_request_on_the_same_head_does_not_merg
 
 # ------------------------------------------------------------------------------------------------------------------------ ciclo
 class Gh:
-    def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, **overrides):
+    def __init__(self, head=HEAD, fresh_head=None, boom=None, labelled=True, draft=False, **overrides):
         self.head, self.fresh_head, self.boom, self.labelled, self.overrides, self.calls = head, fresh_head, boom, labelled, overrides, []
+        self.draft = draft
         self.pulls = 0
 
     def __call__(self, path):
@@ -152,7 +183,7 @@ class Gh:
         if self.boom:
             raise self.boom
         if path.startswith(f"repos/{REPO}/pulls?state=open"):
-            return [{"number": 7, "labels": [{"name": am.PR_LABEL}] if self.labelled else []}]
+            return [{"number": 7, "draft": self.draft, "user": {"login": "fmodesto30" if self.labelled else "outro"}, "labels": []}]
         if path == f"repos/{REPO}/pulls/7":
             self.pulls += 1
             sha = self.fresh_head if (self.fresh_head and self.pulls > 1) else self.head
@@ -160,11 +191,11 @@ class Gh:
         if path.startswith(f"repos/{REPO}/pulls/7/files"):
             return files()
         if path.startswith(f"repos/{REPO}/pulls/7/reviews"):
-            return [approval(commit=self.head)]
+            return [approval(commit=self.head, body=STRONG)]
         if "check-runs" in path:
             return {"total_count": len(lifecycle.MANDATORY_CHECKS), "check_runs": runs()}
         if path == f"repos/{REPO}/issues/5":
-            return issues()[5]
+            return issues(labels=(am.GPT_LABEL,))[5]
         raise AssertionError(path)
 
 
@@ -228,9 +259,10 @@ def test_a_failure_while_gathering_the_facts_of_one_pr_is_an_error_row_and_never
     assert out["prs"][0]["code"] == "ERROR" and runner.calls == []
 
 
-def test_only_prs_with_the_automerge_label_are_candidates():
-    gh, runner = Gh(labelled=False), Runner()
-    assert am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)["prs"] == [] and runner.calls == []
+def test_only_open_non_draft_prs_of_the_executor_are_candidates():
+    for gh in (Gh(labelled=False), Gh(draft=True)):
+        runner = Runner()
+        assert am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON)["prs"] == [] and runner.calls == []
 
 
 def test_merge_refuses_a_head_that_is_not_a_full_sha():
