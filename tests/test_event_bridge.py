@@ -217,3 +217,15 @@ def test_launcher_contract_checks_the_login_not_only_that_gh_is_authenticated():
     ps1 = (Path(__file__).resolve().parents[1] / "tools/orchestration/run_event_bridge.ps1").read_text(encoding="utf-8")
     assert "api user" in ps1 and "ExpectedLogin" in ps1 and "fmodesto30" in ps1 and "exit 3" in ps1
     assert "--execute" in ps1 and "if ($Execute)" in ps1                    # executar so com -Execute explicito
+
+
+def test_gh_json_decodes_the_gh_output_as_utf8_regardless_of_the_locale(monkeypatch):
+    """Regressao (E2E real da MT-06): sem `encoding`, bytes de UTF-8 invalidos em cp1252 (0x81) derrubavam a leitura e `stdout` voltava `None`."""
+    seen = {}
+
+    def fake_run(argv, **kw):
+        seen.update(kw)
+        return type("P", (), {"returncode": 0, "stdout": '[{"body": "travessao \u2014 e emoji \U0001F916"}]', "stderr": ""})()
+    monkeypatch.setattr(eb.subprocess, "run", fake_run)
+    out = eb.gh_json("repos/o/r/pulls")
+    assert out[0]["body"].endswith("\U0001F916") and seen["encoding"] == "utf-8" and seen["errors"] == "replace"
