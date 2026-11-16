@@ -14,7 +14,7 @@ declarado concluído sem evidência verificável; a fonte de verdade do estado v
 | P3 Claude Worker | PARCIAL | executor e entrega guardada em `develop`; confirmação do HEAD publicado / publicação pendente (#652), laço resiliente (#640), worker de implementação e intake (#646/#641/#636) estão em PR com achados do revisor independente em tratamento |
 | P4 Codex Worker + publisher | EM PR | `codex_reviewer`, Outbox e destino GitHub (#630, #632, #618, #619); publicação como `fmmodesto` comprovada em revisões reais (ver §3); pilha depende da atualização com `develop` |
 | P5 Event Bridge GitHub | PARCIAL | bridge em `develop`; durabilidade do estado e recuperação (#635), divergência JSON×SQLite (#634), reconciliação do store (#642) em PR |
-| P6 Closed loop E2E real | PARCIAL | ver §3: ciclo real até o APPROVE comprovado; merge automático aguarda a proteção da branch |
+| P6 Closed loop E2E real | FEITO | ver §3 e §5: ciclo real completo no #667, do pedido de revisão ao merge automático protegido (commit `7ea99dae`) |
 | P7 Operação contínua | ABERTO | tarefa agendada (instalador pronto no #665), reboot real, soak de 2 jobs e Agent Bar com o store (#663) pendentes de merge/registro; **CONTINUOUS só com autorização explícita** |
 
 ## 2. Matriz de testes (§9)
@@ -36,7 +36,7 @@ declarado concluído sem evidência verificável; a fonte de verdade do estado v
 | Nenhuma tarefa (workers ociosos) | PARCIAL | sem pedido pronto o pool/laço ficam ociosos sem gastar cota: `test_an_event_waiting_for_checks_is_not_polled_again_inside_the_recheck_window` e `test_the_pool_default_idle_is_long_enough_not_to_burn_the_quota` (`tests/test_pr_lifecycle.py`, no #665); observado no laço real (ciclos sem evento). Falta o soak de 2 jobs sequenciais com a tarefa registrada |
 | Duas tarefas Ready (ordem do scheduler) | FEITO | `test_the_oldest_ready_request_goes_first_and_a_waiting_one_does_not_block_the_queue` (fila de revisão, #665) e a ordem do agendador de tarefas (`test_decide_skips_tasks_claimed_by_another_execution_and_resumes_its_own_first`, `tests/test_fp057_p2_scheduler.py`) |
 | Publisher indisponível | FEITO | outbox recuperável; reconciliação pelo marcador |
-| PR protegido | BLOQUEADO | `auto_merge` só mescla com a proteção exigindo aprovação independente (lida, nunca alterada); a proteção é configuração do proprietário |
+| PR protegido | FEITO | proteção da `develop` aplicada pelo proprietário; `auto_merge` só mescla com ela exigindo aprovação independente (lida, nunca alterada); comprovado no #667 (§5) |
 | Kill switch | EM PR | `AUTOMERGE_DISABLED` e `PR_LIFECYCLE_DISABLED` (#648/#665) |
 | Reinício Windows | ABERTO | recuperação por morte/reinício de processos validada; reboot real depende de registrar a tarefa |
 | Falha permanente | FEITO | DLQ + `JOB_FAILED` |
@@ -48,7 +48,7 @@ Fonte dos critérios A1–A11: `docs/specs/FP-060_event_driven_agent_orchestrati
 
 Prova real (PR descartável #667, Issue #666), sem intervenção humana entre as etapas: PR aberto em rascunho -> rascunho finalizado e `fmmodesto` solicitado pelo
 `pr_lifecycle` -> `REVIEW_REQUESTED` no EventStore -> Codex real (`CHANGES_REQUESTED` no HEAD `c667f07`) -> executor com Claude real corrige e publica `0bfffe9` -> novo
-HEAD revisado de forma independente (`APPROVED`) com 9/9 checks. A decisão do `auto_merge` para esse HEAD é WAIT **somente** pela proteção da `develop` (ver abaixo).
+HEAD revisado de forma independente (`APPROVED`) com 9/9 checks. A decisão do `auto_merge` ficou em WAIT **somente** até a proteção da `develop` ser aplicada; depois disso decidiu MERGE e mesclou (§5).
 
 | # | Critério | Estado |
 |---|---|---|
@@ -57,22 +57,23 @@ HEAD revisado de forma independente (`APPROVED`) com 9/9 checks. A decisão do `
 | A3 | worker espera checks e dispara sessão real do Codex | FEITO (execução real, até 3 em paralelo) |
 | A4 | parecer publicado como `fmmodesto` via Outbox | FEITO (execução real) |
 | A5 | REQUEST_CHANGES aciona o Claude; novo HEAD gera nova revisão | FEITO no #667 (PR `executor-ok` fora de caminho crítico); PRs do próprio FP-060 tocam caminhos críticos e são corrigidos na sessão do desenvolvedor, por desenho das guardas |
-| A6 | APPROVE libera o merge automático protegido | BLOQUEADO: depende da proteção da `develop` exigir 1 aprovação, descartar aprovações antigas e resolver conversas (script `configure_branch_protection.ps1`, executado pelo proprietário) |
+| A6 | APPROVE libera o merge automático protegido | FEITO: proteção aplicada pelo proprietário (1 aprovação, aprovações antigas descartadas, conversas resolvidas, `enforce_admins`); #667 mesclado pelo `auto_merge` (§5) |
 | A7 | reconciliação periódica recupera pedidos perdidos e PRs antigos | PARCIAL: a recuperação de pedidos perdidos e de PRs antigos foi comprovada em execução real, mas o critério exige ciclo de **30 s** e o laço roda a **60 s** (cota REST de 5000/h esgotada uma vez com 30 s e 3 listagens por ciclo). Pendência explícita: alinhar a frequência (cache da listagem por HEAD já reduz o custo; reavaliar 30 s com a tarefa registrada) ou alterar o critério na SPEC com aprovação |
 | A8 | recuperação após reinício do computador | ABERTO (tarefa agendada ainda não registrada) |
 | A9 | Project Board sincronizado | FEITO (`backlog_reconcile --apply`, 16 movimentos validados) |
 | A10 | independente da tarefa agendada externa | FEITO (nenhum passo lê essa tarefa) |
-| A11 | E2E real sem mocks | PARCIAL: ciclo comprovado até o APPROVE; falta o merge automático |
+| A11 | E2E real sem mocks | FEITO: ciclo completo no #667, até o merge automático protegido (`7ea99dae`) |
 
 ## 4. Definition of Done (§12)
 
 PoC reconciliada FEITO · Event Store FEITO · estados legados migrados FEITO · Claude Worker PARCIAL · Codex Worker EM PR · publisher independente EM PR · SQLite com
-retry/outbox/DLQ FEITO · fencing e cancelamento FEITO · Event Bridge FEITO/PARCIAL · reviews no HEAD certo FEITO · closed loop E2E PARCIAL · Agent Bar com o store EM PR (#663) ·
+retry/outbox/DLQ FEITO · fencing e cancelamento FEITO · Event Bridge FEITO/PARCIAL · reviews no HEAD certo FEITO · closed loop E2E FEITO (#667) · Agent Bar com o store EM PR (#663) ·
 recuperação pós-reinício ABERTO · Quality Guardian e CI verdes FEITO nos PRs abertos · **zero violação de branch protection FEITO (nenhuma proteção foi alterada ou contornada)** ·
 execução contínua autorizada separadamente ABERTO.
 
-**A FP-060 NÃO está concluída.** Pendências que impedem a conclusão: (1) proteção da `develop` (proprietário); (2) merge automático do ciclo completo; (3) registro da
-tarefa agendada e prova de reboot/soak; (4) drenagem dos PRs abertos até aprovação independente e merge.
+**A FP-060 NÃO está concluída.** A proteção da `develop` e o merge automático do ciclo completo já estão FEITOS (§5). Pendências que ainda impedem a conclusão:
+(1) registro da tarefa agendada e prova de reboot e soak (A8, P7); (2) frequência da reconciliação (A7); (3) drenagem dos PRs abertos até aprovação independente e
+merge, incluindo o desbloqueio do revisor para os PRs que tocam o executor (#669 e #670).
 
 ## 5. Evidências de integração (atualizado após a proteção da `develop`)
 
@@ -81,5 +82,5 @@ tarefa agendada e prova de reboot/soak; (4) drenagem dos PRs abertos até aprova
 | Proteção da `develop` | FEITO (aplicada pelo proprietário) | leitura da API: 8 checks obrigatórios, `enforce_admins: true`, `required_approving_review_count: 1`, `dismiss_stale_reviews: true`, `required_conversation_resolution: true`, sem force-push nem exclusão |
 | Merge automático protegido de ponta a ponta | FEITO | PR #667 (disposable, Issue #666): `REVIEW_REQUESTED` → Codex real `CHANGES_REQUESTED` → correção do Claude real → nova revisão `APPROVED` no HEAD exato `0bfffe9` (9/9 checks) → `auto_merge` decidiu MERGE e mesclou (commit `7ea99dae`), com a proteção exigindo aprovação (lida, nunca alterada) |
 | Independência do revisor | FEITO | todas as revisões publicadas como `fmmodesto`, uma por HEAD; aprovações de SHAs antigos nunca reaproveitadas (`dismiss_stale_reviews`) |
-| Revisão dos PRs que têm testes de processos reais | EM CORREÇÃO (#669) | causa raiz reproduzida DENTRO do AppContainer: `taskkill` falha lá (`ERRO: Nome de usuário ou senha incorretos`, rc 1) e deixava o filho vivo, então os testes de kill/cancelamento estouravam o prazo (6 falhas, 173 s); 2 testes de `main()` dependiam de `git` (ausente do sandbox) por não isolar o caminho do estado; `WATCH_PID` vazava entre testes. Correção sem ampliar permissões: `kill_tree` por snapshot de processos + `TerminateProcess` (taskkill só de reserva). Resultado no sandbox: `test_event_executor.py` + `test_event_executor_recovery.py` + `test_event_bridge.py` = 123 passed, exit 0, 4,8 s (antes: `NEEDS_HUMAN`). Regressão de isolamento: 82 passed. Os PRs afetados (#643, #652, #640, #642) precisam incorporar o #669 depois do merge |
+| Revisão dos PRs que têm testes de processos reais | EM CORREÇÃO (#669) | causa raiz reproduzida DENTRO do AppContainer: `taskkill` falha lá (`ERRO: Nome de usuário ou senha incorretos`, rc 1) e deixava o filho vivo, então os testes de kill/cancelamento estouravam o prazo (6 falhas, 173 s); 2 testes de `main()` dependiam de `git` (ausente do sandbox) por não isolar o caminho do estado; `WATCH_PID` vazava entre testes. Correção sem ampliar permissões (versão atual do #669): o filho nasce suspenso dentro de um Job Object kill-on-close, a árvore é encerrada pelo job e o encerramento é confirmado (taskkill só para Popen comum); contenção não confirmada trava o PR inteiro. Os 28 testes de `git`, que não rodam no AppContainer, vão para a delegação ao CI do #670 (workflow aprovado pelo proprietário em 2026-11-16). Resultado no sandbox: `test_event_executor.py` + `test_event_executor_recovery.py` + `test_event_bridge.py` = 123 passed, exit 0, 4,8 s (antes: `NEEDS_HUMAN`). Regressão de isolamento: 82 passed. Os PRs afetados (#643, #652, #640, #642) precisam incorporar o #669 depois do merge |
 | Tarefa agendada, reboot real, soak | ABERTO | dependem do #665 (empilhado no #648) |
