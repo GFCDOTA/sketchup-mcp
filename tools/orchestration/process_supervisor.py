@@ -108,8 +108,16 @@ if os.name == "nt":
     _process_next = _bind("Process32NextW", [_HANDLE, ctypes.POINTER(_ProcessEntry)], wintypes.BOOL)
     _open_process = _bind("OpenProcess", [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD], _HANDLE)
     _process_times = _bind("GetProcessTimes", [_HANDLE] + [ctypes.POINTER(_FileTime)] * 4, wintypes.BOOL)
-    _terminate_process = _bind("TerminateProcess", [_HANDLE, wintypes.UINT], wintypes.BOOL)
     _assign_job = _bind("AssignProcessToJobObject", [_HANDLE, _HANDLE], wintypes.BOOL)
+    _query_job = _bind("QueryInformationJobObject", [_HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD, ctypes.c_void_p], wintypes.BOOL)
+
+    class _JobPidList(ctypes.Structure):
+        _fields_ = [("NumberOfAssignedProcesses", wintypes.DWORD), ("NumberOfProcessIdsInList", wintypes.DWORD), ("ProcessIdList", ctypes.c_size_t * 512)]
+
+    class _JobAccounting(ctypes.Structure):
+        _fields_ = [("TotalUserTime", ctypes.c_int64), ("TotalKernelTime", ctypes.c_int64), ("ThisPeriodTotalUserTime", ctypes.c_int64),
+                    ("ThisPeriodTotalKernelTime", ctypes.c_int64), ("TotalPageFaultCount", wintypes.DWORD), ("TotalProcesses", wintypes.DWORD),
+                    ("ActiveProcesses", wintypes.DWORD), ("TotalTerminatedProcesses", wintypes.DWORD)]
     _ntdll = ctypes.WinDLL("ntdll")
     _nt_resume = _ntdll.NtResumeProcess
     _nt_resume.argtypes, _nt_resume.restype = [_HANDLE], ctypes.c_long
@@ -155,51 +163,16 @@ def _process_table() -> list[tuple[int, int]]:
         _close(snapshot)
 
 
-def _handle_creation_time(handle) -> float | None:
-    created, exited, kernel, user = _FileTime(), _FileTime(), _FileTime(), _FileTime()
-    if not _process_times(handle, ctypes.byref(created), ctypes.byref(exited), ctypes.byref(kernel), ctypes.byref(user)):
-        return None
-    return ((created.high << 32) | created.low) / 1e7 - 11644473600.0
-
-
 def _creation_time(pid: int) -> float | None:
     """Creation time (epoch seconds) of a live process; None when it cannot be read."""
     handle = _open_process(0x1000, False, pid)              # PROCESS_QUERY_LIMITED_INFORMATION
     if not handle:
         return None
     try:
-        return _handle_creation_time(handle)
-    finally:
-        _close(handle)
-
-
-creation_time = _creation_time
-
-
-def tree_identities(root_pid: int, since: float | None) -> list[tuple[int, float]]:
-    """(pid, creation time) of every live DESCENDANT of root_pid (never the root itself). The pair is the process identity: a PID alone can be reused by an unrelated
-    process, the pair cannot (see `terminate_identity`)."""
-    out = []
-    for pid in tree_pids(root_pid, since=since):
-        if pid == root_pid:
-            continue
-        created = _creation_time(pid)
-        if created is not None:
-            out.append((pid, created))
-    return out
-
-
-def terminate_identity(pid: int, created: float) -> bool:
-    """TerminateProcess on the process that has THIS pid AND THIS creation time, through a single handle (the handle pins the process object, so the check and the kill
-    cannot hit different processes). A different process (reused PID), a process that already exited or one we cannot open is left alone: False."""
-    handle = _open_process(0x1001, False, pid)              # PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_TERMINATE
-    if not handle:
-        return False
-    try:
-        seen = _handle_creation_time(handle)
-        if seen is None or seen != created:
-            return False
-        return bool(_terminate_process(handle, 1))
+        created, exited, kernel, user = _FileTime(), _FileTime(), _FileTime(), _FileTime()
+        if not _process_times(handle, ctypes.byref(created), ctypes.byref(exited), ctypes.byref(kernel), ctypes.byref(user)):
+            return None
+        return ((created.high << 32) | created.low) / 1e7 - 11644473600.0
     finally:
         _close(handle)
 
@@ -232,6 +205,20 @@ def tree_pids(root_pid: int, since: float | None = None) -> list[int]:
     return sorted(found)
 
 
+def wait_process_exit(pid: int, timeout: float = 5.0) -> bool:
+    """True once the process `pid` is gone (or never existed), False if it is still running after `timeout`. Waits on a SYNCHRONIZE handle, so it does not race the kernel's
+    teardown of a terminated process (its PID and its locks vanish together with the signal)."""
+    if os.name != "nt":
+        raise ProcessSupervisorError("Windows is required")
+    handle = _open_process(0x00100000, False, int(pid))
+    if not handle:
+        return True
+    try:
+        return _wait(handle, int(timeout * 1000)) == 0
+    finally:
+        _close(handle)
+
+
 class ProcessJob:
     """A kill-on-close Job Object for a process the CALLER already created SUSPENDED (`creationflags=CREATE_SUSPENDED`).
 
@@ -261,6 +248,30 @@ class ProcessJob:
     def terminate(self) -> None:
         if self._job and not _terminate_job(self._job, 1):
             raise _error("TerminateJobObject")
+
+    def active_processes(self) -> int:
+        """Processes still alive in the job (TerminateJobObject is asynchronous: members may linger for a moment)."""
+        info = _JobAccounting()
+        if not self._job or not _query_job(self._job, 1, ctypes.byref(info), ctypes.sizeof(info), None):   # JobObjectBasicAccountingInformation
+            raise _error("QueryInformationJobObject")
+        return info.ActiveProcesses
+
+    def process_ids(self) -> list[int]:
+        """PIDs of the processes currently in the job (up to 512)."""
+        info = _JobPidList()
+        if not self._job or not _query_job(self._job, 3, ctypes.byref(info), ctypes.sizeof(info), None):   # JobObjectBasicProcessIdList
+            raise _error("QueryInformationJobObject(pid list)")
+        return [int(info.ProcessIdList[i]) for i in range(min(info.NumberOfProcessIdsInList, 512))]
+
+    def wait_empty(self, timeout: float = 5.0) -> bool:
+        """True once no process is left in the job (polled), False on timeout."""
+        deadline = time.monotonic() + timeout
+        while True:
+            if self.active_processes() == 0:
+                return True
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(0.02)
 
     def close(self) -> None:
         if self._job:
