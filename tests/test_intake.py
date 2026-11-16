@@ -149,3 +149,25 @@ def test_plan_exits_1_when_there_is_no_candidate(cli, monkeypatch, capsys):
     monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1, labels=("fp060",))], None, []))
     assert intake.main(["plan"]) == 1
     assert json.loads(capsys.readouterr().out)["candidate"] is None
+
+
+# -- 5a revisao do Codex (#641): entrada de prontidao BLOCKED ------------------------------------------------------------------------------------------
+@pytest.mark.parametrize("state", ["BLOCKED", "blocked", "Blocked"])
+def test_an_audited_blocked_readiness_entry_refuses_the_issue(state):
+    res = plan([issue(1)], readiness={1: {"state": state}})
+    assert res.candidate is None and "BLOCKED" in res.skipped[0]
+
+
+def test_an_issue_with_no_readiness_entry_is_still_accepted():
+    assert plan([issue(1)], readiness={}).candidate.node.number == 1
+    assert plan([issue(1)], readiness=None).candidate.node.number == 1
+
+
+@pytest.mark.parametrize("entry", [{"state": "READY", "needs_sketchup": False}, {"state": "READY"}, {}])
+def test_a_non_blocked_readiness_entry_does_not_refuse(entry):
+    assert plan([issue(1)], readiness={1: entry}).candidate.node.number == 1
+
+
+def test_a_blocked_entry_for_another_issue_does_not_affect_this_one():
+    res = plan([issue(1), issue(2)], readiness={2: {"state": "BLOCKED"}})
+    assert res.candidate.node.number == 1 and any(s.startswith("#2:") and "BLOCKED" in s for s in res.skipped)

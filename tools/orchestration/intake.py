@@ -52,7 +52,10 @@ def refusal(verdict: bd.Verdict, readiness: dict[int, dict] | None = None) -> st
         return f"sem a label `{AUTH_LABEL}` (autorizacao humana)"
     if node.spec not in ALLOWED_SPECS:
         return f"SPEC {node.spec!r} fora de {sorted(ALLOWED_SPECS)}: o intake so aceita orquestracao, nunca geometria/mobiliario"
-    if (readiness or {}).get(node.number, {}).get("needs_sketchup") is True:
+    entry = (readiness or {}).get(node.number) or {}
+    if str(entry.get("state", "")).upper() == "BLOCKED":                    # ausencia de registro e permitida; um registro AUDITADO como bloqueado (humano/ambiente/outro) nunca
+        return "a auditoria de prontidao registra a Issue como BLOCKED: nao ha passo executavel pronto"
+    if entry.get("needs_sketchup") is True:
         return "a auditoria de prontidao diz que exige SketchUp"
     if verdict.action != "implement":
         return f"acao do agendador e {verdict.action!r}, nao 'implement' (retomar ou desbloquear nao e um pedido novo de implementacao)"
