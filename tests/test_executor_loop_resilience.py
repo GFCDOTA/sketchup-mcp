@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import subprocess
 
 import pytest
 
@@ -279,3 +280,71 @@ def test_once_keeps_a_failed_identity_fatal(monkeypatch, capsys):
     monkeypatch.setattr(ex, "sleep_watching", lambda *a, **k: pytest.fail("--once nao espera nem repete"))
     assert ex.main(["run", "--once"]) == 3
     capsys.readouterr()
+
+
+# -- 6a revisao do Codex (#640): timeout do gh, ordem espera -> identidade, segredo no log ----------------------------------------------------------------
+@pytest.mark.parametrize("exc", [subprocess.TimeoutExpired("gh", 120), OSError("gh nao iniciou"), subprocess.SubprocessError("falha"), RuntimeError("gh falhou")])
+def test_a_hung_or_missing_gh_at_start_is_retried_not_fatal(monkeypatch, capsys, exc):
+    attempts = []
+
+    def flaky(gh, policy):
+        attempts.append(1)
+        if len(attempts) < 3:
+            raise exc
+        return "fmodesto30"
+    monkeypatch.setattr(ex.eb, "check_identity", flaky)
+    calls = scripted(monkeypatch, [{"action": "IDLE"}])
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: 0.0)
+    monkeypatch.setattr(ex, "sleep_watching", lambda seconds, pid, step=2.0: len(calls) < 1)
+    assert ex.main(["run", "--interval", "10"]) == 5 and len(attempts) == 3 and len(calls) == 1
+    assert sum("degraded" in o for o in lines(capsys)) == 2
+
+
+def test_a_wrong_account_is_still_fatal_even_though_permission_error_is_an_oserror(monkeypatch, capsys):
+    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: (_ for _ in ()).throw(PermissionError("conta errada")))
+    monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: pytest.fail("nao roda ciclo"))
+    assert ex.main(["run", "--interval", "1"]) == 3
+    capsys.readouterr()
+
+
+def test_the_remaining_persisted_backoff_is_slept_BEFORE_the_first_github_call(monkeypatch, capsys):
+    order = []
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: 600.0)
+    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: order.append("identity") or "fmodesto30")
+    monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: order.append("cycle") or {"action": "IDLE"})
+    monkeypatch.setattr(ex, "sleep_watching", lambda seconds, pid, step=2.0: order.append(("sleep", round(seconds))) or len(order) < 4)
+    ex.main(["run", "--interval", "1"])
+    assert order[:3] == [("sleep", 600), "identity", "cycle"]                                                 # espera -> identidade -> ciclo (nunca a identidade primeiro)
+    capsys.readouterr()
+
+
+def test_once_never_waits_for_a_backoff(monkeypatch, capsys):
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: pytest.fail("--once nao espera backoff"))
+    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: "fmodesto30")
+    scripted(monkeypatch, [{"action": "IDLE"}])
+    assert ex.main(["run", "--once"]) == 0
+    capsys.readouterr()
+
+
+@pytest.mark.parametrize("secret", ["ghp_" + "a" * 36, "github_pat_" + "B" * 40])
+def test_a_credential_in_the_identity_error_never_reaches_the_log(monkeypatch, capsys, secret):
+    attempts = []
+
+    def leaky(gh, policy):
+        attempts.append(1)
+        if len(attempts) == 1:
+            raise RuntimeError(f"gh api falhou: Authorization: token {secret}")
+        return "fmodesto30"
+    monkeypatch.setattr(ex.eb, "check_identity", leaky)
+    calls = scripted(monkeypatch, [{"action": "IDLE"}])
+    monkeypatch.setattr(ex, "initial_wait", lambda now=None: 0.0)
+    monkeypatch.setattr(ex, "sleep_watching", lambda seconds, pid, step=2.0: len(calls) < 1)
+    ex.main(["run", "--interval", "1"])
+    out = capsys.readouterr().out
+    assert secret not in out and "degraded" in out
+
+
+def test_a_credential_in_a_fatal_once_identity_error_is_redacted_too(monkeypatch, capsys):
+    secret = "ghp_" + "z" * 36
+    monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: (_ for _ in ()).throw(RuntimeError(f"falhou {secret}")))
+    assert ex.main(["run", "--once"]) == 3 and secret not in capsys.readouterr().out
