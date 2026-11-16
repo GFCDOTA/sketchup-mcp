@@ -171,3 +171,26 @@ def test_a_non_blocked_readiness_entry_does_not_refuse(entry):
 def test_a_blocked_entry_for_another_issue_does_not_affect_this_one():
     res = plan([issue(1), issue(2)], readiness={2: {"state": "BLOCKED"}})
     assert res.candidate.node.number == 1 and any(s.startswith("#2:") and "BLOCKED" in s for s in res.skipped)
+
+
+# -- 6a revisao do Codex (#641): Project consultado, dependencia ausente, lista truncada --------------------------------------------------------------
+def test_with_the_project_consulted_an_issue_missing_from_it_or_without_status_is_not_ready():
+    assert plan([issue(1)], statuses={}).candidate is None and "nao tem status" in plan([issue(1)], statuses={}).skipped[0]
+    assert plan([issue(1)], statuses={2: "Ready"}).candidate is None
+    assert plan([issue(1)], statuses={1: None}).candidate is None
+    assert plan([issue(1)], statuses={1: "Ready"}).candidate.node.number == 1
+    assert plan([issue(1)], statuses=None).candidate.node.number == 1                  # Project nao consultado: vale o comportamento anterior
+
+
+def test_a_dependency_that_is_not_among_the_loaded_issues_refuses_the_candidate():
+    res = plan([issue(1, deps=(9,))])
+    assert res.candidate is None and "#9" in res.skipped[0] and "nao carregada" in res.skipped[0]
+    assert plan([issue(1, deps=(2,)), issue(2, state="CLOSED")]).candidate.node.number == 1               # dependencia carregada e concluida: segue
+
+
+def test_a_possibly_truncated_issue_or_pr_list_publishes_nothing(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1)], None, [{"number": n, "body": "", "headRefName": "x"} for n in range(bd.LOAD_LIMIT)]))
+    assert intake.main(["publish", "--apply"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["candidate"] is None and "truncada" in out["error"] and not cli.exists() or EventStore(cli).events() == []

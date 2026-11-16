@@ -45,9 +45,14 @@ def spec_hash(issue: dict) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
 
 
-def refusal(verdict: bd.Verdict, readiness: dict[int, dict] | None = None) -> str | None:
-    """Motivo da barreira do intake para uma Issue ja elegivel pelo agendador, ou None."""
+def refusal(verdict: bd.Verdict, readiness: dict[int, dict] | None = None, project_known: bool = False, known: frozenset[int] | None = None) -> str | None:
+    """Motivo da barreira do intake para uma Issue ja elegivel pelo agendador, ou None. `project_known`: o Project FOI consultado (entao a Issue ausente do resultado ou
+    sem status NAO esta em `Ready`). `known`: numeros das Issues carregadas (dependencia fora dela = nao comprovada)."""
     node = verdict.node
+    if known is not None:
+        missing = sorted(d for d in node.deps if d != node.number and d not in known)
+        if missing:
+            return "dependencia(s) " + ", ".join(f"#{d}" for d in missing) + " nao carregada(s): conclusao nao comprovada (a lista de Issues pode estar truncada ou a referencia e invalida)"
     if AUTH_LABEL not in node.labels:
         return f"sem a label `{AUTH_LABEL}` (autorizacao humana)"
     if node.spec not in ALLOWED_SPECS:
@@ -59,6 +64,8 @@ def refusal(verdict: bd.Verdict, readiness: dict[int, dict] | None = None) -> st
         return "a auditoria de prontidao diz que exige SketchUp"
     if verdict.action != "implement":
         return f"acao do agendador e {verdict.action!r}, nao 'implement' (retomar ou desbloquear nao e um pedido novo de implementacao)"
+    if project_known and node.status != "Ready":
+        return f"status do Project e {node.status!r}, nao 'Ready'" if node.status is not None else "o Project foi consultado mas a Issue nao tem status (ausente do Project): nao esta em 'Ready'"
     if node.status is not None and node.status != "Ready":
         return f"status do Project e {node.status!r}, nao 'Ready'"
     return None
@@ -69,10 +76,11 @@ def plan(issues: list[dict], prs: list[dict], state: dict, statuses: dict[int, s
     """O candidato do intake: a primeira Issue ELEGIVEL (ordem do agendador) que passa na barreira. Puro."""
     _task, verdicts = ts.decide(issues, prs, state, statuses, None, agent, None)       # readiness=None: ver o docstring do modulo
     skipped, chosen = [], None
+    known = frozenset(int(i["number"]) for i in issues)
     for v in verdicts:
         if not v.eligible:
             continue
-        why = refusal(v, readiness)
+        why = refusal(v, readiness, project_known=statuses is not None, known=known)
         if why is None and chosen is None:
             chosen = v
         elif why is not None:
@@ -103,6 +111,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--apply", action="store_true", help="com `publish`: grava o evento; sem isto so planeja")
     a = ap.parse_args(argv)
     issues, statuses, prs = bd.load(statuses=a.project)
+    if len(issues) >= bd.LOAD_LIMIT or len(prs) >= bd.LOAD_LIMIT:                  # lista possivelmente TRUNCADA: um PR/Issue omitido poderia liberar trabalho duplicado
+        print(json.dumps({"candidate": None, "skipped": [], "error": f"lista de Issues/PRs atingiu o limite de {bd.LOAD_LIMIT}: possivelmente truncada, nada e publicado"}))
+        return 2
     path = es.state_path()
     with es.locked(path):
         state = es.load(path)
