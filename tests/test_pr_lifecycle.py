@@ -411,3 +411,54 @@ def test_the_protection_is_only_ever_read_never_written():
     source = inspect.getsource(pl)
     assert "protection" not in source.replace("branch protection", "").replace("protecao", "")
     assert am.protection_gaps is not None and subprocess is not None
+
+
+# -- a reconciliacao de 30 s nao espera a sessao do Codex (que leva minutos) --------------------------------------------------------------------
+def test_the_reconcile_step_keeps_running_while_a_slow_review_is_in_progress(store):
+    w, wr = World().add(7, requested=("fmmodesto",)).add(8, draft=True), Writes()
+    pl.enqueue(w, store, POLICY, REPO, execute=True)
+    started, release, emitted = threading.Event(), threading.Event(), []
+
+    def slow_review(pr, gh, policy, repo, do_publish=False, **kw):
+        started.set()
+        release.wait(10)
+        return {"action": "DONE", "verdict": "APPROVE"}
+    loop = pl.ReviewLoop(w, store, POLICY, REPO, emitted.append, slow_review, idle_s=0.05)
+    loop.start()
+    try:
+        assert started.wait(10)                                                                          # a revisao esta em andamento (evento RUNNING)
+        assert pending(store)[0]["status"] == "RUNNING"
+        t0 = time.time()
+        out = pl.reconcile_step(w, POLICY, REPO, True, store, wr)                                       # o ciclo rapido roda AGORA, sem esperar
+        assert time.time() - t0 < 5 and out["prepare"][0]["pr"] in (7, 8) and "error" not in str(out)
+        assert any(r.get("action") == "READY" for r in out["prepare"])                                   # e age: tira o rascunho
+        release.set()
+        deadline = time.time() + 10
+        while time.time() < deadline and not emitted:
+            time.sleep(0.05)
+        assert emitted and emitted[0]["review"]["verdict"] == "APPROVE"
+    finally:
+        release.set()
+        loop.stop()
+        loop.join(5)
+
+
+def test_the_review_loop_survives_an_unexpected_error_and_keeps_going(store):
+    calls, emitted = [], []
+
+    class Flaky(World):
+        def __call__(self, path):
+            calls.append(path)
+            if len(calls) == 1:
+                raise ValueError("cai uma vez")
+            return super().__call__(path)
+    w = Flaky().add(7)
+    pl.enqueue(World().add(7), store, POLICY, REPO, execute=True)
+    loop = pl.ReviewLoop(w, store, POLICY, REPO, emitted.append, Reviewer(), idle_s=0.05)
+    loop.start()
+    deadline = time.time() + 10
+    while time.time() < deadline and not any(e["review"].get("action") == "DONE" for e in emitted):
+        time.sleep(0.05)
+    loop.stop()
+    loop.join(5)
+    assert any(e["review"].get("action") == "DONE" for e in emitted)

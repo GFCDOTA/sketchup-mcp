@@ -341,6 +341,40 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False, s
     return out
 
 
+def reconcile_step(gh: eb.Gh, policy: dict, repo: str, execute: bool, store: EventStore | None, runner: Runner = subprocess.run, now: float | None = None) -> dict:
+    """A parte RAPIDA do ciclo (prepara + enfileira): roda a cada 30 s sem esperar uma revisao de varios minutos. Cada etapa isolada."""
+    out: dict = {"execute": execute}
+    for name, step in (("prepare", lambda: prepare(gh, policy, repo, execute, runner, now)), ("enqueue", lambda: enqueue(gh, store, policy, repo, execute))):
+        try:
+            out[name] = step()
+        except Exception as exc:  # noqa: BLE001
+            out[name] = {"error": f"{type(exc).__name__}: {exc}"[:200]}
+    return out
+
+
+class ReviewLoop(threading.Thread):
+    """A parte LENTA: revisa um PR por vez numa thread propria (a sessao do Codex leva minutos), sem atrasar a reconciliacao de 30 s. `emit(dict)` recebe cada resultado."""
+
+    def __init__(self, gh: eb.Gh, store: EventStore, policy: dict, repo: str, emit: Callable[[dict], None], review: Callable[..., dict] | None = None, idle_s: float = 5.0):
+        super().__init__(daemon=True, name="review-loop")
+        self.gh, self.store, self.policy, self.repo, self.emit, self.review, self.idle_s = gh, store, policy, repo, emit, review, idle_s
+        self._stop_evt = threading.Event()
+
+    def run(self) -> None:
+        while not self._stop_evt.is_set():
+            try:
+                out = work(self.gh, self.store, self.policy, self.repo, self.review)
+            except Exception as exc:  # noqa: BLE001 — nunca derruba a thread: o proximo tick tenta de novo
+                out = {"action": "ERROR", "reason": f"{type(exc).__name__}: {exc}"[:200]}
+            if out.get("action") != "IDLE":
+                self.emit({"review": out})
+            if out.get("action") in ("IDLE", "ERROR"):
+                self._stop_evt.wait(self.idle_s)
+
+    def stop(self) -> None:
+        self._stop_evt.set()
+
+
 def main(argv: list[str] | None = None) -> int:
     from tools.orchestration import event_executor as ex
     from tools.orchestration.store_factory import get_store
@@ -364,15 +398,24 @@ def main(argv: list[str] | None = None) -> int:
     if not lock.acquire():
         print(json.dumps({"fatal": "outra instancia do pr_lifecycle ja roda: nao inicia"}))
         return 4
+    print_lock = threading.Lock()
+
+    def emit(obj: dict) -> None:
+        with print_lock:
+            print(json.dumps({"at": dt.datetime.now(dt.timezone.utc).isoformat(), **obj}, ensure_ascii=False, default=str), flush=True)
+    reviewer = ReviewLoop(gh, store, policy, a.repo, emit) if a.execute and store is not None else None
+    if reviewer is not None:
+        reviewer.start()
     try:
         while True:
             if a.watch_pid is not None and not ex.pid_alive(a.watch_pid):
                 return 5
-            res = cycle(gh, policy, a.repo, a.execute, store)
-            print(json.dumps({"at": dt.datetime.now(dt.timezone.utc).isoformat(), **res}, ensure_ascii=False, default=str), flush=True)
+            emit(reconcile_step(gh, policy, a.repo, a.execute, store))
             if not ex.sleep_watching(a.interval, a.watch_pid):
                 return 5
     finally:
+        if reviewer is not None:
+            reviewer.stop()
         lock.release()
 
 
