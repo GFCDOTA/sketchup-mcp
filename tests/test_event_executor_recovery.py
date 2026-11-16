@@ -203,7 +203,7 @@ def test_a_lock_left_by_a_dead_process_is_broken_immediately_not_after_60s(tmp_p
     lock.write_text(str(dead), encoding="utf-8")                              # trava fresca (mtime agora) de um dono morto
     t0 = time.time()
     with es.locked(tmp_path / "s.json", wait_s=2.0):
-        assert lock.read_text(encoding="utf-8").strip() == str(os.getpid())   # agora e nossa
+        assert lock.read_text(encoding="utf-8").strip().split(":")[0] == str(os.getpid())   # agora e nossa (conteudo `<pid>:<token>`)
     assert time.time() - t0 < 1.5 and not lock.exists()
 
 
