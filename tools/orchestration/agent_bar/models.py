@@ -85,15 +85,15 @@ class Snapshot:
         if st.get("state") != "ok":
             return f"EventStore {st.get('state', 'indisponivel')}: {st.get('error') or 'sem leitura'} (NAO e saudavel)"
         c = st["counts"]
-        live = ", ".join(f"{x['owner']} ({x['seconds_left']}s)" for x in st["live_leases"]) or "nenhum"
+        from tools.orchestration.agent_bar.collectors import redact_secrets
+        live = ", ".join(f"{redact_secrets(x['owner'])} ({x['seconds_left']}s)" for x in st["live_leases"]) or "nenhum"
         line = (f"EventStore: {c.get('PENDING', 0)} pendente(s) ({st['backoff']} em backoff), {c.get('RUNNING', 0)} rodando, "
                 f"DLQ {c.get('DLQ', 0)}, retries {st['retries']}; leases vivos: {live}")
         if st["zombies"]:
             line += f"; ATENCAO {st['zombies']} RUNNING com lease vencido (worker morto?)"
         if st["dlq"]:
-            line += "; DLQ: " + "; ".join(f"#{x['id']} {x['key'][:40]}" for x in st["dlq"][:3])
+            line += "; DLQ: " + "; ".join(f"#{x['id']} {redact_secrets(x['key'])[:40]}" for x in st["dlq"][:3])
         if st["last_error"]:
-            from tools.orchestration.agent_bar.collectors import redact_secrets
             line += f"; ultimo erro: {redact_secrets(st['last_error']['error'])[:120]}"
         return line
 

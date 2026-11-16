@@ -223,3 +223,49 @@ def test_an_event_that_later_completed_is_not_the_current_error(store, tmp_path)
     clock.t += 5
     store.complete(again, {"ok": True})
     assert col.collect_store(tmp_path, NOW)["last_error"] is None
+
+
+# -- 3a revisao automatica do Codex (#663): JSON estruturado, TODO campo textual do banco, EXECUTION_STATE_PATH -----------------------------------------
+@pytest.mark.parametrize("text", ['{"password":"minha-senha-longa"}', "{'token': 'abcd1234efgh'}", 'cfg={"api_key" : "k-123456789"}', "secret=valor-secreto", 'x "access_token":"zzzzzzzz"'])
+def test_credentials_in_structured_messages_are_redacted(store, tmp_path, text):
+    store.publish("CORRECTION_REQUESTED", "k1", "pr:1", {"x": 1}, max_attempts=1)
+    ev = store.claim(("CORRECTION_REQUESTED",), "w", 60)
+    store.fail(ev, f"falhou com {text}")
+    out = col.collect_store(tmp_path, NOW)
+    shown = str(out) + snap(out).store_line()
+    for leaked in ("minha-senha-longa", "abcd1234efgh", "k-123456789", "valor-secreto", "zzzzzzzz"):
+        assert leaked not in shown, leaked
+    assert "<segredo>" in shown
+
+
+def test_the_lease_owner_and_the_idempotency_key_are_redacted_everywhere_they_are_shown(store, tmp_path):
+    token = "ghp_" + "k" * 36
+    store.publish("CORRECTION_REQUESTED", f"key-{token}", "pr:1", {"x": 1}, max_attempts=1)
+    live = store.claim(("CORRECTION_REQUESTED",), f"owner-{token}", 600)                                 # RUNNING com lease vivo: o dono aparece
+    out = col.collect_store(tmp_path, NOW)
+    assert token not in str(out) and token not in snap(out).store_line() and out["live_leases"][0]["owner"].startswith("owner-<segredo>")
+    store.fail(live, "falha final")                                                                       # vai para a DLQ: a chave aparece no painel
+    out = col.collect_store(tmp_path, NOW)
+    assert token not in str(out) and token not in snap(out).store_line() and out["dlq"][0]["key"].startswith("key-<segredo>")
+
+
+def test_the_model_redacts_owner_and_key_even_if_raw_values_reach_it():
+    token = "ghp_" + "q" * 30
+    raw = {"state": "ok", "counts": {}, "backoff": 0, "live_leases": [{"key": "k", "owner": token, "seconds_left": 5}], "zombies": 0,
+           "dlq": [{"id": 1, "key": "k-" + token, "error": "e"}], "retries": 0, "last_error": None}
+    line = snap(raw).store_line()
+    assert token not in line and line.count("<segredo>") == 2
+
+
+def test_only_execution_state_path_configured_still_follows_the_producer_contract(tmp_path, monkeypatch):
+    (tmp_path / "gov").mkdir()
+    (tmp_path / "estado").mkdir()
+    producer = EventStore(tmp_path / "estado" / "event_store.db", clock=Clock())                          # ao lado do estado: store_path -> bridge_path -> state_path
+    producer.publish("CORRECTION_REQUESTED", "k-real", "pr:1", {"x": 1})
+    decoy = EventStore(tmp_path / "gov" / "event_store.db", clock=Clock())
+    for n in range(3):
+        decoy.publish("CORRECTION_REQUESTED", f"k-decoy{n}", f"pr:{n}", {"x": 1})
+    for var in ("EVENT_STORE_DB_PATH", "EVENT_BRIDGE_STATE_PATH"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("EXECUTION_STATE_PATH", str(tmp_path / "estado" / "execution_state.json"))
+    assert col.collect_store(tmp_path / "gov", NOW)["counts"] == {"PENDING": 1}                           # le o banco do PRODUTOR (1), nao o do diretorio da barra (3)

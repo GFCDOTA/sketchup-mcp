@@ -506,7 +506,7 @@ _SECRET = re.compile(
     r"(gh[pousr]_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}|sk-[A-Za-z0-9][A-Za-z0-9_-]{15,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|AKIA[0-9A-Z]{12,}"
     r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|Bearer\s+[A-Za-z0-9._~+/-]{10,}"
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"
-    r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token)\b)\s*[:=]\s*\S{8,})")
+    r"|(?i:\b(?:api[_-]?key|secret|password|passwd|access[_-]?token|token)\b)[\"']?\s*[:=]\s*[\"']?[^\s\"',;}]{4,}[\"']?)")                 # inclui JSON: {"password":"..."}
 
 
 def redact_secrets(text: object) -> str:
@@ -517,7 +517,7 @@ def redact_secrets(text: object) -> str:
 def store_db_path(gov: Path, db_name: str | None = None) -> Path:
     """O MESMO caminho que o produtor usa (`store_factory.store_path`: `EVENT_STORE_DB_PATH`, senao ao lado do estado do bridge). Sem nenhuma dessas variaveis a
     barra le o `event_store.db` do diretorio de governanca dela. `db_name` explicito fixa o arquivo dentro de `gov` (testes)."""
-    if db_name is None and (os.environ.get("EVENT_STORE_DB_PATH") or os.environ.get("EVENT_BRIDGE_STATE_PATH")):
+    if db_name is None and any(os.environ.get(v) for v in ("EVENT_STORE_DB_PATH", "EVENT_BRIDGE_STATE_PATH", "EXECUTION_STATE_PATH")):
         from tools.orchestration.store_factory import store_path
         return store_path()
     return Path(gov) / (db_name or "event_store.db")
@@ -546,16 +546,16 @@ def collect_store(gov: Path, now: dt.datetime | None = None, db_name: str | None
     counts: dict[str, int] = {}
     for r in rows:
         counts[r["status"]] = counts.get(r["status"], 0) + 1
-    live = [{"key": r["idempotency_key"], "owner": r["lease_owner"] or "?", "seconds_left": int(r["lease_until"] - ts)}
+    live = [{"key": redact_secrets(r["idempotency_key"]), "owner": redact_secrets(r["lease_owner"] or "?"), "seconds_left": int(r["lease_until"] - ts)}
             for r in rows if r["status"] == "RUNNING" and r["lease_until"] > ts]
     # o ultimo erro e o da FALHA mais recente (transicao RUNNING -> PENDING/DLQ), nao o do evento tocado por ultimo: claim, renovacao e conclusao tambem mexem em
     # `updated_at`. Evento ja concluido (DONE) nao e erro corrente.
     errored = sorted((r for r in rows if r["error"] and r["status"] != "DONE" and r["id"] in failed_at), key=lambda r: failed_at[r["id"]])
     return {"state": "ok", "counts": counts, "backoff": sum(1 for r in rows if r["status"] == "PENDING" and r["available_at"] > ts),
             "live_leases": live, "zombies": sum(1 for r in rows if r["status"] == "RUNNING" and r["lease_until"] <= ts),
-            "dlq": [{"id": r["id"], "key": r["idempotency_key"], "error": redact_secrets(r["error"])[:160]} for r in rows if r["status"] == "DLQ"],
+            "dlq": [{"id": r["id"], "key": redact_secrets(r["idempotency_key"]), "error": redact_secrets(r["error"])[:160]} for r in rows if r["status"] == "DLQ"],
             "retries": sum(1 for r in rows if r["attempt"] > 1),
-            "last_error": ({"key": errored[-1]["idempotency_key"], "error": redact_secrets(errored[-1]["error"])} if errored else None)}
+            "last_error": ({"key": redact_secrets(errored[-1]["idempotency_key"]), "error": redact_secrets(errored[-1]["error"])} if errored else None)}
 
 
 def collect_snapshot(gov: Path | None = None, procs_fn=list_processes, task_fn=task_state, gh=run_gh, cache: GithubCache | None = None,
