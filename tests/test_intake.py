@@ -251,3 +251,34 @@ def test_an_active_claim_on_another_issue_of_the_same_component_blocks_the_candi
     other = es.default_state()
     es.claim(other, 9, holder, "feat/x", "a" * 40, ["FP-043|P1"])                                     # componente diferente: nao bloqueia
     assert plan([issue(1)], state=other).candidate.node.number == 1
+
+
+# -- 9a revisao do Codex (#641): o status do Project vale para a identidade COMPLETA do item ------------------------------------------------------------
+REPO_NAME = "GFCDOTA/sketchup-mcp"
+
+
+def prow(number, status, type_="Issue", repo=REPO_NAME):
+    return {"status": status, "content": {"number": number, "type": type_, "repository": repo}}
+
+
+def test_only_issues_of_this_repository_count_for_the_project_status():
+    from tools.validation import backlog_discovery as bd
+    rows = [prow(1, "Ready", repo="outro/repo"), prow(1, "Ready", type_="PullRequest"), prow(2, "Ready"), prow(3, "In progress", repo="https://github.com/GFCDOTA/sketchup-mcp")]
+    assert bd.project_statuses(rows, REPO_NAME) == {2: "Ready", 3: "In progress"}
+
+
+def test_two_items_with_the_same_number_are_an_ambiguous_identity_never_ready():
+    from tools.validation import backlog_discovery as bd
+    out = bd.project_statuses([prow(5, "Ready"), prow(5, "Ready")], REPO_NAME)
+    assert out == {5: bd.AMBIGUOUS_STATUS}
+    assert plan([issue(5)], statuses=out).candidate is None
+
+
+def test_a_ready_item_of_another_repository_with_the_same_number_does_not_authorize_this_issue(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    mapped = bd.project_statuses([prow(1, "Ready", repo="outro/repo")], REPO_NAME)                  # a Issue #1 DESTE repo nao esta no Project
+    assert mapped == {}
+    monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1)], mapped, []))
+    assert intake.main(["publish", "--apply", "--project"]) == 1
+    assert json.loads(capsys.readouterr().out)["candidate"] is None and not cli.exists() or EventStore(cli).events() == []
+
