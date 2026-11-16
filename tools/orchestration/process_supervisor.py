@@ -108,6 +108,11 @@ if os.name == "nt":
     _process_next = _bind("Process32NextW", [_HANDLE, ctypes.POINTER(_ProcessEntry)], wintypes.BOOL)
     _open_process = _bind("OpenProcess", [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD], _HANDLE)
     _process_times = _bind("GetProcessTimes", [_HANDLE] + [ctypes.POINTER(_FileTime)] * 4, wintypes.BOOL)
+    _terminate_process = _bind("TerminateProcess", [_HANDLE, wintypes.UINT], wintypes.BOOL)
+    _assign_job = _bind("AssignProcessToJobObject", [_HANDLE, _HANDLE], wintypes.BOOL)
+    _ntdll = ctypes.WinDLL("ntdll")
+    _nt_resume = _ntdll.NtResumeProcess
+    _nt_resume.argtypes, _nt_resume.restype = [_HANDLE], ctypes.c_long
 
 
 def _error(action):
@@ -150,16 +155,51 @@ def _process_table() -> list[tuple[int, int]]:
         _close(snapshot)
 
 
+def _handle_creation_time(handle) -> float | None:
+    created, exited, kernel, user = _FileTime(), _FileTime(), _FileTime(), _FileTime()
+    if not _process_times(handle, ctypes.byref(created), ctypes.byref(exited), ctypes.byref(kernel), ctypes.byref(user)):
+        return None
+    return ((created.high << 32) | created.low) / 1e7 - 11644473600.0
+
+
 def _creation_time(pid: int) -> float | None:
     """Creation time (epoch seconds) of a live process; None when it cannot be read."""
     handle = _open_process(0x1000, False, pid)              # PROCESS_QUERY_LIMITED_INFORMATION
     if not handle:
         return None
     try:
-        created, exited, kernel, user = _FileTime(), _FileTime(), _FileTime(), _FileTime()
-        if not _process_times(handle, ctypes.byref(created), ctypes.byref(exited), ctypes.byref(kernel), ctypes.byref(user)):
-            return None
-        return ((created.high << 32) | created.low) / 1e7 - 11644473600.0
+        return _handle_creation_time(handle)
+    finally:
+        _close(handle)
+
+
+creation_time = _creation_time
+
+
+def tree_identities(root_pid: int, since: float | None) -> list[tuple[int, float]]:
+    """(pid, creation time) of every live DESCENDANT of root_pid (never the root itself). The pair is the process identity: a PID alone can be reused by an unrelated
+    process, the pair cannot (see `terminate_identity`)."""
+    out = []
+    for pid in tree_pids(root_pid, since=since):
+        if pid == root_pid:
+            continue
+        created = _creation_time(pid)
+        if created is not None:
+            out.append((pid, created))
+    return out
+
+
+def terminate_identity(pid: int, created: float) -> bool:
+    """TerminateProcess on the process that has THIS pid AND THIS creation time, through a single handle (the handle pins the process object, so the check and the kill
+    cannot hit different processes). A different process (reused PID), a process that already exited or one we cannot open is left alone: False."""
+    handle = _open_process(0x1001, False, pid)              # PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_TERMINATE
+    if not handle:
+        return False
+    try:
+        seen = _handle_creation_time(handle)
+        if seen is None or seen != created:
+            return False
+        return bool(_terminate_process(handle, 1))
     finally:
         _close(handle)
 
@@ -190,6 +230,50 @@ def tree_pids(root_pid: int, since: float | None = None) -> list[int]:
     if root_pid in alive:
         found.add(root_pid)
     return sorted(found)
+
+
+class ProcessJob:
+    """A kill-on-close Job Object for a process the CALLER already created SUSPENDED (`creationflags=CREATE_SUSPENDED`).
+
+    Containing the tree from the first instruction closes the races of a snapshot-based kill: every descendant created afterwards, concurrently or in later generations,
+    is born inside the job, and `terminate()` (or closing the object) ends them all at once, even after the root exited. Works inside an AppContainer (nested job, measured).
+    Use `resume_process` right after `assign`, whatever its outcome: a process left suspended hangs the caller.
+    """
+
+    def __init__(self):
+        if os.name != "nt":
+            raise ProcessSupervisorError("Windows Job Objects are required")
+        job = _create_job(None, None)
+        if not job:
+            raise _error("CreateJobObjectW")
+        self._job = job
+        limits = _ExtendedLimits()
+        limits.BasicLimitInformation.LimitFlags = 0x2000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        if not _set_job(job, 9, ctypes.byref(limits), ctypes.sizeof(limits)):
+            error = _error("SetInformationJobObject")
+            self.close()
+            raise error
+
+    def assign(self, process_handle: int) -> None:
+        if not self._job or not _assign_job(self._job, process_handle):
+            raise _error("AssignProcessToJobObject")
+
+    def terminate(self) -> None:
+        if self._job and not _terminate_job(self._job, 1):
+            raise _error("TerminateJobObject")
+
+    def close(self) -> None:
+        if self._job:
+            _close(self._job)                      # KILL_ON_JOB_CLOSE: nothing born in the job outlives the object
+            self._job = None
+
+
+def resume_process(process_handle: int) -> None:
+    """Resume a process created with CREATE_SUSPENDED (all its threads), by handle."""
+    if os.name != "nt":
+        raise ProcessSupervisorError("Windows is required")
+    if _nt_resume(process_handle) != 0:
+        raise ProcessSupervisorError("NtResumeProcess failed")
 
 
 class WindowsJob:

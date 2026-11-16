@@ -264,7 +264,7 @@ def test_kill_tree_ends_the_child_and_its_grandchild_without_ever_calling_taskki
 @pytest.mark.skipif(os.name != "nt", reason="arvore de processos do Windows")
 def test_kill_tree_falls_back_to_taskkill_only_when_the_native_snapshot_is_unavailable(monkeypatch):
     calls = []
-    monkeypatch.setattr(ex, "_kill_descendants_native", lambda pid: (_ for _ in ()).throw(OSError("sem snapshot")))
+    monkeypatch.setattr(ex, "_kill_descendants_native", lambda pid, since: (_ for _ in ()).throw(OSError("sem snapshot")))
     monkeypatch.setattr(subprocess, "run", lambda argv, *a, **k: calls.append(argv) or type("R", (), {"returncode": 0})())
     child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
     ex.kill_tree(child)
@@ -279,3 +279,148 @@ def test_default_runner_cancel_returns_promptly_for_a_sleeping_child():
     t0 = time.monotonic()
     rc, _, _, timed_out = ex.default_runner([sys.executable, "-c", "import time; time.sleep(60)"], Path.cwd(), dict(os.environ), "", 120, cancel, poll_s=0.1)
     assert rc == -2 and not timed_out and time.monotonic() - t0 < 15
+
+
+SPAWNER = (
+    "import subprocess, sys, time\n"
+    "while True:\n"
+    "    subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(120)'])\n"
+    "    time.sleep(0.05)\n"
+)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="arvore de processos do Windows")
+def test_kill_tree_leaves_no_orphan_even_when_the_child_keeps_spawning_descendants():
+    from tools.orchestration import process_supervisor as ps
+    child = subprocess.Popen([sys.executable, "-c", SPAWNER])
+    try:
+        time.sleep(1.0)
+        since = ps.creation_time(child.pid)
+        assert len(ps.tree_identities(child.pid, since)) >= 3                                          # a arvore cresce de verdade
+        ex.kill_tree(child)
+        child.wait(timeout=15)
+        deadline = time.monotonic() + 15
+        while time.monotonic() < deadline and ps.tree_identities(child.pid, since):
+            time.sleep(0.2)
+        assert ps.tree_identities(child.pid, since) == []                                              # nenhum descendente orfao
+    finally:
+        if child.poll() is None:
+            child.kill()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="identidade de processo do Windows")
+def test_terminate_identity_never_touches_a_process_whose_identity_differs():
+    from tools.orchestration import process_supervisor as ps
+    victim = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    try:
+        created = ps.creation_time(victim.pid)
+        assert ps.terminate_identity(victim.pid, created + 7.0) is False                              # mesmo PID, outra criacao = PID reaproveitado: intocado
+        assert ps.terminate_identity(0x7FFFFFF0, created) is False                                     # PID inexistente
+        time.sleep(0.3)
+        assert victim.poll() is None                                                                    # continua vivo
+        assert ps.terminate_identity(victim.pid, created) is True                                       # a identidade certa morre
+        victim.wait(timeout=15)
+    finally:
+        if victim.poll() is None:
+            victim.kill()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="arvore de processos do Windows")
+def test_kill_tree_on_an_already_exited_child_walks_nothing_so_a_reused_pid_is_never_touched(monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    done = subprocess.Popen([sys.executable, "-c", "pass"])
+    done.wait(timeout=15)
+    monkeypatch.setattr(ps, "tree_identities", lambda *a, **k: pytest.fail("filho encerrado: nao pode varrer a arvore de um PID possivelmente reaproveitado"))
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: pytest.fail("nem taskkill"))
+    ex.kill_tree(done)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="arvore de processos do Windows")
+def test_kill_tree_does_not_kill_an_unrelated_sibling_process():
+    sibling = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    child = subprocess.Popen([sys.executable, "-c", GRANDCHILD], stdout=subprocess.PIPE, text=True)
+    try:
+        child.stdout.readline()
+        ex.kill_tree(child)
+        child.wait(timeout=15)
+        time.sleep(0.5)
+        assert sibling.poll() is None                                                                   # so a arvore do filho e derrubada
+    finally:
+        sibling.kill()
+        sibling.wait(timeout=15)
+
+
+TREE = (
+    "import os, subprocess, sys, time\n"
+    "gen = int(sys.argv[1])\n"
+    "if gen == 0:\n"
+    "    open(sys.argv[2], 'w').write(str(os.getpid()))\n"
+    "n = 0\n"
+    "while True:\n"
+    "    if gen < 3 and n < 2:\n"
+    "        subprocess.Popen([sys.executable, sys.argv[0], str(gen + 1), sys.argv[2]])\n"
+    "        n += 1\n"
+    "    time.sleep(0.05)\n"
+)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_default_runner_cancel_leaves_no_descendant_of_any_generation_even_while_they_are_still_being_created(tmp_path):
+    from tools.orchestration import process_supervisor as ps
+    script, pidfile = tmp_path / "tree.py", tmp_path / "root.pid"
+    script.write_text(TREE, encoding="utf-8")
+    cancel, box = threading.Event(), {}
+    th = threading.Thread(target=lambda: box.setdefault("res", ex.default_runner([sys.executable, str(script), "0", str(pidfile)], tmp_path, dict(os.environ), "", 120, cancel, poll_s=0.1)))
+    th.start()
+    deadline = time.monotonic() + 20
+    while time.monotonic() < deadline and not pidfile.exists():
+        time.sleep(0.1)
+    root = int(pidfile.read_text())
+    since = ps.creation_time(root)
+    while time.monotonic() < deadline and len(ps.tree_identities(root, since)) < 6:                    # varias geracoes ja existem e continuam sendo criadas
+        time.sleep(0.1)
+    assert len(ps.tree_identities(root, since)) >= 6
+    cancel.set()
+    th.join(timeout=30)
+    assert box["res"][0] == -2
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline and ps.tree_identities(root, since):
+        time.sleep(0.2)
+    assert ps.tree_identities(root, since) == []                                                       # nenhum descendente de NENHUMA geracao sobrou
+
+
+@pytest.mark.skipif(os.name != "nt", reason="arvore de processos do Windows")
+def test_kill_tree_still_kills_the_child_when_both_the_snapshot_and_taskkill_fail(monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    monkeypatch.setattr(ps, "creation_time", lambda pid: (_ for _ in ()).throw(OSError("sem snapshot")))
+    real_run = subprocess.run
+
+    def broken_taskkill(argv, *a, **k):
+        if str(argv[0]).lower() == "taskkill":
+            raise FileNotFoundError("taskkill indisponivel")
+        return real_run(argv, *a, **k)
+    monkeypatch.setattr(subprocess, "run", broken_taskkill)
+    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    ex.kill_tree(child)                                                                                # NAO levanta
+    child.wait(timeout=15)
+    assert child.poll() is not None
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_default_runner_without_a_job_falls_back_to_the_snapshot_kill_and_never_leaves_the_child_suspended(monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    monkeypatch.setattr(ps, "ProcessJob", lambda: (_ for _ in ()).throw(OSError("jobs indisponiveis")))
+    rc, out, _err, timed_out = ex.default_runner([sys.executable, "-c", "print('rodou')"], Path.cwd(), dict(os.environ), "", 30)
+    assert rc == 0 and out.strip() == "rodou" and not timed_out                                        # retomado mesmo sem job
+    cancel = threading.Event()
+    threading.Timer(0.5, cancel.set).start()
+    t0 = time.monotonic()
+    rc, _, _, timed_out = ex.default_runner([sys.executable, "-c", "import time; time.sleep(60)"], Path.cwd(), dict(os.environ), "", 120, cancel, poll_s=0.1)
+    assert rc == -2 and time.monotonic() - t0 < 15
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_default_runner_returns_the_real_output_and_exit_code_through_the_job(monkeypatch):
+    rc, out, err, timed_out = ex.default_runner([sys.executable, "-c", "import sys; print(sys.stdin.read().upper()); sys.stderr.write('e'); sys.exit(3)"], Path.cwd(),
+                                                dict(os.environ), "abc", 30)
+    assert (rc, out.strip(), err, timed_out) == (3, "ABC", "e", False)

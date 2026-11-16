@@ -245,57 +245,116 @@ def sleep_watching(seconds: float, pid: int | None, step: float = 2.0) -> bool:
         time.sleep(min(step, left))
 
 
-def _kill_descendants_native(root_pid: int) -> None:
-    """Termina os DESCENDENTES do PID dado SEM executavel externo: snapshot de processos (Toolhelp) + TerminateProcess (`os.kill`) em cada um, do mais fundo para o mais raso.
-    Usa so o PID do proprio filho (nunca nome de imagem). `since` = criacao do filho: um PID reaproveitado com `parent` igual ao dele nao entra."""
+KILL_PASSES = 5
+
+
+def _kill_descendants_native(root_pid: int, since: float) -> int:
+    """Termina os DESCENDENTES do PID dado SEM executavel externo, em passes (o filho pode criar netos entre o snapshot e a morte: refaz ate nao sobrar nenhum, no maximo
+    `KILL_PASSES`). Cada vitima e identificada por (pid, criacao) e morta pelo mesmo handle que confere a identidade (`terminate_identity`): um PID reaproveitado por um processo
+    alheio NUNCA e tocado. `since` = criacao do filho: um PID reaproveitado com `parent` igual ao dele nao entra. Devolve quantas arvores restavam no ultimo passe."""
     from tools.orchestration import process_supervisor as ps
-    since = ps._creation_time(root_pid)
-    for pid in reversed(ps.tree_pids(root_pid, since=since)):
-        if pid != root_pid:
-            try:
-                os.kill(pid, 15)                                           # no Windows `os.kill` chama TerminateProcess
-            except OSError:
-                pass                                                       # ja terminou (ou nao e nosso): o proximo passo confirma
+    left = 0
+    for _ in range(KILL_PASSES):
+        victims = ps.tree_identities(root_pid, since)
+        left = len(victims)
+        if not victims:
+            return 0
+        for pid, created in reversed(victims):                             # do mais fundo para o mais raso
+            ps.terminate_identity(pid, created)
+    return left
 
 
 def kill_tree(p: subprocess.Popen) -> None:
-    """Derruba a arvore do PROPRIO processo filho, nunca por nome de imagem. No Windows: descendentes por snapshot + `TerminateProcess` (sem depender de `taskkill`, que FALHA
-    dentro de um AppContainer com 'usuario ou senha incorretos' e deixava o filho vivo), depois o proprio filho; `taskkill /T` fica so de reserva se o snapshot falhar."""
+    """Derruba a arvore do PROPRIO processo filho, nunca por nome de imagem. 1) Se o filho nasceu num Job Object (`default_runner`), `TerminateJobObject` encerra TODOS os
+    descendentes, inclusive os criados concorrentemente ou em geracoes seguintes e os que sobraram depois que o filho saiu. 2) Sem job (ou como cinto e suspensorio): descendentes
+    por snapshot + `TerminateProcess` por identidade (sem depender de `taskkill`, que FALHA dentro de um AppContainer), o proprio filho e um passe final. 3) `taskkill /T` so de
+    reserva. Cada degrau tolera a falha do anterior (inclusive `taskkill` ausente): o filho sempre recebe `p.kill()`. Filho ja terminado e sem job: nada a fazer (seu PID pode ja
+    ser de outro processo; o objeto `Popen` mantem o handle aberto, entao o PID nao e reaproveitado enquanto `p` existir)."""
     if os.name != "nt":
         p.kill()
         return
+    job = getattr(p, "_fp060_job", None)
+    if job is not None:
+        try:
+            job.terminate()
+        except Exception:  # noqa: BLE001 — job indisponivel: os degraus seguintes cobrem
+            pass
+    if p.poll() is not None:
+        return
+    since = None
     try:
-        _kill_descendants_native(p.pid)
+        from tools.orchestration import process_supervisor as ps
+        since = ps.creation_time(p.pid)
+        if since is None:
+            raise OSError("criacao do filho ilegivel")
+        _kill_descendants_native(p.pid, since)
     except Exception:  # noqa: BLE001 — sem snapshot: tenta o caminho antigo
-        subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)], capture_output=True)
+        try:
+            subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)], capture_output=True)
+        except (OSError, subprocess.SubprocessError):
+            pass                                                           # taskkill ausente/bloqueado: ainda assim o filho recebe p.kill() abaixo
     try:
         p.kill()
     except OSError:
         pass
+    if since is not None:
+        try:
+            _kill_descendants_native(p.pid, since)                         # netos criados entre o ultimo passe e a morte do filho
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _contain(p: subprocess.Popen) -> None:
+    """Coloca o filho (criado SUSPENSO) num Job Object kill-on-close e o retoma SEMPRE. Sem job (indisponivel ou recusado) o filho segue pelo caminho de snapshot de `kill_tree`."""
+    job = None
+    try:
+        from tools.orchestration import process_supervisor as ps
+        job = ps.ProcessJob()
+        job.assign(int(p._handle))
+        p._fp060_job = job
+    except Exception:  # noqa: BLE001
+        if job is not None:
+            job.close()
+        job = None
+    finally:
+        from tools.orchestration import process_supervisor as ps
+        try:
+            ps.resume_process(int(p._handle))                              # nunca deixa o filho suspenso, com ou sem job
+        except Exception:
+            p.kill()
+            raise
 
 
 def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, cancel: threading.Event | None = None,
                    poll_s: float = 0.5) -> tuple:
     """(rc, stdout, stderr, timed_out). Sem shell. Derruba o filho no timeout OU quando `cancel` e acionado (lease perdido/nao
     renovado: o filho nao pode continuar apto a dar push enquanto outro executor reivindica o item)."""
+    suspended = os.name == "nt"                                                # nasce SUSPENSO para entrar no Job Object antes de executar a primeira instrucao
     p = subprocess.Popen(argv, cwd=cwd, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                         text=True, encoding="utf-8", errors="replace")
+                         text=True, encoding="utf-8", errors="replace", creationflags=0x00000004 if suspended else 0)
+    if suspended:
+        _contain(p)
     deadline = time.monotonic() + timeout
     first = True
-    while True:
-        try:
-            out, err = p.communicate(stdin if first else None, timeout=poll_s)
-            return p.returncode, out, err, False
-        except subprocess.TimeoutExpired:
-            first = False
-        if cancel is not None and cancel.is_set():
-            kill_tree(p)
-            out, err = p.communicate()
-            return -2, out or "", err or "", False
-        if time.monotonic() >= deadline:
-            kill_tree(p)
-            out, err = p.communicate()
-            return -1, out or "", err or "", True
+    try:
+        while True:
+            try:
+                out, err = p.communicate(stdin if first else None, timeout=poll_s)
+                return p.returncode, out, err, False
+            except subprocess.TimeoutExpired:
+                first = False
+            if cancel is not None and cancel.is_set():
+                kill_tree(p)
+                out, err = p.communicate()
+                return -2, out or "", err or "", False
+            if time.monotonic() >= deadline:
+                kill_tree(p)
+                out, err = p.communicate()
+                return -1, out or "", err or "", True
+    finally:
+        job = getattr(p, "_fp060_job", None)
+        if job is not None:
+            job.close()                                                        # kill-on-close: nenhum descendente sobrevive ao filho
 
 
 def git(args: list, cwd: Path) -> tuple[int, str]:
