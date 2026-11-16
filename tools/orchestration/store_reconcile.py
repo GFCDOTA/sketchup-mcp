@@ -34,11 +34,29 @@ from tools.orchestration.event_store import EventStore
 
 EVENT_TYPE = "CORRECTION_REQUESTED"
 SHA = re.compile(r"[0-9a-f]{40}")
-FINISHED_JSON = frozenset({"DONE_AWAITING_REREVIEW", "SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"})      # estados em que o item JSON nao tem mais trabalho
+# DONE_AWAITING_REREVIEW NAO e "terminou": o executor grava esse estado no JSON ANTES de sincronizar DONE para o SQLite; descartar o evento nessa janela perderia o resultado
+# efetivo da execucao. So os estados cujo desfecho no store e o mesmo (SUPERSEDED) ou que nunca executaram sao considerados terminados.
+FINISHED_JSON = frozenset({"SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"})      # estados em que o item JSON nao tem mais trabalho
 
 
 def sqlite_is_authoritative() -> bool:
     return os.environ.get("EXECUTOR_SOURCE", "json").strip().lower() == "sqlite"
+
+
+def queue_problem(queue: object) -> str:
+    """'' se a fila tem a ESTRUTURA que a protecao precisa (lista de objetos com `kind`, `state`, `pr` inteiro e `head_sha` de texto nos itens de review); senao o motivo.
+    `{"queue": null}` ou itens quebrados nao podem virar "fila vazia": sem evidencia de que o executor JSON nao e dono, nada e descartado."""
+    if not isinstance(queue, list):
+        return "`queue` nao e uma lista"
+    for n, i in enumerate(queue):
+        if not isinstance(i, dict):
+            return f"item #{n} nao e um objeto"
+        if i.get("kind") == "review" and (not isinstance(i.get("state"), str) or not isinstance(i.get("head_sha"), str)
+                                           or not isinstance(i.get("pr"), int) or isinstance(i.get("pr"), bool)):
+            return f"item de review #{n} sem `state`/`head_sha` de texto ou `pr` inteiro"
+        if not isinstance(i.get("kind"), str):
+            return f"item #{n} sem `kind`"
+    return ""
 
 
 def json_item_active(queue: list[dict], payload: dict) -> bool:
@@ -94,8 +112,13 @@ def reconcile(store: EventStore, gh: eb.Gh, repo: str = eb.REPO, apply: bool = F
     if apply and not authoritative and queue is None:
         try:
             queue = eb.load()["queue"]
-        except (ValueError, OSError, KeyError, TypeError) as exc:                                              # ilegivel: fail-closed, nada e aplicado
-            queue, queue_error = [], f"fila JSON ilegivel ({type(exc).__name__}): nada e aplicado"
+            problem = queue_problem(queue)
+            if problem:
+                raise ValueError(problem)
+        except (ValueError, OSError, KeyError, TypeError) as exc:                                              # ilegivel/invalida: fail-closed, nada e aplicado
+            queue, queue_error = [], f"fila JSON ilegivel ou invalida ({type(exc).__name__}: {str(exc)[:80]}): nada e aplicado"
+    elif apply and not authoritative and queue is not None and queue_problem(queue):
+        queue, queue_error = [], f"fila JSON invalida ({queue_problem(queue)}): nada e aplicado"
     rows = []
     for ev in open_events(store):
         p = _payload(ev)

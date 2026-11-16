@@ -310,7 +310,7 @@ def test_an_event_whose_json_item_is_still_active_is_not_discarded_while_the_jso
     assert row["code"] == "HEAD_MOVED" and row["applied"] == "SKIPPED" and "JSON_ACTIVE" in row["skipped_because"] and status(store) == "PENDING"
 
 
-@pytest.mark.parametrize("state", ["DONE_AWAITING_REREVIEW", "SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"])
+@pytest.mark.parametrize("state", ["SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"])
 def test_an_event_whose_json_item_finished_can_be_reconciled(store, state):
     publish(store)
     report = sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=[json_item(state)], sqlite_authoritative=False)
@@ -362,3 +362,45 @@ def test_a_running_json_executor_still_syncs_its_result_after_a_reconcile_attemp
     monkeypatch.setattr("tools.orchestration.store_factory._inc", lambda *a, **k: None, raising=False)
     ex._sync_result_to_store(store, running, {"action": "DONE", "new_head": NEW})
     assert status(store) == "DONE"                                                # o historico do SQLite ficou correto (sem o reconciliador ter descartado)
+
+
+# -- 6a revisao do Codex (#642): DONE nao sincronizado e fila JSON estruturalmente invalida ---------------------------------------------------------------
+def test_an_event_whose_json_item_is_done_but_not_yet_synced_is_not_discarded(store):
+    publish(store)
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=[json_item("DONE_AWAITING_REREVIEW")], sqlite_authoritative=False)
+    row = report["events"][0]
+    assert row["applied"] == "SKIPPED" and "JSON_ACTIVE" in row["skipped_because"] and status(store) == "PENDING"
+
+
+def test_the_executor_sync_after_the_skipped_reconcile_records_done_with_the_real_result(store, monkeypatch):
+    from tools.orchestration import event_executor as ex
+    publish(store, key=f"review:9:7:{HEAD}")
+    running = json_item("DONE_AWAITING_REREVIEW", event_id="review:9")
+    sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=[running], sqlite_authoritative=False)
+    monkeypatch.setattr("tools.orchestration.store_factory._inc", lambda *a, **k: None, raising=False)
+    ex._sync_result_to_store(store, running, {"action": "DONE", "new_head": NEW})
+    assert status(store) == "DONE"                                                         # o historico do SQLite guarda o resultado efetivo
+
+
+@pytest.mark.parametrize("bad", [{"a": 1}, "texto", [None], ["x"], [{"state": "RUNNING"}], [{"kind": "review", "state": "QUEUED", "head_sha": HEAD, "pr": "7"}],
+                                 [{"kind": "review", "state": "QUEUED", "pr": 7}], [{"kind": "review", "state": 3, "head_sha": HEAD, "pr": 7}]])
+def test_a_structurally_invalid_json_queue_applies_nothing(store, bad):
+    publish(store)
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=bad, sqlite_authoritative=False)
+    row = report["events"][0]
+    assert row["applied"] == "SKIPPED" and "invalida" in row["skipped_because"] and status(store) == "PENDING"
+
+
+def test_a_null_queue_on_disk_is_not_an_empty_queue(store, tmp_path, monkeypatch):
+    import json as _json
+    publish(store)
+    bad = tmp_path / "bridge-null.json"
+    bad.write_text(_json.dumps({"schema_version": 1, "queue": None}), encoding="utf-8")
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(bad))
+    report = sr.reconcile(store, FakeGh(head=NEW), apply=True)
+    assert report["events"][0]["applied"] == "SKIPPED" and status(store) == "PENDING"
+
+
+def test_a_valid_empty_queue_still_lets_an_obsolete_event_be_reconciled(store):
+    publish(store)
+    assert sr.reconcile(store, FakeGh(head=NEW), apply=True, json_queue=[], sqlite_authoritative=False)["events"][0]["applied"] == "SUPERSEDED"
