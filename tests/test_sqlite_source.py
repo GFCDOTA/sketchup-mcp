@@ -481,3 +481,81 @@ def test_an_unreconcilable_pending_event_refuses_the_rollback(clock):
     store.publish(event_type=sq.EVENT_TYPE, idempotency_key="review:x:9:abc", job_id="pr:9", payload={"pr": "nao-inteiro"}, producer=sq.PRODUCER)
     out = sq.rollback_apply(store)
     assert out["applied"] == 0 and "sem review executavel" in out["refused"] and len(out["unreconcilable"]) == 1
+
+
+# -- 7a revisao do Codex (#636): lease vencido, tentativas/retry_after desatualizados, DLQ com linha FAILED ------------------------------------------
+def test_an_sqlite_only_event_whose_executor_died_after_the_claim_is_brought_into_the_json_queue(clock):
+    store = seed_both(item())
+    other = sqlite_only_event(store)
+    ev = store.claim((sq.EVENT_TYPE,), "morto", 60, job_id="pr:8")
+    clock.t += 600                                                                                # o lease venceu e o executor nunca terminou
+    plan = sq.rollback_plan(store, eb.load())
+    assert [a["key"] for a in plan["additions"]] == [other["key"]] and plan["blocked"] == [] and ev
+    out = sq.rollback_apply(store)
+    row = json_item(other["key"])
+    assert out["applied"] >= 1 and row["state"] == "FAILED" and row["attempts"] == 1 and "retry_after" not in row
+
+
+def test_an_expired_lease_on_the_last_attempt_is_exhausted_so_the_json_row_cannot_run_it_again(clock):
+    store = seed_both(item())
+    for _ in range(3):                                                                            # 3 claims sem terminar: o evento esgotou as tentativas
+        store.claim((sq.EVENT_TYPE,), "morto", 60)
+        clock.t += 600
+    ev = ev_of(store, KEY)
+    assert ev["attempt"] == ev["max_attempts"] == 3 and ev["status"] == "RUNNING"
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 1 and json_item(KEY)["state"] == "FAILED" and json_item(KEY)["attempts"] >= 3
+
+
+def test_a_pickable_json_row_with_stale_attempts_and_retry_after_is_reconciled_to_the_event(clock):
+    store = seed_both(item())
+    ev = store.claim((sq.EVENT_TYPE,), "o", 60)
+    store.fail(ev, "falha", retry_delay=900)                                                      # evento: attempt 1, espera 900 s
+    it = json_item(KEY)
+    it.update(state="QUEUED", attempts=0)                                                         # o espelho reverso falhou: JSON ainda acha que e novo e sem espera
+    b = eb.load()
+    b["queue"] = [it]
+    eb.save(b)
+    out = sq.rollback_apply(store)
+    row = json_item(KEY)
+    assert out["applied"] == 1 and row["state"] == "FAILED" and row["attempts"] == 1 and row["retry_after"] == sq._iso(clock.t + 900)
+
+
+def test_a_json_retry_after_later_than_the_event_availability_is_pulled_back(clock):
+    store = seed_both(item())
+    ev = store.claim((sq.EVENT_TYPE,), "o", 60)
+    store.release(ev, "ambiente", retry_delay=0)                                                  # PENDING, attempt 0, disponivel agora
+    it = json_item(KEY)
+    it.update(state="BLOCKED_CLI", retry_after=sq._iso(clock.t + 5000), attempts=0)
+    b = eb.load()
+    b["queue"] = [it]
+    eb.save(b)
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 1 and "retry_after" not in json_item(KEY) and json_item(KEY)["state"] == "QUEUED"
+
+
+def test_a_dlq_event_forces_a_failed_json_row_even_when_it_is_already_failed_with_fewer_attempts(clock):
+    store = seed_both(item())
+    for _ in range(3):
+        ev = store.claim((sq.EVENT_TYPE,), "o", 60)
+        clock.t += 1
+        store.fail(ev, "falha", retry_delay=0)
+    assert ev_of(store, KEY)["status"] == "DLQ"
+    it = json_item(KEY)
+    it.update(state="FAILED", attempts=1)                                                         # o JSON ainda pode escolhe-lo de novo
+    b = eb.load()
+    b["queue"] = [it]
+    eb.save(b)
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 1 and json_item(KEY)["attempts"] >= 3
+    assert ex.pick(eb.load(), NOW) is None                                                        # nada executavel: o trabalho esgotado nao repete
+
+
+def test_a_json_row_already_in_step_with_its_pending_event_is_not_touched(clock):
+    store = seed_both(item())
+    it = json_item(KEY)
+    it.update(state="QUEUED", attempts=0)
+    b = eb.load()
+    b["queue"] = [it]
+    eb.save(b)
+    assert sq.rollback_apply(store)["applied"] == 0

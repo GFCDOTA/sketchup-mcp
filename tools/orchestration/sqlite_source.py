@@ -38,6 +38,7 @@ SOURCES = ("json", "sqlite")
 EVENT_TYPE = "CORRECTION_REQUESTED"
 PRODUCER = "event_bridge"
 PARKED_STATES = frozenset({"SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"})
+JSON_MAX_ATTEMPTS = 3                                                                          # o `pick` JSON so escolhe item com `attempts` abaixo disto (ex.MAX_ATTEMPTS)
 JSON_PICKABLE = frozenset({"QUEUED", "BLOCKED_CREDENTIALS", "BLOCKED_CLI", "BLOCKED_WORKTREE", "FAILED"})        # os estados que o `pick` da fila JSON volta a escolher
 DAY_S = 24 * 3600
 MAX_MALFORMED_PER_CLAIM = 20                                                   # evento malformado e descartado; nao ha loop infinito
@@ -287,7 +288,9 @@ def rollback_plan(store: EventStore, bstate: dict, now: float | None = None) -> 
         if key in live:
             continue
         it = rows.get(key)
-        pending = ev["status"] == "PENDING" and ev["attempt"] < ev["max_attempts"]
+        expired = ev["status"] == "RUNNING" and ev["lease_until"] <= now                  # executor morreu depois do claim: o evento volta a ser reivindicavel (ou esgotou)
+        exhausted = ev["status"] == "DLQ" or (expired and ev["attempt"] >= ev["max_attempts"])
+        pending = (ev["status"] == "PENDING" or expired) and ev["attempt"] < ev["max_attempts"]
         if it is None:
             if pending:
                 item = item_from_event(ev, attempts=ev["attempt"])
@@ -301,11 +304,18 @@ def rollback_plan(store: EventStore, bstate: dict, now: float | None = None) -> 
                 additions.append({"key": item["key"], "item": item, "store_status": "PENDING"})
             continue
         if pending:
-            if it.get("state") not in JSON_PICKABLE:
+            wanted_retry = _iso(ev["available_at"]) if ev["available_at"] > now and ev["status"] == "PENDING" else None
+            row_retry = str(it.get("retry_after") or "")
+            retry_ok = row_retry == wanted_retry if wanted_retry else row_retry <= _iso(now)         # sem espera no evento: um retry_after futuro no JSON atrasaria o trabalho
+            if it.get("state") not in JSON_PICKABLE or int(it.get("attempts") or 0) != ev["attempt"] or not retry_ok:
                 changes.append({"key": it["key"], "from": it.get("state"), "to": "QUEUED" if ev["attempt"] == 0 else "FAILED", "store_status": "PENDING",
-                                "attempts": ev["attempt"], "retry_after": _iso(ev["available_at"]) if ev["available_at"] > now else None})
+                                "attempts": ev["attempt"], "retry_after": wanted_retry})
             continue
-        want = {"DONE": "DONE_AWAITING_REREVIEW", "SUPERSEDED": "SUPERSEDED", "DLQ": "FAILED"}.get(ev["status"])
+        if exhausted:                                                                     # DLQ (ou lease vencido na ultima tentativa): a fila JSON nao pode repetir nem executar de novo
+            if it.get("state") != "FAILED" or int(it.get("attempts") or 0) < JSON_MAX_ATTEMPTS:
+                changes.append({"key": it["key"], "from": it.get("state"), "to": "FAILED", "store_status": "DLQ"})
+            continue
+        want = {"DONE": "DONE_AWAITING_REREVIEW", "SUPERSEDED": "SUPERSEDED"}.get(ev["status"])
         if want and it.get("state") != want:
             changes.append({"key": it["key"], "from": it.get("state"), "to": want, "store_status": ev["status"]})
     return {"changes": changes, "blocked": blocked, "additions": additions, "unreconcilable": unreconcilable}
@@ -332,7 +342,7 @@ def rollback_apply(store: EventStore) -> dict:
                 else:
                     row.pop("retry_after", None)
             elif c["to"] == "FAILED":
-                row["attempts"] = max(row.get("attempts", 0), 3)
+                row["attempts"] = max(row.get("attempts", 0), JSON_MAX_ATTEMPTS)
                 row["last_error"] = row.get("last_error") or "dead-lettered no SQLite (rollback)"
         for a in plan["additions"]:
             b["queue"].append(a["item"])
