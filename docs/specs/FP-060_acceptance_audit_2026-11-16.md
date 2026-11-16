@@ -32,6 +32,9 @@ declarado concluído sem evidência verificável; a fonte de verdade do estado v
 | CLI retornou falso sucesso | FEITO | `is_error` e confirmação do HEAD publicado |
 | Codex não inspecionou | FEITO | `REVIEW_BLOCKED` |
 | CI vermelho | FEITO | pedido descartado; sem aprovação |
+| Codex alterou o workspace | FEITO | veredito invalidado e revisão bloqueada: `tests/test_closed_loop_lab.py::test_reviewer_that_alters_the_workspace_invalidates_its_own_verdict` e `tests/test_codex_reviewer.py::test_check_untouched_blocks_on_dirty_tree_or_moved_head` (guarda de segurança; worktree de revisão separada, `read-only`) |
+| Nenhuma tarefa (workers ociosos) | PARCIAL | sem pedido pronto o pool/laço ficam ociosos sem gastar cota: `test_an_event_waiting_for_checks_is_not_polled_again_inside_the_recheck_window` e `test_the_pool_default_idle_is_long_enough_not_to_burn_the_quota` (`tests/test_pr_lifecycle.py`, no #665); observado no laço real (ciclos sem evento). Falta o soak de 2 jobs sequenciais com a tarefa registrada |
+| Duas tarefas Ready (ordem do scheduler) | FEITO | `test_the_oldest_ready_request_goes_first_and_a_waiting_one_does_not_block_the_queue` (fila de revisão, #665) e a ordem do agendador de tarefas (`test_decide_skips_tasks_claimed_by_another_execution_and_resumes_its_own_first`, `tests/test_fp057_p2_scheduler.py`) |
 | Publisher indisponível | FEITO | outbox recuperável; reconciliação pelo marcador |
 | PR protegido | BLOQUEADO | `auto_merge` só mescla com a proteção exigindo aprovação independente (lida, nunca alterada); a proteção é configuração do proprietário |
 | Kill switch | EM PR | `AUTOMERGE_DISABLED` e `PR_LIFECYCLE_DISABLED` (#648/#665) |
