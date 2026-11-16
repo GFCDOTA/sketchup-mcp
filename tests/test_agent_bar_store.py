@@ -459,6 +459,23 @@ def test_basic_credentials_are_redacted_through_the_persisted_failure_to_the_pan
     assert "dXNlcjpwYXNzd29yZA" not in col.redact_secrets(raw)
 
 
+# -- revisao do Codex (#663, ae31eb2a): `Authorization: token <x>` (esquema do GitHub) passava inteiro --------------------------------------------------------
+@pytest.mark.parametrize("raw", ["Authorization: token abcdefghijklmnop", "authorization: TOKEN abcdefghijklmnop", "Proxy-Authorization: token abcdefghijklmnop",
+                                 "Authorization=token abcdefghijklmnop", "Authorization: abcdefghijklmnop", '"Authorization": "token abcdefghijklmnop"'])
+def test_github_token_scheme_credentials_are_redacted_through_the_persisted_failure_to_the_panel_and_the_copied_diagnostic(store, tmp_path, raw):
+    store.publish("CORRECTION_REQUESTED", "k", "pr:1", {"x": 1})
+    ev = store.claim(("CORRECTION_REQUESTED",), "w", 60, job_id="pr:1")
+    store.fail(ev, f"gh falhou: {raw}", retry_delay=900)
+    out = col.collect_store(tmp_path, NOW)
+    s = snap(out)
+    assert "abcdefghijklmnop" not in s.store_line() and "abcdefghijklmnop" not in str(out.get("last_error"))
+    assert "abcdefghijklmnop" not in col.redact_secrets(raw)
+
+
+def test_the_word_authorization_in_prose_is_not_mistaken_for_a_credential():
+    assert col.redact_secrets("authorization denied by the server") == "authorization denied by the server"
+
+
 def test_a_configured_store_path_with_a_credential_never_reaches_the_panel(tmp_path, monkeypatch):
     secret_dir = tmp_path / ("ghp_" + "z" * 30)
     secret_dir.mkdir()
