@@ -58,7 +58,7 @@ HEAD revisado de forma independente (`APPROVED`) com 9/9 checks. A decisão do `
 | A4 | parecer publicado como `fmmodesto` via Outbox | FEITO (execução real) |
 | A5 | REQUEST_CHANGES aciona o Claude; novo HEAD gera nova revisão | FEITO no #667 (PR `executor-ok` fora de caminho crítico); PRs do próprio FP-060 tocam caminhos críticos e são corrigidos na sessão do desenvolvedor, por desenho das guardas |
 | A6 | APPROVE libera o merge automático protegido | BLOQUEADO: depende da proteção da `develop` exigir 1 aprovação, descartar aprovações antigas e resolver conversas (script `configure_branch_protection.ps1`, executado pelo proprietário) |
-| A7 | reconciliação periódica recupera pedidos perdidos e PRs antigos | FEITO (execução real; ciclo de 60 s por causa da cota da API) |
+| A7 | reconciliação periódica recupera pedidos perdidos e PRs antigos | PARCIAL: a recuperação de pedidos perdidos e de PRs antigos foi comprovada em execução real, mas o critério exige ciclo de **30 s** e o laço roda a **60 s** (cota REST de 5000/h esgotada uma vez com 30 s e 3 listagens por ciclo). Pendência explícita: alinhar a frequência (cache da listagem por HEAD já reduz o custo; reavaliar 30 s com a tarefa registrada) ou alterar o critério na SPEC com aprovação |
 | A8 | recuperação após reinício do computador | ABERTO (tarefa agendada ainda não registrada) |
 | A9 | Project Board sincronizado | FEITO (`backlog_reconcile --apply`, 16 movimentos validados) |
 | A10 | independente da tarefa agendada externa | FEITO (nenhum passo lê essa tarefa) |
