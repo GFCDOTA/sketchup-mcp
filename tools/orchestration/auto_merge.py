@@ -44,14 +44,26 @@ GPT_LABEL = "gpt-review-required"
 REINFORCED_BODY = re.compile(r"confianca\s+HIGH", re.I)
 
 
-def outbox_provenance(store) -> Callable[[str, int, str], bool]:
+def outbox_provenance(store) -> Callable[..., bool]:
     """Prova de PROVENIENCIA que o texto de um review nao consegue forjar: o EventStore LOCAL registra, com producer `codex_reviewer` e status DONE, a publicacao do
     APPROVE deste repositorio, PR e HEAD (o `codex_reviewer` so conclui esse evento depois de gravar o parecer com a prova de isolamento dos testes). O marcador no
     corpo do review e publico; este registro nao."""
-    def check(repo: str, number: int, head: str) -> bool:
-        key = f"review:{repo}#{int(number)}:{head}:APPROVE"
+    def check(repo: str, number: int, head: str, review_id=None) -> bool:
+        """Com `review_id`, o registro precisa ser DESSE review (o publicador grava o id que o GitHub devolveu): um APPROVE do Codex dispensado nao empresta a
+        proveniencia a um review manual posterior que copie o marcador no mesmo HEAD."""
+        base = f"review:{repo}#{int(number)}:{head}:APPROVE"
         try:
-            return any(e["idempotency_key"] == key and e["producer"] == "codex_reviewer" and e["status"] == "DONE" for e in store.events(job_id=f"review:{repo}#{int(number)}"))
+            for e in store.events(job_id=f"review:{repo}#{int(number)}"):
+                if e["producer"] != "codex_reviewer" or e["status"] != "DONE" or not (e["idempotency_key"] == base or e["idempotency_key"].startswith(base + ":")):
+                    continue
+                if review_id is None:
+                    return True
+                try:
+                    if str(json.loads(e.get("result") or "{}").get("review_id")) == str(review_id):
+                        return True
+                except ValueError:
+                    continue
+            return False
         except Exception:  # noqa: BLE001 — sem como consultar o registro local = sem prova (fail-closed)
             return False
     return check
@@ -64,7 +76,8 @@ def reinforced(review: dict | None, repo: str, number: int, head: str, provenanc
     body = (review or {}).get("body") or ""
     marker = f"<!-- fp060-outbox-key:review:{repo}#{int(number)}:{head}:APPROVE -->"
     textual = bool(REINFORCED_BODY.search(body)) and marker in body and str((review or {}).get("commit_id", "")).lower() == head.lower()
-    return textual and provenance is not None and bool(provenance(repo, int(number), head))
+    rid = (review or {}).get("id")                                         # a proveniencia e do REVIEW selecionado, nao so do HEAD
+    return textual and rid is not None and provenance is not None and bool(provenance(repo, int(number), head, rid))
 HUMAN_LABELS = frozenset({"aprovação-humana-pendente", "aprovacao-humana-pendente", "needs-human", "human-decision", "bloqueio:human-decision",
                           "visual-review", "security", "governance", "blocked", "do-not-merge"})
 ALLOWED_SUFFIXES = (".py", ".md", ".txt", ".json")
@@ -356,10 +369,10 @@ def confirm_merged(gh: eb.Gh, repo: str, number: int, head: str) -> tuple[bool, 
 
 def default_provenance() -> Callable[[str, int, str], bool]:
     """O registro LOCAL do publicador (EventStore): so abre quando a decisao realmente precisa dele (caminho critico)."""
-    def check(repo: str, number: int, head: str) -> bool:
+    def check(repo: str, number: int, head: str, review_id=None) -> bool:
         try:
             from tools.orchestration.store_factory import get_store
-            return outbox_provenance(get_store())(repo, number, head)
+            return outbox_provenance(get_store())(repo, number, head, review_id)
         except Exception:  # noqa: BLE001 — sem registro local = sem prova
             return False
     return check

@@ -16,7 +16,7 @@ CFG = guards.load_config()
 ON = (True, "")
 
 
-def ALWAYS(repo, number, head):
+def ALWAYS(repo, number, head, review_id=None):
     """Proveniencia concedida (o registro local do publicador confirma): os testes de decisao pura nao constroem um EventStore."""
     return True
 
@@ -841,8 +841,29 @@ def test_the_real_publisher_of_this_base_produces_the_marker_and_the_local_recor
     monkeypatch.setattr(cr.subprocess, "run", fake_run)
     v = {"pr": 7, "head_sha": HEAD, "verdict": "APPROVE", "confidence": "HIGH", "findings": [], "tests_reviewed": ["tests/test_x.py"]}
     cr.publish(v, "tok", REPO)
-    review = approval(commit=HEAD, body=posted["body"])
+    review = {**approval(commit=HEAD, body=posted["body"]), "id": 1}                                      # o id que o GitHub devolveu na publicacao
     assert am.reinforced(review, REPO, 7, HEAD, am.outbox_provenance(store)) is True                     # o fluxo REAL (marcador + registro local) satisfaz o gate
     assert am.reinforced(review, REPO, 7, HEAD, am.outbox_provenance(EventStore(tmp_path / "vazio.db"))) is False   # so o texto copiado nao basta
     cr.publish(v, "tok", REPO)                                                                            # idempotente
     assert sum(1 for e in store.events() if e["producer"] == "codex_reviewer") == 1
+
+
+
+def test_a_dismissed_codex_approval_does_not_lend_its_provenance_to_a_manual_review_copying_the_marker(tmp_path, monkeypatch):
+    from tools.orchestration import codex_reviewer as cr
+    from tools.orchestration.event_store import EventStore
+    store = EventStore(tmp_path / "store.db")
+    monkeypatch.setattr(cr.store_factory, "get_store", lambda: store)
+    posted = {}
+
+    def fake_run(argv, **kw):
+        posted["body"] = next(a[len("body="):] for a in argv if str(a).startswith("body="))
+        return type("P", (), {"returncode": 0, "stdout": "https://github.com/x/y/pull/7#pullrequestreview-111\n", "stderr": ""})()
+    monkeypatch.setattr(cr.subprocess, "run", fake_run)
+    cr.publish({"pr": 7, "head_sha": HEAD, "verdict": "APPROVE", "confidence": "HIGH", "findings": [], "tests_reviewed": ["t"]}, "tok", REPO)
+    codex_review = {**approval(commit=HEAD, body=posted["body"]), "id": 111}
+    manual_copy = {**approval(commit=HEAD, body=posted["body"]), "id": 222}                                   # outro review, mesmo HEAD, marcador copiado
+    check = am.outbox_provenance(store)
+    assert am.reinforced(codex_review, REPO, 7, HEAD, check) is True
+    assert am.reinforced(manual_copy, REPO, 7, HEAD, check) is False
+    assert am.reinforced({k: v for k, v in codex_review.items() if k != "id"}, REPO, 7, HEAD, check) is False   # review sem id: sem prova

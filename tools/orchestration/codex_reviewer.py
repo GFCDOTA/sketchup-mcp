@@ -368,15 +368,17 @@ def publish(v: dict, token: str, repo: str) -> str:
                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     if r.returncode != 0:
         raise ReviewError(f"publicacao falhou: {(r.stdout + r.stderr).strip()[:200]}")
-    record_provenance(repo, int(v["pr"]), v["head_sha"], event)
-    return r.stdout.strip()
+    url = r.stdout.strip()
+    review_id = url.rsplit("pullrequestreview-", 1)[-1] if "pullrequestreview-" in url else None
+    record_provenance(repo, int(v["pr"]), v["head_sha"], event, review_id=review_id)
+    return url
 
 
-def record_provenance(repo: str, pr: int, head: str, verdict: str, store=None) -> bool:
+def record_provenance(repo: str, pr: int, head: str, verdict: str, store=None, review_id: str | None = None) -> bool:
     """Registro LOCAL de que ESTE publicador postou o parecer (producer `codex_reviewer`, DONE, chave `review:<repo>#<PR>:<HEAD>:<VEREDITO>`): e a prova que o
     `auto_merge` exige para caminhos criticos e que o texto publico de um review nao forja. Idempotente. Falhar aqui nunca desfaz a publicacao: sem o registro, o gate
     so fica em WAIT (fail-closed)."""
-    key = f"review:{repo}#{int(pr)}:{head}:{verdict}"
+    key = f"review:{repo}#{int(pr)}:{head}:{verdict}" + (f":{review_id}" if review_id else "")   # um registro por REVIEW publicado
     try:
         if store is None:
             store = store_factory.get_store()
@@ -384,7 +386,7 @@ def record_provenance(repo: str, pr: int, head: str, verdict: str, store=None) -
                                       producer="codex_reviewer", aggregate_type="review_publication")
         claimed = store.claim_by_id(eid, f"codex-reviewer:{os.getpid()}", 30.0)
         if claimed is not None:
-            store.complete(claimed, {"published": True, "verdict": verdict})
+            store.complete(claimed, {"published": True, "verdict": verdict, "review_id": review_id})
         return any(e["idempotency_key"] == key and e["status"] == "DONE" for e in store.events(job_id=f"review:{repo}#{int(pr)}"))
     except Exception:  # noqa: BLE001
         return False
