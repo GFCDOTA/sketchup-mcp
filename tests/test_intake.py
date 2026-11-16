@@ -220,3 +220,24 @@ def test_the_execution_state_lock_is_held_from_reading_the_claims_until_the_requ
     monkeypatch.setattr(intake, "publish", publish_while_checking_the_lock)
     assert intake.main(["publish", "--apply"]) == 0
     assert held == [True]
+
+
+# -- 8a revisao do Codex (#641): todo claim ativo e externo ao intake, inclusive o de `claude` -------------------------------------------------------
+@pytest.mark.parametrize("holder", ["claude", "codex", "intake", "outro-agente"])
+def test_an_issue_with_an_active_claim_is_never_a_candidate_whoever_holds_it(holder):
+    state = es.default_state()
+    es.claim(state, 1, holder, "feat/x", "a" * 40, ["comp-a"])
+    res = plan([issue(1)], state=state)
+    assert res.candidate is None
+
+
+@pytest.mark.parametrize("holder", ["claude", "codex"])
+def test_an_active_claim_on_another_issue_does_not_block_an_unrelated_candidate(holder):
+    state = es.default_state()
+    es.claim(state, 2, holder, "feat/x", "a" * 40, ["comp-a"])
+    res = plan([issue(1), issue(2)], state=state)
+    assert res.candidate is not None and res.candidate.node.number == 1
+
+
+def test_the_intake_agent_name_never_collides_with_a_real_claim_holder():
+    assert intake.INTAKE_AGENT not in {"claude", "codex", "gpt", "executor"}

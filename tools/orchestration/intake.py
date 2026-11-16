@@ -31,6 +31,7 @@ ALLOWED_SPECS = frozenset({"FP-060"})
 EVENT_TYPE = "IMPLEMENT_REQUESTED"
 AGGREGATE = "issue"
 PRODUCER = "intake"
+INTAKE_AGENT = "intake"                 # nome que NUNCA detem um claim: todo claim ativo (inclusive o de `claude`) e externo ao intake, nos conflitos de Issue e de componente
 
 
 @dataclass
@@ -74,7 +75,7 @@ def refusal(verdict: bd.Verdict, readiness: dict[int, dict] | None = None, proje
 
 
 def plan(issues: list[dict], prs: list[dict], state: dict, statuses: dict[int, str] | None = None,
-         readiness: dict[int, dict] | None = None, agent: str = "claude") -> IntakePlan:
+         readiness: dict[int, dict] | None = None, agent: str = INTAKE_AGENT) -> IntakePlan:
     """O candidato do intake: a primeira Issue ELEGIVEL (ordem do agendador) que passa na barreira. Puro."""
     _task, verdicts = ts.decide(issues, prs, state, statuses, None, agent, None)       # readiness=None: ver o docstring do modulo
     skipped, chosen = [], None
@@ -83,6 +84,8 @@ def plan(issues: list[dict], prs: list[dict], state: dict, statuses: dict[int, s
         if not v.eligible:
             continue
         why = refusal(v, readiness, project_known=statuses is not None, known=known)
+        if why is None and v.node.number in es.active_claims(state):                 # qualquer claim ATIVO na Issue, de qualquer agente: nunca um pedido novo por cima
+            why = f"a Issue #{v.node.number} tem claim ativo de {state['claims'][str(v.node.number)].get('agent')!r}: nao e um pedido novo de implementacao"
         if why is None and chosen is None:
             chosen = v
         elif why is not None:
