@@ -299,6 +299,17 @@ def test_a_unix_path_with_spaces_under_an_arbitrary_root_is_removed_whole(path):
 
 
 def test_plain_words_and_urls_around_a_path_are_not_swallowed():
-    text = "falha em /a/b e depois https://github.com/o/r/pull/7 e texto livre com barra a/b"
+    text = "falha em /a/b: depois https://github.com/o/r/pull/7 e texto livre com barra a/b"
     out = ce.scrub(text)
-    assert out.startswith("falha em <caminho> e depois https://github.com/o/r/pull/7") and out.endswith("e texto livre com barra a/b")
+    assert out.startswith("falha em <caminho>: depois https://github.com/o/r/pull/7") and out.endswith("e texto livre com barra a/b")
+
+
+@pytest.mark.parametrize("path", ["/custom/project/Finance Reports 2026.pdf", "/clientes/Maria Souza/Relatorio Final Q3 v2.docx", "/opt2/a/Meu Arquivo Secreto"])
+def test_the_whole_last_component_with_spaces_is_removed_under_any_root(path):
+    for text in (f"erro em {path}", f"erro em {path}: acesso negado", f"abrir '{path}'"):
+        out = ce.scrub(text)
+        for part in ("Finance", "Reports", "2026", "Souza", "Relatorio", "Secreto", "Meu", "pdf", "docx"):
+            assert part not in out, (part, out)
+        assert "<caminho>" in out
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(f"x {path}")
