@@ -396,6 +396,15 @@ class EventStore:
                 self._record_dlq_fact(db, ev, reason, now)
             return to
 
+    def release(self, ev: dict, reason: str, retry_delay: float = 1.0) -> str:
+        """Return a claimed event to PENDING WITHOUT consuming the attempt the claim took: for a RECOVERABLE environmental block (CLI/credentials/worktree/review fetch
+        unavailable) where the work never started. Fenced by the lease token like every other terminal write; the retry is delayed by `retry_delay`."""
+        with self._tx() as db:
+            now = self.clock()
+            self._owned_update(db, ev, "UPDATE events SET status='PENDING', error=?, available_at=?, attempt=MAX(attempt-1, 0), lease_until=0, updated_at=?",
+                               (reason[:2000], now + retry_delay, now), "PENDING", f"released (attempt not consumed): {reason[:300]}", now)
+        return "PENDING"
+
     def supersede(self, ev: dict, reason: str) -> None:
         """Discard a claimed event that refers to an outdated artifact version."""
         with self._tx() as db:

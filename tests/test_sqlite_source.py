@@ -400,3 +400,84 @@ def test_rollback_cli_exit_codes(clock, capsys):
     assert sq.main(["rollback-apply"]) == 1
     capsys.readouterr()
     assert ev_of(store, KEY)["status"] == "RUNNING"                                            # o CLI recusou e nao mexeu
+
+
+# -- 6a revisao do Codex (#636): bloqueio de ambiente nao gasta tentativa; rollback enxerga eventos so do SQLite ---------------------------------------
+@pytest.mark.parametrize("state", ["BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_WORKTREE", "BLOCKED_REVIEW_FETCH"])
+def test_a_recoverable_environment_block_never_exhausts_the_attempts_of_the_event(clock, state):
+    store = seed_both(item())
+    for _ in range(6):                                                                           # bem alem de max_attempts (3)
+        ev = store.claim((sq.EVENT_TYPE,), "owner", 60)
+        assert ev is not None, "o evento nao pode ter ido para a DLQ por bloqueios de ambiente"
+        store.release(ev, f"{state}: ambiente indisponivel", retry_delay=0)
+    e = ev_of(store, KEY)
+    assert e["status"] == "PENDING" and e["attempt"] == 0
+    ev = store.claim((sq.EVENT_TYPE,), "owner", 60)                                               # corrigido o ambiente: executa
+    assert ev is not None and ev["attempt"] == 1
+
+
+def test_settle_releases_a_blocked_item_and_still_fails_a_real_failure(clock):
+    store = seed_both(item())
+    ev = store.claim((sq.EVENT_TYPE,), "o", 60)
+    assert sq._settle(store, ev, {"state": "BLOCKED_CLI", "last_error": "sem claude"}, None, 60) == "PENDING"
+    assert ev_of(store, KEY)["attempt"] == 0
+    clock.t += 120                                                                                # passa o atraso do retry
+    ev = store.claim((sq.EVENT_TYPE,), "o", 60)
+    assert sq._settle(store, ev, {"state": "FAILED", "last_error": "falhou"}, None, 60) == "PENDING"
+    assert ev_of(store, KEY)["attempt"] == 1                                                      # falha real continua gastando a tentativa
+
+
+def test_a_release_with_a_lost_lease_is_discarded(clock):
+    store = seed_both(item())
+    ev = store.claim((sq.EVENT_TYPE,), "o", 60)
+    clock.t += 120
+    with pytest.raises(sq.LeaseLost):
+        store.release(ev, "tarde demais")
+
+
+def sqlite_only_event(store, n=5, **kw):
+    other = item(key=f"review:{n}:8:{HEAD}", event_id=f"review:{n}", pr=8)
+    store.publish(**sq.store_args_from_item(other))                                              # existe SO no SQLite (o JSON nunca o teve)
+    return other
+
+
+def test_rollback_is_blocked_by_a_live_lease_on_an_event_that_exists_only_in_sqlite(clock):
+    store = seed_both(item())
+    other = sqlite_only_event(store)
+    ev = store.claim((sq.EVENT_TYPE,), "executor-vivo", 600, job_id="pr:8")
+    plan = sq.rollback_plan(store, eb.load())
+    assert [b["owner"] for b in plan["blocked"]] == ["executor-vivo"] and plan["blocked"][0]["key"] == other["key"] and ev
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 0 and "lease vivo" in out["refused"]
+
+
+def test_a_pending_event_only_in_sqlite_is_brought_into_the_json_queue_with_its_attempts(clock):
+    store = seed_both(item())
+    other = sqlite_only_event(store)
+    ev = store.claim((sq.EVENT_TYPE,), "o", 60, job_id="pr:8")
+    store.fail(ev, "falha transitoria", retry_delay=900)                                          # PENDING, attempt 1, em backoff
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 1 and [a["key"] for a in out["additions"]] == [other["key"]]
+    row = json_item(other["key"])
+    assert row["state"] == "FAILED" and row["attempts"] == 1 and row["retry_after"] == sq._iso(clock.t + 900) and row["pr"] == 8
+
+
+def test_a_pending_event_whose_json_row_is_blocked_review_fetch_becomes_retryable_after_rollback(clock):
+    store = seed_both(item())
+    ev = store.claim((sq.EVENT_TYPE,), "o", 60)
+    it = json_item(KEY)
+    it["state"] = "BLOCKED_REVIEW_FETCH"                                                          # o espelho reverso gravou isto
+    b = eb.load()
+    b["queue"] = [it]
+    eb.save(b)
+    store.release(ev, "busca do review falhou", retry_delay=0)
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 1 and json_item(KEY)["state"] == "QUEUED" and json_item(KEY)["attempts"] == 0
+    assert ex.pick(eb.load(), NOW)["key"] == KEY
+
+
+def test_an_unreconcilable_pending_event_refuses_the_rollback(clock):
+    store = seed_both(item())
+    store.publish(event_type=sq.EVENT_TYPE, idempotency_key="review:x:9:abc", job_id="pr:9", payload={"pr": "nao-inteiro"}, producer=sq.PRODUCER)
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 0 and "sem review executavel" in out["refused"] and len(out["unreconcilable"]) == 1
