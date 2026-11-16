@@ -215,10 +215,16 @@ def test_main_exits_3_and_never_polls_when_gh_is_the_wrong_account(monkeypatch, 
     assert "fmmodesto" in capsys.readouterr().out and not (tmp_path / "b.json").exists()
 
 
-def test_launcher_contract_checks_the_login_not_only_that_gh_is_authenticated():
+def test_launcher_contract_leaves_the_identity_check_to_the_python_loop_so_a_github_outage_at_logon_cannot_kill_it_early():
     ps1 = (Path(__file__).resolve().parents[1] / "tools/orchestration/run_event_bridge.ps1").read_text(encoding="utf-8")
-    assert "api user" in ps1 and "ExpectedLogin" in ps1 and "fmodesto30" in ps1 and "exit 3" in ps1
+    assert "api user" not in ps1 and "auth status" not in ps1               # a verificacao (fail-closed) e do `event_executor`, com espera persistida e recuperacao
+    assert "ExpectedLogin" in ps1                                           # o parametro continua aceito (tarefas agendadas existentes), mas quem decide e a politica
     assert "--execute" in ps1 and "if ($Execute)" in ps1                    # executar so com -Execute explicito
+    import inspect
+
+    from tools.orchestration import event_executor as executor
+    src = inspect.getsource(executor.main)
+    assert "wait_for_identity" in src and src.index("initial_wait") < src.index("wait_for_identity")      # espera persistida ANTES de qualquer chamada ao GitHub
 
 
 def test_gh_json_decodes_the_gh_output_as_utf8_regardless_of_the_locale(monkeypatch):

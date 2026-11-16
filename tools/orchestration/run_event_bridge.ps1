@@ -13,11 +13,9 @@ if (-not $gh) { $gh = "C:\Program Files\GitHub CLI\gh.exe" }
 if (-not (Test-Path $gh)) { [Console]::Error.WriteLine("gh CLI nao encontrado"); exit 2 }
 $env:GH_BIN = $gh
 Remove-Item Env:GH_TOKEN -ErrorAction SilentlyContinue
-& $gh auth status *> $null
-if ($LASTEXITCODE -ne 0) { [Console]::Error.WriteLine("gh sem login: rode 'gh auth login' como o executor"); exit 3 }
-# Fail-closed: estar logado nao basta, tem de ser a conta EXECUTORA (nunca o revisor fmmodesto nem outra)
-$login = (& $gh api user --jq .login).Trim()
-if ($login -ne $ExpectedLogin) { [Console]::Error.WriteLine("gh autenticado como '$login'; o bridge so roda como '$ExpectedLogin'"); exit 3 }
+# A IDENTIDADE (login = executor, nunca o revisor) e verificada pelo PROCESSO PYTHON, fail-closed e com recuperacao: `event_executor run` espera o backoff persistido ANTES de
+# qualquer chamada ao GitHub e, se o GitHub/`gh` estiver indisponivel no logon ou no reinicio, repete com backoff em vez de sair (a tarefa agendada tem so 3 reinicios).
+# So uma conta ERRADA e fatal (codigo 3). Este launcher NAO chama `gh` para isso: uma indisponibilidade no logon o derrubaria antes de chegar a essa recuperacao.
 $logDir = Join-Path $repo "runs\governance"
 New-Item -ItemType Directory -Force $logDir | Out-Null
 $log = Join-Path $logDir "event_bridge.log"

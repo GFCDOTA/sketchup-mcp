@@ -28,7 +28,7 @@ def test_helper_and_launcher_are_ascii_only_and_the_launcher_no_longer_uses_tee_
     code = "\n".join(line for line in ps1.splitlines() if not line.lstrip().startswith("#"))
     assert "Tee-Object" not in code and "Write-BridgeLog" in code and "Initialize-BridgeLog" in code
     assert "event_bridge_log.ps1" in code and "PYTHONUTF8" in code
-    assert "api user" in ps1 and "exit 3" in ps1 and "if ($Execute)" in ps1   # identidade e opt-in de -Execute intactos
+    assert "api user" not in ps1 and "if ($Execute)" in ps1   # identidade e do loop Python (espera+recuperacao); opt-in de -Execute intacto
 
 
 @needs_ps
