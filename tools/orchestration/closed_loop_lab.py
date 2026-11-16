@@ -931,8 +931,10 @@ def report(lab: Lab, store: EventStore) -> dict:
     evidence = recorded_test_evidence(events)
     sandboxed = tests_sandboxed(evidence)
     outbox, expected, in_ledger = store.outbox_entries(), expected_publications(events), ledger_keys(lab)
-    all_published = bool(expected) and in_ledger is not None and sorted(in_ledger) == sorted(expected) and all(
-        o["status"] == "DONE" for o in outbox)
+    # cada chave esperada tem de existir no ledger E no outbox (uma entrada por chave, em DONE): ledger integro com outbox vazio NAO prova publicacao via outbox
+    outbox_keys = sorted(o["idempotency_key"] for o in outbox)
+    all_published = (bool(expected) and in_ledger is not None and sorted(in_ledger) == sorted(expected) and outbox_keys == sorted(expected)
+                     and all(o["status"] == "DONE" for o in outbox))
     journal_ok, journal_error = reconciliation_proof(lab)
     consumed =[e for e in events if fault and e["event_type"] in AGENT_EVENTS[FAULTS[fault][0]]]
     faulted_runs = [r for r in runs if fault and r["agent"] == FAULTS[fault][0]]

@@ -1190,6 +1190,20 @@ def test_report_fails_when_no_publication_was_interrupted(env, fake_sandbox):
     assert rep["criteria"]["verdicts_published_once_via_outbox"] is True and rep["verdict"] == "FAIL"
 
 
+@pytest.mark.parametrize("delete", ["all", "one"])
+def test_an_intact_ledger_with_missing_outbox_entries_does_not_prove_publication_via_outbox(env, fake_sandbox, delete):
+    import sqlite3
+    lab, store = env
+    closed_loop(sandboxed_lab(lab), store)
+    assert lab_mod.report(lab, store)["criteria"]["verdicts_published_once_via_outbox"] is True
+    with sqlite3.connect(store.path) as db:                                                    # o ledger fica integro; so o outbox perde a prova
+        db.execute("DELETE FROM outbox" if delete == "all" else "DELETE FROM outbox WHERE id = (SELECT MIN(id) FROM outbox)")
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["criteria"]["verdicts_published_once_via_outbox"] is False and rep["verdict"] == "FAIL"
+
+
 @pytest.mark.parametrize("tamper", ["duplicate", "missing", "foreign"])
 def test_report_fails_when_the_ledger_does_not_match_the_verdicts_exactly_once(env, fake_sandbox, tamper):
     lab, store = env
