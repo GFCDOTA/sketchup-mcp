@@ -331,7 +331,7 @@ def test_ensure_remote_branch_adopts_only_a_single_commit_of_the_executor_and_ne
     base_answers = {"ls-remote": (0, f"{other}\trefs/heads/{BRANCH}"), "fetch": (0, ""), "rev-list": (0, "1"), "rev-parse": (0, BASE),
                     "log": (0, "exec@x.dev"), "config": (0, "exec@x.dev")}
     assert iw.ensure_remote_branch(Path("."), BRANCH, BASE, Git(base_answers))[0] == "RESUMABLE"
-    for change in ({"rev-list": (0, "2")}, {"rev-parse": (0, "e" * 40)}, {"log": (0, "alguem@x.dev")}, {"config": (0, "")}):
+    for change in ({"rev-list": (0, "2")}, {"merge-base": (1, "")}, {"log": (0, "alguem@x.dev")}, {"config": (0, "")}):
         git = Git({**base_answers, **change})
         assert iw.ensure_remote_branch(Path("."), BRANCH, BASE, git)[0] == "CONFLICT", change
         assert not any(c[0] == "push" for c in git.calls)                                          # nunca sobrescreve
@@ -425,3 +425,53 @@ def test_create_pr_applies_every_label_it_is_given(monkeypatch):
     iw.create_pr(BRANCH, TITLE, N, REPO, runner=runner, extra_labels=("automerge-ok",))
     got = [seen[0][i + 1] for i, a in enumerate(seen[0]) if a == "--label"]
     assert got == [ex.guards.load_config().label, "automerge-ok"]
+
+
+# -- 7a revisao do Codex (#646): opt-in lida de novo, retomada com develop avancado, `Relates to` no preflight ------------------------------------------
+def test_an_automerge_opt_in_withdrawn_during_the_run_does_not_reach_the_pr(world, monkeypatch):
+    gh = Gh(issue={"number": N, "state": "open", "title": TITLE, "body": BODY,
+                   "labels": labels(intake.AUTH_LABEL, "spec:FP-060", iw.AUTOMERGE_ISSUE_LABEL)})
+
+    def deliver_and_human_withdraws(wt, branch, base, py, item, **kw):
+        gh.issue = {**gh.issue, "labels": labels(intake.AUTH_LABEL, "spec:FP-060")}                       # o humano retira `executor-automerge` durante a execucao
+        return ("PUSHED", "1 arquivo")
+    monkeypatch.setattr(ex, "deliver", deliver_and_human_withdraws)
+    res, _gh, _child = run(world, gh)
+    assert res["action"] == "DONE" and world.prs[0][3] == ()
+
+
+@pytest.mark.parametrize("boom", [RuntimeError("gh caiu"), ValueError("json ruim")])
+def test_an_unreadable_issue_when_opening_the_pr_leaves_the_automerge_opt_in_off(boom):
+    class Flaky(Gh):
+        def __call__(self, path):
+            if path == f"repos/{REPO}/issues/{N}":
+                raise boom
+            return super().__call__(path)
+    assert iw._fresh_automerge_optin(Flaky(), REPO, N) is False
+    assert iw._fresh_automerge_optin(None, REPO, N) is False
+    assert iw._fresh_automerge_optin(Gh(issue={"state": "closed", "labels": labels(intake.AUTH_LABEL, iw.AUTOMERGE_ISSUE_LABEL)}), REPO, N) is False
+    assert iw._fresh_automerge_optin(Gh(issue={"state": "open", "labels": labels(iw.AUTOMERGE_ISSUE_LABEL)}), REPO, N) is False                # sem a autorizacao do intake
+
+
+def test_a_published_commit_on_an_older_develop_is_still_resumable_after_develop_advances():
+    other = "d" * 40
+    old_parent = "c" * 40                                                                                  # develop avancou: o pai do commit publicado nao e mais a base atual
+    answers = {"ls-remote": (0, f"{other}	refs/heads/{BRANCH}"), "fetch": (0, ""), "rev-list": (0, "1"), "rev-parse": (0, old_parent),
+               "merge-base": (0, ""), "log": (0, "exec@x.dev"), "config": (0, "exec@x.dev")}
+    git = Git(answers)
+    assert iw.ensure_remote_branch(Path("."), BRANCH, BASE, git)[0] == "RESUMABLE"
+    assert ["merge-base", "--is-ancestor", old_parent, BASE] in git.calls
+    assert iw.ensure_remote_branch(Path("."), BRANCH, BASE, Git({**answers, "merge-base": (1, "")}))[0] == "CONFLICT"      # pai fora do develop: trabalho alheio
+
+
+@pytest.mark.parametrize("body", [f"Relates to #{N}", f"relates to: #{N}", f"Refs #{N}", f"Ref: #{N}"])
+def test_an_open_pr_citing_the_issue_in_any_scheduler_format_supersedes_the_request(world, body):
+    gh = Gh(prs=[{"number": 5, "body": body, "head": {"ref": "outra"}}])
+    res, _gh, child = run(world, gh)
+    assert res["action"] == "SUPERSEDED" and "ja existe o PR #5" in res["reason"] and child.calls == []
+
+
+def test_a_pr_that_does_not_cite_the_issue_does_not_supersede_the_request(world):
+    gh = Gh(prs=[{"number": 5, "body": f"Relates to #{N + 1} e Refs #{N + 2}", "head": {"ref": "outra"}}])
+    res, _gh, _child = run(world, gh)
+    assert res["action"] == "DONE"

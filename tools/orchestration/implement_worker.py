@@ -28,6 +28,7 @@ from pathlib import Path
 from tools.orchestration import event_bridge as eb
 from tools.orchestration import event_executor as ex
 from tools.orchestration import intake
+from tools.validation import backlog_discovery as bd
 from tools.validation import execution_state as es
 
 PROMPT = """Voce e o EXECUTOR do repositorio {repo}. Tarefa automatica (FP-060, intake), Issue #{issue}, branch `{branch}` criada a partir de `develop` ({base}).
@@ -89,7 +90,7 @@ def preflight(item: dict, gh: eb.Gh, policy: dict, repo: str) -> tuple[str, str,
             return "SUPERSEDED", f"Issue #{n} foi editada desde o pedido: o intake publica um pedido novo", issue
         branch = branch_for(n, item["spec_hash"])
         for pr in gh(f"repos/{repo}/pulls?state=open&per_page=100") or []:
-            cites = re.search(rf"\brefs?\s*:?\s*#{n}\b", pr.get("body") or "", re.I)
+            cites = n in {int(x) for x in bd._REFS.findall(pr.get("body") or "")}              # a MESMA leitura de referencias do agendador (Ref/Refs/Relates to)
             if cites or (pr.get("head") or {}).get("ref") == branch:
                 return "SUPERSEDED", f"ja existe o PR #{pr.get('number')} para a Issue #{n}: nunca dois PRs", issue
         return "OK", "", issue
@@ -140,7 +141,10 @@ def ensure_remote_branch(wt: Path, branch: str, base: str, run=ex.git) -> tuple[
     rc2, parent = run(["rev-parse", f"{sha}^"], wt)
     rc3, committer = run(["log", "-1", "--format=%ce", sha], wt)
     rc4, me = run(["config", "user.email"], wt)
-    if rc or rc2 or rc3 or rc4 or count.strip() != "1" or parent.strip() != base or not me.strip() or committer.strip().lower() != me.strip().lower():
+    # o pai do commit publicado pode ser um `develop` ANTIGO (develop avancou entre a tentativa e a retomada): basta que ele ainda seja ancestral do `develop` atual
+    # e que o commit seja o UNICO fora dele (`base..sha` == 1); `--is-ancestor` devolve 0 (sim) ou 1 (nao)
+    rc5, _anc = run(["merge-base", "--is-ancestor", parent.strip(), base], wt) if not rc2 else (1, "")
+    if rc or rc2 or rc3 or rc4 or rc5 or count.strip() != "1" or not me.strip() or committer.strip().lower() != me.strip().lower():
         return "CONFLICT", conflict
     return "RESUMABLE", f"commit {sha[:12]} do executor ja publicado na branch; so falta o PR"
 
@@ -219,7 +223,7 @@ def handle(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, runner, c
     if state in ("CONFLICT", "ERROR"):
         return block("BLOCKED_WORKTREE", msg)
     if state == "RESUMABLE":                                                 # a tentativa anterior publicou (via `deliver`); so falta o PR
-        opened = _open_pr(item, owner, issue, branch, repo, t, base, "", key)
+        opened = _open_pr(item, owner, issue, branch, repo, t, base, "", key, gh)
         return opened if opened["action"] == "DONE" else fail(opened["reason"], "")
     if not ex.update_owned(key, owner, lambda it, b: b.setdefault("runs", []).append(es.now_iso(t)), now=t):
         return {"action": "LOST_LEASE", "item": key, "reason": "lease perdido antes de executar"}
@@ -250,7 +254,7 @@ def handle(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, runner, c
             delivery = ("ERROR", f"{type(exc).__name__}: {exc}"[:300])
         ex.write_log(key, f"delivery: {delivery}", "", {"delivery": delivery[0], "at": es.now_iso(t)})
     if delivery[0] == "PUSHED":
-        opened = _open_pr(item, owner, issue, branch, repo, t, base, log, key)
+        opened = _open_pr(item, owner, issue, branch, repo, t, base, log, key, gh)
         if opened["action"] == "DONE":
             return {**opened, "delivery": delivery[0]}
         delivery = ("ERROR", opened["reason"])
@@ -264,11 +268,25 @@ def handle(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, runner, c
     return fail(reason, log)
 
 
-def _open_pr(item: dict, owner: str, issue: dict, branch: str, repo: str, t: dt.datetime, base: str, log: str, key: str) -> dict:
+def _fresh_automerge_optin(gh: eb.Gh | None, repo: str, n: int) -> bool:
+    """A opt-in de merge automatico e a do MOMENTO de criar o PR: a Issue e lida DE NOVO (um humano pode ter retirado `executor-automerge` durante a execucao). Sem `gh`
+    ou com leitura falha/incompleta, NAO ha opt-in (fail-safe: o merge segue humano)."""
+    if gh is None:
+        return False
+    try:
+        fresh = gh(f"repos/{repo}/issues/{n}")
+        if not isinstance(fresh, dict) or fresh.get("state") != "open":
+            return False
+        names = {(x.get("name") if isinstance(x, dict) else x) for x in fresh.get("labels") or []}
+    except (RuntimeError, OSError, ValueError, TypeError, AttributeError, subprocess.SubprocessError):
+        return False
+    return AUTOMERGE_ISSUE_LABEL in names and intake.AUTH_LABEL in names
+
+
+def _open_pr(item: dict, owner: str, issue: dict, branch: str, repo: str, t: dt.datetime, base: str, log: str, key: str, gh: eb.Gh | None = None) -> dict:
     """Ultimo passo: abre o PR. DONE so quando o PR existe; falha devolve `action=FAILED` SEM gravar o estado (o chamador decide o retry)."""
     n = int(item["issue"])
-    names = {(x.get("name") if isinstance(x, dict) else x) for x in issue.get("labels") or []}
-    extra = (AUTOMERGE_PR_LABEL,) if AUTOMERGE_ISSUE_LABEL in names else ()
+    extra = (AUTOMERGE_PR_LABEL,) if _fresh_automerge_optin(gh, repo, n) else ()
     number, detail = create_pr(branch, issue.get("title") or f"Issue #{n}", n, repo, extra_labels=extra)
     if number is None:
         return {"action": "FAILED", "item": key, "reason": f"branch publicada, mas o PR nao abriu: {detail}"}
