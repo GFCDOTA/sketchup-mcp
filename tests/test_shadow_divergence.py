@@ -28,11 +28,12 @@ def codes(found):
     ("QUEUED", "PENDING"), ("RUNNING", "PENDING"),                         # o espelho so e atualizado quando o item JSON termina
     ("DONE_AWAITING_REREVIEW", "DONE"), ("SUPERSEDED", "SUPERSEDED"), ("REFUSED", "SUPERSEDED"), ("PARKED_UNSUPPORTED", "SUPERSEDED"),
     ("FAILED", "PENDING"), ("FAILED", "DLQ"), ("BLOCKED_CLI", "PENDING"), ("BLOCKED_CREDENTIALS", "DLQ"),
-    ("BLOCKED_WORKTREE", "PENDING"), ("BLOCKED_REVIEW_FETCH", "PENDING"),
+    ("BLOCKED_WORKTREE", "PENDING"), ("BLOCKED_REVIEW_FETCH", "DLQ"),
 ])
 def test_a_json_state_and_the_mirror_status_that_the_shadow_sync_produces_agree(state, status):
-    exhausted = {"attempts": sd.MAX_ATTEMPTS}                                  # DLQ so concorda quando o JSON tambem esgotou as tentativas
-    assert sd.compare([item(state=state, **exhausted)], [event(status=status)]) == []
+    # DLQ so concorda com o JSON esgotado; PENDING so concorda com um item que o JSON ainda pode escolher (menos de MAX_ATTEMPTS e estado pickable)
+    attempts = sd.MAX_ATTEMPTS if status == "DLQ" else 1
+    assert sd.compare([item(state=state, attempts=attempts)], [event(status=status)]) == []
 
 
 def test_items_that_are_not_mirrored_by_design_are_ignored():
@@ -239,3 +240,65 @@ def test_the_store_is_always_opened_with_the_sqlite_read_only_uri(tmp_path, monk
     monkeypatch.setattr(sd.sqlite3, "connect", lambda target, *a, **k: (seen.append((target, k.get("uri"))), real(target, *a, **k))[1])
     sd.ReadOnlyStore(db).events()
     assert len(seen) == 1 and seen[0][0].endswith("?mode=ro") and seen[0][1] is True
+
+
+# -- achados da 2a revisao do Codex: elegibilidade REAL dos dois lados e fila invalida ---------------------------------------------
+@pytest.mark.parametrize("state", ["FAILED", "BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_WORKTREE"])
+def test_an_exhausted_json_item_with_a_still_claimable_pending_event_is_a_divergence(state):
+    found = sd.compare([item(state=state, attempts=sd.MAX_ATTEMPTS)], [event(status="PENDING")])
+    assert codes(found) == [("STATE_MISMATCH", "k1")] and "PENDING" in found[0].detail                 # o JSON nao volta a escolher; o store ainda executaria
+
+
+@pytest.mark.parametrize("attempts", [0, 1, 2])
+def test_a_failed_json_item_with_attempts_left_and_a_pending_event_agree(attempts):
+    assert sd.compare([item(state="FAILED", attempts=attempts)], [event(status="PENDING")]) == []
+
+
+@pytest.mark.parametrize("attempts", [0, 1, sd.MAX_ATTEMPTS])
+def test_blocked_review_fetch_is_never_picked_by_the_json_executor_so_a_pending_event_diverges(attempts):
+    found = sd.compare([item(state="BLOCKED_REVIEW_FETCH", attempts=attempts)], [event(status="PENDING")])
+    assert codes(found) == [("STATE_MISMATCH", "k1")]
+
+
+def test_the_json_pick_states_in_the_detector_match_the_executor_picker():
+    import datetime as dt
+
+    from tools.orchestration import event_executor as ex
+    assert sd.MAX_ATTEMPTS == ex.MAX_ATTEMPTS
+    now = dt.datetime(2026, 11, 15, 12, tzinfo=dt.timezone.utc)
+    for state in sorted(sd.EXPECTED):
+        queue = [{"key": "x", "state": state, "attempts": 0}]
+        picked = ex.pick({"queue": queue, "runs": []}, now) is not None
+        assert picked == (state in sd.PICKABLE), state                                                  # a tabela do detector nao pode divergir do executor real
+
+
+@pytest.mark.parametrize("bad, fragment", [
+    ({"state": "QUEUED"}, "kind"),
+    ({"kind": 5}, "kind"),
+    ({"kind": "review", "state": "QUEUED", "event_id": "review:1", "pr": 7, "head_sha": "a" * 40}, "key"),
+    ({"kind": "review", "key": "k", "event_id": "review:1", "pr": 7, "head_sha": "a" * 40}, "state"),
+    ({"kind": "review", "key": "k", "state": "QUEUED", "pr": 7, "head_sha": "a" * 40}, "event_id"),
+    ({"kind": "review", "key": "k", "state": "QUEUED", "event_id": "review:1", "pr": "7", "head_sha": "a" * 40}, "pr"),
+    ({"kind": "review", "key": "k", "state": "QUEUED", "event_id": "review:1", "pr": True, "head_sha": "a" * 40}, "pr"),
+    ({"kind": "review", "key": "k", "state": "QUEUED", "event_id": "review:1", "pr": 7}, "head_sha"),
+    ({"kind": "review", "key": "k", "state": "QUEUED", "event_id": "review:1", "pr": 7, "head_sha": "a" * 40, "attempts": "2"}, "attempts"),
+    ({"kind": "review", "key": "k", "state": "QUEUED", "event_id": "review:1", "pr": 7, "head_sha": "a" * 40, "attempts": -1}, "attempts"),
+])
+def test_an_invalid_queue_item_is_a_structured_error_never_a_silent_ok(bad, fragment, tmp_path):
+    p = tmp_path / "event_bridge.json"
+    p.write_text(json.dumps({"queue": [bad]}), encoding="utf-8")
+    with pytest.raises(ValueError, match=fragment):
+        sd.read_queue(p)
+    with pytest.raises(ValueError, match=fragment):
+        sd.compare([bad], [])
+
+
+def test_main_reports_an_invalid_item_as_a_json_error_with_exit_2(tmp_path, monkeypatch, capsys):
+    p = tmp_path / "event_bridge.json"
+    p.write_text(json.dumps({"queue": [{"state": "QUEUED"}]}), encoding="utf-8")
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(p))
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "events.db"))
+    EventStore(tmp_path / "events.db")
+    assert sd.main(["--json"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["ok"] is False and "kind" in out["error"]

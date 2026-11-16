@@ -26,6 +26,9 @@ MIRROR_EVENT_TYPE = "CORRECTION_REQUESTED"
 MIRROR_PRODUCER = "event_bridge"
 MAX_ATTEMPTS = 3                                                    # `event_executor.MAX_ATTEMPTS`: um item JSON FAILED/BLOCKED com menos tentativas ainda pode ser escolhido
 RETRYABLE = frozenset({"FAILED", "BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_WORKTREE", "BLOCKED_REVIEW_FETCH"})
+# Os estados que `event_executor.pick()` ainda pode escolher (com menos de MAX_ATTEMPTS tentativas). `BLOCKED_REVIEW_FETCH` e retomavel pelo bridge, mas o
+# executor JSON NAO o escolhe: um evento PENDING espelhando-o seria trabalho que so o store executaria.
+PICKABLE = frozenset({"QUEUED", "FAILED", "BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_WORKTREE"})
 EXECUTABLE_EVENT = frozenset({"PENDING", "RUNNING"})                 # um evento assim ainda pode ser reivindicado/executado
 FINISHED = frozenset({"DONE_AWAITING_REREVIEW", "SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"})
 EXPECTED: dict[str, frozenset[str]] = {
@@ -56,7 +59,10 @@ def mirror_key(item: dict) -> str:
 def compare(queue: list[dict], events: list[dict]) -> list[Divergence]:
     mirror = {e["idempotency_key"]: e for e in events if e.get("producer") == MIRROR_PRODUCER and e.get("event_type") == MIRROR_EVENT_TYPE}
     found, matched = [], set()
-    for item in queue:
+    for n, item in enumerate(queue):
+        problem = invalid_item(item) if isinstance(item, dict) else "item que nao e objeto"
+        if problem:
+            raise ValueError(f"fila com item invalido #{n}: {problem}")           # nunca ignorar em silencio: um `ok` falso libera o cutover
         if item.get("kind") != "review":
             continue
         key, state = item["key"], item.get("state")
@@ -71,9 +77,15 @@ def compare(queue: list[dict], events: list[dict]) -> list[Divergence]:
         elif event["status"] not in allowed:
             code = "STALE_PENDING" if event["status"] == "PENDING" and state in FINISHED else "STATE_MISMATCH"
             found.append(Divergence(code, key, f"item {state} mas evento {event['status']} (esperado {'/'.join(sorted(allowed))})"))
-        elif event["status"] == "DLQ" and state in RETRYABLE and int(item.get("attempts") or 0) < MAX_ATTEMPTS:
-            # o evento esgotou as tentativas (DLQ nao e reivindicavel), mas a fila JSON ainda pode escolher o item: trabalho retomavel seria abandonado no cutover
-            found.append(Divergence("STATE_MISMATCH", key, f"item {state} com {item.get('attempts') or 0}/{MAX_ATTEMPTS} tentativas ainda executavel no JSON, mas evento DLQ"))
+        elif state in RETRYABLE:
+            pickable = state in PICKABLE and int(item.get("attempts") or 0) < MAX_ATTEMPTS               # o JSON ainda pode escolher este item?
+            if event["status"] == "DLQ" and pickable:
+                # o evento esgotou as tentativas (DLQ nao e reivindicavel), mas a fila JSON ainda pode escolher o item: trabalho retomavel seria abandonado no cutover
+                found.append(Divergence("STATE_MISMATCH", key, f"item {state} com {item.get('attempts') or 0}/{MAX_ATTEMPTS} tentativas ainda executavel no JSON, mas evento DLQ"))
+            elif event["status"] == "PENDING" and not pickable:
+                # o inverso: o JSON NAO volta a escolher o item (tentativas esgotadas ou estado nao escolhido), mas o store ainda pode reivindicar o evento
+                found.append(Divergence("STATE_MISMATCH", key, f"item {state} com {item.get('attempts') or 0}/{MAX_ATTEMPTS} tentativas que o executor JSON nao escolhe mais, "
+                                                              "mas evento PENDING ainda reivindicavel no store"))
     for idem, event in mirror.items():
         if idem in matched:
             continue
@@ -115,7 +127,30 @@ def read_queue(path: Path) -> list[dict]:
     queue = data.get("queue") if isinstance(data, dict) else None
     if not isinstance(queue, list) or any(not isinstance(i, dict) for i in queue):
         raise ValueError(f"fila JSON sem `queue` (lista de objetos): {path.name}")
+    for n, it in enumerate(queue):
+        problem = invalid_item(it)
+        if problem:
+            raise ValueError(f"fila JSON com item invalido #{n}: {problem}")
     return queue
+
+
+def invalid_item(item: dict) -> str:
+    """'' se o item da fila tem os campos e tipos que a comparacao usa; senao o problema (so nomes de campo, nunca o conteudo). Um item sem `kind` ou sem chave
+    seria ignorado ou quebraria a comparacao e poderia virar um `ok` falso: invalido e erro estruturado, nao divergencia."""
+    kind = item.get("kind")
+    if not isinstance(kind, str) or not kind:
+        return "campo `kind` ausente ou nao-texto"
+    if kind != "review":
+        return ""                                                    # comentarios nao sao espelhados: so exigem o `kind`
+    for field in ("key", "state", "event_id", "head_sha"):
+        if not isinstance(item.get(field), str) or not item[field]:
+            return f"review sem `{field}` (texto nao vazio)"
+    if not isinstance(item.get("pr"), int) or isinstance(item.get("pr"), bool):
+        return "review com `pr` que nao e inteiro"
+    attempts = item.get("attempts")
+    if attempts is not None and (not isinstance(attempts, int) or isinstance(attempts, bool) or attempts < 0):
+        return "review com `attempts` que nao e inteiro >= 0"
+    return ""
 
 
 def _load():
@@ -140,8 +175,9 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         found = collect(queue, store)
-    except sqlite3.Error as exc:
-        print(json.dumps({"ok": False, "error": f"sqlite: {exc}"[:200]}) if ns.json else f"erro: sqlite: {exc}")
+    except (sqlite3.Error, ValueError) as exc:
+        kind = "sqlite" if isinstance(exc, sqlite3.Error) else "fila"
+        print(json.dumps({"ok": False, "error": f"{kind}: {exc}"[:200]}) if ns.json else f"erro: {kind}: {exc}")
         return 2
     orphans = [d for d in found if d.code == "ORPHAN_IN_STORE"]
     errors = [d for d in found if d.code != "ORPHAN_IN_STORE"]
