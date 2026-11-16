@@ -163,6 +163,11 @@ def locked(path: Path | None = None, wait_s: float = 5.0):
     dentro da secao critica, solta e espera; (b) o dono novo GRAVA o proprio PID no inicio do arquivo, de modo que quem roda o protocolo antigo ve um dono vivo e
     espera (e limpa o PID ao sair). O que NAO e coberto: um processo antigo que ja passou da sua checagem de `O_EXCL` exatamente na mesma fracao de tempo em que
     o arquivo foi criado pelo novo: a migracao correta e reiniciar os processos antigos (a tarefa agendada do executor reinicia no proximo logon).
+    MIGRACAO OBRIGATORIA (os dois protocolos NAO convivem com garantia): (1) PARAR todo processo que roda o protocolo antigo (executores, listeners e o launcher agendado) ANTES
+    de subir o codigo novo; (2) so entao iniciar o novo. A convivencia acima e so uma rede de seguranca para a janela de troca, nao um modo suportado: um processo antigo que
+    observou o arquivo com mais de 60 s e pausou ANTES do `unlink` ainda pode apagar o arquivo que um processo novo ja usa e criar outro inode (POSIX), e o arquivo vazio e
+    recente que o protocolo novo deixa ao sair faz o antigo esperar ate 60 s (com o prazo padrao de 5 s ele falha). Ambos so ocorrem COM um processo antigo vivo; o novo
+    protocolo nunca apaga o arquivo exatamente para nao reabrir a corrida entre processos NOVOS, que e a que esta fechada aqui. Depois da migracao nao ha dono antigo.
     Falha ao abrir o arquivo (diretorio sem permissao, disco) levanta de imediato: nunca fica em laco. Sem o lock ate `wait_s`: TimeoutError."""
     import time
     p = (path or state_path()).with_suffix(".lock")
