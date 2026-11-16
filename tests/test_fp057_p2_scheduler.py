@@ -252,3 +252,101 @@ def test_a_permission_error_creating_the_lock_means_busy_and_is_retried(path, mo
     with es.locked(path, wait_s=5):
         pass
     assert len(calls) >= 3
+
+
+# ------------------------------------------- quebra de trava orfa sem corrida (achado HIGH da revisao independente do Codex no #643)
+def _dead_pid() -> int:
+    import subprocess
+    import sys
+    proc = subprocess.Popen([sys.executable, "-c", "pass"])
+    proc.wait()
+    return proc.pid
+
+
+def test_an_old_owner_never_removes_the_lock_that_replaced_its_own(path):
+    lock = path.with_suffix(".lock")
+    with es.locked(path):
+        lock.write_text("424242:token-do-novo-dono", encoding="utf-8")                      # a trava foi quebrada e outro dono criou a dele
+    assert lock.read_text(encoding="utf-8") == "424242:token-do-novo-dono"                  # sair da secao nao pode derrubar a trava do outro
+
+
+def test_break_stale_removes_a_dead_owners_lock_only_if_it_is_still_the_one_that_was_judged(path):
+    lock = path.with_suffix(".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    lock.write_text(f"{_dead_pid()}:abc", encoding="utf-8")
+    observed = lock.read_text(encoding="utf-8")
+    lock.write_text(f"{_dead_pid()}:outro", encoding="utf-8")                              # outro quebrador trocou a trava depois do julgamento
+    assert es._break_stale(lock, observed) is False and lock.exists()
+    assert es._break_stale(lock, lock.read_text(encoding="utf-8")) is True and not lock.exists()
+    assert not lock.with_name(lock.name + ".break").exists()                                 # a guarda sempre e solta
+
+
+def test_break_stale_does_not_break_a_lock_that_is_no_longer_orphaned(path):
+    lock = path.with_suffix(".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    import os
+    lock.write_text(f"{os.getpid() + 1_000_000_000}:abc", encoding="utf-8")
+    lock.write_text(f"{os.getpid()}:vivo", encoding="utf-8")                                 # o dono voltou a estar vivo (este processo) entre o julgamento e a guarda
+    assert es._break_stale(lock, "999999999:abc") is False and lock.exists()
+
+
+def test_only_one_breaker_works_on_a_stale_lock_at_a_time(path):
+    lock = path.with_suffix(".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    lock.write_text(f"{_dead_pid()}:abc", encoding="utf-8")
+    guard = lock.with_name(lock.name + ".break")
+    guard.write_text("outro quebrador", encoding="utf-8")                                    # ja ha um quebrador em curso
+    assert es._break_stale(lock, lock.read_text(encoding="utf-8")) is False and lock.exists() and guard.exists()
+
+
+def test_an_abandoned_break_guard_is_cleared_after_a_minute(path):
+    import os
+    import time
+    lock = path.with_suffix(".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    guard = lock.with_name(lock.name + ".break")
+    guard.write_text("quebrador morto", encoding="utf-8")
+    old = time.time() - 120
+    os.utime(guard, (old, old))
+    assert es._break_stale(lock, None) is False and not guard.exists()
+
+
+def test_threads_recovering_the_same_orphan_lock_never_share_the_critical_section(path):
+    lock = path.with_suffix(".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    inside, peak, errors, guard = [], [0], [], threading.Lock()
+
+    def run():
+        try:
+            with es.locked(path, wait_s=10):
+                with guard:
+                    inside.append(1)
+                    peak[0] = max(peak[0], len(inside))
+                import time
+                time.sleep(0.005)
+                with guard:
+                    inside.pop()
+        except BaseException as exc:                                                         # noqa: BLE001
+            errors.append(f"{type(exc).__name__}: {exc}")
+    for _ in range(12):
+        lock.write_text(f"{_dead_pid()}:orfa", encoding="utf-8")                              # cada rodada comeca com uma trava orfa
+        ts_ = [threading.Thread(target=run) for _ in range(6)]
+        [t.start() for t in ts_]
+        [t.join() for t in ts_]
+    assert errors == [] and peak[0] == 1                                                      # nunca dois dentro ao mesmo tempo
+
+
+def test_locked_breaks_a_stale_lock_only_through_the_serialized_breaker(path, monkeypatch):
+    lock = path.with_suffix(".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    content = f"{_dead_pid()}:orfa"
+    lock.write_text(content, encoding="utf-8")
+    seen = []
+    real = es._break_stale
+    monkeypatch.setattr(es, "_break_stale", lambda p, observed: (seen.append(observed), real(p, observed))[1])
+    removed = []
+    real_unlink = es._unlink_retry
+    monkeypatch.setattr(es, "_unlink_retry", lambda p, *a, **k: (removed.append(p.name), real_unlink(p, *a, **k))[1])
+    with es.locked(path):
+        pass
+    assert seen == [content] and removed[0] == lock.name and removed.count(lock.name) >= 1

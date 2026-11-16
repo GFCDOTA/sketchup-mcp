@@ -79,20 +79,24 @@ def pid_alive(pid: int) -> bool:
     return True
 
 
-def _lock_owner_dead(p: Path) -> bool:
-    """A trava guarda o PID do dono. Dono morto (crash duro DURANTE a secao critica, ex. heartbeat) => trava orfa: quebrar ja,
-    em vez de bloquear todo mundo por 60 s. Sem PID legivel (formato antigo/escrita parcial) => nao decide aqui (regra dos 60 s)."""
+def _read_lock(p: Path) -> str | None:
     try:
-        raw = p.read_text(encoding="utf-8").strip()
+        return p.read_text(encoding="utf-8").strip()
     except OSError:
-        return False
-    return raw.isdigit() and int(raw) != os.getpid() and not pid_alive(int(raw))
+        return None
 
 
-def _release(p: Path, tries: int = 100, pause: float = 0.02) -> None:
-    """Solta a trava. No Windows, outro thread/processo que acabou de abrir ou de dar `stat` no arquivo faz o `unlink` falhar com
-    PermissionError (WinError 32/5) por instantes; desistir ali deixava a trava presa e TODOS os demais esperavam ate o timeout.
-    Tenta de novo por ~2 s; se ainda assim nao soltar, a trava velha/dono morto (`locked`) a quebra depois."""
+def _lock_owner_dead(p: Path, raw: str | None = None) -> bool:
+    """A trava guarda `<pid>:<token>` do dono. Dono morto (crash duro DURANTE a secao critica, ex. heartbeat) => trava orfa: quebrar ja,
+    em vez de bloquear todo mundo por 60 s. Sem PID legivel (formato antigo/escrita parcial) => nao decide aqui (regra dos 60 s)."""
+    raw = _read_lock(p) if raw is None else raw
+    pid = (raw or "").split(":", 1)[0]
+    return pid.isdigit() and int(pid) != os.getpid() and not pid_alive(int(pid))
+
+
+def _unlink_retry(p: Path, tries: int = 100, pause: float = 0.02) -> None:
+    """No Windows, outro thread/processo que acabou de abrir ou de dar `stat` no arquivo faz o `unlink` falhar com PermissionError
+    (WinError 32/5) por instantes; desistir ali deixava a trava presa e TODOS os demais esperavam ate o timeout."""
     import time
     for _ in range(tries):
         try:
@@ -103,31 +107,80 @@ def _release(p: Path, tries: int = 100, pause: float = 0.02) -> None:
     p.unlink(missing_ok=True)
 
 
+def _release(p: Path, token: str) -> None:
+    """Solta A PROPRIA trava: so remove o arquivo se ele ainda tem o token deste dono. Se a trava foi quebrada (dono dado como morto ou velho
+    demais) e outro dono criou a dele, remover o arquivo derrubaria a trava do OUTRO e abriria a secao critica para um terceiro."""
+    import time
+    for _ in range(100):
+        raw = _read_lock(p)
+        if raw is not None and raw != token:
+            return
+        if raw is None and not p.exists():
+            return
+        try:
+            p.unlink(missing_ok=True)
+            return
+        except PermissionError:
+            time.sleep(0.02)
+
+
+def _break_stale(p: Path, observed: str | None) -> bool:
+    """Quebra uma trava julgada orfa/velha sem corrida: so UM quebrador por vez (guarda `.break`), e dentro da guarda a trava e RELIDA: se o conteudo mudou
+    desde o julgamento (outro quebrador ja a trocou) ou ela ja nao esta orfa/velha, nada e removido. Enquanto o arquivo velho existe ninguem consegue criar
+    a trava nova (`O_EXCL`), entao entre a releitura e o `unlink` so o dono original (que so remove o que tem o proprio token) pode mexer nele."""
+    import time
+    guard = p.with_name(p.name + ".break")
+    try:
+        fd = os.open(guard, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except (FileExistsError, PermissionError):
+        try:
+            if time.time() - guard.stat().st_mtime > 60:                 # guarda abandonada por um quebrador que morreu
+                _unlink_retry(guard)
+        except OSError:
+            pass
+        return False
+    os.close(fd)
+    try:
+        now = _read_lock(p)
+        try:
+            age = time.time() - p.stat().st_mtime
+        except OSError:
+            return False                                                 # ja foi solta: nada a quebrar
+        if now != observed or not (age > 60 or _lock_owner_dead(p, now)):
+            return False
+        _unlink_retry(p)
+        return True
+    finally:
+        _unlink_retry(guard)
+
+
 @contextlib.contextmanager
 def locked(path: Path | None = None, wait_s: float = 5.0):
-    """Trava exclusiva curta em torno de ler-alterar-gravar. Dono morto (PID gravado) ou trava velha (> 60 s) => quebrada.
+    """Trava exclusiva curta em torno de ler-alterar-gravar. Dono morto (PID gravado) ou trava velha (> 60 s) => quebrada (`_break_stale`).
     PermissionError ao criar/inspecionar a trava (Windows: arquivo em uso ou com exclusao pendente) significa OCUPADA, nao erro."""
     import time
+    import uuid
     p = (path or state_path()).with_suffix(".lock")
     p.parent.mkdir(parents=True, exist_ok=True)
+    token = f"{os.getpid()}:{uuid.uuid4().hex}"
     deadline = time.time() + wait_s
     while True:
         try:
             fd = os.open(p, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
             try:
-                os.write(fd, str(os.getpid()).encode("ascii"))
+                os.write(fd, token.encode("ascii"))
             finally:
                 os.close(fd)
             break
         except (FileExistsError, PermissionError):
+            observed = _read_lock(p)
             try:
                 age = time.time() - p.stat().st_mtime
             except FileNotFoundError:
                 continue                                             # o dono soltou a trava entre o open e o stat: tenta de novo
             except PermissionError:
                 age = 0.0                                            # exclusao pendente: ainda ocupada, olha de novo
-            if age > 60 or _lock_owner_dead(p):
-                _release(p)
+            if (age > 60 or _lock_owner_dead(p, observed)) and _break_stale(p, observed):
                 continue
             if time.time() > deadline:
                 raise TimeoutError(f"trava do estado de execucao ocupada: {p}") from None
@@ -135,7 +188,7 @@ def locked(path: Path | None = None, wait_s: float = 5.0):
     try:
         yield
     finally:
-        _release(p)
+        _release(p, token)
 
 
 def now_iso(now: dt.datetime | None = None) -> str:
