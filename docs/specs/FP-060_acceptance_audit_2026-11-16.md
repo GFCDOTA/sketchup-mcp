@@ -40,6 +40,9 @@ declarado concluído sem evidência verificável; a fonte de verdade do estado v
 
 ## 3. Critérios §12.1 (acionamento automático do Codex)
 
+Fonte dos critérios A1–A11: `docs/specs/FP-060_event_driven_agent_orchestration.md` §12.1, que **ainda não está em `develop`**: a seção é adicionada pelo PR #665
+(branch `feat/fp060-pr-lifecycle`, empilhado sobre o #648) e só passa a ser rastreável a partir do merge dele. Até lá, a numeração A1–A11 é a desta auditoria e do #665.
+
 Prova real (PR descartável #667, Issue #666), sem intervenção humana entre as etapas: PR aberto em rascunho -> rascunho finalizado e `fmmodesto` solicitado pelo
 `pr_lifecycle` -> `REVIEW_REQUESTED` no EventStore -> Codex real (`CHANGES_REQUESTED` no HEAD `c667f07`) -> executor com Claude real corrige e publica `0bfffe9` -> novo
 HEAD revisado de forma independente (`APPROVED`) com 9/9 checks. A decisão do `auto_merge` para esse HEAD é WAIT **somente** pela proteção da `develop` (ver abaixo).
