@@ -470,3 +470,42 @@ def test_a_pending_recovery_that_vanishes_between_exists_and_read_is_just_absent
         return real(path, *a, **k)
     monkeypatch.setattr(eb, "_read_bytes", vanish)
     assert eb._pending_state(p) is None
+
+
+# -- 7a revisao do Codex (#635): pendencia ilegivel com o oficial TAMBEM corrompido; durabilidade da troca ---------------------------------------------
+def test_when_both_the_official_file_and_the_pending_one_are_corrupt_the_pending_is_preserved_and_nothing_is_overwritten(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    pending_file = eb._pending_path(p)
+    p.write_bytes(b"\x00" * 64)
+    pending_file.write_bytes(b"{ pendente corrompido")                                                  # a evidencia da recuperacao anterior
+    with es.locked(p), pytest.raises(eb.PendingUnreadable):
+        eb.recover_state(p)
+    assert p.read_bytes() == b"\x00" * 64 and pending_file.read_bytes() == b"{ pendente corrompido" and quarantined(p) == []
+
+
+def test_a_readable_pending_next_to_a_still_corrupt_official_file_is_resumed_with_its_diagnosis(tmp_path):
+    p = tmp_path / "event_bridge.json"
+    p.write_bytes(b"\x00" * 64)
+    first = {**eb.default_bridge_state(), "diagnostics": [{"at": "t", "message": "diagnostico original"}],
+             "recovery": {"at": "t", "quarantine": "event_bridge.json.corrupt-20260101000000-1-abcdef"}}
+    eb._write_state(eb._pending_path(p), first)                                                         # a 1a recuperacao parou ANTES de mover o oficial
+    with es.locked(p):
+        out = eb.recover_state(p)
+    assert out["diagnostics"][0]["message"] == "diagnostico original"
+    assert [q.name for q in quarantined(p)] == ["event_bridge.json.corrupt-20260101000000-1-abcdef"] and quarantined(p)[0].read_bytes() == b"\x00" * 64
+    assert eb.load(p)["diagnostics"][0]["message"] == "diagnostico original" and not eb._pending_path(p).exists()
+
+
+@pytest.mark.skipif(os.name == "nt", reason="o sync de diretorio e no-op no Windows (NTFS)")
+def test_every_durable_replace_syncs_the_directory_on_posix(tmp_path, monkeypatch):
+    synced = []
+    monkeypatch.setattr(es, "fsync_dir", lambda d: synced.append(Path(d)))
+    p = tmp_path / "event_bridge.json"
+    es.write_durable(p, "{}")
+    es.replace_retry(p, tmp_path / "outro.json")
+    assert synced == [tmp_path, tmp_path]
+
+
+def test_fsync_dir_never_raises_even_for_a_missing_directory(tmp_path):
+    es.fsync_dir(tmp_path / "nao-existe")
+    es.fsync_dir(tmp_path)

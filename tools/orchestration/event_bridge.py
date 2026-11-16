@@ -141,11 +141,18 @@ def recover_state(path: Path | None = None) -> dict:
     # (3) o pendente toma o lugar do estado. Parar entre (2) e (3) nao perde nada: `load` le o pendente e a proxima recuperacao conclui o passo (3).
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d%H%M%S")
     candidate = p.with_name(f"{p.name}.corrupt-{stamp}-{os.getpid()}-{uuid.uuid4().hex[:6]}")
-    state = default_bridge_state()
-    diagnose(state, f"{reason}; preservado em {candidate.name}; estado limpo, reviews relidos do GitHub no proximo poll (cursor e vistos zerados); reviews "
-                    "re-aceitos ficam em BLOCKED_RECOVERY ate `release-recovery` (limites e contadores perdidos nao sao reconstituidos)")
-    state["recovery"] = {"at": es.now_iso(), "quarantine": candidate.name}
-    _write_state(_pending_path(p), state)
+    pending = _pending_state(p)                                  # a recuperacao ANTERIOR deixou um pendente? ilegivel LEVANTA PendingUnreadable: nunca o sobrescreve
+    if pending is not None:
+        state = pending                                          # pendente legivel (parada antes da quarentena): RETOMA com o diagnostico e o nome de quarentena ja gravados
+        named = (state.get("recovery") or {}).get("quarantine")
+        if isinstance(named, str) and named and "/" not in named and "\\" not in named:
+            candidate = p.with_name(named)
+    else:
+        state = default_bridge_state()
+        diagnose(state, f"{reason}; preservado em {candidate.name}; estado limpo, reviews relidos do GitHub no proximo poll (cursor e vistos zerados); reviews "
+                        "re-aceitos ficam em BLOCKED_RECOVERY ate `release-recovery` (limites e contadores perdidos nao sao reconstituidos)")
+        state["recovery"] = {"at": es.now_iso(), "quarantine": candidate.name}
+        _write_state(_pending_path(p), state)
     try:
         es.replace_retry(p, candidate)                           # atomico (com retry de leitor aberto no Windows); nome unico: nunca sobrescreve outra quarentena
     except FileNotFoundError:

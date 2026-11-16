@@ -57,6 +57,24 @@ def write_durable(p: Path, text: str) -> None:
         handle.flush()
         os.fsync(handle.fileno())
     replace_retry(tmp, p)
+    fsync_dir(p.parent)                                                  # a TROCA e uma alteracao do DIRETORIO: sem isto uma queda logo apos retornar pode desfaze-la (POSIX)
+
+
+def fsync_dir(directory: Path) -> None:
+    """Sincroniza o diretorio para que renames/criacoes ja feitos nele sobrevivam a uma queda de energia. Necessario em POSIX; o NTFS persiste a metadata no proprio
+    `os.replace` e nao permite abrir um diretorio com `os.open`, entao la e no-op. Falha de sync de diretorio nunca derruba a gravacao ja feita."""
+    if os.name == "nt":
+        return
+    try:
+        fd = os.open(directory, os.O_RDONLY)
+    except OSError:
+        return
+    try:
+        os.fsync(fd)
+    except OSError:
+        pass
+    finally:
+        os.close(fd)
 
 
 def replace_retry(src: Path, dst: Path, tries: int = 100, pause: float = 0.02) -> None:
@@ -66,6 +84,7 @@ def replace_retry(src: Path, dst: Path, tries: int = 100, pause: float = 0.02) -
     for attempt in range(tries):
         try:
             os.replace(src, dst)
+            fsync_dir(Path(dst).parent)                                  # durabilidade da troca (quarentena, promocao do pendente, gravacao do estado)
             return
         except PermissionError:
             if attempt + 1 == tries:
