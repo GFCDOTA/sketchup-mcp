@@ -264,7 +264,10 @@ def work(gh: eb.Gh, store: EventStore, policy: dict, repo: str = eb.REPO, review
          heartbeat_s: float = HEARTBEAT_S) -> dict:
     """Revisa UM PR: o evento PENDING mais antigo cujo PR esta aberto, no HEAD do pedido e com os checks obrigatorios VERDES. Nunca lanca."""
     owner = owner or f"review-worker:{os.getpid()}:{uuid.uuid4().hex[:6]}"
-    pending = [e for e in store.events() if e["producer"] == PRODUCER and e["event_type"] == EVENT_TYPE and e["status"] == "PENDING"]
+    now = store.clock()
+    # PENDING, ou RUNNING com o lease VENCIDO (o worker morreu no meio da revisao: o evento volta ao pool; o EventStore cerca o resultado do dono antigo)
+    pending = [e for e in store.events() if e["producer"] == PRODUCER and e["event_type"] == EVENT_TYPE
+               and (e["status"] == "PENDING" or (e["status"] == "RUNNING" and e["lease_until"] <= now))]
     waiting = []
     for ev in pending:
         p = _payload(ev)
