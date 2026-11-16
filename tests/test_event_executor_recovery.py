@@ -394,3 +394,53 @@ def test_kill_tree_returns_only_after_the_whole_job_is_empty():
     assert child._fp060_job.active_processes() >= 2
     ex.kill_tree(child)
     assert not alive(grand) and child.poll() is not None and child._fp060_job is None                 # sem espera: nao resta membro algum quando kill_tree volta
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_a_failing_member_list_does_not_skip_the_termination_of_the_job(monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    monkeypatch.setattr(ps.ProcessJob, "process_ids", lambda self: (_ for _ in ()).throw(ps.ProcessSupervisorError("consulta falhou")))
+    child = ex.spawn_contained([sys.executable, "-c", GRANDCHILD], stdout=subprocess.PIPE, text=True)
+    grand = int(child.stdout.readline())
+    ex.kill_tree(child)                                                                                # a lista falhou, mas o job e terminado e esvaziado
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline and alive(grand):
+        time.sleep(0.1)
+    assert not alive(grand) and child.poll() is not None
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_if_the_job_cannot_be_confirmed_empty_kill_tree_fails_closed_instead_of_returning_quietly(monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    monkeypatch.setattr(ps.ProcessJob, "wait_empty", lambda self, timeout=5.0: False)                  # o job nunca confirma esvaziar
+    child = ex.spawn_contained([sys.executable, "-c", "import time; time.sleep(60)"])
+    with pytest.raises(ex.ContainmentError, match="nao confirmada"):
+        ex.kill_tree(child)
+    child.wait(timeout=15)                                                                              # mesmo assim o filho foi derrubado (kill-on-close + p.kill)
+    assert child.poll() is not None
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_if_terminating_the_job_fails_the_error_is_reported_and_the_close_still_kills_the_tree(monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    monkeypatch.setattr(ps.ProcessJob, "terminate", lambda self: (_ for _ in ()).throw(ps.ProcessSupervisorError("TerminateJobObject recusado")))
+    child = ex.spawn_contained([sys.executable, "-c", GRANDCHILD], stdout=subprocess.PIPE, text=True)
+    grand = int(child.stdout.readline())
+    try:
+        ex.kill_tree(child)
+    except ex.ContainmentError as exc:
+        assert "TerminateJobObject" in str(exc)
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline and alive(grand):
+        time.sleep(0.1)
+    assert not alive(grand)                                                                             # o fechamento do job (kill-on-close) garantiu a arvore
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_default_runner_cancel_propagates_an_unconfirmed_termination_so_nobody_takes_over_the_worktree(monkeypatch):
+    from tools.orchestration import process_supervisor as ps
+    monkeypatch.setattr(ps.ProcessJob, "wait_empty", lambda self, timeout=5.0: False)
+    cancel = threading.Event()
+    threading.Timer(0.3, cancel.set).start()
+    with pytest.raises(ex.ContainmentError):
+        ex.default_runner([sys.executable, "-c", "import time; time.sleep(60)"], Path.cwd(), dict(os.environ), "", 120, cancel, poll_s=0.1)

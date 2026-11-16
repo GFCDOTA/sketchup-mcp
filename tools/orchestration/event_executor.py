@@ -286,6 +286,49 @@ def spawn_contained(argv: list, **kwargs) -> subprocess.Popen:
     return p
 
 
+def _end_job(p: subprocess.Popen, job) -> None:
+    """Encerra TODO o job do filho e CONFIRMA. Cada passo roda mesmo que o anterior falhe (a consulta de PIDs nao condiciona o `TerminateJobObject`), o resultado da espera nao
+    e ignorado e o fechamento do job (kill-on-close) e a ultima garantia. Se nao for possivel confirmar que a arvore terminou levanta `ContainmentError`: o chamador NAO pode
+    liberar a worktree/lease a outro executor com descendentes possivelmente vivos."""
+    from tools.orchestration import process_supervisor as ps
+    problems: list[str] = []
+    notes: list[str] = []                                                  # falha na LISTA de PIDs nao e fatal se o job foi confirmado vazio
+    members: list[int] = []
+    try:
+        members = job.process_ids()
+    except Exception as exc:  # noqa: BLE001 — sem lista de PIDs ainda da para terminar e esperar o job esvaziar
+        notes.append(f"lista de membros: {type(exc).__name__}")
+    try:
+        job.terminate()
+    except Exception as exc:  # noqa: BLE001
+        problems.append(f"TerminateJobObject: {type(exc).__name__}")
+    empty = False
+    try:
+        empty = job.wait_empty(5.0)                                        # o encerramento do job e assincrono
+    except Exception as exc:  # noqa: BLE001
+        problems.append(f"espera do job: {type(exc).__name__}")
+    gone = True
+    for pid in members:                                                    # e cada membro realmente saiu (o SO ainda desmonta PID e locks por alguns ms)
+        try:
+            gone = ps.wait_process_exit(pid, 5.0) and gone
+        except Exception:  # noqa: BLE001
+            gone = False
+    try:
+        job.close()                                                        # kill-on-close: ultima garantia; o job aberto tambem mantem membros ja mortos "vivos" para o SO
+    except Exception as exc:  # noqa: BLE001
+        problems.append(f"fechamento do job: {type(exc).__name__}")
+    p._fp060_job = None
+    if not empty or not gone:
+        problems.append("arvore nao confirmada como encerrada")
+        problems.extend(notes)
+    if problems:
+        try:
+            p.kill()
+        except OSError:
+            pass
+        raise ContainmentError("encerramento do job nao confirmado: " + "; ".join(problems))
+
+
 def kill_tree(p: subprocess.Popen) -> None:
     """Derruba a arvore do PROPRIO processo filho, nunca por nome de imagem. Filho de `spawn_contained`: `TerminateJobObject` encerra TODOS os descendentes de todas as geracoes
     (inclusive os criados concorrentemente e os que sobraram depois que o filho saiu). Filho sem job (Popen comum de teste/lab): `taskkill /T` no PID dele enquanto ele esta
@@ -295,18 +338,7 @@ def kill_tree(p: subprocess.Popen) -> None:
         return
     job = getattr(p, "_fp060_job", None)
     if job is not None:
-        try:
-            members = job.process_ids()
-            job.terminate()
-            job.wait_empty(5.0)                                            # o encerramento do job e assincrono: so devolve quando nenhum membro (nem o neto que segura um lock) resta
-            from tools.orchestration import process_supervisor as ps
-            for pid in members:                                            # e cada membro realmente saiu (o SO ainda desmonta o processo — PID e locks — por alguns ms)
-                ps.wait_process_exit(pid, 5.0)
-        except Exception:  # noqa: BLE001 — o filho ainda recebe p.kill() abaixo
-            pass
-        finally:
-            job.close()                                                    # o job mantem os membros ja mortos "vivos" para o SO enquanto aberto (PID ainda listado)
-            p._fp060_job = None
+        _end_job(p, job)
     elif p.poll() is None:
         try:
             subprocess.run(["taskkill", "/T", "/F", "/PID", str(p.pid)], capture_output=True)
