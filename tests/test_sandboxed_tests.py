@@ -4,6 +4,7 @@ Os testes `windows_only` sobem processos reais num AppContainer real, com arquiv
 agentes ou codigo de PR fora do laboratorio isolado."""
 from __future__ import annotations
 
+import json
 import os
 import socket
 import subprocess
@@ -391,3 +392,46 @@ def test_run_pytest_refuses_a_tree_that_contains_a_hard_link_before_running_any_
         sandboxed(tmp_path, tree, ["tests/test_ok.py"])
 
     assert not (tmp_path / "logs" / "sandbox_t_tests.out").exists()
+
+
+# -- a sonda REAL so aceita negacao de acesso confirmada (revisao independente do #617: `except OSError` virava FileNotFoundError/E-S em "denied") ----
+def run_probe(monkeypatch, capsys, behaviors):
+    """Executa o PROBE_SOURCE de verdade (o texto que vai para o sandbox) com `open` substituido: `behaviors` mapeia (acao) -> excecao ou None."""
+    import builtins
+    import sys as _sys
+
+    def fake_open(path, mode="r", *a, **k):
+        exc = behaviors["read" if "r" in mode else "write_inside" if str(path).endswith("inside") else "write"]
+        if exc is not None:
+            raise exc
+        import io
+        return io.BytesIO(b"conteudo")
+    monkeypatch.setattr(builtins, "open", fake_open)
+    monkeypatch.setattr(_sys, "argv", ["probe", "alvo-leitura", "alvo-escrita", "alvo-inside"])
+    exec(compile(sb.PROBE_SOURCE, "probe", "exec"), {"__name__": "__main__"})
+    return json.loads(capsys.readouterr().out.strip().splitlines()[-1])
+
+
+@pytest.mark.parametrize("exc,label", [(PermissionError(13, "negado"), "denied"), (FileNotFoundError(2, "nao existe"), "missing"),
+                                       (OSError(5, "erro de E/S"), "error:5"), (OSError(28, "disco cheio"), "error:28"), (IsADirectoryError(21, "e pasta"), "error:21")])
+def test_the_real_probe_labels_only_a_permission_error_as_denied(monkeypatch, capsys, exc, label):
+    seen = run_probe(monkeypatch, capsys, {"read": exc, "write": exc, "write_inside": None})
+    assert seen == {"read_outside": label, "write_outside": label, "write_inside": "allowed"}
+
+
+def test_the_real_probe_reports_allowed_when_nothing_stops_the_access(monkeypatch, capsys):
+    assert run_probe(monkeypatch, capsys, {"read": None, "write": None, "write_inside": None}) == {
+        "read_outside": "allowed", "write_outside": "allowed", "write_inside": "allowed"}
+
+
+@pytest.mark.parametrize("label", ["missing", "error:2", "error:5", "allowed", "", None])
+def test_a_probe_that_did_not_get_a_real_denial_fails_closed(label):
+    out = json.dumps({"read_outside": label, "write_outside": "denied", "write_inside": "allowed"})
+    assert any("leu arquivo fora" in g for g in sb.canary_gaps(0, out, "SEGREDO", False))
+    out = json.dumps({"read_outside": "denied", "write_outside": label, "write_inside": "allowed"})
+    assert any("escreveu fora" in g for g in sb.canary_gaps(0, out, "SEGREDO", False))
+
+
+def test_a_genuine_denial_with_a_working_workspace_passes_the_probe():
+    out = json.dumps({"read_outside": "denied", "write_outside": "denied", "write_inside": "allowed"})
+    assert sb.canary_gaps(0, out, "SEGREDO", False) == []
