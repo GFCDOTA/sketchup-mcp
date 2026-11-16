@@ -390,12 +390,18 @@ def _settle_after_exit(p: subprocess.Popen) -> str:
 DRAIN_S = 5.0                                                                  # depois de a arvore terminar, os pipes fecham: espera curta pela drenagem final
 
 
+class _Pumped(list):
+    """Saida lida linha a linha + se a leitura terminou por ERRO (e nao por EOF): leitura interrompida = saida possivelmente truncada."""
+    failed: str = ""
+
+
 def _pump(stream, sink: list) -> None:
     try:
         for chunk in iter(stream.readline, ""):                                # linha a linha: o que ja chegou nao se perde se o pipe nunca fechar
             sink.append(chunk)
-    except (OSError, ValueError):
-        pass
+    except (OSError, ValueError) as exc:                                       # NAO e drenagem completa: o runner bloqueia a entrega
+        if isinstance(sink, _Pumped):
+            sink.failed = f"{type(exc).__name__}: {exc}"[:120]
 
 
 def _feed(stream, text: str) -> None:
@@ -415,8 +421,8 @@ def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, c
     arvore e encerrada e CONFIRMADA antes de a saida ser drenada e do sucesso ser devolvido."""
     p = spawn_contained(argv, cwd=cwd, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                         text=True, encoding="utf-8", errors="replace")        # contido desde a primeira instrucao; sem Job Object o filho nao executa (ContainmentError)
-    out_b: list = []
-    err_b: list = []
+    out_b: _Pumped = _Pumped()
+    err_b: _Pumped = _Pumped()
     readers = [threading.Thread(target=_pump, args=(p.stdout, out_b), daemon=True), threading.Thread(target=_pump, args=(p.stderr, err_b), daemon=True)]
     for t in (*readers, threading.Thread(target=_feed, args=(p.stdin, stdin), daemon=True)):
         t.start()
@@ -443,8 +449,10 @@ def default_runner(argv: list, cwd: Path, env: dict, stdin: str, timeout: int, c
             rc = p.returncode if not note else -3
         for t in readers:
             t.join(DRAIN_S)
-        if any(t.is_alive() for t in readers):                                 # drenagem incompleta: a saida pode estar truncada => nunca sucesso
-            note += "\n[executor] saida do filho NAO drenada por completo: resultado incerto; entrega bloqueada (fail-closed)"
+        read_errors = [b.failed for b in (out_b, err_b) if b.failed]
+        if any(t.is_alive() for t in readers) or read_errors:                  # drenagem incompleta OU leitura interrompida por erro: saida possivelmente truncada
+            note += ("\n[executor] saida do filho NAO drenada por completo" + (f" (erro de leitura: {'; '.join(read_errors)})" if read_errors else "")
+                     + ": resultado incerto; entrega bloqueada (fail-closed)")
             if rc == 0:
                 rc = -4
         return rc, "".join(out_b), "".join(err_b) + note, timed_out

@@ -553,3 +553,24 @@ def test_an_undrained_output_never_returns_success(tmp_path, monkeypatch):
     monkeypatch.setattr(ex, "_pump", slow)
     rc, _out, err, _t = ex.default_runner([sys.executable, "-c", "print('ok')"], tmp_path, dict(os.environ), "", 60, threading.Event())
     assert rc == -4 and "NAO drenada" in err
+
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Job Objects do Windows")
+def test_a_read_error_after_a_valid_result_is_not_a_complete_drain_and_blocks_the_delivery(tmp_path, monkeypatch):
+    real_pump = ex._pump
+
+    class Breaks:
+        def __init__(self, stream):
+            self.stream, self.n = stream, 0
+
+        def readline(self):
+            self.n += 1
+            if self.n > 1:
+                raise OSError("pipe quebrado no meio da leitura")
+            return self.stream.readline()
+
+    monkeypatch.setattr(ex, "_pump", lambda stream, sink: real_pump(Breaks(stream), sink))
+    code = "import json; print(json.dumps({'type': 'result', 'is_error': False, 'result': 'ok'})); print('mais saida')"
+    rc, out, err, _t = ex.default_runner([sys.executable, "-c", code], tmp_path, dict(os.environ), "", 60, threading.Event())
+    assert '"type": "result"' in out and rc == -4 and "erro de leitura" in err and "pipe quebrado" in err
