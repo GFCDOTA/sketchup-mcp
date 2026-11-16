@@ -19,10 +19,19 @@ POLICY = {"reviewers": ["fmmodesto"], "executor_logins": ["fmodesto30"]}
 
 
 @pytest.fixture(autouse=True)
-def fresh_cache():
+def fresh_cache(monkeypatch):
     pl._FACTS.clear()
+    pl._RECHECK_AT.clear()
+    pl._LIST_CACHE.clear()
+    pl._REVIEWS_CACHE.clear()
+    monkeypatch.setattr(pl, "LIST_TTL_S", 0.0)                # os testes de decisao veem o estado novo a cada chamada; os de cota ligam os caches de proposito
+    monkeypatch.setattr(pl, "REVIEWS_TTL_S", 0.0)
+    monkeypatch.setattr(pl, "RECHECK_S", 0.0)                 # os testes de decisao reconsultam a cada chamada; o de cota liga a janela de proposito
     yield
     pl._FACTS.clear()
+    pl._RECHECK_AT.clear()
+    pl._LIST_CACHE.clear()
+    pl._REVIEWS_CACHE.clear()
 
 
 def runs(state="passed"):
@@ -591,3 +600,61 @@ def test_two_events_of_the_same_pr_never_run_at_once_even_with_a_pool(gov, store
 
 def test_the_pool_size_is_clamped_to_at_least_one():
     assert len(pl.ReviewPool(0, None, None, POLICY, REPO, lambda x: None).loops) == 1 and len(pl.ReviewPool(-3, None, None, POLICY, REPO, lambda x: None).loops) == 1
+
+
+# -- cota da API: o worker nao reconsulta o mesmo evento a cada tick (o laco real estourou os 5000/h) ---------------------------------------------------
+def test_an_event_waiting_for_checks_is_not_polled_again_inside_the_recheck_window(store, monkeypatch):
+    monkeypatch.setattr(pl, "RECHECK_S", 60.0)
+    w, rv = World().add(7, ci="pending"), Reviewer()
+    pl.enqueue(w, store, POLICY, REPO, execute=True)
+    pl.work(w, store, POLICY, REPO, rv)
+    first = len(w.calls)
+    for _ in range(5):
+        assert pl.work(w, store, POLICY, REPO, rv)["action"] == "IDLE"
+    assert len(w.calls) == first                                                                      # 5 ticks seguidos: ZERO chamadas novas ao GitHub
+    w.ci[7] = "passed"
+    pl._RECHECK_AT.clear()                                                                            # passada a janela, volta a consultar e revisa
+    assert pl.work(w, store, POLICY, REPO, rv)["action"] == "DONE"
+
+
+def test_a_rate_limit_error_backs_off_twice_as_long(store, monkeypatch):
+    monkeypatch.setattr(pl, "RECHECK_S", 60.0)
+
+    class Limited(World):
+        def __call__(self, path):
+            if "/pulls/7" in path:
+                raise RuntimeError("gh: API rate limit exceeded for user ID 1")
+            return super().__call__(path)
+    w = Limited().add(7)
+    pl.enqueue(World().add(7), store, POLICY, REPO, execute=True)
+    t0 = time.monotonic()
+    pl.work(w, store, POLICY, REPO, Reviewer())
+    until = next(iter(pl._RECHECK_AT.values()))
+    assert 110 < until - t0 < 130                                                                     # 2 x 60 s
+
+
+def test_the_pool_default_idle_is_long_enough_not_to_burn_the_quota():
+    assert pl.ReviewLoop(None, None, {}, REPO, lambda x: None).idle_s >= 15.0
+
+
+def test_one_reconcile_cycle_lists_the_open_prs_once_and_reuses_the_reviews(monkeypatch, store):
+    monkeypatch.setattr(pl, "LIST_TTL_S", 20.0)
+    monkeypatch.setattr(pl, "REVIEWS_TTL_S", 120.0)
+    w, wr = World().add(7).add(8, draft=True), Writes()
+    pl.reconcile_step(w, POLICY, REPO, False, None, wr)
+    lists = [c for c in w.calls if c.startswith(f"repos/{REPO}/pulls?state=open")]
+    assert len(lists) == 1                                                                           # prepare + enqueue: UMA listagem
+    before = len(w.calls)
+    pl.reconcile_step(w, POLICY, REPO, False, None, wr)
+    assert len([c for c in w.calls[before:] if "/reviews" in c]) == 0                                # os reviews do mesmo (PR, HEAD) vem do cache
+
+
+def test_a_new_head_invalidates_the_reviews_cache_by_key(monkeypatch):
+    monkeypatch.setattr(pl, "REVIEWS_TTL_S", 120.0)
+    w = World().add(7)
+    pl.reviews_of(w, REPO, 7, HEAD)
+    n = len(w.calls)
+    pl.reviews_of(w, REPO, 7, HEAD)
+    assert len(w.calls) == n
+    pl.reviews_of(w, REPO, 7, NEW)
+    assert len(w.calls) == n + 1

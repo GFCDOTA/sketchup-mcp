@@ -46,6 +46,8 @@ HEARTBEAT_S = 60.0
 MAX_ATTEMPTS = 5
 RETRY_S = 120.0
 FACTS_TTL_S = 600.0
+RECHECK_S = 90.0                                          # um evento que esperou os checks (ou deu erro) so e consultado de novo depois disto: poupa a cota da API (5000/h)
+_RECHECK_AT: dict[int, float] = {}
 REFS = re.compile(r"\brefs?\s*:?\s*#(\d+)", re.I)
 DEP_TEXT = re.compile(r"(?:empilhad[oa]\s+sobre|depends?\s+on|depende\s+de|stacked\s+on)\s+((?:#\d+\s*(?:,|\+|&|\be\b|\band\b)?\s*)+)", re.I)
 Runner = Callable[..., "subprocess.CompletedProcess"]
@@ -126,10 +128,37 @@ def _facts(gh: eb.Gh, repo: str, number: int, head: str, now: float) -> dict:
     return facts
 
 
+LIST_TTL_S = 20.0
+REVIEWS_TTL_S = 120.0
+_LIST_CACHE: dict[str, tuple[float, list[dict]]] = {}
+_REVIEWS_CACHE: dict[tuple, tuple[float, list[dict]]] = {}
+
+
+def open_prs(gh: eb.Gh, repo: str) -> list[dict]:
+    """Os PRs abertos: UMA chamada paginada por ciclo (prepare e enqueue compartilham; antes eram 3 por ciclo de 30 s)."""
+    hit = _LIST_CACHE.get(repo)
+    if hit and time.monotonic() - hit[0] < LIST_TTL_S:
+        return hit[1]
+    data = am.complete_list(gh, f"repos/{repo}/pulls?state=open&per_page=100")
+    _LIST_CACHE[repo] = (time.monotonic(), data)
+    return data
+
+
+def reviews_of(gh: eb.Gh, repo: str, number: int, head: str) -> list[dict]:
+    """Os reviews do PR, em cache por (PR, HEAD) por alguns minutos: o HEAD novo invalida sozinho; a cota da API (5000/h) nao aguenta 1 chamada por PR a cada 30 s."""
+    key = (repo, number, head.lower())
+    hit = _REVIEWS_CACHE.get(key)
+    if hit and time.monotonic() - hit[0] < REVIEWS_TTL_S:
+        return hit[1]
+    data = am.complete_list(gh, f"repos/{repo}/pulls/{number}/reviews?per_page=100")
+    _REVIEWS_CACHE[key] = (time.monotonic(), data)
+    return data
+
+
 def candidates(gh: eb.Gh, policy: dict, repo: str) -> list[dict]:
-    """PRs abertos do EXECUTOR, nao-fork, base develop (1 chamada paginada)."""
+    """PRs abertos do EXECUTOR, nao-fork, base develop."""
     executors = set(policy.get("executor_logins", []))
-    return [p for p in am.complete_list(gh, f"repos/{repo}/pulls?state=open&per_page=100")
+    return [p for p in open_prs(gh, repo)
             if (p.get("user") or {}).get("login") in executors and (p.get("base") or {}).get("ref") == am.BASE_BRANCH
             and ((p.get("head") or {}).get("repo") or {}).get("full_name") == repo]
 
@@ -145,7 +174,7 @@ def prepare(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False,
     now = time.time() if now is None else now
     reviewer = reviewer_login(policy)
     cands = candidates(gh, policy, repo)
-    open_heads = {p["number"]: (p.get("head") or {}).get("sha", "") for p in am.complete_list(gh, f"repos/{repo}/pulls?state=open&per_page=100")}
+    open_heads = {p["number"]: (p.get("head") or {}).get("sha", "") for p in open_prs(gh, repo)}
     identity: tuple[bool, str] | None = None
     rows = []
     for cand in cands:
@@ -174,7 +203,7 @@ def prepare(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = False,
                 rows.append(row)
                 continue
             if reviewer and reviewer.lower() not in _requested(cand):
-                reviews = am.complete_list(gh, f"repos/{repo}/pulls/{n}/reviews?per_page=100")
+                reviews = reviews_of(gh, repo, n, head)
                 if lifecycle.latest_review(reviews, head, policy) is None:
                     row["action"] = "REQUEST_REVIEW"
                     if execute:
@@ -227,7 +256,7 @@ def enqueue(gh: eb.Gh, store: EventStore | None, policy: dict, repo: str = eb.RE
             continue                                                                                    # ja existe para este HEAD (qualquer estado): nada a fazer, nada a consultar
         asked = reviewer in _requested(pr)
         if not asked:
-            reviews = am.complete_list(gh, f"repos/{repo}/pulls/{n}/reviews?per_page=100")
+            reviews = reviews_of(gh, repo, n, head)
             if lifecycle.latest_review(reviews, head, policy) is not None:
                 continue                                                                                # ja revisado neste HEAD
         row = {"pr": n, "head": head[:12], "requested": asked, "action": "ENQUEUE"}
@@ -279,6 +308,8 @@ def work(gh: eb.Gh, store: EventStore, policy: dict, repo: str = eb.REPO, review
                and (e["status"] == "PENDING" or (e["status"] == "RUNNING" and e["lease_until"] <= now))]
     waiting = []
     for ev in pending:
+        if _RECHECK_AT.get(ev["id"], 0.0) > time.monotonic():
+            continue                                                                                    # esperou ha pouco: nao refaz 2 chamadas por evento a cada tick
         p = _payload(ev)
         n, head = p.get("pr"), str(p.get("head_sha", "")).lower()
         try:
@@ -292,6 +323,7 @@ def work(gh: eb.Gh, store: EventStore, policy: dict, repo: str = eb.REPO, review
             state = lifecycle.checks_state(am.complete_check_runs(gh, repo, head))
         except (RuntimeError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as exc:
             waiting.append({"event": ev["id"], "pr": n, "action": "ERROR", "reason": f"{type(exc).__name__}: {exc}"[:200]})
+            _RECHECK_AT[ev["id"]] = time.monotonic() + RECHECK_S * (2 if "rate limit" in str(exc).lower() else 1)
             continue
         if state == "failed":
             owned = store.claim_by_id(ev["id"], owner, 30.0)
@@ -300,6 +332,7 @@ def work(gh: eb.Gh, store: EventStore, policy: dict, repo: str = eb.REPO, review
             continue
         if state != "passed":
             waiting.append({"event": ev["id"], "pr": n, "action": "WAIT_CHECKS", "reason": f"checks obrigatorios {state}"})
+            _RECHECK_AT[ev["id"]] = time.monotonic() + RECHECK_S
             continue
         claimed = store.claim_by_id(ev["id"], owner, LEASE_S)
         if claimed is None:
@@ -406,7 +439,7 @@ class ReviewLoop(threading.Thread):
     """A parte LENTA: revisa um PR por vez NESTA thread (a sessao do Codex leva minutos), sem atrasar a reconciliacao de 30 s. `emit(dict)` recebe cada resultado.
     `ReviewPool` roda N destas em paralelo: a exclusao entre elas e a do EventStore (claim atomico, lease, e UM PR por vez porque o job do evento e `pr:<N>`)."""
 
-    def __init__(self, gh: eb.Gh, store: EventStore, policy: dict, repo: str, emit: Callable[[dict], None], review: Callable[..., dict] | None = None, idle_s: float = 5.0,
+    def __init__(self, gh: eb.Gh, store: EventStore, policy: dict, repo: str, emit: Callable[[dict], None], review: Callable[..., dict] | None = None, idle_s: float = 15.0,
                  name: str = "review-loop"):
         super().__init__(daemon=True, name=name)
         self.gh, self.store, self.policy, self.repo, self.emit, self.review, self.idle_s = gh, store, policy, repo, emit, review, idle_s
