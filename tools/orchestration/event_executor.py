@@ -45,6 +45,7 @@ from tools.orchestration import event_bridge as eb
 from tools.orchestration import execution_guards as guards
 from tools.orchestration.executor_delivery import (  # noqa: F401  (run_checks reexportado)
     deliver,
+    remote_tip,
     run_checks,
 )
 from tools.validation import execution_state as es
@@ -338,11 +339,15 @@ def _utc(now: dt.datetime | None) -> dt.datetime:
 
 def recover(bstate: dict, now: dt.datetime | None = None) -> int:
     """RUNNING com lease vencido volta a QUEUED (sobrevive a reinicio/crash). Devolve quantos.
-    So o heartbeat do dono renova o lease; lease vencido = dono morto."""
+    So o heartbeat do dono renova o lease; lease vencido = dono morto. EXCECAO: se o dono ja tinha registrado `published_sha` (o commit a publicar, gravado
+    ANTES do push), o push pode ter sido aceito: o item vai para PUBLISH_PENDING, reconciliado com o remoto, e NUNCA reexecutado."""
     n = 0
     for t in bstate["queue"]:
         if t["state"] == "RUNNING" and (t.get("lease_expires") or "") < es.now_iso(now):
-            t["state"], t["last_error"] = "QUEUED", "lease vencido (execucao interrompida): reenfileirado"
+            if t.get("published_sha"):
+                t["state"], t["last_error"] = "PUBLISH_PENDING", "dono morreu depois de registrar o commit a publicar: publicacao pendente de reconciliacao com o remoto"
+            else:
+                t["state"], t["last_error"] = "QUEUED", "lease vencido (execucao interrompida): reenfileirado"
             t.pop("owner", None)
             t.pop("lease_expires", None)
             n += 1
@@ -544,11 +549,58 @@ def published_sha(item: dict, wt: Path, run=git) -> str:
     return sha if rc == 0 and re.fullmatch(r"[0-9a-f]{40}", sha) and sha != item["head_sha"].lower() else ""
 
 
-def confirm_head(item: dict, gh: eb.Gh, repo: str, pushed: bool, published: str = "", tries: int | None = None, pause: float | None = None) -> str:
-    """HEAD atual do PR. Logo depois de um push que deu certo, a API REST do GitHub pode devolver o HEAD ANTIGO por alguns segundos: tratar isso como "sem commit
-    novo" marcava FAILED uma entrega que tinha publicado (visto no E2E real da MT-06). Depois de `pushed`, repete a leitura ate a API mostrar OUTRO HEAD (o publicado,
-    ou um avanco externo: o chamador compara com `published`). Se a API seguir velha, devolve `published`: o `git push` com saida 0 e a prova, e nada mais e consultado
-    na rede (sem `ls-remote`, que podia travar o item). Erro/timeout da API vira leitura vazia, nunca excecao."""
+def remote_tip_of(wt: Path, branch: str) -> tuple[bool, str]:
+    """(consultou, sha) da ponta remota da branch, com prazo e sem prompt. Ponto unico (os testes o substituem)."""
+    return remote_tip(wt, branch, git)
+
+
+def settle_pending(gh: eb.Gh, repo: str = eb.REPO, now: dt.datetime | None = None) -> list[dict]:
+    """Reconcilia os itens PUBLISH_PENDING (push com resultado desconhecido) com a ponta REMOTA, ANTES de qualquer nova execucao. So le a rede e grava o desfecho:
+    remoto == commit registrado -> DONE_AWAITING_REREVIEW; remoto ainda no HEAD revisado (o push nao entrou) -> FAILED com retry; outra ponta -> SUPERSEDED;
+    sem como consultar -> continua pendente (nunca executa de novo no escuro)."""
+    try:
+        queue = eb.load()["queue"]
+    except (ValueError, OSError):
+        return []
+    out = []
+    for it in [i for i in queue if i.get("state") == "PUBLISH_PENDING"]:
+        key, sha = it["key"], str(it.get("published_sha") or "").lower()
+        try:
+            branch = (gh(f"repos/{repo}/pulls/{it['pr']}").get("head") or {}).get("ref") or ""
+        except (RuntimeError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+            branch = ""
+        ok, tip = remote_tip_of(repo_root(), branch) if BRANCH_OK.match(branch or "") else (False, "")
+        if not ok:
+            out.append({"item": key, "action": "PUBLISH_PENDING", "reason": "nao foi possivel consultar a ponta remota: segue pendente"})
+            continue
+
+        def settle(item_: dict, b: dict, tip=tip, sha=sha) -> None:
+            if item_.get("state") != "PUBLISH_PENDING":
+                return
+            if tip == sha:
+                item_["state"], item_["new_head"], item_["last_error"] = "DONE_AWAITING_REREVIEW", sha, ""
+                item_["attempts"] = item_.get("attempts", 0) + 1
+            elif tip == str(item_.get("head_sha") or "").lower():
+                item_["state"], item_["last_error"] = "FAILED", "o push nao entrou no remoto (ponta ainda no HEAD revisado)"
+                item_["attempts"] = item_.get("attempts", 0) + 1
+                item_["retry_after"] = es.now_iso(_utc(now) + dt.timedelta(seconds=RETRY_S * item_["attempts"]))
+                item_.pop("published_sha", None)
+            else:
+                item_["state"], item_["new_head"] = "SUPERSEDED", tip
+                item_["last_error"] = f"a ponta remota ({tip[:12] or 'ausente'}) nao e o commit registrado ({sha[:12]}): avanco externo"
+            eb.diagnose(b, f"{key}: publicacao pendente reconciliada -> {item_['state']}", now)
+        with es.locked(eb.bridge_path()):
+            b = eb.load()
+            target = next((i for i in b["queue"] if i.get("key") == key), None)
+            if target is not None:
+                settle(target, b)
+                eb.save(b)
+        out.append({"item": key, "action": "SETTLED", "remote": tip[:12]})
+    return out
+
+
+def _confirm(item: dict, gh: eb.Gh, repo: str, pushed: bool, published: str = "", tries: int | None = None, pause: float | None = None) -> tuple[str, bool]:
+    """Como `confirm_head`, mas diz se a API CONFIRMOU um HEAD novo (`True`) ou se a resposta e so o fallback `published` (`False`)."""
     tries = CONFIRM_TRIES if tries is None else tries
     pause = CONFIRM_PAUSE_S if pause is None else pause
     head = ""
@@ -558,10 +610,25 @@ def confirm_head(item: dict, gh: eb.Gh, repo: str, pushed: bool, published: str 
         except (RuntimeError, OSError, ValueError, subprocess.SubprocessError):
             head = ""
         if not pushed or (head and head.lower() != item["head_sha"].lower()):
-            return head
+            return head, True
         if attempt + 1 < tries:
             time.sleep(pause)
-    return published or head
+    return published or head, False
+
+
+def confirm_head(item: dict, gh: eb.Gh, repo: str, pushed: bool, published: str = "", tries: int | None = None, pause: float | None = None) -> str:
+    """HEAD atual do PR. Logo depois de um push que deu certo, a API REST do GitHub pode devolver o HEAD ANTIGO por alguns segundos: tratar isso como "sem commit
+    novo" marcava FAILED uma entrega que tinha publicado (visto no E2E real da MT-06). Depois de `pushed`, repete a leitura ate a API mostrar OUTRO HEAD (o publicado,
+    ou um avanco externo: o chamador compara com `published`). Se a API seguir velha, devolve `published`: o `git push` com saida 0 e a prova, e nada mais e consultado
+    na rede (sem `ls-remote`, que podia travar o item). Erro/timeout da API vira leitura vazia, nunca excecao."""
+    return _confirm(item, gh, repo, pushed, published, tries, pause)[0]
+
+
+def _to_publish_pending(key: str, owner: str, reason: str, log: str, t: dt.datetime) -> bool:
+    def pend(it, b):
+        it["state"], it["last_error"], it["log"] = "PUBLISH_PENDING", reason, log
+        eb.diagnose(b, f"{key}: PUBLISH_PENDING {reason}", t)
+    return update_owned(key, owner, pend, release=True, now=t)
 
 
 def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runner, claude_bin: str, wt_prep, t: dt.datetime,
@@ -628,13 +695,27 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
     if rc == 0 and not timed_out and not cancel.is_set() and not child_error:
         try:
             delivery = deliver(wt, branch, item["head_sha"], python or venv_python(), item,
-                               revalidate=lambda: _revalidate(item, gh, policy or {}, repo))
+                               revalidate=lambda: _revalidate(item, gh, policy or {}, repo),
+                               record=lambda sha: update_owned(key, owner, lambda it, b: it.__setitem__("published_sha", sha), now=t))
         except (OSError, ValueError, subprocess.SubprocessError) as exc:
             delivery = ("ERROR", f"{type(exc).__name__}: {exc}"[:300])
         write_log(key, f"delivery: {delivery}", "", {"delivery": delivery[0], "at": es.now_iso(t)})
+    if delivery[0] == "PUBLISH_UNCONFIRMED":                               # o remoto pode ter aceito o commit: estado DURAVEL, sem nova execucao ate reconciliar
+        reason = f"{delivery[1]} (commit {str(item.get('published_sha'))[:12]})"
+        _to_publish_pending(key, owner, reason, log, t)
+        comment_pr(item["pr"], repo, f"Executor local: {reason}. Nenhuma nova execucao ate o remoto ser reconciliado.")
+        return {"action": "PUBLISH_PENDING", "item": key, "reason": reason}
     pushed = delivery[0] == "PUSHED"
     published = published_sha(item, wt) if pushed else ""
-    new_head = confirm_head(item, gh, repo, pushed, published)
+    new_head, api_confirmed = _confirm(item, gh, repo, pushed, published)
+    if pushed and published and not api_confirmed:                         # a API seguiu velha: so o REMOTO prova qual e a ponta (nunca atribuir DONE no escuro)
+        consulted, tip = remote_tip_of(wt, branch)
+        if not consulted:
+            reason = f"o push saiu ({published[:12]}), a API segue velha e a ponta remota nao pode ser consultada: publicacao pendente"
+            _to_publish_pending(key, owner, reason, log, t)
+            return {"action": "PUBLISH_PENDING", "item": key, "reason": reason}
+        if tip != published.lower():
+            new_head = tip or "(ausente)"                                   # a ponta remota NAO e o commit do executor: avanco externo
     if question and delivery[0] in ("SKIPPED", "NOOP") and not child_error:
         comment_pr(item["pr"], repo, f"Executor local: o agente parou com uma duvida e nao editou nada.\n\n> {question}")
     head_moved = bool(new_head) and new_head.lower() != item["head_sha"].lower()
@@ -704,6 +785,8 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
     trabalho longo sem trava com heartbeat renovando o lease, e cada gravacao final so vale se o dono ainda e este processo."""
     if disabled_flag().exists():
         return {"action": "DISABLED", "reason": f"interruptor {disabled_flag().name} presente"}
+    if execute:
+        settle_pending(gh, repo, now)                                        # push de resultado desconhecido: reconcilia com o remoto ANTES de qualquer nova execucao
     owner = uuid.uuid4().hex
     item = claim_next(owner, now)
     if item is None:

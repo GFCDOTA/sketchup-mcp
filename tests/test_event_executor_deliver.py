@@ -426,7 +426,7 @@ def test_a_push_that_times_out_without_reaching_the_remote_is_an_error_that_is_n
     wt, remote, base = repo
     edit_test(wt)
     action, msg, item = run_with_item(wt, base, run=pushing_through(real_push=False))
-    assert action == "ERROR" and "sem confirmacao" in msg and "nao reexecuto" in msg and untouched(remote, base) and item["published_sha"]
+    assert action == "PUBLISH_UNCONFIRMED" and "sem confirmacao" in msg and "pendente" in msg and untouched(remote, base) and item["published_sha"]
 
 
 def test_a_plain_push_refusal_is_still_reported_as_a_refusal(repo):
@@ -437,3 +437,60 @@ def test_a_plain_push_refusal_is_still_reported_as_a_refusal(repo):
         return (1, "rejected: non-fast-forward") if args and args[0] == "push" else dl._git(args, cwd)
     action, msg, _item = run_with_item(wt, base, run=refuse)
     assert action == "ERROR" and "recusado" in msg and "sem confirmacao" not in msg
+
+
+def test_the_commit_is_recorded_durably_before_the_push_happens(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+    at_record = {}
+
+    def record(sha):
+        at_record["remote"] = dl._git(["ls-remote", "origin", "refs/heads/feat/x"], wt)[1].split()[0]
+        at_record["sha"] = sha
+        return True
+    action, _msg, item = run_with_item(wt, base, record=record)
+    assert action == "PUSHED" and at_record["sha"] == item["published_sha"] and at_record["remote"] == base     # quando gravou, o remoto ainda NAO tinha o commit
+
+
+def test_when_the_commit_cannot_be_recorded_nothing_is_pushed(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+    action, msg, _item = run_with_item(wt, base, record=lambda sha: False)
+    assert action == "ERROR" and "registrar" in msg and untouched(remote, base)
+
+
+def test_a_head_that_cannot_be_read_is_not_published(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+
+    def blind(args, cwd):
+        if args and args[0] == "rev-list":
+            blind.verified = True                                                                 # a verificacao do commit unico ja passou: o proximo `rev-parse HEAD` e o do registro
+        if args == ["rev-parse", "HEAD"] and getattr(blind, "verified", False):
+            return 1, "fatal"
+        return dl._git(args, cwd)
+    action, msg, _item = run_with_item(wt, base, run=blind)
+    assert action == "ERROR" and "identificar o commit" in msg and untouched(remote, base)
+
+
+def test_a_timeout_where_the_remote_cannot_be_read_is_unconfirmed_not_done(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+    state = {"pushed": False}
+
+    def run(args, cwd):
+        if args and args[0] == "push":
+            state["pushed"] = True
+            return 124, "prazo"
+        if args and args[0] == "ls-remote" and state["pushed"]:
+            return 124, "prazo"                                                                   # depois do push, toda consulta ao remoto estoura o prazo
+        return dl._git(args, cwd)
+    action, msg, item = run_with_item(wt, base, run=run)
+    assert action == "PUBLISH_UNCONFIRMED" and item["published_sha"] and untouched(remote, base)
+
+
+def test_remote_tip_distinguishes_a_missing_branch_from_an_unreachable_remote(repo):
+    wt, remote, base = repo
+    assert dl.remote_tip(wt, "main", dl._git)[0] is True or dl.remote_tip(wt, "master", dl._git)[0] is True
+    assert dl.remote_tip(wt, "nao-existe-xyz", dl._git) == (True, "")                              # consultou: a branch nao existe
+    assert dl.remote_tip(wt, "feat/x", lambda a, c: (124, "prazo")) == (False, "")                   # nao consultou: sem prova

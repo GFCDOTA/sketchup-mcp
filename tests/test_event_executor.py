@@ -25,6 +25,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
     monkeypatch.setattr(ex, "CONFIRM_PAUSE_S", 0.0)                          # nao espera de verdade o GitHub atualizar o HEAD
     monkeypatch.setattr(ex, "deliver", fake_deliver)                         # a entrega tem testes proprios (test_event_executor_deliver)
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, NEWHEAD))   # `git ls-remote` real nao roda aqui: a ponta remota e o commit publicado
     monkeypatch.setattr(ex, "comment_pr", lambda *a, **k: None)
 
 
@@ -815,6 +816,7 @@ def test_confirm_head_survives_any_github_error_including_a_timeout(monkeypatch,
 def test_a_push_that_github_shows_late_is_recorded_as_done_with_the_published_commit(monkeypatch):
     gh = FakeGh()                                                                 # a API segue mostrando o HEAD antigo
     monkeypatch.setattr(ex, "published_sha", lambda item, wt, run=None: PUBLISHED)
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, PUBLISHED))   # e o REMOTO confirma que a ponta e o commit do executor
     b = bstate(item())
     res = go(gh, b, Runner(gh, push=False))
     assert res["action"] == "DONE" and res["new_head"] == PUBLISHED and b["queue"][0]["state"] == "DONE_AWAITING_REREVIEW"
@@ -876,3 +878,133 @@ def test_git_has_a_deadline_and_never_prompts(monkeypatch):
     rc, msg = ex.git(["ls-remote", "origin"], Path("."))
     assert rc == 124 and "prazo" in msg and seen["timeout"] == ex.GIT_TIMEOUT_S
     assert seen["env"]["GIT_TERMINAL_PROMPT"] == "0" and seen["env"]["GCM_INTERACTIVE"] == "never"
+
+
+# -- achados da 4a revisao do Codex (#652): publicacao pendente DURAVEL, reinicio e API velha ---------------------------------------------
+def unconfirmed_deliver(wt, branch, base, py, it, **kw):
+    """Como o `deliver` real num timeout do push: registra o commit (duravel) ANTES e devolve PUBLISH_UNCONFIRMED."""
+    it["published_sha"] = NEWHEAD
+    assert kw["record"](NEWHEAD) is True
+    return ("PUBLISH_UNCONFIRMED", "git push sem confirmacao")
+
+
+def test_a_push_timeout_leaves_a_durable_publish_pending_state_and_the_item_is_never_picked_again(monkeypatch):
+    gh = FakeGh()                                                            # a API segue mostrando o HEAD ANTIGO
+    runner = Runner(gh, push=False)
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    b = bstate(item())
+    res = go(gh, b, runner)
+    row = b["queue"][0]
+    assert res["action"] == "PUBLISH_PENDING" and row["state"] == "PUBLISH_PENDING" and row["published_sha"] == NEWHEAD and "owner" not in row
+    assert ex.pick(eb.load(), NOW + dt.timedelta(days=2)) is None            # nem depois do retry_after: nunca volta a ser escolhido
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (False, ""))   # remoto segue inalcancavel
+    again = ex.process_one(gh, POLICY, REPO, True, runner, "claude", wt_ok, NOW + dt.timedelta(days=2))
+    assert again["action"] == "IDLE" and len(runner.calls) == 1              # o claude NAO foi executado de novo, e o item segue pendente
+    assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"
+
+
+def test_a_pending_publish_whose_remote_has_the_recorded_commit_becomes_done(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, NEWHEAD))
+    out = ex.settle_pending(gh, REPO, NOW)
+    row = eb.load()["queue"][0]
+    assert out[0]["action"] == "SETTLED" and row["state"] == "DONE_AWAITING_REREVIEW" and row["new_head"] == NEWHEAD
+
+
+def test_a_pending_publish_whose_remote_never_got_the_push_is_retried_not_marked_done(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, HEAD))     # a ponta remota ainda e o HEAD revisado
+    ex.settle_pending(gh, REPO, NOW)
+    row = eb.load()["queue"][0]
+    assert row["state"] == "FAILED" and row["attempts"] == 1 and "published_sha" not in row and row["retry_after"] > ex.es.now_iso(NOW)
+
+
+def test_a_pending_publish_with_another_remote_tip_is_superseded(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, "e" * 40))
+    ex.settle_pending(gh, REPO, NOW)
+    row = eb.load()["queue"][0]
+    assert row["state"] == "SUPERSEDED" and row["new_head"] == "e" * 40 and "avanco externo" in row["last_error"]
+
+
+def test_a_pending_publish_stays_pending_while_the_remote_cannot_be_consulted(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (False, ""))
+    out = ex.settle_pending(gh, REPO, NOW)
+    assert out[0]["action"] == "PUBLISH_PENDING" and eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"
+
+
+def test_a_restart_after_the_commit_was_recorded_goes_to_publish_pending_not_back_to_the_queue():
+    expired = item(state="RUNNING", owner="morto", lease_expires="2026-11-04T11:00:00Z", published_sha=NEWHEAD)
+    plain = item(key="review:10:7:" + HEAD, event_id="review:10", state="RUNNING", owner="morto2", lease_expires="2026-11-04T11:00:00Z")
+    b = bstate(expired, plain)
+    assert ex.recover(b, NOW) == 2
+    assert b["queue"][0]["state"] == "PUBLISH_PENDING" and b["queue"][1]["state"] == "QUEUED"         # so quem registrou o commit vai para a reconciliacao
+    assert ex.pick(b, NOW + dt.timedelta(days=1))["key"] == plain["key"]
+
+
+def test_the_commit_is_recorded_durably_before_the_push_and_a_failed_record_blocks_it(monkeypatch):
+    seen = {}
+
+    def spy(wt, branch, base, py, it, **kw):
+        seen["on_disk"] = eb.load()["queue"][0].get("published_sha")           # o que ja esta no DISCO quando a entrega comeca o push
+        kw["record"](NEWHEAD)
+        seen["after_record"] = eb.load()["queue"][0].get("published_sha")
+        it["published_sha"] = NEWHEAD
+        return ("PUSHED", "fake")
+    monkeypatch.setattr(ex, "deliver", spy)
+    gh = FakeGh()
+    go(gh, bstate(item()), Runner(gh))
+    assert seen["on_disk"] is None and seen["after_record"] == NEWHEAD
+
+
+def test_a_stale_api_with_a_remote_that_holds_another_commit_is_superseded_not_done(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, "f" * 40))     # alguem reescreveu a branch depois do push
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))                                  # a API segue velha (HEAD antigo)
+    assert res["action"] == "SUPERSEDED" and b["queue"][0]["state"] == "SUPERSEDED" and b["queue"][0]["new_head"] == "f" * 40
+
+
+def test_a_stale_api_with_an_unreachable_remote_is_publish_pending_not_done(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (False, ""))
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))
+    assert res["action"] == "PUBLISH_PENDING" and b["queue"][0]["state"] == "PUBLISH_PENDING"
+
+
+def test_a_stale_api_with_a_remote_that_confirms_the_published_commit_is_done():
+    gh = FakeGh()
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))                                  # fixture: remote_tip_of == NEWHEAD == commit publicado
+    assert res["action"] == "DONE" and b["queue"][0]["state"] == "DONE_AWAITING_REREVIEW" and b["queue"][0]["new_head"] == NEWHEAD
+
+
+def test_the_dry_run_never_reconciles_pending_items(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    called = []
+    monkeypatch.setattr(ex, "settle_pending", lambda *a, **k: called.append(1) or [])
+    ex.process_one(gh, POLICY, REPO, False, Runner(gh), "claude", wt_ok, NOW)
+    assert called == []
+
+
+def test_the_next_executor_cycle_reconciles_a_pending_publish_before_picking_new_work(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    runner = Runner(gh, push=False)
+    go(gh, bstate(item()), runner)
+    assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, NEWHEAD))     # o push TINHA entrado
+    res = ex.process_one(gh, POLICY, REPO, True, runner, "claude", wt_ok, NOW)
+    assert eb.load()["queue"][0]["state"] == "DONE_AWAITING_REREVIEW" and res["action"] == "IDLE" and len(runner.calls) == 1

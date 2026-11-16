@@ -151,14 +151,23 @@ def run_checks(py: str, wt: Path, files: list, tests: list[str] | None = None) -
     return False, "BLOCKED: execucao de testes requer sandbox de SO real (FP-060 P2); edicoes preservadas na worktree"
 
 
+def remote_tip(wt: Path, branch: str, run: Run) -> tuple[bool, str]:
+    """(consultou, sha): a ponta REMOTA da branch. `(True, "")` = a branch nao existe la; `(False, "")` = nao foi possivel consultar (rede/prazo): sem prova."""
+    rc, out = run(["ls-remote", "--exit-code", "origin", f"refs/heads/{branch}"], wt)
+    if rc == 0 and out.split():
+        return True, out.split()[0].lower()
+    return (True, "") if rc == 2 else (False, "")
+
+
 def remote_head(wt: Path, branch: str, run: Run) -> str | None:
     rc, out = run(["ls-remote", "--exit-code", "origin", f"refs/heads/{branch}"], wt)
     return out.split()[0] if rc == 0 and out else None
 
 
 def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _git, check=run_checks,
-            cfg: "guards.Config | None" = None, revalidate: Revalidate | None = None) -> tuple[str, str]:
-    """('NOOP'|'PUSHED'|'STALE'|'BLOCKED_GUARDS'|'FAILED_CHECKS'|'ERROR', msg). Nunca publica sem as duas barreiras de autorizacao."""
+            cfg: "guards.Config | None" = None, revalidate: Revalidate | None = None, record: Callable[[str], bool] | None = None) -> tuple[str, str]:
+    """('NOOP'|'PUSHED'|'PUBLISH_UNCONFIRMED'|'STALE'|'BLOCKED_GUARDS'|'FAILED_CHECKS'|'ERROR', msg). Nunca publica sem as duas barreiras de autorizacao.
+    `record(sha)` grava o commit a publicar de forma DURAVEL antes do push (se nao conseguir, nao publica)."""
     cfg = cfg or guards.load_config()
 
     def authorized(stage: str) -> tuple[bool, str]:
@@ -255,13 +264,16 @@ def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _g
         return "STALE", "HEAD remoto mudou durante a validacao: nao publico"
     rc_head, local_head = run(["rev-parse", "HEAD"], wt)
     local_head = local_head.strip().lower()
-    if rc_head == 0 and re.fullmatch(r"[0-9a-f]{40}", local_head):
-        item["published_sha"] = local_head                                  # o commit que SERA publicado: o executor o usa para provar o que publicou
+    if rc_head != 0 or not re.fullmatch(r"[0-9a-f]{40}", local_head):
+        return "ERROR", "nao consegui identificar o commit a publicar: nao publico"
+    item["published_sha"] = local_head                                      # o commit que SERA publicado: o executor o usa para provar o que publicou
+    if record is not None and not record(local_head):                       # duravel ANTES do push: um crash/timeout depois dele nao perde a identidade do commit
+        return "ERROR", "nao consegui registrar de forma duravel o commit a publicar: nao publico"
     rc, out = run(["push", "origin", f"HEAD:refs/heads/{branch}"], wt)      # push normal: git recusa nao-fast-forward
-    if rc == 124 and item.get("published_sha") and remote_head(wt, branch, run) == item["published_sha"]:
+    if rc == 124 and remote_head(wt, branch, run) == local_head:
         rc = 0                                                              # estourou o prazo, mas o remoto ja tem o commit: a publicacao aconteceu
     if rc == 124:
-        return "ERROR", "git push sem confirmacao (prazo estourado): o remoto pode ter aceito o commit; nao reexecuto, o proximo HEAD reconcilia"
+        return "PUBLISH_UNCONFIRMED", "git push sem confirmacao (prazo estourado): o remoto pode ter aceito o commit; o item fica com publicacao pendente ate o remoto ser reconciliado"
     if rc != 0:
         return "ERROR", f"git push recusado: {out[:200]}"
     return "PUSHED", f"{len(files)} arquivo(s), {verdict.lines} linha(s); publicado em {branch}"
