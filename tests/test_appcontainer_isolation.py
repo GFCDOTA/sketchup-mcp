@@ -174,3 +174,17 @@ def test_workspace_security_descriptor_failure_creates_nothing(tmp_path, monkeyp
         with pytest.raises(AppContainerError, match="ConvertStringSecurityDescriptor"):
             create_workspace(profile, tmp_path)
     assert list(tmp_path.iterdir()) == []
+
+
+def test_token_facts_tell_a_contained_process_from_an_ordinary_one():
+    executable = str(Path(os.environ["SystemRoot"]) / "System32" / "cmd.exe")
+    assert appcontainer.token_facts(os.getpid())["is_appcontainer"] is False
+    with AppContainerProfile() as profile:
+        with ps.WindowsJob([executable, "/d", "/c", "exit", "0"], cwd=Path(executable).parent, env=_child_env(),
+                           suspended=True, profile=profile) as job:
+            assert appcontainer.token_facts(job.pid) == {"is_appcontainer": True, "capabilities": 0}
+
+
+def test_token_facts_of_a_process_that_cannot_be_opened_is_an_error_not_a_guess():
+    with pytest.raises(AppContainerError, match="OpenProcess"):
+        appcontainer.token_facts(0)
