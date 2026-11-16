@@ -1339,3 +1339,51 @@ def test_two_attempts_from_a_failure_before_the_send_do_not_prove_an_interruptio
     proof = [{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}, {"key": "k", "event": "RECONCILED", "attempt": 2}]
     assert lab_mod.interrupted_then_reconciled(proof) is True
     assert lab_mod.interrupted_then_reconciled([{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}]) is False      # sem reconciliacao posterior
+
+
+# -- revisao do Codex (#618, 56cccc4e): diario PUBLICATIONS.jsonl truncado nao derruba o relatorio; reprova o criterio ----------------------------------------
+PROOF_ROWS = [{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}, {"key": "k", "event": "RECONCILED", "attempt": 2}]
+
+
+def _journal(tmp_path, text: str) -> Lab:
+    lab = Lab(tmp_path)
+    (tmp_path / "PUBLICATIONS.jsonl").write_bytes(text.encode("utf-8"))
+    return lab
+
+
+def test_a_complete_journal_proves_the_reconciliation(tmp_path):
+    lab = Lab(tmp_path)
+    for row in PROOF_ROWS:
+        lab_mod._record_publication(lab, row)
+    assert lab_mod.publications(lab) == PROOF_ROWS
+    assert lab_mod.reconciliation_proof(lab) == (True, None)
+
+
+@pytest.mark.parametrize("text", ['{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}\n{"key": "k", "ev',
+                                  '{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}\n{"key": "k", "event": "RECONCILED", "attempt": 2}\n[1, 2]\n',
+                                  '{"key": "k", "event": "EFFECT_APPLIED"}\n'])
+def test_a_truncated_or_malformed_journal_fails_the_criterion_with_the_reason_instead_of_raising(tmp_path, text):
+    lab = _journal(tmp_path, text)
+    with pytest.raises(lab_mod.JournalCorrupt):
+        lab_mod.publications(lab)
+    ok, why = lab_mod.reconciliation_proof(lab)
+    assert ok is False and "PUBLICATIONS.jsonl linha" in why
+
+
+def test_a_missing_or_empty_journal_fails_the_criterion(tmp_path):
+    assert lab_mod.reconciliation_proof(Lab(tmp_path)) == (False, "PUBLICATIONS.jsonl ausente ou vazio")
+    assert lab_mod.reconciliation_proof(_journal(tmp_path, "\n\n"))[0] is False
+
+
+def test_a_record_written_after_an_interrupted_write_is_never_glued_to_the_torn_fragment(tmp_path):
+    lab = _journal(tmp_path, '{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}\n{"key": "k", "ev')   # o processo morreu no meio da 2a gravacao
+    lab_mod._record_publication(lab, {"key": "k", "event": "RECONCILED", "attempt": 2})
+    lines = (tmp_path / "PUBLICATIONS.jsonl").read_text(encoding="utf-8").splitlines()
+    assert lines[1] == '{"key": "k", "ev' and json.loads(lines[2]) == {"attempt": 2, "event": "RECONCILED", "key": "k"}   # registro novo intacto, na propria linha
+    ok, why = lab_mod.reconciliation_proof(lab)
+    assert ok is False and "linha 2" in why                                                       # o fragmento continua acusado: a prova nao vale
+
+
+def test_an_attempt_that_is_not_an_integer_never_counts_and_never_raises():
+    rows = [{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}, {"key": "k", "event": "RECONCILED", "attempt": None}]
+    assert lab_mod.interrupted_then_reconciled(rows) is False
