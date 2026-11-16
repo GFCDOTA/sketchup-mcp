@@ -1,0 +1,437 @@
+"""FP-060-A01 M1 (#606): pytest sobre uma arvore nao confiavel dentro de um AppContainer sem capacidades.
+
+Os testes `windows_only` sobem processos reais num AppContainer real, com arquivos sinteticos. Nenhum deles autoriza executar
+agentes ou codigo de PR fora do laboratorio isolado."""
+from __future__ import annotations
+
+import json
+import os
+import socket
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+import pytest
+
+from tools.orchestration import sandboxed_tests as sb
+from tools.orchestration.appcontainer import AppContainerError
+from tools.orchestration.sandboxed_tests import SandboxError
+
+windows_only = pytest.mark.skipif(os.name != "nt", reason="requires real Windows AppContainer")
+
+PASSING = "def test_ok():\n    assert 1 + 1 == 2\n"
+FAILING = "def test_bad():\n    assert 1 + 1 == 3\n"
+DENIED = {"read_outside": "denied", "write_outside": "denied"}
+
+
+def tree_with(tmp_path, **files) -> Path:
+    tree = tmp_path / "tree"
+    (tree / "tests").mkdir(parents=True)
+    for name, text in files.items():
+        (tree / "tests" / f"{name}.py").write_text(text, encoding="utf-8")
+    return tree
+
+
+def sandboxed(tmp_path, tree, tests, timeout=120.0, tag="t"):
+    return sb.run_pytest(tree, tests, root=tmp_path / "sandbox", ini_text="[pytest]\n", timeout=timeout,
+                         log_dir=tmp_path / "logs", tag=tag)
+
+
+def _read_all(directory: Path) -> str:
+    return "".join(p.read_text(encoding="utf-8", errors="replace") for p in sorted(directory.iterdir()))
+
+
+# -- provas reais ----------------------------------------------------------------------------------------------------------
+@windows_only
+def test_passing_tests_run_inside_an_appcontainer_without_capabilities(tmp_path):
+    tree = tree_with(tmp_path, test_ok=PASSING)
+
+    run = sandboxed(tmp_path, tree, ["tests/test_ok.py"])
+
+    assert (run.exit_code, run.timed_out) == (0, False) and "1 passed" in run.output
+    assert run.facts["is_appcontainer"] is True and run.facts["capabilities"] == 0 and run.facts["canary"] == DENIED
+    assert sb.proves_isolation(run.facts)
+    assert any(d.startswith("pytest==") for d in run.facts["runtime"]["distributions"])
+    assert run.facts["tree_files"] == 1 and run.facts["workspace_removed"] is True
+    assert list((tmp_path / "sandbox").iterdir()) == []                 # nem workspace, nem canario
+    assert (tmp_path / "logs" / "sandbox_t_tests.out").read_text(encoding="utf-8").strip().endswith("s")
+
+
+@windows_only
+def test_failing_test_comes_back_as_pytest_exit_code_1(tmp_path):
+    run = sandboxed(tmp_path, tree_with(tmp_path, test_bad=FAILING), ["tests/test_bad.py"])
+    assert (run.exit_code, run.timed_out) == (1, False) and "1 failed" in run.output
+
+
+@windows_only
+def test_tested_code_imports_modules_from_the_tree_root(tmp_path):
+    tree = tree_with(tmp_path, test_uses_root="from thing import VALUE\n\n\ndef test_it():\n    assert VALUE == 7\n")
+    (tree / "thing.py").write_text("VALUE = 7\n", encoding="utf-8")
+    assert sandboxed(tmp_path, tree, ["tests/test_uses_root.py"]).exit_code == 0
+
+
+ESCAPE_ATTEMPTS = '''import socket
+
+import pytest
+
+SECRET, INTRUDER, PORT = {secret!r}, {intruder!r}, {port}
+
+
+def test_cannot_read_a_file_outside_the_workspace():
+    with pytest.raises(OSError):
+        open(SECRET, encoding="utf-8").read()
+
+
+def test_cannot_write_outside_the_workspace():
+    with pytest.raises(OSError):
+        open(INTRUDER, "w", encoding="utf-8").write("x")
+
+
+def test_cannot_reach_a_loopback_listener():
+    with pytest.raises(OSError):
+        socket.create_connection(("127.0.0.1", PORT), timeout=3).close()
+'''
+
+
+@windows_only
+def test_tested_code_cannot_read_write_outside_or_reach_the_network_and_the_control_can(tmp_path):
+    secret, intruder = tmp_path / "secret.txt", tmp_path / "intruder.txt"
+    secret.write_text("segredo sintetico", encoding="utf-8")
+    with socket.socket() as listener:
+        listener.bind(("127.0.0.1", 0))
+        listener.listen(4)
+        listener.settimeout(0.2)
+        tree = tree_with(tmp_path, test_escape=ESCAPE_ATTEMPTS.format(secret=str(secret), intruder=str(intruder),
+                                                                     port=listener.getsockname()[1]))
+
+        run = sandboxed(tmp_path, tree, ["tests/test_escape.py"])
+
+        assert run.exit_code == 0 and "3 passed" in run.output           # as tres tentativas foram negadas pelo SO
+        assert not intruder.exists()
+        with pytest.raises(TimeoutError):
+            listener.accept()
+        # Controle: a MESMA arvore, sem o AppContainer, consegue os tres acessos — a negacao acima vem do sandbox.
+        control = subprocess.run([sys.executable, "-m", "pytest", "tests/test_escape.py", "-q", "-p", "no:cacheprovider"],
+                                 cwd=tree, capture_output=True, text=True)
+        assert control.returncode == 1 and "3 failed" in control.stdout
+        assert intruder.exists()
+        listener.settimeout(5)
+        listener.accept()[0].close()
+
+
+@windows_only
+def test_timeout_kills_the_test_and_is_reported(tmp_path):
+    tree = tree_with(tmp_path, test_slow="import time\n\n\ndef test_slow():\n    time.sleep(120)\n")
+    started = time.monotonic()
+
+    run = sandboxed(tmp_path, tree, ["tests/test_slow.py"], timeout=3)
+
+    assert run.timed_out is True and run.exit_code is None
+    assert time.monotonic() - started < 60 and run.facts["workspace_removed"] is True
+
+
+@windows_only
+def test_tree_with_a_junction_is_refused_and_nothing_runs(tmp_path, monkeypatch):
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    made = subprocess.run(["cmd", "/d", "/c", "mklink", "/J", str(tree / "tests" / "link"), str(outside)], capture_output=True)
+    assert made.returncode == 0
+    launched = []
+    monkeypatch.setattr(sb.ps, "WindowsJob", lambda *a, **k: launched.append(a) or pytest.fail("processo lancado"))
+
+    with pytest.raises(SandboxError, match="reparse point"):
+        sandboxed(tmp_path, tree, ["tests/test_ok.py"])
+
+    assert not launched and list((tmp_path / "sandbox").iterdir()) == []
+
+
+@windows_only
+def test_token_that_is_not_a_bare_appcontainer_stops_the_run_before_it_starts(tmp_path, monkeypatch):
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    monkeypatch.setattr(sb, "token_facts", lambda pid: {"is_appcontainer": True, "capabilities": 1})
+
+    with pytest.raises(SandboxError, match="token"):
+        sandboxed(tmp_path, tree, ["tests/test_ok.py"])
+
+    logs = tmp_path / "logs"
+    assert _read_all(logs) == "" and list((tmp_path / "sandbox").iterdir()) == []   # o processo morreu suspenso: nada rodou
+
+
+@windows_only
+def test_probe_that_reaches_the_canary_stops_the_run_before_the_tests(tmp_path, monkeypatch):
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    monkeypatch.setattr(sb, "PROBE_SOURCE", 'print(\'{"read_outside": "allowed", "write_outside": "denied", "write_inside": "allowed"}\')\n')
+
+    with pytest.raises(SandboxError, match="leu arquivo fora"):
+        sandboxed(tmp_path, tree, ["tests/test_ok.py"])
+
+    assert not (tmp_path / "logs" / "sandbox_t_tests.out").exists()     # os testes nem foram lancados
+
+
+@windows_only
+def test_copied_runtime_runs_pytest_without_the_coordinator_environment(tmp_path):
+    facts = sb.copy_runtime(tmp_path / "runtime")
+
+    r = subprocess.run([str(tmp_path / "runtime" / "python.exe"), "-I", "-c",
+                        "import sys; sys.path.insert(0, sys.argv[1]); import pytest; print(pytest.__file__)",
+                        str(tmp_path / "runtime" / "site")],
+                       capture_output=True, text=True, env={"SYSTEMROOT": os.environ["SYSTEMROOT"]}, cwd=tmp_path)
+
+    assert r.returncode == 0, r.stderr
+    assert Path(r.stdout.strip()).is_relative_to(tmp_path / "runtime")
+    assert facts["python"] == sys.version.split()[0] and not (tmp_path / "runtime" / "Lib" / "site-packages").exists()
+
+
+# -- falha fechada (qualquer plataforma) -----------------------------------------------------------------------------------
+def test_outside_windows_nothing_runs(tmp_path, monkeypatch):
+    monkeypatch.setattr(sb, "_WINDOWS", False)
+    with pytest.raises(SandboxError, match="Windows"):
+        sandboxed(tmp_path, tree_with(tmp_path, test_ok=PASSING), ["tests/test_ok.py"])
+    assert not (tmp_path / "sandbox").exists()
+
+
+def test_profile_failure_is_a_sandbox_error_and_no_process_is_launched(tmp_path, monkeypatch):
+    launched = []
+
+    def no_profile():
+        raise AppContainerError("CreateAppContainerProfile failed: 0x80070005")
+
+    monkeypatch.setattr(sb, "_WINDOWS", True)
+    monkeypatch.setattr(sb, "AppContainerProfile", no_profile)
+    monkeypatch.setattr(sb.ps, "WindowsJob", lambda *a, **k: launched.append(a))
+
+    with pytest.raises(SandboxError, match="CreateAppContainerProfile"):
+        sandboxed(tmp_path, tree_with(tmp_path, test_ok=PASSING), ["tests/test_ok.py"])
+
+    assert not launched and list((tmp_path / "sandbox").iterdir()) == []   # o canario tambem e removido
+
+
+def test_run_without_selected_tests_is_a_caller_error(tmp_path):
+    with pytest.raises(ValueError, match="nenhum teste"):
+        sandboxed(tmp_path, tree_with(tmp_path, test_ok=PASSING), [])
+
+
+OK_PROBE = '{"read_outside": "denied", "write_outside": "denied", "write_inside": "allowed"}'
+
+
+@pytest.mark.parametrize("exit_code, stdout, intruder, expected", [
+    (0, OK_PROBE, False, []),
+    (0, OK_PROBE.replace('"read_outside": "denied"', '"read_outside": "allowed"'), False, ["leu arquivo fora do workspace"]),
+    (0, OK_PROBE.replace('"write_outside": "denied"', '"write_outside": "allowed"'), False, ["escreveu fora do workspace"]),
+    (0, OK_PROBE, True, ["escreveu fora do workspace"]),
+    (0, OK_PROBE.replace('"write_inside": "allowed"', '"write_inside": "denied"'), False, ["nao escreveu dentro do workspace"]),
+    (0, OK_PROBE + "\nSEGREDO", False, ["sonda sem resultado legivel (exit 0)"]),
+    (0, "SEGREDO\n" + OK_PROBE, False, ["conteudo do canario apareceu na saida"]),
+    (3, OK_PROBE, False, ["sonda saiu com codigo 3"]),
+    (3221225781, "", False, ["sonda sem resultado legivel (exit 3221225781)"]),
+    (0, "[1, 2]", False, ["sonda sem resultado legivel (exit 0)"]),
+])
+def test_canary_gaps_name_every_way_the_probe_can_fail(exit_code, stdout, intruder, expected):
+    assert sb.canary_gaps(exit_code, stdout, "SEGREDO", intruder) == expected
+
+
+@pytest.mark.parametrize("facts, expected", [
+    ({"is_appcontainer": True, "capabilities": 0, "canary": DENIED}, True),
+    ({"is_appcontainer": False, "capabilities": 0, "canary": DENIED}, False),
+    ({"is_appcontainer": True, "capabilities": 1, "canary": DENIED}, False),
+    ({"is_appcontainer": True, "capabilities": 0, "canary": {**DENIED, "read_outside": "allowed"}}, False),
+    ({"is_appcontainer": True, "capabilities": 0}, False),
+    ({"is_appcontainer": 1, "capabilities": 0, "canary": DENIED}, False),
+    (None, False),
+    ("appcontainer", False),
+])
+def test_isolation_is_proven_only_by_token_and_canary_together(facts, expected):
+    assert sb.proves_isolation(facts) is expected
+
+
+def test_tree_copy_keeps_only_regular_files_and_counts_them(tmp_path):
+    src = tmp_path / "src"
+    (src / "a" / "b").mkdir(parents=True)
+    (src / "top.py").write_text("x = 1\n", encoding="utf-8")
+    (src / "a" / "b" / "deep.txt").write_bytes(b"\x00\x01")
+
+    assert sb._copy_tree(src, tmp_path / "dst") == 2
+    assert (tmp_path / "dst" / "a" / "b" / "deep.txt").read_bytes() == b"\x00\x01"
+
+
+def test_workspace_removal_only_touches_a_sandbox_directory_under_the_root(tmp_path):
+    victim = tmp_path / "not_a_sandbox"
+    victim.mkdir()
+    with pytest.raises(SandboxError, match="fora da raiz"):
+        sb._remove_workspace(victim, tmp_path)
+    with pytest.raises(SandboxError, match="fora da raiz"):
+        sb._remove_workspace(tmp_path / "other" / "sandbox-abc", tmp_path)
+    assert victim.exists()
+
+
+def test_workspace_that_cannot_be_removed_is_reported_not_hidden(tmp_path, monkeypatch):
+    ws = tmp_path / "sandbox-abc"
+    ws.mkdir()
+
+    def locked(path):
+        raise PermissionError("em uso")
+
+    monkeypatch.setattr(sb.shutil, "rmtree", locked)
+    assert sb._remove_workspace(ws, tmp_path, retry_delays=(0.0, 0.0)) is False
+
+
+# Medido no runner Windows Server 2025 do CI: dentro do AppContainer abrir o dispositivo nulo e NEGADO (no Windows 11 e
+# permitido). O pytest o abre em dois pontos: a captura por descritor (stdin) e o plugin de logging (`log_file` padrao).
+# Este bootstrap reproduz a negacao para qualquer `open` do dispositivo.
+DENY_NULL_DEVICE = """import builtins
+import os
+
+_open = builtins.open
+
+
+def _deny_null(file, *args, **kwargs):
+    # O plugin de logging abre o caminho absoluto do dispositivo, entao compara-se so o final do caminho.
+    if isinstance(file, (str, os.PathLike)) and os.fspath(file).lower().endswith(os.devnull):
+        raise PermissionError(13, "Permission denied", file)
+    return _open(file, *args, **kwargs)
+
+
+builtins.open = _deny_null
+"""
+
+
+@windows_only
+def test_pytest_runs_where_the_null_device_is_denied_to_the_appcontainer(tmp_path, monkeypatch):
+    monkeypatch.setattr(sb, "BOOT_SOURCE", DENY_NULL_DEVICE + sb.BOOT_SOURCE)
+    tree = tree_with(tmp_path, test_ok=PASSING, test_bad="def test_bad():\n    print('saida do teste')\n    assert False\n")
+
+    run = sandboxed(tmp_path, tree, ["tests/test_ok.py", "tests/test_bad.py"])
+
+    assert run.exit_code == 1 and "1 failed, 1 passed" in run.output
+    assert "Captured stdout call" in run.output and "saida do teste" in run.output     # a saida do teste continua capturada
+
+
+@windows_only
+def test_the_documented_file_boundary_hides_user_files_but_not_what_every_appcontainer_may_read(tmp_path):
+    """Trava o contrato MEDIDO (pre-revisao do Codex no #617): o sandbox nega arquivo de usuario sem concessao a AppContainer, mas le
+    arquivo concedido a ALL APPLICATION PACKAGES e os binarios do Windows. Se isto mudar, o contrato do modulo precisa mudar junto."""
+    plain, shared = tmp_path / "plain.txt", tmp_path / "shared.txt"
+    plain.write_text("x", encoding="ascii")
+    shared.write_text("x", encoding="ascii")
+    granted = subprocess.run(["icacls", str(shared), "/grant", "*S-1-15-2-1:(R)"], capture_output=True)       # ALL APPLICATION PACKAGES
+    assert granted.returncode == 0
+    system = Path(os.environ["SystemRoot"]) / "System32" / "cmd.exe"
+    tree = tree_with(tmp_path, test_boundary=f"""import pytest
+
+
+def test_user_file_without_an_appcontainer_grant_is_denied():
+    with pytest.raises(PermissionError):                       # NAO OSError: um arquivo inexistente tambem e OSError e nao prova negacao
+        open({str(plain)!r}, "rb").read(1)
+
+
+def test_user_file_granted_to_all_application_packages_is_readable():
+    assert open({str(shared)!r}, "rb").read(1) == b"x"
+
+
+def test_windows_binaries_are_readable():
+    assert open({str(system)!r}, "rb").read(2) == b"MZ"
+""")
+
+    run = sandboxed(tmp_path, tree, ["tests/test_boundary.py"])
+
+    assert run.exit_code == 0 and "3 passed" in run.output, run.output[-800:]
+
+
+@windows_only
+def test_a_missing_file_is_not_mistaken_for_a_denied_one(tmp_path):
+    """Controle negativo do contrato de fronteira: "negado" e PermissionError; um caminho inexistente (FileNotFoundError) nao passa."""
+    missing = tmp_path / "nao_existe.txt"
+    tree = tree_with(tmp_path, test_missing=f"""import pytest
+
+
+def test_denied_means_permission_error_not_a_missing_file():
+    with pytest.raises(PermissionError):
+        open({str(missing)!r}, "rb")
+""")
+
+    run = sandboxed(tmp_path, tree, ["tests/test_missing.py"])
+
+    assert run.exit_code == 1 and "1 failed" in run.output, run.output[-600:]
+
+
+def _hard_link_or_skip(private: Path, link: Path) -> None:
+    try:
+        os.link(private, link)
+    except (OSError, NotImplementedError, AttributeError):
+        pytest.skip("este ambiente nao cria hard links")
+
+
+def test_a_hard_link_in_the_tree_is_refused_and_its_content_is_never_copied(tmp_path):
+    private = tmp_path / "private_outside_the_tree.txt"
+    private.write_text("segredo sintetico do coordenador", encoding="utf-8")
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    _hard_link_or_skip(private, tree / "linked.txt")
+
+    with pytest.raises(SandboxError, match="hard link"):
+        sb._copy_tree(tree, tmp_path / "copy")
+
+    assert not (tmp_path / "copy" / "linked.txt").exists()
+
+
+def test_a_tree_without_hard_links_is_copied_normally_and_counts_its_files(tmp_path):
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    (tree / "other.txt").write_text("x", encoding="utf-8")
+    assert sb._copy_tree(tree, tmp_path / "copy") == 2
+
+
+@windows_only
+def test_run_pytest_refuses_a_tree_that_contains_a_hard_link_before_running_any_test(tmp_path):
+    private = tmp_path / "private_outside_the_tree.txt"
+    private.write_text("segredo sintetico do coordenador", encoding="utf-8")
+    tree = tree_with(tmp_path, test_ok=PASSING)
+    _hard_link_or_skip(private, tree / "linked.txt")
+
+    with pytest.raises(SandboxError, match="hard link"):
+        sandboxed(tmp_path, tree, ["tests/test_ok.py"])
+
+    assert not (tmp_path / "logs" / "sandbox_t_tests.out").exists()
+
+
+# -- a sonda REAL so aceita negacao de acesso confirmada (revisao independente do #617: `except OSError` virava FileNotFoundError/E-S em "denied") ----
+def run_probe(monkeypatch, capsys, behaviors):
+    """Executa o PROBE_SOURCE de verdade (o texto que vai para o sandbox) com `open` substituido: `behaviors` mapeia (acao) -> excecao ou None."""
+    import builtins
+    import sys as _sys
+
+    def fake_open(path, mode="r", *a, **k):
+        exc = behaviors["read" if "r" in mode else "write_inside" if str(path).endswith("inside") else "write"]
+        if exc is not None:
+            raise exc
+        import io
+        return io.BytesIO(b"conteudo")
+    monkeypatch.setattr(builtins, "open", fake_open)
+    monkeypatch.setattr(_sys, "argv", ["probe", "alvo-leitura", "alvo-escrita", "alvo-inside"])
+    exec(compile(sb.PROBE_SOURCE, "probe", "exec"), {"__name__": "__main__"})
+    return json.loads(capsys.readouterr().out.strip().splitlines()[-1])
+
+
+@pytest.mark.parametrize("exc,label", [(PermissionError(13, "negado"), "denied"), (FileNotFoundError(2, "nao existe"), "missing"),
+                                       (OSError(5, "erro de E/S"), "error:5"), (OSError(28, "disco cheio"), "error:28"), (IsADirectoryError(21, "e pasta"), "error:21")])
+def test_the_real_probe_labels_only_a_permission_error_as_denied(monkeypatch, capsys, exc, label):
+    seen = run_probe(monkeypatch, capsys, {"read": exc, "write": exc, "write_inside": None})
+    assert seen == {"read_outside": label, "write_outside": label, "write_inside": "allowed"}
+
+
+def test_the_real_probe_reports_allowed_when_nothing_stops_the_access(monkeypatch, capsys):
+    assert run_probe(monkeypatch, capsys, {"read": None, "write": None, "write_inside": None}) == {
+        "read_outside": "allowed", "write_outside": "allowed", "write_inside": "allowed"}
+
+
+@pytest.mark.parametrize("label", ["missing", "error:2", "error:5", "allowed", "", None])
+def test_a_probe_that_did_not_get_a_real_denial_fails_closed(label):
+    out = json.dumps({"read_outside": label, "write_outside": "denied", "write_inside": "allowed"})
+    assert any("leu arquivo fora" in g for g in sb.canary_gaps(0, out, "SEGREDO", False))
+    out = json.dumps({"read_outside": "denied", "write_outside": label, "write_inside": "allowed"})
+    assert any("escreveu fora" in g for g in sb.canary_gaps(0, out, "SEGREDO", False))
+
+
+def test_a_genuine_denial_with_a_working_workspace_passes_the_probe():
+    out = json.dumps({"read_outside": "denied", "write_outside": "denied", "write_inside": "allowed"})
+    assert sb.canary_gaps(0, out, "SEGREDO", False) == []
