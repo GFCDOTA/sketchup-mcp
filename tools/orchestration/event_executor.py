@@ -531,8 +531,11 @@ GIT_TIMEOUT_S = 120
 
 
 def published_sha(item: dict, wt: Path, run=git) -> str:
-    """O commit que o `deliver` acabou de publicar: o HEAD local da worktree, que o `git push` (codigo de saida 0) deixou no remoto. '' se nao der para saber
-    (git indisponivel/travado ou nada de novo em relacao ao HEAD revisado)."""
+    """O commit que o `deliver` acabou de publicar. O proprio `deliver` o registra em `item["published_sha"]` ANTES do push (nao depende de ler o git
+    depois); sem isso, cai no HEAD local da worktree. '' se nao der para saber (git indisponivel/travado ou nada de novo em relacao ao HEAD revisado)."""
+    recorded = str(item.get("published_sha") or "").lower()
+    if re.fullmatch(r"[0-9a-f]{40}", recorded) and recorded != item["head_sha"].lower():
+        return recorded
     try:
         rc, out = run(["rev-parse", "HEAD"], wt)
     except (OSError, subprocess.SubprocessError):
@@ -636,15 +639,20 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
         comment_pr(item["pr"], repo, f"Executor local: o agente parou com uma duvida e nao editou nada.\n\n> {question}")
     head_moved = bool(new_head) and new_head.lower() != item["head_sha"].lower()
     external = bool(published) and head_moved and new_head.lower() != published      # a API mostra um HEAD que NAO e o que o executor publicou
-    if pushed and head_moved and not external:                              # DONE so quando QUEM publicou foi o executor
+    unconfirmed = pushed and not published                                  # publicou, mas nao ha como provar QUAL commit: nunca atribuir ao executor
+    if pushed and head_moved and not external and not unconfirmed:          # DONE so quando QUEM publicou foi o executor
         def done(it, b):
             it["state"], it["new_head"], it["last_error"], it["log"] = "DONE_AWAITING_REREVIEW", new_head, "", log
             it["attempts"] = it.get("attempts", 0) + 1
         update_owned(key, owner, done, release=True, now=t)
         comment_pr(item["pr"], repo, f"Executor local: correcao publicada pelo executor no HEAD {new_head} ({delivery[1]}). Pedido de nova revisao.")
         return {"action": "DONE", "item": key, "new_head": new_head, "delivery": delivery[0]}
-    if head_moved:                                                          # HEAD externo: concorrencia, nunca sucesso do executor
-        why = f"HEAD do PR mudou para {new_head[:12]} sem publicacao do executor (entrega {delivery[0]}): SUPERSEDED"
+    if head_moved or unconfirmed:                                           # HEAD externo ou publicacao nao provada: nunca sucesso do executor
+        if pushed:
+            why = (f"o executor publicou {published[:12] or '(commit nao confirmado)'}, mas o HEAD do PR e {new_head[:12] or '(ilegivel)'}: avanco externo ou publicacao "
+                   "nao confirmada; SUPERSEDED (o proximo HEAD reconcilia, o review nao e reexecutado)")
+        else:
+            why = f"HEAD do PR mudou para {new_head[:12]} sem publicacao do executor (entrega {delivery[0]}): SUPERSEDED"
 
         def superseded(it, b):
             it["state"], it["new_head"], it["last_error"], it["log"] = "SUPERSEDED", new_head, why, log

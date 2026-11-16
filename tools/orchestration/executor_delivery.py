@@ -13,6 +13,7 @@ Sandbox: `run_checks` recusa execucao sem sandbox de SO (FP-060 P2); ambiente SE
 from __future__ import annotations
 
 import os
+import re
 import stat
 import subprocess
 from pathlib import Path
@@ -252,7 +253,15 @@ def deliver(wt: Path, branch: str, base: str, py: str, item: dict, run: Run = _g
         return "STALE", why
     if remote_head(wt, branch, run) != base:
         return "STALE", "HEAD remoto mudou durante a validacao: nao publico"
+    rc_head, local_head = run(["rev-parse", "HEAD"], wt)
+    local_head = local_head.strip().lower()
+    if rc_head == 0 and re.fullmatch(r"[0-9a-f]{40}", local_head):
+        item["published_sha"] = local_head                                  # o commit que SERA publicado: o executor o usa para provar o que publicou
     rc, out = run(["push", "origin", f"HEAD:refs/heads/{branch}"], wt)      # push normal: git recusa nao-fast-forward
+    if rc == 124 and item.get("published_sha") and remote_head(wt, branch, run) == item["published_sha"]:
+        rc = 0                                                              # estourou o prazo, mas o remoto ja tem o commit: a publicacao aconteceu
+    if rc == 124:
+        return "ERROR", "git push sem confirmacao (prazo estourado): o remoto pode ter aceito o commit; nao reexecuto, o proximo HEAD reconcilia"
     if rc != 0:
         return "ERROR", f"git push recusado: {out[:200]}"
     return "PUSHED", f"{len(files)} arquivo(s), {verdict.lines} linha(s); publicado em {branch}"

@@ -24,8 +24,14 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("BRIDGE_WORKTREE_ROOT", str(tmp_path / "wt"))
     monkeypatch.setenv("GH_TOKEN", "ghp_" + "x" * 30)
     monkeypatch.setattr(ex, "CONFIRM_PAUSE_S", 0.0)                          # nao espera de verdade o GitHub atualizar o HEAD
-    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("PUSHED", "fake"))   # a entrega tem testes proprios (test_event_executor_deliver)
+    monkeypatch.setattr(ex, "deliver", fake_deliver)                         # a entrega tem testes proprios (test_event_executor_deliver)
     monkeypatch.setattr(ex, "comment_pr", lambda *a, **k: None)
+
+
+def fake_deliver(wt, branch, base, py, it, **kw):
+    """Como o `deliver` real: registra em `item["published_sha"]` o commit que SERA publicado e devolve PUSHED."""
+    it["published_sha"] = NEWHEAD
+    return ("PUSHED", "fake")
 
 
 def item(**kw):
@@ -212,7 +218,9 @@ def test_claude_cli_not_installed_is_blocked_cli_with_a_message():
 
 @pytest.mark.parametrize("kw,reason", [({"push": False}, "sem commit novo"), ({"push": False, "rc": 1}, "codigo 1"),
                                        ({"push": False, "rc": -1, "timed_out": True}, "timeout")])
-def test_failed_runs_are_retried_with_a_cap_of_three_attempts(kw, reason):
+def test_failed_runs_are_retried_with_a_cap_of_three_attempts(kw, reason, monkeypatch):
+    if reason == "sem commit novo":
+        monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("NOOP", "nenhuma alteracao"))      # o filho terminou sem editar nada
     gh = FakeGh()
     b = bstate(item())
     clock = NOW
@@ -399,7 +407,9 @@ def test_heartbeat_renews_the_lease_while_the_child_runs(monkeypatch):
     th.start()
     assert started.wait(10)
     import time
-    time.sleep(0.4)
+    deadline = time.time() + 8                                               # espera ATE o heartbeat renovar (nao um sleep fixo: carga na maquina atrasa a thread)
+    while time.time() < deadline and eb.load()["queue"][0]["lease_expires"] <= seen["before"]:
+        time.sleep(0.05)
     release.set()
     th.join(15)
     assert seen["after"] > seen["before"]                                    # renovado pelo relogio real (NOW fixo e antigo)
@@ -682,7 +692,6 @@ def test_a_head_moved_by_someone_else_is_never_recorded_as_executor_done(monkeyp
 
 
 def test_pushed_delivery_is_the_only_path_to_done(monkeypatch):
-    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("PUSHED", "1 arquivo"))
     gh = FakeGh()
     b = bstate(item())
     res = go(gh, b, Runner(gh, push=True))
@@ -826,11 +835,35 @@ def test_an_external_advance_right_after_the_push_is_superseded_not_credited_to_
     assert res["action"] == "SUPERSEDED" and b["queue"][0]["state"] == "SUPERSEDED" and b["queue"][0]["new_head"] == "f" * 40
 
 
-def test_without_a_provable_published_commit_a_moved_head_still_counts_as_done(monkeypatch):
+@pytest.mark.parametrize("api_moved", [True, False])
+def test_a_push_whose_published_commit_cannot_be_proven_is_never_credited_to_the_executor(monkeypatch, api_moved):
+    """Revisao independente do #652: sem o commit publicado nao ha como separar a entrega do executor de um avanco externo: SUPERSEDED, nunca DONE nem retry."""
     gh = FakeGh()
-    monkeypatch.setattr(ex, "published_sha", lambda item, wt, run=None: "")
+    monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("PUSHED", "fake"))                    # sem registrar published_sha
+    monkeypatch.setattr(ex, "published_sha", lambda item, wt, run=None: "")                   # e o git nao responde
     b = bstate(item())
-    assert go(gh, b, Runner(gh))["action"] == "DONE"                              # Runner empurra o HEAD do FakeGh (comportamento anterior)
+    res = go(gh, b, Runner(gh, push=api_moved))
+    assert res["action"] == "SUPERSEDED" and "nao confirmada" in res["reason"] and b["queue"][0]["state"] == "SUPERSEDED"
+
+
+def test_published_sha_prefers_the_commit_the_delivery_recorded_before_pushing():
+    it = item(published_sha=PUBLISHED)
+    assert ex.published_sha(it, Path("."), lambda *a: (_ for _ in ()).throw(AssertionError("nao deveria ler o git"))) == PUBLISHED
+    assert ex.published_sha(item(published_sha=HEAD), Path("."), head_git(local="nao-e-sha")) == ""      # registrado = HEAD revisado: nada de novo
+    assert ex.published_sha(item(published_sha="xyz"), Path("."), head_git()) == PUBLISHED               # registro invalido: cai no git
+
+
+def test_the_external_advance_message_says_the_executor_did_publish(monkeypatch):
+    gh = FakeGh()
+    r = Runner(gh, push=False)
+
+    def other_person_pushes(wt, branch, base, py, it, **kw):
+        it["published_sha"] = PUBLISHED
+        gh.head = "f" * 40
+        return ("PUSHED", "fake")
+    monkeypatch.setattr(ex, "deliver", other_person_pushes)
+    res = go(gh, bstate(item()), r)
+    assert res["action"] == "SUPERSEDED" and "o executor publicou" in res["reason"] and "avanco externo" in res["reason"]
 
 
 def test_git_has_a_deadline_and_never_prompts(monkeypatch):

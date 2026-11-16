@@ -386,3 +386,54 @@ def test_delivery_git_calls_have_a_deadline_and_never_prompt(monkeypatch, tmp_pa
     rc_raw, out_raw = dl._git_raw(["diff", "--numstat"], tmp_path)
     assert rc == 124 and "prazo" in msg and rc_raw == 124 and out_raw == b""
     assert all(kw["timeout"] == dl.GIT_TIMEOUT_S and kw["env"]["GIT_TERMINAL_PROMPT"] == "0" for kw in seen) and len(seen) == 2
+
+
+# -------------------------------------------------- commit publicado registrado antes do push e timeout do push (revisao independente do #652)
+def run_with_item(wt, base, **kw):
+    item = dict(ITEM)
+    kw.setdefault("check", OK)
+    kw.setdefault("revalidate", AUTH)
+    action, msg = dl.deliver(wt, "feat/x", base, "py", item, cfg=CFG, **kw)
+    return action, msg, item
+
+
+def pushing_through(real_push: bool):
+    """`run` que trata o push como se tivesse estourado o prazo: com `real_push` o remoto JA recebeu o commit antes da resposta, sem ele nao."""
+    def run_git(args, cwd):
+        if args and args[0] == "push":
+            if real_push:
+                dl._git(args, cwd)
+            return 124, "git push: prazo estourado"
+        return dl._git(args, cwd)
+    return run_git
+
+
+def test_the_delivery_records_the_exact_commit_it_publishes_before_pushing(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+    action, _msg, item = run_with_item(wt, base)
+    assert action == "PUSHED" and item["published_sha"] == sh(remote, "rev-parse", "feat/x") == sh(wt, "rev-parse", "HEAD")
+
+
+def test_a_push_that_times_out_but_reached_the_remote_is_still_a_publication(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+    action, msg, item = run_with_item(wt, base, run=pushing_through(real_push=True))
+    assert action == "PUSHED" and item["published_sha"] == sh(remote, "rev-parse", "feat/x"), msg
+
+
+def test_a_push_that_times_out_without_reaching_the_remote_is_an_error_that_is_never_rerun_blindly(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+    action, msg, item = run_with_item(wt, base, run=pushing_through(real_push=False))
+    assert action == "ERROR" and "sem confirmacao" in msg and "nao reexecuto" in msg and untouched(remote, base) and item["published_sha"]
+
+
+def test_a_plain_push_refusal_is_still_reported_as_a_refusal(repo):
+    wt, remote, base = repo
+    edit_test(wt)
+
+    def refuse(args, cwd):
+        return (1, "rejected: non-fast-forward") if args and args[0] == "push" else dl._git(args, cwd)
+    action, msg, _item = run_with_item(wt, base, run=refuse)
+    assert action == "ERROR" and "recusado" in msg and "sem confirmacao" not in msg

@@ -42,8 +42,9 @@ def child(argv, cwd, env, stdin, timeout, cancel=None):
     if mode == "block":
         time.sleep(120)                         # simula o Claude em andamento (sera morto de fora)
     return 0, "", "", False                     # o filho so edita: quem publica e o executor (R4)
-def fake_deliver(*a, **k):
+def fake_deliver(wt, branch, base, py, it, **k):
     gh.head = "d" * 40                          # o executor "publica" um commit
+    it["published_sha"] = "d" * 40              # como o deliver real: registra o commit publicado antes do push
     return "PUSHED", "fake"
 ex.deliver = fake_deliver
 now = dt.datetime.strptime(now_iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
@@ -170,6 +171,7 @@ def test_main_refuses_to_start_a_second_executor_and_never_polls(tmp_path, monke
 
 
 def test_main_exits_when_the_launcher_pid_is_gone_and_heartbeat_cancels_the_child(monkeypatch, capsys):
+    monkeypatch.setattr(ex, "WATCH_PID", None)                                 # `main` grava este global: o monkeypatch o restaura no fim (senao vaza p/ os outros testes)
     monkeypatch.setattr(ex.eb, "check_identity", lambda gh, policy: "fmodesto30")
     monkeypatch.setattr(ex, "run_cycle", lambda *a, **k: pytest.fail("sem launcher vivo nao roda ciclo"))
     gone = dead_pid()
