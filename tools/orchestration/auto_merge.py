@@ -40,6 +40,8 @@ from tools.orchestration import lifecycle
 
 ENABLE_ENV = "AUTOMERGE_ENABLED"
 HARD_HUMAN_PREFIXES = (".github/", "docs/governance/", ".claude/", "docs/adr/")          # governanca: nunca automatico
+# entradas de INSTRUCAO de agente (o executor as le como regra) em QUALQUER pasta: mudar uma delas e mudar a governanca, como `.claude/`
+INSTRUCTION_FILES = ("claude.md", "claude.local.md", "agents.md", "gemini.md", "copilot-instructions.md", ".cursorrules", ".windsurfrules")
 GPT_LABEL = "gpt-review-required"
 REINFORCED_BODY = re.compile(r"confianca\s+HIGH", re.I)
 
@@ -176,7 +178,7 @@ def decide(pr: dict, files: list[dict], runs: list[dict], reviews: list[dict], i
         except ValueError:
             refuse.append(f"caminho invalido: {p!r} (decisao humana)")
             continue
-        if normalized.startswith(hard):
+        if normalized.startswith(hard) or normalized.rsplit("/", 1)[-1] in INSTRUCTION_FILES or normalized.startswith(".cursor/rules/"):
             refuse.append(f"governanca: {p} (decisao humana)")
     verdict = guards.evaluate_diff(numstat_from_files(files), cfg)
     critical = [v for v in verdict.violations if v["rule"] == "path_critico"]
@@ -300,6 +302,16 @@ def protection_gaps(gh: eb.Gh, repo: str, base: str = BASE_BRANCH) -> list[str]:
         gaps.append(f"a protecao de {base} nao descarta aprovacoes velhas quando o codigo muda (dismiss_stale_reviews)")
     if not (prot.get("enforce_admins") or {}).get("enabled"):
         gaps.append(f"a protecao de {base} nao vale para administradores (enforce_admins)")
+    # o SERVIDOR tem de exigir cada check obrigatorio: `--match-head-commit` so prende o HEAD; um check que mude de estado depois da ultima leitura local so e
+    # barrado no merge se a protecao o exigir
+    rsc = prot.get("required_status_checks")
+    enforced = set()
+    if isinstance(rsc, dict):
+        enforced |= {c for c in (rsc.get("contexts") or []) if isinstance(c, str)}
+        enforced |= {c.get("context") for c in (rsc.get("checks") or []) if isinstance(c, dict) and isinstance(c.get("context"), str)}
+    missing = sorted(lifecycle.MANDATORY_CHECKS - enforced)
+    if missing:
+        gaps.append(f"a protecao de {base} nao exige no servidor os checks obrigatorios: {', '.join(missing)}")
     try:
         rules = gh(f"repos/{repo}/rules/branches/{base}")
     except (RuntimeError, OSError, ValueError) as exc:
@@ -473,6 +485,9 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                             row.update(code="DISABLED", reasons=[f"desligado durante a ultima leitura: {still_on2[1]}"])
                         elif not isinstance(pr3, dict) or mutable_facts(pr3) != mutable_facts(pr2) or last.code != "MERGE" or (pr3.get("head") or {}).get("sha") != row["head"]:
                             row.update(code="WAIT", reasons=["base, labels, estado, corpo ou Issues do PR mudaram na ultima leitura antes do merge: nada e mesclado nesta rodada"])
+                        elif gaps3 := protection_gaps(gh, repo):
+                            # protecao e regras relidas DEPOIS da coleta final (arquivos/checks/reviews/Issues, as consultas demoradas): removida no meio dela, nada e mesclado
+                            row.update(code="WAIT", reasons=["a protecao da branch mudou durante a coleta final: " + "; ".join(gaps3)[:200]])
                         elif not isinstance(pr4 := gh(f"repos/{repo}/pulls/{number}"), dict) or mutable_facts(pr4) != mutable_facts(pr2):
                             # `gather` le o PR ANTES de arquivos/checks/reviews/Issues (consultas demoradas): base ou label podem mudar no meio. Esta releitura do PR e a
                             # ULTIMA chamada antes do comando. Janela residual (nao fechavel pela API: nao ha merge condicionado a base/labels): o tempo de UMA ida ao servidor

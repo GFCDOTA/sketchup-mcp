@@ -186,7 +186,7 @@ def test_an_approval_followed_by_a_change_request_on_the_same_head_does_not_merg
 
 # ------------------------------------------------------------------------------------------------------------------------ ciclo
 GOOD_PROTECTION = {"required_pull_request_reviews": {"required_approving_review_count": 1, "dismiss_stale_reviews": True},
-                   "enforce_admins": {"enabled": True}, "required_status_checks": {"contexts": []}}
+                   "enforce_admins": {"enabled": True}, "required_status_checks": {"contexts": sorted(lifecycle.MANDATORY_CHECKS)}}
 
 
 class Gh:
@@ -883,3 +883,41 @@ def test_a_dismissed_codex_approval_does_not_lend_its_provenance_to_a_manual_rev
     assert am.reinforced(codex_review, REPO, 7, HEAD, check) is True
     assert am.reinforced(manual_copy, REPO, 7, HEAD, check) is False
     assert am.reinforced({k: v for k, v in codex_review.items() if k != "id"}, REPO, 7, HEAD, check) is False   # review sem id: sem prova
+
+
+# -- 12a revisao do Codex (#648, 39b595c1): instrucoes de agente sao governanca; o servidor exige os checks; protecao relida apos a coleta final ---------
+@pytest.mark.parametrize("path", ["CLAUDE.md", "claude.md", "tools/rooms/CLAUDE.md", "AGENTS.md", "apps/x/agents.md", "GEMINI.md", "CLAUDE.local.md",
+                                  ".github/copilot-instructions.md", ".cursorrules", ".cursor/rules/x.mdc", ".windsurfrules"])
+def test_agent_instruction_files_anywhere_are_governance_and_need_a_human(path):
+    d = decide(files=files(path))
+    assert d.code == "REFUSE" and any("governanca" in r for r in d.reasons), (path, d.reasons)
+
+
+def test_a_file_that_only_mentions_claude_in_its_name_is_not_governance():
+    assert decide(files=files("docs/claude_notes.md", "tools/claude_md_parser.py")).code == "MERGE"
+
+
+@pytest.mark.parametrize("rsc", [{"contexts": []}, None, {}, {"contexts": ["pytest (py3.11)"]},
+                                 {"contexts": sorted(lifecycle.MANDATORY_CHECKS - {"windows process supervisor"})}])
+def test_a_protection_that_does_not_enforce_every_mandatory_check_on_the_server_blocks_the_merge(rsc):
+    prot = {**GOOD_PROTECTION, "required_status_checks": rsc}
+    runner = Runner()
+    out = am.cycle(Gh(protection=prot), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
+    assert out["prs"][0]["code"] == "WAIT" and any("checks obrigatorios" in r for r in out["prs"][0]["reasons"]) and runner.calls == []
+
+
+def test_mandatory_checks_listed_in_the_checks_array_also_count_as_enforced():
+    prot = {**GOOD_PROTECTION, "required_status_checks": {"contexts": [], "checks": [{"context": c, "app_id": 15368} for c in sorted(lifecycle.MANDATORY_CHECKS)]}}
+    assert am.protection_gaps(Gh(protection=prot), REPO) == []
+
+
+def test_a_protection_removed_during_the_final_collection_blocks_the_merge():
+    class DropsLate(Gh):
+        def __call__(self, path):
+            if path.endswith("/protection") and self.pulls >= 3:                                   # 3a leitura do PR = a coleta final; as duas checagens anteriores passaram
+                return {"enforce_admins": {"enabled": True}}
+            return super().__call__(path)
+    gh, runner = DropsLate(), Runner()
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
+    row = out["prs"][0]
+    assert row["code"] == "WAIT" and "coleta final" in row["reasons"][0] and runner.calls == [] and gh.pulls == 3
