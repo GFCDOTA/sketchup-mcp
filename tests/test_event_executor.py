@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -919,6 +920,10 @@ def test_a_pending_publish_whose_remote_never_got_the_push_is_retried_not_marked
     go(gh, bstate(item()), Runner(gh, push=False))
     monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, HEAD))     # a ponta remota ainda e o HEAD revisado
     ex.settle_pending(gh, REPO, NOW)
+    assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"                    # UMA leitura ainda no HEAD revisado nao prova que o push nao entrou (pode estar sendo aplicado)
+    ex.settle_pending(gh, REPO, NOW + dt.timedelta(seconds=ex.PENDING_GRACE_S - 5))
+    assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"                    # ainda dentro da janela de graca
+    ex.settle_pending(gh, REPO, NOW + dt.timedelta(seconds=ex.PENDING_GRACE_S + 5))
     row = eb.load()["queue"][0]
     assert row["state"] == "FAILED" and row["attempts"] == 1 and "published_sha" not in row and row["retry_after"] > ex.es.now_iso(NOW)
 
@@ -1059,3 +1064,67 @@ def test_a_definitive_failure_drops_the_recorded_commit_so_a_restart_does_not_mi
     b = bstate(item())
     go(gh, b, Runner(gh, push=False))
     assert b["queue"][0]["state"] == "FAILED" and "published_sha" not in b["queue"][0]
+
+
+# -- 6a revisao do Codex (#652): graca para push abandonado, excecao apos o registro, remoto tambem com a API em dia -------------------------------------
+def test_a_late_push_that_completes_after_a_remote_still_showed_the_reviewed_head_is_recognized_as_done(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "deliver", unconfirmed_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, HEAD))     # 1a leitura: o servidor ainda nao aplicou
+    ex.settle_pending(gh, REPO, NOW)
+    assert eb.load()["queue"][0]["state"] == "PUBLISH_PENDING"
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, NEWHEAD))  # o push abandonado TERMINA de ser aplicado
+    ex.settle_pending(gh, REPO, NOW + dt.timedelta(seconds=60))
+    row = eb.load()["queue"][0]
+    assert row["state"] == "DONE_AWAITING_REREVIEW" and row["new_head"] == NEWHEAD   # nunca foi reexecutado: nao houve segundo push
+
+
+@pytest.mark.parametrize("exc", [OSError("git nao iniciou"), ValueError("saida inesperada"), subprocess.SubprocessError("falha")])
+def test_an_exception_after_the_commit_was_recorded_is_a_pending_publication_not_an_error(monkeypatch, exc):
+    gh = FakeGh()
+
+    def deliver_raises(wt, branch, base, py, it, **kw):
+        it["published_sha"] = NEWHEAD
+        kw["record"](NEWHEAD)
+        raise exc
+    monkeypatch.setattr(ex, "deliver", deliver_raises)
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))
+    row = b["queue"][0]
+    assert res["action"] == "PUBLISH_PENDING" and row["state"] == "PUBLISH_PENDING" and row["published_sha"] == NEWHEAD and row.get("pending_since")
+    assert ex.pick(eb.load(), NOW + dt.timedelta(days=2)) is None
+
+
+def test_an_exception_provably_before_the_push_is_still_a_plain_failure(monkeypatch):
+    gh = FakeGh()
+
+    def deliver_raises(wt, branch, base, py, it, **kw):
+        raise OSError("git nao iniciou antes de qualquer commit")                      # nenhum published_sha: comprovadamente antes do push
+    monkeypatch.setattr(ex, "deliver", deliver_raises)
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=False))
+    assert res["action"] == "FAILED" and b["queue"][0]["state"] == "FAILED" and "published_sha" not in b["queue"][0]
+
+
+def test_a_cached_api_showing_the_published_commit_is_still_checked_against_the_remote(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (True, "9" * 40))     # a branch avancou depois do push, mas a API em cache ainda mostra o commit publicado
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=True))                                              # a API mostra NEWHEAD (o publicado)
+    assert res["action"] == "SUPERSEDED" and b["queue"][0]["state"] == "SUPERSEDED" and b["queue"][0]["new_head"] == "9" * 40
+
+
+def test_a_cached_api_with_an_unreachable_remote_keeps_the_item_pending(monkeypatch):
+    gh = FakeGh()
+    monkeypatch.setattr(ex, "remote_tip_of", lambda wt, branch: (False, ""))
+    b = bstate(item())
+    res = go(gh, b, Runner(gh, push=True))
+    assert res["action"] == "PUBLISH_PENDING" and b["queue"][0]["state"] == "PUBLISH_PENDING"
+
+
+def test_recover_stamps_the_pending_window_so_the_grace_period_counts_from_the_restart():
+    expired = item(state="RUNNING", owner="morto", lease_expires="2026-11-04T11:00:00Z", published_sha=NEWHEAD)
+    b = bstate(expired)
+    ex.recover(b, NOW)
+    assert b["queue"][0]["state"] == "PUBLISH_PENDING" and b["queue"][0]["pending_since"] == ex.es.now_iso(NOW)

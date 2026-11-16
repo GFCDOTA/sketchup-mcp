@@ -47,6 +47,7 @@ def fake_deliver(wt, branch, base, py, it, **k):
     it["published_sha"] = "d" * 40              # como o deliver real: registra o commit publicado antes do push
     return "PUSHED", "fake"
 ex.deliver = fake_deliver
+ex.remote_tip_of = lambda wt, branch: (True, "d" * 40)   # a ponta remota (consultada tambem com a API em dia) e o commit publicado
 now = dt.datetime.strptime(now_iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
 res = ex.process_one(gh, POLICY, REPO, True, child, "claude", lambda pr, b, s, r: (True, "", Path("wt")), now, None, 0.05)
 print(json.dumps(res), flush=True)

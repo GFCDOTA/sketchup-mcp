@@ -56,6 +56,7 @@ DAILY_CAP = 6
 RUN_TIMEOUT_S = 45 * 60
 MAX_BUDGET_USD = "5"
 RETRY_S = 900
+PENDING_GRACE_S = 1800                                                        # depois disto um push abandonado ja nao pode mais ser aplicado pelo servidor
 LEASE_S = 300                                                                 # lease de execucao; o heartbeat o renova
 HEARTBEAT_S = 60
 BRANCH_OK = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,100}$")
@@ -346,6 +347,7 @@ def recover(bstate: dict, now: dt.datetime | None = None) -> int:
         if t["state"] == "RUNNING" and (t.get("lease_expires") or "") < es.now_iso(now):
             if t.get("published_sha"):
                 t["state"], t["last_error"] = "PUBLISH_PENDING", "dono morreu depois de registrar o commit a publicar: publicacao pendente de reconciliacao com o remoto"
+                t["pending_since"] = es.now_iso(now)
             else:
                 t["state"], t["last_error"] = "QUEUED", "lease vencido (execucao interrompida): reenfileirado"
             t.pop("owner", None)
@@ -581,7 +583,14 @@ def settle_pending(gh: eb.Gh, repo: str = eb.REPO, now: dt.datetime | None = Non
                 item_["state"], item_["new_head"], item_["last_error"] = "DONE_AWAITING_REREVIEW", sha, ""
                 item_["attempts"] = item_.get("attempts", 0) + 1
             elif tip == str(item_.get("head_sha") or "").lower():
-                item_["state"], item_["last_error"] = "FAILED", "o push nao entrou no remoto (ponta ainda no HEAD revisado)"
+                since = item_.get("pending_since")
+                if not since or es.now_iso(_utc(now) - dt.timedelta(seconds=PENDING_GRACE_S)) < since:
+                    # UMA leitura do remoto ainda no SHA revisado NAO prova que o push nao entrou: o servidor pode ainda estar aplicando o push que o cliente abandonou.
+                    # So depois da janela de graca (o `receive-pack` abandonado ja terminou) o "nao entrou" e conclusivo.
+                    item_.setdefault("pending_since", es.now_iso(_utc(now)))
+                    eb.diagnose(b, f"{key}: publicacao pendente: remoto ainda no HEAD revisado; aguardando a janela de {PENDING_GRACE_S}s antes de concluir que o push nao entrou", now)
+                    return
+                item_["state"], item_["last_error"] = "FAILED", "o push nao entrou no remoto (ponta ainda no HEAD revisado depois da janela de graca)"
                 item_["attempts"] = item_.get("attempts", 0) + 1
                 item_["retry_after"] = es.now_iso(_utc(now) + dt.timedelta(seconds=RETRY_S * item_["attempts"]))
                 item_.pop("published_sha", None)
@@ -627,6 +636,7 @@ def confirm_head(item: dict, gh: eb.Gh, repo: str, pushed: bool, published: str 
 def _to_publish_pending(key: str, owner: str, reason: str, log: str, t: dt.datetime) -> bool:
     def pend(it, b):
         it["state"], it["last_error"], it["log"] = "PUBLISH_PENDING", reason, log
+        it["pending_since"] = es.now_iso(t)
         eb.diagnose(b, f"{key}: PUBLISH_PENDING {reason}", t)
     return update_owned(key, owner, pend, release=True, now=t)
 
@@ -698,7 +708,10 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
                                revalidate=lambda: _revalidate(item, gh, policy or {}, repo),
                                record=lambda sha: update_owned(key, owner, lambda it, b: it.__setitem__("published_sha", sha), now=t))
         except (OSError, ValueError, subprocess.SubprocessError) as exc:
-            delivery = ("ERROR", f"{type(exc).__name__}: {exc}"[:300])
+            if item.get("published_sha"):                                  # excecao DEPOIS de escolher/registrar o commit: o push pode ter sido aceito
+                delivery = ("PUBLISH_UNCONFIRMED", f"{type(exc).__name__}: {exc} (apos registrar o commit a publicar)"[:300])
+            else:
+                delivery = ("ERROR", f"{type(exc).__name__}: {exc}"[:300])        # comprovadamente ANTES do push
         write_log(key, f"delivery: {delivery}", "", {"delivery": delivery[0], "at": es.now_iso(t)})
     if delivery[0] == "PUBLISH_UNCONFIRMED":                               # o remoto pode ter aceito o commit: estado DURAVEL, sem nova execucao ate reconciliar
         reason = f"{delivery[1]} (commit {str(item.get('published_sha'))[:12]})"
@@ -709,7 +722,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
     published = published_sha(item, wt) if pushed else ""
     new_head, api_confirmed = _confirm(item, gh, repo, pushed, published)
     remote_mismatch = False                                                 # a ponta remota consultada NAO e o commit publicado (mesmo que seja o SHA revisado: restaurada)
-    if pushed and published and not api_confirmed:                         # a API seguiu velha: so o REMOTO prova qual e a ponta (nunca atribuir DONE no escuro)
+    if pushed and published and (not api_confirmed or new_head.lower() == published):    # so o REMOTO prova qual e a ponta (API velha OU em cache mostrando o commit publicado)
         try:
             consulted, tip = remote_tip_of(wt, branch)
         except Exception:  # noqa: BLE001 — git ausente/travado DEPOIS do push registrado: o resultado e incerto, nunca FAILED
@@ -807,6 +820,7 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
         def crashed(it, b):
             if it.get("published_sha"):                                     # o commit a publicar ja foi registrado: a publicacao pode ter acontecido; nunca volta a ser elegivel
                 it["state"], it["last_error"] = "PUBLISH_PENDING", f"{reason} (apos registrar o commit a publicar: reconciliar com o remoto)"
+                it["pending_since"] = es.now_iso(_utc(now))
                 eb.diagnose(b, f"{item['key']}: {it['last_error']}", now)
                 return
             it["state"], it["last_error"] = "FAILED", reason
