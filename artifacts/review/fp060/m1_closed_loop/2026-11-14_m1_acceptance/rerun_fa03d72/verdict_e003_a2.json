@@ -1,0 +1,25 @@
+{
+  "pr": 1,
+  "head_sha": "5b84f8afb8422a245d373a0429d06696ef3985fe",
+  "verdict": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "severity": "MEDIUM",
+      "file": "lab_slug.py",
+      "line": 8,
+      "reason": "A expressão regular mantém apenas letras e dígitos ASCII, violando R2 para caracteres alfanuméricos Unicode. Por exemplo, slugify(\"Café com Leite!\") retorna \"caf-com-leite\" em vez de \"café-com-leite\".",
+      "required_change": "Classificar cada caractere após str.lower() com str.isalnum(), mantendo os alfanuméricos Unicode e convertendo cada sequência dos demais em um único hífen. Acrescentar testes para caracteres Unicode."
+    }
+  ],
+  "tests_reviewed": [
+    "tests/test_lab_slug.py"
+  ],
+  "confidence": "HIGH",
+  "files_reviewed": [
+    {
+      "path": "lab_slug.py",
+      "sha256": "007e659400a71d6bf63295d4fa00d3e592f479f625ffadf79281b67c070f72a0",
+      "code_excerpt": "    text = re.sub(r\"[^a-z0-9]+\", \"-\", text)"
+    }
+  ]
+}

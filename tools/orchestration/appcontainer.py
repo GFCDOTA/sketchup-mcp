@@ -45,6 +45,8 @@ if os.name == "nt":
     _kernel.GetCurrentProcess.argtypes, _kernel.GetCurrentProcess.restype = [], wintypes.HANDLE
     _kernel.CloseHandle.argtypes, _kernel.CloseHandle.restype = [wintypes.HANDLE], wintypes.BOOL
     _kernel.LocalFree.argtypes, _kernel.LocalFree.restype = [ctypes.c_void_p], ctypes.c_void_p
+    _kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    _kernel.OpenProcess.restype = wintypes.HANDLE
 
     class _SecurityAttributes(ctypes.Structure):
         _fields_ = [("length", wintypes.DWORD), ("descriptor", ctypes.c_void_p), ("inheritable", wintypes.BOOL)]
@@ -83,6 +85,39 @@ def _current_user_sid():
         return _to_sid_string(sid)
     finally:
         _kernel.CloseHandle(token)
+
+
+def token_facts(pid: int) -> dict:
+    """Ask the kernel whether a live process runs in an AppContainer and how many capabilities its token holds.
+
+    This reads the token of the process that was actually created; it is not derived
+    from the arguments used to create it. It says nothing about file ACLs.
+    """
+    if os.name != "nt":
+        raise AppContainerError("Windows AppContainer is required")
+    process = _kernel.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+    if not process:
+        raise _windows_error("OpenProcess")
+    try:
+        token = wintypes.HANDLE()
+        if not _open_token(process, 0x0008, ctypes.byref(token)):  # TOKEN_QUERY
+            raise _windows_error("OpenProcessToken")
+        try:
+            flag, size = wintypes.DWORD(), wintypes.DWORD()
+            if not _token_info(token, 29, ctypes.byref(flag), ctypes.sizeof(flag), ctypes.byref(size)):  # TokenIsAppContainer
+                raise _windows_error("GetTokenInformation TokenIsAppContainer")
+            _token_info(token, 30, None, 0, ctypes.byref(size))  # TokenCapabilities
+            if not size.value:
+                raise _windows_error("GetTokenInformation TokenCapabilities size")
+            buffer = ctypes.create_string_buffer(size.value)
+            if not _token_info(token, 30, buffer, size, ctypes.byref(size)):
+                raise _windows_error("GetTokenInformation TokenCapabilities")
+            count = ctypes.cast(buffer, ctypes.POINTER(wintypes.DWORD)).contents.value
+            return {"is_appcontainer": flag.value == 1, "capabilities": count}
+        finally:
+            _kernel.CloseHandle(token)
+    finally:
+        _kernel.CloseHandle(process)
 
 
 class AppContainerProfile:
