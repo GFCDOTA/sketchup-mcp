@@ -783,6 +783,39 @@ def loop_wait(interval: int, failures: int) -> float:
     return max(own, persisted)
 
 
+def initial_wait(now: dt.datetime | None = None) -> float:
+    """Quanto falta do backoff PERSISTIDO do bridge ao iniciar/reiniciar: `backoff_s` contado a partir do ultimo poll (`last_poll`). Assim um reinicio rapido da
+    tarefa agendada nao faz outra chamada a API que ja pediu espera. Estado ilegivel ou sem `last_poll` => 0 (nao bloqueia o inicio)."""
+    try:
+        b = eb.load()
+        backoff = float(b.get("backoff_s") or 0)
+        last = dt.datetime.strptime(b["last_poll"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc) if b.get("last_poll") else None
+    except (ValueError, OSError, TypeError, KeyError):
+        return 0.0
+    if backoff <= 0 or last is None:
+        return 0.0
+    return max(0.0, backoff - (_utc(now) - last).total_seconds())
+
+
+def wait_for_identity(policy: dict, interval: int) -> int | None:
+    """Verifica que o `gh` e o EXECUTOR (fail-closed). Conta ERRADA (`PermissionError`) e fatal: codigo 3, esperar nao conserta. `gh`/rede indisponivel
+    (`RuntimeError`) NAO derruba o processo: espera com backoff e tenta de novo, para que o listener volte sozinho depois de uma indisponibilidade longa, sem depender
+    do limite de reinicios da tarefa agendada. Devolve None quando verificada; ou o codigo de saida (3 conta errada, 5 launcher morreu)."""
+    attempt = 0
+    while True:
+        try:
+            eb.check_identity(eb.gh_json, policy)
+            return None
+        except PermissionError as exc:
+            print(json.dumps({"at": es.now_iso(), "fatal": str(exc)[:300]}), flush=True)
+            return 3
+        except RuntimeError as exc:
+            attempt += 1
+            print(json.dumps({"at": es.now_iso(), "degraded": f"identidade do gh nao verificada ({str(exc)[:160]}): tentativa {attempt}, nenhuma acao ate verificar"}), flush=True)
+            if not sleep_watching(cycle_backoff(interval, attempt), WATCH_PID):
+                return 5
+
+
 def guarded_cycle(cycle: Callable[[], dict], consecutive: int) -> tuple[dict, int]:
     """Roda UM ciclo sem deixar uma excecao derrubar o processo. Devolve (resultado, falhas seguidas): o resultado de um ciclo com erro e
     um registro (`cycle_error`) e o contador sobe; um ciclo sem erro zera o contador. `KeyboardInterrupt`/`SystemExit` sao `BaseException`: passam (nao sao falha de ciclo)."""
@@ -823,6 +856,8 @@ def main(argv: list[str] | None = None) -> int:
     rp.add_argument("--repo", default=eb.REPO)
     rp.add_argument("--execute", action="store_true", help="executa o Claude; sem isto e dry-run")
     rp.add_argument("--watch-pid", type=int, default=None, help="encerra se este PID (o launcher) morrer")
+    rp.add_argument("--exit-after-failures", type=int, default=0,
+                    help="sai com codigo 7 depois de N ciclos seguidos com erro (para uma tarefa que reinicia); 0 (padrao) = nunca sai: segue degradado, com backoff, e volta sozinho")
     sub.add_parser("status")
     a = ap.parse_args(argv)
     if a.cmd == "status":
@@ -836,13 +871,18 @@ def main(argv: list[str] | None = None) -> int:
                           "diagnostics": b["diagnostics"][-5:]}, indent=1, ensure_ascii=False))
         return 0
     policy = eb.load_policy()
-    try:
-        eb.check_identity(eb.gh_json, policy)
-    except (PermissionError, RuntimeError) as exc:
-        print(json.dumps({"at": es.now_iso(), "fatal": str(exc)[:300]}), flush=True)
-        return 3
     global WATCH_PID
     WATCH_PID = a.watch_pid
+    if a.once:                                                               # execucao unica: qualquer falha de identidade e fatal
+        try:
+            eb.check_identity(eb.gh_json, policy)
+        except (PermissionError, RuntimeError) as exc:
+            print(json.dumps({"at": es.now_iso(), "fatal": str(exc)[:300]}), flush=True)
+            return 3
+    else:
+        code = wait_for_identity(policy, a.interval)
+        if code is not None:
+            return code
     lock = InstanceLock(instance_lock_path())
     if not lock.acquire():
         print(json.dumps({"at": es.now_iso(), "fatal": f"outra instancia do executor ja consome a fila (pid {lock.holder()}): nao inicia"}), flush=True)
@@ -850,13 +890,18 @@ def main(argv: list[str] | None = None) -> int:
     claude_bin = resolve_claude()
     failures = 0
     try:
+        first_wait = 0.0 if a.once else initial_wait()
+        if first_wait > 0 and not sleep_watching(first_wait, WATCH_PID):         # o backoff persistido vale tambem depois de um reinicio
+            return 5
         while True:
             if WATCH_PID is not None and not pid_alive(WATCH_PID):
                 print(json.dumps({"at": es.now_iso(), "fatal": f"processo pai {WATCH_PID} encerrou: saindo"}), flush=True)
                 return 5
             res, failures = guarded_cycle(lambda: run_cycle(eb.gh_json, policy, a.repo, a.execute, claude_bin=claude_bin), failures)
-            print(json.dumps({"at": es.now_iso(), "execute": a.execute, **res}, ensure_ascii=False), flush=True)
             if failures >= MAX_CONSECUTIVE_CYCLE_ERRORS:
+                res = {**res, "degraded": True}                              # visivel no log e na Agent Bar; o laco segue vivo e volta sozinho quando o GitHub voltar
+            print(json.dumps({"at": es.now_iso(), "execute": a.execute, **res}, ensure_ascii=False), flush=True)
+            if a.exit_after_failures and failures >= a.exit_after_failures:
                 print(json.dumps({"at": es.now_iso(), "fatal": f"{failures} ciclos seguidos com erro: saindo para a tarefa agendada reiniciar"}), flush=True)
                 return 7
             if a.once:
