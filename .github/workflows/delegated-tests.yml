@@ -7,6 +7,10 @@ name: delegated-tests
 # A politica (quais node ids) tambem e lida da base. O revisor confere: repositorio, este workflow (blob fixado na politica), HEAD exato, execucao, tentativa, digest do
 # artefato e que CADA node id da politica esta `passed`.
 
+# Num `workflow_run`, GITHUB_SHA/head_sha da PROPRIA execucao sao a ponta da branch padrao, nao o HEAD do PR. O HEAD do PR fica no titulo (`display_title` na API),
+# vindo da definicao confiavel da base: e por ele que o revisor encontra a execucao do HEAD exato.
+run-name: delegated-tests ${{ github.event.workflow_run.head_sha }}
+
 on:
   workflow_run:
     workflows: ["ci"]
@@ -27,6 +31,7 @@ jobs:
       - name: Checkout the BASE (trusted collector and policy)
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.sha }}
           path: base
           persist-credentials: false
       - name: Checkout the exact PR head (code under test, no credentials)

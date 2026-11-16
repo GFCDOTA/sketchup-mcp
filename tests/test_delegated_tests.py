@@ -184,8 +184,10 @@ class Ci:
     """GitHub falso com uma execucao do workflow autorizado e seu artefato; cada teste adultera UM aspecto."""
     def __init__(self, base_sha: str, head: str = HEAD, attempt: int = 1, run_id: int = 900):
         self.head, self.attempt, self.run_id, self.base_sha = head, attempt, run_id, base_sha
-        self.run = {"id": run_id, "run_number": 5, "run_attempt": attempt, "head_sha": head, "event": "workflow_run", "conclusion": "success",
-                    "path": ".github/workflows/delegated-tests.yml@refs/heads/develop", "repository": {"full_name": REPO}, "head_repository": {"full_name": REPO}}
+        # semantica real do `workflow_run`: head_sha/head_branch da execucao = ponta da branch padrao no disparo; o HEAD do PR so aparece no titulo (`run-name`); `path` sem sufixo
+        self.run = {"id": run_id, "run_number": 5, "run_attempt": attempt, "head_sha": base_sha, "head_branch": "develop", "display_title": f"delegated-tests {head}",
+                    "event": "workflow_run", "conclusion": "success", "path": ".github/workflows/delegated-tests.yml",
+                    "repository": {"full_name": REPO}, "head_repository": {"full_name": REPO}}
         self.report = {"schema": 1, "repository": REPO, "head_sha": head, "run_id": run_id, "run_attempt": attempt, "workflow_path": dt.WORKFLOW_PATH,
                        "policy_base_sha": base_sha, "results": [{"node_id": i, "outcome": "passed"} for i in IDS]}
         self.files = None
@@ -204,15 +206,15 @@ class Ci:
     def gh(self, path: str):
         if self.boom:
             raise self.boom
-        if "/workflows/" in path and path.endswith("per_page=100") and "head_sha=" in path:
-            assert f"head_sha={self.head}" in path and "event=workflow_run" in path
+        if "/workflows/" in path and path.endswith("per_page=100"):
+            assert "head_sha=" not in path and "event=workflow_run" in path and "branch=develop" in path   # filtrar pelo HEAD do PR nunca acharia a execucao
             return {"workflow_runs": [self.run]}
         if path.endswith(f"actions/runs/{self.run_id}/artifacts?per_page=100"):
             if self.artifacts is not None:
                 return {"artifacts": self.artifacts}
             data = self.zip_bytes()
             return {"artifacts": [{"id": 77, "name": dt.ARTIFACT_NAME, "expired": False, "digest": self.digest_override or "sha256:" + hashlib.sha256(data).hexdigest(),
-                                   "workflow_run": {"id": self.run_id, "head_sha": self.head}}]}
+                                   "workflow_run": {"id": self.run_id, "head_sha": self.base_sha}}]}
         raise AssertionError(path)
 
     def download(self, path: str) -> bytes:
@@ -234,26 +236,58 @@ def test_good_evidence_for_the_exact_head_is_accepted(base):
 
 
 def test_evidence_of_an_old_sha_is_refused(base):
-    ci = Ci(base[1], head="b" * 40)                                                         # a execucao existe, mas e de OUTRO commit
-    ci.gh_orig = ci.gh
-    root, sha, _ = base
-    pol = dt.load_policy(root, run_git, sha)
-
-    def gh(path):
-        if "head_sha=" in path:
-            return {"workflow_runs": [ci.run]}                                              # o GitHub devolve so a execucao antiga
-        return ci.gh_orig(path)
+    ci = Ci(base[1], head="b" * 40)                                                         # a execucao existe, mas o titulo e de OUTRO commit do PR
     with pytest.raises(dt.DelegationError, match="HEAD exato"):
-        dt.verify_ci_evidence(gh, ci.download, REPO, HEAD, pol, run_git, root)
+        verify(base, ci)
 
 
-@pytest.mark.parametrize("field,value", [("event", "pull_request"), ("conclusion", "failure"), ("conclusion", None), ("path", ".github/workflows/ci.yml@refs/heads/develop"),
+def test_a_run_whose_own_head_sha_is_the_pr_head_is_not_how_workflow_run_works_and_is_refused(base):
+    ci = Ci(base[1])
+    ci.run["head_sha"] = HEAD                                                               # HEAD do PR nao e commit da base: nao esta na historia
+    with pytest.raises(dt.DelegationError, match="historia da base"):
+        verify(base, ci)
+
+
+@pytest.mark.parametrize("field,value", [("event", "pull_request"), ("conclusion", "failure"), ("conclusion", None), ("path", ".github/workflows/ci.yml"),
                                          ("path", ".github/workflows/delegated-tests.yml@refs/pull/9/merge"), ("path", ".github/workflows/delegated-tests.yml@refs/heads/feat/x"),
-                                         ("repository", {"full_name": "outro/repo"}), ("head_repository", {"full_name": "fork/sketchup-mcp"}), ("head_sha", "c" * 40)])
-def test_a_run_of_an_unauthorized_workflow_event_branch_fork_or_conclusion_is_refused(base, field, value):
+                                         ("head_branch", "feat/x"), ("head_branch", None), ("display_title", "delegated-tests " + "c" * 40), ("display_title", HEAD),
+                                         ("display_title", "outro titulo"), ("head_sha", "zz"), ("head_sha", None),
+                                         ("repository", {"full_name": "outro/repo"}), ("head_repository", {"full_name": "fork/sketchup-mcp"})])
+def test_a_run_of_an_unauthorized_workflow_event_branch_fork_title_or_conclusion_is_refused(base, field, value):
     ci = Ci(base[1])
     ci.run[field] = value
     with pytest.raises(dt.DelegationError, match="nenhuma execucao"):
+        verify(base, ci)
+
+
+@pytest.mark.parametrize("path", [".github/workflows/delegated-tests.yml@refs/heads/develop", ".github/workflows/delegated-tests.yml@develop"])
+def test_a_path_with_the_base_branch_suffix_is_still_accepted(base, path):
+    ci = Ci(base[1])
+    ci.run["path"] = path
+    assert verify(base, ci)["run_id"] == 900
+
+
+def test_a_run_that_executed_a_workflow_other_than_the_pinned_blob_is_refused(base):
+    root, sha, pin = base
+    (root / ".github/workflows/delegated-tests.yml").write_text(WORKFLOW_TEXT + "# versao intermediaria\n", encoding="utf-8", newline="\n")
+    sh(root, "add", "-A")
+    sh(root, "commit", "-q", "-m", "workflow intermediario")
+    mid = sh(root, "rev-parse", "HEAD")
+    (root / ".github/workflows/delegated-tests.yml").write_text(WORKFLOW_TEXT, encoding="utf-8", newline="\n")
+    sh(root, "add", "-A")
+    sh(root, "commit", "-q", "-m", "workflow restaurado")
+    new = sh(root, "rev-parse", "HEAD")
+    pol = dt.load_policy(root, run_git, new)
+    assert pol.workflow_blob_sha == pin
+    ci = Ci(mid)                                                                            # a execucao rodou na base intermediaria, com outra definicao
+    with pytest.raises(dt.DelegationError, match="que executou"):
+        dt.verify_ci_evidence(ci.gh, ci.download, REPO, HEAD, pol, run_git, root)
+
+
+def test_a_report_claiming_a_base_other_than_the_one_the_run_executed_on_is_refused(base):
+    ci = Ci(base[1])
+    ci.report["policy_base_sha"] = "a" * 40
+    with pytest.raises(dt.DelegationError, match="rodou em"):
         verify(base, ci)
 
 

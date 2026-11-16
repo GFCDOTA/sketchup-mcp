@@ -34,6 +34,8 @@ WORKFLOW_PATH = ".github/workflows/delegated-tests.yml"
 COLLECTOR_PATH = "tools/orchestration/delegated_results.py"
 ARTIFACT_NAME = "delegated-test-results"
 RESULT_FILE = "results.json"
+BASE_BRANCH = "develop"                                              # branch padrao do repositorio (workflow_run so dispara da padrao; trocada de main em 2026-11-16)
+RUN_TITLE_PREFIX = "delegated-tests "                                # `run-name` do workflow: prefixo + HEAD exato do PR
 SCHEMA = 1
 # Arquivos que o PR nunca pode alterar para manter a delegacao: a politica, o workflow que gera a evidencia e o coletor.
 PROTECTED = (POLICY_PATH, WORKFLOW_PATH, COLLECTOR_PATH)
@@ -173,16 +175,21 @@ def verify_ci_evidence(gh, download: Callable[[str], bytes], repo: str, head_sha
     rc, blob = run_git(["rev-parse", f"{policy.base_sha}:{policy.workflow_path}"], root)
     if rc != 0 or blob.strip().lower() != policy.workflow_blob_sha:
         raise DelegationError("o workflow autorizado na base nao confere com o blob fixado na politica")
-    runs = _api(gh, f"repos/{repo}/actions/workflows/{Path(policy.workflow_path).name}/runs?head_sha={head_sha}&event=workflow_run&status=completed&per_page=100")
+    # Semantica do `workflow_run` (docs do GitHub): a execucao roda no contexto da branch padrao — o `head_sha`/`head_branch` DELA sao a ponta da `develop` no disparo, nunca
+    # o HEAD do PR. Por isso nao se filtra por `head_sha` do PR: a execucao e encontrada pelo titulo (`run-name` da definicao confiavel, com o HEAD do PR) e o `head_sha` dela
+    # tem de ser um commit da base cujo workflow e o blob fixado. O `path` da API vem sem sufixo de ref. So as 100 execucoes mais recentes sao lidas (fail-closed se sair da janela).
+    runs = _api(gh, f"repos/{repo}/actions/workflows/{Path(policy.workflow_path).name}/runs?event=workflow_run&branch={BASE_BRANCH}&status=completed&per_page=100")
     rows = runs.get("workflow_runs") if isinstance(runs, dict) else None
     if not isinstance(rows, list):
         raise DelegationError("lista de execucoes do workflow ilegivel")
+    title = f"{RUN_TITLE_PREFIX}{head_sha}"
     good = []
     for r in rows:
         if not isinstance(r, dict):
             continue
-        if (str(r.get("head_sha", "")).lower() != head_sha or r.get("event") != "workflow_run" or r.get("conclusion") != "success"
-                or str(r.get("path", "")).split("@")[0] != policy.workflow_path or not str(r.get("path", "")).endswith("@refs/heads/develop")
+        if (r.get("display_title") != title or r.get("event") != "workflow_run" or r.get("conclusion") != "success" or r.get("head_branch") != BASE_BRANCH
+                or str(r.get("path", "")).partition("@")[0] != policy.workflow_path
+                or str(r.get("path", "")).partition("@")[2] not in ("", BASE_BRANCH, f"refs/heads/{BASE_BRANCH}") or not re.fullmatch(r"[0-9a-f]{40}", str(r.get("head_sha", "")).lower())
                 or (r.get("repository") or {}).get("full_name") != repo or (r.get("head_repository") or {}).get("full_name") != repo):
             continue
         good.append(r)
@@ -190,12 +197,20 @@ def verify_ci_evidence(gh, download: Callable[[str], bytes], repo: str, head_sha
         raise DelegationError("nenhuma execucao do workflow autorizado, bem-sucedida, para este HEAD exato e este repositorio")
     run = max(good, key=lambda r: (int(r.get("run_number") or 0), int(r.get("run_attempt") or 0)))
     run_id, attempt = int(run["id"]), int(run.get("run_attempt") or 1)
+    run_base = str(run["head_sha"]).lower()
+    # a definicao que EXECUTOU e a do commit da base no disparo: tem de estar na historia da base atual e ter o workflow fixado
+    rc, _ = run_git(["merge-base", "--is-ancestor", run_base, policy.base_sha], root)
+    if rc != 0:
+        raise DelegationError(f"a execucao rodou num commit ({run_base[:8]}) que nao esta na historia da base ({policy.base_sha[:8]})")
+    rc, ran = run_git(["rev-parse", f"{run_base}:{policy.workflow_path}"], root)
+    if rc != 0 or ran.strip().lower() != policy.workflow_blob_sha:
+        raise DelegationError("o workflow que executou nao e o blob fixado na politica")
     arts = _api(gh, f"repos/{repo}/actions/runs/{run_id}/artifacts?per_page=100")
     found = [a for a in (arts.get("artifacts") if isinstance(arts, dict) else None) or [] if isinstance(a, dict) and a.get("name") == ARTIFACT_NAME and not a.get("expired")]
     if len(found) != 1:
         raise DelegationError(f"esperava exatamente 1 artefato {ARTIFACT_NAME!r} valido na execucao {run_id}, achei {len(found)}")
     art = found[0]
-    if str((art.get("workflow_run") or {}).get("head_sha", "")).lower() != head_sha or int((art.get("workflow_run") or {}).get("id") or 0) != run_id:
+    if str((art.get("workflow_run") or {}).get("head_sha", "")).lower() != run_base or int((art.get("workflow_run") or {}).get("id") or 0) != run_id:
         raise DelegationError("artefato nao pertence a execucao/HEAD verificados")
     try:
         blob_bytes = download(f"repos/{repo}/actions/artifacts/{art['id']}/zip")
@@ -220,6 +235,8 @@ def verify_ci_evidence(gh, download: Callable[[str], bytes], repo: str, head_sha
     used = str(report.get("policy_base_sha", "")).lower()
     if not re.fullmatch(r"[0-9a-f]{40}", used):
         raise DelegationError("relatorio sem `policy_base_sha` valido")
+    if used != run_base:
+        raise DelegationError(f"o relatorio diz ter usado a base {used[:8]}, mas a execucao rodou em {run_base[:8]}")
     for path in PROTECTED:
         rc1, now = run_git(["rev-parse", f"{policy.base_sha}:{path}"], root)
         rc2, then = run_git(["rev-parse", f"{used}:{path}"], root)
