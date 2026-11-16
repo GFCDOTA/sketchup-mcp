@@ -15,7 +15,8 @@ def item(n=1, state="QUEUED", kind="review", pr=7, sha="a" * 40, **kw):
 
 
 def event(n=1, status="PENDING", pr=7, sha="a" * 40, **kw):
-    return {"id": n, "event_type": "CORRECTION_REQUESTED", "producer": "event_bridge", "status": status,
+    return {"id": n, "event_type": "CORRECTION_REQUESTED", "producer": "event_bridge", "status": status, "job_id": f"pr:{pr}",
+            "payload": json.dumps({"pr": pr, "issue": None, "head_sha": sha, "review_id": str(1000 + n), "author": None, "url": None}),
             "idempotency_key": f"review:{1000 + n}:{pr}:{sha}", **kw}
 
 
@@ -398,3 +399,19 @@ def test_an_event_with_max_attempts_zero_is_never_claimable_and_is_a_divergence_
 def test_a_non_canonical_retry_after_is_a_structured_error_because_the_json_executor_compares_text(bad):
     with pytest.raises(ValueError, match="retry_after"):
         sd.compare([item(state="FAILED", attempts=1, retry_after=bad)], [event(status="PENDING", attempt=1)], now=1000.0)
+
+
+# -- 10a revisao do Codex (#634): a chave sozinha nao prova que e o mesmo trabalho -------------------------------------------------------------------
+@pytest.mark.parametrize("change", [{"job_id": "pr:99"}, {"job_id": None}, {"payload": json.dumps({"pr": 99, "issue": None, "head_sha": "a" * 40, "review_id": "1001"})},
+                                    {"payload": json.dumps({"pr": 7, "issue": None, "head_sha": "b" * 40, "review_id": "1001"})},
+                                    {"payload": json.dumps({"pr": 7, "issue": 5, "head_sha": "a" * 40, "review_id": "1001"})},
+                                    {"payload": json.dumps({"pr": 7, "issue": None, "head_sha": "a" * 40, "review_id": "outro"})}, {"payload": "nao e json"}, {"payload": "[]"}, {"payload": None}])
+def test_an_event_with_the_expected_key_but_a_different_job_or_payload_is_a_divergence(change):
+    found = sd.compare([item(state="QUEUED")], [event(status="PENDING", **change)], now=1000.0)
+    assert codes(found) == [("PAYLOAD_MISMATCH", "k1")]
+
+
+def test_a_payload_decoded_by_the_store_as_a_dict_is_accepted_too():
+    ev = event(status="PENDING")
+    ev["payload"] = json.loads(ev["payload"])
+    assert sd.compare([item(state="QUEUED")], [ev], now=1000.0) == []

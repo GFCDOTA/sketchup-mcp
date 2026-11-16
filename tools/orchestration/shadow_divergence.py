@@ -58,6 +58,25 @@ def mirror_key(item: dict) -> str:
     return f"review:{str(item.get('event_id', '')).split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
 
 
+def payload_mismatch(item: dict, event: dict) -> str:
+    """'' se o evento descreve o MESMO trabalho do item JSON; senao o motivo. A chave de idempotencia nao basta: o EventStore preserva o payload do PRIMEIRO evento publicado
+    para uma chave, entao um evento com a chave esperada e PR/Issue/HEAD/job divergentes seria aceito e, apos o cutover, o consumidor receberia dados diferentes."""
+    raw = event.get("payload")
+    try:
+        payload = json.loads(raw) if isinstance(raw, str) else raw
+    except ValueError:
+        return "payload do evento nao e JSON"
+    if not isinstance(payload, dict):
+        return "evento sem payload legivel"
+    rid = str(item.get("event_id", "")).split(":")[-1]
+    if event.get("job_id") != f"pr:{item.get('pr')}":
+        return f"job_id do evento {event.get('job_id')!r} != 'pr:{item.get('pr')}'"
+    for field, want in (("pr", item.get("pr")), ("head_sha", item.get("head_sha")), ("review_id", rid), ("issue", item.get("issue"))):
+        if payload.get(field) != want:
+            return f"campo `{field}` do payload ({payload.get(field)!r}) difere do item JSON ({want!r})"
+    return ""
+
+
 CANONICAL_ISO = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 LATE_TOLERANCE_S = 60                  # atraso do evento em relacao ao JSON que ainda nao e divergencia (relogio/jitter de backoff)
 
@@ -88,6 +107,10 @@ def compare(queue: list[dict], events: list[dict], now: float | None = None) -> 
             found.append(Divergence("MISSING_IN_STORE", key, f"item {state} sem evento {mirror_key(item)}"))
             continue
         matched.add(event["idempotency_key"])
+        wrong = payload_mismatch(item, event)
+        if wrong:
+            found.append(Divergence("PAYLOAD_MISMATCH", key, f"evento com a chave esperada mas outro trabalho: {wrong}"))
+            continue
         if state == "RUNNING":
             # o executor JSON ainda TRABALHA neste item: trocar a fonte agora deixaria o evento PENDING reivindicavel por um segundo executor (mesma correcao em
             # duplicidade). O cutover so e autorizado com a fila JSON DRENADA (nenhum item RUNNING).
