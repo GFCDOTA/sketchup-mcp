@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sqlite3
 import sys
 import time
@@ -57,12 +58,15 @@ def mirror_key(item: dict) -> str:
     return f"review:{str(item.get('event_id', '')).split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
 
 
+CANONICAL_ISO = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 LATE_TOLERANCE_S = 60                  # atraso do evento em relacao ao JSON que ainda nao e divergencia (relogio/jitter de backoff)
 
 
 def _epoch(iso: object) -> float | None:
     """`retry_after` do item JSON (ISO UTC, `%Y-%m-%dT%H:%M:%SZ`) em epoch; ausente/ilegivel = None (sem espera conhecida)."""
     import datetime as dt
+    if not isinstance(iso, str) or not CANONICAL_ISO.fullmatch(iso):         # o executor JSON compara `retry_after` como TEXTO: so o formato canonico exato tem a ordem lexical certa
+        return None
     try:
         return dt.datetime.strptime(str(iso), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc).timestamp()
     except ValueError:
@@ -102,7 +106,12 @@ def compare(queue: list[dict], events: list[dict], now: float | None = None) -> 
             elif event["status"] == "PENDING" and pickable:
                 # os DOIS lados ainda executam: confere o ORCAMENTO de tentativas e a janela de espera, senao o cutover muda quantas vezes e quando o item roda
                 json_left = MAX_ATTEMPTS - int(item.get("attempts") or 0)
-                event_left = int(event.get("max_attempts") or MAX_ATTEMPTS) - int(event.get("attempt") or 0)
+                event_max = MAX_ATTEMPTS if event.get("max_attempts") is None else int(event["max_attempts"])      # ausente != zero: max_attempts=0 e um evento que nunca e reivindicado
+                event_left = event_max - int(event.get("attempt") or 0)
+                if event_left <= 0:
+                    found.append(Divergence("STATE_MISMATCH", key, f"evento PENDING nao reivindicavel (max_attempts={event_max}, attempt={int(event.get('attempt') or 0)}) mas o item JSON "
+                                                                  f"ainda tem {json_left} tentativa(s): o trabalho ficaria sem consumidor apos o cutover"))
+                    continue
                 if event_left < json_left:
                     found.append(Divergence("STATE_MISMATCH", key, f"orcamento de tentativas divergente: o JSON ainda tem {json_left}, o evento so {event_left}: uma falha apos o "
                                                                   "cutover levaria o item a DLQ antes da hora"))

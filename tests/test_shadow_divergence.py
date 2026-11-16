@@ -385,3 +385,16 @@ def test_an_event_waiting_much_longer_than_the_json_retry_after_is_a_divergence_
     assert codes(late) == [("STATE_MISMATCH", "k1")] and "atrasaria" in late[0].detail
     skew = sd.compare([item(state="FAILED", attempts=1, retry_after="2026-11-16T00:00:00Z")], [event(status="PENDING", attempt=1, available_at=retry + 30)], now=retry - 1000)
     assert skew == []
+
+
+# -- 9a revisao do Codex (#634): max_attempts=0 e formato canonico de retry_after ------------------------------------------------------------------------
+def test_an_event_with_max_attempts_zero_is_never_claimable_and_is_a_divergence_not_a_default_of_three():
+    found = sd.compare([item(state="QUEUED", attempts=0)], [event(status="PENDING", attempt=0, max_attempts=0)], now=1000.0)
+    assert codes(found) == [("STATE_MISMATCH", "k1")] and "nao reivindicavel" in found[0].detail
+    assert sd.compare([item(state="QUEUED", attempts=0)], [event(status="PENDING", attempt=0)], now=1000.0) == []                 # ausente = padrao
+
+
+@pytest.mark.parametrize("bad", ["2026-1-01T00:00:00Z", "2026-01-1T00:00:00Z", "2026-01-01T0:00:00Z", "2026-01-01 00:00:00Z", "2026-01-01T00:00:00+00:00", " 2026-01-01T00:00:00Z"])
+def test_a_non_canonical_retry_after_is_a_structured_error_because_the_json_executor_compares_text(bad):
+    with pytest.raises(ValueError, match="retry_after"):
+        sd.compare([item(state="FAILED", attempts=1, retry_after=bad)], [event(status="PENDING", attempt=1)], now=1000.0)
