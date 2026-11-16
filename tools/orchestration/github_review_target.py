@@ -39,6 +39,36 @@ def marker(key: str) -> str:
     return f"<!-- fp060-outbox-key:{key} -->"
 
 
+GH_CALL_TIMEOUT_S = 60.0                                          # teto DURO de cada chamada `gh api` (o subprocesso e morto no timeout)
+DISPOSABLE_MARKER = "<!-- fp060-disposable-e2e -->"               # marcador verificavel, no corpo, de PR DESCARTAVEL para a prova E2E
+
+
+class NotDisposable(RuntimeError):
+    """O PR nao e comprovadamente descartavel: a prova E2E nao publica nada nele."""
+
+
+def require_disposable_pr(pr: object, reviewer: str) -> tuple[str, str]:
+    """Guarda da prova E2E (sem `assert`, vale com `python -O`): PR aberto, em draft, com o marcador de descartavel no corpo, SEM arquivos alterados e de autor
+    diferente do revisor. Devolve (head_sha, autor); qualquer desvio levanta `NotDisposable` ANTES de existir entrada no outbox."""
+    if not isinstance(pr, dict):
+        raise NotDisposable("resposta do PR ilegivel")
+    problems = []
+    if pr.get("state") != "open" or pr.get("draft") is not True:
+        problems.append("precisa estar aberto e em draft")
+    if DISPOSABLE_MARKER not in (pr.get("body") or ""):
+        problems.append(f"corpo sem o marcador {DISPOSABLE_MARKER}")
+    if pr.get("changed_files") != 0:
+        problems.append(f"altera {pr.get('changed_files')!r} arquivo(s); precisa alterar 0")
+    head, author = str((pr.get("head") or {}).get("sha") or ""), str((pr.get("user") or {}).get("login") or "")
+    if not _SHA.match(head):
+        problems.append("HEAD invalido")
+    if not author or author == reviewer:
+        problems.append("autor e revisor precisam ser contas diferentes")
+    if problems:
+        raise NotDisposable("PR nao e descartavel: " + "; ".join(problems))
+    return head, author
+
+
 def gh_api(method: str, path: str, *, token: str | None = None, fields: dict | None = None) -> Any:
     """Chamada real via `gh api`. O token vai so no ambiente do filho; falha vira `TargetError` sem o token."""
     argv = [shutil.which("gh") or "gh", "api", "-X", method, path]
@@ -49,7 +79,7 @@ def gh_api(method: str, path: str, *, token: str | None = None, fields: dict | N
     if token:
         env["GH_TOKEN"] = token
     try:
-        r = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=60,
+        r = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, timeout=GH_CALL_TIMEOUT_S,
                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise TargetError(f"gh api {method} indisponivel: {type(exc).__name__}") from exc
@@ -66,6 +96,10 @@ def _scrub(text: str, token: str | None) -> str:
 
 
 class GitHubReviewTarget:
+    # `send` faz um GET e um POST, cada um com teto de GH_CALL_TIMEOUT_S: o publicador mantem o lease por todo esse prazo (+ folga) antes de enviar. Sem idempotencia
+    # atomica no GitHub (nao ha POST condicionado a chave), esse teto e o que impede outro publicador de reconciliar enquanto o POST ainda pode aparecer.
+    send_timeout_s = 2 * GH_CALL_TIMEOUT_S
+
     def __init__(self, api: Api, *, token: str, reviewer: str, repo: str, page_size: int = 100, max_pages: int = 10):
         if not token or not reviewer or not repo:
             raise ValueError("token, reviewer e repo sao obrigatorios")

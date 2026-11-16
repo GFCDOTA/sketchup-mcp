@@ -24,9 +24,8 @@ class Crash(BaseException):
 target = gt.from_policy(eb.load_policy(), eb.REPO)        # recusa executor, login fora de `reviewers` ou token ausente
 token = os.environ["CODEX_REVIEWER_GH_TOKEN"].strip().lstrip("﻿")
 pr = gt.gh_api("GET", f"repos/{eb.REPO}/pulls/{PR}")      # credencial do executor (keyring), so leitura
-assert pr["state"] == "open" and pr["draft"] is True, "PR descartavel precisa estar aberto e em draft"
-head, author = pr["head"]["sha"], pr["user"]["login"]
-assert author != target.reviewer, "autor e revisor precisam ser contas diferentes"
+# guarda EXPLICITA (vale com `python -O`): aberto, draft, marcador de descartavel no corpo, 0 arquivos alterados, autor != revisor; senao nada entra no outbox
+head, author = gt.require_disposable_pr(pr, target.reviewer)
 
 key = f"fp060-m2-e2e:pr{PR}:{head}:REQUEST_CHANGES"
 body = ("Codex CLI (revisor independente) — prova DESCARTAVEL de publicacao via outbox (FP-060 M2, #606).\n"
@@ -63,7 +62,7 @@ except Crash:
     steps.append({"step": "publicador 1 morreu depois do POST e antes do ACK", "outbox": outbox(), "reviews_com_a_chave": len(reviews_with_key())})
 steps.append({"step": "publicador 2 logo depois (lease do morto ainda vale)", "resultado": op.publish_one(store, targets, "pub-2", lease_seconds=LEASE_S),
               "reviews_com_a_chave": len(reviews_with_key())})
-time.sleep(LEASE_S + 1)
+time.sleep(max(LEASE_S, target.send_timeout_s + op.SEND_MARGIN_S) + 1)   # o lease do morto cobre o teto do envio (GET + POST), nao so LEASE_S
 second = op.publish_one(store, targets, "pub-2", lease_seconds=LEASE_S)
 steps.append({"step": "publicador 2 depois do lease expirar", "resultado": second, "outbox": outbox(), "reviews_com_a_chave": len(reviews_with_key())})
 steps.append({"step": "publicador 2 de novo", "resultado": op.publish_one(store, targets, "pub-2", lease_seconds=LEASE_S)})

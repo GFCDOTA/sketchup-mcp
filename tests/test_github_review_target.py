@@ -174,7 +174,7 @@ def test_publisher_that_died_after_the_post_does_not_post_a_second_review(tmp_pa
     with pytest.raises(Crash):
         op.publish_one(store, targets, "pub-1", lease_seconds=30, after_send=die)
     assert len(gh.reviews) == 1
-    clock[0] += 31
+    clock[0] += gt.GitHubReviewTarget.send_timeout_s + op.SEND_MARGIN_S + 1                    # o lease do morto cobre o teto do envio (GET + POST)
 
     res = op.publish_one(store, targets, "pub-2", lease_seconds=30)
 
@@ -243,3 +243,84 @@ def test_default_api_reports_a_failed_call_without_the_token(monkeypatch):
     with pytest.raises(TargetError) as exc:
         gt.gh_api("GET", "repos/x/y", token="segredo")
     assert "segredo" not in str(exc.value) and "401" in str(exc.value)
+
+
+# -- revisao do Codex (#619, 0b97e44a): lease durante todo o POST; guarda do PR descartavel da prova E2E -------------------------------------------------
+def test_the_github_target_declares_a_send_ceiling_covering_its_get_and_post():
+    assert gt.GitHubReviewTarget.send_timeout_s == 2 * gt.GH_CALL_TIMEOUT_S
+
+
+def test_a_post_slower_than_the_original_lease_is_never_doubled_by_a_second_publisher(tmp_path):
+    import threading
+    clock = [1_000_000.0]
+    store = EventStore(tmp_path / "events.db", clock=lambda: clock[0])
+    gh = FakeGitHub()
+    queue(store, "k1")
+    entered, release, results = threading.Event(), threading.Event(), {}
+    real = gh.__call__
+
+    def slow_api(method, path, **kw):
+        if method == "POST":
+            entered.set()
+            release.wait(10)                                                                       # o POST ainda esta em voo
+        return real(method, path, **kw)
+    t1 = threading.Thread(target=lambda: results.update(first=op.publish_one(store, {"github": target(slow_api)}, "pub-1", lease_seconds=30)))
+    t1.start()
+    assert entered.wait(10)
+    clock[0] += 31                                                                                 # o lease ORIGINAL (30 s) venceu durante o POST
+    second = op.publish_one(store, {"github": target(gh)}, "pub-2", lease_seconds=30)
+    assert second == {"action": "IDLE"}                                                            # ninguem reconcilia enquanto o POST pode aparecer
+    release.set()
+    t1.join(10)
+    assert results["first"]["action"] == "SENT" and len(gh.posts()) == 1 and len(gh.reviews) == 1
+
+
+def test_a_target_without_a_send_ceiling_or_atomic_idempotency_is_refused_before_any_send(tmp_path):
+    store = EventStore(tmp_path / "events.db")
+    queue(store, "k1")
+    sent = []
+
+    class Bare:
+        def find(self, entry_):
+            return None
+
+        def send(self, entry_):
+            sent.append(entry_)
+            return "x"
+    res = op.publish_one(store, {"github": Bare()}, "pub-1", lease_seconds=30)
+    assert res["action"] == "FAILED" and "send_timeout_s" in res["reason"] and sent == []
+
+
+def disposable(**over):
+    base = {"state": "open", "draft": True, "body": f"prova descartavel\n{gt.DISPOSABLE_MARKER}", "changed_files": 0,
+            "head": {"sha": SHA}, "user": {"login": EXECUTOR}}
+    return {**base, **over}
+
+
+def test_a_verifiably_disposable_pr_passes_the_e2e_guard():
+    assert gt.require_disposable_pr(disposable(), REVIEWER) == (SHA, EXECUTOR)
+
+
+@pytest.mark.parametrize("over,why", [({"body": "um draft comum"}, "marcador"), ({"body": None}, "marcador"), ({"changed_files": 3}, "altera"),
+                                      ({"changed_files": None}, "altera"), ({"draft": False}, "draft"), ({"state": "closed"}, "draft"),
+                                      ({"user": {"login": REVIEWER}}, "autor"), ({"head": {"sha": "zz"}}, "HEAD")])
+def test_an_ordinary_or_non_empty_pr_is_refused_by_the_e2e_guard(over, why):
+    with pytest.raises(gt.NotDisposable, match=why):
+        gt.require_disposable_pr(disposable(**over), REVIEWER)
+
+
+def test_the_e2e_guard_raises_instead_of_asserting_so_python_dash_o_cannot_remove_it():
+    import subprocess
+    import sys
+    code = ("from tools.orchestration import github_review_target as gt\n"
+            "try:\n    gt.require_disposable_pr({'state': 'open', 'draft': True, 'body': 'comum', 'changed_files': 0, 'head': {'sha': 'a'*40},"
+            " 'user': {'login': 'x'}}, 'r')\nexcept gt.NotDisposable:\n    print('RECUSADO')\n")
+    r = subprocess.run([sys.executable, "-O", "-c", code], capture_output=True, text=True, cwd=str(__import__("pathlib").Path(__file__).resolve().parents[1]))
+    assert r.stdout.strip() == "RECUSADO", r.stderr[-400:]
+
+
+def test_the_e2e_script_uses_the_guard_and_no_assert():
+    from pathlib import Path
+    src = (Path(__file__).resolve().parents[1] / "artifacts/review/fp060/m2_outbox/2026-11-15_github_disposable_pr/e2e_outbox_github.py").read_text(encoding="utf-8")
+    assert "gt.require_disposable_pr(pr, target.reviewer)" in src and "\nassert " not in src
+    assert src.index("require_disposable_pr(") < src.index("store.complete(")                    # a guarda vem ANTES de existir entrada no outbox

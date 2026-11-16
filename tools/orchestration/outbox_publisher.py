@@ -43,7 +43,7 @@ SEND_MARGIN_S = 10.0
 
 
 class Target(Protocol):
-    """`send_timeout_s` (obrigatorio para alvo SEM idempotencia atomica): teto DURO do `send` (o alvo garante que nao produz efeito depois dele, ex.: timeout do subprocesso). O publicador estende o lease
+    """`send_timeout_s` (obrigatorio para alvo SEM idempotencia atomica; quem nao declara nem um nem `atomic_idempotency = True` e RECUSADO antes do envio): teto DURO do `send` (o alvo garante que nao produz efeito depois dele, ex.: timeout do subprocesso). O publicador estende o lease
     para cobrir esse teto ANTES de enviar: enquanto um envio ainda pode produzir efeito, nenhum outro publicador reivindica a entrada."""
     send_timeout_s: float
 
@@ -94,6 +94,8 @@ class LedgerTarget:
     """Arquivo JSONL, uma linha por efeito: o "sistema externo" do laboratorio. O estado e o arquivo, nao a instancia.
     Idempotencia ATOMICA no alvo: `send` reconfere a chave e grava sob a mesma trava; dois envios sobrepostos da mesma chave geram UM efeito (por isso nao precisa
     declarar `send_timeout_s`)."""
+
+    atomic_idempotency = True
 
     def __init__(self, path: str | Path):
         self.path = Path(path)
@@ -153,6 +155,9 @@ def publish_one(store: EventStore, targets: Mapping[str, Target], owner: str, *,
         reference, action = handler.find(entry), "RECONCILED"
         if reference is None:
             ceiling = getattr(handler, "send_timeout_s", None)
+            if not ceiling and getattr(handler, "atomic_idempotency", False) is not True:
+                # sem teto comprovado do envio, o lease pode vencer no meio do efeito e outro publicador reconciliar antes de ele aparecer: envio duplicado
+                raise TargetError(f"alvo {claimed['target']!r} sem `send_timeout_s` e sem idempotencia atomica: nao envio")
             window = max(lease_seconds, float(ceiling) + SEND_MARGIN_S) if ceiling else lease_seconds
             if not store.renew_outbox(claimed, window):                      # fencing + o lease cobre o teto do envio: ninguem reivindica enquanto ele pode ter efeito
                 raise LeaseLost(f"outbox {claimed['id']}: lease perdido antes do envio; nada enviado")

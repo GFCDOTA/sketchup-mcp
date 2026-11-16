@@ -31,7 +31,9 @@ class Crash(BaseException):
 
 
 class FakeTarget:
-    """Sistema externo em memoria: guarda os efeitos por chave de idempotencia."""
+    """Sistema externo em memoria: guarda os efeitos por chave de idempotencia. O envio e instantaneo: teto declarado de 1 s (abaixo do lease dos testes)."""
+
+    send_timeout_s = 1.0
 
     def __init__(self):
         self.effects: list[str] = []
