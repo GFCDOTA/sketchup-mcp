@@ -644,3 +644,35 @@ def test_the_check_creates_writes_or_removes_no_file_in_the_governance_dir(tmp_p
     snapshot = files()
     assert sd.main(["--json"]) == 0
     assert files() == snapshot and not (gov / "bridge.lock").exists()
+
+
+@pytest.mark.parametrize("content, held, in_flight", [
+    (b"123", False, True),                                                          # protocolo de arquivo: existir com PID = dono (ou orfa)
+    (b"123:oslock", False, False), (b"", False, False),                             # lock do SO (#642): arquivo permanente; sem dono no byte = livre
+    (b"123:oslock", True, True), (b"", True, True)])
+def test_the_poll_probe_understands_both_lock_protocols_and_writes_nothing(tmp_path, monkeypatch, content, held, in_flight):
+    import os
+    gov = real_world(tmp_path, monkeypatch)
+    lock = gov / "bridge.lock"
+    lock.write_bytes(content)
+    fd = os.open(lock, os.O_RDWR)
+    try:
+        if held:
+            os.lseek(fd, sd.OS_LOCK_POS, os.SEEK_SET)
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        assert REAL_POLL_IN_FLIGHT() is in_flight
+    finally:
+        os.close(fd)
+    assert lock.read_bytes() == content
+
+
+def test_the_os_lock_constants_match_the_execution_state_protocol_when_it_is_present():
+    from tools.validation import execution_state as es
+    if not hasattr(es, "NEW_PROTOCOL_MARK"):
+        pytest.skip("protocolo de lock do SO (#642) ainda nao esta nesta base")
+    assert (es.NEW_PROTOCOL_MARK, es.LOCK_POS) == (sd.OS_LOCK_MARK, sd.OS_LOCK_POS)

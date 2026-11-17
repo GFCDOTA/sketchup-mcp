@@ -27,6 +27,8 @@ from pathlib import Path
 MIRROR_EVENT_TYPE = "CORRECTION_REQUESTED"
 MIRROR_PRODUCER = "event_bridge"
 MAX_ATTEMPTS = 3                                                    # `event_executor.MAX_ATTEMPTS`: um item JSON FAILED/BLOCKED com menos tentativas ainda pode ser escolhido
+OS_LOCK_MARK = ":oslock"                                            # `execution_state.NEW_PROTOCOL_MARK` do lock do SO (#642)
+OS_LOCK_POS = 4096                                                  # `execution_state.LOCK_POS`: o byte que o dono segura
 RETRYABLE = frozenset({"FAILED", "BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_WORKTREE", "BLOCKED_REVIEW_FETCH"})
 # Os estados que `event_executor.pick()` ainda pode escolher (com menos de MAX_ATTEMPTS tentativas). `BLOCKED_REVIEW_FETCH` e retomavel pelo bridge, mas o
 # executor JSON NAO o escolhe: um evento PENDING espelhando-o seria trabalho que so o store executaria.
@@ -262,26 +264,32 @@ def executor_running() -> bool:
         return False
     fd = os.open(path, os.O_RDONLY)                                       # PermissionError sobe: o chamador trata como erro estruturado (sem autorizacao)
     try:
-        try:
-            if os.name == "nt":
-                import msvcrt
-                os.lseek(fd, 0, os.SEEK_SET)
-                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)                    # o MESMO byte que o InstanceLock trava; nada e gravado no arquivo
-            else:
-                import fcntl
-                fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
-        except OSError:
-            return True
-        if os.name == "nt":
-            import msvcrt
-            os.lseek(fd, 0, os.SEEK_SET)
-            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
-        else:
-            import fcntl
-            fcntl.flock(fd, fcntl.LOCK_UN)
-        return False
+        return _byte_held(fd, 0)                                          # o MESMO byte que o InstanceLock trava; nada e gravado no arquivo
     finally:
         os.close(fd)
+
+
+def _byte_held(fd: int, pos: int) -> bool:
+    """Outro processo segura o lock do SO neste byte? Adquire e solta sem gravar nada (o fd pode ser somente leitura)."""
+    import os
+    try:
+        if os.name == "nt":
+            import msvcrt
+            os.lseek(fd, pos, os.SEEK_SET)
+            msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
+    except OSError:
+        return True
+    if os.name == "nt":
+        import msvcrt
+        os.lseek(fd, pos, os.SEEK_SET)
+        msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    return False
 
 
 def executor_paused() -> bool:
@@ -298,8 +306,21 @@ def poll_paused() -> bool:
 
 def poll_in_flight() -> bool:
     """Um ciclo do poll segura a trava do estado do bridge (`.lock`). So olha se o arquivo existe: nao cria, grava nem remove nada.
-    Com a pausa ja presente, um ciclo que ainda grava pegou a trava ANTES dela; se nao ha trava agora, nenhum ciclo gravara depois."""
-    return _bridge_path().with_suffix(".lock").exists()
+    Com a pausa ja presente, um ciclo que ainda grava pegou a trava ANTES dela; se nao ha trava agora, nenhum ciclo gravara depois.
+    Dois protocolos de trava: o de arquivo (`O_EXCL`, apagado ao sair: existir com PID = dono, ou orfa) e o de lock do SO (arquivo permanente marcado `:oslock`
+    ou vazio; o dono segura o byte `LOCK_POS`). O probe abre SOMENTE leitura e nao grava nada."""
+    import os
+    try:
+        fd = os.open(_bridge_path().with_suffix(".lock"), os.O_RDONLY)
+    except FileNotFoundError:
+        return False
+    try:
+        text = os.read(fd, 64).decode("ascii", "ignore").strip()
+        if text and not text.endswith(OS_LOCK_MARK):
+            return True                                                   # protocolo de arquivo: so existe com um dono (ou orfa: fail-closed)
+        return _byte_held(fd, OS_LOCK_POS)
+    finally:
+        os.close(fd)
 
 
 def _bridge_path() -> Path:
