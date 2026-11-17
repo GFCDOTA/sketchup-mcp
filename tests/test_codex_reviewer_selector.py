@@ -98,3 +98,15 @@ def test_a_missing_watch_report_counts_as_not_read(monkeypatch, tmp_path):
     wt, _ = _reviewer(monkeypatch, tmp_path, None)
     out = cr.run_coordinator_tests(wt, [WF])
     assert out["uncovered"] == [WF]
+
+
+# -- PR so de documentacao/dados: os testes que leem o arquivo sao ESCOLHIDOS (o revisor tem uma execucao para avaliar); doc nunca fica "descoberto" ----------
+def test_a_docs_or_data_only_change_selects_the_tests_that_cite_it(tmp_path):
+    inv = "docs/specs/fp042_inventory.v1.json"
+    wt = tree(tmp_path, {"test_inventory_gate.py": f'INV = "{inv}"\n', "test_other.py": "def test_x(): pass\n"})
+    assert cr.select_tests(wt, [inv, "docs/specs/FP-060_audit.md"]) == (["tests/test_inventory_gate.py"], [])
+
+
+def test_a_doc_nobody_cites_selects_nothing_and_is_never_uncovered(tmp_path):
+    wt = tree(tmp_path, {"test_other.py": "def test_x(): pass\n"})
+    assert cr.select_tests(wt, ["docs/notes.md"]) == ([], [])
