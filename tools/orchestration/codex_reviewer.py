@@ -61,6 +61,7 @@ RUNNER_SOURCE = "coordinator_test_runner"   # NAO e "trusted": roda codigo do PR
 ISOLATION_SKIPPED = "tests_skipped_no_sandbox"
 ISOLATION_OS = "os_sandbox"                # AppContainer sem capacidades, token e canario provados NA execucao; NAO e confinamento geral
                                            # de arquivos: le o que a ACL abre a todo AppContainer (contrato em `sandboxed_tests`)
+EVIDENCE_ROOT = "artifacts/"                                            # so evidencia sai da exigencia de cobertura (ops/ tem scripts operacionais: continua exigindo teste)
 SANDBOX_SKIP = ("artifacts", "assets", "ops", "runs", ".git")   # nao e codigo: 351 dos 429 MB rastreados sao `artifacts/` (medido, MT-04)
 ISOLATION_ENV = "env_allowlist_only"
 CODE_EXT = (".py", ".rb", ".ps1", ".psm1", ".sh", ".js", ".ts", ".yml", ".yaml", ".toml", ".cfg", ".ini")
@@ -273,6 +274,8 @@ def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
             continue
         if _is_test(p) or not p.endswith(CODE_EXT) or p.startswith("tests/"):
             continue
+        if p.startswith(EVIDENCE_ROOT):                                         # evidencia (artifacts/): o sandbox nao a copia, entao nenhum teste a executa la;
+            continue                                                             # a logica testavel vive em tools/. Listada a parte em `not_testable_in_sandbox`
         stem = Path(p).stem
         found = sorted({q.relative_to(wt).as_posix() for pat in (f"test_{stem}.py", f"test_{stem}_*.py")
                         for q in (tests_dir.rglob(pat) if tests_dir.is_dir() and p.endswith(".py") else [])})
@@ -372,7 +375,8 @@ def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None,
     sel, uncovered = select_tests(wt, files)
     # arquivos nao-.py escolhidos por CITACAO: so contam como cobertos se algum teste os ABRIR de fato no sandbox (citar o caminho nao e cobertura)
     cited = sorted(p for p in files if p.endswith(CODE_EXT) and not p.endswith(".py") and not p.startswith("tests/") and p not in uncovered)
-    base = {"source": RUNNER_SOURCE, "selected": sel, "uncovered": uncovered}
+    base = {"source": RUNNER_SOURCE, "selected": sel, "uncovered": uncovered,
+            "not_testable_in_sandbox": sorted(p for p in files if p.endswith(CODE_EXT) and p.startswith(EVIDENCE_ROOT))}
 
     def skipped(why: str) -> dict:
         return {**base, "isolation": ISOLATION_SKIPPED, "tests_passed": None, "summary": f"testes NAO executados: {why}"}

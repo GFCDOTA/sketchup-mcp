@@ -110,3 +110,24 @@ def test_a_docs_or_data_only_change_selects_the_tests_that_cite_it(tmp_path):
 def test_a_doc_nobody_cites_selects_nothing_and_is_never_uncovered(tmp_path):
     wt = tree(tmp_path, {"test_other.py": "def test_x(): pass\n"})
     assert cr.select_tests(wt, ["docs/notes.md"]) == ([], [])
+
+
+# -- evidencia em pastas que o sandbox nao copia (artifacts/...): fora da exigencia de cobertura, listada a parte ------------------------------------------
+def test_an_evidence_script_under_artifacts_is_not_uncovered_code(tmp_path):
+    script = "artifacts/review/fp060/x/collect_evidence.py"
+    wt = tree(tmp_path, {"test_other.py": "def test_x(): pass\n"})
+    assert cr.select_tests(wt, [script]) == ([], [])
+
+
+def test_the_report_lists_evidence_code_the_sandbox_cannot_run(monkeypatch, tmp_path):
+    wt, _ = _reviewer(monkeypatch, tmp_path, [])
+    out = cr.run_coordinator_tests(wt, ["artifacts/review/x/e2e.py", WF])
+    assert out["not_testable_in_sandbox"] == ["artifacts/review/x/e2e.py"] and "artifacts/review/x/e2e.py" not in out["uncovered"]
+
+
+def test_operational_scripts_under_ops_still_require_a_test():
+    import pathlib
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        wt = tree(pathlib.Path(d), {"test_other.py": "def test_x(): pass\n"})
+        assert cr.select_tests(wt, ["ops/launchers/run.ps1"]) == ([], ["ops/launchers/run.ps1"])   # ops/ roda em producao: nunca isento
