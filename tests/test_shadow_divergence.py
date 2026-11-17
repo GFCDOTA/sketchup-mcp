@@ -16,7 +16,7 @@ def item(n=1, state="QUEUED", kind="review", pr=7, sha="a" * 40, **kw):
 
 def event(n=1, status="PENDING", pr=7, sha="a" * 40, **kw):
     return {"id": n, "event_type": "CORRECTION_REQUESTED", "producer": "event_bridge", "status": status,
-            "idempotency_key": f"review:{1000 + n}:{pr}:{sha}", **kw}
+            "idempotency_key": f"review:{1000 + n}:{pr}:{sha}", "attempt": 0, "max_attempts": 3, **kw}
 
 
 def codes(found):
@@ -31,7 +31,8 @@ def codes(found):
     ("BLOCKED_WORKTREE", "PENDING"), ("BLOCKED_REVIEW_FETCH", "PENDING"),
 ])
 def test_a_json_state_and_the_mirror_status_that_the_shadow_sync_produces_agree(state, status):
-    assert sd.compare([item(state=state)], [event(status=status)]) == []
+    attempts = sd.JSON_MAX_ATTEMPTS if status == "DLQ" else 0                                  # DLQ so concorda com item JSON tambem esgotado
+    assert sd.compare([item(state=state, attempts=attempts)], [event(status=status)]) == []
 
 
 def test_items_that_are_not_mirrored_by_design_are_ignored():
@@ -132,3 +133,27 @@ def test_a_missing_store_is_an_error_not_an_empty_comparison_and_is_not_created(
 
     out = json.loads(capsys.readouterr().out)
     assert out["ok"] is False and "EventStore ausente" in out["error"] and not (tmp_path / "gov").exists()
+
+
+# -- revisao do Codex (#636, e448b479): elegibilidade e tentativas das DUAS fontes ------------------------------------------------------------------------
+@pytest.mark.parametrize("state", ["FAILED", "BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_WORKTREE", "BLOCKED_REVIEW_FETCH"])
+def test_an_item_still_eligible_in_json_whose_mirror_is_in_dlq_is_a_divergence(state):
+    assert codes(sd.compare([item(state=state, attempts=1)], [event(status="DLQ", attempt=3)])) == [("ELIGIBILITY_MISMATCH", "k1")]
+
+
+def test_an_item_exhausted_in_json_whose_mirror_is_still_pending_with_attempts_is_a_divergence():
+    assert codes(sd.compare([item(state="FAILED", attempts=3)], [event(status="PENDING", attempt=1)])) == [("ELIGIBILITY_MISMATCH", "k1")]
+
+
+def test_a_pending_mirror_without_attempts_left_is_not_claimable_and_diverges_from_a_queued_item():
+    assert codes(sd.compare([item(state="QUEUED")], [event(status="PENDING", attempt=3, max_attempts=3)])) == [("ELIGIBILITY_MISMATCH", "k1")]
+
+
+def test_both_sources_eligible_or_both_exhausted_agree():
+    assert sd.compare([item(state="FAILED", attempts=1)], [event(status="PENDING", attempt=1)]) == []
+    assert sd.compare([item(state="FAILED", attempts=3)], [event(status="DLQ", attempt=3)]) == []
+
+
+def test_the_json_attempt_limit_matches_the_executor():
+    from tools.orchestration import event_executor as ex
+    assert sd.JSON_MAX_ATTEMPTS == ex.MAX_ATTEMPTS

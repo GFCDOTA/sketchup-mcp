@@ -325,6 +325,18 @@ def rollback_plan(store: EventStore, bstate: dict, now: float | None = None) -> 
                 if ev["available_at"] > now:
                     item["retry_after"] = _iso(ev["available_at"])
                 additions.append({"key": item["key"], "item": item, "store_status": "PENDING"})
+                continue
+            terminal = {"DONE": "DONE_AWAITING_REREVIEW", "SUPERSEDED": "SUPERSEDED"}.get(ev["status"]) or ("FAILED" if exhausted else None)
+            if terminal:                                                                  # decisao TERMINAL so no SQLite: a fila JSON e a deduplicacao precisam preserva-la
+                item = item_from_event(ev, attempts=max(ev["attempt"], JSON_MAX_ATTEMPTS) if terminal == "FAILED" else ev["attempt"])
+                if item is None:                                                          # sem identidade do review, o bridge poderia enfileirar o mesmo trabalho de novo
+                    unreconcilable.append({"key": key, "event": ev["id"], "status": ev["status"]})
+                    continue
+                item["state"] = terminal
+                item.pop("store_event", None)
+                if terminal == "FAILED":
+                    item["last_error"] = "dead-lettered no SQLite (rollback)"
+                additions.append({"key": item["key"], "item": item, "store_status": ev["status"]})
             continue
         if pending:
             wanted_retry = _iso(ev["available_at"]) if ev["available_at"] > now and ev["status"] == "PENDING" else None
@@ -351,7 +363,8 @@ def rollback_apply(store: EventStore) -> dict:
         if plan["blocked"]:
             return {"applied": 0, "refused": "evento(s) com lease vivo: o executor ainda esta rodando; pare-o antes", **plan}
         if plan["unreconcilable"]:
-            return {"applied": 0, "refused": "evento(s) PENDING so no SQLite sem review executavel: nao ha como leva-los para a fila JSON; resolva antes", **plan}
+            return {"applied": 0, "refused": "evento(s) so no SQLite (pendentes ou terminais) sem review reconstruivel: nao ha como preserva-los na fila JSON; resolva antes",
+                    **plan}
         by_key = {t["key"]: t for t in b["queue"]}
         for c in plan["changes"]:
             row = by_key[c["key"]]
@@ -367,8 +380,11 @@ def rollback_apply(store: EventStore) -> dict:
             elif c["to"] == "FAILED":
                 row["attempts"] = max(row.get("attempts", 0), JSON_MAX_ATTEMPTS)
                 row["last_error"] = row.get("last_error") or "dead-lettered no SQLite (rollback)"
+        seen = b.setdefault("seen", [])
         for a in plan["additions"]:
             b["queue"].append(a["item"])
+            if a["key"] not in seen:                                              # deduplicacao do bridge: o mesmo review observado de novo NAO volta como QUEUED
+                seen.append(a["key"])
         n = len(plan["changes"]) + len(plan["additions"])
         if n:
             eb.diagnose(b, f"rollback para a fila JSON: {n} item(ns) reconciliados com o SQLite")

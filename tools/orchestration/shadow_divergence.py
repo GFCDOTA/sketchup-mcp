@@ -48,7 +48,11 @@ def mirror_key(item: dict) -> str:
     return f"review:{str(item.get('event_id', '')).split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
 
 
-def compare(queue: list[dict], events: list[dict]) -> list[Divergence]:
+RETRYABLE = frozenset({"QUEUED", "FAILED", "BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_WORKTREE", "BLOCKED_REVIEW_FETCH"})
+JSON_MAX_ATTEMPTS = 3                                                    # o `pick` da fila JSON (`event_executor.MAX_ATTEMPTS`); conferido por teste
+
+
+def compare(queue: list[dict], events: list[dict], json_max_attempts: int = JSON_MAX_ATTEMPTS) -> list[Divergence]:
     mirror = {e["idempotency_key"]: e for e in events if e.get("producer") == MIRROR_PRODUCER and e.get("event_type") == MIRROR_EVENT_TYPE}
     found, matched = [], set()
     for item in queue:
@@ -66,6 +70,15 @@ def compare(queue: list[dict], events: list[dict]) -> list[Divergence]:
         elif event["status"] not in allowed:
             code = "STALE_PENDING" if event["status"] == "PENDING" and state in FINISHED else "STATE_MISMATCH"
             found.append(Divergence(code, key, f"item {state} mas evento {event['status']} (esperado {'/'.join(sorted(allowed))})"))
+        elif state in RETRYABLE:
+            # o estado bate, mas a ELEGIBILIDADE pode nao bater: o que o JSON ainda executaria e o que o SQLite ainda reivindicaria precisam ser o mesmo, senao o cutover
+            # perde trabalho (DLQ no SQLite, ainda elegivel no JSON) ou repete trabalho esgotado (esgotado no JSON, PENDING com tentativas no SQLite)
+            json_ok = int(item.get("attempts") or 0) < json_max_attempts
+            store_ok = event["status"] == "PENDING" and int(event.get("attempt") or 0) < int(event.get("max_attempts") or 0)
+            if json_ok != store_ok:
+                found.append(Divergence("ELIGIBILITY_MISMATCH", key, f"item {state} {'elegivel' if json_ok else 'esgotado'} no JSON (tentativas {item.get('attempts', 0)}/"
+                                        f"{json_max_attempts}) mas evento {event['status']} {'elegivel' if store_ok else 'nao reivindicavel'} no SQLite "
+                                        f"(tentativas {event.get('attempt')}/{event.get('max_attempts')})"))
     for idem, event in mirror.items():
         if idem not in matched:
             found.append(Divergence("ORPHAN_IN_STORE", idem, f"evento {event['status']} sem item na fila JSON"))

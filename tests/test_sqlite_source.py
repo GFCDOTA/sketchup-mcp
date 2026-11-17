@@ -665,3 +665,35 @@ def test_a_real_failure_in_shadow_mode_still_spends_the_attempt(clock):
     store = seed_both(item())
     ex._sync_result_to_store(store, json_item(KEY), {"action": "FAILED", "reason": "falhou"})
     assert ev_of(store, KEY)["attempt"] == 1
+
+
+# -- revisao do Codex (#636, e448b479): eventos TERMINAIS que existem so no SQLite sobrevivem ao rollback -----------------------------------------------------
+@pytest.mark.parametrize("finish, want", [("dlq", "FAILED"), ("done", "DONE_AWAITING_REREVIEW"), ("superseded", "SUPERSEDED")])
+def test_a_terminal_event_only_in_sqlite_is_preserved_in_the_json_queue_and_in_dedup(clock, finish, want):
+    seed_json()                                                                                  # a fila JSON NAO conhece o review
+    store = sf.get_store()
+    store.publish(**sq.store_args_from_item(item()))
+    if finish == "dlq":
+        for _ in range(3):
+            store.fail(store.claim(("CORRECTION_REQUESTED",), "x", 60), "boom", retry_delay=0)
+    elif finish == "done":
+        store.complete(store.claim(("CORRECTION_REQUESTED",), "x", 60), {"action": "DONE", "new_head": NEWHEAD})
+    else:
+        store.supersede(store.claim(("CORRECTION_REQUESTED",), "x", 60), "head mudou")
+    out = sq.rollback_apply(store)
+    b = eb.load()
+    assert out["applied"] == 1 and json_item(KEY)["state"] == want and KEY in b["seen"]            # o bridge que observar o mesmo review nao o enfileira de novo
+    if want == "FAILED":
+        assert json_item(KEY)["attempts"] >= ex.MAX_ATTEMPTS
+    assert ex.pick(b, None) is None                                                                # nada esgotado ou concluido volta a rodar
+    assert sq.rollback_apply(store)["applied"] == 0                                                # idempotente
+
+
+def test_a_terminal_event_only_in_sqlite_without_a_rebuildable_review_refuses_the_rollback(clock):
+    seed_json()
+    store = sf.get_store()
+    args = sq.store_args_from_item(item())
+    store.publish(**{**args, "payload": {"pr": 7}})                                               # payload sem review_id/head_sha: identidade irrecuperavel
+    store.supersede(store.claim(("CORRECTION_REQUESTED",), "x", 60), "head mudou")
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 0 and "terminais" in out["refused"] and out["unreconcilable"][0]["status"] == "SUPERSEDED"
