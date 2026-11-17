@@ -290,10 +290,16 @@ def executor_paused() -> bool:
     return ex.disabled_flag().exists()
 
 
-def _bridge_lock():
-    """A trava COMPARTILHADA do estado do bridge (a mesma do poll e do executor)."""
-    from tools.validation import execution_state as es
-    return es.locked(_bridge_path())
+def poll_paused() -> bool:
+    """Pausa DURAVEL do poll do bridge (`BRIDGE_POLL_DISABLED`): conferida pelo poll SOB a trava, entao nenhum ciclo iniciado depois dela grava. Fica ate a troca de fonte."""
+    from tools.orchestration import event_bridge as eb
+    return eb.poll_disabled_flag().exists()
+
+
+def poll_in_flight() -> bool:
+    """Um ciclo do poll segura a trava do estado do bridge (`.lock`). So olha se o arquivo existe: nao cria, grava nem remove nada.
+    Com a pausa ja presente, um ciclo que ainda grava pegou a trava ANTES dela; se nao ha trava agora, nenhum ciclo gravara depois."""
+    return _bridge_path().with_suffix(".lock").exists()
 
 
 def _bridge_path() -> Path:
@@ -333,14 +339,23 @@ def main(argv: list[str] | None = None) -> int:
                    "iniciar durante ou depois da verificacao")
             print(json.dumps({"ok": False, "authorizes_cutover": False, "error": msg}) if ns.json else f"erro: {msg}")
             return 2
+        if not poll_paused():
+            msg = ("pausa DURAVEL do poll ausente: crie o interruptor BRIDGE_POLL_DISABLED ao lado do estado do bridge e mantenha-o ate trocar EXECUTOR_SOURCE; "
+                   "sem ele um review novo entra na fila depois da verificacao e o cutover o perde")
+            print(json.dumps({"ok": False, "authorizes_cutover": False, "error": msg}) if ns.json else f"erro: {msg}")
+            return 2
+        if poll_in_flight():
+            msg = "um ciclo do poll segura a trava do estado do bridge (ou ela ficou orfa): a fila pode mudar durante a leitura; repita a verificacao"
+            print(json.dumps({"ok": False, "authorizes_cutover": False, "error": msg}) if ns.json else f"erro: {msg}")
+            return 2
     try:
         from tools.orchestration import store_factory
         if not store_factory.store_path().is_file():                      # antes da trava: fonte ausente e erro e o detector nao cria nada (nem a pasta da trava)
             raise FileNotFoundError(f"EventStore ausente: {store_factory.store_path().name}")
-        with _bridge_lock():                                              # o poll do bridge publica no SQLite e salva a fila SOB esta trava: a leitura ve o par consistente
-            queue, store = _load()
-            found = collect(queue, store)
-            found += daily_cap_divergence(_bridge_path(), store.events())
+        # sem trava: com executor e poll pausados de forma duravel e nenhum ciclo em voo, ninguem grava fila nem SQLite; a leitura nao cria arquivo algum
+        queue, store = _load()
+        found = collect(queue, store)
+        found += daily_cap_divergence(_bridge_path(), store.events())
     except (OSError, ValueError, sqlite3.Error, TimeoutError) as exc:
         kind = "sqlite" if isinstance(exc, sqlite3.Error) else "fila"
         print(json.dumps({"ok": False, "error": f"{kind}: {exc}"[:200]}) if ns.json else f"erro: {kind}: {exc}")

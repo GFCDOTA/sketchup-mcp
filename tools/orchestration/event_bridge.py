@@ -233,12 +233,20 @@ def poll_once(gh: Gh, policy: dict, bstate: dict, repo: str = REPO, now: dt.date
     return counts
 
 
+def poll_disabled_flag(bpath: Path | None = None) -> Path:
+    """Pausa DURAVEL do poll (`BRIDGE_POLL_DISABLED` ao lado do estado): enquanto existir, nenhum ciclo enfileira nem publica no EventStore.
+    O cutover do executor para o SQLite exige esta pausa ate a troca de fonte (o detector de divergencia so autoriza com ela)."""
+    return (bpath or bridge_path()).with_name("BRIDGE_POLL_DISABLED")
+
+
 def run_cycle(gh: Gh, policy: dict, bpath: Path | None = None, repo: str = REPO, now: dt.datetime | None = None,
               store=None) -> dict:
     """Um ciclo sob trava: carrega, enfileira e grava UM unico arquivo (fila + chaves vistas + cursor) com `os.replace`.
     Crash antes do replace = nada mudou (o proximo ciclo reenfileira uma vez); crash depois = tudo gravado. Sem estado em dois lugares.
     When ``store`` is given, accepted events are also shadow-published to the EventStore (SPEC §6.3)."""
     with es.locked(bpath or bridge_path()):
+        if poll_disabled_flag(bpath).exists():                       # conferido SOB a trava: um ciclo que comeca depois do interruptor nao grava nada
+            return {"ACCEPT": 0, "DUPLICATE": 0, "STALE": 0, "IGNORE": 0, "ERROR": 0, "DISABLED": 1}
         bstate = load(bpath)
         counts = poll_once(gh, policy, bstate, repo, now, store=store)
         save(bstate, bpath)

@@ -10,6 +10,8 @@ from tools.orchestration.event_store import EventStore
 from tools.orchestration.store_factory import bridge_to_store_args
 
 REAL_EXECUTOR_PAUSED = sd.executor_paused                              # capturada antes da fixture que a troca
+REAL_POLL_PAUSED = sd.poll_paused
+REAL_POLL_IN_FLIGHT = sd.poll_in_flight
 
 
 def item(n=1, state="QUEUED", kind="review", pr=7, sha="a" * 40, **kw):
@@ -26,6 +28,8 @@ def event(n=1, status="PENDING", pr=7, sha="a" * 40, **kw):
 def _paused_by_default(monkeypatch):
     """Os testes do relatorio partem do estado exigido pelo operador: executor PAUSADO de forma duravel (interruptor presente). Os testes da pausa o sobrescrevem."""
     monkeypatch.setattr(sd, "executor_paused", lambda: True)
+    monkeypatch.setattr(sd, "poll_paused", lambda: True)
+    monkeypatch.setattr(sd, "poll_in_flight", lambda: False)
 
 
 def codes(found):
@@ -522,23 +526,6 @@ def test_the_real_pause_is_the_executor_kill_switch_file(tmp_path, monkeypatch):
     assert REAL_EXECUTOR_PAUSED() is True and ex.disabled_flag().parent == gov
 
 
-def test_the_queue_and_the_store_are_read_while_the_bridge_lock_is_held(tmp_path, monkeypatch, capsys):
-    from tools.validation import execution_state as es
-    real_world(tmp_path, monkeypatch)
-    held = []
-    real_collect = sd.collect
-
-    def checking(queue, store, **kw):
-        try:
-            with es.locked(sd._bridge_path(), wait_s=0.2):
-                held.append(False)
-        except TimeoutError:
-            held.append(True)
-        return real_collect(queue, store, **kw)
-    monkeypatch.setattr(sd, "collect", checking)
-    assert sd.main(["--json"]) == 0 and held == [True]                                              # um poll/executor nao grava fila nem SQLite no meio da leitura
-
-
 @pytest.mark.parametrize("recent, pending, diverges", [(3, 1, False), (4, 1, True), (5, 1, True), (0, 2, False), (0, 3, True)])   # cada evento: 3 tentativas restantes
 def test_the_daily_cap_counts_the_remaining_budget_not_only_a_reached_limit(tmp_path, recent, pending, diverges):
     import time as _t
@@ -591,3 +578,69 @@ def test_the_daily_cap_counts_the_attempts_each_pending_event_can_still_make(tmp
     p.write_text(json.dumps({"queue": [], "runs": [stamp] * 5}), encoding="utf-8")               # resta 1 execucao no dia
     found = sd.daily_cap_divergence(p, [event(1, status="PENDING", attempt=attempt, max_attempts=3)], now=now)
     assert bool(found) is diverges                                                                 # 1 evento com 3 tentativas restantes pode rodar 3 vezes
+
+
+# -- revisao do Codex (#634, 5e0a7e05): o poll fica pausado ate a troca de fonte; a verificacao nao cria nem grava arquivo algum ----------------------------
+def test_without_the_durable_poll_pause_the_check_never_authorizes_the_cutover(tmp_path, monkeypatch, capsys):
+    real_world(tmp_path, monkeypatch)
+    monkeypatch.setattr(sd, "poll_paused", lambda: False)
+    assert sd.main(["--json"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["authorizes_cutover"] is False and "BRIDGE_POLL_DISABLED" in out["error"]
+
+
+def test_a_poll_cycle_holding_the_bridge_lock_blocks_the_check(tmp_path, monkeypatch, capsys):
+    gov = real_world(tmp_path, monkeypatch)
+    monkeypatch.setattr(sd, "poll_in_flight", REAL_POLL_IN_FLIGHT)
+    (gov / "bridge.lock").write_text("123", encoding="utf-8")
+    assert sd.main(["--json"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["authorizes_cutover"] is False and "repita" in out["error"]
+
+
+def test_the_real_poll_pause_is_the_bridge_kill_switch_file(tmp_path, monkeypatch):
+    from tools.orchestration import event_bridge as eb
+    gov = real_world(tmp_path, monkeypatch)
+    assert REAL_POLL_PAUSED() is False
+    eb.poll_disabled_flag().write_text("", encoding="utf-8")
+    assert REAL_POLL_PAUSED() is True and eb.poll_disabled_flag().parent == gov
+
+
+def test_after_a_green_report_a_new_review_never_enters_the_queue_or_the_store_while_the_poll_is_paused(tmp_path, monkeypatch, capsys):
+    from tools.orchestration import event_bridge as eb
+    gov = real_world(tmp_path, monkeypatch)
+    for f in (eb.poll_disabled_flag(),):
+        f.write_text("", encoding="utf-8")
+    monkeypatch.setattr(sd, "poll_paused", REAL_POLL_PAUSED)
+    monkeypatch.setattr(sd, "poll_in_flight", REAL_POLL_IN_FLIGHT)
+    assert sd.main(["--json"]) == 0 and json.loads(capsys.readouterr().out)["authorizes_cutover"] is True
+    before = (gov / "bridge.json").read_bytes()
+    calls = []
+
+    class BrokenStore:                                                              # a publicacao falharia; com a pausa ela nem e tentada
+        def publish(self, **kw):
+            raise RuntimeError("publicacao falhou")
+
+    def gh(path):
+        calls.append(path)
+        return []
+    counts = eb.run_cycle(gh, {"executor_logins": [], "reviewers": []}, store=BrokenStore())
+    assert counts["DISABLED"] == 1 and counts["ACCEPT"] == 0 and calls == []
+    assert (gov / "bridge.json").read_bytes() == before and EventStore(gov / "store.db").events() == []
+    assert sd.main(["--json"]) == 0                                                  # o relatorio verde continua valendo
+
+
+def test_the_check_creates_writes_or_removes_no_file_in_the_governance_dir(tmp_path, monkeypatch, capsys):
+    from tools.validation import execution_state as es
+    gov = real_world(tmp_path, monkeypatch, queue=[])
+    monkeypatch.setattr(sd, "poll_in_flight", REAL_POLL_IN_FLIGHT)
+
+    def no_lock(*a, **k):
+        raise AssertionError("a verificacao nao pode pegar a trava (ela cria e grava o .lock)")
+    monkeypatch.setattr(es, "locked", no_lock)
+
+    def files():                                                                     # os indices -wal/-shm sao do proprio SQLite ao abrir o banco WAL em mode=ro (dados intactos)
+        return {f.name: (f.stat().st_mtime_ns, f.read_bytes()) for f in gov.iterdir() if not f.name.endswith(("-wal", "-shm"))}
+    snapshot = files()
+    assert sd.main(["--json"]) == 0
+    assert files() == snapshot and not (gov / "bridge.lock").exists()
