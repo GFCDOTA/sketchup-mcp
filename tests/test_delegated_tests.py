@@ -501,11 +501,13 @@ def test_the_repository_policy_matches_the_workflow_it_pins_and_names_only_exact
     pol = dt.validate_policy(json.loads((root / POLICY_FILE).read_text(encoding="utf-8")), "b" * 40)
     assert pol.workflow_blob_sha == git_blob_sha((root / dt.WORKFLOW_PATH).read_bytes())    # workflow e politica andam juntos (blob do COMMIT, nao da worktree)
     # 28 do executor + 53 do laboratorio (git) + 7 TestRealProcesses do event_store (pipe nomeado do multiprocessing negado no AppContainer) — 2026-11-16
-    files = {"tests/test_event_executor_deliver.py": 28, "tests/test_closed_loop_lab.py": 53, "tests/test_event_store.py": 7}
+    files = {"tests/test_event_executor_deliver.py": 28, "tests/test_closed_loop_lab.py": 53, "tests/test_event_store.py": 7,
+             "tests/test_event_executor.py": 1, "tests/test_event_executor_recovery.py": 5}          # + 6 de processos reais do executor
     assert len(pol.ids) == sum(files.values()) <= dt.MAX_DELEGATED
     assert {f: sum(1 for i in pol.ids if i.startswith(f + "::")) for f in files} == files
     raw = json.loads((root / POLICY_FILE).read_text(encoding="utf-8"))["delegated"]
-    reasons = {"tests/test_event_store.py": "multiprocessing_pipe_denied_in_appcontainer"}
+    reasons = {"tests/test_event_store.py": "multiprocessing_pipe_denied_in_appcontainer", "tests/test_event_executor.py": "real_os_processes_in_appcontainer",
+               "tests/test_event_executor_recovery.py": "real_os_processes_in_appcontainer"}
     assert all(d["reason"] == reasons.get(d["node_id"].split("::")[0], "git_unavailable_in_appcontainer") and d["sandbox_proof"]["run_alone"] is True
                for d in raw)                                                                                   # prova individual de cada um
     assert all(i.startswith("tests/test_event_store.py::TestRealProcesses::") for i in pol.ids if i.startswith("tests/test_event_store.py"))

@@ -538,6 +538,16 @@
    }
   },
   {
+   "node_id": "tests/test_event_executor.py::test_default_runner_kills_a_live_process_tree_as_soon_as_cancel_is_set",
+   "reason": "real_os_processes_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "AssertionError: assert (-2 == -2 and not False and (53455.39 - 53395.359) < 15)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
    "node_id": "tests/test_event_executor_deliver.py::test_a_local_head_that_does_not_descend_from_the_reviewed_sha_is_blocked",
    "reason": "git_unavailable_in_appcontainer",
    "sandbox_proof": {
@@ -813,6 +823,56 @@
    "sandbox_proof": {
     "outcome": "error",
     "first_error": "FileNotFoundError: [WinError 2] (git nao encontrado no PATH do AppContainer; com git no PATH, `git init` falha ao criar .git/HEAD)",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_recovery.py::test_hard_killed_executor_leaves_a_recoverable_running_item_that_is_not_stolen_early_and_runs_once_after_the_lease",
+   "reason": "real_os_processes_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "AssertionError(path)\\ngh = Gh()\\ndef child(argv, cwd, env, stdin, timeout, cancel=None):\\n    marker.write_text(\"child-started\", encoding=\"utf-8\")\\n    if mode == \"block\":\\n",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_recovery.py::test_instance_lock_is_exclusive_across_real_processes_and_released_by_the_os_on_a_hard_kill",
+   "reason": "real_os_processes_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "========== short test summary info ===========================\nFAILED tests/test_event_executor_recovery.py::test_instance_lock_is_exclusive_across_real_processes_and_released_by_the_os_on_a_hard_kill",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_recovery.py::test_main_exits_when_the_launcher_pid_is_gone_and_heartbeat_cancels_the_child",
+   "reason": "real_os_processes_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] O sistema n?o pode encontrar o arquivo especificado",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_recovery.py::test_main_refuses_to_start_a_second_executor_and_never_polls",
+   "reason": "real_os_processes_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "FileNotFoundError: [WinError 2] O sistema n?o pode encontrar o arquivo especificado",
+    "sandbox_exit_code": 1,
+    "run_alone": true
+   }
+  },
+  {
+   "node_id": "tests/test_event_executor_recovery.py::test_two_real_os_processes_never_run_the_same_item",
+   "reason": "real_os_processes_in_appcontainer",
+   "sandbox_proof": {
+    "outcome": "error",
+    "first_error": "AssertionError(path)\\ngh = Gh()\\ndef child(argv, cwd, env, stdin, timeout, cancel=None):\\n    marker.write_text(\"child-started\", encoding=\"utf-8\")\\n    if mode == \"block\":\\n",
     "sandbox_exit_code": 1,
     "run_alone": true
    }
