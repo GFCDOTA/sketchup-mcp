@@ -172,8 +172,8 @@ def main(argv: list[str] | None = None) -> int:
         out["published"] = {"event_id": event_id, "created": created}
         _i, _s, after_prs = bd.load(statuses=False)
         linked = open_pr_for(after_prs, again.candidate.node.number)
-        if linked is not None and created:
-            owned = store.claim_by_id(event_id, "intake:post-check", 30.0)
+        if linked is not None:                                                            # recem-criado OU identico ja PENDING: o PR vinculado vence os dois
+            owned = store.claim_by_id(event_id, "intake:post-check", 30.0)                # so pega evento ainda reivindicavel (PENDING); um ja em execucao fica com o executor
             if owned is not None:
                 store.supersede(owned, f"o PR #{linked} foi vinculado a Issue enquanto o pedido era gravado: descartado")
                 out["superseded"] = {"event_id": event_id, "pr": linked}

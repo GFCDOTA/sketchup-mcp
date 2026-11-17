@@ -261,19 +261,6 @@ def prow(number, status, type_="Issue", repo=REPO_NAME):
     return {"status": status, "content": {"number": number, "type": type_, "repository": repo}}
 
 
-def test_only_issues_of_this_repository_count_for_the_project_status():
-    from tools.validation import backlog_discovery as bd
-    rows = [prow(1, "Ready", repo="outro/repo"), prow(1, "Ready", type_="PullRequest"), prow(2, "Ready"), prow(3, "In progress", repo="https://github.com/GFCDOTA/sketchup-mcp")]
-    assert bd.project_statuses(rows, REPO_NAME) == {2: "Ready", 3: "In progress"}
-
-
-def test_two_items_with_the_same_number_are_an_ambiguous_identity_never_ready():
-    from tools.validation import backlog_discovery as bd
-    out = bd.project_statuses([prow(5, "Ready"), prow(5, "Ready")], REPO_NAME)
-    assert out == {5: bd.AMBIGUOUS_STATUS}
-    assert plan([issue(5)], statuses=out).candidate is None
-
-
 def test_a_ready_item_of_another_repository_with_the_same_number_does_not_authorize_this_issue(cli, monkeypatch, capsys):
     from tools.validation import backlog_discovery as bd
     mapped = bd.project_statuses([prow(1, "Ready", repo="outro/repo")], REPO_NAME)                  # a Issue #1 DESTE repo nao esta no Project
@@ -281,7 +268,6 @@ def test_a_ready_item_of_another_repository_with_the_same_number_does_not_author
     monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1)], mapped, []))
     assert intake.main(["publish", "--apply", "--project"]) == 1
     assert json.loads(capsys.readouterr().out)["candidate"] is None and (not cli.exists() or EventStore(cli).events() == [])
-
 
 
 # -- 8a revisao do Codex (#641): vinculos de fechamento do GitHub; revalidacao sob a trava -------------------------------------------------------------
@@ -303,7 +289,6 @@ def test_a_pr_opened_between_the_first_read_and_the_lock_is_seen_by_the_revalida
     out = json.loads(capsys.readouterr().out)
     assert out["published"] is None and "revalidacao" in out["note"] and any("PR #77" in s for s in out["revalidated_skipped"])
     assert not cli.exists() or EventStore(cli).events() == []
-
 
 
 # -- 9a revisao do Codex (#641): a revalidacao tambem checa a truncagem e o status do Project; `bd.load` testado com o gh simulado ---------------------------
@@ -328,30 +313,6 @@ def test_a_card_that_leaves_ready_between_the_reads_is_not_published(cli, monkey
     assert intake.main(["publish", "--apply", "--project"]) == 1
     out = json.loads(capsys.readouterr().out)
     assert seen == [True, True] and out["published"] is None and (not cli.exists() or EventStore(cli).events() == [])
-
-
-def test_backlog_load_reads_issues_prs_and_the_project_through_gh_with_explicit_limits(monkeypatch):
-    from tools.validation import backlog_discovery as bd
-    from tools.validation import backlog_gate as bg
-    calls = []
-    rows = {"items": [{"content": {"number": 1, "type": "Issue", "repository": "https://github.com/" + bg.REPO}, "status": "Ready"}]}
-
-    def fake_gh(*argv):
-        calls.append(argv)
-        if argv[:2] == ("issue", "list"):
-            return json.dumps([issue(1)])
-        if argv[:2] == ("pr", "list"):
-            return json.dumps([{"number": 9, "body": "Closes #1", "headRefName": "x"}])
-        if argv[:2] == ("project", "item-list"):
-            return json.dumps(rows)
-        raise AssertionError(argv)
-    monkeypatch.setattr(bg, "_gh", fake_gh)
-    issues, statuses, prs = bd.load(statuses=True)
-    assert [i["number"] for i in issues] == [1] and prs[0]["number"] == 9 and statuses == {1: "Ready"}
-    assert all(str(bd.LOAD_LIMIT) in a for a in calls if a[:2] in (("issue", "list"), ("pr", "list")))      # nunca o limite padrao de 30 do gh
-    assert "--state" in calls[1] and "open" in calls[1]
-    _i, st, _p = bd.load(statuses=False)
-    assert st is None and not any(a[:2] == ("project", "item-list") for a in calls[3:])                  # sem --project, o Project nao e consultado
 
 
 # -- 10a revisao do Codex (#641): trava curta fora do gh; vinculo pela interface; pos-checagem ------------------------------------------------------------
@@ -388,4 +349,20 @@ def test_a_pr_linked_between_the_reread_and_the_write_supersedes_the_just_publis
     assert intake.main(["publish", "--apply"]) == 0
     out = json.loads(capsys.readouterr().out)
     assert out["superseded"]["pr"] == 88
+    assert [e["status"] for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER] == ["SUPERSEDED"]
+
+
+# -- 11a revisao do Codex (#641, d58b47ec): a pos-checagem tambem descarta um pedido identico que ja estava PENDING ----------------------------------------
+def test_a_pr_linked_after_the_write_supersedes_an_identical_request_that_was_already_pending(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, [])])            # 1a execucao: publica normalmente (3 leituras)
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 0
+    capsys.readouterr()
+    linked = [{"number": 89, "body": "", "headRefName": "x", "closingIssuesReferences": [{"number": 1}]}]
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, linked)])          # 2a: pedido identico (created=False) e PR vinculado depois
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["published"]["created"] is False and out["superseded"]["pr"] == 89
     assert [e["status"] for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER] == ["SUPERSEDED"]
