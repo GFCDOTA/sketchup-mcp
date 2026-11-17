@@ -31,7 +31,8 @@ AUTH_LABEL = "executor-intake"
 ALLOWED_SPECS = frozenset({"FP-060"})
 EVENT_TYPE = "IMPLEMENT_REQUESTED"
 AGGREGATE = "issue"
-POST_CHECK_RETRY_S = 900.0                                                        # pos-checagem inconclusiva: o pedido espera 15 min antes de poder rodar
+HOLD_OWNER = "intake:hold"                                                         # dono do lease que PRENDE um pedido de pos-checagem inconclusiva
+HOLD_S = 30 * 24 * 3600.0                                                         # o lease nao vence sozinho na pratica: so release_holds solta (leitura completa)
 PRODUCER = "intake"
 INTAKE_AGENT = None                     # SEM nome: `decide` exclui dos conflitos so os claims do agente dado, e nenhum claim tem agente None => todo claim ativo (de qualquer nome, inclusive "intake") e externo
 
@@ -131,6 +132,27 @@ def publish(store, verdict: bd.Verdict, issues: list[dict]) -> tuple[int, bool]:
     return store.publish(**publish_args(verdict, issues))
 
 
+def release_holds(store, prs: list[dict]) -> list[dict]:
+    """Com uma lista COMPLETA de PRs abertos (o chamador ja recusou a truncada): para cada pedido preso pelo intake, PR vinculado = descarta; sem vinculo = solta
+    (volta a PENDING). Soltar consome a tentativa que o lease de retencao contou: so acontece em pos-checagem inconclusiva, que e rara."""
+    out = []
+    for ev in store.events():
+        if ev.get("producer") != PRODUCER or ev.get("status") != "RUNNING" or ev.get("lease_owner") != HOLD_OWNER:
+            continue
+        try:
+            issue = json.loads(ev["payload"]).get("issue") if isinstance(ev["payload"], str) else ev["payload"].get("issue")
+        except (ValueError, AttributeError):
+            issue = None
+        linked = open_pr_for(prs, issue) if isinstance(issue, int) else None
+        if linked is not None:
+            store.supersede(ev, f"o PR #{linked} esta vinculado a Issue (pos-checagem completa): descartado")
+            out.append({"event_id": ev["id"], "superseded_by_pr": linked})
+        elif isinstance(issue, int):
+            store.fail(ev, "pos-checagem completa sem PR vinculado: liberado", retry_delay=0.0)
+            out.append({"event_id": ev["id"], "released": True})
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("cmd", choices=("plan", "publish"))
@@ -141,6 +163,10 @@ def main(argv: list[str] | None = None) -> int:
     if len(issues) >= bd.LOAD_LIMIT or len(prs) >= bd.LOAD_LIMIT:                  # lista possivelmente TRUNCADA: um PR/Issue omitido poderia liberar trabalho duplicado
         print(json.dumps({"candidate": None, "skipped": [], "error": f"lista de Issues/PRs atingiu o limite de {bd.LOAD_LIMIT}: possivelmente truncada, nada e publicado"}))
         return 2
+    held = None
+    if a.cmd == "publish" and a.apply:                                              # leitura COMPLETA e bem-sucedida: decide os pedidos presos por pos-checagem inconclusiva
+        from tools.orchestration.store_factory import get_store
+        held = release_holds(get_store(), prs)
     path = es.state_path()
     readiness = bd.load_readiness()                                                 # so para recusar o que a auditoria marcou como SketchUp
     # a trava do estado de execucao vale da LEITURA dos claims ate a GRAVACAO do pedido: um claim concorrente (executor reivindicando a Issue ou o componente) nao pode
@@ -153,6 +179,8 @@ def main(argv: list[str] | None = None) -> int:
     result = plan(issues, prs, state, statuses, readiness)
     out: dict = {"candidate": None if result.candidate is None else {
         "issue": result.candidate.node.number, "title": result.candidate.node.title}, "skipped": result.skipped}
+    if held:
+        out["released_holds"] = held
     if a.cmd == "publish" and a.apply and result.candidate is not None:
         fresh_issues, fresh_statuses, fresh_prs = bd.load(statuses=a.project)              # o status do Project tambem e RELIDO: Ready pode ter saido no meio
         if len(fresh_issues) >= bd.LOAD_LIMIT or len(fresh_prs) >= bd.LOAD_LIMIT:
@@ -171,20 +199,24 @@ def main(argv: list[str] | None = None) -> int:
             store = get_store()
             event_id, created = publish(store, again.candidate, fresh_issues)
         out["published"] = {"event_id": event_id, "created": created}
-        _i, _s, after_prs = bd.load(statuses=False)
-        linked = open_pr_for(after_prs, again.candidate.node.number)
-        if len(after_prs) >= bd.LOAD_LIMIT:
-            # pos-checagem TRUNCADA: a ausencia de um PR vinculado nao prova nada. O pedido nao e descartado (a chave idempotente o recuperaria descartado), mas
-            # fica SEGURO: volta a PENDING com espera e o motivo registrado, e nao roda antes de uma leitura completa
-            owned = store.claim_by_id(event_id, "intake:post-check", 30.0)
-            if owned is not None:
-                store.fail(owned, f"pos-checagem inconclusiva: lista de PRs no limite de {bd.LOAD_LIMIT} (possivelmente truncada)", retry_delay=POST_CHECK_RETRY_S)
-            out["post_check"] = {"inconclusive": True, "held": owned is not None, "retry_s": POST_CHECK_RETRY_S}
-        elif linked is not None:                                                            # recem-criado OU identico ja PENDING: o PR vinculado vence os dois
-            owned = store.claim_by_id(event_id, "intake:post-check", 30.0)                # so pega evento ainda reivindicavel (PENDING); um ja em execucao fica com o executor
+        try:
+            _i, _s, after_prs = bd.load(statuses=False)
+        except Exception as exc:  # noqa: BLE001 — falha do gh na pos-checagem: o pedido ja gravado fica PRESO ate uma leitura completa
+            after_prs, read_error = None, f"{type(exc).__name__}: {str(exc)[:120]}"
+        else:
+            read_error = None
+        linked = open_pr_for(after_prs or [], again.candidate.node.number)
+        if linked is not None:                                                              # vinculo ACHADO vence sempre (mesmo numa lista truncada); recem-criado OU identico PENDING
+            owned = store.claim_by_id(event_id, "intake:post-check", 30.0)                # so pega evento ainda reivindicavel; um ja em execucao fica com o executor
             if owned is not None:
                 store.supersede(owned, f"o PR #{linked} foi vinculado a Issue enquanto o pedido era gravado: descartado")
                 out["superseded"] = {"event_id": event_id, "pr": linked}
+        elif read_error is not None or len(after_prs) >= bd.LOAD_LIMIT:
+            # pos-checagem INCONCLUSIVA (gh falhou ou lista truncada): a ausencia de vinculo nao prova nada. O pedido nao e descartado (a chave idempotente o recuperaria
+            # descartado), mas fica PRESO pelo lease longo do intake: nenhum consumidor o pega e ele NAO se solta sozinho; so a proxima leitura completa decide (release_holds)
+            why = read_error or f"lista de PRs no limite de {bd.LOAD_LIMIT} (possivelmente truncada)"
+            owned = store.claim_by_id(event_id, HOLD_OWNER, HOLD_S)
+            out["post_check"] = {"inconclusive": True, "held": owned is not None, "reason": why}
     elif a.cmd == "publish":
         out["published"] = None
         out["note"] = "sem --apply (ou sem candidato): nada foi gravado"

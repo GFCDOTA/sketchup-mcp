@@ -368,14 +368,61 @@ def test_a_pr_linked_after_the_write_supersedes_an_identical_request_that_was_al
     assert [e["status"] for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER] == ["SUPERSEDED"]
 
 
-# -- 12a revisao do Codex (#641, 10b3747b): pos-checagem truncada e inconclusiva: o pedido fica seguro, nao livre ------------------------------------------
-def test_a_truncated_post_check_holds_the_new_request_instead_of_leaving_it_runnable(cli, monkeypatch, capsys):
+# -- 12a/13a revisao do Codex (#641): pos-checagem inconclusiva PRENDE o pedido ate uma leitura completa; vinculo achado sempre descarta -----------------
+def _run_publish(monkeypatch, capsys, reads):
     from tools.validation import backlog_discovery as bd
-    many = [{"number": 1000 + n, "body": "", "headRefName": "x"} for n in range(bd.LOAD_LIMIT)]
-    reads = iter([([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, many)])
-    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
-    assert intake.main(["publish", "--apply"]) == 0
-    out = json.loads(capsys.readouterr().out)
-    assert out["post_check"] == {"inconclusive": True, "held": True, "retry_s": intake.POST_CHECK_RETRY_S} and "superseded" not in out
-    ev = next(e for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER)
-    assert ev["status"] == "PENDING" and "inconclusiva" in ev["error"] and ev["available_at"] > ev["created_at"] + intake.POST_CHECK_RETRY_S - 5
+    it = iter(reads)
+
+    def load(statuses=False):
+        nxt = next(it)
+        if isinstance(nxt, Exception):
+            raise nxt
+        return nxt
+    monkeypatch.setattr(bd, "load", load)
+    code = intake.main(["publish", "--apply"])
+    return code, json.loads(capsys.readouterr().out)
+
+
+def _intake_event(cli):
+    return next(e for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER)
+
+
+def _many():
+    from tools.validation import backlog_discovery as bd
+    return [{"number": 1000 + n, "body": "", "headRefName": "x"} for n in range(bd.LOAD_LIMIT)]
+
+
+def test_a_truncated_post_check_holds_the_request_and_time_alone_never_releases_it(cli, monkeypatch, capsys):
+    code, out = _run_publish(monkeypatch, capsys, [([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, _many())])
+    assert code == 0 and out["post_check"]["inconclusive"] is True and out["post_check"]["held"] is True
+    ev = _intake_event(cli)
+    assert ev["status"] == "RUNNING" and ev["lease_owner"] == intake.HOLD_OWNER
+    st = EventStore(cli, clock=lambda: ev["created_at"] + 7 * 24 * 3600)                             # uma semana depois: ainda preso
+    assert st.claim(("IMPLEMENT_REQUESTED",), "worker", 60) is None
+
+
+def test_a_gh_failure_in_the_post_check_holds_the_request(cli, monkeypatch, capsys):
+    code, out = _run_publish(monkeypatch, capsys, [([issue(1)], None, []), ([issue(1)], None, []), RuntimeError("gh: HTTP 502")])
+    assert code == 0 and out["post_check"]["held"] is True and "RuntimeError" in out["post_check"]["reason"]
+    assert _intake_event(cli)["lease_owner"] == intake.HOLD_OWNER
+
+
+def test_a_linked_pr_found_in_a_truncated_post_check_still_supersedes(cli, monkeypatch, capsys):
+    many = _many()
+    many[0] = {"number": 77, "body": "Closes #1", "headRefName": "x"}
+    code, out = _run_publish(monkeypatch, capsys, [([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, many)])
+    assert out["superseded"]["pr"] == 77 and _intake_event(cli)["status"] == "SUPERSEDED"
+
+
+def test_the_next_complete_read_releases_a_held_request_without_a_link(cli, monkeypatch, capsys):
+    _run_publish(monkeypatch, capsys, [([issue(1)], None, []), ([issue(1)], None, []), RuntimeError("gh: HTTP 502")])
+    code, out = _run_publish(monkeypatch, capsys, [([issue(2)], None, []), ([issue(2)], None, []), ([issue(2)], None, [])])
+    assert out["released_holds"] == [{"event_id": _intake_event(cli)["id"], "released": True}]
+    assert _intake_event(cli)["status"] == "PENDING"
+
+
+def test_the_next_complete_read_supersedes_a_held_request_whose_issue_got_a_pr(cli, monkeypatch, capsys):
+    _run_publish(monkeypatch, capsys, [([issue(1)], None, []), ([issue(1)], None, []), RuntimeError("gh: HTTP 502")])
+    linked = [{"number": 88, "body": "Fixes #1", "headRefName": "x"}]
+    _run_publish(monkeypatch, capsys, [([issue(1)], None, linked), ([issue(1)], None, linked), ([issue(1)], None, linked)])
+    assert _intake_event(cli)["status"] == "SUPERSEDED"
