@@ -22387,6 +22387,20 @@
       "disposition": "retain_canonical_location",
       "phase": "P6",
       "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-16_github_disposable_pr_v2/README.md",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-16_github_disposable_pr_v2/evidence.json",
+      "domain": "reference_or_artifact",
+      "disposition": "retain_canonical_location",
+      "phase": "P6",
+      "status": "VERIFIED_CANONICAL_LOCATION_AND_GIT_BLOB"
     }
   ]
 }

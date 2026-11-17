@@ -75,5 +75,5 @@ aberto em draft (sem verificar marcador de descartável nem `changed_files == 0`
 `python -O`). O script agora chama `github_review_target.require_disposable_pr` ANTES de criar a entrada do outbox: aberto, draft,
 marcador `<!-- fp060-disposable-e2e -->` no corpo, 0 arquivos alterados e autor diferente do revisor, com erro explícito. Ele também
 espera o teto do envio do alvo GitHub (`send_timeout_s` = GET + POST, 120 s + folga) antes do passo de reconciliação, porque o lease
-do publicador morto agora cobre esse prazo. O resultado acima NÃO foi refeito com esta versão: uma nova execução real exige um PR
-descartável novo com o marcador.
+do publicador morto agora cobre esse prazo. O resultado acima NÃO foi refeito com esta versão nesta pasta. A execução real com o script atual (PR descartável #673, PASS) está em
+`../2026-11-16_github_disposable_pr_v2/`.

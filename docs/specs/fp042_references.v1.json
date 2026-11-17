@@ -9258,8 +9258,8 @@
     },
     {
       "path": "artifacts/review/fp060/m2_outbox/2026-11-15_github_disposable_pr/README.md",
-      "blob_sha": "1f820dfcdb23ab958cc1b8e5c3c84e4b59b27492",
-      "blob_size": 5517,
+      "blob_sha": "c0323ed5b2431606b7ddf580cb41d3c787301a7c",
+      "blob_size": 5575,
       "owner_group": "artifacts"
     },
     {
@@ -9380,6 +9380,18 @@
       "path": "artifacts/review/fp060/m2_outbox/2026-11-16_lab_journal/crash_after_publish/sandbox_logs/sandbox_seed_check_tests.txt",
       "blob_sha": "9ee089ad0e8506f93274a5aff1cf37e97aeca024",
       "blob_size": 1588,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-16_github_disposable_pr_v2/README.md",
+      "blob_sha": "e816f25c45c8c6a5903612d739304c9d8f960a84",
+      "blob_size": 2675,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/fp060/m2_outbox/2026-11-16_github_disposable_pr_v2/evidence.json",
+      "blob_sha": "7142b66707a5c70881903271b865043c093272ae",
+      "blob_size": 1452,
       "owner_group": "artifacts"
     }
   ]
