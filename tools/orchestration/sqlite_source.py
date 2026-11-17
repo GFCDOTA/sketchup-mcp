@@ -132,11 +132,15 @@ def backfill_store(store: EventStore, bstate: dict | None = None) -> int:
 
 
 # --------------------------------------------------------------------------------------------------------- claim / lease
+BRIDGE_PRODUCER = "event_bridge"                                       # o UNICO produtor de CORRECTION_REQUESTED que esta fonte consome (o mesmo que o detector compara)
+
+
 def _recent_claims(store: EventStore, now: float) -> int:
-    ids = {e["id"] for e in store.events() if e["event_type"] == EVENT_TYPE}
+    """Claims de EXECUCAO da fonte primaria nas ultimas 24 h. Os claims de sincronizacao do espelho no modo JSON (dono `sync:`) nao executam nada e nao contam."""
+    ids = {e["id"] for e in store.events() if e["event_type"] == EVENT_TYPE and e.get("producer") == BRIDGE_PRODUCER}
     return sum(1 for t in store.transitions()
                if t["event_id"] in ids and t["to_status"] == "RUNNING" and (t["detail"] or "").startswith(("claimed", "reclaimed"))
-               and t["at"] >= now - DAY_S)
+               and not str(t["actor"] or "").startswith("sync:") and t["at"] >= now - DAY_S)
 
 
 def claim_next(owner: str, now: dt.datetime | None = None, *, lease_s: float, daily_cap: int) -> dict | None:
@@ -145,7 +149,7 @@ def claim_next(owner: str, now: dt.datetime | None = None, *, lease_s: float, da
     if _recent_claims(store, store.clock()) >= daily_cap:
         return None
     for _ in range(MAX_MALFORMED_PER_CLAIM):
-        ev = store.claim((EVENT_TYPE,), owner, lease_s)
+        ev = store.claim((EVENT_TYPE,), owner, lease_s, producers=(BRIDGE_PRODUCER,))
         if ev is None:
             return None
         item = item_from_event(ev)
@@ -164,7 +168,7 @@ def peek_next(daily_cap: int | None = None) -> dict | None:
     store = _store()
     now = store.clock()
     all_events = store.events()
-    events = [e for e in all_events if e["event_type"] == EVENT_TYPE]
+    events = [e for e in all_events if e["event_type"] == EVENT_TYPE and e.get("producer") == BRIDGE_PRODUCER]
     if daily_cap is not None and _recent_claims(store, now) >= daily_cap:                       # o teto diario vale tambem para o que o claim real faria
         return None
     live = {e["job_id"] for e in all_events if e["status"] == "RUNNING" and e["lease_until"] > now}     # QUALQUER tipo: o claim real exclui o agregado com lease ativo
@@ -294,7 +298,8 @@ def rollback_plan(store: EventStore, bstate: dict, now: float | None = None) -> 
     `additions` = eventos PENDING que existem so no SQLite (viram itens da fila JSON, com identidade e tentativas). `unreconcilable` = evento executavel que nao descreve
     um review: o rollback recusa. `changes` inclui PENDING cuja linha JSON esta num estado que o `pick` JSON nao escolhe (ex.: BLOCKED_REVIEW_FETCH): volta a ser retomavel."""
     now = store.clock() if now is None else now
-    events = [e for e in store.events() if e["event_type"] == EVENT_TYPE]
+    all_events = store.events()
+    events = [e for e in all_events if e["event_type"] == EVENT_TYPE and e.get("producer") == BRIDGE_PRODUCER]
     rows = {}
     for it in bstate["queue"]:
         args = store_args_from_item(it)
@@ -302,7 +307,7 @@ def rollback_plan(store: EventStore, bstate: dict, now: float | None = None) -> 
             rows[args["idempotency_key"]] = it
     changes, blocked, additions, unreconcilable = [], [], [], []
     live = set()
-    for ev in events:                                                            # TODOS os eventos, nao so os que tem linha JSON
+    for ev in all_events:                                                        # QUALQUER tipo e produtor, com ou sem linha JSON: um executor ainda trabalha no agregado
         if ev["status"] == "RUNNING" and ev["lease_until"] > now:
             blocked.append({"key": (rows.get(ev["idempotency_key"]) or {}).get("key", ev["idempotency_key"]), "owner": ev["lease_owner"]})
             live.add(ev["idempotency_key"])
@@ -356,9 +361,31 @@ def rollback_plan(store: EventStore, bstate: dict, now: float | None = None) -> 
     return {"changes": changes, "blocked": blocked, "additions": additions, "unreconcilable": unreconcilable}
 
 
+def _rollback_gate() -> str | None:
+    """Pre-condicoes do rollback: pausa DURAVEL do executor (EXECUTOR_DISABLED) e nenhuma instancia viva (lock de instancia livre). None = pode aplicar."""
+    from tools.orchestration import event_executor as ex
+    from tools.orchestration import shadow_divergence as sd
+    if not ex.disabled_flag().exists():
+        return "pausa DURAVEL ausente: crie EXECUTOR_DISABLED antes do rollback (um executor ocioso reivindicaria trabalho durante a reconciliacao)"
+    try:
+        if sd.executor_running():
+            return "executor ativo (lock de instancia ocupado): pare-o antes do rollback"
+    except OSError as exc:
+        return f"lock de instancia inacessivel ({type(exc).__name__}): nao aplico o rollback"
+    return None
+
+
 def rollback_apply(store: EventStore) -> dict:
+    gate = _rollback_gate()
+    if gate:
+        return {"applied": 0, "refused": gate, "changes": [], "blocked": [], "additions": [], "unreconcilable": []}
     with es.locked(eb.bridge_path()):
-        b = eb.load()
+        if not eb.bridge_path().is_file():                                  # fila ausente: eb.load() devolveria um estado VAZIO e gravar perderia dedup, execucoes e o teto
+            return {"applied": 0, "refused": "fila JSON ausente: nada a reconciliar e nada e gravado", "changes": [], "blocked": [], "additions": [], "unreconcilable": []}
+        try:
+            b = eb.load()
+        except ValueError as exc:                                           # inclui BridgeStateCorrupt (#635) e JSON invalido
+            return {"applied": 0, "refused": f"fila JSON invalida ({str(exc)[:120]}): nada e gravado", "changes": [], "blocked": [], "additions": [], "unreconcilable": []}
         plan = rollback_plan(store, b)
         if plan["blocked"]:
             return {"applied": 0, "refused": "evento(s) com lease vivo: o executor ainda esta rodando; pare-o antes", **plan}

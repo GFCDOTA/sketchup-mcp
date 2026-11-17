@@ -14,6 +14,9 @@ from tools.orchestration import sqlite_source as sq
 from tools.orchestration import store_factory as sf
 
 
+REAL_ROLLBACK_GATE = sq._rollback_gate
+
+
 class Clock:
     def __init__(self, t: float = 1_000_000.0):
         self.t = t
@@ -33,6 +36,7 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setattr(ex, "WATCH_PID", None)                                  # `main(--watch-pid)` deixa o global setado em outros testes
     monkeypatch.setattr(ex, "deliver", lambda *a, **k: ("PUSHED", "fake"))
     monkeypatch.setattr(ex, "comment_pr", lambda *a, **k: None)
+    monkeypatch.setattr(sq, "_rollback_gate", lambda: None)                    # os testes do rollback partem do executor PAUSADO e parado; os da pausa usam REAL_ROLLBACK_GATE
     sf.reset_store()
     sq.reset_claims()
     yield
@@ -161,7 +165,7 @@ def test_idle_when_there_is_nothing_to_claim(clock):
 
 def test_a_malformed_event_is_discarded_and_never_executed(clock):
     store = sf.get_store()
-    store.publish(event_type="CORRECTION_REQUESTED", idempotency_key="review:9:7:" + HEAD, job_id="pr:7", payload={"pr": 7})
+    store.publish(event_type="CORRECTION_REQUESTED", idempotency_key="review:9:7:" + HEAD, job_id="pr:7", payload={"pr": 7}, producer="event_bridge")
     gh = FakeGh()
     runner = Runner(gh)
 
@@ -697,3 +701,57 @@ def test_a_terminal_event_only_in_sqlite_without_a_rebuildable_review_refuses_th
     store.supersede(store.claim(("CORRECTION_REQUESTED",), "x", 60), "head mudou")
     out = sq.rollback_apply(store)
     assert out["applied"] == 0 and "terminais" in out["refused"] and out["unreconcilable"][0]["status"] == "SUPERSEDED"
+
+
+# -- revisao do Codex (#636, 6d933121): produtor alinhado; teto so com claims de execucao; leases de qualquer tipo; fila ausente; pausa duravel ------------
+def test_the_claim_never_takes_a_correction_request_from_another_producer(clock):
+    seed_json()
+    store = sf.get_store()
+    args = sq.store_args_from_item(item())
+    store.publish(**{**args, "producer": "outro"})
+    assert sq.claim_next("w", lease_s=60, daily_cap=6) is None and sq.peek_next() is None
+    assert [e["status"] for e in store.events()] == ["PENDING"]                                   # o evento alheio nao foi tocado
+
+
+def test_mirror_sync_claims_in_json_mode_do_not_consume_the_daily_cap(clock):
+    store = seed_both(*[item(key=f"review:{n}:7:{HEAD}", event_id=f"review:{n}") for n in range(20, 27)])
+    for ev in [e for e in store.events()][:6]:
+        owned = store.claim_by_id(ev["id"], "sync:abcd1234", 30.0)                             # sincronizacao do espelho (bloqueio de ambiente) no modo JSON
+        store.release(owned, "BLOCKED_WORKTREE")
+    assert sq._recent_claims(store, store.clock()) == 0 and sq.claim_next("w", lease_s=60, daily_cap=6) is not None
+
+
+def test_a_live_lease_of_any_event_type_blocks_the_rollback(clock):
+    seed_json()
+    store = sf.get_store()
+    store.publish("IMPLEMENT_REQUESTED", "implement:issue:5:h", "pr:7", {"issue": 5}, producer="intake")
+    assert store.claim(("IMPLEMENT_REQUESTED",), "outro-consumidor", 600) is not None
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 0 and "lease vivo" in out["refused"]
+
+
+def test_a_missing_json_queue_refuses_the_rollback_and_writes_nothing(clock, tmp_path):
+    store = sf.get_store()
+    store.publish(**sq.store_args_from_item(item()))
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 0 and "ausente" in out["refused"] and not eb.bridge_path().exists()
+
+
+def test_an_invalid_json_queue_refuses_the_rollback_and_is_left_untouched(clock):
+    eb.bridge_path().write_text("{ quebrado", encoding="utf-8")
+    out = sq.rollback_apply(sf.get_store())
+    assert out["applied"] == 0 and "invalida" in out["refused"] and eb.bridge_path().read_text(encoding="utf-8") == "{ quebrado"
+
+
+def test_the_rollback_requires_the_durable_pause_and_no_live_executor(clock, monkeypatch):
+    from tools.orchestration import shadow_divergence as sd
+    seed_json(item())
+    monkeypatch.setattr(sq, "_rollback_gate", REAL_ROLLBACK_GATE)
+    out = sq.rollback_apply(sf.get_store())
+    assert out["applied"] == 0 and "EXECUTOR_DISABLED" in out["refused"]
+    ex.disabled_flag().write_text("", encoding="utf-8")
+    monkeypatch.setattr(sd, "executor_running", lambda: True)                                    # executor ativo e ocioso (sem lease)
+    out = sq.rollback_apply(sf.get_store())
+    assert out["applied"] == 0 and "executor ativo" in out["refused"]
+    monkeypatch.setattr(sd, "executor_running", lambda: False)
+    assert "refused" not in sq.rollback_apply(sf.get_store())

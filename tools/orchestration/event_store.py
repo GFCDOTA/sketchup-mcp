@@ -224,7 +224,7 @@ class EventStore:
 
     # -- consuming ----------------------------------------------------------
     def claim(self, event_types, owner: str, lease_seconds: float,
-              *, job_id: str | None = None) -> dict | None:
+              *, job_id: str | None = None, producers: tuple[str, ...] | None = None) -> dict | None:
         """Atomically claim the oldest eligible event (PENDING & available, or
         RUNNING with an expired lease), excluding any live aggregate owner.
 
@@ -254,6 +254,9 @@ class EventStore:
                 self._record_dlq_fact(db, ev, reason, now)
             job_filter = " AND e.job_id=?" if job_id else ""
             job_params = (job_id,) if job_id else ()
+            if producers:                                                   # so eventos destes produtores (filtro DENTRO da mesma consulta atomica do claim)
+                job_filter += f" AND e.producer IN ({','.join('?' * len(producers))})"
+                job_params += tuple(producers)
             job = db.execute(
                 f"""SELECT e.* FROM events e WHERE e.event_type IN ({marks}){job_filter} AND e.attempt<e.max_attempts AND
                     ((e.status='PENDING' AND e.available_at<=?) OR (e.status='RUNNING' AND e.lease_until<=?))
