@@ -351,10 +351,20 @@ def gh_user_with(token: str) -> str | None:
     return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else None
 
 
-def publish(v: dict, token: str, repo: str) -> str:
+def publish(v: dict, token: str, repo: str, *, evidence: dict | None = None, pkg: dict | None = None) -> str:
+    """Publica o parecer. Um APPROVE so sai (e so grava a PROVENIENCIA que o `auto_merge` exige) com a evidencia validada NA FRONTEIRA: testes do coordenador
+    verdes em sandbox de SO e nenhuma lacuna de `approval_gaps` para este parecer e este pacote. Chamada direta sem essa evidencia = ReviewError, nada postado."""
     event = {"APPROVE": "APPROVE", "REQUEST_CHANGES": "REQUEST_CHANGES"}.get(v["verdict"])
     if not event:
         raise ReviewError("veredito NEEDS_HUMAN nao e publicado como review")
+    if event == "APPROVE":
+        if not isinstance(evidence, dict) or not isinstance(pkg, dict):
+            raise ReviewError("APPROVE sem a evidencia dos testes e o pacote revisado: nao publico nem registro proveniencia")
+        if evidence.get("isolation") != "os_sandbox":
+            raise ReviewError(f"APPROVE exige testes em sandbox de SO (isolamento: {evidence.get('isolation')!r}): nao publico")
+        gaps = approval_gaps(v, evidence, pkg)
+        if gaps:
+            raise ReviewError("APPROVE sem prova suficiente na publicacao: " + "; ".join(gaps)[:300])
     lines = [f"Codex CLI (revisor independente) — HEAD {v['head_sha']} — confianca {v['confidence']}"]
     lines += [f"- [{f['severity']}] {f['file']}:{f['line']} — {f['reason']} → {f['required_change']}" for f in v["findings"]]
     if v["tests_reviewed"]:
@@ -370,11 +380,13 @@ def publish(v: dict, token: str, repo: str) -> str:
         raise ReviewError(f"publicacao falhou: {(r.stdout + r.stderr).strip()[:200]}")
     url = r.stdout.strip()
     review_id = url.rsplit("pullrequestreview-", 1)[-1] if "pullrequestreview-" in url else None
-    record_provenance(repo, int(v["pr"]), v["head_sha"], event, review_id=review_id)
+    digest = hashlib.sha256(json.dumps({"verdict": v, "isolation": (evidence or {}).get("isolation"), "tests_passed": (evidence or {}).get("tests_passed")},
+                                       sort_keys=True, ensure_ascii=True).encode("utf-8")).hexdigest()
+    record_provenance(repo, int(v["pr"]), v["head_sha"], event, review_id=review_id, verdict_digest=digest)   # amarrado ao parecer VALIDADO
     return url
 
 
-def record_provenance(repo: str, pr: int, head: str, verdict: str, store=None, review_id: str | None = None) -> bool:
+def record_provenance(repo: str, pr: int, head: str, verdict: str, store=None, review_id: str | None = None, verdict_digest: str | None = None) -> bool:
     """Registro LOCAL de que ESTE publicador postou o parecer (producer `codex_reviewer`, DONE, chave `review:<repo>#<PR>:<HEAD>:<VEREDITO>`): e a prova que o
     `auto_merge` exige para caminhos criticos e que o texto publico de um review nao forja. Idempotente. Falhar aqui nunca desfaz a publicacao: sem o registro, o gate
     so fica em WAIT (fail-closed)."""
@@ -382,7 +394,7 @@ def record_provenance(repo: str, pr: int, head: str, verdict: str, store=None, r
     try:
         if store is None:
             store = store_factory.get_store()
-        eid, _created = store.publish("REVIEW_REQUESTED", key, f"review:{repo}#{int(pr)}", {"repo": repo, "pr": int(pr), "head_sha": head, "verdict": verdict},
+        eid, _created = store.publish("REVIEW_REQUESTED", key, f"review:{repo}#{int(pr)}", {"repo": repo, "pr": int(pr), "head_sha": head, "verdict": verdict, "verdict_digest": verdict_digest},
                                       producer="codex_reviewer", aggregate_type="review_publication")
         claimed = store.claim_by_id(eid, f"codex-reviewer:{os.getpid()}", 30.0)
         if claimed is not None:
@@ -453,7 +465,7 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
                 if live.get("state") != "open" or live_sha != sha:
                     record("failed", pr=pr, sha=sha, error="HEAD/estado mudou antes de publicar (STALE)")
                     return {"action": "STALE", "reason": f"antes de publicar: HEAD {sha[:8]} -> {live_sha[:8]}, estado {live.get('state')}"}
-                published = publisher(verdict, token, repo)
+                published = publisher(verdict, token, repo, evidence=evidence, pkg=pkg)
                 after = (gh(f"repos/{repo}/pulls/{pr}").get("head") or {}).get("sha", "").lower()   # reconcilia depois
                 if after != sha:
                     moved_after = after

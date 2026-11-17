@@ -272,6 +272,11 @@ def gather(gh: eb.Gh, repo: str, number: int) -> tuple[dict, list[dict], list[di
     files = complete_list(gh, f"repos/{repo}/pulls/{number}/files?per_page=100")
     runs = complete_check_runs(gh, repo, head)
     reviews = complete_list(gh, f"repos/{repo}/pulls/{number}/reviews?per_page=100")
+    return pr, files, runs, reviews, read_issues(gh, repo, pr)
+
+
+def read_issues(gh: eb.Gh, repo: str, pr: dict) -> dict[int, dict]:
+    """As Issues que o corpo do PR referencia (`Refs #N`), lidas AGORA. Issue ilegivel fica de fora (a decisao a trata como ausente: fail-closed)."""
     refs = sorted({int(n) for n in re.findall(r"\brefs?\s*:?\s*#(\d+)", pr.get("body") or "", re.I)})
     issues = {}
     for n in refs:
@@ -280,7 +285,7 @@ def gather(gh: eb.Gh, repo: str, number: int) -> tuple[dict, list[dict], list[di
             issues[n] = iss if isinstance(iss, dict) and "pull_request" not in iss else None
         except RuntimeError:
             issues[n] = None
-    return pr, files, runs, reviews, {k: v for k, v in issues.items() if v}
+    return {k: v for k, v in issues.items() if v}
 
 
 def protection_gaps(gh: eb.Gh, repo: str, base: str = BASE_BRANCH) -> list[str]:
@@ -493,6 +498,10 @@ def cycle(gh: eb.Gh, policy: dict, repo: str = eb.REPO, apply: bool = False, run
                             # ULTIMA chamada antes do comando. Janela residual (nao fechavel pela API: nao ha merge condicionado a base/labels): o tempo de UMA ida ao servidor
                             # entre esta leitura e o merge; quem a cobre no servidor e a protecao da branch (aprovacao exigida, aprovacoes velhas descartadas).
                             row.update(code="WAIT", reasons=["base, labels, estado ou corpo do PR mudaram depois das consultas da ultima leitura: nada e mesclado nesta rodada"])
+                        elif decide(pr4, files3, runs3, reviews3, read_issues(gh, repo, pr4), policy, cfg, on, provenance).code != "MERGE":
+                            # as Issues obrigatorias (labels de decisao humana, fechamento) NAO sao exigidas pelo servidor: sao relidas e decididas de novo como as
+                            # ULTIMAS chamadas remotas antes do comando. Residuo: uma ida ao servidor, como base/labels (a API nao tem merge condicionado a Issues).
+                            row.update(code="WAIT", reasons=["uma Issue obrigatoria mudou depois da coleta final (label de decisao humana, fechada ou ilegivel): nada e mesclado"])
                         elif not (still_on3 := enabled() if is_enabled is None else is_enabled)[0]:
                             # o interruptor e relido DEPOIS da releitura do PR (pr4), a ultima chamada remota: e a leitura local imediatamente anterior ao comando de merge
                             row.update(code="DISABLED", reasons=[f"desligado durante a releitura final do PR: {still_on3[1]}"])

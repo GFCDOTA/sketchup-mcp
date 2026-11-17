@@ -844,6 +844,9 @@ def test_a_merge_landing_while_cancelling_with_another_head_or_without_proof_req
     assert ok is False and "INTERVENCAO" in why                                                          # sem HEAD autorizado para conferir
 
 
+GOOD_EVIDENCE = {"evidence": {"isolation": "os_sandbox", "tests_passed": True, "uncovered": [], "selected": ["tests/test_x.py"]}, "pkg": {"files": ["tests/test_x.py"]}}
+
+
 def test_the_real_publisher_of_this_base_produces_the_marker_and_the_local_record_that_satisfy_the_reinforced_gate(tmp_path, monkeypatch):
     from tools.orchestration import codex_reviewer as cr
     from tools.orchestration.event_store import EventStore
@@ -855,12 +858,12 @@ def test_the_real_publisher_of_this_base_produces_the_marker_and_the_local_recor
         posted["body"] = next(a[len("body="):] for a in argv if str(a).startswith("body="))
         return type("P", (), {"returncode": 0, "stdout": "https://github.com/x/y/pull/7#pullrequestreview-1\n", "stderr": ""})()
     monkeypatch.setattr(cr.subprocess, "run", fake_run)
-    v = {"pr": 7, "head_sha": HEAD, "verdict": "APPROVE", "confidence": "HIGH", "findings": [], "tests_reviewed": ["tests/test_x.py"]}
-    cr.publish(v, "tok", REPO)
+    v = {"pr": 7, "head_sha": HEAD, "verdict": "APPROVE", "confidence": "HIGH", "findings": [], "tests_reviewed": ["tests/test_x.py"], "files_reviewed": [{"path": "tests/test_x.py"}]}
+    cr.publish(v, "tok", REPO, **GOOD_EVIDENCE)
     review = {**approval(commit=HEAD, body=posted["body"]), "id": 1}                                      # o id que o GitHub devolveu na publicacao
     assert am.reinforced(review, REPO, 7, HEAD, am.outbox_provenance(store)) is True                     # o fluxo REAL (marcador + registro local) satisfaz o gate
     assert am.reinforced(review, REPO, 7, HEAD, am.outbox_provenance(EventStore(tmp_path / "vazio.db"))) is False   # so o texto copiado nao basta
-    cr.publish(v, "tok", REPO)                                                                            # idempotente
+    cr.publish(v, "tok", REPO, **GOOD_EVIDENCE)                                                           # idempotente
     assert sum(1 for e in store.events() if e["producer"] == "codex_reviewer") == 1
 
 
@@ -876,7 +879,8 @@ def test_a_dismissed_codex_approval_does_not_lend_its_provenance_to_a_manual_rev
         posted["body"] = next(a[len("body="):] for a in argv if str(a).startswith("body="))
         return type("P", (), {"returncode": 0, "stdout": "https://github.com/x/y/pull/7#pullrequestreview-111\n", "stderr": ""})()
     monkeypatch.setattr(cr.subprocess, "run", fake_run)
-    cr.publish({"pr": 7, "head_sha": HEAD, "verdict": "APPROVE", "confidence": "HIGH", "findings": [], "tests_reviewed": ["t"]}, "tok", REPO)
+    cr.publish({"pr": 7, "head_sha": HEAD, "verdict": "APPROVE", "confidence": "HIGH", "findings": [], "tests_reviewed": ["tests/test_x.py"], "files_reviewed": [{"path": "tests/test_x.py"}]},
+               "tok", REPO, **GOOD_EVIDENCE)
     codex_review = {**approval(commit=HEAD, body=posted["body"]), "id": 111}
     manual_copy = {**approval(commit=HEAD, body=posted["body"]), "id": 222}                                   # outro review, mesmo HEAD, marcador copiado
     check = am.outbox_provenance(store)
@@ -921,3 +925,39 @@ def test_a_protection_removed_during_the_final_collection_blocks_the_merge():
     out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     row = out["prs"][0]
     assert row["code"] == "WAIT" and "coleta final" in row["reasons"][0] and runner.calls == [] and gh.pulls == 3
+
+
+# -- 13a revisao do Codex (#648, 79ba2cda): a fronteira de publicacao valida a evidencia antes de postar e de gravar a proveniencia --------------------------
+@pytest.mark.parametrize("kw", [{}, {"evidence": {"isolation": "os_sandbox", "tests_passed": True, "uncovered": [], "selected": ["tests/test_x.py"]}},
+                                {"evidence": {"isolation": "env", "tests_passed": True, "uncovered": [], "selected": ["tests/test_x.py"]}, "pkg": {"files": ["tests/test_x.py"]}},
+                                {"evidence": {"isolation": "os_sandbox", "tests_passed": False, "uncovered": [], "selected": ["tests/test_x.py"]}, "pkg": {"files": ["tests/test_x.py"]}},
+                                {"evidence": {"isolation": "os_sandbox", "tests_passed": True, "uncovered": ["tools/y.py"], "selected": ["tests/test_x.py"]},
+                                 "pkg": {"files": ["tests/test_x.py"]}},
+                                {"evidence": {"isolation": "os_sandbox", "tests_passed": True, "uncovered": [], "selected": ["tests/test_x.py"]},
+                                 "pkg": {"files": ["tests/test_x.py", "tools/nao_inspecionado.py"]}}])
+def test_a_direct_approve_publish_without_valid_evidence_posts_nothing_and_records_no_provenance(tmp_path, monkeypatch, kw):
+    from tools.orchestration import codex_reviewer as cr
+    from tools.orchestration.event_store import EventStore
+    store = EventStore(tmp_path / "store.db")
+    monkeypatch.setattr(cr.store_factory, "get_store", lambda: store)
+    calls = []
+    monkeypatch.setattr(cr.subprocess, "run", lambda argv, **k: calls.append(argv))
+    v = {"pr": 7, "head_sha": HEAD, "verdict": "APPROVE", "confidence": "HIGH", "findings": [], "tests_reviewed": ["tests/test_x.py"], "files_reviewed": [{"path": "tests/test_x.py"}]}
+    with pytest.raises(cr.ReviewError):
+        cr.publish(v, "tok", REPO, **kw)
+    assert calls == [] and not [e for e in store.events() if e["producer"] == "codex_reviewer"]
+    assert am.outbox_provenance(store)(REPO, 7, HEAD) is False
+
+
+def test_a_request_changes_publish_needs_no_test_evidence():
+    import inspect
+
+    from tools.orchestration import codex_reviewer as cr
+    assert "if event == \"APPROVE\":" in inspect.getsource(cr.publish)                                     # so o APPROVE exige a evidencia
+
+
+def test_an_issue_that_gains_a_human_decision_label_after_the_final_collection_blocks_the_merge():
+    gh, runner = Gh(issue_flip_at=4), Runner()                                                          # 4a leitura da Issue = depois da releitura final do PR (pr4)
+    out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
+    row = out["prs"][0]
+    assert row["code"] == "WAIT" and "depois da coleta final" in row["reasons"][0] and runner.calls == [] and gh.issue_reads == 4

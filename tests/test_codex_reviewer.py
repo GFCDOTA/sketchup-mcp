@@ -165,7 +165,7 @@ def test_closed_pr_and_wrong_identity_do_not_run_codex(tmp_path):
 # ------------------------------------------------------------------------------------------- publicacao independente
 def test_without_an_independent_identity_the_review_is_blocked_and_nothing_is_published(tmp_path):
     published = []
-    res = review(tmp_path, do_publish=True, publisher=lambda *a: published.append(a))
+    res = review(tmp_path, do_publish=True, publisher=lambda *a, **k: published.append(a))
     assert res["action"] == "REVIEW_BLOCKED" and "CODEX_REVIEWER_GH_TOKEN ausente" in res["reason"] and not published
     r = rec(tmp_path)
     assert r["status"] == "done" and r["blocked"] and not r["published"]                      # o parecer fica salvo
@@ -181,7 +181,7 @@ def test_publisher_identity_must_be_a_listed_reviewer_and_not_the_executor(monke
 def test_independent_identity_publishes_exactly_the_validated_verdict(tmp_path, monkeypatch):
     monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "﻿tok")
     published = []
-    res = review(tmp_path, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda v, token, repo: published.append((v["verdict"], token, repo)) or "https://x/r/1")
+    res = review(tmp_path, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda v, token, repo, **k: published.append((v["verdict"], token, repo)) or "https://x/r/1")
     assert res["action"] == "DONE" and res["published"] == "https://x/r/1" and published == [("REQUEST_CHANGES", "tok", REPO)]
     assert rec(tmp_path)["published"] == "https://x/r/1"
 
@@ -190,7 +190,7 @@ def test_needs_human_is_never_published_as_a_review(tmp_path, monkeypatch):
     monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
     published = []
     run = Run(verdict(verdict="NEEDS_HUMAN", findings=[], confidence="LOW"))
-    res = review(tmp_path, run=run, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a))
+    res = review(tmp_path, run=run, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a, **k: published.append(a))
     assert res["action"] == "REVIEW_BLOCKED" and "NEEDS_HUMAN" in res["reason"] and not published
 
 
@@ -400,7 +400,7 @@ def test_a_valid_approve_is_recorded_but_never_auto_published_without_an_os_sand
     monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
     published = []
     res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])), do_publish=True,
-                 gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a))
+                 gh_user=lambda t: "fmmodesto", publisher=lambda *a, **k: published.append(a))
     assert res["action"] == "REVIEW_BLOCKED" and "sandbox de SO" in res["reason"] and not published
     assert rec(tmp_path)["verdict"] == "APPROVE" and rec(tmp_path)["blocked"]
 
@@ -409,14 +409,14 @@ def test_head_moving_between_validation_and_publish_aborts_the_post(tmp_path, mo
     monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
     published = []
     gh = FakeGh(moved="c" * 40, moved_after=2)                                   # 1 = inicio, 2 = checagem pos-Codex, 3 = antes do POST
-    res = review(tmp_path, gh=gh, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a) or "u")
+    res = review(tmp_path, gh=gh, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a, **k: published.append(a) or "u")
     assert res["action"] == "STALE" and "antes de publicar" in res["reason"] and not published
 
 
 def test_head_moving_right_after_publish_is_reconciled_and_reported(tmp_path, monkeypatch):
     monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
     gh = FakeGh(moved="c" * 40, moved_after=3)                                   # 4 = reconciliacao depois do POST
-    res = review(tmp_path, gh=gh, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a: "https://x/r/2")
+    res = review(tmp_path, gh=gh, do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a, **k: "https://x/r/2")
     assert res["action"] == "DONE" and res["published"] == "https://x/r/2" and res["head_moved_after_publish"] == "c" * 40
     assert rec(tmp_path)["head_moved_after_publish"] == "c" * 40
 
@@ -466,7 +466,7 @@ def test_skipped_tests_evidence_blocks_approve_publication_in_full_flow(tmp_path
     monkeypatch.setenv("CODEX_REVIEWER_GH_TOKEN", "tok")
     published = []
     res = review(tmp_path, run=Run(verdict(verdict="APPROVE", findings=[], tests_reviewed=["tests/test_x.py"])),
-                 do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a: published.append(a))
+                 do_publish=True, gh_user=lambda t: "fmmodesto", publisher=lambda *a, **k: published.append(a))
     assert res["action"] == "REVIEW_BLOCKED" and "sandbox" in res["reason"].lower() and not published
 
 
