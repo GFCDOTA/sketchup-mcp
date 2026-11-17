@@ -6,7 +6,7 @@ Evidência datada (2026-11-15). Refs #625, #606. Três fluxos reais, todos em PR
 
 | Fluxo | Issue → PR | O que percorreu | Resultado |
 |---|---|---|---|
-| **A — correção** | #650 → #651 (defeito semeado) | Codex real `REQUEST_CHANGES` (HEAD `4346d5c`) → Claude real corrige → executor publica `7c3d7bc` pelas guardas + testes no AppContainer → Codex real `APPROVED` no HEAD final | CI 9/9 no HEAD final |
+| **A — correção** | #650 → #651 (defeito semeado) | Codex real `REQUEST_CHANGES` (HEAD `4346d5c`) → correção `7c3d7bc` no PR → Codex real `APPROVED` no HEAD final. **Limite:** a evidência versionada registra o único `CORRECTION_REQUESTED` como `PENDING` ("terminou sem commit novo no PR"); a trilha da execução que publicou `7c3d7bc` pelas guardas e testes **não** está nesta evidência, então ela não prova a publicação pelo executor | CI 9/9 no HEAD final |
 | **B — implementação** | #653 → #655 | Issue com a label humana `executor-intake` → intake → worker (Claude real) → PR aberto pelo executor → Codex real `APPROVED` (HEAD `cf31eb4`) | CI 9/9 |
 | **C — corrida contínua** | #658 → #659 | executor em **laço** (`run --interval 45 --execute`, fonte SQLite, intake e revisão publicada ligados) sem nenhum disparo manual depois da label | CI 9/9, Codex real `APPROVED` (HEAD `a6ee910`) |
 

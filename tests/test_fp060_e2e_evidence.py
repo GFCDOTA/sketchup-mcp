@@ -414,3 +414,21 @@ def test_bearer_and_basic_credentials_in_any_case_are_removed_from_the_report(ra
     ce.assert_clean(blob)
     with pytest.raises(SystemExit):
         ce.assert_clean(raw)
+
+
+# -- revisao do Codex (#660, 5d2a7b3a): a recusa nao vaza o valor; a entrada de linha de comando e testada pelo modulo (o invólucro fica fora do sandbox) ----
+SENSITIVE = ["ghp_" + "Q" * 36, "felipe.real@example.com", r"C:\Users\fulano\segredo.txt", "/home/fulano/segredo.txt"]
+
+
+@pytest.mark.parametrize("value", SENSITIVE)
+def test_the_refusal_message_carries_no_character_of_the_sensitive_value(value):
+    with pytest.raises(SystemExit) as exc:
+        ce.assert_clean(f"saida: {value}")
+    msg = str(exc.value)
+    assert "RECUSADA" in msg and value not in msg and value[:4] not in msg.replace("RECUSADA", "")
+
+
+def test_the_module_command_line_needs_its_arguments_and_shows_the_usage():
+    with pytest.raises(SystemExit) as exc:
+        ce.main([])
+    assert str(exc.value) == (ce.__doc__ or "")                                                      # o invólucro versionado so chama este `main`

@@ -58,7 +58,8 @@ def assert_clean(text: str) -> None:
     for pattern in FORBIDDEN:
         found = pattern.search(text)
         if found:
-            raise SystemExit(f"evidencia RECUSADA: padrao proibido na saida ({pattern.pattern[:30]}...): {found.group(0)[:12]}...")
+            # NENHUM caractere do valor achado vai para a mensagem (stderr/logs): so o tipo do padrao e a posicao
+            raise SystemExit(f"evidencia RECUSADA: padrao proibido na saida (padrao #{FORBIDDEN.index(pattern)}, posicao {found.start()}); nada foi gravado")
 
 
 def sqlite_ro_uri(path: Path) -> str:
