@@ -480,7 +480,7 @@ def test_an_unreconcilable_pending_event_refuses_the_rollback(clock):
     store = seed_both(item())
     store.publish(event_type=sq.EVENT_TYPE, idempotency_key="review:x:9:abc", job_id="pr:9", payload={"pr": "nao-inteiro"}, producer=sq.PRODUCER)
     out = sq.rollback_apply(store)
-    assert out["applied"] == 0 and "sem review executavel" in out["refused"] and len(out["unreconcilable"]) == 1
+    assert out["applied"] == 0 and "sem review reconstruivel" in out["refused"] and len(out["unreconcilable"]) == 1
 
 
 # -- 7a revisao do Codex (#636): lease vencido, tentativas/retry_after desatualizados, DLQ com linha FAILED ------------------------------------------
