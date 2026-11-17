@@ -447,3 +447,28 @@ def test_a_real_wrong_account_with_a_valid_login_is_still_fatal(monkeypatch, cap
     monkeypatch.setattr(ex, "initial_wait", lambda now=None: 0.0)
     assert ex.main(["run", "--interval", "1"]) == 3
     capsys.readouterr()
+
+
+# -- revisao do Codex (#640, 629477cc): launcher fixa o caminho do gh e aplica o contrato de saida apos 8 falhas -------------------------------------------
+LAUNCHER = "tools/orchestration/run_event_bridge.ps1"
+
+
+def _launcher_text() -> str:
+    from pathlib import Path
+    return (Path(__file__).resolve().parents[1] / LAUNCHER).read_text(encoding="utf-8")
+
+
+def test_the_launcher_pins_gh_bin_to_the_fallback_path_even_when_gh_is_missing_at_logon():
+    src = _launcher_text()
+    assert "\n$env:GH_BIN = $gh\n" in src                                                          # incondicional: o gh que reaparecer ali e achado depois
+    assert "if (Test-Path $gh) { $env:GH_BIN = $gh }" not in src
+
+
+def test_the_launcher_exits_after_eight_consecutive_cycle_failures_by_default():
+    src = _launcher_text()
+    assert "[int]$ExitAfterFailures = 8" in src and '"--exit-after-failures", $ExitAfterFailures' in src
+
+
+def test_the_default_launcher_failure_limit_matches_the_executor_constant():
+    from tools.orchestration import event_executor as ex
+    assert ex.MAX_CONSECUTIVE_CYCLE_ERRORS == 8 and "= 8)" in _launcher_text()

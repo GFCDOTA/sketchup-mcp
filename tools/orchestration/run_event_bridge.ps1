@@ -2,7 +2,7 @@
 # Uso:  powershell -File tools\orchestration\run_event_bridge.ps1 [-Once] [-IntervalSeconds 120] [-Execute]
 # Log:  runs\governance\event_bridge.log (uma linha JSON por ciclo, UTF-8 sem BOM; ver event_bridge_log.ps1). Parar: Ctrl+C ou encerrar a tarefa agendada.
 # Agendador de Tarefas: use tools\orchestration\install_event_bridge_task.ps1 (dry-run por padrao).
-param([switch]$Once, [int]$IntervalSeconds = 120, [string]$ExpectedLogin = "fmodesto30", [switch]$Execute)
+param([switch]$Once, [int]$IntervalSeconds = 120, [string]$ExpectedLogin = "fmodesto30", [switch]$Execute, [int]$ExitAfterFailures = 8)
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "event_bridge_log.ps1")
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
@@ -12,7 +12,9 @@ $gh = (Get-Command gh -ErrorAction SilentlyContinue).Source
 if (-not $gh) { $gh = "C:\Program Files\GitHub CLI\gh.exe" }
 # `gh` ausente/indisponivel NAO encerra o launcher: o loop Python trata isso como falha transitoria (backoff) e volta sozinho quando o executavel reaparecer; sair aqui
 # gastaria os 3 reinicios da tarefa agendada sem nunca chegar a recuperacao.
-if (Test-Path $gh) { $env:GH_BIN = $gh } else { [Console]::Error.WriteLine("gh CLI nao encontrado agora: o loop tentara de novo com backoff") }
+# GH_BIN fica FIXADO no caminho mesmo se o executavel ainda nao existir: quando o `gh` reaparecer ali, o loop Python o acha na tentativa seguinte (o PATH herdado nao muda).
+$env:GH_BIN = $gh
+if (-not (Test-Path $gh)) { [Console]::Error.WriteLine("gh CLI nao encontrado agora: o loop tentara de novo com backoff") }
 Remove-Item Env:GH_TOKEN -ErrorAction SilentlyContinue
 # A IDENTIDADE (login = executor, nunca o revisor) e verificada pelo PROCESSO PYTHON, fail-closed e com recuperacao: `event_executor run` espera o backoff persistido ANTES de
 # qualquer chamada ao GitHub e, se o GitHub/`gh` estiver indisponivel no logon ou no reinicio, repete com backoff em vez de sair (a tarefa agendada tem so 3 reinicios).
@@ -25,6 +27,8 @@ Initialize-BridgeLog -Path $log
 if ($Execute) { $argsList = @("-m", "tools.orchestration.event_executor", "run", "--interval", $IntervalSeconds, "--watch-pid", $PID, "--execute") }
 else { $argsList = @("-m", "tools.orchestration.event_executor", "run", "--interval", $IntervalSeconds, "--watch-pid", $PID) }
 if ($Once) { $argsList += "--once" }
+# contrato do launcher: 8 falhas de ciclo consecutivas encerram com codigo 7 para o Agendador reiniciar (0 = nunca sair)
+if ($ExitAfterFailures -gt 0) { $argsList += @("--exit-after-failures", $ExitAfterFailures) }
 # Python em UTF-8 e o console decodifica UTF-8; o log e gravado por Write-BridgeLog (nunca Tee-Object: grava UTF-16 no PS 5.1).
 $env:PYTHONUTF8 = "1"
 $env:PYTHONIOENCODING = "utf-8"
