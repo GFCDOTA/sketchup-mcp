@@ -193,19 +193,41 @@ def render(verdicts: list[Verdict], limit_ineligible: int = 40) -> str:
     return "\n".join(lines)
 
 
+LOAD_LIMIT = 1000                       # `gh ... list` sem --limit devolve so 30: um PR/Issue alem do limite seria omitido em silencio
+
+
 def load(statuses: bool = False) -> tuple[list[dict], dict[int, str] | None, list[dict]]:
     """(issues, status do Project ou None, PRs abertos) via `gh`. O Project so e lido quando pedido (custa cota GraphQL)."""
     import json
 
     from tools.validation.backlog_gate import OWNER, PROJECT, REPO, _gh
-    issues = json.loads(_gh("issue", "list", "--repo", REPO, "--state", "all", "--limit", "1000",
+    issues = json.loads(_gh("issue", "list", "--repo", REPO, "--state", "all", "--limit", str(LOAD_LIMIT),
                             "--json", "number,title,state,stateReason,labels,body"))
-    prs = json.loads(_gh("pr", "list", "--repo", REPO, "--state", "open", "--json", "number,body,headRefName"))
+    prs = json.loads(_gh("pr", "list", "--repo", REPO, "--state", "open", "--limit", str(LOAD_LIMIT), "--json", "number,body,headRefName,closingIssuesReferences"))
     st = None
     if statuses:
         rows = json.loads(_gh("project", "item-list", PROJECT, "--owner", OWNER, "--limit", "1000", "--format", "json"))["items"]
-        st = {r["content"]["number"]: r.get("status") for r in rows if r.get("content", {}).get("number")}
+        st = project_statuses(rows, REPO)
     return issues, st, prs
+
+
+AMBIGUOUS_STATUS = "AMBIGUO"
+
+
+def project_statuses(rows: list[dict], repo: str) -> dict[int, str | None]:
+    """Status do Project por numero de Issue, SO de itens que sao Issues DESTE repositorio. O Project pode conter PRs e itens de outros repositorios com o mesmo numero: um
+    `Ready` alheio nunca vale para esta Issue. Mais de um item para o mesmo numero = identidade ambigua (`AMBIGUO`, nunca `Ready`)."""
+    out: dict[int, str | None] = {}
+    for r in rows:
+        c = r.get("content") or {}
+        number = c.get("number")
+        if not isinstance(number, int) or isinstance(number, bool) or str(c.get("type", "")).lower() != "issue":
+            continue
+        where = str(c.get("repository") or "")
+        if where.lower().rstrip("/").split("github.com/")[-1] != repo.lower():
+            continue
+        out[number] = AMBIGUOUS_STATUS if number in out else r.get("status")
+    return out
 
 
 def main(argv: list[str]) -> int:

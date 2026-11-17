@@ -149,3 +149,220 @@ def test_plan_exits_1_when_there_is_no_candidate(cli, monkeypatch, capsys):
     monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1, labels=("fp060",))], None, []))
     assert intake.main(["plan"]) == 1
     assert json.loads(capsys.readouterr().out)["candidate"] is None
+
+
+# -- 5a revisao do Codex (#641): entrada de prontidao BLOCKED ------------------------------------------------------------------------------------------
+@pytest.mark.parametrize("state", ["BLOCKED", "blocked", "Blocked"])
+def test_an_audited_blocked_readiness_entry_refuses_the_issue(state):
+    res = plan([issue(1)], readiness={1: {"state": state}})
+    assert res.candidate is None and "BLOCKED" in res.skipped[0]
+
+
+def test_an_issue_with_no_readiness_entry_is_still_accepted():
+    assert plan([issue(1)], readiness={}).candidate.node.number == 1
+    assert plan([issue(1)], readiness=None).candidate.node.number == 1
+
+
+@pytest.mark.parametrize("entry", [{"state": "READY", "needs_sketchup": False}, {"state": "READY"}, {}])
+def test_a_non_blocked_readiness_entry_does_not_refuse(entry):
+    assert plan([issue(1)], readiness={1: entry}).candidate.node.number == 1
+
+
+def test_a_blocked_entry_for_another_issue_does_not_affect_this_one():
+    res = plan([issue(1), issue(2)], readiness={2: {"state": "BLOCKED"}})
+    assert res.candidate.node.number == 1 and any(s.startswith("#2:") and "BLOCKED" in s for s in res.skipped)
+
+
+# -- 6a revisao do Codex (#641): Project consultado, dependencia ausente, lista truncada --------------------------------------------------------------
+def test_with_the_project_consulted_an_issue_missing_from_it_or_without_status_is_not_ready():
+    assert plan([issue(1)], statuses={}).candidate is None and "nao tem status" in plan([issue(1)], statuses={}).skipped[0]
+    assert plan([issue(1)], statuses={2: "Ready"}).candidate is None
+    assert plan([issue(1)], statuses={1: None}).candidate is None
+    assert plan([issue(1)], statuses={1: "Ready"}).candidate.node.number == 1
+    assert plan([issue(1)], statuses=None).candidate.node.number == 1                  # Project nao consultado: vale o comportamento anterior
+
+
+def test_a_dependency_that_is_not_among_the_loaded_issues_refuses_the_candidate():
+    res = plan([issue(1, deps=(9,))])
+    assert res.candidate is None and "#9" in res.skipped[0] and "nao carregada" in res.skipped[0]
+    assert plan([issue(1, deps=(2,)), issue(2, state="CLOSED")]).candidate.node.number == 1               # dependencia carregada e concluida: segue
+
+
+def test_a_possibly_truncated_issue_or_pr_list_publishes_nothing(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1)], None, [{"number": n, "body": "", "headRefName": "x"} for n in range(bd.LOAD_LIMIT)]))
+    assert intake.main(["publish", "--apply"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["candidate"] is None and "truncada" in out["error"] and (not cli.exists() or EventStore(cli).events() == [])
+
+
+# -- 7a revisao do Codex (#641): dependencia reflexiva; trava do estado ate a publicacao ----------------------------------------------------------------
+def test_a_self_dependency_refuses_the_candidate_and_publishes_nothing(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    res = plan([issue(1, deps=(1,))])
+    assert res.candidate is None and "depende dela mesma" in res.skipped[0]
+    monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1, deps=(1,))], None, []))
+    assert intake.main(["publish", "--apply"]) == 1
+    assert json.loads(capsys.readouterr().out)["candidate"] is None and (not cli.exists() or EventStore(cli).events() == [])
+
+
+def test_the_execution_state_lock_is_held_from_reading_the_claims_until_the_request_is_written(cli, monkeypatch):
+    held = []
+    real_publish = intake.publish
+
+    def publish_while_checking_the_lock(store, verdict, issues):
+        try:
+            with es.locked(es.state_path(), wait_s=0.2):                                 # outro processo tentando reivindicar nesta janela
+                held.append(False)
+        except TimeoutError:
+            held.append(True)
+        return real_publish(store, verdict, issues)
+    monkeypatch.setattr(intake, "publish", publish_while_checking_the_lock)
+    assert intake.main(["publish", "--apply"]) == 0
+    assert held == [True]
+
+
+# -- 8a revisao do Codex (#641): todo claim ativo e externo ao intake, inclusive o de `claude` -------------------------------------------------------
+@pytest.mark.parametrize("holder", ["claude", "codex", "intake", "outro-agente"])
+def test_an_issue_with_an_active_claim_is_never_a_candidate_whoever_holds_it(holder):
+    state = es.default_state()
+    es.claim(state, 1, holder, "feat/x", "a" * 40, ["comp-a"])
+    res = plan([issue(1)], state=state)
+    assert res.candidate is None
+
+
+@pytest.mark.parametrize("holder", ["claude", "codex"])
+def test_an_active_claim_on_another_issue_does_not_block_an_unrelated_candidate(holder):
+    state = es.default_state()
+    es.claim(state, 2, holder, "feat/x", "a" * 40, ["comp-a"])
+    res = plan([issue(1), issue(2)], state=state)
+    assert res.candidate is not None and res.candidate.node.number == 1
+
+
+def test_the_intake_agent_is_no_name_at_all_so_no_claim_is_ever_its_own():
+    assert intake.INTAKE_AGENT is None
+
+
+@pytest.mark.parametrize("holder", ["intake", "claude", "None", ""])
+def test_an_active_claim_on_another_issue_of_the_same_component_blocks_the_candidate_whatever_the_agent_name(holder):
+    state = es.default_state()
+    es.claim(state, 9, holder, "feat/x", "a" * 40, ["FP-060|-"])                                      # outra Issue, MESMO componente que a candidata
+    assert plan([issue(1)], state=state).candidate is None
+    other = es.default_state()
+    es.claim(other, 9, holder, "feat/x", "a" * 40, ["FP-043|P1"])                                     # componente diferente: nao bloqueia
+    assert plan([issue(1)], state=other).candidate.node.number == 1
+
+
+# -- 9a revisao do Codex (#641): o status do Project vale para a identidade COMPLETA do item ------------------------------------------------------------
+REPO_NAME = "GFCDOTA/sketchup-mcp"
+
+
+def prow(number, status, type_="Issue", repo=REPO_NAME):
+    return {"status": status, "content": {"number": number, "type": type_, "repository": repo}}
+
+
+def test_a_ready_item_of_another_repository_with_the_same_number_does_not_authorize_this_issue(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    mapped = bd.project_statuses([prow(1, "Ready", repo="outro/repo")], REPO_NAME)                  # a Issue #1 DESTE repo nao esta no Project
+    assert mapped == {}
+    monkeypatch.setattr(bd, "load", lambda statuses=False: ([issue(1)], mapped, []))
+    assert intake.main(["publish", "--apply", "--project"]) == 1
+    assert json.loads(capsys.readouterr().out)["candidate"] is None and (not cli.exists() or EventStore(cli).events() == [])
+
+
+# -- 8a revisao do Codex (#641): vinculos de fechamento do GitHub; revalidacao sob a trava -------------------------------------------------------------
+@pytest.mark.parametrize("body", ["Closes #1", "fixes #1", "Resolves: #1", "Refs #1", "Relates to #1", "Fixed #3, #1", "closes #1 and #2"])
+def test_an_open_pr_linked_by_any_github_keyword_blocks_a_new_request(body):
+    res = plan([issue(1)], prs=[{"number": 50, "body": body, "headRefName": "x"}])
+    assert res.candidate is None and all("PR #50" in x for x in res.skipped)                          # `Refs`/`Relates to` o agendador ja descarta antes
+
+
+def test_a_pr_that_only_mentions_the_number_without_a_link_keyword_does_not_block():
+    assert plan([issue(1)], prs=[{"number": 50, "body": "ver tambem #1 na discussao", "headRefName": "x"}]).candidate.node.number == 1
+
+
+def test_a_pr_opened_between_the_first_read_and_the_lock_is_seen_by_the_revalidation_and_nothing_is_published(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, [{"number": 77, "body": "Closes #1", "headRefName": "feat/x"}])])
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["published"] is None and "revalidacao" in out["note"] and any("PR #77" in s for s in out["revalidated_skipped"])
+    assert not cli.exists() or EventStore(cli).events() == []
+
+
+# -- 9a revisao do Codex (#641): a revalidacao tambem checa a truncagem e o status do Project; `bd.load` testado com o gh simulado ---------------------------
+def test_a_truncated_second_read_publishes_nothing(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, [{"number": n, "body": "", "headRefName": "x"} for n in range(bd.LOAD_LIMIT)])])
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["published"] is None and "truncada" in out["note"] and (not cli.exists() or EventStore(cli).events() == [])
+
+
+def test_a_card_that_leaves_ready_between_the_reads_is_not_published(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], {1: "Ready"}, []), ([issue(1)], {1: "In Progress"}, [])])
+    seen = []
+
+    def load(statuses=False):
+        seen.append(statuses)
+        return next(reads)
+    monkeypatch.setattr(bd, "load", load)
+    assert intake.main(["publish", "--apply", "--project"]) == 1
+    out = json.loads(capsys.readouterr().out)
+    assert seen == [True, True] and out["published"] is None and (not cli.exists() or EventStore(cli).events() == [])
+
+
+# -- 10a revisao do Codex (#641): trava curta fora do gh; vinculo pela interface; pos-checagem ------------------------------------------------------------
+def test_a_slow_github_reread_does_not_hold_the_lock_and_a_concurrent_claim_wins(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    calls = []
+
+    def load(statuses=False):
+        calls.append(1)
+        if len(calls) == 2:                                                                               # a releitura lenta: enquanto isso o executor reivindica
+            with es.locked(es.state_path(), wait_s=0.5):                                                 # a trava esta LIVRE (antes ficaria presa ate 5 s)
+                st = es.load(es.state_path())
+                es.claim(st, 1, "claude", "feat/x", "a" * 40, ["comp-a"])
+                es.save(st, es.state_path())
+        return [issue(1)], None, []
+    monkeypatch.setattr(bd, "load", load)
+    assert intake.main(["publish", "--apply"]) == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["published"] is None and "revalidacao" in out["note"]                                          # o claim feito durante a releitura vence
+    assert not cli.exists() or EventStore(cli).events() == []
+
+
+def test_a_pr_linked_through_the_github_interface_without_any_body_keyword_blocks_the_request():
+    pr = {"number": 61, "body": "sem referencia no texto", "headRefName": "x", "closingIssuesReferences": [{"number": 1}]}
+    res = plan([issue(1)], prs=[pr])
+    assert res.candidate is None and all("PR #61" in x for x in res.skipped)
+
+
+def test_a_pr_linked_between_the_reread_and_the_write_supersedes_the_just_published_request(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, [{"number": 88, "body": "", "headRefName": "x",
+                                                                                         "closingIssuesReferences": [{"number": 1}]}])])
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["superseded"]["pr"] == 88
+    assert [e["status"] for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER] == ["SUPERSEDED"]
+
+
+# -- 11a revisao do Codex (#641, d58b47ec): a pos-checagem tambem descarta um pedido identico que ja estava PENDING ----------------------------------------
+def test_a_pr_linked_after_the_write_supersedes_an_identical_request_that_was_already_pending(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, [])])            # 1a execucao: publica normalmente (3 leituras)
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 0
+    capsys.readouterr()
+    linked = [{"number": 89, "body": "", "headRefName": "x", "closingIssuesReferences": [{"number": 1}]}]
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, linked)])          # 2a: pedido identico (created=False) e PR vinculado depois
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["published"]["created"] is False and out["superseded"]["pr"] == 89
+    assert [e["status"] for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER] == ["SUPERSEDED"]
