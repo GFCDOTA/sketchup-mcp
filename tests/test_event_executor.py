@@ -956,7 +956,7 @@ def test_a_restart_after_the_commit_was_recorded_goes_to_publish_pending_not_bac
     b = bstate(expired, plain)
     assert ex.recover(b, NOW) == 2
     assert b["queue"][0]["state"] == "PUBLISH_PENDING" and b["queue"][1]["state"] == "QUEUED"         # so quem registrou o commit vai para a reconciliacao
-    assert ex.pick(b, NOW + dt.timedelta(days=1))["key"] == plain["key"]
+    assert ex.pick(b, NOW + dt.timedelta(days=1)) is None                                         # mesmo PR com publicacao pendente: nada novo (revisao de c88ed461)
 
 
 def test_the_commit_is_recorded_durably_before_the_push_and_a_failed_record_blocks_it(monkeypatch):
@@ -1257,3 +1257,18 @@ def test_the_superseded_comment_says_nothing_was_published_when_there_was_no_pus
     monkeypatch.setattr(ex, "deliver", head_moves)
     res = go(gh, bstate(item()), Runner(gh, push=False))
     assert res["action"] == "SUPERSEDED" and comments and "nada publicado" in comments[-1]
+
+
+# -- revisao do Codex (#652, c88ed461): PR com publicacao pendente nao recebe trabalho novo ----------------------------------------------------------------
+def test_another_review_of_a_pr_with_a_pending_publication_is_not_picked():
+    pending = item(state="PUBLISH_PENDING", published_sha=NEWHEAD)
+    other_same_pr = item(key=f"review:10:7:{HEAD}", event_id="review:10")
+    other_pr = item(key=f"review:11:8:{HEAD}", event_id="review:11", pr=8)
+    assert ex.pick(bstate(pending, other_same_pr), NOW) is None                     # mesmo PR: espera a reconciliacao
+    assert ex.pick(bstate(pending, other_same_pr, other_pr), NOW)["pr"] == 8        # outro PR segue livre
+
+
+def test_once_the_pending_publication_is_resolved_the_same_pr_is_picked_again():
+    done = item(state="DONE", published_sha=NEWHEAD)
+    other_same_pr = item(key=f"review:10:7:{HEAD}", event_id="review:10")
+    assert ex.pick(bstate(done, other_same_pr), NOW)["key"] == other_same_pr["key"]

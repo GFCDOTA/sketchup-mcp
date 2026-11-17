@@ -366,7 +366,12 @@ def pick(bstate: dict, now: dt.datetime | None = None) -> dict | None:
     cutoff = es.now_iso(_utc(now) - dt.timedelta(hours=24))
     if len([r for r in bstate.get("runs", []) if r >= cutoff]) >= DAILY_CAP:
         return None
+    # PR com publicacao PUBLISH_PENDING (push sem desfecho reconciliado) nao recebe trabalho novo: outro review do mesmo PR reusaria a worktree e o checkout tiraria
+    # do HEAD local o commit cuja publicacao ainda esta em aberto. Decidido sob a MESMA trava do claim.
+    pending_prs = {t.get("pr") for t in bstate["queue"] if t["state"] == "PUBLISH_PENDING" and t.get("pr") is not None}
     for t in bstate["queue"]:
+        if t.get("pr") in pending_prs:
+            continue
         if t["state"] in ("QUEUED", "BLOCKED_CREDENTIALS", "BLOCKED_CLI", "BLOCKED_WORKTREE", "FAILED") and t.get("attempts", 0) < MAX_ATTEMPTS \
                 and (t.get("retry_after") or "") <= t_now:
             return t
