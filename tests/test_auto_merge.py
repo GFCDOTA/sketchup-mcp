@@ -186,7 +186,8 @@ def test_an_approval_followed_by_a_change_request_on_the_same_head_does_not_merg
 
 # ------------------------------------------------------------------------------------------------------------------------ ciclo
 GOOD_PROTECTION = {"required_pull_request_reviews": {"required_approving_review_count": 1, "dismiss_stale_reviews": True},
-                   "enforce_admins": {"enabled": True}, "required_status_checks": {"contexts": sorted(lifecycle.MANDATORY_CHECKS)}}
+                   "enforce_admins": {"enabled": True}, "required_status_checks": {"contexts": sorted(lifecycle.MANDATORY_CHECKS)},
+                   "required_conversation_resolution": {"enabled": True}}
 
 
 class Gh:
@@ -1000,3 +1001,14 @@ def test_an_issue_that_gains_a_human_decision_label_after_the_final_collection_b
     out = am.cycle(gh, POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
     row = out["prs"][0]
     assert row["code"] == "WAIT" and "depois da coleta final" in row["reasons"][0] and runner.calls == [] and gh.issue_reads == 4
+
+
+# -- revisao do Codex (#648, bdcecf84): a protecao precisa exigir conversas resolvidas -------------------------------------------------------------------------
+@pytest.mark.parametrize("conv", [None, {"enabled": False}, {}])
+def test_a_protection_without_required_conversation_resolution_blocks_the_merge(conv):
+    prot = {k: v for k, v in GOOD_PROTECTION.items() if k != "required_conversation_resolution"}
+    if conv is not None:
+        prot["required_conversation_resolution"] = conv
+    runner = Runner()
+    out = am.cycle(Gh(protection=prot), POLICY, REPO, apply=True, runner=runner, is_enabled=ON, provenance=ALWAYS)
+    assert out["prs"][0]["code"] == "WAIT" and any("conversas resolvidas" in r for r in out["prs"][0]["reasons"]) and runner.calls == []

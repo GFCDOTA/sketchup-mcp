@@ -307,6 +307,8 @@ def protection_gaps(gh: eb.Gh, repo: str, base: str = BASE_BRANCH) -> list[str]:
         gaps.append(f"a protecao de {base} nao descarta aprovacoes velhas quando o codigo muda (dismiss_stale_reviews)")
     if not (prot.get("enforce_admins") or {}).get("enabled"):
         gaps.append(f"a protecao de {base} nao vale para administradores (enforce_admins)")
+    if not (prot.get("required_conversation_resolution") or {}).get("enabled"):
+        gaps.append(f"a protecao de {base} nao exige conversas resolvidas (required_conversation_resolution): um PR com conversa pendente seria mesclado")
     # o SERVIDOR tem de exigir cada check obrigatorio: `--match-head-commit` so prende o HEAD; um check que mude de estado depois da ultima leitura local so e
     # barrado no merge se a protecao o exigir
     rsc = prot.get("required_status_checks")
