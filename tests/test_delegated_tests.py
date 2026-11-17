@@ -423,7 +423,7 @@ def test_the_reviewer_marks_the_tests_green_only_with_sandbox_and_ci_evidence(ba
     ci = Ci(base[1])
     out = cr.run_coordinator_tests(wt, ["tests/test_git_thing.py"], delegation=delegation(base, ci))
     assert out["tests_passed"] is True and seen["delegated"] == tuple(IDS)
-    assert out["delegated"]["ids"] == IDS and out["delegated"]["evidence"]["run_id"] == 900
+    assert out["delegated"]["ids"] == IDS and out["delegated"]["evidence"]["policy"]["run_id"] == 900 and "owner_waiver" not in out["delegated"]["evidence"]
 
 
 @pytest.mark.parametrize("mutate", [lambda ci: setattr(ci, "artifacts", []), lambda ci: setattr(ci, "boom", RuntimeError("502")),

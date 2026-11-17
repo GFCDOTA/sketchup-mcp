@@ -258,7 +258,82 @@ def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
     return sorted(sel), sorted(uncovered)
 
 
-def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S, delegation: dtests.Delegation | None = None) -> dict:
+OWNER_WAIVERS_FILE = "owner_test_waivers.json"
+MAX_WAIVED_PER_PR = 32
+
+
+def owner_waived_ids(repo: str, pr: int | None, selected: list[str], path: Path | None = None) -> tuple[list[str], dict | None, str | None]:
+    """Dispensa do PROPRIETARIO para testes que o PR ACRESCENTA e que o AppContainer nao executa (a politica da base ainda nao os conhece). Fica no diretorio do
+    COORDENADOR (nunca no repositorio/PR): `{"schema": 1, "waivers": [{"repo", "pr", "node_ids", "decided_by", "decided_at", "decision"}]}`. Vale so para ESTE PR e
+    para node ids EXATOS; a evidencia (checks obrigatorios do CI verdes no HEAD exato) e exigida a cada revisao. Arquivo ausente = nada; ilegivel = nada + motivo."""
+    p = path or (codex_dir() / OWNER_WAIVERS_FILE)
+    if pr is None or not p.is_file():
+        return [], None, None
+    try:
+        raw = json.loads(p.read_text(encoding="utf-8"))
+        if not isinstance(raw, dict) or raw.get("schema") != 1 or not isinstance(raw.get("waivers"), list):
+            raise ValueError("sem schema 1")
+        mine = [w for w in raw["waivers"] if isinstance(w, dict) and w.get("repo") == repo and w.get("pr") == pr]
+        if len(mine) > 1:
+            raise ValueError(f"mais de uma dispensa para o PR #{pr}")
+        if not mine:
+            return [], None, None
+        w = mine[0]
+        ids = w.get("node_ids")
+        if not isinstance(ids, list) or not ids or len(ids) > MAX_WAIVED_PER_PR or len(set(ids)) != len(ids) or not w.get("decided_by") or not w.get("decided_at"):
+            raise ValueError("dispensa sem node_ids validos (1..32, sem repeticao) ou sem decided_by/decided_at")
+        for nid in ids:
+            if (not isinstance(nid, str) or not dtests.NODE_ID.fullmatch(nid) or any(ch in nid.split("::", 1)[1].split("[")[0] for ch in "*?")
+                    or any(part in ("", ".", "..") for part in nid.split("::", 1)[0].split("/"))):
+                raise ValueError(f"node id invalido na dispensa: {str(nid)[:120]!r}")
+    except (OSError, ValueError) as exc:
+        return [], None, f"dispensa do proprietario ilegivel ({str(exc)[:160]}): nada dispensado"
+    files = set(selected)
+    return sorted(i for i in ids if i.split("::", 1)[0] in files), w, None
+
+
+def _ci_green_at_head(gh: Callable, repo: str, head: str) -> tuple[bool, str]:
+    """Checks obrigatorios do CI (`lifecycle.MANDATORY_CHECKS`), todos `success`, no HEAD EXATO. Leitura falha = nao comprovado."""
+    from tools.orchestration import lifecycle
+    try:
+        data = gh(f"repos/{repo}/commits/{head}/check-runs?per_page=100")
+    except Exception as exc:  # noqa: BLE001 — sem leitura, sem evidencia (fail-closed)
+        return False, f"check-runs do HEAD ilegiveis ({type(exc).__name__})"
+    runs = data.get("check_runs") if isinstance(data, dict) else None
+    if not isinstance(runs, list):
+        return False, "check-runs do HEAD em formato inesperado"
+    state = lifecycle.checks_state([r for r in runs if isinstance(r, dict) and str(r.get("head_sha", head)).lower() == head.lower()])
+    return state == "passed", f"checks obrigatorios do CI no HEAD {head[:8]}: {state}"
+
+
+def _settle_delegation(d: dtests.Delegation, planned: dict, waived: list[str], waiver: dict | None, facts: dict) -> dict:
+    """Confere o relatorio do plugin (deselecao EXATA de politica + dispensa) e exige a evidencia de cada parte: artefato por teste do CI (politica da base) e checks
+    obrigatorios verdes no HEAD (dispensa do proprietario). Fail-closed."""
+    ids = sorted(set(planned["ids"]) | set(waived))
+    rep = facts.get("delegation")
+    if not isinstance(rep, dict) or sorted(rep.get("requested") or []) != ids:
+        return {"ok": False, "reasons": ["relatorio de delecao do plugin ausente ou diferente do pedido"], "evidence": None}
+    if rep.get("not_collected"):
+        return {"ok": False, "reasons": [f"teste(s) dispensado(s) nao coletado(s) no PR: {rep['not_collected'][:3]}"], "evidence": None}
+    if sorted(rep.get("deselected") or []) != ids:
+        return {"ok": False, "reasons": ["o plugin deselecionou ids diferentes dos pedidos"], "evidence": None}
+    evidence: dict = {}
+    if planned["ids"]:
+        try:
+            evidence["policy"] = dtests.verify_ci_evidence(d.gh, d.download or dtests.default_download, d.repo, d.head_sha, planned["policy"], d.run_git, d.root)
+        except dtests.DelegationError as exc:
+            return {"ok": False, "reasons": [str(exc)[:300]], "evidence": None}
+    if waived:
+        ok, why = _ci_green_at_head(d.gh, d.repo, d.head_sha)
+        if not ok:
+            return {"ok": False, "reasons": [f"dispensa do proprietario sem evidencia: {why}"], "evidence": None}
+        evidence["owner_waiver"] = {"ids": waived, "decided_by": waiver.get("decided_by"), "decided_at": waiver.get("decided_at"),
+                                    "decision": waiver.get("decision"), "ci": why}
+    return {"ok": True, "reasons": [], "evidence": evidence}
+
+
+def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None, timeout: int = TEST_TIMEOUT_S, delegation: dtests.Delegation | None = None,
+                          pr: int | None = None, waivers_path: Path | None = None) -> dict:
     """Fail-closed: os testes do PR so rodam dentro de um AppContainer sem capacidades, com o token do processo e um canario
     provados NESTA execucao (`sandboxed_tests.run_pytest`). Qualquer falha — fora do Windows, sandbox que nao sobe, sonda
     reprovada, prova ausente — devolve ISOLATION_SKIPPED com `tests_passed=None` e nada roda fora do sandbox. Nao ha parametro
@@ -277,10 +352,12 @@ def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None,
         return skipped("nenhum teste selecionado, nada a rodar em sandbox de SO")
     root = codex_dir() / "tests_sandbox"
     planned = dtests.plan(delegation, sel) if delegation is not None else {"active": False, "ids": []}
+    waived, waiver, waiver_error = owner_waived_ids(delegation.repo, pr, sel, waivers_path) if delegation is not None else ([], None, None)
+    waived = [i for i in waived if i not in planned["ids"]]                              # o que a politica da base ja cobre fica com a politica (evidencia por teste)
     try:
         run = sb.run_pytest(wt, sel, root=root, ini_text="[pytest]\n", timeout=timeout, log_dir=root / "logs",
                             tag=re.sub(r"[^A-Za-z0-9_.-]", "_", wt.name)[:40],
-                            dists=sb.project_distributions(ex.repo_root() / "pyproject.toml"), skip=SANDBOX_SKIP, delegated=tuple(planned["ids"]))
+                            dists=sb.project_distributions(ex.repo_root() / "pyproject.toml"), skip=SANDBOX_SKIP, delegated=tuple(sorted({*planned["ids"], *waived})))
     except sb.SandboxError as exc:
         return skipped(f"sandbox de SO indisponivel ({str(exc)[:200]}); escalar ao proprietario")
     if not sb.proves_isolation(run.facts):
@@ -288,11 +365,12 @@ def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None,
     summary = f"timeout de {timeout}s" if run.timed_out else run.output[-1500:]
     passed = (not run.timed_out) and run.exit_code == 0
     extra: dict = {}
-    if delegation is not None and (planned["ids"] or planned.get("error") or planned.get("note")):
-        settled = dtests.settle(delegation, planned, run.facts) if planned["ids"] else {"ok": True, "reasons": [], "evidence": None}
-        extra["delegated"] = {"ids": planned["ids"], "evidence": settled["evidence"], "reasons": settled["reasons"] + ([planned["error"]] if planned.get("error") else [])
-                              + ([planned["note"]] if planned.get("note") else [])}
-        if planned["ids"] and not settled["ok"]:
+    if delegation is not None and (planned["ids"] or waived or planned.get("error") or planned.get("note") or waiver_error):
+        settled = _settle_delegation(delegation, planned, waived, waiver, run.facts) if (planned["ids"] or waived) else {"ok": True, "reasons": [], "evidence": None}
+        extra["delegated"] = {"ids": planned["ids"], "owner_waived": waived, "evidence": settled["evidence"],
+                              "reasons": settled["reasons"] + ([planned["error"]] if planned.get("error") else []) + ([planned["note"]] if planned.get("note") else [])
+                              + ([waiver_error] if waiver_error else [])}
+        if (planned["ids"] or waived) and not settled["ok"]:
             passed = False                                                              # evidencia ausente/inconsistente: o que foi dispensado NAO fica provado
             summary = "delegacao ao CI NAO comprovada (fail-closed): " + "; ".join(settled["reasons"]) + "\n" + summary
     return {**base, "isolation": ISOLATION_OS, "tests_passed": passed, "exit_code": run.exit_code,
@@ -423,7 +501,7 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
         wt = review_worktree(pr, sha, ex.repo_root())
         pkg = review_package(wt, base or "origin/develop", sha)
         evidence = run_coordinator_tests(wt, list(pkg["files"]), delegation=dtests.Delegation(gh=gh, repo=repo, head_sha=sha, changed_files=list(pkg["files"]), root=ex.repo_root(),
-                                                                                         run_git=ex.git))
+                                                                                         run_git=ex.git), pr=pr)
         check_untouched(wt, sha, "coordinator_tests")
         out_dir = tmp or codex_dir()
         out_dir.mkdir(parents=True, exist_ok=True)
