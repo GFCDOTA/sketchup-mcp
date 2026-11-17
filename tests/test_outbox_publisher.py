@@ -249,7 +249,8 @@ def test_ledger_target_appends_one_line_per_key_and_finds_it_again(tmp_path, sto
     lines = LedgerTarget(tmp_path / "external" / "ledger.jsonl").lines()        # outra instancia: o estado e o arquivo
     assert [(ln["key"], ln["operation"], ln["payload"]) for ln in lines] == [
         ("k1", "publish_review", {"verdict": "APPROVE"}), ("k2", "publish_review", {"verdict": "APPROVE"})]
-    assert ledger.find({"idempotency_key": "k2"}) == "ledger:2" and ledger.find({"idempotency_key": "k9"}) is None
+    same = {"operation": "publish_review", "payload": {"verdict": "APPROVE"}}
+    assert ledger.find({"idempotency_key": "k2", **same}) == "ledger:2" and ledger.find({"idempotency_key": "k9", **same}) is None
 
 
 def test_ledger_that_cannot_be_read_blocks_the_send_instead_of_risking_a_duplicate(tmp_path, store):
@@ -331,3 +332,36 @@ def test_two_overlapping_ledger_sends_of_the_same_key_produce_one_effect(tmp_pat
     for t in ts:
         t.join(20)
     assert len(ledger.lines()) == 1 and set(refs) == {"ledger:1"}
+
+
+# -- revisao do Codex (#618, 14af59ee): reconciliar so o MESMO efeito; ledger terminado em JSON valido sem newline ---------------------------------------
+ENTRY = {"idempotency_key": "k1", "operation": "publish_review", "payload": {"pr": 7, "verdict": "REQUEST_CHANGES"}}
+
+
+@pytest.mark.parametrize("row", [{"key": "k1"}, {"key": "k1", "operation": "publish_review"}, {"key": "k1", "operation": "publish_review", "payload": {"pr": 7, "verdict": "APPROVE"}},
+                                 {"key": "k1", "operation": "outra", "payload": {"pr": 7, "verdict": "REQUEST_CHANGES"}}])
+def test_a_ledger_record_with_the_right_key_but_another_effect_is_never_reconciled(tmp_path, row):
+    ledger = LedgerTarget(tmp_path / "ledger.jsonl")
+    ledger.path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+    with pytest.raises(TargetError, match="diferentes"):
+        ledger.find(ENTRY)
+    with pytest.raises(TargetError, match="diferentes"):
+        ledger.send(ENTRY)
+    assert ledger.path.read_text(encoding="utf-8") == json.dumps(row) + "\n"                    # nada acrescentado
+
+
+def test_the_publisher_gives_no_ack_when_the_ledger_has_the_key_with_another_payload(store, tmp_path):
+    ledger = LedgerTarget(tmp_path / "ledger.jsonl")
+    (oid,) = queue(store, "k1", target="lab")
+    ledger.path.write_text(json.dumps({"key": "k1", "operation": "publish_review", "payload": {"forjado": True}}) + "\n", encoding="utf-8")
+    res = op.publish_one(store, {"lab": ledger}, "pub-1", lease_seconds=30)
+    assert res["action"] == "FAILED" and "diferentes" in res["reason"] and status(store, oid) != "DONE"
+
+
+def test_publishing_after_a_ledger_ending_in_valid_json_without_newline_keeps_both_records_readable(tmp_path):
+    ledger = LedgerTarget(tmp_path / "ledger.jsonl")
+    first = {"key": "k0", "operation": "publish_review", "payload": {"pr": 1}}
+    ledger.path.write_text(json.dumps(first), encoding="utf-8")                                 # registro completo, sem o `\n` final
+    assert ledger.send(ENTRY) == "ledger:2"
+    rows = ledger.lines()
+    assert [r["key"] for r in rows] == ["k0", "k1"] and ledger.find(ENTRY) == "ledger:2"

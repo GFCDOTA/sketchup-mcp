@@ -1204,6 +1204,24 @@ def test_an_intact_ledger_with_missing_outbox_entries_does_not_prove_publication
     assert rep["criteria"]["verdicts_published_once_via_outbox"] is False and rep["verdict"] == "FAIL"
 
 
+@pytest.mark.parametrize("tamper", ["no_payload", "other_verdict", "other_operation"])
+def test_report_fails_when_the_ledger_has_the_right_key_with_another_effect(env, fake_sandbox, tamper):
+    lab, store = env
+    closed_loop(sandboxed_lab(lab), store)
+    rows = [json.loads(x) for x in lab.ledger.read_text(encoding="utf-8").splitlines()]
+    if tamper == "no_payload":
+        rows[0].pop("payload")
+    elif tamper == "other_verdict":
+        rows[0]["payload"] = {**rows[0]["payload"], "verdict": "APPROVE" if rows[0]["payload"].get("verdict") != "APPROVE" else "REQUEST_CHANGES"}
+    else:
+        rows[0]["operation"] = "outra"
+    lab.ledger.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["criteria"]["verdicts_published_once_via_outbox"] is False and rep["verdict"] == "FAIL"
+
+
 @pytest.mark.parametrize("tamper", ["duplicate", "missing", "foreign"])
 def test_report_fails_when_the_ledger_does_not_match_the_verdicts_exactly_once(env, fake_sandbox, tamper):
     lab, store = env

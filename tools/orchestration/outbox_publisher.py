@@ -109,26 +109,37 @@ class LedgerTarget:
             raise TargetError("ledger ilegivel: linha sem chave")
         return rows
 
+    @staticmethod
+    def _same_effect(row: dict, entry: dict) -> bool:
+        """O registro com a chave so reconcilia se for o MESMO efeito (operacao e payload). Mesma chave com conteudo diferente: nao confirma nada."""
+        if row.get("operation") != entry.get("operation") or row.get("payload") != entry.get("payload"):
+            raise TargetError(f"ledger tem a chave {entry['idempotency_key']!r} com operacao/payload diferentes da entrada: nao reconcilio nem dou ACK")
+        return True
+
     def find(self, entry: dict) -> str | None:
         for number, row in enumerate(self.lines(), 1):
-            if row["key"] == entry["idempotency_key"]:
+            if row["key"] == entry["idempotency_key"] and self._same_effect(row, entry):
                 return f"ledger:{number}"
         return None
 
     def send(self, entry: dict) -> str:
         with _file_lock(self.path.with_name(self.path.name + ".lock")):
             for number, row in enumerate(self.lines(), 1):                    # outro envio da MESMA chave ja aplicou: devolve a referencia dele
-                if row["key"] == entry["idempotency_key"]:
+                if row["key"] == entry["idempotency_key"] and self._same_effect(row, entry):
                     return f"ledger:{number}"
             return self._append(entry)
 
     def _append(self, entry: dict) -> str:
-        count = len(self.lines())
+        count = len(self.lines())                                             # linha ilegivel => TargetError antes de qualquer escrita (sem ACK)
         line = json.dumps({"key": entry["idempotency_key"], "operation": entry["operation"], "payload": entry["payload"]},
                           sort_keys=True, ensure_ascii=True)
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
+            # ultimo registro completo (JSON valido) sem `\n` final: o delimitador e reparado SOB a trava antes de acrescentar, senao os dois objetos colariam
+            torn = self.path.exists() and self.path.stat().st_size > 0 and self.path.read_bytes()[-1:] != b"\n"
             with self.path.open("a", encoding="utf-8", newline="\n") as handle:
+                if torn:
+                    handle.write("\n")
                 handle.write(line + "\n")
                 handle.flush()
                 os.fsync(handle.fileno())

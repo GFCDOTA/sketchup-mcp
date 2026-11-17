@@ -899,6 +899,23 @@ def ledger_keys(lab: Lab) -> list[str] | None:
         return None
 
 
+def ledger_matches_outbox(lab: Lab, outbox: list[dict]) -> bool:
+    """Cada entrada do outbox tem, no ledger, um registro com a MESMA chave, operacao e payload (a chave certa com o parecer errado nao conta)."""
+    try:
+        rows = {row["key"]: row for row in op.LedgerTarget(lab.ledger).lines()}
+    except op.TargetError:
+        return False
+    for o in outbox:
+        row = rows.get(o["idempotency_key"])
+        try:
+            payload = json.loads(o["payload"]) if isinstance(o["payload"], str) else o["payload"]
+        except ValueError:
+            return False
+        if row is None or row.get("operation") != o.get("operation") or row.get("payload") != payload:
+            return False
+    return True
+
+
 def tests_sandboxed(evidence: list[dict | None]) -> bool:
     """Toda entrega e todo parecer concluido tem evidencia do AppContainer E ela carrega as duas provas da propria execucao
     (token e canario). Evidencia ausente ou invalida reprova o criterio."""
@@ -934,7 +951,7 @@ def report(lab: Lab, store: EventStore) -> dict:
     # cada chave esperada tem de existir no ledger E no outbox (uma entrada por chave, em DONE): ledger integro com outbox vazio NAO prova publicacao via outbox
     outbox_keys = sorted(o["idempotency_key"] for o in outbox)
     all_published = (bool(expected) and in_ledger is not None and sorted(in_ledger) == sorted(expected) and outbox_keys == sorted(expected)
-                     and all(o["status"] == "DONE" for o in outbox))
+                     and all(o["status"] == "DONE" for o in outbox) and ledger_matches_outbox(lab, outbox))
     journal_ok, journal_error = reconciliation_proof(lab)
     consumed =[e for e in events if fault and e["event_type"] in AGENT_EVENTS[FAULTS[fault][0]]]
     faulted_runs = [r for r in runs if fault and r["agent"] == FAULTS[fault][0]]
