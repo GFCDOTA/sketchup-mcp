@@ -371,6 +371,10 @@ def rollback_plan(store: EventStore, bstate: dict, now: float | None = None) -> 
         want = {"DONE": "DONE_AWAITING_REREVIEW", "SUPERSEDED": "SUPERSEDED"}.get(ev["status"])
         if want and it.get("state") != want:
             changes.append({"key": it["key"], "from": it.get("state"), "to": want, "store_status": ev["status"]})
+    for ev in all_events:                                                        # a fonte JSON nao executa pedidos de implementacao: nenhum pode ficar sem consumidor
+        if ev["event_type"] == IMPLEMENT_TYPE and ev["status"] in ("PENDING", "RUNNING") and ev["idempotency_key"] not in live:
+            unreconcilable.append({"key": ev["idempotency_key"], "event": ev["id"], "status": ev["status"],
+                                   "why": "pedido de implementacao nao terminal: a fila JSON nao o executa"})
     return {"changes": changes, "blocked": blocked, "additions": additions, "unreconcilable": unreconcilable}
 
 

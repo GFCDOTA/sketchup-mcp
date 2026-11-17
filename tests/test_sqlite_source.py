@@ -716,3 +716,12 @@ def test_an_expired_implement_lease_does_not_block_the_rollback(clock):
     store.claim(("IMPLEMENT_REQUESTED",), "worker-morto", 60)
     clock.t += 120
     assert sq.rollback_plan(store, eb.load())["blocked"] == []
+
+
+# -- revisao do Codex (#646, 134c9ba7): pedido de implementacao nao terminal impede o rollback -------------------------------------------------------------
+def test_a_pending_implement_request_refuses_the_rollback(clock):
+    seed_json()
+    store = sf.get_store()
+    store.publish("IMPLEMENT_REQUESTED", "implement:issue:5:h", "issue:5", {"issue": 5, "title": "t", "spec_hash": "h"}, producer="intake", aggregate_type="issue")
+    out = sq.rollback_apply(store)
+    assert out["applied"] == 0 and any(u.get("why", "").startswith("pedido de implementacao") for u in out["unreconcilable"])

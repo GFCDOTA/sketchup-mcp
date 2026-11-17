@@ -35,6 +35,7 @@ class Gh:
         self.issue = {"number": N, "state": "open", "title": TITLE, "body": BODY,
                       "labels": [{"name": intake.AUTH_LABEL}, {"name": "spec:FP-060"}]} if issue is None else issue
         self.prs, self.login, self.boom, self.calls = list(prs), login, boom, []
+        Gh.current = self                                                       # o preflight le os PRs abertos por `_open_prs` (a fonte do intake); o teste os liga a este Gh
 
     def __call__(self, path):
         self.calls.append(path)
@@ -61,6 +62,17 @@ class Child:
         if self.boom:
             raise self.boom
         return self.rc, json.dumps(self.result), self.err, self.timed_out
+
+
+@pytest.fixture(autouse=True)
+def _prs_from_the_fake_github(monkeypatch):
+    def open_prs():
+        g = getattr(Gh, "current", None)
+        if g is not None and g.boom:
+            raise g.boom
+        return [{"number": pr.get("number"), "body": pr.get("body") or "", "headRefName": (pr.get("head") or {}).get("ref") or pr.get("headRefName"),
+                 "closingIssuesReferences": pr.get("closingIssuesReferences") or []} for pr in (g.prs if g is not None else [])]
+    monkeypatch.setattr(iw, "_open_prs", open_prs)
 
 
 @pytest.fixture()
@@ -475,3 +487,45 @@ def test_a_pr_that_does_not_cite_the_issue_does_not_supersede_the_request(world)
     gh = Gh(prs=[{"number": 5, "body": f"Relates to #{N + 1} e Refs #{N + 2}", "head": {"ref": "outra"}}])
     res, _gh, _child = run(world, gh)
     assert res["action"] == "DONE"
+
+
+# -- revisao do Codex (#646, 134c9ba7): deteccao de vinculo do intake; posse antes/depois do PR -------------------------------------------------------------
+@pytest.mark.parametrize("pr", [{"number": 6, "body": f"Closes #{N}", "head": {"ref": "outra"}}, {"number": 6, "body": f"fixes #{N}", "head": {"ref": "outra"}},
+                                {"number": 6, "body": f"Resolves: #{N}", "head": {"ref": "outra"}},
+                                {"number": 6, "body": "sem referencia", "head": {"ref": "outra"}, "closingIssuesReferences": [{"number": N}]}])
+def test_a_pr_linked_by_a_closing_keyword_or_through_the_interface_supersedes_the_request(world, pr):
+    res, _gh, child = run(world, Gh(prs=[pr]))
+    assert res["action"] == "SUPERSEDED" and "ja existe o PR #6" in res["reason"] and child.calls == []
+
+
+def test_a_truncated_pr_list_refuses_the_preflight(world, monkeypatch):
+    from tools.validation import backlog_discovery as bd
+    monkeypatch.setattr(iw, "_open_prs", lambda: [{"number": 1000 + n, "body": "", "headRefName": "x"} for n in range(bd.LOAD_LIMIT)])
+    res, _gh, child = run(world, Gh())
+    assert res["action"] in ("REFUSED", "SUPERSEDED", "FAILED") and "truncada" in res["reason"] and child.calls == [] and world.prs == []
+
+
+def test_a_lost_lease_before_opening_the_pr_opens_nothing(world, monkeypatch):
+    real = ex.update_owned
+    calls = {"n": 0}
+
+    def lose_on_pr_check(key, owner, mutate, release=False, now=None):
+        if not release and mutate.__name__ == "<lambda>" and calls["n"] == 0 and world.delivered:
+            calls["n"] += 1
+            return False                                                                             # a conferencia de posse imediatamente antes do PR falha
+        return real(key, owner, mutate, release=release, now=now)
+    monkeypatch.setattr(ex, "update_owned", lose_on_pr_check)
+    res, _gh, _child = run(world, Gh())
+    assert res["action"] == "LEASE_LOST" and world.prs == []
+
+
+def test_a_lost_lease_after_the_pr_is_not_reported_as_done(world, monkeypatch):
+    real = ex.update_owned
+
+    def lose_on_done(key, owner, mutate, release=False, now=None):
+        if release and getattr(mutate, "__name__", "") == "done":
+            return False
+        return real(key, owner, mutate, release=release, now=now)
+    monkeypatch.setattr(ex, "update_owned", lose_on_done)
+    res, _gh, _child = run(world, Gh())
+    assert res["action"] == "LEASE_LOST_AFTER_PR" and res["pr"] == 77 and len(world.prs) == 1

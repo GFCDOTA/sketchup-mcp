@@ -69,6 +69,11 @@ def write_issue_file(issue: dict, item: dict) -> Path:
 
 
 # ----------------------------------------------------------------------------------------------------------------- preflight
+def _open_prs() -> list[dict]:
+    """PRs abertos como o `gh pr list` os devolve (`number`, `body`, `headRefName`, `closingIssuesReferences`): a MESMA fonte do intake."""
+    return bd.load(statuses=False)[2]
+
+
 def preflight(item: dict, gh: eb.Gh, policy: dict, repo: str) -> tuple[str, str, dict | None]:
     """('OK'|'SUPERSEDED'|'REFUSED', motivo, issue). Revalida TUDO no GitHub antes de rodar e de novo antes do push."""
     try:
@@ -89,10 +94,14 @@ def preflight(item: dict, gh: eb.Gh, policy: dict, repo: str) -> tuple[str, str,
         if intake.spec_hash(issue) != item["spec_hash"]:
             return "SUPERSEDED", f"Issue #{n} foi editada desde o pedido: o intake publica um pedido novo", issue
         branch = branch_for(n, item["spec_hash"])
-        for pr in gh(f"repos/{repo}/pulls?state=open&per_page=100") or []:
-            cites = n in {int(x) for x in bd._REFS.findall(pr.get("body") or "")}              # a MESMA leitura de referencias do agendador (Ref/Refs/Relates to)
-            if cites or (pr.get("head") or {}).get("ref") == branch:
-                return "SUPERSEDED", f"ja existe o PR #{pr.get('number')} para a Issue #{n}: nunca dois PRs", issue
+        prs = _open_prs()                                                                # PRs abertos COM closingIssuesReferences (vinculo pela interface)
+        if len(prs) >= bd.LOAD_LIMIT:
+            return "REFUSED", f"lista de PRs no limite de {bd.LOAD_LIMIT} (possivelmente truncada): sem prova de que nao ha PR para a Issue #{n}", issue
+        linked = intake.open_pr_for(prs, n)                                              # a MESMA deteccao do intake: Closes/Fixes/Resolves/Refs + vinculo pela interface
+        if linked is None:
+            linked = next((int(pr["number"]) for pr in prs if pr.get("headRefName") == branch), None)   # a branch deste pedido ja tem PR (retomada apos perder o lease)
+        if linked is not None:
+            return "SUPERSEDED", f"ja existe o PR #{linked} para a Issue #{n}: nunca dois PRs", issue
         return "OK", "", issue
     except (PermissionError, RuntimeError, KeyError, AttributeError, ValueError, TypeError) as exc:
         return "REFUSED", f"preflight falhou fail-closed ({type(exc).__name__}): {exc}", None
@@ -224,7 +233,7 @@ def handle(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, runner, c
         return block("BLOCKED_WORKTREE", msg)
     if state == "RESUMABLE":                                                 # a tentativa anterior publicou (via `deliver`); so falta o PR
         opened = _open_pr(item, owner, issue, branch, repo, t, base, "", key, gh)
-        return opened if opened["action"] == "DONE" else fail(opened["reason"], "")
+        return opened if opened["action"] in ("DONE", "LEASE_LOST", "LEASE_LOST_AFTER_PR") else fail(opened["reason"], "")
     if not ex.update_owned(key, owner, lambda it, b: b.setdefault("runs", []).append(es.now_iso(t)), now=t):
         return {"action": "LOST_LEASE", "item": key, "reason": "lease perdido antes de executar"}
     try:
@@ -255,7 +264,7 @@ def handle(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, runner, c
         ex.write_log(key, f"delivery: {delivery}", "", {"delivery": delivery[0], "at": es.now_iso(t)})
     if delivery[0] == "PUSHED":
         opened = _open_pr(item, owner, issue, branch, repo, t, base, log, key, gh)
-        if opened["action"] == "DONE":
+        if opened["action"] in ("DONE", "LEASE_LOST", "LEASE_LOST_AFTER_PR"):            # sem posse nada mais e gravado: o resultado volta como esta
             return {**opened, "delivery": delivery[0]}
         delivery = ("ERROR", opened["reason"])
     if question and delivery[0] in ("SKIPPED", "NOOP") and not child_error:
@@ -286,6 +295,8 @@ def _fresh_automerge_optin(gh: eb.Gh | None, repo: str, n: int) -> bool:
 def _open_pr(item: dict, owner: str, issue: dict, branch: str, repo: str, t: dt.datetime, base: str, log: str, key: str, gh: eb.Gh | None = None) -> dict:
     """Ultimo passo: abre o PR. DONE so quando o PR existe; falha devolve `action=FAILED` SEM gravar o estado (o chamador decide o retry)."""
     n = int(item["issue"])
+    if not ex.update_owned(key, owner, lambda it, b: None, now=t):                   # posse conferida ANTES de criar o PR: sem lease, nada e aberto
+        return {"action": "LEASE_LOST", "item": key, "reason": "lease perdido antes de abrir o PR: nada aberto (a retomada reconcilia pela branch)"}
     extra = (AUTOMERGE_PR_LABEL,) if _fresh_automerge_optin(gh, repo, n) else ()
     number, detail = create_pr(branch, issue.get("title") or f"Issue #{n}", n, repo, extra_labels=extra)
     if number is None:
@@ -295,7 +306,9 @@ def _open_pr(item: dict, owner: str, issue: dict, branch: str, repo: str, t: dt.
         it["state"], it["last_error"], it["log"] = "DONE_AWAITING_REREVIEW", "", log
         it["new_head"], it["pr_number"] = base, number
         it["attempts"] = it.get("attempts", 0) + 1
-    ex.update_owned(key, owner, done, release=True, now=t)
+    if not ex.update_owned(key, owner, done, release=True, now=t):
+        # o PR EXISTE mas o resultado nao foi confirmado pelo dono: nao e DONE. A retomada acha o PR pela branch (preflight) e nunca abre outro
+        return {"action": "LEASE_LOST_AFTER_PR", "item": key, "pr": number, "reason": "PR aberto, mas o lease foi perdido antes de confirmar: a retomada reconcilia"}
     return {"action": "DONE", "item": key, "pr": number, "branch": branch}
 
 
