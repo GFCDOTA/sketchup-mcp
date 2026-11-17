@@ -1190,6 +1190,38 @@ def test_report_fails_when_no_publication_was_interrupted(env, fake_sandbox):
     assert rep["criteria"]["verdicts_published_once_via_outbox"] is True and rep["verdict"] == "FAIL"
 
 
+@pytest.mark.parametrize("delete", ["all", "one"])
+def test_an_intact_ledger_with_missing_outbox_entries_does_not_prove_publication_via_outbox(env, fake_sandbox, delete):
+    import sqlite3
+    lab, store = env
+    closed_loop(sandboxed_lab(lab), store)
+    assert lab_mod.report(lab, store)["criteria"]["verdicts_published_once_via_outbox"] is True
+    with sqlite3.connect(store.path) as db:                                                    # o ledger fica integro; so o outbox perde a prova
+        db.execute("DELETE FROM outbox" if delete == "all" else "DELETE FROM outbox WHERE id = (SELECT MIN(id) FROM outbox)")
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["criteria"]["verdicts_published_once_via_outbox"] is False and rep["verdict"] == "FAIL"
+
+
+@pytest.mark.parametrize("tamper", ["no_payload", "other_verdict", "other_operation"])
+def test_report_fails_when_the_ledger_has_the_right_key_with_another_effect(env, fake_sandbox, tamper):
+    lab, store = env
+    closed_loop(sandboxed_lab(lab), store)
+    rows = [json.loads(x) for x in lab.ledger.read_text(encoding="utf-8").splitlines()]
+    if tamper == "no_payload":
+        rows[0].pop("payload")
+    elif tamper == "other_verdict":
+        rows[0]["payload"] = {**rows[0]["payload"], "verdict": "APPROVE" if rows[0]["payload"].get("verdict") != "APPROVE" else "REQUEST_CHANGES"}
+    else:
+        rows[0]["operation"] = "outra"
+    lab.ledger.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+
+    rep = lab_mod.report(lab, store)
+
+    assert rep["criteria"]["verdicts_published_once_via_outbox"] is False and rep["verdict"] == "FAIL"
+
+
 @pytest.mark.parametrize("tamper", ["duplicate", "missing", "foreign"])
 def test_report_fails_when_the_ledger_does_not_match_the_verdicts_exactly_once(env, fake_sandbox, tamper):
     lab, store = env
@@ -1387,3 +1419,21 @@ def test_a_record_written_after_an_interrupted_write_is_never_glued_to_the_torn_
 def test_an_attempt_that_is_not_an_integer_never_counts_and_never_raises():
     rows = [{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}, {"key": "k", "event": "RECONCILED", "attempt": None}]
     assert lab_mod.interrupted_then_reconciled(rows) is False
+
+
+# -- revisao do Codex (#619, 21126f81): ultimo registro sem delimitador; prova amarrada as publicacoes esperadas -------------------------------------------
+def test_a_journal_whose_last_valid_json_record_has_no_final_newline_fails_the_criterion(tmp_path):
+    lab = _journal(tmp_path, json.dumps(PROOF_ROWS[0]) + "\n" + json.dumps(PROOF_ROWS[1]))           # JSON valido, mas sem o `\n` que o gravador sempre escreve
+    ok, why = lab_mod.reconciliation_proof(lab)
+    assert ok is False and "delimitador final" in why
+
+
+def test_a_reconciliation_of_a_foreign_or_stale_key_does_not_prove_the_expected_publication(tmp_path):
+    lab = Lab(tmp_path)
+    for row in PROOF_ROWS:                                                                          # chave `k` reconciliada...
+        lab_mod._record_publication(lab, row)
+    lab_mod._record_publication(lab, {"key": "esperada", "event": "SENT", "attempt": 1})            # ...mas a esperada foi enviada sem interrupcao
+    assert lab_mod.reconciliation_proof(lab)[0] is True                                             # sem amarrar, a chave alheia "provaria"
+    ok, why = lab_mod.reconciliation_proof(lab, ["esperada"])
+    assert ok is False and "publicacao esperada" in why
+    assert lab_mod.reconciliation_proof(lab, ["k"]) == (True, None)
