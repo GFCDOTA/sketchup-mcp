@@ -799,13 +799,17 @@ def step(lab: Lab, store: EventStore, owner: str, *, claude_runner: Runner | Non
     def done(res: dict) -> dict:
         return {**res, "outbox": published} if published else res
 
-    if outbox_unfinished(store):
+    # outbox pendente, DLQ e estado terminal decididos a partir da MESMA foto do banco: com leituras separadas, outro coordenador podia concluir uma revisao
+    # (criando uma publicacao pendente) entre elas e este step devolver TERMINAL, parando o driver antes da publicacao
+    events_now, outbox_now = store.snapshot(JOB_ID)
+    if any(o["status"] in ("PENDING", "RUNNING") for o in outbox_now):
         return done({"action": "IDLE", "waiting": "outbox"})
-    dead = outbox_dead(store)
+    dead = [o for o in outbox_now if o["status"] == "DLQ"]
     if dead:
         return done({"action": "BLOCKED", "waiting": "outbox_dlq", "reason": f"publicacao em DLQ (entradas {[o['id'] for o in dead]}): reconciliacao ou intervencao "
                      "obrigatoria antes de qualquer correcao ou estado terminal"})
-    state = terminal(store)
+    kinds = {e["event_type"] for e in events_now}
+    state = next((k for k in ("WORKFLOW_COMPLETED", "JOB_FAILED") if k in kinds), None)
     if state:
         return done({"action": "TERMINAL", "state": state})
     ev = store.claim(CONSUMED, owner, CLAIM_LEASE_S, outbox_barrier=True)     # barreira e claim ATOMICOS: entre a checagem acima e o claim outro coordenador pode concluir

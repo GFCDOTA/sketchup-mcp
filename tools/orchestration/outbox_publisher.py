@@ -176,10 +176,10 @@ def publish_one(store: EventStore, targets: Mapping[str, Target], owner: str, *,
         try:
             to = store.fail_outbox(claimed, str(exc), retry_delay)
         except LeaseLost as lost:
-            return {"action": "LEASE_LOST", **out, "reason": str(lost)}
+            return {"action": "LEASE_LOST", **out, "reason": str(lost), "attempt": claimed["attempts"]}
         return {"action": "FAILED", **out, "to": to, "reason": str(exc), "attempt": claimed["attempts"]}
     except LeaseLost as exc:
-        return {"action": "LEASE_LOST", **out, "reason": str(exc)}
+        return {"action": "LEASE_LOST", **out, "reason": str(exc), "attempt": claimed["attempts"]}       # a tentativa e preservada: no diario e um DESFECHO
 
 
 def drain(store: EventStore, targets: Mapping[str, Target], owner: str, *, limit: int = 20, **options) -> list[dict]:

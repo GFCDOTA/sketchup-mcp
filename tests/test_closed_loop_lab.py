@@ -1437,3 +1437,39 @@ def test_a_reconciliation_of_a_foreign_or_stale_key_does_not_prove_the_expected_
     ok, why = lab_mod.reconciliation_proof(lab, ["esperada"])
     assert ok is False and "publicacao esperada" in why
     assert lab_mod.reconciliation_proof(lab, ["k"]) == (True, None)
+
+
+# -- revisao do Codex (#618, 2bf6a9ef): outbox e estado terminal na MESMA leitura; LEASE_LOST e desfecho no diario --------------------------------------
+def test_a_review_completed_by_another_coordinator_right_after_the_gate_never_yields_terminal_before_its_publication(env, monkeypatch):
+    lab, store = env
+    real = store.snapshot
+
+    def snapshot_then_other_coordinator_finishes(job_id):
+        events, outbox = real(job_id)                                                              # foto ANTES da conclusao alheia
+        store.publish("WORKFLOW_COMPLETED", "race:done", lab_mod.JOB_ID, {})                        # outro coordenador conclui o fluxo...
+        other = store.claim(("IMPLEMENT_REQUESTED",), "lab-coordinator:outro", 60)                 # o evento pendente da fila, concluido pelo OUTRO
+        store.complete(other, {}, outbox_entries=[{"target": lab_mod.OUTBOX_TARGET, "operation": "publish_review", "idempotency_key": "race:k",
+                                                   "payload": {"round": 1, "head_sha": "a" * 40, "verdict": "APPROVE", "findings": 0}}])   # ...com publicacao pendente
+        monkeypatch.setattr(store, "snapshot", real)
+        return events, outbox
+    monkeypatch.setattr(store, "snapshot", snapshot_then_other_coordinator_finishes)
+    first = run(lab, store, FakeClaude(), FakeCodex())
+    assert first["action"] != "TERMINAL"
+    actions = [first["action"]]
+    for _ in range(4):
+        res = run(lab, store, FakeClaude(), FakeCodex())
+        actions.append(res["action"])
+        if res["action"] == "TERMINAL":
+            break
+    assert actions[-1] == "TERMINAL" and [ln["key"] for ln in ledger(lab)] == ["race:k"]           # so termina DEPOIS de publicar
+
+
+def test_the_store_snapshot_reads_events_and_outbox_together(env):
+    _lab, store = env
+    events, outbox = store.snapshot(lab_mod.JOB_ID)
+    assert [e["id"] for e in events] == [e["id"] for e in store.events(lab_mod.JOB_ID)] and outbox == store.outbox_entries()
+
+
+def test_a_lease_lost_after_the_effect_is_an_outcome_so_a_later_reconciliation_proves_no_interruption():
+    rows = [{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}, {"key": "k", "event": "LEASE_LOST", "attempt": 1}, {"key": "k", "event": "RECONCILED", "attempt": 2}]
+    assert lab_mod.interrupted_then_reconciled(rows) is False

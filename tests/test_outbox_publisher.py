@@ -365,3 +365,14 @@ def test_publishing_after_a_ledger_ending_in_valid_json_without_newline_keeps_bo
     assert ledger.send(ENTRY) == "ledger:2"
     rows = ledger.lines()
     assert [r["key"] for r in rows] == ["k0", "k1"] and ledger.find(ENTRY) == "ledger:2"
+
+
+def test_a_lease_lost_result_keeps_the_attempt_number(store, clock):
+    target = FakeTarget()
+    (oid,) = queue(store, "k1")
+
+    def steal(entry, ref):
+        clock.advance(LEASE + 60)
+        store.claim_outbox("ladrao", LEASE)                                                        # outro publicador toma a entrada depois do efeito
+    res = publish(store, target, after_send=steal)
+    assert res["action"] == "LEASE_LOST" and res["attempt"] == 1
