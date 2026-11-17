@@ -243,9 +243,11 @@ def daily_cap_divergence(bridge_path: Path, events: list[dict], now: float | Non
     claimable = [e for e in events if e.get("event_type") == MIRROR_EVENT_TYPE and e.get("status") == "PENDING"
                  and int(e.get("attempt") or 0) < int(e.get("max_attempts") if e.get("max_attempts") is not None else MAX_ATTEMPTS)]
     remaining = max(0, ex.DAILY_CAP - len(recent))
-    if len(claimable) > remaining:                                        # o EventStore nao aplica o teto global: o orcamento RESTANTE precisa cobrir todo o pendente
-        return [Divergence("DAILY_CAP", "queue", f"o JSON ja fez {len(recent)}/{ex.DAILY_CAP} execucoes nas ultimas 24 h (restam {remaining}) e ha {len(claimable)} evento(s) PENDING "
-                                                  "reivindicavel(is): o cutover poderia ultrapassar o limite vigente")]
+    # o EventStore nao aplica o teto global e cada evento pode rodar ate max_attempts vezes: o orcamento RESTANTE precisa cobrir TODAS as tentativas ainda possiveis
+    possible = sum(int(e.get("max_attempts") if e.get("max_attempts") is not None else MAX_ATTEMPTS) - int(e.get("attempt") or 0) for e in claimable)
+    if possible > remaining:
+        return [Divergence("DAILY_CAP", "queue", f"o JSON ja fez {len(recent)}/{ex.DAILY_CAP} execucoes nas ultimas 24 h (restam {remaining}) e os {len(claimable)} evento(s) PENDING "
+                                                  f"ainda podem rodar {possible} vez(es) contando as tentativas restantes: o cutover poderia ultrapassar o limite vigente")]
     return []
 
 

@@ -501,8 +501,8 @@ def test_the_json_daily_cap_blocks_the_cutover_while_a_pending_event_could_run_r
     old = dt.datetime.fromtimestamp(now - 25 * 3600, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     bridge.write_text(json.dumps({"queue": [], "runs": [old] * ex.DAILY_CAP}), encoding="utf-8")
     assert sd.daily_cap_divergence(bridge, [event(status="PENDING")], now=now) == []                                   # execucoes fora da janela de 24 h nao contam
-    bridge.write_text(json.dumps({"queue": [], "runs": [stamp] * (ex.DAILY_CAP - 1)}), encoding="utf-8")
-    assert sd.daily_cap_divergence(bridge, [event(status="PENDING")], now=now) == []                                   # abaixo do limite
+    bridge.write_text(json.dumps({"queue": [], "runs": [stamp] * (ex.DAILY_CAP - 3)}), encoding="utf-8")
+    assert sd.daily_cap_divergence(bridge, [event(status="PENDING", attempt=0, max_attempts=3)], now=now) == []          # o orcamento restante cobre as 3 tentativas
 
 
 # -- revisao do Codex (#634, 361b4c8b): pausa duravel + leitura sob a trava do bridge; orcamento diario restante; probe somente leitura ---------------------
@@ -539,7 +539,7 @@ def test_the_queue_and_the_store_are_read_while_the_bridge_lock_is_held(tmp_path
     assert sd.main(["--json"]) == 0 and held == [True]                                              # um poll/executor nao grava fila nem SQLite no meio da leitura
 
 
-@pytest.mark.parametrize("recent, pending, diverges", [(5, 1, False), (5, 2, True), (6, 1, True), (0, 6, False), (0, 7, True)])
+@pytest.mark.parametrize("recent, pending, diverges", [(3, 1, False), (4, 1, True), (5, 1, True), (0, 2, False), (0, 3, True)])   # cada evento: 3 tentativas restantes
 def test_the_daily_cap_counts_the_remaining_budget_not_only_a_reached_limit(tmp_path, recent, pending, diverges):
     import time as _t
 
@@ -580,3 +580,14 @@ def test_an_unreadable_instance_lock_is_a_structured_error_that_never_authorizes
     assert sd.main(["--json"]) == 2
     out = json.loads(capsys.readouterr().out)
     assert out["authorizes_cutover"] is False and "inacessivel" in out["error"]
+
+
+@pytest.mark.parametrize("attempt, diverges", [(0, True), (1, True), (2, False)])
+def test_the_daily_cap_counts_the_attempts_each_pending_event_can_still_make(tmp_path, attempt, diverges):
+    import time as _t
+    now = _t.time()
+    stamp = _t.strftime("%Y-%m-%dT%H:%M:%SZ", _t.gmtime(now - 60))
+    p = tmp_path / "bridge.json"
+    p.write_text(json.dumps({"queue": [], "runs": [stamp] * 5}), encoding="utf-8")               # resta 1 execucao no dia
+    found = sd.daily_cap_divergence(p, [event(1, status="PENDING", attempt=attempt, max_attempts=3)], now=now)
+    assert bool(found) is diverges                                                                 # 1 evento com 3 tentativas restantes pode rodar 3 vezes
