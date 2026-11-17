@@ -362,6 +362,11 @@ def publish(v: dict, token: str, repo: str, *, evidence: dict | None = None, pkg
         if not isinstance(evidence, dict) or not isinstance(pkg, dict) or not isinstance(pkg.get("files"), dict):
             raise ReviewError("APPROVE sem a evidencia dos testes e o pacote revisado: nao publico nem registro proveniencia")
         validate_verdict(json.dumps(v), int(v["pr"]), v["head_sha"])            # o parecer e revalidado AQUI (schema, PR, HEAD), nao confiado ao chamador
+        head = str(v["head_sha"]).lower()
+        if str(pkg.get("sha", "")).lower() != head:                              # hashes "validos" de OUTRO commit nao valem: pacote e parecer do mesmo HEAD
+            raise ReviewError(f"pacote revisado de outro commit ({str(pkg.get('sha'))[:8]} != {head[:8]}): nao publico")
+        if str(evidence.get("head_sha", "")).lower() != head or evidence.get("repo") != repo or evidence.get("pr") != int(v["pr"]):
+            raise ReviewError("evidencia de testes nao amarrada ao mesmo repositorio, PR e HEAD do parecer: nao publico")
         verify_inspection(v, pkg)                                                 # hashes e trechos conferidos contra os blobs do HEAD revisado
         if evidence.get("isolation") != "os_sandbox" or not sb.proves_isolation(evidence.get("sandbox")):
             raise ReviewError("APPROVE exige a prova do sandbox de SO desta execucao (token sem capacidades + canario negado), nao um rotulo: nao publico")
@@ -423,7 +428,7 @@ def review_pr(pr: int, gh: eb.Gh, policy: dict, repo: str = eb.REPO, do_publish:
         record("running", pr=pr, sha=sha)
         wt = review_worktree(pr, sha, ex.repo_root())
         pkg = review_package(wt, base or "origin/develop", sha)
-        evidence = run_coordinator_tests(wt, list(pkg["files"]))
+        evidence = {**run_coordinator_tests(wt, list(pkg["files"])), "repo": repo, "pr": int(pr), "head_sha": sha}   # amarrada ao que foi testado
         check_untouched(wt, sha, "coordinator_tests")
         out_dir = tmp or codex_dir()
         out_dir.mkdir(parents=True, exist_ok=True)

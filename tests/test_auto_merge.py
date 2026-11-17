@@ -847,8 +847,9 @@ def test_a_merge_landing_while_cancelling_with_another_head_or_without_proof_req
 _TEST_SRC = "def test_x():\n    assert 1 + 1 == 2\n"
 _TEST_SHA = __import__("hashlib").sha256(_TEST_SRC.encode()).hexdigest()
 SANDBOX_PROOF = {"is_appcontainer": True, "capabilities": 0, "canary": {"read_outside": "denied", "write_outside": "denied"}}
-GOOD_EVIDENCE = {"evidence": {"isolation": "os_sandbox", "tests_passed": True, "uncovered": [], "selected": ["tests/test_x.py"], "sandbox": SANDBOX_PROOF},
-                 "pkg": {"files": {"tests/test_x.py": {"sha256": _TEST_SHA, "text": _TEST_SRC}}}}
+GOOD_EVIDENCE = {"evidence": {"isolation": "os_sandbox", "tests_passed": True, "uncovered": [], "selected": ["tests/test_x.py"], "sandbox": SANDBOX_PROOF,
+                              "repo": REPO, "pr": 7, "head_sha": HEAD},
+                 "pkg": {"sha": HEAD, "files": {"tests/test_x.py": {"sha256": _TEST_SHA, "text": _TEST_SRC}}}}
 REVIEWED = [{"path": "tests/test_x.py", "sha256": _TEST_SHA, "code_excerpt": "assert 1 + 1 == 2"}]
 
 
@@ -967,6 +968,24 @@ def test_a_direct_approve_publish_without_valid_evidence_posts_nothing_and_recor
         cr.publish(v, "tok", REPO, **kw)
     assert calls == [] and not [e for e in store.events() if e["producer"] == "codex_reviewer"]
     assert am.outbox_provenance(store)(REPO, 7, HEAD) is False
+
+
+@pytest.mark.parametrize("kw", [
+    {"evidence": _E, "pkg": {**_P, "sha": "c" * 40}},                                                    # hashes validos, mas o pacote e de OUTRO commit
+    {"evidence": {**_E, "head_sha": "c" * 40}, "pkg": _P},                                               # testes de outro commit
+    {"evidence": {**_E, "pr": 8}, "pkg": _P}, {"evidence": {**_E, "repo": "outro/repo"}, "pkg": _P},
+    {"evidence": {k: v for k, v in _E.items() if k != "head_sha"}, "pkg": _P},
+])
+def test_package_and_test_evidence_must_be_bound_to_the_verdict_repo_pr_and_head(tmp_path, monkeypatch, kw):
+    from tools.orchestration import codex_reviewer as cr
+    from tools.orchestration.event_store import EventStore
+    store = EventStore(tmp_path / "store.db")
+    monkeypatch.setattr(cr.store_factory, "get_store", lambda: store)
+    calls = []
+    monkeypatch.setattr(cr.subprocess, "run", lambda argv, **k: calls.append(argv))
+    with pytest.raises(cr.ReviewError):
+        cr.publish(approve_verdict(), "tok", REPO, **kw)
+    assert calls == [] and am.outbox_provenance(store)(REPO, 7, HEAD) is False
 
 
 def test_a_request_changes_publish_needs_no_test_evidence():
