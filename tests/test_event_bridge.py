@@ -186,7 +186,7 @@ def test_restart_with_an_already_queued_event_neither_loses_nor_duplicates_it(tm
 def test_there_is_a_single_state_file_so_dedupe_and_queue_cannot_diverge(tmp_path):
     bp = tmp_path / "bridge.json"
     eb.run_cycle(fake_gh(reviews=[review()]), POLICY, bp, now=NOW)
-    assert sorted(x.name for x in tmp_path.iterdir()) == ["bridge.json"]
+    assert sorted(x.name for x in tmp_path.iterdir() if x.suffix != ".lock") == ["bridge.json"]            # um unico arquivo de estado (o `.lock` e so o lock do SO)
 
 
 # ------------------------------------------------------------------------------- identidade local (fail-closed)

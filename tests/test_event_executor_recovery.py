@@ -195,32 +195,46 @@ def test_launcher_passes_its_own_pid_so_the_executor_never_outlives_it():
 
 
 # ------------------------------------------------------------- trava de dono morto (crash durante o heartbeat): quebra na hora
-def test_a_lock_left_by_a_dead_process_is_broken_immediately_not_after_60s(tmp_path):
+def test_a_lock_file_left_by_a_dead_process_does_not_block_because_the_os_released_it(tmp_path):
     from tools.validation import execution_state as es
     p = subprocess.Popen([sys.executable, "-c", "import os; print(os.getpid())"], stdout=subprocess.PIPE, text=True)
     dead = int(p.communicate(timeout=30)[0].strip())                          # PID real que ja terminou
     lock = (tmp_path / "s.json").with_suffix(".lock")
-    lock.write_text(str(dead), encoding="utf-8")                              # trava fresca (mtime agora) de um dono morto
+    lock.write_text(str(dead), encoding="utf-8")                              # arquivo velho com o PID de um dono morto
     t0 = time.time()
     with es.locked(tmp_path / "s.json", wait_s=2.0):
-        assert lock.read_text(encoding="utf-8").strip() == str(os.getpid())   # agora e nossa
-    assert time.time() - t0 < 1.5 and not lock.exists()
+        pass
+    assert time.time() - t0 < 1.5 and lock.exists()                           # o arquivo persiste (nunca e apagado); o que vale e o lock do SO
 
 
-def test_a_lock_held_by_a_live_process_is_respected(tmp_path):
+def test_a_lock_held_by_a_live_holder_is_respected(tmp_path):
+    from tools.validation import execution_state as es
+    import threading
+    held, release = threading.Event(), threading.Event()
+
+    def holder():
+        with es.locked(tmp_path / "s.json"):
+            held.set()
+            release.wait(10)
+    t = threading.Thread(target=holder)
+    t.start()
+    held.wait(5)
+    try:
+        with pytest.raises(TimeoutError):
+            with es.locked(tmp_path / "s.json", wait_s=0.3):
+                pass
+    finally:
+        release.set()
+        t.join()
+
+
+def test_a_legacy_lock_file_without_pid_never_waits_for_a_60s_rule(tmp_path):
     from tools.validation import execution_state as es
     lock = (tmp_path / "s.json").with_suffix(".lock")
-    lock.write_text(str(os.getpid()), encoding="utf-8")                       # dono vivo (este processo, outra "thread")
-    with pytest.raises(TimeoutError):
-        with es.locked(tmp_path / "s.json", wait_s=0.3):
-            pass
-    assert lock.exists()
+    lock.write_text("", encoding="utf-8")                                     # formato antigo, sem PID
+    t0 = time.time()
+    with es.locked(tmp_path / "s.json", wait_s=2.0):
+        pass
+    assert time.time() - t0 < 1.0
 
 
-def test_a_legacy_lock_without_pid_still_waits_for_the_60s_rule(tmp_path):
-    from tools.validation import execution_state as es
-    lock = (tmp_path / "s.json").with_suffix(".lock")
-    lock.write_text("", encoding="utf-8")
-    with pytest.raises(TimeoutError):
-        with es.locked(tmp_path / "s.json", wait_s=0.3):
-            pass

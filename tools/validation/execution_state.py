@@ -79,46 +79,148 @@ def pid_alive(pid: int) -> bool:
     return True
 
 
-def _lock_owner_dead(p: Path) -> bool:
-    """A trava guarda o PID do dono. Dono morto (crash duro DURANTE a secao critica, ex. heartbeat) => trava orfa: quebrar ja,
-    em vez de bloquear todo mundo por 60 s. Sem PID legivel (formato antigo/escrita parcial) => nao decide aqui (regra dos 60 s)."""
+LOCK_POS = 4096                                                 # byte travado: longe do texto (PID) que o protocolo ANTIGO le no inicio do arquivo
+LEGACY_STALE_S = 60.0                                           # o protocolo antigo quebrava trava com mais de 60 s
+
+
+def _os_lock(fd: int) -> None:
+    """Trava exclusiva, NAO bloqueante, de UM byte (`LOCK_POS`) do arquivo (`OSError` se outro a segura). O byte 0 fica livre: o PID do dono e gravado no inicio do
+    arquivo e continua legivel por quem ainda roda o protocolo antigo."""
+    os.lseek(fd, LOCK_POS, os.SEEK_SET)
+    if os.name == "nt":
+        import msvcrt
+        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _os_unlock(fd: int) -> None:
+    os.lseek(fd, LOCK_POS, os.SEEK_SET)
+    if os.name == "nt":
+        import msvcrt
+        msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(fd, fcntl.LOCK_UN)
+
+
+NEW_PROTOCOL_MARK = ":oslock"
+
+
+def _holder_of(text: str, age: float) -> int | None:
+    """PID de um dono do protocolo ANTIGO ainda dentro da secao critica, a partir do conteudo do arquivo e da sua idade; None se nao ha. O protocolo antigo cria o
+    arquivo com `O_EXCL`, grava o PID e o APAGA ao sair; PID vivo e idade <= 60 s (a mesma regra de trava velha dele) = dentro da secao. O proprio PID e os de
+    donos mortos nao contam."""
+    if text.strip().endswith(NEW_PROTOCOL_MARK):                       # arquivo do protocolo NOVO: o lock do SO e a fonte da verdade; um PID dele pode ter sido REUSADO por outro processo
+        return None
+    head = text.strip().split(":")[0]
+    if not head.isdigit() or int(head) == os.getpid() or age > LEGACY_STALE_S:
+        return None
+    return int(head) if pid_alive(int(head)) else None
+
+
+def _peek_holder(path: Path) -> int | None:
+    """Le o arquivo SEM impedir que o dono antigo o apague ao sair: no Windows um handle aberto sem FILE_SHARE_DELETE faz o `unlink` dele falhar com
+    PermissionError, entao o espiao abre com SHARE_DELETE. Arquivo ausente = nenhum dono antigo."""
+    import time
     try:
-        raw = p.read_text(encoding="utf-8").strip()
+        if os.name == "nt":
+            import ctypes
+            import msvcrt
+            from ctypes import wintypes
+            k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            k32.CreateFileW.restype = wintypes.HANDLE
+            h = k32.CreateFileW(str(path), 0x80000000, 0x7, None, 3, 0x80, None)           # GENERIC_READ; compartilha leitura/escrita/DELETE; OPEN_EXISTING
+            if h in (None, -1, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF):
+                return None
+            fd = msvcrt.open_osfhandle(h, os.O_RDONLY)
+            try:
+                text, mtime = os.read(fd, 64).decode("ascii", "ignore"), os.fstat(fd).st_mtime
+            finally:
+                os.close(fd)
+        else:
+            text, mtime = path.read_bytes()[:64].decode("ascii", "ignore"), path.stat().st_mtime
     except OSError:
-        return False
-    return raw.isdigit() and int(raw) != os.getpid() and not pid_alive(int(raw))
+        return None
+    return _holder_of(text, time.time() - mtime)
+
+
+def _legacy_holder(fd: int, path: Path) -> int | None:
+    """Mesma checagem, DEPOIS de obter o lock do SO, lendo pelo proprio handle (fecha a corrida entre a espiada e a abertura)."""
+    import time
+    os.lseek(fd, 0, os.SEEK_SET)
+    try:
+        text = os.read(fd, 64).decode("ascii", "ignore")
+        age = time.time() - path.stat().st_mtime
+    except OSError:
+        return None
+    return _holder_of(text, age)
 
 
 @contextlib.contextmanager
 def locked(path: Path | None = None, wait_s: float = 5.0):
-    """Trava exclusiva curta em torno de ler-alterar-gravar. Dono morto (PID gravado) ou trava velha (> 60 s) => quebrada."""
+    """Trava exclusiva curta em torno de ler-alterar-gravar, por LOCK DO SISTEMA OPERACIONAL num arquivo `.lock` que NUNCA e removido.
+    Por que nao um arquivo criado com `O_EXCL` e apagado depois: apagar/quebrar o arquivo abre corridas que nenhum retry fecha (um dono lento
+    libera enquanto outro quebra e um terceiro cria; `unlink` com PermissionError no Windows deixava a trava presa para todos). Aqui o SO e a
+    fonte de verdade: o lock some sozinho quando o dono morre (nao ha trava orfa nem regra dos 60 s).
+    TRANSICAO com o protocolo antigo (processos que ainda rodam o codigo da base): (a) depois de obter o lock do SO, se o arquivo guarda o PID VIVO de um dono antigo
+    dentro da secao critica, solta e espera; (b) o dono novo GRAVA o proprio PID no inicio do arquivo, de modo que quem roda o protocolo antigo ve um dono vivo e
+    espera (e limpa o PID ao sair). O que NAO e coberto: um processo antigo que ja passou da sua checagem de `O_EXCL` exatamente na mesma fracao de tempo em que
+    o arquivo foi criado pelo novo: a migracao correta e reiniciar os processos antigos (a tarefa agendada do executor reinicia no proximo logon).
+    MIGRACAO OBRIGATORIA (os dois protocolos NAO convivem com garantia): (1) PARAR todo processo que roda o protocolo antigo (executores, listeners e o launcher agendado) ANTES
+    de subir o codigo novo; (2) so entao iniciar o novo. A convivencia acima e so uma rede de seguranca para a janela de troca, nao um modo suportado: um processo antigo que
+    observou o arquivo com mais de 60 s e pausou ANTES do `unlink` ainda pode apagar o arquivo que um processo novo ja usa e criar outro inode (POSIX), e o arquivo vazio e
+    recente que o protocolo novo deixa ao sair faz o antigo esperar ate 60 s (com o prazo padrao de 5 s ele falha). Ambos so ocorrem COM um processo antigo vivo; o novo
+    protocolo nunca apaga o arquivo exatamente para nao reabrir a corrida entre processos NOVOS, que e a que esta fechada aqui. Depois da migracao nao ha dono antigo.
+    Falha ao abrir o arquivo (diretorio sem permissao, disco) levanta de imediato: nunca fica em laco. Sem o lock ate `wait_s`: TimeoutError."""
     import time
     p = (path or state_path()).with_suffix(".lock")
     p.parent.mkdir(parents=True, exist_ok=True)
     deadline = time.time() + wait_s
-    while True:
-        try:
-            fd = os.open(p, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            try:
-                os.write(fd, str(os.getpid()).encode("ascii"))
-            finally:
-                os.close(fd)
-            break
-        except FileExistsError:
-            try:
-                age = time.time() - p.stat().st_mtime
-            except FileNotFoundError:
-                continue                                             # o dono soltou a trava entre o open e o stat: tenta de novo
-            if age > 60 or _lock_owner_dead(p):
-                p.unlink(missing_ok=True)
-                continue
-            if time.time() > deadline:
-                raise TimeoutError(f"trava do estado de execucao ocupada: {p}") from None
-            time.sleep(0.05)
+    fd = -1
     try:
-        yield
+        while True:
+            holder = _peek_holder(p) if fd < 0 else None
+            if holder is not None:
+                # um dono do protocolo ANTIGO esta na secao: nao entra junto e NAO segura o arquivo aberto enquanto espera (no Windows um handle aberto sem
+                # SHARE_DELETE impede o `unlink` com que ele sai da secao, e ele cairia com PermissionError)
+                if time.time() > deadline:
+                    raise TimeoutError(f"trava do estado de execucao ocupada por um processo antigo (pid {holder}): {p}") from None
+                time.sleep(0.05)
+                continue
+            if fd < 0:
+                fd = os.open(p, os.O_CREAT | os.O_RDWR)
+            try:
+                _os_lock(fd)
+            except OSError:
+                if time.time() > deadline:
+                    raise TimeoutError(f"trava do estado de execucao ocupada: {p}") from None
+                time.sleep(0.02)
+                continue
+            holder = _legacy_holder(fd, p)                       # depois do lock do SO, pelo proprio handle: fecha a corrida com a espiada
+            if holder is None:
+                break
+            _os_unlock(fd)
+            os.close(fd)
+            fd = -1
+            if time.time() > deadline:
+                raise TimeoutError(f"trava do estado de execucao ocupada por um processo antigo (pid {holder}): {p}") from None
+            time.sleep(0.05)
+        try:
+            os.lseek(fd, 0, os.SEEK_SET)
+            os.ftruncate(fd, 0)
+            os.write(fd, f"{os.getpid()}{NEW_PROTOCOL_MARK}".encode("ascii"))       # o protocolo antigo le o PID (antes de ':') e ve um dono VIVO; o novo reconhece a marca e ignora o PID
+            yield
+        finally:
+            try:
+                os.ftruncate(fd, 0)
+            except OSError:
+                pass                                             # o lock do SO e a verdade; o PID e so cortesia para o protocolo antigo
+            _os_unlock(fd)
     finally:
-        p.unlink(missing_ok=True)
+        if fd >= 0:
+            os.close(fd)
 
 
 def now_iso(now: dt.datetime | None = None) -> str:
