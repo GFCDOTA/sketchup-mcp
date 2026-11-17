@@ -3,9 +3,12 @@ name: delegated-tests
 # FP-060 MT-03 — evidencia, por teste, do CI para os testes que NAO rodam no AppContainer do revisor (precisam do `git`).
 #
 # Por que `workflow_run`: este workflow e disparado pela conclusao do `ci`, mas sua DEFINICAO e o coletor vem da branch padrao (develop), nunca do PR. Um PR nao consegue
-# alterar a regra que gera a propria evidencia. O codigo do PR so e baixado (em `pr/`) para ser testado; nenhum segredo existe neste job (`contents: read`, `actions: read`).
-# A politica (quais node ids) tambem e lida da base. O revisor confere: repositorio, este workflow (blob fixado na politica), HEAD exato, execucao, tentativa, digest do
-# artefato e que CADA node id da politica esta `passed`.
+# alterar a regra que gera a propria evidencia. Nenhum segredo existe aqui (`contents: read`, `actions: read`). A politica (quais node ids) tambem e lida da base.
+# O revisor confere: repositorio, este workflow (blob fixado na politica), HEAD exato, execucao, tentativa, digest do artefato e que CADA node id esta `passed`.
+#
+# DOIS JOBS, de proposito: o codigo do PR (instalacao com backend de build, testes) roda SO no job `tests`, que nao tem o coletor nem a politica no disco quando o codigo do
+# PR roda e so publica um JUnit. O job `evidence` nunca executa codigo do PR: faz checkout SO da base, baixa o JUnit e gera `results.json` com o coletor e a politica da
+# base. Um backend de build malicioso no PR nao alcanca o sistema de arquivos onde o coletor confiavel roda.
 
 # Num `workflow_run`, GITHUB_SHA/head_sha da PROPRIA execucao sao a ponta da branch padrao, nao o HEAD do PR. O HEAD do PR fica no titulo (`display_title` na API),
 # vindo da definicao confiavel da base: e por ele que o revisor encontra a execucao do HEAD exato.
@@ -21,19 +24,25 @@ permissions:
   actions: read
 
 jobs:
-  delegated:
+  tests:
     name: delegated tests (git) for the exact PR head
-    # so PRs deste repositorio (nunca forks) cujo `ci` terminou; o resultado do `ci` em si nao importa aqui — este job so produz evidencia dos testes delegados.
+    # so PRs deste repositorio (nunca forks) cujo `ci` terminou; o resultado do `ci` em si nao importa aqui — este job so produz o JUnit dos testes delegados.
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout the BASE (trusted collector and policy)
+      - name: Read the delegated node ids from the BASE policy (before any PR code runs)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
           path: base
           persist-credentials: false
+          sparse-checkout: docs/governance/sandbox_delegated_tests.v1.json
+          sparse-checkout-cone-mode: false
+      - name: Extract the ids and drop the base checkout
+        run: |
+          python3 -c "import json; print('\n'.join(d['node_id'] for d in json.load(open('base/docs/governance/sandbox_delegated_tests.v1.json'))['delegated']))" > ids.txt
+          rm -rf base
       - name: Checkout the exact PR head (code under test, no credentials)
         uses: actions/checkout@v4
         with:
@@ -48,14 +57,48 @@ jobs:
           enable-cache: false
       - name: Sync the PR's locked environment (core + dev)
         run: cd pr && uv sync --locked --extra dev
-      - name: Run EXACTLY the delegated node ids and write the per-test report
+      - name: Run EXACTLY the delegated node ids into a JUnit report
         env:
-          DELEGATED_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          DELEGATED_POLICY_BASE_SHA: ${{ github.sha }}
           MPLBACKEND: Agg
         run: |
           cd pr
-          uv run --no-sync python ../base/tools/orchestration/delegated_results.py --policy ../base/docs/governance/sandbox_delegated_tests.v1.json --tree . --out ../results.json
+          set +e
+          xargs -a ../ids.txt -d '\n' uv run --no-sync python -m pytest -p no:cacheprovider -q --junitxml=../junit/junit.xml -o junit_family=xunit1
+          echo $? > ../junit/pytest_exit_code
+          exit 0
+      - name: Publish the JUnit (untrusted input for the evidence job)
+        uses: actions/upload-artifact@v4
+        with:
+          name: delegated-junit
+          path: junit/
+          if-no-files-found: error
+          retention-days: 14
+
+  evidence:
+    name: delegated evidence from the BASE collector (no PR code)
+    needs: tests
+    if: always() && needs.tests.result != 'skipped'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout ONLY the BASE (trusted collector and policy)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: base
+          persist-credentials: false
+      - name: Download the JUnit produced by the tests job
+        uses: actions/download-artifact@v4
+        with:
+          name: delegated-junit
+          path: junit
+      - name: Build the per-test report with the base collector
+        env:
+          DELEGATED_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          DELEGATED_POLICY_BASE_SHA: ${{ github.sha }}
+        run: |
+          python3 base/tools/orchestration/delegated_results.py --policy base/docs/governance/sandbox_delegated_tests.v1.json \
+            --junit junit/junit.xml --pytest-exit-code "$(cat junit/pytest_exit_code)" --out results.json
       - name: Publish the evidence (artifact digest is computed by GitHub)
         uses: actions/upload-artifact@v4
         with:

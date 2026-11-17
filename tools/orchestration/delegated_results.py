@@ -64,25 +64,38 @@ def collect(junit: Path, ids: list[str] | tuple[str, ...]) -> dict[str, str]:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--policy", required=True)
-    ap.add_argument("--tree", required=True)
+    ap.add_argument("--tree", help="roda o pytest nesta arvore (uso local); no CI o job confiavel usa --junit e NUNCA executa codigo do PR")
+    ap.add_argument("--junit", help="JUnit ja produzido pelo job nao confiavel: so e LIDO (ausente/ilegivel = todo id `missing`)")
+    ap.add_argument("--pytest-exit-code", type=int, default=None, help="codigo de saida do pytest no job nao confiavel (com --junit)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
+    if bool(a.tree) == bool(a.junit):
+        ap.error("informe exatamente um entre --tree e --junit")
     env = os.environ
     base_sha = env["DELEGATED_POLICY_BASE_SHA"].lower()
     policy = dt.validate_policy(json.loads(Path(a.policy).read_text(encoding="utf-8")), base_sha)
-    with tempfile.TemporaryDirectory() as tmp:
-        junit = Path(tmp) / "junit.xml"
-        proc = subprocess.run([sys.executable, "-m", "pytest", *policy.ids, "-p", "no:cacheprovider", "-q", f"--junitxml={junit}", "-o", "junit_family=xunit1"],
-                              cwd=a.tree, env={**env, "PYTHONDONTWRITEBYTECODE": "1"})
-        seen = collect(junit, policy.ids) if junit.exists() else {}
+    if a.junit:
+        junit = Path(a.junit)
+        try:
+            seen = collect(junit, policy.ids) if junit.is_file() else {}
+        except ET.ParseError:
+            seen = {}                                                    # JUnit ilegivel: nenhum teste pode ser afirmado
+        exit_code = a.pytest_exit_code if a.pytest_exit_code is not None else 1
+    else:
+        with tempfile.TemporaryDirectory() as tmp:
+            junit = Path(tmp) / "junit.xml"
+            proc = subprocess.run([sys.executable, "-m", "pytest", *policy.ids, "-p", "no:cacheprovider", "-q", f"--junitxml={junit}", "-o", "junit_family=xunit1"],
+                                  cwd=a.tree, env={**env, "PYTHONDONTWRITEBYTECODE": "1"})
+            seen = collect(junit, policy.ids) if junit.exists() else {}
+            exit_code = proc.returncode
     results = [{"node_id": nid, "outcome": seen.get(nid, "missing")} for nid in policy.ids]
     report = {"schema": dt.SCHEMA, "repository": env["GITHUB_REPOSITORY"], "head_sha": env["DELEGATED_HEAD_SHA"].lower(), "run_id": int(env["GITHUB_RUN_ID"]),
-              "run_attempt": int(env.get("GITHUB_RUN_ATTEMPT", "1")), "workflow_path": dt.WORKFLOW_PATH, "policy_base_sha": base_sha, "pytest_exit_code": proc.returncode,
+              "run_attempt": int(env.get("GITHUB_RUN_ATTEMPT", "1")), "workflow_path": dt.WORKFLOW_PATH, "policy_base_sha": base_sha, "pytest_exit_code": exit_code,
               "results": results}
     Path(a.out).write_text(json.dumps(report, indent=1), encoding="utf-8")
     bad = [r for r in results if r["outcome"] != "passed"]
     print(f"delegated: {len(results) - len(bad)}/{len(results)} passed", flush=True)
-    return 0 if not bad and proc.returncode == 0 else 1
+    return 0 if not bad and exit_code == 0 else 1
 
 
 if __name__ == "__main__":

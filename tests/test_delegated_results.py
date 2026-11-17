@@ -6,6 +6,8 @@ from __future__ import annotations
 import json
 import textwrap
 
+import pytest
+
 from tests.test_delegated_tests import HEAD, IDS, REPO, policy_json
 from tools.orchestration import delegated_results as dr
 
@@ -89,3 +91,54 @@ def test_the_collector_reports_a_missing_test_as_missing(tmp_path, monkeypatch):
     out = tmp_path / "r.json"
     assert dr.main(["--policy", str(pol), "--tree", str(tree), "--out", str(out)]) == 1
     assert {r["node_id"]: r["outcome"] for r in json.loads(out.read_text(encoding="utf-8"))["results"]}[IDS[1]] == "missing"
+
+
+# -- revisao do Codex (#672, dcf09bcf): o job confiavel so LE o JUnit; nunca executa codigo do PR ---------------------------------------------------------
+def _env(monkeypatch):
+    for k, v in {"GITHUB_REPOSITORY": REPO, "DELEGATED_HEAD_SHA": HEAD, "GITHUB_RUN_ID": "900", "GITHUB_RUN_ATTEMPT": "1", "DELEGATED_POLICY_BASE_SHA": "b" * 40}.items():
+        monkeypatch.setenv(k, v)
+
+
+def test_junit_mode_builds_the_report_without_running_anything(tmp_path, monkeypatch):
+    import subprocess as sp
+    _env(monkeypatch)
+    monkeypatch.setattr(sp, "run", lambda *a, **k: (_ for _ in ()).throw(AssertionError("o job confiavel nao executa processo nenhum")))
+    pol = tmp_path / "policy.json"
+    pol.write_text(json.dumps(policy_json()), encoding="utf-8")
+    junit = tmp_path / "junit.xml"
+    junit.write_text('<testsuites><testsuite>' + "".join(f'<testcase classname="tests.test_git_thing" name="{n.split("::")[1]}"/>' for n in IDS)
+                     + '</testsuite></testsuites>', encoding="utf-8")
+    out = tmp_path / "results.json"
+    assert dr.main(["--policy", str(pol), "--junit", str(junit), "--pytest-exit-code", "0", "--out", str(out)]) == 0
+    rep = json.loads(out.read_text(encoding="utf-8"))
+    assert {r["outcome"] for r in rep["results"]} == {"passed"} and rep["pytest_exit_code"] == 0
+
+
+@pytest.mark.parametrize("junit_text, code", [(None, "0"), ("<nao e xml", "0"), ("<testsuites/>", "0")])
+def test_a_missing_unreadable_or_empty_junit_proves_nothing(tmp_path, monkeypatch, junit_text, code):
+    _env(monkeypatch)
+    pol = tmp_path / "policy.json"
+    pol.write_text(json.dumps(policy_json()), encoding="utf-8")
+    junit = tmp_path / "junit.xml"
+    if junit_text is not None:
+        junit.write_text(junit_text, encoding="utf-8")
+    out = tmp_path / "results.json"
+    assert dr.main(["--policy", str(pol), "--junit", str(junit), "--pytest-exit-code", code, "--out", str(out)]) == 1
+    assert {r["outcome"] for r in json.loads(out.read_text(encoding="utf-8"))["results"]} == {"missing"}
+
+
+def test_a_failed_pytest_exit_code_fails_the_evidence_even_with_a_green_junit(tmp_path, monkeypatch):
+    _env(monkeypatch)
+    pol = tmp_path / "policy.json"
+    pol.write_text(json.dumps(policy_json()), encoding="utf-8")
+    junit = tmp_path / "junit.xml"
+    junit.write_text('<testsuites><testsuite>' + "".join(f'<testcase classname="tests.test_git_thing" name="{n.split("::")[1]}"/>' for n in IDS)
+                     + '</testsuite></testsuites>', encoding="utf-8")
+    assert dr.main(["--policy", str(pol), "--junit", str(junit), "--pytest-exit-code", "2", "--out", str(tmp_path / "r.json")]) == 1
+
+
+def test_exactly_one_of_tree_or_junit(tmp_path):
+    with pytest.raises(SystemExit):
+        dr.main(["--policy", "p", "--out", str(tmp_path / "r.json")])
+    with pytest.raises(SystemExit):
+        dr.main(["--policy", "p", "--tree", ".", "--junit", "j", "--out", str(tmp_path / "r.json")])

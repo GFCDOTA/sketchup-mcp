@@ -512,3 +512,25 @@ def test_the_repository_policy_matches_the_workflow_it_pins_and_names_only_exact
                for d in raw)                                                                                   # prova individual de cada um
     assert all(i.startswith("tests/test_event_store.py::TestRealProcesses::") for i in pol.ids if i.startswith("tests/test_event_store.py"))
     assert not any("real_appcontainer" in i for i in pol.ids)                                                 # o teste @windows_only seria PULADO no CI Linux
+
+
+# -- revisao do Codex (#672, dcf09bcf): o codigo do PR e o coletor confiavel NUNCA compartilham o job --------------------------------------------------------
+def _workflow_jobs():
+    root = Path(__file__).resolve().parents[1]
+    text = (root / dt.WORKFLOW_PATH).read_text(encoding="utf-8")
+    tests_job, evidence_job = text.split("\n  evidence:\n", 1)
+    return tests_job.split("\n  tests:\n", 1)[1], evidence_job
+
+
+def test_the_evidence_job_never_checks_out_or_installs_pr_code():
+    _tests, evidence = _workflow_jobs()
+    assert "workflow_run.head_sha }}\n" not in evidence.split("env:")[0]                           # nenhum checkout do HEAD do PR
+    assert "uv sync" not in evidence and "uv run" not in evidence and "pip install" not in evidence
+    assert "--junit junit/junit.xml" in evidence and "needs: tests" in evidence
+
+
+def test_the_untrusted_tests_job_has_no_collector_and_reads_the_ids_before_pr_code():
+    tests, _evidence = _workflow_jobs()
+    assert "delegated_results.py" not in tests and "results.json" not in tests                       # o job do PR nao gera a evidencia
+    order = [tests.index(s) for s in ("ids.txt", "rm -rf base", "workflow_run.head_sha", "uv sync")]
+    assert order == sorted(order)                                                                    # ids lidos e base apagada ANTES do codigo do PR
