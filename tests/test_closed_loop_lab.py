@@ -1419,3 +1419,21 @@ def test_a_record_written_after_an_interrupted_write_is_never_glued_to_the_torn_
 def test_an_attempt_that_is_not_an_integer_never_counts_and_never_raises():
     rows = [{"key": "k", "event": "EFFECT_APPLIED", "attempt": 1}, {"key": "k", "event": "RECONCILED", "attempt": None}]
     assert lab_mod.interrupted_then_reconciled(rows) is False
+
+
+# -- revisao do Codex (#619, 21126f81): ultimo registro sem delimitador; prova amarrada as publicacoes esperadas -------------------------------------------
+def test_a_journal_whose_last_valid_json_record_has_no_final_newline_fails_the_criterion(tmp_path):
+    lab = _journal(tmp_path, json.dumps(PROOF_ROWS[0]) + "\n" + json.dumps(PROOF_ROWS[1]))           # JSON valido, mas sem o `\n` que o gravador sempre escreve
+    ok, why = lab_mod.reconciliation_proof(lab)
+    assert ok is False and "delimitador final" in why
+
+
+def test_a_reconciliation_of_a_foreign_or_stale_key_does_not_prove_the_expected_publication(tmp_path):
+    lab = Lab(tmp_path)
+    for row in PROOF_ROWS:                                                                          # chave `k` reconciliada...
+        lab_mod._record_publication(lab, row)
+    lab_mod._record_publication(lab, {"key": "esperada", "event": "SENT", "attempt": 1})            # ...mas a esperada foi enviada sem interrupcao
+    assert lab_mod.reconciliation_proof(lab)[0] is True                                             # sem amarrar, a chave alheia "provaria"
+    ok, why = lab_mod.reconciliation_proof(lab, ["esperada"])
+    assert ok is False and "publicacao esperada" in why
+    assert lab_mod.reconciliation_proof(lab, ["k"]) == (True, None)

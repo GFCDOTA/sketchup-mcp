@@ -626,8 +626,11 @@ def publications(lab: Lab) -> list[dict]:
     p = _publications_file(lab)
     if not p.exists():
         return []
+    text = p.read_text(encoding="utf-8", errors="replace")
+    if text and not text.endswith("\n"):                              # o gravador SEMPRE termina com `\n`: sem ele, o ultimo registro pode ter sido interrompido
+        raise JournalCorrupt(f"PUBLICATIONS.jsonl linha {text.count(chr(10)) + 1} sem o delimitador final (gravacao interrompida?)")
     rows = []
-    for n, line in enumerate(p.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+    for n, line in enumerate(text.splitlines(), 1):
         if not line.strip():
             continue
         try:
@@ -640,16 +643,19 @@ def publications(lab: Lab) -> list[dict]:
     return rows
 
 
-def reconciliation_proof(lab: Lab) -> tuple[bool, str | None]:
-    """(prova valida?, motivo da reprovacao). Diario ausente, vazio ou corrompido REPROVA o criterio com o motivo — o relatorio nunca quebra por causa dele."""
+def reconciliation_proof(lab: Lab, expected: list[str] | None = None) -> tuple[bool, str | None]:
+    """(prova valida?, motivo da reprovacao). Diario ausente, vazio ou corrompido REPROVA o criterio com o motivo — o relatorio nunca quebra por causa dele.
+    `expected`: so chaves das publicacoes ESPERADAS deste fluxo provam algo (linhas antigas ou alheias nao contam)."""
     try:
         rows = publications(lab)
     except (JournalCorrupt, OSError) as exc:
         return False, str(exc)
     if not rows:
         return False, "PUBLICATIONS.jsonl ausente ou vazio"
+    if expected is not None:
+        rows = [r for r in rows if r["key"] in set(expected)]
     if not interrupted_then_reconciled(rows):
-        return False, "o diario nao mostra EFFECT_APPLIED sem desfecho seguido de RECONCILED numa tentativa posterior"
+        return False, "o diario nao mostra, para uma publicacao esperada, EFFECT_APPLIED sem desfecho seguido de RECONCILED numa tentativa posterior"
     return True, None
 
 
@@ -952,7 +958,7 @@ def report(lab: Lab, store: EventStore) -> dict:
     outbox_keys = sorted(o["idempotency_key"] for o in outbox)
     all_published = (bool(expected) and in_ledger is not None and sorted(in_ledger) == sorted(expected) and outbox_keys == sorted(expected)
                      and all(o["status"] == "DONE" for o in outbox) and ledger_matches_outbox(lab, outbox))
-    journal_ok, journal_error = reconciliation_proof(lab)
+    journal_ok, journal_error = reconciliation_proof(lab, expected)
     consumed =[e for e in events if fault and e["event_type"] in AGENT_EVENTS[FAULTS[fault][0]]]
     faulted_runs = [r for r in runs if fault and r["agent"] == FAULTS[fault][0]]
     negative = {
