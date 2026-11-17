@@ -474,3 +474,34 @@ def test_the_supersede_runs_while_the_bridge_lock_is_held(store, tmp_path, monke
         return real(st, ev, why)
     monkeypatch.setattr(sr, "_supersede", checking)
     assert sr.reconcile(store, FakeGh(head=NEW), apply=True)["events"][0]["applied"] == "SUPERSEDED" and held == [True]
+
+
+# -- 10a revisao do Codex (#642, 3012c864): a trava de um bridge VIVO nunca e quebrada por idade (lock do SO, #643) -----------------------------------------
+def test_a_live_bridge_holding_the_lock_longer_than_the_old_stale_limit_is_never_broken_by_the_reconciler(store, tmp_path, monkeypatch):
+    import os
+    import threading
+    import time
+    publish(store)
+    path = tmp_path / "bridge.json"
+    path.write_bytes(b'{"queue": []}')
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(path))
+    holding, release = threading.Event(), threading.Event()
+
+    def bridge():
+        with es.locked(eb.bridge_path()):                                                              # o bridge segura a trava durante consultas longas ao GitHub
+            lockfile = path.with_suffix(".lock")
+            old = time.time() - 600
+            os.utime(lockfile, (old, old))                                                               # 10 min: o protocolo antigo a daria por abandonada (> 60 s)
+            holding.set()
+            release.wait(30)
+    t = threading.Thread(target=bridge)
+    t.start()
+    try:
+        assert holding.wait(10)
+        monkeypatch.setattr(es, "locked", lambda p, wait_s=0.3, _real=es.locked: _real(p, wait_s=wait_s))
+        report = sr.reconcile(store, FakeGh(head=NEW), apply=True)
+    finally:
+        release.set()
+        t.join(30)
+    row = report["events"][0]
+    assert row["applied"] == "SKIPPED" and "trava ocupada" in row["skipped_because"] and status(store) == "PENDING"     # nada aplicado sob a trava alheia
