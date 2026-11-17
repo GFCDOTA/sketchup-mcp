@@ -595,16 +595,49 @@ def test_launch_hands_the_delivery_a_revalidation_that_rereads_github(monkeypatc
     captured = {}
 
     def fake_deliver(wt, branch, base, py, it, **kw):
-        captured["revalidate"] = kw["revalidate"]
+        rv = kw["revalidate"]                                                  # chamada DURANTE a entrega, como o `deliver` real faz
+        captured["first"] = rv()
+        gh.head = NEWHEAD                                                      # alguem publicou depois do inicio
+        captured["moved"] = rv()
+        gh.head, gh.labels = HEAD, []                                          # label removida depois do inicio
+        captured["unlabelled"] = rv()
         return ("NOOP", "")
     monkeypatch.setattr(ex, "deliver", fake_deliver)
     go(gh, bstate(item()), Runner(gh, push=False))
-    assert captured["revalidate"]() == (True, "ok")
-    gh.head = NEWHEAD                                                          # alguem publicou depois do inicio
-    ok, why = captured["revalidate"]()
-    assert not ok and "HEAD mudou" in why
-    gh.head, gh.labels = HEAD, []                                              # label removida depois do inicio
-    assert not captured["revalidate"]()[0]
+    assert captured["first"] == (True, "ok")
+    assert not captured["moved"][0] and "HEAD mudou" in captured["moved"][1]
+    assert not captured["unlabelled"][0]
+
+
+# -- revisao do Codex (#635, 8d41f4fe): sem posse comprovada no estado duravel, nada e publicado -------------------------------------------------------------
+def test_a_recovery_that_erased_the_running_record_blocks_the_push_even_after_the_child_finished(monkeypatch):
+    gh = FakeGh()
+    seen = {}
+
+    def fake_deliver(wt, branch, base, py, it, **kw):
+        eb.save(eb.default_bridge_state())                                     # a recuperacao de um estado corrompido recriou o arquivo SEM o registro RUNNING
+        seen["auth"] = kw["revalidate"]()
+        return ("STALE", seen["auth"][1]) if not seen["auth"][0] else ("PUSHED", "x")
+    monkeypatch.setattr(ex, "deliver", fake_deliver)
+    go(gh, bstate(item()), Runner(gh, push=False))
+    assert seen["auth"][0] is False and "posse" in seen["auth"][1]
+
+
+def test_a_cancelled_lease_blocks_the_push_at_the_last_authorization():
+    import threading
+    cancel = threading.Event()
+    cancel.set()
+    ok, why = ex._revalidate_owned("k", "dono", cancel, item(), FakeGh(), POLICY, REPO)
+    assert ok is False and "cancel" in why
+
+
+def test_ownership_is_read_from_the_durable_state_under_the_lock():
+    owner = "dono-vivo"
+    eb.save(bstate(item(state="RUNNING", owner=owner, lease_expires="2099-01-01T00:00:00Z")))
+    assert ex.still_owner(item()["key"], owner) is True
+    assert ex.still_owner(item()["key"], "outro") is False
+    eb.save(bstate(item(state="QUEUED")))
+    assert ex.still_owner(item()["key"], owner) is False
 
 
 def test_a_stale_delivery_fails_the_item_with_the_reason_and_comments(monkeypatch):

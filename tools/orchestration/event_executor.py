@@ -378,6 +378,26 @@ def claim_next(owner: str, now: dt.datetime | None = None) -> dict | None:
         return dict(item)
 
 
+def still_owner(key: str, owner: str) -> bool:
+    """Este processo AINDA e o dono do item (RUNNING + owner), lido agora do disco sob a trava. A recuperacao de um estado corrompido apaga o registro RUNNING: sem ele,
+    a posse nao esta comprovada e nada e publicado."""
+    try:
+        with es.locked(eb.bridge_path()):
+            return _owned(eb.load(), key, owner) is not None
+    except (OSError, ValueError, TimeoutError, eb.BridgeStateCorrupt):
+        return False
+
+
+def _revalidate_owned(key: str, owner: str, cancel: threading.Event, item: dict, gh, policy: dict, repo: str) -> tuple[bool, str]:
+    """Autorizacao de publicacao em CADA ponto do `deliver` (antes de stagear e imediatamente antes do push): lease nao cancelado, posse comprovada no estado
+    duravel e, so entao, a revalidacao do GitHub."""
+    if cancel.is_set():
+        return False, "lease perdido (cancel acionado): nao publico"
+    if not still_owner(key, owner):
+        return False, "posse do item nao comprovada no estado (recuperacao ou outro dono): nao publico"
+    return _revalidate(item, gh, policy, repo)
+
+
 def _owned(b: dict, key: str, owner: str) -> dict | None:
     it = next((t for t in b["queue"] if t["key"] == key), None)
     return it if it and it["state"] == "RUNNING" and it.get("owner") == owner else None
@@ -585,7 +605,7 @@ def _launch(item: dict, owner: str, pr: dict, gh: eb.Gh, repo: str, runner: Runn
     if rc == 0 and not timed_out and not cancel.is_set() and not child_error:
         try:
             delivery = deliver(wt, branch, item["head_sha"], python or venv_python(), item,
-                               revalidate=lambda: _revalidate(item, gh, policy or {}, repo))
+                               revalidate=lambda: _revalidate_owned(key, owner, cancel, item, gh, policy or {}, repo))
         except (OSError, ValueError, subprocess.SubprocessError) as exc:
             delivery = ("ERROR", f"{type(exc).__name__}: {exc}"[:300])
         write_log(key, f"delivery: {delivery}", "", {"delivery": delivery[0], "at": es.now_iso(t)})
