@@ -40,6 +40,8 @@ IMPLEMENT_TYPE = "IMPLEMENT_REQUESTED"
 CLAIMED_TYPES = (EVENT_TYPE, IMPLEMENT_TYPE)                                   # correcao de review e pedido de implementacao (intake)
 PRODUCER = "event_bridge"
 PARKED_STATES = frozenset({"SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"})
+JSON_MAX_ATTEMPTS = 3                                                                          # o `pick` JSON so escolhe item com `attempts` abaixo disto (ex.MAX_ATTEMPTS)
+JSON_PICKABLE = frozenset({"QUEUED", "BLOCKED_CREDENTIALS", "BLOCKED_CLI", "BLOCKED_WORKTREE", "FAILED"})        # os estados que o `pick` da fila JSON volta a escolher
 DAY_S = 24 * 3600
 MAX_MALFORMED_PER_CLAIM = 20                                                   # evento malformado e descartado; nao ha loop infinito
 
@@ -62,9 +64,18 @@ def is_sqlite() -> bool:
     return source() == "sqlite"
 
 
+BOOTSTRAP_ENV = "EXECUTOR_SQLITE_BOOTSTRAP"
+
+
 def _store() -> EventStore:
-    from tools.orchestration.store_factory import get_store
-    return get_store()                                                         # sem try/except: aqui o SQLite e a verdade, falhar e parar
+    """O EventStore PRIMARIO. Aqui o SQLite e a verdade, entao um arquivo AUSENTE (banco perdido ou caminho configurado errado) NUNCA vira um banco novo e vazio: o executor
+    recusaria silenciosamente tudo o que so existia nele e republicaria trabalho cujo resultado nao chegou ao espelho JSON. Criar do zero exige `EXECUTOR_SQLITE_BOOTSTRAP=1`,
+    explicito (primeiro cutover sem modo sombra); falhar aqui e parar (BLOCKED_STORE no executor)."""
+    from tools.orchestration import store_factory
+    if getattr(store_factory, "_STORE", None) is None and not store_factory.store_path().is_file() and os.environ.get(BOOTSTRAP_ENV) != "1":
+        raise FileNotFoundError(f"EventStore primario ausente ({store_factory.store_path().name}): nao crio um banco vazio como fonte da verdade "
+                                f"(restaure o arquivo, corrija o caminho ou defina {BOOTSTRAP_ENV}=1 de forma explicita)")
+    return store_factory.get_store()
 
 
 def _parse_iso(value: str) -> dt.datetime | None:
@@ -163,17 +174,31 @@ def claim_next(owner: str, now: dt.datetime | None = None, *, lease_s: float, da
     return None
 
 
-def peek_next() -> dict | None:
-    """O proximo candidato SEM reivindicar (DRY_RUN): um claim gastaria uma tentativa do evento."""
+def peek_next(daily_cap: int | None = None) -> dict | None:
+    """O proximo candidato SEM reivindicar (DRY_RUN): um claim gastaria uma tentativa do evento. Reflete os candidatos do claim REAL: eventos PENDING disponiveis, eventos
+    RUNNING com lease VENCIDO (o claim os recupera) e itens JSON QUEUED que ainda nao estao no SQLite (o claim os publica antes de reivindicar)."""
     store = _store()
     now = store.clock()
-    live = {e["job_id"] for e in store.events() if e["event_type"] in CLAIMED_TYPES and e["status"] == "RUNNING" and e["lease_until"] > now}
-    for ev in store.events():
-        if (ev["event_type"] in CLAIMED_TYPES and ev["status"] == "PENDING" and ev["available_at"] <= now
-                and ev["attempt"] < ev["max_attempts"] and ev["job_id"] not in live):
+    all_events = store.events()
+    events = [e for e in all_events if e["event_type"] in CLAIMED_TYPES]          # correcao E implementacao (#646)
+    if daily_cap is not None and _recent_claims(store, now) >= daily_cap:                       # o teto diario vale tambem para o que o claim real faria
+        return None
+    live = {e["job_id"] for e in all_events if e["status"] == "RUNNING" and e["lease_until"] > now}     # QUALQUER tipo: o claim real exclui o agregado com lease ativo
+    for ev in events:
+        claimable = ((ev["status"] == "PENDING" and ev["available_at"] <= now) or (ev["status"] == "RUNNING" and ev["lease_until"] <= now)) and ev["attempt"] < ev["max_attempts"]
+        if claimable and ev["job_id"] not in live:
             item = item_from_event(ev, attempts=ev["attempt"])
             if item is not None:
                 return item
+    known = {e["idempotency_key"] for e in events}
+    with es.locked(eb.bridge_path()):
+        queue = eb.load()["queue"]
+    for it in queue:
+        if it.get("state") != "QUEUED":
+            continue
+        args = store_args_from_item(it)
+        if args is not None and args["idempotency_key"] not in known and args["job_id"] not in live:
+            return {**it, "state": "RUNNING", "attempts": int(it.get("attempts") or 0)}                  # o backfill do claim real publicaria este item e o reivindicaria
     return None
 
 
@@ -241,6 +266,8 @@ def _settle(store: EventStore, ev: dict, it: dict, now: dt.datetime | None, retr
         store.supersede(ev, why[:2000])
         return "SUPERSEDED"
     delay = _retry_delay(it, now, retry_s) if state != "QUEUED" else 0.0
+    if isinstance(state, str) and state.startswith("BLOCKED"):
+        return store.release(ev, why[:2000], retry_delay=delay)                  # bloqueio de AMBIENTE (CLI/credencial/worktree/busca do review): o trabalho nao rodou; nao gasta tentativa
     return store.fail(ev, why[:2000], retry_delay=delay)
 
 
@@ -275,23 +302,76 @@ def reset_claims() -> None:
 
 
 # ------------------------------------------------------------------------------------------------------------- rollback
+def _iso(epoch: float) -> str:
+    return dt.datetime.fromtimestamp(epoch, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def rollback_plan(store: EventStore, bstate: dict, now: float | None = None) -> dict:
-    """O que a volta para a fila JSON mudaria. `blocked` = eventos com lease vivo: o executor ainda esta no meio do trabalho."""
+    """O que a volta para a fila JSON mudaria. `blocked` = QUALQUER evento com lease vivo (tenha ou nao linha na fila JSON): o executor ainda esta no meio do trabalho.
+    `additions` = eventos PENDING que existem so no SQLite (viram itens da fila JSON, com identidade e tentativas). `unreconcilable` = evento executavel que nao descreve
+    um review: o rollback recusa. `changes` inclui PENDING cuja linha JSON esta num estado que o `pick` JSON nao escolhe (ex.: BLOCKED_REVIEW_FETCH): volta a ser retomavel."""
     now = store.clock() if now is None else now
-    by_key = {e["idempotency_key"]: e for e in store.events() if e["event_type"] == EVENT_TYPE}
-    changes, blocked = [], []
+    all_events = store.events()
+    events = [e for e in all_events if e["event_type"] == EVENT_TYPE]
+    rows = {}
     for it in bstate["queue"]:
         args = store_args_from_item(it)
-        ev = by_key.get(args["idempotency_key"]) if args else None
-        if ev is None:
+        if args:
+            rows[args["idempotency_key"]] = it
+    changes, blocked, additions, unreconcilable = [], [], [], []
+    live = set()
+    for ev in all_events:                                                        # QUALQUER evento reivindicado (correcao E implementacao), com ou sem linha JSON:
+        if ev["event_type"] in CLAIMED_TYPES and ev["status"] == "RUNNING" and ev["lease_until"] > now:   # um executor ainda trabalha
+            blocked.append({"key": (rows.get(ev["idempotency_key"]) or {}).get("key", ev["idempotency_key"]), "owner": ev["lease_owner"]})
+            live.add(ev["idempotency_key"])
+    for ev in events:
+        key = ev["idempotency_key"]
+        if key in live:
             continue
-        if ev["status"] == "RUNNING" and ev["lease_until"] > now:
-            blocked.append({"key": it["key"], "owner": ev["lease_owner"]})
+        it = rows.get(key)
+        expired = ev["status"] == "RUNNING" and ev["lease_until"] <= now                  # executor morreu depois do claim: o evento volta a ser reivindicavel (ou esgotou)
+        exhausted = ev["status"] == "DLQ" or (expired and ev["attempt"] >= ev["max_attempts"])
+        pending = (ev["status"] == "PENDING" or expired) and ev["attempt"] < ev["max_attempts"]
+        if it is None:
+            if pending:
+                item = item_from_event(ev, attempts=ev["attempt"])
+                if item is None:
+                    unreconcilable.append({"key": key, "event": ev["id"]})
+                    continue
+                item["state"] = "QUEUED" if ev["attempt"] == 0 else "FAILED"
+                item.pop("store_event", None)
+                if ev["available_at"] > now:
+                    item["retry_after"] = _iso(ev["available_at"])
+                additions.append({"key": item["key"], "item": item, "store_status": "PENDING"})
+                continue
+            terminal = {"DONE": "DONE_AWAITING_REREVIEW", "SUPERSEDED": "SUPERSEDED"}.get(ev["status"]) or ("FAILED" if exhausted else None)
+            if terminal:                                                                  # decisao TERMINAL so no SQLite: a fila JSON e a deduplicacao precisam preserva-la
+                item = item_from_event(ev, attempts=max(ev["attempt"], JSON_MAX_ATTEMPTS) if terminal == "FAILED" else ev["attempt"])
+                if item is None:                                                          # sem identidade do review, o bridge poderia enfileirar o mesmo trabalho de novo
+                    unreconcilable.append({"key": key, "event": ev["id"], "status": ev["status"]})
+                    continue
+                item["state"] = terminal
+                item.pop("store_event", None)
+                if terminal == "FAILED":
+                    item["last_error"] = "dead-lettered no SQLite (rollback)"
+                additions.append({"key": item["key"], "item": item, "store_status": ev["status"]})
             continue
-        want = {"DONE": "DONE_AWAITING_REREVIEW", "SUPERSEDED": "SUPERSEDED", "DLQ": "FAILED"}.get(ev["status"])
+        if pending:
+            wanted_retry = _iso(ev["available_at"]) if ev["available_at"] > now and ev["status"] == "PENDING" else None
+            row_retry = str(it.get("retry_after") or "")
+            retry_ok = row_retry == wanted_retry if wanted_retry else row_retry <= _iso(now)         # sem espera no evento: um retry_after futuro no JSON atrasaria o trabalho
+            if it.get("state") not in JSON_PICKABLE or int(it.get("attempts") or 0) != ev["attempt"] or not retry_ok:
+                changes.append({"key": it["key"], "from": it.get("state"), "to": "QUEUED" if ev["attempt"] == 0 else "FAILED", "store_status": "PENDING",
+                                "attempts": ev["attempt"], "retry_after": wanted_retry})
+            continue
+        if exhausted:                                                                     # DLQ (ou lease vencido na ultima tentativa): a fila JSON nao pode repetir nem executar de novo
+            if it.get("state") != "FAILED" or int(it.get("attempts") or 0) < JSON_MAX_ATTEMPTS:
+                changes.append({"key": it["key"], "from": it.get("state"), "to": "FAILED", "store_status": "DLQ"})
+            continue
+        want = {"DONE": "DONE_AWAITING_REREVIEW", "SUPERSEDED": "SUPERSEDED"}.get(ev["status"])
         if want and it.get("state") != want:
             changes.append({"key": it["key"], "from": it.get("state"), "to": want, "store_status": ev["status"]})
-    return {"changes": changes, "blocked": blocked}
+    return {"changes": changes, "blocked": blocked, "additions": additions, "unreconcilable": unreconcilable}
 
 
 def rollback_apply(store: EventStore) -> dict:
@@ -300,19 +380,34 @@ def rollback_apply(store: EventStore) -> dict:
         plan = rollback_plan(store, b)
         if plan["blocked"]:
             return {"applied": 0, "refused": "evento(s) com lease vivo: o executor ainda esta rodando; pare-o antes", **plan}
+        if plan["unreconcilable"]:
+            return {"applied": 0, "refused": "evento(s) so no SQLite (pendentes ou terminais) sem review reconstruivel: nao ha como preserva-los na fila JSON; resolva antes",
+                    **plan}
         by_key = {t["key"]: t for t in b["queue"]}
         for c in plan["changes"]:
             row = by_key[c["key"]]
             row["state"] = c["to"]
             row.pop("owner", None)
             row.pop("lease_expires", None)
-            if c["to"] == "FAILED":
-                row["attempts"] = max(row.get("attempts", 0), 3)
+            if c["store_status"] == "PENDING":                                    # retomavel pela fila JSON, com as tentativas e o atraso do evento
+                row["attempts"] = c["attempts"]
+                if c["retry_after"]:
+                    row["retry_after"] = c["retry_after"]
+                else:
+                    row.pop("retry_after", None)
+            elif c["to"] == "FAILED":
+                row["attempts"] = max(row.get("attempts", 0), JSON_MAX_ATTEMPTS)
                 row["last_error"] = row.get("last_error") or "dead-lettered no SQLite (rollback)"
-        if plan["changes"]:
-            eb.diagnose(b, f"rollback para a fila JSON: {len(plan['changes'])} item(ns) reconciliados com o SQLite")
+        seen = b.setdefault("seen", [])
+        for a in plan["additions"]:
+            b["queue"].append(a["item"])
+            if a["key"] not in seen:                                              # deduplicacao do bridge: o mesmo review observado de novo NAO volta como QUEUED
+                seen.append(a["key"])
+        n = len(plan["changes"]) + len(plan["additions"])
+        if n:
+            eb.diagnose(b, f"rollback para a fila JSON: {n} item(ns) reconciliados com o SQLite")
             eb.save(b)
-        return {"applied": len(plan["changes"]), **plan}
+        return {"applied": n, **plan}
 
 
 # ----------------------------------------------------------------------------------------------------------------- CLI
@@ -335,7 +430,7 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "rollback-check":
         plan = rollback_plan(store, b)
         print(json.dumps(plan, indent=1, ensure_ascii=False))
-        return 1 if plan["blocked"] else 0
+        return 1 if plan["blocked"] or plan["unreconcilable"] else 0
     from tools.orchestration import shadow_divergence as sd
     div = [d.as_dict() for d in sd.collect(b["queue"], store)]
     now = store.clock()

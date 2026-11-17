@@ -705,7 +705,7 @@ def process_one(gh: eb.Gh, policy: dict, repo: str = eb.REPO, execute: bool = Fa
 
 def _dry_run_sqlite(gh: eb.Gh, policy: dict, repo: str, claude_bin: str, python: str | None) -> dict:
     """DRY_RUN com o SQLite como fonte: olha o proximo candidato e roda o preflight, mas NAO reivindica (um claim gasta uma tentativa)."""
-    item = sq.peek_next()
+    item = sq.peek_next(daily_cap=DAILY_CAP)
     if item is None:
         return {"action": "IDLE"}
     if item.get("kind") == "implement":
@@ -725,8 +725,11 @@ def _dry_run_sqlite(gh: eb.Gh, policy: dict, repo: str, claude_bin: str, python:
 
 
 def _get_store():
-    """Best-effort EventStore for shadow mode (SPEC §6.3 step 4)."""
+    """Best-effort EventStore for shadow mode (SPEC §6.3 step 4). Em modo PRIMARIO o banco nunca e criado aqui: `sqlite_source._store()` recusa o arquivo ausente
+    (sem `EXECUTOR_SQLITE_BOOTSTRAP=1`), e o `process_one` seguinte devolve BLOCKED_STORE."""
     try:
+        if _sqlite_primary():
+            return sq._store()
         from tools.orchestration.store_factory import get_store
         return get_store()
     except Exception:  # noqa: BLE001
@@ -762,8 +765,11 @@ def _sync_result_to_store(store, item: dict, result: dict) -> None:
                                      "new_head": result.get("new_head", "")})
         elif action in ("SUPERSEDED", "REFUSED", "PARKED_UNSUPPORTED"):
             store.supersede(claimed, result.get("reason", action)[:2000])
-        elif action in ("FAILED", "BLOCKED_WORKTREE", "BLOCKED_CLI", "BLOCKED_CREDENTIALS",
-                         "BLOCKED_REVIEW_FETCH", "LOST_LEASE"):
+        elif action in ("BLOCKED_WORKTREE", "BLOCKED_CLI", "BLOCKED_CREDENTIALS", "BLOCKED_REVIEW_FETCH"):
+            # bloqueio de AMBIENTE: o trabalho nao rodou e o item JSON continua elegivel sem gastar tentativa; o espelho tambem nao pode gastar (3 bloqueios o levariam a DLQ
+            # enquanto o JSON ainda pode executar, e o cutover pareceria limpo mas nunca reivindicaria esse trabalho)
+            store.release(claimed, result.get("reason", action)[:2000])
+        elif action in ("FAILED", "LOST_LEASE"):
             store.fail(claimed, result.get("reason", action)[:2000])
         elif action == "DRY_RUN":
             store.fail(claimed, "dry-run: executor did not run", retry_delay=0)
