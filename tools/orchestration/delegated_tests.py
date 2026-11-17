@@ -171,6 +171,15 @@ def _api(gh, path: str):
         raise DelegationError(f"GitHub indisponivel para a evidencia ({type(exc).__name__}): {str(exc)[:120]}") from exc
 
 
+def _pos_int(value: object) -> int | None:
+    """Inteiro positivo de verdade (nao bool, nao texto, nao float); qualquer outra coisa = None."""
+    return value if isinstance(value, int) and not isinstance(value, bool) and value > 0 else None
+
+
+def _full_name(repo: object) -> object:
+    return repo.get("full_name") if isinstance(repo, dict) else None
+
+
 def verify_ci_evidence(gh, download: Callable[[str], bytes], repo: str, head_sha: str, policy: Policy,
                        run_git: Callable[[list, Path], tuple[int, str]], root: Path) -> dict:
     """Confere, para o HEAD EXATO, a evidencia individual de CADA teste delegado. Devolve os fatos (run, tentativa, digest); levanta `DelegationError` em qualquer inconsistencia."""
@@ -190,16 +199,18 @@ def verify_ci_evidence(gh, download: Callable[[str], bytes], repo: str, head_sha
     for r in rows:
         if not isinstance(r, dict):
             continue
+        # campos numericos e objetos aninhados com tipo errado DESCARTAM a execucao (nunca ValueError/TypeError/AttributeError fora de DelegationError)
         if (r.get("display_title") != title or r.get("event") != "workflow_run" or r.get("conclusion") != "success" or r.get("head_branch") != BASE_BRANCH
                 or str(r.get("path", "")).partition("@")[0] != policy.workflow_path
                 or str(r.get("path", "")).partition("@")[2] not in ("", BASE_BRANCH, f"refs/heads/{BASE_BRANCH}") or not re.fullmatch(r"[0-9a-f]{40}", str(r.get("head_sha", "")).lower())
-                or (r.get("repository") or {}).get("full_name") != repo or (r.get("head_repository") or {}).get("full_name") != repo):
+                or _full_name(r.get("repository")) != repo or _full_name(r.get("head_repository")) != repo
+                or None in (_pos_int(r.get("id")), _pos_int(r.get("run_number")), _pos_int(r.get("run_attempt")))):
             continue
         good.append(r)
     if not good:
         raise DelegationError("nenhuma execucao do workflow autorizado, bem-sucedida, para este HEAD exato e este repositorio")
-    run = max(good, key=lambda r: (int(r.get("run_number") or 0), int(r.get("run_attempt") or 0)))
-    run_id, attempt = int(run["id"]), int(run.get("run_attempt") or 1)
+    run = max(good, key=lambda r: (r["run_number"], r["run_attempt"]))
+    run_id, attempt = run["id"], run["run_attempt"]
     run_base = str(run["head_sha"]).lower()
     # a definicao que EXECUTOU e a do commit da base no disparo: tem de estar na historia da base atual e ter o workflow fixado
     rc, _ = run_git(["merge-base", "--is-ancestor", run_base, policy.base_sha], root)
@@ -213,7 +224,8 @@ def verify_ci_evidence(gh, download: Callable[[str], bytes], repo: str, head_sha
     if len(found) != 1:
         raise DelegationError(f"esperava exatamente 1 artefato {ARTIFACT_NAME!r} valido na execucao {run_id}, achei {len(found)}")
     art = found[0]
-    if str((art.get("workflow_run") or {}).get("head_sha", "")).lower() != run_base or int((art.get("workflow_run") or {}).get("id") or 0) != run_id:
+    wr = art.get("workflow_run") if isinstance(art.get("workflow_run"), dict) else {}
+    if str(wr.get("head_sha", "")).lower() != run_base or _pos_int(wr.get("id")) != run_id or _pos_int(art.get("id")) is None:
         raise DelegationError("artefato nao pertence a execucao/HEAD verificados")
     try:
         blob_bytes = download(f"repos/{repo}/actions/artifacts/{art['id']}/zip")

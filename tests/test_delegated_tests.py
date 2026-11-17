@@ -282,6 +282,8 @@ def test_a_run_whose_own_head_sha_is_the_pr_head_is_not_how_workflow_run_works_a
                                          ("path", ".github/workflows/delegated-tests.yml@refs/pull/9/merge"), ("path", ".github/workflows/delegated-tests.yml@refs/heads/feat/x"),
                                          ("head_branch", "feat/x"), ("head_branch", None), ("display_title", "delegated-tests " + "c" * 40), ("display_title", HEAD),
                                          ("display_title", "outro titulo"), ("head_sha", "zz"), ("head_sha", None),
+                                         ("run_number", "5"), ("run_number", None), ("run_number", 5.0), ("run_attempt", "x"), ("run_attempt", True), ("run_attempt", 0),
+                                         ("id", "900"), ("id", None), ("repository", "GFCDOTA/sketchup-mcp"), ("head_repository", ["x"]),
                                          ("repository", {"full_name": "outro/repo"}), ("head_repository", {"full_name": "fork/sketchup-mcp"})])
 def test_a_run_of_an_unauthorized_workflow_event_branch_fork_title_or_conclusion_is_refused(base, field, value):
     ci = Ci(base[1])
@@ -385,6 +387,11 @@ def test_a_report_made_under_a_different_rule_set_is_refused(base):
     (lambda ci: setattr(ci, "artifacts", [{"id": 77, "name": "outro", "expired": False, "digest": "sha256:x", "workflow_run": {"id": 900, "head_sha": HEAD}}]), "exatamente 1"),
     (lambda ci: setattr(ci, "artifacts", [{"id": 77, "name": dt.ARTIFACT_NAME, "expired": False, "digest": "sha256:x", "workflow_run": {"id": 901, "head_sha": HEAD}}]), "nao pertence"),
     (lambda ci: setattr(ci, "artifacts", [{"id": 77, "name": dt.ARTIFACT_NAME, "expired": False, "digest": "sha256:x", "workflow_run": {"id": 900, "head_sha": "e" * 40}}]), "nao pertence"),
+    (lambda ci: setattr(ci, "artifacts", [{"id": 77, "name": dt.ARTIFACT_NAME, "expired": False, "digest": "sha256:x", "workflow_run": {"id": "900", "head_sha": ci.base_sha}}]),
+     "nao pertence"),
+    (lambda ci: setattr(ci, "artifacts", [{"id": 77, "name": dt.ARTIFACT_NAME, "expired": False, "digest": "sha256:x", "workflow_run": "900"}]), "nao pertence"),
+    (lambda ci: setattr(ci, "artifacts", [{"id": "77", "name": dt.ARTIFACT_NAME, "expired": False, "digest": "sha256:x", "workflow_run": {"id": 900, "head_sha": ci.base_sha}}]),
+     "nao pertence"),
     (lambda ci: setattr(ci, "files", {}), "inesperado"),
     (lambda ci: setattr(ci, "files", {dt.RESULT_FILE: "{}", "extra.txt": "x"}), "inesperado"),
     (lambda ci: setattr(ci, "files", {dt.RESULT_FILE: "isto nao e json"}), "ilegivel"),
