@@ -1,0 +1,89 @@
+{
+  "pr": 617,
+  "head_sha": "e5b1ed57e1a75ca3328d0bb0a6fc09ea92fb357d",
+  "verdict": "REQUEST_CHANGES",
+  "findings": [
+    {
+      "severity": "MEDIUM",
+      "file": "tools/orchestration/closed_loop_lab.py",
+      "line": 733,
+      "reason": "O relatório omite eventos concluídos cujo resultado ou evidência de testes esteja ausente. Se outra entrega ou revisão tiver evidência válida, tests_sandboxed recebe apenas essa evidência e pode declarar PASS para coordinator_tests_ran_in_os_sandbox, embora não haja prova para todos os eventos concluídos, como exige o contrato.",
+      "required_change": "Exigir uma evidência válida para cada IMPLEMENT_REQUESTED, CORRECTION_REQUESTED e REVIEW_REQUESTED concluído; tratar resultado ou evidência ausente ou inválida como falha do critério. Acrescentar teste com um evento concluído sem evidência e outro com evidência válida."
+    },
+    {
+      "severity": "LOW",
+      "file": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/measure_fs_boundary.py",
+      "line": 19,
+      "reason": "O script não verifica o código de saída dos comandos Git. Executado fora de um repositório, rev-parse e status podem falhar com stdout vazio; ainda assim a medição prossegue e pode gerar evidence.json com commit vazio, apesar de declarar que exige uma árvore limpa e associar a evidência a um commit.",
+      "required_change": "Rejeitar falhas de ambos os comandos Git, validar o SHA obtido e verificar a árvore no repositório pretendido antes de gerar evidência. Acrescentar cobertura para execução fora de um repositório ou falha do Git."
+    }
+  ],
+  "tests_reviewed": [
+    "tests/test_appcontainer_isolation.py",
+    "tests/test_closed_loop_lab.py",
+    "tests/test_sandboxed_tests.py"
+  ],
+  "confidence": "HIGH",
+  "files_reviewed": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "f10db24b595cf8ef15a93283c1831a25314d689520795abbf1191abc07f2eb37",
+      "code_excerpt": "        run: uv run --no-sync python -m pytest --noconftest tests/test_process_supervisor.py tests/test_appcontainer_isolation.py tests/test_sandboxed_tests.py tests/test_closed_loop_lab.py -q"
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/README.md",
+      "sha256": "6678bd6269caa6cd84df4c1b52403e8d7796b4eb576eb9e92084d34b4a7b67bf",
+      "code_excerpt": "do SQLite: só passa se **toda** entrega e **todo** parecer tiverem o rótulo do AppContainer **e** as duas provas."
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/README.md",
+      "sha256": "ccada76d8d280fde1106feadedfb1f52e34d5ab93b508037dcac1a5a79a8afc4",
+      "code_excerpt": "O isolamento foi provado na execução (token AppContainer com zero capacidades e canário negado)."
+    },
+    {
+      "path": "artifacts/review/fp060/m1_closed_loop/2026-11-15_fs_boundary/measure_fs_boundary.py",
+      "sha256": "576d684fdbbb91d3afe46ab809460d04bb4863a06a25355a3dcf934014727d9e",
+      "code_excerpt": "head = subprocess.run([\"git\", \"rev-parse\", \"HEAD\"], capture_output=True, text=True).stdout.strip()"
+    },
+    {
+      "path": "docs/specs/fp042_inventory.v1.json",
+      "sha256": "33c28613cca74a97aac344be4240776f60f13889db73452d83d34787f42c1a5e",
+      "code_excerpt": "      \"path\": \"artifacts/review/fp060/m1_closed_loop/2026-11-13_sandboxed_tests/sandboxed/sandbox_logs/sandbox_seed_check_tests.txt\","
+    },
+    {
+      "path": "docs/specs/fp042_references.v1.json",
+      "sha256": "6079c007e86af275a8ba577acbd25d2e530b24a1ce9c3ebebc6ffd48bfc664f5",
+      "code_excerpt": "  \"preservation_policy\": \"CANONICAL_LOCATION_AND_BYTES_PINNED\","
+    },
+    {
+      "path": "tests/test_appcontainer_isolation.py",
+      "sha256": "81f1684df0ed0dba09bf4b12794999540fa805983305a001ad17563e886dca12",
+      "code_excerpt": "def test_token_facts_tell_a_contained_process_from_an_ordinary_one():"
+    },
+    {
+      "path": "tests/test_closed_loop_lab.py",
+      "sha256": "ac6930a2bb02de35950e446e49cea084829f4f03659df358e3d1edab13b9f4a8",
+      "code_excerpt": "def test_evidence_that_names_the_sandbox_without_its_proofs_does_not_pass(env, fake_sandbox):"
+    },
+    {
+      "path": "tests/test_sandboxed_tests.py",
+      "sha256": "13c9d87f6add1a2d13a913dcd771edfc0c0697c044b40464f626d1df709f840e",
+      "code_excerpt": "def test_isolation_is_proven_only_by_token_and_canary_together(facts, expected):"
+    },
+    {
+      "path": "tools/orchestration/appcontainer.py",
+      "sha256": "83249ca705d2fb0675ab28fcc32da24e5c2b56a0f7b6b7be4cfa224c519e02d4",
+      "code_excerpt": "    from the arguments used to create it. It says nothing about file ACLs."
+    },
+    {
+      "path": "tools/orchestration/closed_loop_lab.py",
+      "sha256": "91fdcd5a97e4395a2c27f26a21f17af205ad32556dd45c84c2e4a640716fc3a2",
+      "code_excerpt": "        if e[\"status\"] != \"DONE\" or not e[\"result\"]:"
+    },
+    {
+      "path": "tools/orchestration/sandboxed_tests.py",
+      "sha256": "db06077a65e1107ce880f2023fcbdfd1062b6ea4efdcbb2a3b591677ea748047",
+      "code_excerpt": "                if os.lstat(entry.path).st_nlink > 1:"
+    }
+  ]
+}
