@@ -259,7 +259,7 @@ def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
 
 
 OWNER_WAIVERS_FILE = "owner_test_waivers.json"
-MAX_WAIVED_PER_PR = 32
+MAX_WAIVED_PER_PR = 96                                               # 32 -> 96 por decisao do proprietario em 2026-11-16 (#672: 68 testes proprios que o AppContainer nao roda)
 
 
 def owner_waived_ids(repo: str, pr: int | None, selected: list[str], path: Path | None = None) -> tuple[list[str], dict | None, str | None]:
@@ -281,7 +281,7 @@ def owner_waived_ids(repo: str, pr: int | None, selected: list[str], path: Path 
         w = mine[0]
         ids = w.get("node_ids")
         if not isinstance(ids, list) or not ids or len(ids) > MAX_WAIVED_PER_PR or len(set(ids)) != len(ids) or not w.get("decided_by") or not w.get("decided_at"):
-            raise ValueError("dispensa sem node_ids validos (1..32, sem repeticao) ou sem decided_by/decided_at")
+            raise ValueError("dispensa sem node_ids validos (1..MAX_WAIVED_PER_PR, sem repeticao) ou sem decided_by/decided_at")
         for nid in ids:
             if (not isinstance(nid, str) or not dtests.NODE_ID.fullmatch(nid) or any(ch in nid.split("::", 1)[1].split("[")[0] for ch in "*?")
                     or any(part in ("", ".", "..") for part in nid.split("::", 1)[0].split("/"))):

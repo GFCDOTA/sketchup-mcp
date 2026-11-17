@@ -121,7 +121,7 @@ def test_only_waived_ids_whose_file_was_selected_are_deselected(env):
 
 
 @pytest.mark.parametrize("bad", [entry(node_ids=["tests/test_lab.py::test_*"]), entry(node_ids=["tests/test_lab.py"]), entry(node_ids=["tests/../x.py::t"]),
-                                 entry(node_ids=[]), entry(node_ids=IDS + IDS[:1]), entry(decided_by=""), entry(node_ids=[f"tests/test_lab.py::t{i}" for i in range(33)])])
+                                 entry(node_ids=[]), entry(node_ids=IDS + IDS[:1]), entry(decided_by=""), entry(node_ids=[f"tests/test_lab.py::t{i}" for i in range(cr.MAX_WAIVED_PER_PR + 1)])])
 def test_a_malformed_waiver_waives_nothing_and_says_why(env, bad):
     tmp_path, seen = env
     waivers(tmp_path, bad)
