@@ -13,7 +13,6 @@ from tools.orchestration import shadow_divergence as sd
 from tools.orchestration import sqlite_source as sq
 from tools.orchestration import store_factory as sf
 
-
 REAL_ROLLBACK_GATE = sq._rollback_gate
 
 
