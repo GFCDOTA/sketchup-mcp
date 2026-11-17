@@ -431,6 +431,18 @@ class EventStore:
                 rows = db.execute("SELECT * FROM outbox WHERE status='PENDING' ORDER BY id")
             return [dict(r) for r in rows]
 
+    def snapshot(self, job_id: str) -> tuple[list[dict], list[dict]]:
+        """(eventos do job, outbox) lidos na MESMA transacao de leitura: uma foto consistente. Quem decide "terminal" e "sem publicacao pendente" a partir
+        de duas leituras separadas pode ver o estado terminal de depois e o outbox de antes."""
+        with self._conn() as db:
+            db.execute("BEGIN")
+            try:
+                events = [dict(r) for r in db.execute("SELECT * FROM events WHERE job_id=? ORDER BY id", (job_id,))]
+                outbox = [dict(r) for r in db.execute("SELECT * FROM outbox ORDER BY id")]
+            finally:
+                db.execute("COMMIT")
+            return events, outbox
+
     def outbox_entries(self) -> list[dict]:
         """Inspection only: every entry, whatever its status, in creation order."""
         with self._conn() as db:
