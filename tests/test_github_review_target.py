@@ -44,7 +44,7 @@ class FakeGitHub:
             return {"state": self.state, "head": {"sha": self.head, "repo": {"full_name": self.repo}}}
         if method == "POST" and path == f"repos/{REPO}/pulls/{PR}/reviews":
             review = {"id": 1000 + len(self.reviews), "user": {"login": REVIEWER}, "commit_id": fields["commit_id"],
-                      "body": fields["body"], "state": fields["event"]}
+                      "body": fields["body"], "state": gt.REVIEW_STATE[fields["event"]]}
             self.reviews.append(review)
             return review
         raise AssertionError(f"chamada inesperada: {method} {path}")
@@ -88,7 +88,7 @@ def test_find_reads_every_page_of_reviews():
     gh.page_size = 2
     for i in range(5):
         gh.reviews.append({"id": i, "user": {"login": REVIEWER}, "commit_id": SHA, "body": gt.marker(f"old{i}")})
-    gh.reviews.append({"id": 99, "user": {"login": REVIEWER}, "commit_id": SHA, "body": gt.marker("k1")})
+    gh.reviews.append({"id": 99, "user": {"login": REVIEWER}, "commit_id": SHA, "state": "CHANGES_REQUESTED", "body": gt.marker("k1")})
 
     found = gt.GitHubReviewTarget(gh, token="t", reviewer=REVIEWER, repo=REPO, page_size=2).find(entry("k1"))
 
@@ -324,3 +324,25 @@ def test_the_e2e_script_uses_the_guard_and_no_assert():
     src = (Path(__file__).resolve().parents[1] / "artifacts/review/fp060/m2_outbox/2026-11-15_github_disposable_pr/e2e_outbox_github.py").read_text(encoding="utf-8")
     assert "gt.require_disposable_pr(pr, target.reviewer)" in src and "\nassert " not in src
     assert src.index("require_disposable_pr(") < src.index("store.complete(")                    # a guarda vem ANTES de existir entrada no outbox
+
+
+# -- revisao do Codex (#619, af3a7c54): o review achado pelo marcador precisa ser do HEAD e do veredito da entrada ------------------------------------------
+@pytest.mark.parametrize("override", [{"commit_id": "c" * 40}, {"state": "APPROVED"}, {"state": "COMMENTED"}])
+def test_a_marked_review_with_another_commit_or_verdict_is_never_reconciled(override):
+    gh = FakeGitHub()
+    t = target(gh)
+    t.send(entry("k1"))
+    gh.reviews[0].update(override)
+    with pytest.raises(TargetError, match="outro efeito"):
+        t.find(entry("k1"))
+
+
+def test_the_publisher_gives_no_ack_and_no_second_post_for_a_marked_review_with_another_effect(tmp_path):
+    store = EventStore(tmp_path / "events.db")
+    gh = FakeGitHub()
+    queue(store, "k1")
+    target(gh).send(entry("k1"))
+    gh.reviews[0]["commit_id"] = "c" * 40
+    posts = len(gh.posts())
+    res = op.publish_one(store, {"github": target(gh)}, "pub-1", lease_seconds=30)
+    assert res["action"] == "FAILED" and "outro efeito" in res["reason"] and len(gh.posts()) == posts

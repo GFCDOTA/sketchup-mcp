@@ -30,6 +30,7 @@ from tools.orchestration.outbox_publisher import TargetError
 
 Api = Callable[..., Any]       # api(method, path, *, token=None, fields=None) -> JSON decodificado; levanta TargetError
 PUBLISHABLE = ("APPROVE", "REQUEST_CHANGES")
+REVIEW_STATE = {"APPROVE": "APPROVED", "REQUEST_CHANGES": "CHANGES_REQUESTED"}   # `event` do POST -> `state` que o GitHub devolve na listagem
 ENV_KEEP = {"PATH", "SYSTEMROOT", "WINDIR", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "COMSPEC", "PATHEXT", "HOME"}
 _SHA = re.compile(r"^[0-9a-f]{40}$")
 
@@ -139,6 +140,11 @@ class GitHubReviewTarget:
                 raise TargetError("listagem de reviews em formato inesperado")
             for row in rows:
                 if (row.get("user") or {}).get("login") == self.reviewer and key in (row.get("body") or ""):
+                    # o marcador sozinho nao confirma o EFEITO: o review achado precisa ser do HEAD e do veredito da entrada; diferente = falha sem ACK nem novo POST
+                    want_state = REVIEW_STATE.get(p["verdict"])
+                    if str(row.get("commit_id", "")).lower() != p["head_sha"] or row.get("state") != want_state:
+                        raise TargetError(f"review {row.get('id')} tem o marcador da chave mas outro efeito (commit {str(row.get('commit_id'))[:8]}, estado {row.get('state')!r}; "
+                                          f"esperado {p['head_sha'][:8]}/{want_state}): nao reconcilio nem reenvio")
                     return f"github-review:{row['id']}"
             if len(rows) < self.page_size:
                 return None
