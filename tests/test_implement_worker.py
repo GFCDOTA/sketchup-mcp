@@ -200,19 +200,10 @@ def test_a_remote_branch_conflict_or_error_blocks_without_running_claude(world, 
     assert res["action"] == "BLOCKED_WORKTREE" and child.calls == [] and world.delivered == []
 
 
-def test_a_resumable_branch_opens_the_pr_without_running_claude_or_delivering_again(world, monkeypatch):
+def test_a_resumable_looking_branch_is_never_adopted_without_durable_proof_of_a_validated_delivery(world, monkeypatch):
     monkeypatch.setattr(iw, "ensure_remote_branch", lambda wt, branch, base: ("RESUMABLE", "ja publicada"))
     res, _gh, child = run(world)
-    assert res["action"] == "DONE" and res["pr"] == 77 and child.calls == [] and world.delivered == []
-    assert event(world)["status"] == "DONE"
-
-
-def test_a_resumable_branch_whose_pr_still_fails_is_retried_not_lost(world, monkeypatch):
-    monkeypatch.setattr(iw, "ensure_remote_branch", lambda wt, branch, base: ("RESUMABLE", "ja publicada"))
-    monkeypatch.setattr(iw, "create_pr", lambda *a, **k: (None, "gh pr create recusado: 502"))
-    res, _gh, _child = run(world)
-    assert res["action"] == "FAILED" and "PR nao abriu" in res["reason"]
-    assert event(world)["status"] == "PENDING" and event(world)["attempt"] == 1
+    assert res["action"] == "BLOCKED_WORKTREE" and "prova duravel" in res["reason"] and child.calls == [] and world.delivered == [] and world.prs == []
 
 
 # --------------------------------------------------------------------------------------------------------- resultados do filho

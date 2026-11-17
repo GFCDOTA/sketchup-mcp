@@ -231,9 +231,10 @@ def handle(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, runner, c
     state, msg = ensure_remote_branch(wt, branch, base)
     if state in ("CONFLICT", "ERROR"):
         return block("BLOCKED_WORKTREE", msg)
-    if state == "RESUMABLE":                                                 # a tentativa anterior publicou (via `deliver`); so falta o PR
-        opened = _open_pr(item, owner, issue, branch, repo, t, base, "", key, gh)
-        return opened if opened["action"] in ("DONE", "LEASE_LOST", "LEASE_LOST_AFTER_PR") else fail(opened["reason"], "")
+    if state == "RESUMABLE":
+        # um commit na branch cujo committer bate com o e-mail local NAO prova que passou pelas guardas e testes da entrega (o e-mail e forjavel): sem prova
+        # duravel de entrega validada daquele SHA, nada e adotado nem vira PR. Escala ao proprietario (nunca abre PR com diff nao validado)
+        return block("BLOCKED_WORKTREE", f"{msg}: sem prova duravel de entrega validada deste commit, nao abro o PR; escalar ao proprietario")
     if not ex.update_owned(key, owner, lambda it, b: b.setdefault("runs", []).append(es.now_iso(t)), now=t):
         return {"action": "LOST_LEASE", "item": key, "reason": "lease perdido antes de executar"}
     try:
