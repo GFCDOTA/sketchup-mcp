@@ -109,7 +109,10 @@ class Snapshot:
     def store_ok(self) -> bool:
         st = self.store or {}
         ob = st.get("outbox")
-        return st.get("state") == "ok" and not st["dlq"] and not st["zombies"] and isinstance(ob, dict) and not ob.get("dlq") and not ob.get("zombies")      # sem leitura da outbox: nao e saudavel
+        # a outbox precisa ter sido LIDA de fato (contagens, DLQ e leases mortos presentes): vazia ou incompleta nao e saude
+        read = isinstance(ob, dict) and isinstance(ob.get("counts"), dict) and isinstance(ob.get("dlq"), list) and isinstance(ob.get("zombies"), int)
+        return (st.get("state") == "ok" and not st["dlq"] and not st["zombies"] and read
+                and not ob["dlq"] and not ob["zombies"] and not ob["counts"].get("DLQ"))
 
     def agents(self) -> list[AgentStatus]:
         return [self.claude, self.codex, self.listener, self.github]

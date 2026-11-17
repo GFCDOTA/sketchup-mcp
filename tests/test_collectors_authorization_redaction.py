@@ -28,8 +28,14 @@ def test_quoted_json_and_multi_parameter_authorization_values_are_redacted_entir
     assert CRED not in col.redact_secrets(raw)
 
 
-def test_text_after_a_semicolon_survives_so_the_rest_of_the_error_stays_readable():
-    out = col.redact_secrets(f"Authorization: OAuth {CRED}; HTTP 401 do servidor")
+@pytest.mark.parametrize("raw", [f"Authorization: Custom id=a;opaque={CRED}", f"Authorization: Digest realm=x; nonce=y; response={CRED}",
+                                 f"Proxy-Authorization: OAuth a=1;b={CRED}"])
+def test_parameters_after_a_semicolon_are_part_of_the_header_value_and_are_redacted(raw):
+    assert CRED not in col.redact_secrets(raw)
+
+
+def test_the_next_line_of_the_error_survives_so_it_stays_readable():
+    out = col.redact_secrets(f"Authorization: OAuth {CRED}\nHTTP 401 do servidor")
     assert CRED not in out and "HTTP 401 do servidor" in out
 
 

@@ -22,7 +22,8 @@ def test_a_missing_or_unreadable_store_is_never_healthy_and_says_so():
 
 
 def test_dlq_zombies_or_an_unread_outbox_make_the_store_unhealthy():
-    for change in ({"dlq": [{"id": 9, "key": "k"}]}, {"zombies": 1}, {"outbox": None}, {"outbox": {"counts": {}, "zombies": 1, "dlq": []}},
+    for change in ({"dlq": [{"id": 9, "key": "k"}]}, {"zombies": 1}, {"outbox": None}, {"outbox": {}}, {"outbox": {"counts": {}}}, {"outbox": {"dlq": [], "zombies": 0}},
+                   {"outbox": {"counts": {"DLQ": 2}, "zombies": 0, "dlq": []}}, {"outbox": {"counts": {}, "zombies": 1, "dlq": []}},
                    {"outbox": {"counts": {}, "zombies": 0, "dlq": [{"id": 1, "target": "github", "key": "k"}]}}):
         assert snap({**OK, **change}).store_ok() is False
 
