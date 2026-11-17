@@ -388,6 +388,9 @@ def test_a_report_made_under_a_different_rule_set_is_refused(base):
     (lambda ci: setattr(ci, "files", {}), "inesperado"),
     (lambda ci: setattr(ci, "files", {dt.RESULT_FILE: "{}", "extra.txt": "x"}), "inesperado"),
     (lambda ci: setattr(ci, "files", {dt.RESULT_FILE: "isto nao e json"}), "ilegivel"),
+    (lambda ci: setattr(ci, "files", {dt.RESULT_FILE: "[]"}), "nao e um objeto"),
+    (lambda ci: setattr(ci, "files", {dt.RESULT_FILE: '"texto"'}), "nao e um objeto"),
+    (lambda ci: setattr(ci, "files", {dt.RESULT_FILE: "3"}), "nao e um objeto"),
     (lambda ci: setattr(ci, "files", {"results.txt": "{}"}), "inesperado"),
     (lambda ci: setattr(ci, "download_boom", True), "download"),
 ])

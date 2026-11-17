@@ -230,6 +230,8 @@ def verify_ci_evidence(gh, download: Callable[[str], bytes], repo: str, head_sha
             report = json.loads(z.read(RESULT_FILE).decode("utf-8"))
     except (zipfile.BadZipFile, ValueError, KeyError) as exc:
         raise DelegationError(f"artefato ilegivel ({type(exc).__name__})") from exc
+    if not isinstance(report, dict):                                  # JSON valido que nao e objeto ([], "x", 3): rejeicao controlada, nunca AttributeError
+        raise DelegationError(f"relatorio do artefato nao e um objeto JSON ({type(report).__name__})")
     want = {"schema": SCHEMA, "repository": repo, "head_sha": head_sha, "run_id": run_id, "run_attempt": attempt, "workflow_path": policy.workflow_path}
     for key, value in want.items():
         if (str(report.get(key)).lower() if key == "head_sha" else report.get(key)) != value:
