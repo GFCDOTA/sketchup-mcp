@@ -100,18 +100,6 @@ def test_a_missing_watch_report_counts_as_not_read(monkeypatch, tmp_path):
     assert out["uncovered"] == [WF]
 
 
-# -- PR so de documentacao/dados: os testes que leem o arquivo sao ESCOLHIDOS (o revisor tem uma execucao para avaliar); doc nunca fica "descoberto" ----------
-def test_a_docs_or_data_only_change_selects_the_tests_that_cite_it(tmp_path):
-    inv = "docs/specs/fp042_inventory.v1.json"
-    wt = tree(tmp_path, {"test_inventory_gate.py": f'INV = "{inv}"\n', "test_other.py": "def test_x(): pass\n"})
-    assert cr.select_tests(wt, [inv, "docs/specs/FP-060_audit.md"]) == (["tests/test_inventory_gate.py"], [])
-
-
-def test_a_doc_nobody_cites_selects_nothing_and_is_never_uncovered(tmp_path):
-    wt = tree(tmp_path, {"test_other.py": "def test_x(): pass\n"})
-    assert cr.select_tests(wt, ["docs/notes.md"]) == ([], [])
-
-
 # -- evidencia em pastas que o sandbox nao copia (artifacts/...): fora da exigencia de cobertura, listada a parte ------------------------------------------
 def test_an_evidence_script_under_artifacts_is_not_uncovered_code(tmp_path):
     script = "artifacts/review/fp060/x/collect_evidence.py"

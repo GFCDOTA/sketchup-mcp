@@ -269,9 +269,6 @@ def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
     tests_dir = wt / "tests"
     cache: dict = {}
     for p in files:
-        if not _is_test(p) and not p.startswith("tests/") and not p.endswith(CODE_EXT):
-            sel.update(tests_citing(wt, p, cache))                               # doc/dado (JSON, Markdown): so ESCOLHE os testes que o leem; nao entra na exigencia de cobertura
-            continue
         if _is_test(p) or not p.endswith(CODE_EXT) or p.startswith("tests/"):
             continue
         if p.startswith(EVIDENCE_ROOT):                                         # evidencia (artifacts/): o sandbox nao a copia, entao nenhum teste a executa la;
