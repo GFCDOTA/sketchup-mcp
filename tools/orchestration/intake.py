@@ -31,6 +31,7 @@ AUTH_LABEL = "executor-intake"
 ALLOWED_SPECS = frozenset({"FP-060"})
 EVENT_TYPE = "IMPLEMENT_REQUESTED"
 AGGREGATE = "issue"
+POST_CHECK_RETRY_S = 900.0                                                        # pos-checagem inconclusiva: o pedido espera 15 min antes de poder rodar
 PRODUCER = "intake"
 INTAKE_AGENT = None                     # SEM nome: `decide` exclui dos conflitos so os claims do agente dado, e nenhum claim tem agente None => todo claim ativo (de qualquer nome, inclusive "intake") e externo
 
@@ -172,7 +173,14 @@ def main(argv: list[str] | None = None) -> int:
         out["published"] = {"event_id": event_id, "created": created}
         _i, _s, after_prs = bd.load(statuses=False)
         linked = open_pr_for(after_prs, again.candidate.node.number)
-        if linked is not None:                                                            # recem-criado OU identico ja PENDING: o PR vinculado vence os dois
+        if len(after_prs) >= bd.LOAD_LIMIT:
+            # pos-checagem TRUNCADA: a ausencia de um PR vinculado nao prova nada. O pedido nao e descartado (a chave idempotente o recuperaria descartado), mas
+            # fica SEGURO: volta a PENDING com espera e o motivo registrado, e nao roda antes de uma leitura completa
+            owned = store.claim_by_id(event_id, "intake:post-check", 30.0)
+            if owned is not None:
+                store.fail(owned, f"pos-checagem inconclusiva: lista de PRs no limite de {bd.LOAD_LIMIT} (possivelmente truncada)", retry_delay=POST_CHECK_RETRY_S)
+            out["post_check"] = {"inconclusive": True, "held": owned is not None, "retry_s": POST_CHECK_RETRY_S}
+        elif linked is not None:                                                            # recem-criado OU identico ja PENDING: o PR vinculado vence os dois
             owned = store.claim_by_id(event_id, "intake:post-check", 30.0)                # so pega evento ainda reivindicavel (PENDING); um ja em execucao fica com o executor
             if owned is not None:
                 store.supersede(owned, f"o PR #{linked} foi vinculado a Issue enquanto o pedido era gravado: descartado")

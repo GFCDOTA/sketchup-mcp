@@ -366,3 +366,16 @@ def test_a_pr_linked_after_the_write_supersedes_an_identical_request_that_was_al
     out = json.loads(capsys.readouterr().out)
     assert out["published"]["created"] is False and out["superseded"]["pr"] == 89
     assert [e["status"] for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER] == ["SUPERSEDED"]
+
+
+# -- 12a revisao do Codex (#641, 10b3747b): pos-checagem truncada e inconclusiva: o pedido fica seguro, nao livre ------------------------------------------
+def test_a_truncated_post_check_holds_the_new_request_instead_of_leaving_it_runnable(cli, monkeypatch, capsys):
+    from tools.validation import backlog_discovery as bd
+    many = [{"number": 1000 + n, "body": "", "headRefName": "x"} for n in range(bd.LOAD_LIMIT)]
+    reads = iter([([issue(1)], None, []), ([issue(1)], None, []), ([issue(1)], None, many)])
+    monkeypatch.setattr(bd, "load", lambda statuses=False: next(reads))
+    assert intake.main(["publish", "--apply"]) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["post_check"] == {"inconclusive": True, "held": True, "retry_s": intake.POST_CHECK_RETRY_S} and "superseded" not in out
+    ev = next(e for e in EventStore(cli).events() if e["producer"] == intake.PRODUCER)
+    assert ev["status"] == "PENDING" and "inconclusiva" in ev["error"] and ev["available_at"] > ev["created_at"] + intake.POST_CHECK_RETRY_S - 5
