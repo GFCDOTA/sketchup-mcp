@@ -36,3 +36,24 @@ def test_an_outbox_dlq_entry_warns_to_reconcile_before_republishing_instead_of_c
 def test_the_store_line_is_part_of_the_copied_diagnostic():
     s = snap({**OK, "last_error": {"key": "k", "error": "gh falhou: Authorization: OAuth abcdefghijklmnop"}})
     assert s.store_line() in s.diagnostic() and "abcdefghijklmnop" not in s.diagnostic()
+
+
+# -- revisao do Codex (#663, e07f4ada): a linha exibida no painel e provada SEM Qt (o PySide6 nao existe no sandbox nem no CI) ------------------------------
+def test_the_panel_html_of_a_healthy_store_is_grey_and_carries_the_line():
+    html_line = snap(OK).store_line_html()
+    assert html_line.startswith("<span style='color:#6d6d75'>") and "EventStore: 2 pendente(s)" in html_line
+
+
+def test_the_panel_html_of_an_unhealthy_store_is_red():
+    assert snap({"state": "ausente", "error": "sem event_store.db"}).store_line_html().startswith("<span style='color:#ff9a9b'>")
+
+
+def test_the_panel_html_is_escaped_and_carries_no_credential():
+    html_line = snap({**OK, "last_error": {"key": "k", "error": "<b>gh</b> falhou: Authorization: OAuth abcdefghijklmnop"}}).store_line_html()
+    assert "abcdefghijklmnop" not in html_line and "<b>gh</b>" not in html_line and "&lt;b&gt;gh&lt;/b&gt;" in html_line
+
+
+def test_the_qt_window_shows_exactly_the_tested_html():
+    from pathlib import Path
+    src = (Path(__file__).resolve().parents[1] / "tools/orchestration/agent_bar/window.py").read_text(encoding="utf-8")
+    assert "s.store_line_html()" in src and "esc(s.store_line())" not in src                     # o painel nao monta a linha por conta propria

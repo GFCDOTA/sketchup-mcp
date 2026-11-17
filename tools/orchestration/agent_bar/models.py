@@ -106,6 +106,12 @@ class Snapshot:
                 f"#{x['id']} {redact_secrets(x['target'])[:20]} {redact_secrets(x['key'])[:40]}" for x in dead[:3])
         return line
 
+    def store_line_html(self) -> str:
+        """A linha do EventStore como o painel Qt a exibe (sem Qt, testavel no sandbox e no CI): ESCAPADA, sem credencial e cinza so quando saudavel."""
+        import html
+        color = "#6d6d75" if self.store_ok() else "#ff9a9b"
+        return f"<span style='color:{color}'>{html.escape(self.store_line())}</span>"
+
     def store_ok(self) -> bool:
         st = self.store or {}
         ob = st.get("outbox")
