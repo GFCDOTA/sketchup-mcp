@@ -52,3 +52,23 @@ def test_an_oauth_style_credential_never_reaches_the_panel_or_the_copied_diagnos
     out = col.collect_store(tmp_path, NOW)
     s = snap(out)
     assert CRED not in s.store_line() and CRED not in str(out.get("last_error")) and CRED not in s.diagnostic()
+
+
+# -- revisao do Codex (#663, d41d5731): erro persistido com JSON ESCAPADO --------------------------------------------------------------------------------------
+ESCAPED = [r'{\"Authorization\": \"OAuth abcdefghijklmnop\"}', r"{\'authorization\': \'Bearer abcdefghijklmnop\'}",
+           r'resposta: {\"headers\": {\"Proxy-Authorization\": \"Digest response=abcdefghijklmnop\"}}']
+
+
+@pytest.mark.parametrize("raw", ESCAPED)
+def test_an_authorization_header_inside_escaped_json_is_redacted(raw):
+    assert CRED not in col.redact_secrets(raw)
+
+
+@pytest.mark.parametrize("raw", ESCAPED)
+def test_escaped_json_credentials_never_reach_the_panel_or_the_copied_diagnostic(store, tmp_path, raw):  # noqa: F811
+    store.publish("CORRECTION_REQUESTED", "k", "pr:1", {"x": 1})
+    ev = store.claim(("CORRECTION_REQUESTED",), "w", 60, job_id="pr:1")
+    store.fail(ev, f"gh falhou: {raw}", retry_delay=900)
+    out = col.collect_store(tmp_path, NOW)
+    s = snap(out)
+    assert CRED not in s.store_line() and CRED not in str(out.get("last_error")) and CRED not in s.diagnostic() and CRED not in s.store_line_html()

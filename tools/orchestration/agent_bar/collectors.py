@@ -504,7 +504,8 @@ def collect_backlog(gh: Callable[[list[str]], tuple[int, str]] = run_gh, owner: 
 
 _SECRET = re.compile(
     # cabecalho Authorization/Proxy-Authorization: o VALOR INTEIRO sai, qualquer que seja o esquema (Basic, Bearer, token, OAuth, Digest, AWS4-HMAC-SHA256...)
-    r"((?i:(?<![A-Za-z0-9_-])(?:proxy-)?authorization)[\"']?\s*[:=]\s*(?:\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'|[^\r\n]+)"         # o valor inteiro ate o fim da linha: parametros depois de `;` tambem sao credencial
+    # aspas opcionalmente ESCAPADAS em volta da chave (`{\"Authorization\": \"OAuth x\"}` num erro com JSON escapado); valor inteiro ate o fim da linha (`;` tambem)
+    r"((?i:(?<![A-Za-z0-9_-])(?:proxy-)?authorization)(?:\\?[\"'])?\s*[:=]\s*(?:\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'|[^\r\n]+)"
     r"|gh[pousr]_[A-Za-z0-9]{10,}|github_pat_[A-Za-z0-9_]{10,}|sk-[A-Za-z0-9][A-Za-z0-9_-]{15,}|xox[abprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{20,}|AKIA[0-9A-Z]{12,}"
     r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|(?i:bearer)\s+[A-Za-z0-9._~+/=-]{8,}|(?i:basic)\s+[A-Za-z0-9+/=]{8,}"
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)"
