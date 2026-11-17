@@ -464,11 +464,16 @@ def test_the_launcher_pins_gh_bin_to_the_fallback_path_even_when_gh_is_missing_a
     assert "if (Test-Path $gh) { $env:GH_BIN = $gh }" not in src
 
 
-def test_the_launcher_exits_after_eight_consecutive_cycle_failures_by_default():
+def test_the_launcher_recovers_continuously_by_default_and_exit_code_7_is_opt_in():
     src = _launcher_text()
-    assert "[int]$ExitAfterFailures = 8" in src and '"--exit-after-failures", $ExitAfterFailures' in src
+    assert "[int]$ExitAfterFailures = 0" in src                                                      # padrao: nunca sair (a tarefa agendada so reinicia 3 vezes)
+    assert 'if ($ExitAfterFailures -gt 0) { $argsList += @("--exit-after-failures", $ExitAfterFailures) }' in src
 
 
-def test_the_default_launcher_failure_limit_matches_the_executor_constant():
+def test_a_long_outage_never_ends_the_default_loop():
+    """Indisponibilidade maior que (falhas para sair x 3 reinicios da tarefa): nem o executor nem o launcher saem por padrao."""
+    import inspect
+
     from tools.orchestration import event_executor as ex
-    assert ex.MAX_CONSECUTIVE_CYCLE_ERRORS == 8 and "= 8)" in _launcher_text()
+    src = inspect.getsource(ex)
+    assert '"--exit-after-failures", type=int, default=0' in src and "[int]$ExitAfterFailures = 0" in _launcher_text()

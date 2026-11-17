@@ -2,7 +2,7 @@
 # Uso:  powershell -File tools\orchestration\run_event_bridge.ps1 [-Once] [-IntervalSeconds 120] [-Execute]
 # Log:  runs\governance\event_bridge.log (uma linha JSON por ciclo, UTF-8 sem BOM; ver event_bridge_log.ps1). Parar: Ctrl+C ou encerrar a tarefa agendada.
 # Agendador de Tarefas: use tools\orchestration\install_event_bridge_task.ps1 (dry-run por padrao).
-param([switch]$Once, [int]$IntervalSeconds = 120, [string]$ExpectedLogin = "fmodesto30", [switch]$Execute, [int]$ExitAfterFailures = 8)
+param([switch]$Once, [int]$IntervalSeconds = 120, [string]$ExpectedLogin = "fmodesto30", [switch]$Execute, [int]$ExitAfterFailures = 0)
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "event_bridge_log.ps1")
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
@@ -27,7 +27,8 @@ Initialize-BridgeLog -Path $log
 if ($Execute) { $argsList = @("-m", "tools.orchestration.event_executor", "run", "--interval", $IntervalSeconds, "--watch-pid", $PID, "--execute") }
 else { $argsList = @("-m", "tools.orchestration.event_executor", "run", "--interval", $IntervalSeconds, "--watch-pid", $PID) }
 if ($Once) { $argsList += "--once" }
-# contrato do launcher: 8 falhas de ciclo consecutivas encerram com codigo 7 para o Agendador reiniciar (0 = nunca sair)
+# contrato do launcher: RECUPERACAO CONTINUA por padrao (0 = nunca sair; o laco faz backoff e volta sozinho quando o GitHub/gh voltam). Sair com codigo 7 apos N falhas
+# e opcional (-ExitAfterFailures N): a tarefa agendada so reinicia 3 vezes, entao sair por padrao mataria o listener numa indisponibilidade longa.
 if ($ExitAfterFailures -gt 0) { $argsList += @("--exit-after-failures", $ExitAfterFailures) }
 # Python em UTF-8 e o console decodifica UTF-8; o log e gravado por Write-BridgeLog (nunca Tee-Object: grava UTF-16 no PS 5.1).
 $env:PYTHONUTF8 = "1"
