@@ -267,13 +267,53 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
 
 
+WATCH_PLUGIN = "fp060_watch"
+_WATCH_SOURCE = """\"\"\"Plugin do COORDENADOR (FP-060): registra quais arquivos vigiados os testes ABREM (audit hook `open`). Escrito fora da arvore do PR.\"\"\"
+import json, os, sys
+
+_WATCH = {watch_json}
+_REPORT = {report!r}
+_ROOT = os.path.realpath(os.getcwd())
+_TARGETS = {{os.path.normcase(os.path.realpath(os.path.join(_ROOT, p))): p for p in _WATCH}}
+_OPENED = set()
+
+
+def _hook(event, args):
+    if event != "open" or not args:
+        return
+    target = args[0]
+    if isinstance(target, int):
+        return
+    try:
+        key = os.path.normcase(os.path.realpath(os.fsdecode(target)))
+    except (TypeError, ValueError, OSError):
+        return
+    if key in _TARGETS:
+        _OPENED.add(_TARGETS[key])
+
+
+def pytest_configure(config):
+    sys.addaudithook(_hook)
+
+
+def pytest_unconfigure(config):
+    with open(_REPORT, "w", encoding="utf-8") as fh:
+        json.dump({{"watched": sorted(_WATCH), "opened": sorted(_OPENED)}}, fh)
+"""
+
+
+def watch_plugin_source(watch: list[str], report_path: str) -> str:
+    return _WATCH_SOURCE.format(watch_json=json.dumps(sorted(watch)), report=report_path)
+
+
 def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeout: float, log_dir: Path, tag: str,
-               dists: tuple[str, ...] = ("pytest",), skip: tuple[str, ...] = (), delegated: tuple[str, ...] = ()) -> SandboxRun:
+               dists: tuple[str, ...] = ("pytest",), skip: tuple[str, ...] = (), delegated: tuple[str, ...] = (), watch: tuple[str, ...] = ()) -> SandboxRun:
     """Roda `tests` (caminhos relativos a `tree`) sobre uma COPIA de `tree` dentro de um AppContainer sem capacidades.
     `dists` sao as distribuicoes (com as dependencias obrigatorias) levadas para o runtime; `skip`, entradas do nivel de cima
     da arvore que ficam de fora da copia.
 
     `delegated`: node ids EXATOS (vindos da politica confiavel da base, `delegated_tests`) que um plugin do coordenador deseleciona por igualdade de node id; todo o resto roda.
+    `watch`: caminhos (relativos a `tree`) cuja LEITURA pelos testes o coordenador quer medir; `facts["watched"]["opened"]` diz quais foram abertos de fato.
 
     `root` recebe o workspace temporario e o canario (ambos removidos ao final); `log_dir` recebe stdout/stderr da sonda e
     dos testes, abertos pelo coordenador e herdados pelo processo — ficam fora do workspace. A arvore original nao e tocada.
@@ -293,7 +333,7 @@ def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeo
     canary, intruder = root / f"canary-{secret[:12]}.txt", root / f"canary-{secret[:12]}.written"
     canary.write_text(secret, encoding="ascii")
     try:
-        return _run(Path(tree), tests, root, ini_text, timeout, log_dir, tag, secret, canary, intruder, dists, skip, delegated)
+        return _run(Path(tree), tests, root, ini_text, timeout, log_dir, tag, secret, canary, intruder, dists, skip, delegated, watch)
     except (AppContainerError, ps.ProcessSupervisorError) as exc:
         raise SandboxError(f"{type(exc).__name__}: {exc}") from exc
     except OSError as exc:                                   # sem o caminho: o motivo vai para evento, log e relatorio
@@ -305,7 +345,7 @@ def run_pytest(tree: Path, tests: list[str], *, root: Path, ini_text: str, timeo
 
 
 def _run(tree: Path, tests: list[str], root: Path, ini_text: str, timeout: float, log_dir: Path, tag: str, secret: str,
-         canary: Path, intruder: Path, dists: tuple[str, ...], skip: tuple[str, ...], delegated: tuple[str, ...] = ()) -> SandboxRun:
+         canary: Path, intruder: Path, dists: tuple[str, ...], skip: tuple[str, ...], delegated: tuple[str, ...] = (), watch: tuple[str, ...] = ()) -> SandboxRun:
     facts: dict = {}
     with AppContainerProfile() as profile:
         ws = create_workspace(profile, root)
@@ -335,6 +375,10 @@ def _run(tree: Path, tests: list[str], root: Path, ini_text: str, timeout: float
                 )
                 (coordinator / f"{dt.PLUGIN_NAME}.py").write_text(dt.plugin_source(list(delegated), str(report)), encoding="utf-8")
                 plugin_args = ["-p", dt.PLUGIN_NAME]
+            watch_report = coordinator / "watched.json"
+            if watch:                                                                  # plugin do COORDENADOR: mede quais arquivos vigiados os testes ABREM
+                (coordinator / f"{WATCH_PLUGIN}.py").write_text(watch_plugin_source(list(watch), str(watch_report)), encoding="utf-8")
+                plugin_args += ["-p", WATCH_PLUGIN]
             # `--confcutdir .`: sem ele o pytest faz stat no pai do workspace ao coletar, e o AppContainer nega (medido).
             # No Windows Server 2025 o AppContainer nao pode abrir o dispositivo nulo (medido no runner do CI; no Windows 11
             # pode), e o pytest o abre em dois pontos. `--capture=sys` evita a captura por descritor, que o abre para o stdin
@@ -351,6 +395,11 @@ def _run(tree: Path, tests: list[str], root: Path, ini_text: str, timeout: float
                     facts["delegation"] = json.loads(report.read_text(encoding="utf-8")) if report.exists() else None
                 except ValueError:
                     facts["delegation"] = None                                           # relatorio ilegivel: o chamador trata como ausente (fail-closed)
+            if watch:
+                try:
+                    facts["watched"] = json.loads(watch_report.read_text(encoding="utf-8")) if watch_report.exists() else None
+                except ValueError:
+                    facts["watched"] = None                                              # ilegivel: nada conta como aberto (fail-closed)
         finally:
             facts["workspace_removed"] = _remove_workspace(ws, root)
     return SandboxRun(code, code is None, output, facts)

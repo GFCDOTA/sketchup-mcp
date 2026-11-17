@@ -59,3 +59,42 @@ def test_a_powershell_script_is_covered_by_the_test_that_cites_it(tmp_path):
 def test_only_test_files_count_as_citations(tmp_path):
     wt = tree(tmp_path, {"helpers.py": f'P = "{WF}"\n', "conftest.py": f'P = "{WF}"\n'})
     assert cr.select_tests(wt, [WF]) == ([], [WF])
+
+
+# -- cobertura COMPORTAMENTAL: citado escolhe o teste; so conta como coberto se o teste ABRIR o arquivo no sandbox ----------------------------------------
+class _Run:
+    def __init__(self, opened):
+        self.exit_code, self.timed_out, self.output = 0, False, "ok"
+        self.facts = {"is_appcontainer": True, "watched": {"watched": [WF], "opened": opened}}
+
+
+def _reviewer(monkeypatch, tmp_path, opened):
+    wt = tree(tmp_path, {"test_wf.py": f'P = "{WF}"\ndef test_pin(): pass\n'})
+    monkeypatch.setattr(cr, "codex_dir", lambda: tmp_path / "codex")
+    monkeypatch.setattr(cr.sb, "project_distributions", lambda p: ("pytest",))
+    monkeypatch.setattr(cr.sb, "proves_isolation", lambda facts: True)
+    seen = {}
+
+    def fake_run_pytest(tree_, tests, **kw):
+        seen["watch"] = kw.get("watch")
+        return _Run(opened)
+    monkeypatch.setattr(cr.sb, "run_pytest", fake_run_pytest)
+    return wt, seen
+
+
+def test_a_cited_file_that_the_tests_really_read_is_covered(monkeypatch, tmp_path):
+    wt, seen = _reviewer(monkeypatch, tmp_path, [WF])
+    out = cr.run_coordinator_tests(wt, [WF])
+    assert seen["watch"] == (WF,) and out["uncovered"] == [] and out["cited_files"] == {"read_by_tests": [WF], "not_read": []}
+
+
+def test_a_cited_file_that_no_test_reads_stays_uncovered(monkeypatch, tmp_path):
+    wt, _ = _reviewer(monkeypatch, tmp_path, [])
+    out = cr.run_coordinator_tests(wt, [WF])
+    assert out["uncovered"] == [WF] and out["cited_files"]["not_read"] == [WF]
+
+
+def test_a_missing_watch_report_counts_as_not_read(monkeypatch, tmp_path):
+    wt, _ = _reviewer(monkeypatch, tmp_path, None)
+    out = cr.run_coordinator_tests(wt, [WF])
+    assert out["uncovered"] == [WF]

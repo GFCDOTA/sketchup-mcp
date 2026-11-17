@@ -367,6 +367,8 @@ def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None,
     `delegation` (MT-03): testes comprovadamente incompativeis com o AppContainer (git) sao DELEGADOS ao CI por node id EXATO, com a politica lida da BASE e a evidencia do CI
     individual por teste, ligada ao HEAD exato (`delegated_tests`); todo o resto roda aqui. Sem politica/evidencia nada e dispensado."""
     sel, uncovered = select_tests(wt, files)
+    # arquivos nao-.py escolhidos por CITACAO: so contam como cobertos se algum teste os ABRIR de fato no sandbox (citar o caminho nao e cobertura)
+    cited = sorted(p for p in files if p.endswith(CODE_EXT) and not p.endswith(".py") and not p.startswith("tests/") and p not in uncovered)
     base = {"source": RUNNER_SOURCE, "selected": sel, "uncovered": uncovered}
 
     def skipped(why: str) -> dict:
@@ -381,7 +383,8 @@ def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None,
     try:
         run = sb.run_pytest(wt, sel, root=root, ini_text="[pytest]\n", timeout=timeout, log_dir=root / "logs",
                             tag=re.sub(r"[^A-Za-z0-9_.-]", "_", wt.name)[:40],
-                            dists=sb.project_distributions(ex.repo_root() / "pyproject.toml"), skip=SANDBOX_SKIP, delegated=tuple(sorted({*planned["ids"], *waived})))
+                            dists=sb.project_distributions(ex.repo_root() / "pyproject.toml"), skip=SANDBOX_SKIP, delegated=tuple(sorted({*planned["ids"], *waived})),
+                            watch=tuple(cited))
     except sb.SandboxError as exc:
         return skipped(f"sandbox de SO indisponivel ({str(exc)[:200]}); escalar ao proprietario")
     if not sb.proves_isolation(run.facts):
@@ -397,6 +400,11 @@ def run_coordinator_tests(wt: Path, files: list[str], python: str | None = None,
         if (planned["ids"] or waived) and not settled["ok"]:
             passed = False                                                              # evidencia ausente/inconsistente: o que foi dispensado NAO fica provado
             summary = "delegacao ao CI NAO comprovada (fail-closed): " + "; ".join(settled["reasons"]) + "\n" + summary
+    if cited:
+        opened = set(((run.facts.get("watched") or {}).get("opened")) or [])
+        unread = [p for p in cited if p not in opened]
+        base["uncovered"] = sorted({*base["uncovered"], *unread})                      # citado mas nunca lido pelos testes = sem cobertura comportamental
+        extra["cited_files"] = {"read_by_tests": sorted(opened & set(cited)), "not_read": unread}
     return {**base, "isolation": ISOLATION_OS, "tests_passed": passed, "exit_code": run.exit_code,
             "summary": summary, "sandbox": run.facts, **extra}
 
