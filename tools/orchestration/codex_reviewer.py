@@ -239,18 +239,42 @@ def _is_test(path: str) -> bool:
     return path.startswith("tests/") and Path(path).name.startswith("test_") and path.endswith(".py")
 
 
+def tests_citing(wt: Path, path: str, cache: dict | None = None) -> list[str]:
+    """Testes (`tests/**/test_*.py`) cujo codigo cita o caminho EXATO `path` (relativo ao repositorio, com `/`) como texto. Usado so para arquivos
+    que nao sao Python (workflow, .ps1, .sh...): eles nunca tem `test_<nome>.py`, e o teste que os le cita o caminho."""
+    tests_dir = wt / "tests"
+    if not tests_dir.is_dir():
+        return []
+    if cache is None:
+        cache = {}
+    if "texts" not in cache:
+        texts = {}
+        for q in tests_dir.rglob("test_*.py"):
+            try:
+                texts[q.relative_to(wt).as_posix()] = q.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+        cache["texts"] = texts
+    needles = (f'"{path}"', f"'{path}'")
+    return sorted(name for name, text in cache["texts"].items() if any(n in text for n in needles))
+
+
 def select_tests(wt: Path, files: list[str]) -> tuple[list[str], list[str]]:
     """(selecionados, descobertos). Testes alterados + para cada modulo .py alterado fora de tests/: tests/**/test_<nome>.py e
-    tests/**/test_<nome>_*.py existentes. Codigo alterado sem teste correspondente (inclusive .ps1/.yml) fica em `descobertos`."""
+    tests/**/test_<nome>_*.py existentes; para arquivo de codigo que NAO e .py (workflow, .ps1, .sh...): os testes que citam o caminho exato dele.
+    Codigo alterado sem teste correspondente fica em `descobertos`. Um .py so e coberto pelo teste com o nome dele (mencao em teste de inventario nao conta)."""
     sel = {p for p in files if _is_test(p) and (wt / p).is_file()}
     uncovered = []
     tests_dir = wt / "tests"
+    cache: dict = {}
     for p in files:
         if _is_test(p) or not p.endswith(CODE_EXT) or p.startswith("tests/"):
             continue
         stem = Path(p).stem
         found = sorted({q.relative_to(wt).as_posix() for pat in (f"test_{stem}.py", f"test_{stem}_*.py")
                         for q in (tests_dir.rglob(pat) if tests_dir.is_dir() and p.endswith(".py") else [])})
+        if not found and not p.endswith(".py"):
+            found = tests_citing(wt, p, cache)
         if found:
             sel.update(found)
         else:
