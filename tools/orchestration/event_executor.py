@@ -358,6 +358,9 @@ def recover(bstate: dict, now: dt.datetime | None = None) -> int:
     return n
 
 
+PUBLISH_HOLD = ("PUBLISH_PENDING", "PUBLISH_MANUAL")                 # publicacao sem desfecho: PENDING (reconciliacao automatica) ou MANUAL (decisao do operador)
+
+
 def pick(bstate: dict, now: dt.datetime | None = None) -> dict | None:
     """Concorrencia 1: nada se houver RUNNING com lease valido. Senao o 1o QUEUED/BLOCKED_* elegivel."""
     if any(t["state"] == "RUNNING" for t in bstate["queue"]):
@@ -366,9 +369,9 @@ def pick(bstate: dict, now: dt.datetime | None = None) -> dict | None:
     cutoff = es.now_iso(_utc(now) - dt.timedelta(hours=24))
     if len([r for r in bstate.get("runs", []) if r >= cutoff]) >= DAILY_CAP:
         return None
-    # PR com publicacao PUBLISH_PENDING (push sem desfecho reconciliado) nao recebe trabalho novo: outro review do mesmo PR reusaria a worktree e o checkout tiraria
+    # PR com publicacao PUBLISH_PENDING ou PUBLISH_MANUAL (push sem desfecho; MANUAL ate o operador liberar com retry-publish) nao recebe trabalho novo: outro review do mesmo PR reusaria a worktree e o checkout tiraria
     # do HEAD local o commit cuja publicacao ainda esta em aberto. Decidido sob a MESMA trava do claim.
-    pending_prs = {t.get("pr") for t in bstate["queue"] if t["state"] == "PUBLISH_PENDING" and t.get("pr") is not None}
+    pending_prs = {t.get("pr") for t in bstate["queue"] if t["state"] in PUBLISH_HOLD and t.get("pr") is not None}
     for t in bstate["queue"]:
         if t.get("pr") in pending_prs:
             continue
@@ -997,7 +1000,7 @@ def main(argv: list[str] | None = None) -> int:
             by_state[t["state"]] = by_state.get(t["state"], 0) + 1
         print(json.dumps({"queue": by_state, "disabled": disabled_flag().exists(),
                           "blocked": [{"key": t["key"], "state": t["state"], "why": t.get("last_error")} for t in b["queue"]
-                                      if t["state"].startswith(("BLOCKED", "FAILED", "PARKED", "REFUSED"))],
+                                      if t["state"].startswith(("BLOCKED", "FAILED", "PARKED", "REFUSED", "PUBLISH_"))],   # PUBLISH_PENDING/MANUAL: chave p/ retry-publish
                           "diagnostics": b["diagnostics"][-5:]}, indent=1, ensure_ascii=False))
         return 0
     policy = eb.load_policy()

@@ -1272,3 +1272,24 @@ def test_once_the_pending_publication_is_resolved_the_same_pr_is_picked_again():
     done = item(state="DONE", published_sha=NEWHEAD)
     other_same_pr = item(key=f"review:10:7:{HEAD}", event_id="review:10")
     assert ex.pick(bstate(done, other_same_pr), NOW)["key"] == other_same_pr["key"]
+
+
+# -- revisao do Codex (#652, 26fdd26b): PUBLISH_MANUAL tambem segura o PR ate o operador liberar; status mostra a chave e o motivo -----------------------
+def test_a_pr_with_a_manual_publication_gets_no_new_work_until_the_operator_releases_it():
+    manual = item(state="PUBLISH_MANUAL", published_sha=NEWHEAD, last_error="push sem desfecho: decisao do proprietario")
+    other_same_pr = item(key=f"review:10:7:{HEAD}", event_id="review:10")
+    eb.save(bstate(manual, other_same_pr))
+    assert ex.pick(eb.load(), NOW) is None
+    assert ex.retry_publish(manual["key"], NOW) is True                                            # o operador libera
+    later = NOW + dt.timedelta(seconds=ex.RETRY_S + 1)
+    assert ex.pick(eb.load(), later)["key"] in (manual["key"], other_same_pr["key"])
+
+
+def test_status_lists_publication_holds_with_key_and_reason(capsys):
+    manual = item(state="PUBLISH_MANUAL", last_error="push sem desfecho: decisao do proprietario")
+    pending = item(key=f"review:11:8:{HEAD}", event_id="review:11", pr=8, state="PUBLISH_PENDING", last_error="aguardando reconciliacao")
+    eb.save(bstate(manual, pending))
+    assert ex.main(["status"]) == 0
+    blocked = {b["key"]: b for b in json.loads(capsys.readouterr().out)["blocked"]}
+    assert blocked[manual["key"]]["state"] == "PUBLISH_MANUAL" and "decisao" in blocked[manual["key"]]["why"]
+    assert blocked[pending["key"]]["state"] == "PUBLISH_PENDING"
