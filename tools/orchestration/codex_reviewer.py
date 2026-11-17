@@ -358,10 +358,13 @@ def publish(v: dict, token: str, repo: str, *, evidence: dict | None = None, pkg
     if not event:
         raise ReviewError("veredito NEEDS_HUMAN nao e publicado como review")
     if event == "APPROVE":
-        if not isinstance(evidence, dict) or not isinstance(pkg, dict):
+        from tools.orchestration import sandboxed_tests as sb
+        if not isinstance(evidence, dict) or not isinstance(pkg, dict) or not isinstance(pkg.get("files"), dict):
             raise ReviewError("APPROVE sem a evidencia dos testes e o pacote revisado: nao publico nem registro proveniencia")
-        if evidence.get("isolation") != "os_sandbox":
-            raise ReviewError(f"APPROVE exige testes em sandbox de SO (isolamento: {evidence.get('isolation')!r}): nao publico")
+        validate_verdict(json.dumps(v), int(v["pr"]), v["head_sha"])            # o parecer e revalidado AQUI (schema, PR, HEAD), nao confiado ao chamador
+        verify_inspection(v, pkg)                                                 # hashes e trechos conferidos contra os blobs do HEAD revisado
+        if evidence.get("isolation") != "os_sandbox" or not sb.proves_isolation(evidence.get("sandbox")):
+            raise ReviewError("APPROVE exige a prova do sandbox de SO desta execucao (token sem capacidades + canario negado), nao um rotulo: nao publico")
         gaps = approval_gaps(v, evidence, pkg)
         if gaps:
             raise ReviewError("APPROVE sem prova suficiente na publicacao: " + "; ".join(gaps)[:300])
