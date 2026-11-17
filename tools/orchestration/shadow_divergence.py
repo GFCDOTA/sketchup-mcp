@@ -242,23 +242,56 @@ def daily_cap_divergence(bridge_path: Path, events: list[dict], now: float | Non
     recent = [r for r in runs if isinstance(r, str) and r >= cutoff]
     claimable = [e for e in events if e.get("event_type") == MIRROR_EVENT_TYPE and e.get("status") == "PENDING"
                  and int(e.get("attempt") or 0) < int(e.get("max_attempts") if e.get("max_attempts") is not None else MAX_ATTEMPTS)]
-    if len(recent) >= ex.DAILY_CAP and claimable:
-        return [Divergence("DAILY_CAP", "queue", f"o JSON ja fez {len(recent)}/{ex.DAILY_CAP} execucoes nas ultimas 24 h (nao escolhe mais nada) e ha {len(claimable)} evento(s) PENDING "
-                                                  "reivindicavel(is): o cutover ultrapassaria o limite vigente")]
+    remaining = max(0, ex.DAILY_CAP - len(recent))
+    if len(claimable) > remaining:                                        # o EventStore nao aplica o teto global: o orcamento RESTANTE precisa cobrir todo o pendente
+        return [Divergence("DAILY_CAP", "queue", f"o JSON ja fez {len(recent)}/{ex.DAILY_CAP} execucoes nas ultimas 24 h (restam {remaining}) e ha {len(claimable)} evento(s) PENDING "
+                                                  "reivindicavel(is): o cutover poderia ultrapassar o limite vigente")]
     return []
 
 
 def executor_running() -> bool:
     """O executor JSON esta VIVO? Probe do lock de instancia (lock do SO mantido pela vida do processo). Sem executor parado nao ha barreira: um item lido como QUEUED pode virar
     RUNNING logo depois da leitura e o relatorio `ok` seria falso. O probe adquire e solta o lock; se nao adquire, ha um executor segurando a fila."""
+    import os
+
     from tools.orchestration import event_executor as ex
-    if not ex.instance_lock_path().exists():                              # nenhum executor jamais rodou aqui: nada a segurar (e o detector e SOMENTE leitura: nao cria o arquivo)
+    path = ex.instance_lock_path()
+    if not path.exists():                                                 # nenhum executor jamais rodou aqui: nada a segurar (e o detector e SOMENTE leitura: nao cria o arquivo)
         return False
-    lock = ex.InstanceLock(ex.instance_lock_path())
-    if not lock.acquire():
-        return True
-    lock.release()
-    return False
+    fd = os.open(path, os.O_RDONLY)                                       # PermissionError sobe: o chamador trata como erro estruturado (sem autorizacao)
+    try:
+        try:
+            if os.name == "nt":
+                import msvcrt
+                os.lseek(fd, 0, os.SEEK_SET)
+                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)                    # o MESMO byte que o InstanceLock trava; nada e gravado no arquivo
+            else:
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
+        except OSError:
+            return True
+        if os.name == "nt":
+            import msvcrt
+            os.lseek(fd, 0, os.SEEK_SET)
+            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        return False
+    finally:
+        os.close(fd)
+
+
+def executor_paused() -> bool:
+    """Pausa DURAVEL do executor: o interruptor `EXECUTOR_DISABLED` (o executor nao reivindica nada enquanto ele existe). Ele precisa ficar ate a troca de fonte."""
+    from tools.orchestration import event_executor as ex
+    return ex.disabled_flag().exists()
+
+
+def _bridge_lock():
+    """A trava COMPARTILHADA do estado do bridge (a mesma do poll e do executor)."""
+    from tools.validation import execution_state as es
+    return es.locked(_bridge_path())
 
 
 def _bridge_path() -> Path:
@@ -282,19 +315,31 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--strict", action="store_true", help="orfao TERMINAL (evento ja concluido sem item JSON) tambem falha; orfao executavel sempre falha")
     ap.add_argument("--allow-live-executor", action="store_true", help="inspecao com o executor ativo (o resultado NAO autoriza o cutover)")
     ns = ap.parse_args(argv)
-    if not ns.allow_live_executor and executor_running():
-        msg = "executor JSON ativo: pause-o (pare a tarefa agendada) e drene a fila antes de verificar o cutover; --allow-live-executor so para inspecao, nunca para autorizar o cutover"
-        print(json.dumps({"ok": False, "error": msg}) if ns.json else f"erro: {msg}")
-        return 2
+    if not ns.allow_live_executor:
+        try:
+            live = executor_running()
+        except OSError as exc:                                            # lock sem permissao de leitura etc.: nao da para provar que o executor esta parado
+            msg = f"lock de instancia do executor inacessivel ({type(exc).__name__}): nao autorizo o cutover"
+            print(json.dumps({"ok": False, "authorizes_cutover": False, "error": msg}) if ns.json else f"erro: {msg}")
+            return 2
+        if live:
+            msg = "executor JSON ativo: pause-o (pare a tarefa agendada) e drene a fila antes de verificar o cutover; --allow-live-executor so para inspecao, nunca para autorizar o cutover"
+            print(json.dumps({"ok": False, "error": msg}) if ns.json else f"erro: {msg}")
+            return 2
+        if not executor_paused():
+            msg = ("pausa DURAVEL ausente: crie o interruptor EXECUTOR_DISABLED ao lado do estado do bridge e mantenha-o ate trocar EXECUTOR_SOURCE; sem ele um executor pode "
+                   "iniciar durante ou depois da verificacao")
+            print(json.dumps({"ok": False, "authorizes_cutover": False, "error": msg}) if ns.json else f"erro: {msg}")
+            return 2
     try:
-        queue, store = _load()
-    except (OSError, ValueError, sqlite3.Error) as exc:
-        print(json.dumps({"ok": False, "error": str(exc)[:200]}) if ns.json else f"erro: {exc}")
-        return 2
-    try:
-        found = collect(queue, store)
-        found += daily_cap_divergence(_bridge_path(), store.events())
-    except (sqlite3.Error, ValueError) as exc:
+        from tools.orchestration import store_factory
+        if not store_factory.store_path().is_file():                      # antes da trava: fonte ausente e erro e o detector nao cria nada (nem a pasta da trava)
+            raise FileNotFoundError(f"EventStore ausente: {store_factory.store_path().name}")
+        with _bridge_lock():                                              # o poll do bridge publica no SQLite e salva a fila SOB esta trava: a leitura ve o par consistente
+            queue, store = _load()
+            found = collect(queue, store)
+            found += daily_cap_divergence(_bridge_path(), store.events())
+    except (OSError, ValueError, sqlite3.Error, TimeoutError) as exc:
         kind = "sqlite" if isinstance(exc, sqlite3.Error) else "fila"
         print(json.dumps({"ok": False, "error": f"{kind}: {exc}"[:200]}) if ns.json else f"erro: {kind}: {exc}")
         return 2

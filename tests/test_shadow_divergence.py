@@ -9,6 +9,8 @@ from tools.orchestration import shadow_divergence as sd
 from tools.orchestration.event_store import EventStore
 from tools.orchestration.store_factory import bridge_to_store_args
 
+REAL_EXECUTOR_PAUSED = sd.executor_paused                              # capturada antes da fixture que a troca
+
 
 def item(n=1, state="QUEUED", kind="review", pr=7, sha="a" * 40, **kw):
     return {"key": f"k{n}", "kind": kind, "event_id": f"review:{1000 + n}", "pr": pr, "head_sha": sha, "state": state, **kw}
@@ -18,6 +20,12 @@ def event(n=1, status="PENDING", pr=7, sha="a" * 40, **kw):
     return {"id": n, "event_type": "CORRECTION_REQUESTED", "producer": "event_bridge", "status": status, "job_id": f"pr:{pr}",
             "payload": json.dumps({"pr": pr, "issue": None, "head_sha": sha, "review_id": str(1000 + n), "author": None, "url": None}),
             "idempotency_key": f"review:{1000 + n}:{pr}:{sha}", **kw}
+
+
+@pytest.fixture(autouse=True)
+def _paused_by_default(monkeypatch):
+    """Os testes do relatorio partem do estado exigido pelo operador: executor PAUSADO de forma duravel (interruptor presente). Os testes da pausa o sobrescrevem."""
+    monkeypatch.setattr(sd, "executor_paused", lambda: True)
 
 
 def codes(found):
@@ -112,6 +120,8 @@ def test_collect_reads_the_real_store_and_the_bridge_queue(tmp_path, monkeypatch
 
 def test_main_prints_the_report_and_exits_nonzero_only_on_real_divergences(tmp_path, monkeypatch, capsys):
     store = EventStore(tmp_path / "events.db")
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "events.db"))
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "bridge.json"))
     monkeypatch.setattr(sd, "_load", lambda: ([item(1)], store))
 
     assert sd.main(["--json"]) == 1
@@ -124,6 +134,8 @@ def test_main_prints_the_report_and_exits_nonzero_only_on_real_divergences(tmp_p
 
 def test_a_terminal_orphan_is_a_warning_that_fails_only_in_strict_mode_and_an_executable_one_always_fails(tmp_path, monkeypatch, capsys):
     store = EventStore(tmp_path / "events.db")
+    monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "events.db"))
+    monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "bridge.json"))
     args = bridge_to_store_args({"kind": "review", "state": "CHANGES_REQUESTED", "event_id": "review:42", "pr": 7, "author": "x", "url": "u"},
                                 {"head_sha": "a" * 40, "refs": []})
     event_id, _ = store.publish(**args)
@@ -491,3 +503,80 @@ def test_the_json_daily_cap_blocks_the_cutover_while_a_pending_event_could_run_r
     assert sd.daily_cap_divergence(bridge, [event(status="PENDING")], now=now) == []                                   # execucoes fora da janela de 24 h nao contam
     bridge.write_text(json.dumps({"queue": [], "runs": [stamp] * (ex.DAILY_CAP - 1)}), encoding="utf-8")
     assert sd.daily_cap_divergence(bridge, [event(status="PENDING")], now=now) == []                                   # abaixo do limite
+
+
+# -- revisao do Codex (#634, 361b4c8b): pausa duravel + leitura sob a trava do bridge; orcamento diario restante; probe somente leitura ---------------------
+def test_without_the_durable_pause_the_check_never_authorizes_the_cutover(tmp_path, monkeypatch, capsys):
+    real_world(tmp_path, monkeypatch)
+    monkeypatch.setattr(sd, "executor_paused", lambda: False)
+    assert sd.main(["--json"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["authorizes_cutover"] is False and "EXECUTOR_DISABLED" in out["error"]
+
+
+def test_the_real_pause_is_the_executor_kill_switch_file(tmp_path, monkeypatch):
+    from tools.orchestration import event_executor as ex
+    gov = real_world(tmp_path, monkeypatch)
+    assert REAL_EXECUTOR_PAUSED() is False
+    ex.disabled_flag().write_text("", encoding="utf-8")
+    assert REAL_EXECUTOR_PAUSED() is True and ex.disabled_flag().parent == gov
+
+
+def test_the_queue_and_the_store_are_read_while_the_bridge_lock_is_held(tmp_path, monkeypatch, capsys):
+    from tools.validation import execution_state as es
+    real_world(tmp_path, monkeypatch)
+    held = []
+    real_collect = sd.collect
+
+    def checking(queue, store, **kw):
+        try:
+            with es.locked(sd._bridge_path(), wait_s=0.2):
+                held.append(False)
+        except TimeoutError:
+            held.append(True)
+        return real_collect(queue, store, **kw)
+    monkeypatch.setattr(sd, "collect", checking)
+    assert sd.main(["--json"]) == 0 and held == [True]                                              # um poll/executor nao grava fila nem SQLite no meio da leitura
+
+
+@pytest.mark.parametrize("recent, pending, diverges", [(5, 1, False), (5, 2, True), (6, 1, True), (0, 6, False), (0, 7, True)])
+def test_the_daily_cap_counts_the_remaining_budget_not_only_a_reached_limit(tmp_path, recent, pending, diverges):
+    import time as _t
+
+    from tools.orchestration import event_executor as ex
+    now = _t.time()
+    stamp = _t.strftime("%Y-%m-%dT%H:%M:%SZ", _t.gmtime(now - 60))
+    p = tmp_path / "bridge.json"
+    p.write_text(json.dumps({"queue": [], "runs": [stamp] * recent}), encoding="utf-8")
+    events = [event(n, status="PENDING", attempt=0, max_attempts=3) for n in range(1, pending + 1)]
+    found = sd.daily_cap_divergence(p, events, now=now)
+    assert bool(found) is diverges, (ex.DAILY_CAP, recent, pending, found)
+
+
+def test_the_instance_lock_probe_never_writes_to_the_lock_file(tmp_path, monkeypatch):
+    import os
+    import stat
+
+    from tools.orchestration import event_executor as ex
+    real_world(tmp_path, monkeypatch)
+    path = ex.instance_lock_path()
+    path.write_bytes(b"x" * 16 + b"12345\n")
+    os.chmod(path, stat.S_IREAD)                                                                       # somente leitura: o probe antigo abria para escrita e gravava o PID
+    try:
+        before = path.read_bytes()
+        assert sd.executor_running() is False and path.read_bytes() == before
+    finally:
+        os.chmod(path, stat.S_IREAD | stat.S_IWRITE)
+
+
+def test_an_unreadable_instance_lock_is_a_structured_error_that_never_authorizes(tmp_path, monkeypatch, capsys):
+    from tools.orchestration import event_executor as ex
+    real_world(tmp_path, monkeypatch)
+    ex.instance_lock_path().write_bytes(b"x")
+
+    def denied():
+        raise PermissionError(13, "acesso negado")
+    monkeypatch.setattr(sd, "executor_running", denied)
+    assert sd.main(["--json"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["authorizes_cutover"] is False and "inacessivel" in out["error"]
