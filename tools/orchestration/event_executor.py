@@ -378,12 +378,19 @@ def claim_next(owner: str, now: dt.datetime | None = None) -> dict | None:
         return dict(item)
 
 
+def _ownership_clock() -> dt.datetime | None:
+    """Relogio da conferencia de posse: None = agora (producao). Os testes o fixam para mundos com relogio proprio."""
+    return None
+
+
 def still_owner(key: str, owner: str) -> bool:
     """Este processo AINDA e o dono do item (RUNNING + owner), lido agora do disco sob a trava. A recuperacao de um estado corrompido apaga o registro RUNNING: sem ele,
     a posse nao esta comprovada e nada e publicado."""
     try:
         with es.locked(eb.bridge_path()):
-            return _owned(eb.load(), key, owner) is not None
+            it = _owned(eb.load(), key, owner)
+            # RUNNING + dono nao bastam: o lease precisa estar VALIDO agora (um heartbeat que nao acionou `cancel` a tempo nao autoriza o push)
+            return it is not None and str(it.get("lease_expires") or "") > es.now_iso(_ownership_clock())
     except (OSError, ValueError, TimeoutError, eb.BridgeStateCorrupt):
         return False
 

@@ -229,3 +229,24 @@ def test_gh_json_decodes_the_gh_output_as_utf8_regardless_of_the_locale(monkeypa
     monkeypatch.setattr(eb.subprocess, "run", fake_run)
     out = eb.gh_json("repos/o/r/pulls")
     assert out[0]["body"].endswith("\U0001F916") and seen["encoding"] == "utf-8" and seen["errors"] == "replace"
+
+
+# -- revisao do Codex (#635, 8a2bd120): estado oficial com JSON valido mas incompleto e corrupcao -----------------------------------------------------
+import pytest as _pytest  # noqa: E402
+
+
+@_pytest.mark.parametrize("raw", ["{}", '{"queue": "x"}', '{"queue": [], "seen": {}}', '{"seen": []}'])
+def test_a_valid_but_incomplete_official_state_is_treated_as_corrupt(tmp_path, raw):
+    from tools.orchestration import event_bridge as eb
+    p = tmp_path / "event_bridge.json"
+    p.write_text(raw, encoding="utf-8")
+    with _pytest.raises(eb.BridgeStateCorrupt):
+        eb.load(p)
+    assert p.read_text(encoding="utf-8") == raw                                                    # preservado como estava (so a recuperacao, sob a trava, mexe)
+
+
+def test_a_minimal_complete_state_loads_with_defaults(tmp_path):
+    from tools.orchestration import event_bridge as eb
+    p = tmp_path / "event_bridge.json"
+    p.write_text('{"queue": [], "seen": []}', encoding="utf-8")
+    assert eb.load(p)["queue"] == [] and eb.load(p)["backoff_s"] == 0

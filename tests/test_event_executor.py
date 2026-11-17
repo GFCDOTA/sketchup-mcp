@@ -591,6 +591,7 @@ def test_pr_without_the_executor_ok_label_is_refused_and_never_runs_claude():
 
 
 def test_launch_hands_the_delivery_a_revalidation_that_rereads_github(monkeypatch):
+    monkeypatch.setattr(ex, "_ownership_clock", lambda: NOW)                                        # o mundo do teste roda no relogio fixo NOW
     gh = FakeGh()
     captured = {}
 
@@ -764,3 +765,10 @@ def test_review_fetch_failure_blocks_without_launching_the_child():
     b = bstate(item())
     res = go(gh, b, r)
     assert res["action"] == "BLOCKED_REVIEW_FETCH" and r.calls == [] and b["queue"][0]["state"] == "BLOCKED_REVIEW_FETCH"
+
+
+# -- revisao do Codex (#635, 8a2bd120): a posse exige lease VALIDO agora -------------------------------------------------------------------------------
+def test_an_expired_lease_is_not_ownership_even_if_running_and_owner_still_match():
+    owner = "dono"
+    eb.save(bstate(item(state="RUNNING", owner=owner, lease_expires="2000-01-01T00:00:00Z")))
+    assert ex.still_owner(item()["key"], owner) is False

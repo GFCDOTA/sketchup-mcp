@@ -80,6 +80,12 @@ def _read_state(p: Path) -> dict:
     data = json.loads(raw.decode("utf-8"))
     if not isinstance(data, dict):
         raise ValueError("a raiz do JSON nao e um objeto")
+    # JSON valido mas INCOMPLETO (ex.: `{}`) nao e saudavel: mesclar os padroes perderia fila e deduplicacao e o proximo ciclo reenfileiraria reviews ja vistos
+    if not isinstance(data.get("queue"), list):
+        raise ValueError("estado sem `queue` (lista): incompleto")
+    for key in ("seen", "diagnostics"):
+        if key in data and not isinstance(data[key], list):
+            raise ValueError(f"`{key}` nao e lista")
     return data
 
 
