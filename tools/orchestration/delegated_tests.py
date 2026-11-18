@@ -15,8 +15,16 @@ Contrato (tudo fail-closed; qualquer duvida => a delegacao nao vale e o teste NA
      SHA, execucao, tentativa, conclusao, integridade do artefato (digest que o GitHub calcula) e que CADA node id da politica esta `passed` (nunca skipped/xfail/ausente/extra).
   4. CI verde nunca substitui a revisao substantiva independente: este modulo so decide se os testes delegados contam como executados e aprovados.
 
-Limite declarado: a evidencia vale o que vale o CI (o PR executa codigo la). Ela impede esquecimento, SHA velho, teste pulado e relatorio adulterado depois do job; nao e defesa contra
-um autor malicioso que consiga mentir DENTRO do job — para isso existem a revisao do diff e o isolamento do AppContainer para todo o resto.
+MODELO DE AMEACA (o JUnit NAO e autenticado; ele nao tem como ser). O job `tests` executa codigo do PR, e qualquer codigo que roda no processo que grava o relatorio pode grava-lo de
+outra forma: nenhuma assinatura ou segredo mantido por esse processo resiste a ele. A separacao em dois jobs protege o coletor e a politica da BASE, nao a integridade do relatorio.
+O que o desenho faz, por vetor (cada linha tem teste em tests/test_delegated_results.py ou tests/test_delegated_tests.py):
+  - Forjar fora dos testes (backend de build no `uv sync`, conftest/plugin, configuracao do pytest, lock, `.pth`/`sitecustomize`): BLOQUEADO em `eligible` — o PR que traz um desses
+    arquivos perde a delegacao e o revisor roda tudo no sandbox. Prova: um conftest real faz um teste que falha aparecer `passed` no JUnit; o coletor aceita, a elegibilidade recusa.
+  - Alterar politica, workflow ou coletor: BLOQUEADO em `eligible` (PROTECTED, `.github/`), e o blob do workflow e fixado na politica da base.
+  - Relatorio de outro HEAD, outra execucao, outro workflow, adulterado depois do job, teste pulado/ausente/duplicado: BLOQUEADO em `verify_ci_evidence` e no coletor.
+  - Codigo-fonte ou teste do PR que forja o relatorio de dentro dos testes: NAO DEFENDIDO (limite declarado, fixado por `test_declared_residual_...`). E o mesmo limite do job `ci`
+    (um PR tambem pode fazer o `ci` passar assim). O que o controla e a revisao independente do diff, que le exatamente esse codigo; esta evidencia nunca substitui essa leitura.
+Uma defesa mais forte exigiria rodar o codigo do PR numa fronteira que ele nao alcanca (VM/runner efemero separado que assina o resultado fora do processo testado); nao ha isso hoje.
 """
 from __future__ import annotations
 
@@ -115,13 +123,28 @@ def load_policy(root: Path, run_git: Callable[[list, Path], tuple[int, str]], ba
     return validate_policy(raw, base_sha)
 
 
+# Arquivos que o interpretador, o `uv` ou o pytest executam ANTES ou FORA dos testes (backend de build, plugin/conftest, configuracao, lock, hooks de inicializacao). Um deles no PR
+# pode reescrever o JUnit sem que nenhum teste rode de verdade (prova adversarial em tests/test_delegated_results.py). Comparacao pelo nome base, sem diferenciar maiusculas.
+CODE_RUNNING_NAMES = frozenset({"conftest.py", "pyproject.toml", "uv.lock", "uv.toml", "pytest.ini", "tox.ini", "setup.cfg", "setup.py", ".python-version",
+                                "sitecustomize.py", "usercustomize.py"})
+
+
+def _runs_code_around_pytest(path: str) -> bool:
+    name = path.replace("\\", "/").rsplit("/", 1)[-1].lower()
+    return name in CODE_RUNNING_NAMES or name.endswith(".pth") or (name.startswith("requirements") and name.endswith(".txt"))
+
+
 def eligible(policy: Policy | None, changed_files: list[str]) -> tuple[bool, str]:
-    """A delegacao vale para ESTE PR? Nao se o PR toca a politica, o workflow, o coletor ou `.github/` (o PR nao muda a propria regra de validacao)."""
+    """A delegacao vale para ESTE PR? Nao se o PR toca a politica, o workflow, o coletor ou `.github/` (o PR nao muda a propria regra de validacao), nem arquivos que executam
+    codigo do PR antes/fora dos testes (`CODE_RUNNING_NAMES`): neles o JUnit pode ser forjado sem deixar rastro nos testes. `changed_files` e a lista COMPLETA do diff (`git diff --name-only`)."""
     if policy is None:
         return False, "a base nao tem politica de delegacao"
     touched = [p for p in changed_files if p in PROTECTED or p.startswith(".github/")]
     if touched:
         return False, "o PR altera a propria regra de validacao (" + ", ".join(sorted(touched)[:3]) + "): nenhum teste e delegado"
+    around = [p for p in changed_files if _runs_code_around_pytest(p)]
+    if around:
+        return False, "o PR altera arquivo que executa codigo do PR fora dos testes (" + ", ".join(sorted(around)[:3]) + "): o JUnit nao pode ser aceito como evidencia"
     return True, ""
 
 

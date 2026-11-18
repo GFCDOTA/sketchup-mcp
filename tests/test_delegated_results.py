@@ -4,6 +4,9 @@ Mapeia cada node id da politica para o registro EXATO que o pytest grava no JUni
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 import textwrap
 
 import pytest
@@ -40,6 +43,60 @@ def test_two_policy_ids_with_the_same_junit_record_are_never_counted_as_passed(t
     f.write_text('<testsuites><testsuite><testcase classname="tests.a.b" name="test_x"/></testsuite></testsuites>', encoding="utf-8")
     ids = ["tests/a/b.py::test_x", "tests/a.py::b::test_x"]                                     # arquivo `tests/a/b.py` x classe `b` de `tests/a.py`
     assert dr.collect(f, ids) == {ids[0]: "ambiguous", ids[1]: "ambiguous"}
+
+
+def _forged_run(tmp_path, files):
+    """Roda o pytest REAL numa arvore de PR cujo teste FALHA e cujos arquivos tentam reescrever o JUnit como se tudo tivesse passado; devolve (JUnit, ids da politica)."""
+    tree = tmp_path / "pr"
+    (tree / "tests").mkdir(parents=True)
+    (tree / "tests/test_git_thing.py").write_text("from pr_helper import helper\n\ndef test_alpha():\n    assert False, 'o teste real falha'\n", encoding="utf-8")
+    forged = ('<?xml version="1.0"?><testsuites><testsuite tests="1"><testcase classname="tests.test_git_thing" name="test_alpha"/></testsuite></testsuites>')
+    for rel, body in files.items():
+        target = tree / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(body.replace("@FORGED@", forged), encoding="utf-8")
+    junit = tmp_path / "junit.xml"
+    env = {**os.environ, "FORGE_TARGET": str(junit), "PYTHONPATH": str(tree)}
+    subprocess.run([sys.executable, "-m", "pytest", "tests/test_git_thing.py::test_alpha", "-p", "no:cacheprovider", "-q", f"--junitxml={junit}", "-o", "junit_family=xunit1"],
+                   cwd=tree, env=env, capture_output=True, timeout=120)
+    return junit, ["tests/test_git_thing.py::test_alpha"]
+
+
+CONFTEST_FORGER = '''import os, pytest
+
+@pytest.hookimpl(trylast=True)
+def pytest_sessionfinish(session, exitstatus):
+    open(os.environ["FORGE_TARGET"], "w", encoding="utf-8").write(r"""@FORGED@""")
+'''
+SRC_FORGER = '''import atexit, os
+
+def helper():
+    pass
+
+atexit.register(lambda: open(os.environ["FORGE_TARGET"], "w", encoding="utf-8").write(r"""@FORGED@"""))
+'''
+
+
+@pytest.mark.parametrize("where", ["conftest.py", "tests/conftest.py"])
+def test_adversarial_conftest_really_forges_the_junit_and_the_delegation_is_refused_for_that_pr(tmp_path, where):
+    """Prova adversarial REAL: um conftest do PR faz um teste que FALHA aparecer como `passed` no JUnit (o coletor sozinho nao percebe). A defesa e a elegibilidade: o PR que traz esse
+    arquivo perde a delegacao, entao essa evidencia nunca e aceita para ele."""
+    from tools.orchestration import delegated_tests as dt
+    junit, ids = _forged_run(tmp_path, {where: CONFTEST_FORGER, "pr_helper.py": "def helper():\n    pass\n"})
+    assert dr.collect(junit, ids) == {ids[0]: "passed"}                          # a falsificacao FUNCIONA contra o coletor: por isso ele nunca e a defesa
+    pol = dt.validate_policy(policy_json(ids), "b" * 40)
+    ok, why = dt.eligible(pol, [where, "pr_helper.py"])
+    assert ok is False and "executa codigo do PR" in why
+
+
+def test_declared_residual_source_code_under_test_can_forge_its_own_junit(tmp_path):
+    """Limite DECLARADO, nao defendido: codigo-fonte do PR importado pelos testes roda no mesmo processo que grava o relatorio. Aparece no diff que a revisao independente le (e vale o
+    mesmo para o job `ci`); a elegibilidade nao tem como detectar isso. Este teste fixa o limite para que ninguem afirme uma garantia que o desenho nao da."""
+    from tools.orchestration import delegated_tests as dt
+    junit, ids = _forged_run(tmp_path, {"pr_helper.py": SRC_FORGER})
+    assert dr.collect(junit, ids) == {ids[0]: "passed"}
+    pol = dt.validate_policy(policy_json(ids), "b" * 40)
+    assert dt.eligible(pol, ["pr_helper.py"]) == (True, "")
 
 
 def test_the_collector_maps_real_pytest_junit_for_parametrized_class_methods(tmp_path, monkeypatch):

@@ -104,6 +104,23 @@ def test_a_pr_that_touches_the_policy_the_workflow_the_collector_or_github_loses
     assert dt.eligible(pol, ["tools/a.py", "tests/test_x.py"]) == (True, "")
 
 
+@pytest.mark.parametrize("changed", [
+    "conftest.py", "tests/conftest.py", "tests/sub/conftest.py", "pyproject.toml", "uv.lock", "uv.toml", "pytest.ini", "tox.ini", "setup.cfg", "setup.py",
+    ".python-version", "requirements.txt", "requirements-dev.txt", "sitecustomize.py", "usercustomize.py", "evil.pth", "tools/CONFTEST.PY"])
+def test_a_pr_that_changes_what_runs_code_around_pytest_loses_the_delegation(base, changed):
+    """Backend de build, plugin/conftest, configuracao do pytest, lock e hooks de interpretador executam codigo do PR ANTES e FORA dos testes e podem reescrever o JUnit: ficam sem delegacao."""
+    root, sha, _ = base
+    pol = dt.load_policy(root, run_git, sha)
+    ok, why = dt.eligible(pol, ["tools/a.py", changed])
+    assert ok is False and "executa codigo do PR" in why and changed.lower() in why.lower()
+
+
+def test_ordinary_source_and_test_files_keep_the_delegation(base):
+    root, sha, _ = base
+    pol = dt.load_policy(root, run_git, sha)
+    assert dt.eligible(pol, ["tools/orchestration/x.py", "tests/test_x.py", "docs/a.md", "tests/data/conftest_notes.txt"]) == (True, "")
+
+
 @pytest.mark.parametrize("bad", [
     {"node_id": "tests/test_git_thing.py", "case": "arquivo inteiro"},
     {"node_id": "tests/test_git_thing.py::test_*", "case": "curinga"},
