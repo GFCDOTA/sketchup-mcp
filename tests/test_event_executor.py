@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -177,13 +178,93 @@ def test_queued_item_is_revalidated_and_never_runs_when_the_facts_changed(kw, st
     assert r.calls == [] and b["queue"][0]["state"] == state and needle in res["reason"]
 
 
-def test_a_github_failure_in_preflight_fails_closed():
-    def boom(path):
-        raise RuntimeError("rate limit")
+TRANSIENT_FAILURES = [RuntimeError("gh: API rate limit exceeded (HTTP 403)"), RuntimeError("gh: connection reset"), OSError("rede fora"), TimeoutError("lento"),
+                      PermissionError("gh nao pode ser iniciado"), subprocess.TimeoutExpired("gh", 120), json.JSONDecodeError("truncado", "{", 1)]
+
+
+@pytest.mark.parametrize("failure", TRANSIENT_FAILURES, ids=lambda f: type(f).__name__)
+def test_a_transient_github_failure_in_preflight_defers_the_item_without_running_or_refusing_it(failure):
+    def down(path):
+        raise failure
     r = Runner(FakeGh())
     b = bstate(item())
-    go(boom, b, r)
-    assert r.calls == [] and b["queue"][0]["state"] == "REFUSED"
+    res = go(down, b, r)
+    t = b["queue"][0]
+    assert res["action"] == "DEFERRED" and r.calls == []
+    assert t["state"] == "QUEUED" and t.get("attempts", 0) == 0 and t["transient_deferrals"] == 1       # nao consome tentativa, nao e estado terminal
+    assert t["retry_after"] > ex.es.now_iso(NOW) and "owner" not in t and "lease_expires" not in t
+
+
+def test_deferral_backs_off_and_a_deferred_item_is_not_picked_before_retry_after():
+    def down(path):
+        raise RuntimeError("gh: connection reset")
+    b = bstate(item())
+    go(down, b)
+    first = b["queue"][0]["retry_after"]
+    assert go(down, b, now=NOW)["action"] == "IDLE"                                                  # ainda nao venceu
+    later = NOW + dt.timedelta(seconds=ex.DEFER_BASE_S + 1)
+    go(down, b, now=later)
+    assert b["queue"][0]["transient_deferrals"] == 2 and b["queue"][0]["retry_after"] > first
+    delays = [ex.cycle_backoff(ex.DEFER_BASE_S, n) for n in range(0, 12)]
+    assert delays == sorted(delays) and max(delays) == ex.MAX_CYCLE_BACKOFF_S                        # cresce e tem teto
+
+
+@pytest.mark.parametrize("failure", [RuntimeError("gh: Not Found (HTTP 404)"), RuntimeError("gh: Gone (HTTP 410)")])
+def test_a_resource_that_no_longer_exists_is_refused_not_retried_forever(failure):
+    def gone(path):
+        raise failure
+    r = Runner(FakeGh())
+    b = bstate(item())
+    res = go(gone, b, r)
+    assert res["action"] == "REFUSED" and r.calls == [] and b["queue"][0]["state"] == "REFUSED"
+
+
+@pytest.mark.parametrize("failure", [KeyError("number"), AttributeError("x"), TypeError("y"), ValueError("z")])
+def test_malformed_github_data_still_fails_closed_as_refused(failure):
+    def bad(path):
+        raise failure
+    r = Runner(FakeGh())
+    b = bstate(item())
+    res = go(bad, b, r)
+    assert res["action"] == "REFUSED" and r.calls == [] and b["queue"][0]["state"] == "REFUSED"
+
+
+class FlakyGh(FakeGh):
+    """GitHub que cai e volta: `down` faz TODA chamada falhar; ligado, responde tambem ao poll do bridge (sem PRs)."""
+    down = False
+
+    def __call__(self, path):
+        if self.down:
+            raise RuntimeError("gh: connection reset by peer")
+        if path.startswith(f"repos/{REPO}/pulls?state=open") or path.startswith(f"repos/{REPO}/issues/comments"):
+            return []
+        return super().__call__(path)
+
+
+def test_cycle_survives_a_github_outage_and_runs_the_queued_item_after_recovery(monkeypatch):
+    """Integracao pelo `run_cycle` real (poll + preflight + execucao): indisponibilidade, depois recuperacao."""
+    monkeypatch.setattr(ex, "_get_store", lambda: None)
+    gh = FlakyGh()
+    r = Runner(gh)
+    eb.save(bstate(item()))
+    gh.down = True
+    out = ex.run_cycle(gh, POLICY, REPO, True, r, "claude", wt_ok, NOW)
+    assert out["poll"]["ERROR"] == 1 and out["action"] == "DEFERRED" and r.calls == []
+    state = eb.load()["queue"][0]
+    assert state["state"] == "QUEUED" and state.get("attempts", 0) == 0                                 # nunca REFUSED
+    gh.down = False
+    later = NOW + dt.timedelta(seconds=ex.MAX_CYCLE_BACKOFF_S + 1)
+    out = ex.run_cycle(gh, POLICY, REPO, True, r, "claude", wt_ok, later)
+    assert out["action"] == "DONE" and len(r.calls) == 1
+    final = eb.load()["queue"][0]
+    assert final["state"] == "DONE_AWAITING_REREVIEW" and "transient_deferrals" not in final
+
+
+def test_a_deferred_item_does_not_touch_the_event_store_mirror(monkeypatch):
+    class Spy:
+        def events(self, **kw):
+            raise AssertionError("o espelho nao deve ser lido: nada terminou")
+    ex._sync_result_to_store(Spy(), item(), {"action": "DEFERRED", "item": "k"})
 
 
 # ------------------------------------------------------------------------------------- credenciais / CLI / falhas

@@ -444,8 +444,14 @@ class Heartbeat(threading.Thread):
         self.join(timeout=5)
 
 
+TRANSIENT_ERRORS = (RuntimeError, OSError, subprocess.SubprocessError, json.JSONDecodeError)   # gh falhou/estourou o prazo/devolveu JSON truncado (IdentityError e tratado antes)
+GONE = re.compile(r"HTTP (?:404|410)\b")                                     # o PR/review nao existe mais: recusa definitiva, nao ha o que esperar
+DEFER_BASE_S = 60
+
+
 def preflight(item: dict, gh: eb.Gh, policy: dict, repo: str) -> tuple[str, str, dict | None]:
-    """('OK'|'SUPERSEDED'|'REFUSED'|'UNSUPPORTED', motivo, pr). Revalida TUDO no GitHub antes de rodar."""
+    """('OK'|'SUPERSEDED'|'REFUSED'|'UNSUPPORTED'|'TRANSIENT', motivo, pr). Revalida TUDO no GitHub antes de rodar. `TRANSIENT` = nao foi possivel validar
+    (GitHub fora): nada e executado e o item volta para a fila com backoff, sem estado terminal e sem consumir tentativa."""
     if item.get("kind") != "review":
         return "UNSUPPORTED", (f"evento {item.get('kind')!r} ({item.get('event_id')}) nao e uma revisao: o executor so age sobre "
                                "review CHANGES_REQUESTED; estacionado, nunca tratado como revisao valida"), None
@@ -473,7 +479,13 @@ def preflight(item: dict, gh: eb.Gh, policy: dict, repo: str) -> tuple[str, str,
         if verdict != "ACCEPT":
             return "REFUSED", f"review {rid} nao valido agora: {verdict} {why}", pr
         return "OK", "", pr
-    except (PermissionError, RuntimeError, KeyError, AttributeError, ValueError, TypeError) as exc:
+    except eb.IdentityError as exc:                                          # conta ERRADA: decisao definitiva, nunca uma falha de rede
+        return "REFUSED", f"preflight falhou fail-closed ({type(exc).__name__}): {exc}", None
+    except TRANSIENT_ERRORS as exc:                                          # GitHub/gh fora do ar: o item NAO e recusado (REFUSED nunca e retomado) nem executado
+        if GONE.search(str(exc)):
+            return "REFUSED", f"recurso nao existe mais no GitHub ({type(exc).__name__}): {exc}"[:300], None
+        return "TRANSIENT", f"GitHub indisponivel no preflight ({type(exc).__name__}): {exc}"[:300], None
+    except (KeyError, AttributeError, ValueError, TypeError) as exc:         # resposta malformada: fail-closed definitivo
         return "REFUSED", f"preflight falhou fail-closed ({type(exc).__name__}): {exc}", None
 
 
@@ -633,6 +645,16 @@ def _handle_claimed(item: dict, owner: str, gh: eb.Gh, policy: dict, repo: str, 
                     wt_prep, t: dt.datetime, python: str | None, cancel: threading.Event) -> dict:
     key = item["key"]
     verdict, why, pr = preflight(item, gh, policy, repo)
+    if verdict == "TRANSIENT":
+        def defer(it, b):
+            n = it.get("transient_deferrals", 0) + 1
+            it["transient_deferrals"], it["state"], it["last_error"] = n, "QUEUED", why
+            it["retry_after"] = es.now_iso(t + dt.timedelta(seconds=cycle_backoff(DEFER_BASE_S, n - 1)))
+            eb.diagnose(b, f"{key}: adiado ({n}x): {why}", t)
+        update_owned(key, owner, defer, release=True, now=t)
+        return {"action": "DEFERRED", "item": key, "reason": why}
+    if item.get("transient_deferrals"):                                      # o GitHub voltou: o proximo apagao comeca do backoff curto
+        update_owned(key, owner, lambda it, b: it.pop("transient_deferrals", None), now=t)
     if verdict != "OK":
         def park(it, b):
             it["state"], it["last_error"] = PARKED[verdict], why
@@ -691,11 +713,11 @@ def _sync_result_to_store(store, item: dict, result: dict) -> None:
     """After completing a JSON queue item, mirror the outcome to the EventStore.
     Best-effort: never blocks the JSON path.  Claims the exact event by its
     database ID (review finding #1) — no other event is ever touched."""
-    if store is None:
+    if store is None or result.get("action") == "DEFERRED":                  # adiado: nada terminou, o evento segue PENDING no store
         return
     try:
         from tools.orchestration.store_factory import _inc, _record_shadow_error
-        idem = f"review:{item.get('event_id', '').split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
+        idem =f"review:{item.get('event_id', '').split(':')[-1]}:{item.get('pr')}:{item.get('head_sha')}"
         job_id = f"pr:{item.get('pr', '')}"
         events = [e for e in store.events(job_id=job_id) if e.get("idempotency_key") == idem]
         if not events:
