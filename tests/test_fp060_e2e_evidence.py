@@ -432,3 +432,48 @@ def test_the_module_command_line_needs_its_arguments_and_shows_the_usage():
     with pytest.raises(SystemExit) as exc:
         ce.main([])
     assert str(exc.value) == (ce.__doc__ or "")                                                      # o invólucro versionado so chama este `main`
+
+
+# -- revisao do Codex (#660, finding HIGH): UNIX_PATH deve incluir virgula nos componentes ---------------------------------------------------------------
+@pytest.mark.parametrize("path", [
+    "/custom/client/Finance, Reports 2026.pdf",
+    "/srv/logs/Error,2026-11-18.log",
+    "/data/exports/Report, Final v2.csv",
+])
+def test_a_unix_path_with_a_comma_in_a_component_is_removed_whole(path):
+    out = ce.scrub(f"erro em {path} fim")
+    for part in ("Finance", "Reports", "2026", "Error", "Report", "Final"):
+        if part in path:
+            assert part not in out, (part, out)
+    assert "<caminho>" in out
+    with pytest.raises(SystemExit, match="RECUSADA"):
+        ce.assert_clean(f"x {path}")
+
+
+def test_a_unix_path_with_a_comma_never_reaches_the_written_evidence(tmp_path, monkeypatch):
+    path = "/custom/client/Finance, Reports 2026.pdf"
+    monkeypatch.setattr(ce, "collect_flow", lambda n, i: {"pr": n, "issue": i, "head_final": "a" * 40, "reviews": [], "error": f"nao abriu {path}"})
+    monkeypatch.setattr(ce, "read_store", lambda p: {"eventos": [], "transicoes": []})
+    out = tmp_path / "out"
+    assert ce.main([str(out), "A=1:2:" + (tmp_path / "s.db").as_posix()]) == 0
+    written = (out / "evidence.json").read_text(encoding="utf-8")
+    assert "Finance" not in written and "Reports" not in written and "<caminho>" in written
+
+
+# -- revisao do Codex (#660, finding MEDIUM): erro de fluxo invalido nao deve expor o argumento ---------------------------------------------------------
+def test_an_invalid_flow_error_does_not_expose_the_argument(tmp_path):
+    # PR number "x" torna o argumento invalido; o caminho sensivel nao deve aparecer na mensagem
+    sensitive_arg = "A=x:2:" + (tmp_path / "Users" / "Fulano" / "segredo.db").as_posix()
+    with pytest.raises(SystemExit) as exc:
+        ce.parse_flow(sensitive_arg)
+    msg = str(exc.value)
+    assert "fluxo invalido" in msg
+    assert "Fulano" not in msg and "segredo" not in msg and str(tmp_path) not in msg
+
+
+def test_an_invalid_flow_error_does_not_expose_a_unix_path_in_the_argument():
+    # Issue number "y" torna o argumento invalido; o caminho nao deve vazar em stderr/logs
+    with pytest.raises(SystemExit) as exc:
+        ce.parse_flow("A=1:y:/home/fulano/segredo.db")
+    msg = str(exc.value)
+    assert "fluxo invalido" in msg and "fulano" not in msg and "segredo" not in msg
