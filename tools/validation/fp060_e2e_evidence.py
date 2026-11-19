@@ -29,7 +29,7 @@ TOKEN = re.compile(
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 WIN_PATH = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\"'<>|\r\n]*")
 UNC_PATH = re.compile(r"(?:\\\\|(?<![:\w/.])//)[A-Za-z0-9_.$-]+[\\/][^\"'<>|\r\n]*")                   # \\servidor\compartilhamento\... (e //servidor/compartilhamento/...)                    # ate o fim da linha/aspas: cobre espacos no caminho
-UNIX_PATH = re.compile(r"(?<![\w.:#/-])/(?:(?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+(?: (?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+)*/)+(?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+(?: (?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+)*|(?<![\w.:#/-])/(?:(?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+(?: (?:[\w.@+~()\[\]&=!%-]|[:#](?=[\w.@+~()\[\]&=!%/-]))+)*/)+")      # caminho absoluto Unix (2+ segmentos) de QUALQUER raiz; componentes (e o ultimo) podem ter espacos e parenteses/colchetes/& = ! %; dois-pontos DENTRO do componente (valido em nome Unix); prefere redigir demais a vazar
+UNIX_PATH = re.compile(r"(?<![\w.:#/-])/(?:(?:[\w,.@+~()\[\]&=!%-]|[:#](?=[\w,.@+~()\[\]&=!%/-]))+(?: (?:[\w,.@+~()\[\]&=!%-]|[:#](?=[\w,.@+~()\[\]&=!%/-]))+)*/)+(?:[\w,.@+~()\[\]&=!%-]|[:#](?=[\w,.@+~()\[\]&=!%/-]))+(?: (?:[\w,.@+~()\[\]&=!%-]|[:#](?=[\w,.@+~()\[\]&=!%/-]))+)*|(?<![\w.:#/-])/(?:(?:[\w,.@+~()\[\]&=!%-]|[:#](?=[\w,.@+~()\[\]&=!%/-]))+(?: (?:[\w,.@+~()\[\]&=!%-]|[:#](?=[\w,.@+~()\[\]&=!%/-]))+)*/)+")      # caminho absoluto Unix (2+ segmentos) de QUALQUER raiz; componentes (e o ultimo) podem ter espacos, virgulas e parenteses/colchetes/& = ! %; dois-pontos DENTRO do componente (valido em nome Unix); prefere redigir demais a vazar
 UNIX_SPACED = re.compile(r"(?<![\w.:#/-])/(?:home|Users|users|root|mnt|srv|opt|var|tmp|Volumes|workspace|data|media)/[^\"'<>|\r\n]*")     # raiz de usuario/maquina: ate o fim da linha (cobre espacos)
 FORBIDDEN = (TOKEN, EMAIL, WIN_PATH, UNC_PATH, UNIX_SPACED, UNIX_PATH)
 
@@ -71,7 +71,7 @@ def parse_flow(arg: str) -> tuple[str, int, int, Path]:
     name, _, rest = arg.partition("=")
     parts = rest.split(":", 2)
     if not name or len(parts) != 3 or not parts[0].isdigit() or not parts[1].isdigit() or not parts[2]:
-        raise SystemExit(f"fluxo invalido {arg!r}: use NOME=<PR>:<Issue>:<store.db>")
+        raise SystemExit("fluxo invalido: use NOME=<PR>:<Issue>:<store.db>")
     return name, int(parts[0]), int(parts[1]), Path(parts[2])
 
 
