@@ -126,6 +126,7 @@ def test_main_prints_the_report_and_exits_nonzero_only_on_real_divergences(tmp_p
     store = EventStore(tmp_path / "events.db")
     monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "events.db"))
     monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "bridge.json"))
+    (tmp_path / "bridge.json").write_text(json.dumps({"queue": []}), encoding="utf-8")                # o teto diario le o estado real: ausente agora e erro, nao "sem execucoes"
     monkeypatch.setattr(sd, "_load", lambda: ([item(1)], store))
 
     assert sd.main(["--json"]) == 1
@@ -140,6 +141,7 @@ def test_a_terminal_orphan_is_a_warning_that_fails_only_in_strict_mode_and_an_ex
     store = EventStore(tmp_path / "events.db")
     monkeypatch.setenv("EVENT_STORE_DB_PATH", str(tmp_path / "events.db"))
     monkeypatch.setenv("EVENT_BRIDGE_STATE_PATH", str(tmp_path / "bridge.json"))
+    (tmp_path / "bridge.json").write_text(json.dumps({"queue": []}), encoding="utf-8")
     args = bridge_to_store_args({"kind": "review", "state": "CHANGES_REQUESTED", "event_id": "review:42", "pr": 7, "author": "x", "url": "u"},
                                 {"head_sha": "a" * 40, "refs": []})
     event_id, _ = store.publish(**args)
@@ -676,3 +678,112 @@ def test_the_os_lock_constants_match_the_execution_state_protocol_when_it_is_pre
     if not hasattr(es, "NEW_PROTOCOL_MARK"):
         pytest.skip("protocolo de lock do SO (#642) ainda nao esta nesta base")
     assert (es.NEW_PROTOCOL_MARK, es.LOCK_POS) == (sd.OS_LOCK_MARK, sd.OS_LOCK_POS)
+
+
+# -- 14a revisao do Codex (#634, 7da63c67): `runs` invalido nao autoriza; a posse da trava nao e provada pela AUSENCIA do .lock ------------------------------
+@pytest.mark.parametrize("runs", [[None], ["ontem"], [123], ["2026-11-16 00:00:00"], ["2026-1-01T00:00:00Z"], "2026-11-16T00:00:00Z", {"a": "2026-11-16T00:00:00Z"}, [["x"]]])
+def test_an_invalid_runs_value_is_a_structured_error_that_never_authorizes_the_cutover(tmp_path, monkeypatch, capsys, runs):
+    """`event_executor.pick` compara cada item de `runs` com o corte como texto: `null` ou lixo derrubaria o executor JSON. Fila e espelho concordantes NAO podem virar ok."""
+    gov = real_world(tmp_path, monkeypatch)
+    (gov / "bridge.json").write_text(json.dumps({"queue": [], "runs": runs}), encoding="utf-8")
+    assert sd.main(["--json"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["ok"] is False and "authorizes_cutover" not in out or out.get("authorizes_cutover") is False
+    assert "runs" in out["error"]
+
+
+@pytest.mark.parametrize("runs", [None, [], ["2026-11-16T00:00:00Z", "2026-11-16T01:30:00Z"]])
+def test_absent_empty_or_canonical_runs_do_not_block_an_otherwise_green_check(tmp_path, monkeypatch, capsys, runs):
+    gov = real_world(tmp_path, monkeypatch)
+    state = {"queue": []} if runs is None else {"queue": [], "runs": runs}
+    (gov / "bridge.json").write_text(json.dumps(state), encoding="utf-8")
+    assert sd.main(["--json"]) == 0 and json.loads(capsys.readouterr().out)["authorizes_cutover"] is True
+
+
+def test_a_bridge_state_that_cannot_be_reread_for_the_daily_cap_is_an_error_not_an_empty_list(tmp_path):
+    with pytest.raises(OSError):
+        sd.daily_cap_divergence(tmp_path / "nao_existe.json", [])
+
+
+def _slow_poll_world(tmp_path, monkeypatch):
+    """Um ciclo A do poll em voo (segura o bridge.lock, parado no `gh`); devolve (gov, controle) para o teste conduzir A e um segundo ciclo B."""
+    import os
+    import threading
+    import time
+
+    from tools.orchestration import event_bridge as eb
+    gov = real_world(tmp_path, monkeypatch)
+    monkeypatch.setattr(sd, "poll_paused", REAL_POLL_PAUSED)
+    monkeypatch.setattr(sd, "poll_in_flight", REAL_POLL_IN_FLIGHT)
+    policy = {"reviewers": ["fmmodesto"], "executor_logins": ["fmodesto30"]}
+    head = "a" * 40
+    started, release, box = threading.Event(), threading.Event(), {}
+
+    def gh_a(path):
+        if path.startswith("repos/GFCDOTA/sketchup-mcp/pulls?"):
+            return [{"number": 7, "head": {"sha": head}, "body": "Refs #589"}]
+        if "/reviews" in path:
+            started.set()
+            assert release.wait(20), "o teste nao liberou o ciclo A"
+            return [{"id": 1, "user": {"login": "fmmodesto"}, "state": "CHANGES_REQUESTED", "commit_id": head, "html_url": "https://x/r/1",
+                     "submitted_at": "2026-11-04T11:00:00Z"}]
+        return []
+
+    def run_a():
+        box["counts"] = eb.run_cycle(gh_a, policy, store=EventStore(gov / "store.db"))
+    thread = threading.Thread(target=run_a, daemon=True)
+    thread.start()
+    assert started.wait(10)
+    old = time.time() - 120                                                            # o ciclo A ja roda ha mais de 60 s: a regra antiga do `locked` quebra a trava
+    os.utime(gov / "bridge.lock", (old, old))
+    return gov, policy, release, thread, box
+
+
+def test_a_poll_cycle_older_than_60s_whose_lock_was_broken_cannot_write_after_the_pause_and_the_green_report_holds(tmp_path, monkeypatch, capsys):
+    """Cenario do review: A em voo ha > 60 s; a pausa e criada; um 2o ciclo B quebra e remove o .lock e sai por `BRIDGE_POLL_DISABLED`; o detector nao ve trava e autoriza.
+    A continua e antes publicava no EventStore e salvava a fila DEPOIS do relatorio verde. Agora A descobre a pausa e descarta tudo."""
+    from tools.orchestration import event_bridge as eb
+    gov, policy, release, thread, box = _slow_poll_world(tmp_path, monkeypatch)
+    eb.poll_disabled_flag().write_text("", encoding="utf-8")
+    counts_b = eb.run_cycle(lambda p: (_ for _ in ()).throw(AssertionError("B nao pode consultar o GitHub")), policy)
+    assert counts_b["DISABLED"] == 1 and not (gov / "bridge.lock").exists()           # a posse de A foi perdida: a AUSENCIA do .lock nao prova nada
+    before = (gov / "bridge.json").read_bytes()
+    assert sd.main(["--json"]) == 0 and json.loads(capsys.readouterr().out)["authorizes_cutover"] is True
+    release.set()
+    thread.join(10)
+    assert not thread.is_alive()
+    assert box["counts"]["DISABLED"] == 1 and box["counts"]["ACCEPT"] == 0 and box["counts"]["DISCARDED"] == 1
+    assert (gov / "bridge.json").read_bytes() == before and EventStore(gov / "store.db").events() == []
+    assert sd.main(["--json"]) == 0                                                    # o relatorio verde continua valendo depois que A terminou
+
+
+def test_the_check_refuses_when_the_queue_changed_while_it_was_reading(tmp_path, monkeypatch, capsys):
+    """Uma gravacao que cai DURANTE a leitura (ciclo antigo que passou da ultima checagem) invalida o relatorio: ele so autoriza com a fila estavel do inicio ao fim."""
+    gov = real_world(tmp_path, monkeypatch)
+    real_collect = sd.collect
+
+    def collect_then_a_late_write(queue, store):
+        found = real_collect(queue, store)
+        (gov / "bridge.json").write_text(json.dumps({"queue": [item(9)]}), encoding="utf-8")
+        return found
+    monkeypatch.setattr(sd, "collect", collect_then_a_late_write)
+    assert sd.main(["--json"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["ok"] is False and "mudou durante a leitura" in out["error"]
+
+
+def test_the_check_refuses_when_the_poll_pause_disappears_while_it_was_reading(tmp_path, monkeypatch, capsys):
+    from tools.orchestration import event_bridge as eb
+    real_world(tmp_path, monkeypatch)
+    eb.poll_disabled_flag().write_text("", encoding="utf-8")
+    monkeypatch.setattr(sd, "poll_paused", REAL_POLL_PAUSED)
+    real_collect = sd.collect
+
+    def collect_then_unpause(queue, store):
+        found = real_collect(queue, store)
+        eb.poll_disabled_flag().unlink()
+        return found
+    monkeypatch.setattr(sd, "collect", collect_then_unpause)
+    assert sd.main(["--json"]) == 2
+    out = json.loads(capsys.readouterr().out)
+    assert out["authorizes_cutover"] is False and "BRIDGE_POLL_DISABLED" in out["error"]

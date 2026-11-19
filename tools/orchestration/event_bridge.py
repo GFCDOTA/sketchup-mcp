@@ -175,6 +175,22 @@ def pr_facts(pr_raw: dict) -> dict:
             "refs": sorted({int(n) for n in REFS.findall(pr_raw.get("body") or "")})}
 
 
+class PollPaused(RuntimeError):
+    """A pausa duravel do poll apareceu no meio de um ciclo: nada mais e publicado nem gravado por ele."""
+
+
+class _PauseGuardedStore:
+    """Fachada do EventStore para o ciclo do poll: recusa publicar depois que `BRIDGE_POLL_DISABLED` existe."""
+
+    def __init__(self, store, flag: Path):
+        self._store, self._flag = store, flag
+
+    def publish(self, **kw):
+        if self._flag.exists():
+            raise PollPaused("poll pausado durante o ciclo: nada e publicado")
+        return self._store.publish(**kw)
+
+
 def _shadow_publish(store, event: dict, pr_facts: dict) -> None:
     """Dual-write to EventStore (shadow mode, SPEC §6.3 step 4).  Best-effort:
     a failure here never blocks the JSON queue."""
@@ -188,6 +204,8 @@ def _shadow_publish(store, event: dict, pr_facts: dict) -> None:
         if args:
             store.publish(**args)
             _inc("publish_ok")
+    except PollPaused:                                                  # pausa deliberada: nao e erro do espelho
+        return
     except Exception as exc:  # noqa: BLE001
         from tools.orchestration.store_factory import _inc, _record_shadow_error
         _inc("publish_err")
@@ -244,11 +262,16 @@ def run_cycle(gh: Gh, policy: dict, bpath: Path | None = None, repo: str = REPO,
     """Um ciclo sob trava: carrega, enfileira e grava UM unico arquivo (fila + chaves vistas + cursor) com `os.replace`.
     Crash antes do replace = nada mudou (o proximo ciclo reenfileira uma vez); crash depois = tudo gravado. Sem estado em dois lugares.
     When ``store`` is given, accepted events are also shadow-published to the EventStore (SPEC §6.3)."""
+    flag = poll_disabled_flag(bpath)
     with es.locked(bpath or bridge_path()):
-        if poll_disabled_flag(bpath).exists():                       # conferido SOB a trava: um ciclo que comeca depois do interruptor nao grava nada
+        if flag.exists():                                            # conferido SOB a trava: um ciclo que comeca depois do interruptor nao grava nada
             return {"ACCEPT": 0, "DUPLICATE": 0, "STALE": 0, "IGNORE": 0, "ERROR": 0, "DISABLED": 1}
         bstate = load(bpath)
-        counts = poll_once(gh, policy, bstate, repo, now, store=store)
+        # A trava NAO prova posse: no protocolo de arquivo ela e quebrada apos 60 s mesmo com o dono vivo, e um 2o ciclo a remove. Um ciclo que ja comecou antes da pausa
+        # precisa descobri-la sozinho: a pausa e rechecada antes de CADA publicacao no EventStore e antes de gravar a fila; achada, o ciclo descarta tudo.
+        counts = poll_once(gh, policy, bstate, repo, now, store=_PauseGuardedStore(store, flag) if store is not None else None)
+        if flag.exists():
+            return {"ACCEPT": 0, "DUPLICATE": 0, "STALE": 0, "IGNORE": 0, "ERROR": 0, "DISABLED": 1, "DISCARDED": counts["ACCEPT"]}
         save(bstate, bpath)
     return counts
 

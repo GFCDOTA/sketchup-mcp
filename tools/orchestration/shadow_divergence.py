@@ -235,13 +235,16 @@ def daily_cap_divergence(bridge_path: Path, events: list[dict], now: float | Non
     import datetime as dt
 
     from tools.orchestration import event_executor as ex
-    try:
-        runs = json.loads(Path(bridge_path).read_bytes().decode("utf-8")).get("runs") or []
-    except (OSError, ValueError, AttributeError):
-        return []
+    data = json.loads(Path(bridge_path).read_bytes().decode("utf-8"))      # OSError/ValueError sobem: ilegivel agora e erro estruturado, nunca "sem execucoes"
+    runs = data.get("runs") if isinstance(data, dict) else None
+    if runs is None:
+        runs = []
+    # `event_executor.pick` compara cada item com o corte COMO TEXTO: `null`, numero ou formato fora do canonico derruba o executor JSON, entao nunca pode virar um relatorio ok.
+    if not isinstance(runs, list) or any(_epoch(r) is None for r in runs):
+        raise ValueError("estado do bridge com `runs` invalido (esperado: lista de instantes ISO UTC AAAA-MM-DDTHH:MM:SSZ): o executor JSON falharia ao aplicar o teto diario")
     t = time.time() if now is None else now
     cutoff = dt.datetime.fromtimestamp(t - 24 * 3600, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    recent = [r for r in runs if isinstance(r, str) and r >= cutoff]
+    recent = [r for r in runs if r >= cutoff]
     claimable = [e for e in events if e.get("event_type") == MIRROR_EVENT_TYPE and e.get("status") == "PENDING"
                  and int(e.get("attempt") or 0) < int(e.get("max_attempts") if e.get("max_attempts") is not None else MAX_ATTEMPTS)]
     remaining = max(0, ex.DAILY_CAP - len(recent))
@@ -304,9 +307,21 @@ def poll_paused() -> bool:
     return eb.poll_disabled_flag().exists()
 
 
+def _fingerprint(path: Path) -> tuple[int, int, str]:
+    """(tamanho, mtime_ns, sha256) do arquivo de estado: mudou entre dois instantes = alguem gravou no intervalo."""
+    import hashlib
+    try:
+        raw = Path(path).read_bytes()
+        return len(raw), Path(path).stat().st_mtime_ns, hashlib.sha256(raw).hexdigest()
+    except FileNotFoundError:
+        return 0, 0, "ausente"                                            # ausente nos dois instantes = estavel; a leitura real da fila ja trata a fonte ausente como erro
+
+
 def poll_in_flight() -> bool:
     """Um ciclo do poll segura a trava do estado do bridge (`.lock`). So olha se o arquivo existe: nao cria, grava nem remove nada.
-    Com a pausa ja presente, um ciclo que ainda grava pegou a trava ANTES dela; se nao ha trava agora, nenhum ciclo gravara depois.
+    LIMITE: isto NAO prova que nenhum ciclo esta gravando. No protocolo de arquivo a trava e quebrada apos 60 s mesmo com o dono vivo e um 2o ciclo a remove; so o lock do SO
+    mantem a posse ate o fim. Por isso o relatorio nao depende desta sonda: (1) o poll recheca a pausa antes de cada publicacao e antes de gravar e descarta o ciclo
+    (`event_bridge.run_cycle`), e (2) `main` exige a fila estavel e a pausa mantida da primeira leitura ate a ultima.
     Dois protocolos de trava: o de arquivo (`O_EXCL`, apagado ao sair: existir com PID = dono, ou orfa) e o de lock do SO (arquivo permanente marcado `:oslock`
     ou vazio; o dono segura o byte `LOCK_POS`). O probe abre SOMENTE leitura e nao grava nada."""
     import os
@@ -374,12 +389,21 @@ def main(argv: list[str] | None = None) -> int:
         if not store_factory.store_path().is_file():                      # antes da trava: fonte ausente e erro e o detector nao cria nada (nem a pasta da trava)
             raise FileNotFoundError(f"EventStore ausente: {store_factory.store_path().name}")
         # sem trava: com executor e poll pausados de forma duravel e nenhum ciclo em voo, ninguem grava fila nem SQLite; a leitura nao cria arquivo algum
+        first = _fingerprint(_bridge_path())
         queue, store = _load()
         found = collect(queue, store)
         found += daily_cap_divergence(_bridge_path(), store.events())
+        if _fingerprint(_bridge_path()) != first:                         # um ciclo antigo gravou durante a leitura: o que foi comparado nao e mais a fila
+            msg = "a fila do bridge mudou durante a leitura (um ciclo do poll gravou): repita a verificacao"
+            print(json.dumps({"ok": False, "authorizes_cutover": False, "error": msg}) if ns.json else f"erro: {msg}")
+            return 2
+        if not ns.allow_live_executor and not poll_paused():              # a pausa tem de valer ate o FIM: removida no meio, um poll novo pode gravar depois do relatorio
+            msg = "a pausa BRIDGE_POLL_DISABLED sumiu durante a verificacao: recrie-a e repita"
+            print(json.dumps({"ok": False, "authorizes_cutover": False, "error": msg}) if ns.json else f"erro: {msg}")
+            return 2
     except (OSError, ValueError, sqlite3.Error, TimeoutError) as exc:
         kind = "sqlite" if isinstance(exc, sqlite3.Error) else "fila"
-        print(json.dumps({"ok": False, "error": f"{kind}: {exc}"[:200]}) if ns.json else f"erro: {kind}: {exc}")
+        print(json.dumps({"ok": False, "authorizes_cutover": False, "error": f"{kind}: {exc}"[:200]}) if ns.json else f"erro: {kind}: {exc}")
         return 2
     orphans = [d for d in found if d.code == "ORPHAN_IN_STORE"]
     errors = [d for d in found if d.code != "ORPHAN_IN_STORE"]
