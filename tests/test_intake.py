@@ -397,8 +397,19 @@ def test_a_truncated_post_check_holds_the_request_and_time_alone_never_releases_
     assert code == 0 and out["post_check"]["inconclusive"] is True and out["post_check"]["held"] is True
     ev = _intake_event(cli)
     assert ev["status"] == "RUNNING" and ev["lease_owner"] == intake.HOLD_OWNER
-    st = EventStore(cli, clock=lambda: ev["created_at"] + 7 * 24 * 3600)                             # uma semana depois: ainda preso
-    assert st.claim(("IMPLEMENT_REQUESTED",), "worker", 60) is None
+    st7 = EventStore(cli, clock=lambda: ev["created_at"] + 7 * 24 * 3600)                           # uma semana depois: ainda preso
+    assert st7.claim(("IMPLEMENT_REQUESTED",), "worker", 60) is None
+    st31 = EventStore(cli, clock=lambda: ev["created_at"] + 31 * 24 * 3600)                         # 31 dias: a garantia vale alem dos 30 dias do lease antigo
+    assert st31.claim(("IMPLEMENT_REQUESTED",), "worker", 60) is None
+
+
+def test_repeated_hold_and_release_cycles_never_send_the_event_to_dlq(cli, monkeypatch, capsys):
+    """4 ciclos de retencao (pos-checagem inconclusiva) + liberacao (leitura completa sem PR) nunca chegam a DLQ."""
+    for _ in range(4):
+        _run_publish(monkeypatch, capsys, [([issue(1)], None, []), ([issue(1)], None, []), RuntimeError("gh: HTTP 502")])
+        _run_publish(monkeypatch, capsys, [([issue(2)], None, []), ([issue(2)], None, []), ([issue(2)], None, [])])
+    ev = _intake_event(cli)
+    assert ev["status"] == "PENDING", f"apos 4 ciclos hold/release o evento deve estar PENDING, nao {ev['status']!r}"
 
 
 def test_a_gh_failure_in_the_post_check_holds_the_request(cli, monkeypatch, capsys):

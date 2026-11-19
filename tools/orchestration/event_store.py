@@ -396,6 +396,20 @@ class EventStore:
                 self._record_dlq_fact(db, ev, reason, now)
             return to
 
+    def release_hold(self, ev: dict, reason: str) -> None:
+        """Return a held event to PENDING, undoing the attempt increment from the hold claim.
+
+        A hold is a durable pause, not a failure: releasing it must not consume
+        the event's retry budget so real execution later gets its full max_attempts.
+        """
+        with self._tx() as db:
+            now = self.clock()
+            self._owned_update(
+                db, ev,
+                "UPDATE events SET status='PENDING', available_at=?, lease_until=0, attempt=MAX(0, attempt-1), updated_at=?",
+                (now, now), "PENDING", f"hold released: {reason[:300]}", now,
+            )
+
     def supersede(self, ev: dict, reason: str) -> None:
         """Discard a claimed event that refers to an outdated artifact version."""
         with self._tx() as db:

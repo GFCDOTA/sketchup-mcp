@@ -32,7 +32,7 @@ ALLOWED_SPECS = frozenset({"FP-060"})
 EVENT_TYPE = "IMPLEMENT_REQUESTED"
 AGGREGATE = "issue"
 HOLD_OWNER = "intake:hold"                                                         # dono do lease que PRENDE um pedido de pos-checagem inconclusiva
-HOLD_S = 30 * 24 * 3600.0                                                         # o lease nao vence sozinho na pratica: so release_holds solta (leitura completa)
+HOLD_S = 10 * 365 * 24 * 3600.0                                                   # ~10 anos: so release_holds solta (leitura completa); tempo sozinho nao libera
 PRODUCER = "intake"
 INTAKE_AGENT = None                     # SEM nome: `decide` exclui dos conflitos so os claims do agente dado, e nenhum claim tem agente None => todo claim ativo (de qualquer nome, inclusive "intake") e externo
 
@@ -134,7 +134,7 @@ def publish(store, verdict: bd.Verdict, issues: list[dict]) -> tuple[int, bool]:
 
 def release_holds(store, prs: list[dict]) -> list[dict]:
     """Com uma lista COMPLETA de PRs abertos (o chamador ja recusou a truncada): para cada pedido preso pelo intake, PR vinculado = descarta; sem vinculo = solta
-    (volta a PENDING). Soltar consome a tentativa que o lease de retencao contou: so acontece em pos-checagem inconclusiva, que e rara."""
+    (volta a PENDING sem contar como falha, preservando o budget de tentativas para a execucao real)."""
     out = []
     for ev in store.events():
         if ev.get("producer") != PRODUCER or ev.get("status") != "RUNNING" or ev.get("lease_owner") != HOLD_OWNER:
@@ -148,7 +148,7 @@ def release_holds(store, prs: list[dict]) -> list[dict]:
             store.supersede(ev, f"o PR #{linked} esta vinculado a Issue (pos-checagem completa): descartado")
             out.append({"event_id": ev["id"], "superseded_by_pr": linked})
         elif isinstance(issue, int):
-            store.fail(ev, "pos-checagem completa sem PR vinculado: liberado", retry_delay=0.0)
+            store.release_hold(ev, "pos-checagem completa sem PR vinculado: liberado")
             out.append({"event_id": ev["id"], "released": True})
     return out
 
