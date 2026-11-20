@@ -84,13 +84,6 @@
         }
       ]
     },
-    "551": {
-      "audited_at": "2026-11-02",
-      "state": "BLOCKED",
-      "cause": "REVIEW",
-      "ref": "#524",
-      "detail": "Os 3 criterios cumpridos pelos PRs 563, 564 e 552 (merge 459bc30; issue_integrity_gate.py e caminho critico). Nenhum passo tecnico resta; PR 552 mergeado a pedido do proprietario em 2026-10-30 sem revisao independente verificavel (reviewers vazio): fica em GPT Review ate a aprovacao verificada."
-    },
     "502": {
       "audited_at": "2026-11-02",
       "state": "READY",
