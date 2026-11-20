@@ -65,6 +65,7 @@ def test_local_text_reads_only_from_a_real_checkout(tmp_path, monkeypatch):
 
 def test_real_index_maps_every_removed_spec_and_pins_a_sha():
     moved = si.moved_specs(ROOT)
-    assert len(moved) == 82 and si.pinned_sha(ROOT)
+    # 82 saíram do develop + 2 da FP-062 (branches dos PRs #674/#677, nunca mergeados)
+    assert len(moved) == 84 and si.pinned_sha(ROOT)
     assert all(old.endswith(".md") and not (ROOT / old).exists() for old in moved)
     assert {old.split("/", 1)[0] for old in moved} == {"docs", ".claude", "interior"}

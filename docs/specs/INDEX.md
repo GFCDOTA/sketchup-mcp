@@ -3,12 +3,13 @@
 As SPECs saíram deste repositório e moram em **`Plan2Space/engineering-specs`** (privado), pasta `sketchup-mcp/`,
 conforme o contrato de ownership v2 do `claude-engineering-skills`. Editar SPEC = PR lá, nunca aqui.
 
-SHA: `661ea23ade081157b073a031ba4d0d4e8fa89414`
+SHA: `40b76f9ce10ab7e9a51e2a1e03495a9cd1ba2b72`
 
 Link de uma SPEC: `https://github.com/Plan2Space/engineering-specs/blob/<SHA>/<caminho em engineering-specs>`.
 Em código: `tools.validation.spec_index.url("docs/specs/FP-030_visual_oracle_gate.md")`.
 
-Copiadas byte a byte do `develop` `7ea99daeafda2d0a553d3fc4781a581a73d45d47`. Ficaram aqui porque o código lê esses
+Copiadas byte a byte do `develop` `7ea99daeafda2d0a553d3fc4781a581a73d45d47`. As duas SPECs da FP-062 nunca chegaram ao `develop`: vieram byte a byte dos branches
+preservados dos PRs #677 (`e25253b0`) e #674 (`18736dd2`), fechados sem merge. Ficaram aqui porque o código lê esses
 arquivos e eles não são SPEC: `docs/specs/*.json`, `docs/specs/_assets/`, `docs/specs/FP-SOFA-PREMIUM/*.json`,
 `interior/class_specs/__init__.py`.
 
@@ -99,3 +100,5 @@ tabela**. Por isso relatório e handoff históricos continuam válidos sem reesc
 | `interior/class_specs/ARMCHAIR_CLASS_SPEC.md` | `sketchup-mcp/class-specs/ARMCHAIR_CLASS_SPEC.md` |
 | `interior/class_specs/BED_CLASS_SPEC.md` | `sketchup-mcp/class-specs/BED_CLASS_SPEC.md` |
 | `interior/class_specs/SOFA_CLASS_SPEC.md` | `sketchup-mcp/class-specs/SOFA_CLASS_SPEC.md` |
+| `docs/specs/FP-062_MIGRATION_EXECUTION_PLAN.md` | `sketchup-mcp/docs-specs/FP-062_MIGRATION_EXECUTION_PLAN.md` |
+| `docs/specs/FP-062_plan2space_architecture_reset.md` | `sketchup-mcp/docs-specs/FP-062_plan2space_architecture_reset.md` |
