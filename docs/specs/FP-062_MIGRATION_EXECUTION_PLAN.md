@@ -162,13 +162,13 @@ Estados: `BACKLOG`, `READY`, `IN_PROGRESS`, `IN_REVIEW`, `VERIFIED`, `DONE`, `BL
 | R-04 | agent-runtime | Portar publicador de outbox | DONE | R-03 | PR #30 (`18ccde8`). Issue #25 segue aberta |
 | R-05 | agent-runtime | Portar helpers de escrita durável | DONE | R-01 | PR #32 (`5323e4b`) |
 | R-06 | agent-runtime | Detector somente leitura de divergência | DONE | R-03 | PR #31 (`eb93c85`). Issue #21 segue aberta |
-| R-07 | agent-runtime | Prova de concorrência e recuperação do EventStore com processos reais, leases, fencing e DLQ | READY | R-03 | issue #48 |
+| R-07 | agent-runtime | Prova de concorrência e recuperação do EventStore com processos reais, leases, fencing e DLQ | IN_PROGRESS | R-03 | issue #48. Os 7 testes de processo reais em `tests/test_event_store_processes.py` cobrem morte após claim, corrida de 4 processos, disputa por um evento, publicação duplicada, DLQ, reinício e prazo do filho. Verdes em 10 de 10 execuções locais (Python 3.12) e no CI de `main`. Falta AC-03: o teste usa 16 eventos e 4 processos, abaixo do limiar proposto (DEC-06) |
 | R-08 | agent-runtime | Loader de estado tolerante com quarentena | DONE | R-05 | PR #43 (`079a8fd`). Issue #20 segue aberta |
 | R-09 | agent-runtime | Liberar claim bloqueado sem consumir tentativa | DONE | R-03 | PR #46 (`23dc268`), primeira microtarefa do #19 |
-| R-10 | agent-runtime | Gate de quiescência com contrato de evidência | IN_PROGRESS | R-06 | PR #49 aberto com CI **vermelho**: `test_lock_offset_must_match_the_owner_byte` falha em 3.11 e 3.12 |
+| R-10 | agent-runtime | Gate de quiescência com contrato de evidência | IN_REVIEW | R-06 | PR #49, HEAD `2f176dd8`: CI verde em 3.11 e 3.12. O teste de offset de byte virou Windows-only, porque o flock POSIX é de arquivo inteiro; o comportamento POSIX tem testes próprios. Aguarda revisão independente (conta revisora) |
 | R-11 | agent-runtime | Pacote instalável, contrato público e install check | IN_REVIEW | R-01 | PR #42 aberto; `CLEAN`, 3 checks verdes; sem revisão |
 | R-12 | agent-runtime | `EXECUTOR_SOURCE` com JSON como padrão e SQLite atrás de flag | BACKLOG | R-06, R-07, R-10 | issue #19 (restante); origem em sketchup-mcp #626 |
-| R-13 | agent-runtime | Publicar o parecer do revisor pelo outbox, sem POST direto | READY | R-04 | issue #22 |
+| R-13 | agent-runtime | Publicar o parecer do revisor pelo outbox, sem POST direto | IN_PROGRESS | R-04 | issue #22. Diagnóstico: o POST direto está em `tools/orchestration/codex_reviewer.py`, função `publish`, chamada `gh api -X POST repos/{repo}/pulls/{pr}/reviews` (linha 363). O porte para o outbox ainda não foi feito |
 | R-14 | agent-runtime | Alvo GitHub do publicador com reconciliação de review | READY | R-04 | issue #24 (mesmos arquivos de R-13: sequenciar) |
 | R-15 | agent-runtime | Revisor em AppContainer comprovado; liberar APPROVE | BLOCKED | conta revisora configurada e prova E2E (contrato em `claude-engineering-skills` PR #31, §11), prova de sandbox | issue #23 |
 | R-16 | agent-runtime | Validar por CI os testes que o AppContainer não executa | READY | R-11 | issues #2 e #4 |
@@ -189,7 +189,7 @@ Estados: `BACKLOG`, `READY`, `IN_PROGRESS`, `IN_REVIEW`, `VERIFIED`, `DONE`, `BL
 | ID | Repo | Microtarefa | Estado | Depende de | Referência / evidência |
 |---|---|---|---|---|---|
 | A-01 | agent-bar | Importação standalone, ADRs 0001 a 0013 | DONE | — | `develop` @ `366b7a6` |
-| A-02 | agent-bar | Leitor somente leitura do EventStore | IN_PROGRESS | R-03 | issue agent-bar #1; PR #3 aberto |
+| A-02 | agent-bar | Leitor somente leitura do EventStore | IN_REVIEW | R-03 | issue agent-bar #1. PR #3 (+113/−0: `docs/contracts/READER_CONTRACT.md` e `tests/test_reader_contract.py`): CI verde em 3.11 e 3.12, `CLEAN`, sem revisão. O leitor real do EventStore ainda não foi verificado no código |
 | A-03 | agent-bar | Contratos de controle pela API do runtime | BACKLOG | A-02, R-01 | sketchup-mcp #628 (P0) |
 | A-04 | agent-bar | Barra flutuante de observabilidade | DEFERRED | A-03 | sketchup-mcp #599 (P2). Adiada até A-03 |
 
@@ -198,8 +198,8 @@ Estados: `BACKLOG`, `READY`, `IN_PROGRESS`, `IN_REVIEW`, `VERIFIED`, `DONE`, `BL
 | ID | Repo | Microtarefa | Estado | Depende de | Referência / evidência |
 |---|---|---|---|---|---|
 | P-01 | sketchup-mcp | Relocar 12 módulos de produto para `tools/sketchup` e `core` | IN_PROGRESS | — | `feat/fp062-relocate-product`: `a7f6ff7f`, `ab3d1e7b`, `a3499dbd`. Sem PR |
-| P-02 | sketchup-mcp | Prova L2 pós-relocação (regressão da planta_74) | IN_PROGRESS | P-01, DEC-05 | `artifacts/review/planta_74/fp062-relocation/`: staged, não commitado, não verificado |
-| P-03 | sketchup-mcp | Registrar caminhos relocados no inventário FP-042 | IN_PROGRESS | P-01 | `a3499dbd` |
+| P-02 | sketchup-mcp | Prova L2 pós-relocação (regressão da planta_74) | IN_REVIEW | P-01, DEC-05 | commit `536a15e5` na branch: `.skp` final, renders top e iso, `regression_summary.md` e README com o que é e o que não é. Veredito visual `PENDING_HUMAN`. O `.skp` de 3,3 MB está versionado: DEC-05 segue aberta |
+| P-03 | sketchup-mcp | Registrar caminhos relocados no inventário FP-042 | IN_REVIEW | P-01 | `a3499dbd`; inventário, referências e blobs atualizados em `536a15e5` |
 | P-04 | sketchup-mcp | PR consolidado de remoção da infraestrutura genérica | BLOCKED | P-01 mesclado, R-07, R-12 | `feat/fp062-consolidated-cleanup` existe e não tem commits próprios: não iniciado. Strangler: só após paridade |
 | P-05 | sketchup-mcp | Consumir o contrato versionado do runtime, sem import direto | BACKLOG | R-01, R-12 | — |
 | P-06 | sketchup-mcp | Gate de quiescência e divergência antes de trocar a fonte | BACKLOG | R-10, R-06 | — |
@@ -230,9 +230,9 @@ Total de microtarefas: 49.
 | Estado | Quantidade | IDs |
 |---|---|---|
 | DONE | 11 | G-03, R-01, R-02, R-03, R-04, R-05, R-06, R-08, R-09, R-26, A-01 |
-| IN_REVIEW | 3 | G-01, G-02, R-11 |
-| IN_PROGRESS | 7 | G-04, R-10, R-27, A-02, P-01, P-02, P-03 |
-| READY | 4 | R-07, R-13, R-14, R-16 |
+| IN_REVIEW | 7 | G-01, G-02, R-10, R-11, A-02, P-02, P-03 |
+| IN_PROGRESS | 5 | G-04, R-07, R-13, R-27, P-01 |
+| READY | 2 | R-14, R-16 |
 | BLOCKED | 7 | G-07, G-08, G-10, R-15, R-20, R-21, P-04 |
 | BACKLOG | 15 | G-05, G-06, G-09, R-12, R-17, R-18, R-19, R-22, R-23, R-24, R-25, A-03, P-05, P-06, P-08 |
 | DEFERRED | 2 | A-04, P-07 |
@@ -299,7 +299,7 @@ Os números são contagens, não progresso ponderado. Nenhuma microtarefa aqui e
 |---|---|---|---|
 | B-01 | PR #49 com CI vermelho (`test_lock_offset_must_match_the_owner_byte`, 3.11 e 3.12) | R-10, R-12 | corrigir no mesmo branch e reexecutar o CI |
 | B-02 | Conta separada do revisor decidida, mas ainda não criada. Sem ela, G-REV não pode ser satisfeito com verificação | R-15, R-20, R-21 | o proprietário cria a conta e configura as credenciais, fora do repositório. O agente não cria contas, não manipula credenciais e não as registra em SPEC, log ou commit. Contrato: `claude-engineering-skills` PR #31 |
-| B-03 | Worktree `fp062-relocation` com artefatos staged e JSON do FP-042 modificados, não commitados. Dono do trabalho não identificado nesta reconciliação | P-01, P-02 | não tocar. Confirmar o dono antes de commitar ou descartar |
+| B-03 | Os artefatos da relocação foram commitados em `536a15e5`, por outra sessão ou pelo proprietário. A worktree local `fp062-relocation` pode ainda ter estado não commitado | P-01, P-02 | não tocar na worktree local. Confirmar com o dono se algo ficou de fora do commit |
 | B-04 | CI do PR #26 (skills): correção em `f8d8ecf`, re-execução pendente | G-01 | acompanhar o CI do PR |
 | B-05 | Gap de rastreabilidade: supervisor Windows (R-19) sem issue | R-19 | criar issue no agent-runtime |
 
@@ -319,6 +319,10 @@ Entradas só são acrescentadas. Correções são novas linhas que referenciam a
 | 2026-11-20 | — | SPEC aberta como PR contra `develop` | `Plan2Space/sketchup-mcp` PR #677, branch `docs/fp062-execution-plan` |
 | 2026-11-20 | — | Owner confirmou DEC-01 (conta separada). R-15 e R-20 seguem BLOCKED até conta configurada e prova E2E. Microtarefas que não dependem da conta seguem sem bloqueio | instrução do proprietário no chat |
 | 2026-11-20 | — | Contrato de identidade do revisor em DRAFT, centralizado em `claude-engineering-skills` | `docs/specs/reviewer-identity-contract.md`, PR #31 |
+| 2026-11-20 | — | R-10: PR #49 com CI verde em `2f176dd8` (3.11 e 3.12). A correção já estava na branch quando a sessão retomou; não foi feita aqui | `Plan2Space/agent-runtime` PR #49, check runs |
+| 2026-11-20 | — | R-07: 7 testes de processo reais verdes em 10 de 10 execuções locais (Python 3.12). AC-03 ainda não atendido | `tests/test_event_store_processes.py` |
+| 2026-11-20 | — | R-13: POST direto localizado em `tools/orchestration/codex_reviewer.py:363` | leitura do código em `origin/feat/fp062-relocate-product` |
+| 2026-11-20 | — | A-02: PR #3 do agent-bar com CI verde e sem revisão | `Plan2Space/agent-bar` PR #3 |
 | 2026-11-20 | — | Achado: `agent_bar/` ausente e `executor_delivery.py` presente em `origin/develop`; correções a FP-060 §0 | `git ls-tree origin/develop` |
 
 ## 14. Próximas microtarefas
