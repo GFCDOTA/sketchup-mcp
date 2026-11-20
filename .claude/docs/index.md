@@ -26,22 +26,22 @@ aponta pra source-of-truth, não pra cópia.
 
 | Arquivo | Pra que serve |
 |---|---|
-| [`specs/product_goal.md`](../specs/product_goal.md) | O que é sucesso pro humano |
-| [`specs/fidelity_gate.md`](../specs/fidelity_gate.md) | Dimensões de fidelidade |
-| [`specs/perfect_reference_strategy.md`](../specs/perfect_reference_strategy.md) | Tiers de verdade, truth cards |
-| [`specs/skp_artifact_layout.md`](../specs/skp_artifact_layout.md) | Paths, naming, metadata |
-| [`specs/skp_proof_of_progress_gate.md`](../specs/skp_proof_of_progress_gate.md) | "No SKP, no progress" — toda PR de fidelidade gera SKP + comparação |
-| [`specs/sdd_and_harness_engineering.md`](../specs/sdd_and_harness_engineering.md) | Spec → fixture → teste → artifact |
-| [`specs/repository_hygiene.md`](../specs/repository_hygiene.md) | Triggers reais pra cleanup |
+| [`product_goal.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/product_goal.md) | O que é sucesso pro humano |
+| [`fidelity_gate.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/fidelity_gate.md) | Dimensões de fidelidade |
+| [`perfect_reference_strategy.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/perfect_reference_strategy.md) | Tiers de verdade, truth cards |
+| [`skp_artifact_layout.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/skp_artifact_layout.md) | Paths, naming, metadata |
+| [`skp_proof_of_progress_gate.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/skp_proof_of_progress_gate.md) | "No SKP, no progress" — toda PR de fidelidade gera SKP + comparação |
+| [`sdd_and_harness_engineering.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/sdd_and_harness_engineering.md) | Spec → fixture → teste → artifact |
+| [`repository_hygiene.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/repository_hygiene.md) | Triggers reais pra cleanup |
 
 ### Templates (usar ao criar nova feature/spec)
 
 | Template | Quando |
 |---|---|
-| [`specs/templates/feature_spec_template.md`](../specs/templates/feature_spec_template.md) | Nova feature FP-NNN |
-| [`specs/templates/fidelity_spec_template.md`](../specs/templates/fidelity_spec_template.md) | Documentar veredito de fidelidade de um build |
-| [`specs/templates/artifact_contract_template.md`](../specs/templates/artifact_contract_template.md) | Documentar contrato de artifact (input/output/schema) |
-| [`specs/templates/regression_summary_template.md`](../specs/templates/regression_summary_template.md) | Preencher `regression_summary.md` em `artifacts/review/<plant>/<cycle>/` |
+| [`feature_spec_template.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/templates/feature_spec_template.md) | Nova feature FP-NNN |
+| [`fidelity_spec_template.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/templates/fidelity_spec_template.md) | Documentar veredito de fidelidade de um build |
+| [`artifact_contract_template.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/templates/artifact_contract_template.md) | Documentar contrato de artifact (input/output/schema) |
+| [`regression_summary_template.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/templates/regression_summary_template.md) | Preencher `regression_summary.md` em `artifacts/review/<plant>/<cycle>/` |
 
 ## Evals — como medimos progresso
 

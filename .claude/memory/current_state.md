@@ -2,7 +2,7 @@
 
 > **Snapshot:** 2026-10-22. Decai rápido — conferir com `git`/`gh` antes de agir em decisão remota.
 > Retrato completo e próximos passos: `docs/handoffs/2026-10-22_general_app_handoff.md`.
-> Fila de trabalho do core de construção: `docs/specs/construction_core_microphases.md`.
+> Fila de trabalho do core de construção: [`construction_core_microphases.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/docs-specs/construction_core_microphases.md).
 
 ## Branch base & CI
 

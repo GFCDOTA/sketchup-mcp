@@ -9,4 +9,4 @@ def test_readme_nao_afirma_o_que_ja_foi_corrigido():
     text = (ROOT / "README.md").read_text("utf-8")
     assert "ainda rodam `taskkill" not in text and "tools/*.rb" not in text
     assert "tools/sketchup/{shell,furnish,inspect,vray}" in text
-    assert "docs/specs/FP-044_root_and_tools_consolidation.md" in text
+    assert "sketchup-mcp/docs-specs/FP-044_root_and_tools_consolidation.md" in text  # SPEC mora no engineering-specs

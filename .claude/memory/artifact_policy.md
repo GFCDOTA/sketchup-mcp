@@ -92,7 +92,7 @@ requisito**: artefatos de comparação antes/depois em
 `artifacts/review/<plant>/<cycle>/` + `regression_summary.md`.
 
 Detalhe completo em
-[`specs/skp_proof_of_progress_gate.md`](../specs/skp_proof_of_progress_gate.md).
+[`skp_proof_of_progress_gate.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/skp_proof_of_progress_gate.md).
 Skill operacional em
 [`skills/generate-and-compare-skp-after-change/SKILL.md`](../skills/generate-and-compare-skp-after-change/SKILL.md).
 

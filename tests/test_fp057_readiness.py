@@ -7,6 +7,7 @@ from pathlib import Path
 from tools.validation import backlog_discovery as bd
 from tools.validation import dependency_graph as dg
 from tools.validation import issue_integrity_gate as ig
+from tools.validation import spec_index
 from tools.validation import task_readiness as tr
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -94,7 +95,7 @@ def test_every_file_ref_in_the_real_registry_exists_and_issue_refs_are_well_form
             if ref.startswith("#"):
                 assert ref[1:].isdigit(), (n, ref)
             else:
-                assert (ROOT / ref.split("#")[0]).exists(), (n, ref)
+                assert spec_index.resolves(ref, ROOT), (n, ref)  # existe aqui ou é SPEC movida (INDEX.md)
 
 
 def codes(reg, issues):

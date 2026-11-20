@@ -23,6 +23,7 @@ import re
 import sys
 from pathlib import Path
 
+from tools.validation import spec_index
 from tools.validation.backlog_gate import REPO, Finding, _gh
 
 ROOT = Path(__file__).resolve().parent.parent.parent
@@ -92,7 +93,7 @@ def check(issues: dict[int, dict], specs: set[str], exceptions: dict | None = No
                 found.append(Finding(n, "BLOCK_DEPENDENCY_STALE", f"nenhuma dependencia aberta entre {real}"))
         for lab in sorted(names):
             if lab.startswith("spec:") and not _spec_exists(lab, specs):
-                found.append(Finding(n, "SPEC_LABEL_UNKNOWN", f"{lab} sem arquivo em docs/specs/"))
+                found.append(Finding(n, "SPEC_LABEL_UNKNOWN", f"{lab} sem SPEC em docs/specs/INDEX.md"))
     ok = exceptions or {}
     return [f for f in found if f.code not in ok.get(str(f.issue), {})]
 
@@ -105,7 +106,7 @@ def load() -> dict[int, dict]:
 def main() -> int:
     exc_path = ROOT / "docs/governance/backlog_exceptions.json"
     exceptions = json.loads(exc_path.read_text(encoding="utf-8")) if exc_path.exists() else {}
-    specs = {p.name for p in (ROOT / "docs/specs").glob("*.md")}
+    specs = spec_index.spec_names(ROOT)
     from tools.validation import task_readiness
     findings = check(load(), specs, exceptions, task_readiness.load())
     for f in findings:

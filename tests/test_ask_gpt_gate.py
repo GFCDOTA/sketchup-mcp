@@ -27,6 +27,7 @@ from tools.oracle.ask_gpt_gate import (
     probe_bridge,
     run_gate,
 )
+from tools.validation import spec_index
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -249,8 +250,12 @@ def test_ai_bridge_questions_dir_documented():
     evidence of the gate being used."""
     # Soft check — directories may not exist yet on a fresh clone
     # but the LL-024 spec documents them.
-    spec = REPO_ROOT / "docs" / "specs" / "LL-024_gpt_auto_consult_gate.md"
-    assert spec.exists()
-    text = spec.read_text(encoding="utf-8")
+    # A SPEC saiu para o Plan2Space/engineering-specs (docs/specs/INDEX.md). O índice tem que conhecê-la sempre;
+    # o conteúdo só é conferido onde houver clone local (ENGINEERING_SPECS_DIR); o CI não acessa o repo privado.
+    spec = "docs/specs/LL-024_gpt_auto_consult_gate.md"
+    assert spec_index.is_moved(spec, REPO_ROOT)
+    text = spec_index.local_text(spec, REPO_ROOT)
+    if text is None:
+        pytest.skip("conteudo da LL-024 so com clone local do engineering-specs")
     assert ".ai_bridge/questions/" in text
     assert ".ai_bridge/responses/" in text

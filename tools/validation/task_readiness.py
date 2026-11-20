@@ -16,6 +16,8 @@ import json
 import re
 from pathlib import Path
 
+from tools.validation import spec_index
+
 ROOT = Path(__file__).resolve().parents[2]
 PATH = ROOT / "docs/governance/task_readiness.json"
 CAUSES = ("HUMAN_DECISION", "ENVIRONMENT", "EVIDENCE", "DEPENDENCY", "EXTERNAL", "REVIEW")
@@ -34,7 +36,7 @@ def _check_ref(ref: str, issues: dict[int, dict], root: Path) -> str | None:
     if m:
         return None if int(m.group(1)) in issues else f"Issue {ref} inexistente"
     target = (ref or "").split("#", 1)[0]
-    return None if target and (root / target).exists() else f"arquivo {ref!r} inexistente"
+    return None if spec_index.resolves(target, root) else f"arquivo {ref!r} inexistente"
 
 
 def validate(tasks: dict[int, dict], issues: dict[int, dict], root: Path = ROOT) -> list[tuple[str, int, str]]:

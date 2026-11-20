@@ -7,6 +7,7 @@ import pytest
 
 from tools.validation import issue_integrity_gate as ig
 from tools.validation import pr_policy_gate as pg
+from tools.validation import spec_index
 from tools.validation import spec_integrity_gate as sg
 
 OK_BODY = "**Dependências:** #2\n\n## Critérios de aceite\n- [ ] algo\n\n## Alternativas\n- a\n\n## Recomendação\n- a"
@@ -73,7 +74,12 @@ def test_spec_cannot_cite_missing_issues_or_paths_nor_declare_done_what_the_back
 
 def test_real_specs_cite_only_existing_paths():
     root = Path(__file__).resolve().parents[1]
-    texts = {n: (root / "docs/specs" / n).read_text("utf-8") for n in sg.SPECS}
+    # As SPECs FP-055/FP-056 moram no Plan2Space/engineering-specs (docs/specs/INDEX.md). O índice tem que conhecê-las;
+    # o texto vem do clone local (ENGINEERING_SPECS_DIR). O CI não acessa o repo privado e só confere o índice.
+    assert all(spec_index.is_moved(f"docs/specs/{n}", root) for n in sg.SPECS)
+    texts = {n: spec_index.local_text(f"docs/specs/{n}", root) for n in sg.SPECS}
+    if None in texts.values():
+        pytest.skip("texto das SPECs FP-055/FP-056 so com clone local do engineering-specs")
     assert not [f for f in sg.check(texts, {}, root) if f.code == "SPEC_PATH_MISSING"]
 
 

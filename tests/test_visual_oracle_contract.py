@@ -16,12 +16,14 @@ from pathlib import Path
 import pytest
 
 from core.schemas import schema_path
+from tools.validation import spec_index
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = REPO_ROOT / "fixtures" / "visual_oracle_examples" / "manifest.json"
 SCHEMA = schema_path("visual_findings.schema.json")
 SKILL = REPO_ROOT / ".claude" / "skills" / "skp-visual-self-correction" / "SKILL.md"
-SPEC = REPO_ROOT / "docs" / "specs" / "FP-030_visual_oracle_gate.md"
+# A SPEC mora no Plan2Space/engineering-specs (docs/specs/INDEX.md).
+SPEC = "docs/specs/FP-030_visual_oracle_gate.md"
 TOOL = REPO_ROOT / "tools" / "oracle" / "run_skp_visual_review.py"
 REVIEWER_PROMPT = REPO_ROOT / "tools" / "oracle" / "prompts" / "visual_oracle_reviewer.md"
 
@@ -42,7 +44,7 @@ def test_skill_exists():
 
 
 def test_spec_exists():
-    assert SPEC.exists(), f"missing: {SPEC.relative_to(REPO_ROOT)}"
+    assert spec_index.is_moved(SPEC, REPO_ROOT), f"missing from docs/specs/INDEX.md: {SPEC}"
 
 
 def test_tool_exists():
@@ -202,7 +204,9 @@ def test_schema_severity_enum():
 
 
 def test_spec_references_schema_and_tool():
-    text = SPEC.read_text(encoding="utf-8")
+    text = spec_index.local_text(SPEC, REPO_ROOT)
+    if text is None:
+        pytest.skip("texto da FP-030 so com clone local do engineering-specs (ENGINEERING_SPECS_DIR)")
     assert "core/schemas/visual_findings.schema.json" in text
     assert "tools/oracle/run_skp_visual_review.py" in text
 

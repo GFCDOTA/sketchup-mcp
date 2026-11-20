@@ -79,7 +79,7 @@ Despache via `Skill`/`Task`. Nunca duplique a função de um destes.
   Consulta até três receitas citadas, compara estratégias e aponta lacunas antes
   do executor. Primeira fatia: marcenaria consultiva; não executa geometria nem
   substitui ledger/OperationPlan do FP-041. Ver
-  `docs/specs/FP-041_video_knowledge_consultation.md`.
+  [`FP-041_video_knowledge_consultation.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/docs-specs/FP-041_video_knowledge_consultation.md).
 - **Executores de geometria/render (tools):** `tools/rooms/kitchen/layout.py`,
   `tools/rooms/kitchen/capabilities/vray.py` (driver canônico), `tools/rooms/kitchen/validation/ergonomics.py`.
 - **Gates determinísticos:** `tools/validation/run_deterministic_gates.py`,

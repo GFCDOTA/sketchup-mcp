@@ -13,7 +13,7 @@ description: >-
 
 Skill operacional que implementa o **SKP Proof-of-Progress Gate**.
 Detalhe completo do contrato em
-[`specs/skp_proof_of_progress_gate.md`](../../specs/skp_proof_of_progress_gate.md).
+[`skp_proof_of_progress_gate.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/skp_proof_of_progress_gate.md).
 
 ## Quando usar
 
@@ -124,7 +124,7 @@ review.
 
 ### 4. Escrever `regression_summary.md`
 
-Usar [`specs/templates/regression_summary_template.md`](../../specs/templates/regression_summary_template.md)
+Usar [`regression_summary_template.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/templates/regression_summary_template.md)
 como esqueleto. Preencher:
 
 - Mudança em 1-2 frases
