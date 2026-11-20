@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-ROOT_MD_ALLOWLIST = {"CLAUDE.md", "README.md"}
+ROOT_MD_ALLOWLIST = {"AGENTS.md", "CLAUDE.md", "README.md"}
 _SKIP_DIRS = (".venv", "node_modules", ".git", ".pytest_cache")
 _SCALE_SOURCE = "core/scale.py"                      # único arquivo que pode definir escala
 _SCALE_DEF = re.compile(r"^(PT_TO_M|PT_TO_IN)\s*=")   # def nível-módulo (coluna 0)

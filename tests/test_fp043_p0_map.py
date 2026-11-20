@@ -124,7 +124,7 @@ def test_nenhuma_decisao_e_fachada_sem_justificativa_e_riscos_consistentes(doc):
 
 def test_raiz_planejada_so_tem_arquivos_de_papel_explicito(doc):
     assert doc["root_allowlist"] == sorted([
-        ".dockerignore", ".gitattributes", ".gitignore", ".mcp.json", "CLAUDE.md", "README.md", "docker-compose.rag.yml",
+        ".dockerignore", ".gitattributes", ".gitignore", ".mcp.json", "AGENTS.md", "CLAUDE.md", "README.md", "docker-compose.rag.yml",
         "pyproject.toml", "uv.lock"])                    # .mcp.json: Context7 project-scoped (docs/engineering, 2026-10-23)
                     # docker-compose.yml arquivado em 2026-10-22 (D-002)
     movem = {r["item"] for r in doc["items"] if "/" not in r["item"] and r["disposition"] == "move"}

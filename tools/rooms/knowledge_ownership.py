@@ -14,6 +14,7 @@ EXPLICIT = {
     ".impeccable/config.json": "agent_configuration",
     ".mcp.json": "agent_tooling_configuration",
     "CLAUDE.md": "agent_project_instructions",
+    "AGENTS.md": "agent_project_instructions",
     "README.md": "project_readme",
     "docker-compose.rag.yml": "infrastructure_compose",
     "docker-compose.yml": "infrastructure_compose",

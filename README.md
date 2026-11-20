@@ -69,6 +69,7 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 | `.gitattributes` | normalização de fim de linha |
 | `.gitignore` | o que não versiona (`runs/`, scratch, caches) |
 | `.mcp.json` | MCP de DESENVOLVIMENTO dos agentes (Context7, docs de libs externas); nao e runtime — ver `docs/engineering/` |
+| `AGENTS.md` | instruções Codex CLI e referência versionada do hub de skills |
 | `CLAUDE.md` | ponteiro para `.claude/CLAUDE.md` |
 | `docker-compose.rag.yml` | Qdrant opcional do RAG (degrada para busca facetada se estiver desligado) |
 | `pyproject.toml` | pacote, dependências (`[dev]` inclui ruff/pytest) e config de lint/teste |

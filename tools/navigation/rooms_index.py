@@ -147,6 +147,7 @@ ROOT_ROLES = {
     ".github": "CI (4 checks obrigatórios)",
     ".impeccable": "config que mantém DESLIGADO o hook de design do plugin impeccable neste projeto (D-008)",
     "README.md": "este arquivo", "CLAUDE.md": "ponteiro para `.claude/CLAUDE.md`",
+    "AGENTS.md": "instruções Codex CLI e referência versionada do hub de skills",
     "pyproject.toml": "pacote, dependências (`[dev]` inclui ruff/pytest) e config de lint/teste", "uv.lock": "lock das dependências",
     "docker-compose.rag.yml": "Qdrant opcional do RAG (degrada para busca facetada se estiver desligado)",
     ".gitignore": "o que não versiona (`runs/`, scratch, caches)", ".gitattributes": "normalização de fim de linha",

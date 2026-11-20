@@ -24,6 +24,7 @@
     ".gitattributes",
     ".gitignore",
     ".mcp.json",
+    "AGENTS.md",
     "CLAUDE.md",
     "README.md",
     "docker-compose.rag.yml",
@@ -205,6 +206,27 @@
         "tests_sample": [
           "tests/test_fp043_p0_map.py"
         ]
+      }
+    },
+    {
+      "item": "AGENTS.md",
+      "kind": "file",
+      "disposition": "retain",
+      "destination": null,
+      "phase": "P2",
+      "rationale": "Instruções do Codex CLI na raiz, com ponte para o contrato de produto e hub versionado.",
+      "risk": "low",
+      "risk_reasons": [],
+      "depth_sensitive": false,
+      "consumers": {
+        "counts": {
+          "code": 0,
+          "data": 0,
+          "docs": 0,
+          "history": 0,
+          "tests": 0
+        },
+        "tests_sample": []
       }
     },
     {
