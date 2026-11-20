@@ -170,12 +170,12 @@ Estados: `BACKLOG`, `READY`, `IN_PROGRESS`, `IN_REVIEW`, `VERIFIED`, `DONE`, `BL
 | R-12 | agent-runtime | `EXECUTOR_SOURCE` com JSON como padrão e SQLite atrás de flag | BACKLOG | R-06, R-07, R-10 | issue #19 (restante); origem em sketchup-mcp #626 |
 | R-13 | agent-runtime | Publicar o parecer do revisor pelo outbox, sem POST direto | READY | R-04 | issue #22 |
 | R-14 | agent-runtime | Alvo GitHub do publicador com reconciliação de review | READY | R-04 | issue #24 (mesmos arquivos de R-13: sequenciar) |
-| R-15 | agent-runtime | Revisor em AppContainer comprovado; liberar APPROVE | BLOCKED | conta do revisor (B-02), prova de sandbox | issue #23 |
+| R-15 | agent-runtime | Revisor em AppContainer comprovado; liberar APPROVE | BLOCKED | conta revisora configurada e prova E2E (contrato em `claude-engineering-skills` PR #31, §11), prova de sandbox | issue #23 |
 | R-16 | agent-runtime | Validar por CI os testes que o AppContainer não executa | READY | R-11 | issues #2 e #4 |
 | R-17 | agent-runtime | Limite de uso do revisor como estado persistente | BACKLOG | — | issue #3 |
 | R-18 | agent-runtime | Derrubar árvore de processos sem `taskkill` | BACKLOG | — | issue #5 |
 | R-19 | agent-runtime | Supervisor Windows | BACKLOG | R-11 | ADR 0001, ordem 6. **Gap: sem issue** (B-05) |
-| R-20 | agent-runtime | Revisão independente verificável e reforço do Quality Guardian | BLOCKED | conta do revisor (B-02) | issue #36 |
+| R-20 | agent-runtime | Revisão independente verificável e reforço do Quality Guardian | BLOCKED | conta revisora configurada e prova E2E (contrato em `claude-engineering-skills` PR #31, §11) | issue #36 |
 | R-21 | agent-runtime | E2E real com Claude, Codex e GitHub em PR descartável | BLOCKED | R-14, R-15, R-20 | issues #8 e #47 |
 | R-22 | agent-runtime | E2E descartável com defeito semeado no ciclo padrão | BACKLOG | R-14 | issue #40. Regra: nunca mesclar |
 | R-23 | agent-runtime | Recuperação ponta a ponta no GitHub | BACKLOG | R-12 | issue #38 |
@@ -263,7 +263,7 @@ Os números são contagens, não progresso ponderado. Nenhuma microtarefa aqui e
 ## 10. Gates
 
 - **G-CI.** Checks obrigatórios do `develop` do sketchup-mcp: `uv lock is current`, `pytest (py3.11)`, `pytest (py3.12)`, `deterministic fidelity gates`, `mcp server (smoke + stdio handshake)`, `qg: backlog, issues and specs`, `qg: PR policy`, `qg: geometry, program and integration`, `windows process supervisor`. Nos outros repositórios, o workflow próprio do repositório.
-- **G-REV.** Revisão independente no HEAD final, de identidade distinta do autor (DEC-01). Não há auto-aprovação nem aprovação simulada.
+- **G-REV.** Revisão independente no HEAD final, feita pela conta revisora separada (DEC-01), conforme o contrato em `claude-engineering-skills` PR #31. Exige revisão real do Codex sobre o SHA exato antes de qualquer aprovação publicada pela conta revisora. Proibidos: autoaprovação, aprovação simulada e reutilização de parecer de SHA antigo. Não se altera branch protection e não se mescla para contornar o bloqueio.
 - **G-L2.** Para mudança de produto, a prova L2 definida pela SPEC de origem (FP-054, FP-055). CI verde não substitui essa prova.
 - **G-E2E.** Para R-21 e R-22, o E2E real em PR descartável, registrado com data e IDs. Não conta como merge.
 - **G-INT.** Gates não podem passar em falso (issue #533). Um gate que não falha diante de um defeito semeado é reprovado, mesmo com CI verde.
@@ -298,7 +298,7 @@ Os números são contagens, não progresso ponderado. Nenhuma microtarefa aqui e
 | ID | Bloqueio | Afeta | Ação necessária |
 |---|---|---|---|
 | B-01 | PR #49 com CI vermelho (`test_lock_offset_must_match_the_owner_byte`, 3.11 e 3.12) | R-10, R-12 | corrigir no mesmo branch e reexecutar o CI |
-| B-02 | Conta separada do revisor decidida, mas ainda não criada. Sem ela, G-REV não pode ser satisfeito com verificação | R-15, R-20, R-21 | o proprietário cria a conta e configura as credenciais. O agente não cria contas nem manipula credenciais |
+| B-02 | Conta separada do revisor decidida, mas ainda não criada. Sem ela, G-REV não pode ser satisfeito com verificação | R-15, R-20, R-21 | o proprietário cria a conta e configura as credenciais, fora do repositório. O agente não cria contas, não manipula credenciais e não as registra em SPEC, log ou commit. Contrato: `claude-engineering-skills` PR #31 |
 | B-03 | Worktree `fp062-relocation` com artefatos staged e JSON do FP-042 modificados, não commitados. Dono do trabalho não identificado nesta reconciliação | P-01, P-02 | não tocar. Confirmar o dono antes de commitar ou descartar |
 | B-04 | CI do PR #26 (skills): correção em `f8d8ecf`, re-execução pendente | G-01 | acompanhar o CI do PR |
 | B-05 | Gap de rastreabilidade: supervisor Windows (R-19) sem issue | R-19 | criar issue no agent-runtime |
@@ -317,6 +317,8 @@ Entradas só são acrescentadas. Correções são novas linhas que referenciam a
 | 2026-11-20 | — | Achado: `EXECUTOR_SOURCE` ausente de `origin/develop` | busca em `*.py` sem ocorrências |
 | 2026-11-20 | — | Decisão DEC-01 pelo proprietário, no chat: conta separada para o revisor independente. G-03 DONE; B-02 vira ação de criação da conta | comentário em #524, `issuecomment-7030315116` |
 | 2026-11-20 | — | SPEC aberta como PR contra `develop` | `Plan2Space/sketchup-mcp` PR #677, branch `docs/fp062-execution-plan` |
+| 2026-11-20 | — | Owner confirmou DEC-01 (conta separada). R-15 e R-20 seguem BLOCKED até conta configurada e prova E2E. Microtarefas que não dependem da conta seguem sem bloqueio | instrução do proprietário no chat |
+| 2026-11-20 | — | Contrato de identidade do revisor em DRAFT, centralizado em `claude-engineering-skills` | `docs/specs/reviewer-identity-contract.md`, PR #31 |
 | 2026-11-20 | — | Achado: `agent_bar/` ausente e `executor_delivery.py` presente em `origin/develop`; correções a FP-060 §0 | `git ls-tree origin/develop` |
 
 ## 14. Próximas microtarefas
