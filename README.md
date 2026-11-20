@@ -7,9 +7,9 @@ cômodos em pontos de PDF) o projeto gera o shell (paredes extrudadas, portas/pa
 como aberturas 3D que **preservam peitoril e verga**), renders, relatório de geometria, mobília paramétrica opcional
 e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe para provar que ele é fiel ao PDF.
 
-> **Política de SPECs e skills:** as SPECs e skills do ecossistema Plan2Space são mantidas exclusivamente em
-> `Plan2Space/claude-engineering-skills`. Nenhuma SPEC nova é criada neste repositório. Ver
-> `.claude/rules/spec-centralization.md`.
+> **Conhecimento compartilhado:** skills reutilizáveis e contratos entre repositórios ficam em
+> `Plan2Space/claude-engineering-skills`; SPECs de produto, código, testes e evidências SketchUp
+> ficam aqui. Ver `.claude/CLAUDE.md` e `AGENTS.md` para referência versionada.
 
 | | |
 |---|---|

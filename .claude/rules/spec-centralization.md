@@ -4,14 +4,13 @@ paths:
   - ".claude/specs/**"
 ---
 
-# Centralização de SPECs e skills
+# Ownership de SPECs e skills
 
-Todas as SPECs e skills do ecossistema Plan2Space são mantidas exclusivamente em
-`Plan2Space/claude-engineering-skills`. Nenhuma SPEC nova pode ser criada fora desse repositório.
-Toda alteração de SPEC é feita na fonte central e referenciada por este repositório.
+O contrato `Plan2Space/claude-engineering-skills/contracts/ownership.v1.md`
+mantém skills reutilizáveis e contratos compartilhados no hub. SPECs de produto,
+código, testes e evidências SketchUp são mantidos neste repositório.
 
-- **Nova SPEC:** não crie arquivo novo em `docs/specs/` nem em `.claude/specs/`. Abra a proposta na fonte central.
-- **SPEC existente:** não a reescreva aqui. Mudança de conteúdo autoritativo segue o plano de migração da fonte central.
-- **Skill:** consumida por referência versionada (`skills.manifest.json`, pino por SHA ou tag), nunca copiada como fonte.
-- **Exceção temporária:** só existe quando registrada na fonte central para a migração. Sem registro, a violação é bloqueante.
-- **Governança:** `specs/governance/SPEC-001-centralized-engineering-governance.md` no repositório central.
+- **Nova SPEC de produto:** escreva em `docs/specs/` ou `.claude/specs/` conforme a convenção local, com owner, aceite, testes, rollback e referências externas por commit imutável.
+- **Contrato compartilhado:** altere no hub, cite versão e SHA aqui; não copie texto normativo.
+- **Skill:** consulte `catalog/skills.json` do hub na versão fixada em `.claude/CLAUDE.md` e verifique a carga. O mecanismo automático é a issue central #29.
+- **Estado:** Issues e Project Board guardam prioridade e progresso; a SPEC local preserva decisões e evidências datadas.

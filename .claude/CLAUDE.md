@@ -21,7 +21,11 @@ Estado vivo (PRs, fases, pendências): `.ai_bridge/HANDOFF.md` — ler ao retoma
 5. **Nunca autodeclarar aparência.** `visual` fica `NOT_REVIEWED`/`PENDING_HUMAN` até o Felipe decidir `APPROVED`/`CHANGES_REQUESTED` no chat.
 6. **Medida que o pedido não trouxe não vira geometria.** Toda grandeza chega como `{value, unit, origin}`; sem default inventado.
 7. **SketchUp real só em cópia sob `runs/`.** Fechar só os PIDs que você abriu; nunca `taskkill /IM`; `--mode headless` só no CI.
-8. **SPEC e skill só no repositório central.** Toda SPEC e skill do ecossistema Plan2Space é mantida exclusivamente em `Plan2Space/claude-engineering-skills`. Nenhuma SPEC nova pode ser criada fora desse repositório. Toda alteração de SPEC é feita na fonte central e referenciada aqui (`.claude/rules/spec-centralization.md`).
+8. **Ownership de conhecimento.** Skills reutilizáveis e contratos entre repositórios pertencem a `Plan2Space/claude-engineering-skills`; SPECs de produto, código, testes e evidências SketchUp pertencem aqui. Consulte `.claude/rules/spec-centralization.md` e registre referências externas versionadas.
+
+## Skills compartilhadas
+
+Consulte o hub na release `v0.9.3`, commit `3f93ccb001d4609527587ddfa1a716ca5a09b38c`. Leia `catalog/skills.json` e a skill escolhida antes de usá-la; `spec-author`, `spec-progress-keeper` e `backlog-governance` apoiam SPECs, marcos e Board. Registre nome, versão/SHA, SPEC, issue, PR, evidência e resultado. O loader automático segue em Plan2Space/claude-engineering-skills#29; não afirme carga automática antes de verificá-la. Priorize dependências, risco, impacto e aceite; reconcilie a SPEC após marcos e antes do handoff.
 
 ## Mapa do código (detalhe: `docs/architecture/repository_map.md`)
 

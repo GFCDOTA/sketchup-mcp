@@ -664,6 +664,15 @@
       "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
     },
     {
+      "path": ".claude/rules/spec-centralization.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_skills_memory",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
       "path": ".claude/rules/sketchup-ruby-jobs.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
@@ -9676,6 +9685,15 @@
     },
     {
       "path": "CLAUDE.md",
+      "domain": "documentation_or_agent",
+      "disposition": "retain_path_with_explicit_owner",
+      "phase": "P5",
+      "status": "VERIFIED_PATH_BASED_OWNER_CLASSIFICATION",
+      "document_owner": "agent_project_instructions",
+      "ownership_evidence": "FP042_P5_PATH_RULES_NOT_CONTENT_SEMANTICS"
+    },
+    {
+      "path": "AGENTS.md",
       "domain": "documentation_or_agent",
       "disposition": "retain_path_with_explicit_owner",
       "phase": "P5",
