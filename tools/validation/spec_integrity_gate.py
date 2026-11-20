@@ -56,7 +56,8 @@ def main() -> int:
     findings = check(texts, issues, ROOT, exceptions)
     for f in findings:
         print(f)
-    print(f"spec_integrity_gate: {len(findings)} divergencia(s) em {len(texts)} SPEC(s)")
+    note = "" if texts else " (SPECs movidas para o hub privado; ver docs/specs/INDEX.md)"
+    print(f"spec_integrity_gate: {len(findings)} divergencia(s) em {len(texts)} SPEC(s){note}")
     return 1 if findings else 0
 
 

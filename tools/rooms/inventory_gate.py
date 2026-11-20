@@ -15,7 +15,6 @@ ROOT = Path(__file__).resolve().parents[2]
 INVENTORY = ROOT / "docs/specs/fp042_inventory.v1.json"
 CONTROL_PATHS = frozenset({
     "docs/specs/fp042_inventory.v1.json",
-    "docs/specs/FP-042_exhaustive_modularization.md",
     "tools/rooms/inventory_gate.py",
     "tests/test_fp042_inventory_gate.py",
 })

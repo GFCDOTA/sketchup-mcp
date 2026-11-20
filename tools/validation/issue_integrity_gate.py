@@ -46,6 +46,18 @@ def _spec_exists(label: str, specs: set[str]) -> bool:
     return any(s.startswith(key) for s in specs)
 
 
+def _indexed_specs(index: Path) -> set[str]:
+    """Nomes de SPEC listados no indice docs/specs/INDEX.md (as SPECs moraram no hub privado)."""
+    if not index.exists():
+        return set()
+    names = set()
+    for line in index.read_text(encoding="utf-8").splitlines():
+        cells = [c.strip().strip("`") for c in line.split("|")]
+        if len(cells) >= 3 and cells[1].endswith(".md"):
+            names.add(cells[1].rsplit("/", 1)[-1])
+    return names
+
+
 def check(issues: dict[int, dict], specs: set[str], exceptions: dict | None = None,
           readiness: dict[int, dict] | None = None) -> list[Finding]:
     found: list[Finding] = []
@@ -105,7 +117,7 @@ def load() -> dict[int, dict]:
 def main() -> int:
     exc_path = ROOT / "docs/governance/backlog_exceptions.json"
     exceptions = json.loads(exc_path.read_text(encoding="utf-8")) if exc_path.exists() else {}
-    specs = {p.name for p in (ROOT / "docs/specs").glob("*.md")}
+    specs = _indexed_specs(ROOT / "docs/specs/INDEX.md")
     from tools.validation import task_readiness
     findings = check(load(), specs, exceptions, task_readiness.load())
     for f in findings:
