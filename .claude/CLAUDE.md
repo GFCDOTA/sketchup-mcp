@@ -34,7 +34,7 @@ Estado vivo (PRs, fases, pendências): `.ai_bridge/HANDOFF.md` — ler ao retoma
 | `tools/sketchup/` | executor SketchUp (jobs Ruby, `su_*` do MCP, shell da planta) |
 | `tools/validation/` | gates transversais (arquitetura, sobreposição, circulação, regressão por cômodo FP-047) |
 | `references/sketchup/knowledge/` | recipes de aulas com fonte, trecho e `human_review` (conhecimento ≠ execução) |
-| `docs/specs/FP-NNN_*.md` | specs SDD por frente; `docs/specs/fp042_*.v1.json` = inventário e hashes de todo arquivo versionado |
+| `docs/specs/INDEX.md` | as SPECs moram em `Plan2Space/engineering-specs` (privado), pasta `sketchup-mcp/`; aqui fica só o índice (caminho antigo → novo, SHA fixado). SPEC nova ou alterada = PR lá. `docs/specs/fp042_*.v1.json` = inventário e hashes de todo arquivo versionado (fica aqui) |
 | `runs/` | scratch ignorado pelo git; evidência que vale vai para `artifacts/review/` |
 
 ## Comandos
@@ -104,13 +104,13 @@ Registrar no mesmo PR em `docs/specs/fp042_inventory.v1.json`; evidência em `ar
 | Quando | Arquivo |
 |---|---|
 | retomar trabalho / saber o que está aberto | `.ai_bridge/HANDOFF.md`, `.claude/plans/next_actions.md` |
-| melhorar o detalhe de um componente (fila T0/K/B/L/W/S) | `docs/specs/construction_core_microphases.md` |
+| melhorar o detalhe de um componente (fila T0/K/B/L/W/S) | [`construction_core_microphases.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/docs-specs/construction_core_microphases.md) |
 | autonomia GREEN/YELLOW/RED, quando parar | `.claude/memory/operational_rules.md` |
-| promover `.skp`, `runs/` × `artifacts/` | `.claude/memory/artifact_policy.md`, `.claude/specs/skp_artifact_layout.md` |
-| PR que muda geração do `.skp` | `.claude/specs/skp_proof_of_progress_gate.md`, `.claude/specs/fidelity_gate.md` |
+| promover `.skp`, `runs/` × `artifacts/` | `.claude/memory/artifact_policy.md`, [`skp_artifact_layout.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/skp_artifact_layout.md) |
+| PR que muda geração do `.skp` | [`skp_proof_of_progress_gate.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/skp_proof_of_progress_gate.md), [`fidelity_gate.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/fidelity_gate.md) |
 | coordenação com outro agente | `.claude/memory/multi_agent_coordination.md` |
 | histórico e lições | `.claude/memory/lessons_learned.md`, `.claude/memory/deprecated_context.md` |
-| frente ativa (gabinete, Shaker, regressão, aprendizado) | `docs/specs/FP-045*` … `FP-052*` (índice no `.ai_bridge/HANDOFF.md`) |
+| frente ativa (gabinete, Shaker, regressão, aprendizado) | FP-045 … FP-052 em `engineering-specs/sketchup-mcp/docs-specs/` (mapa em `docs/specs/INDEX.md`) |
 
 ## Oráculos externos
 

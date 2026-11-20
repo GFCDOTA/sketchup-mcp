@@ -16,6 +16,7 @@ import re
 import sys
 from pathlib import Path
 
+from tools.validation import spec_index
 from tools.validation.backlog_gate import REPO, Finding, _gh
 
 ROOT = Path(__file__).resolve().parent.parent.parent
@@ -35,7 +36,7 @@ def check(spec_texts: dict[str, str], issues: dict[int, dict], root: Path = ROOT
         for p in sorted(set(_PATH.findall(text))):
             if "*" in p or p.endswith("/"):
                 continue
-            if not (root / p).exists() and "SPEC_PATH_MISSING" not in skip:
+            if not spec_index.resolves(p, root) and "SPEC_PATH_MISSING" not in skip:
                 found.append(Finding(0, "SPEC_PATH_MISSING", f"{name} cita `{p}`, inexistente"))
         for line in text.splitlines():
             m = _DONE_ROW.match(line)
@@ -50,13 +51,13 @@ def check(spec_texts: dict[str, str], issues: dict[int, dict], root: Path = ROOT
 def main() -> int:
     raw = json.loads(_gh("issue", "list", "--repo", REPO, "--state", "all", "--limit", "1000", "--json", "number,state"))
     issues = {i["number"]: i for i in raw}
-    texts = {n: (ROOT / "docs/specs" / n).read_text(encoding="utf-8") for n in SPECS if (ROOT / "docs/specs" / n).exists()}
+    texts = {n: t for n in SPECS if (t := spec_index.local_text(f"docs/specs/{n}", ROOT)) is not None}
     exc_path = ROOT / "docs/governance/backlog_exceptions.json"
     exceptions = json.loads(exc_path.read_text(encoding="utf-8")) if exc_path.exists() else {}
     findings = check(texts, issues, ROOT, exceptions)
     for f in findings:
         print(f)
-    note = "" if texts else " (SPECs movidas para o hub privado; ver docs/specs/INDEX.md)"
+    note = "" if texts else " (SKIPPED: SPECs em Plan2Space/engineering-specs; defina ENGINEERING_SPECS_DIR com um clone)"
     print(f"spec_integrity_gate: {len(findings)} divergencia(s) em {len(texts)} SPEC(s){note}")
     return 1 if findings else 0
 

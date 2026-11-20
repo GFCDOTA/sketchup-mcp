@@ -28,17 +28,18 @@ rooms / openings que não existem no consensus. Honesto > completo.
 ## 4. Spec precisa virar teste + harness + artifact
 
 Spec sem teste é ADR de prateleira. Cada feature relevante
-exige: spec curto em `docs/specs/FP-NNN_*.md` → fixture mínima →
+exige: spec curto no repo `Plan2Space/engineering-specs`
+(`sketchup-mcp/docs-specs/FP-NNN_*.md`, indexado em `docs/specs/INDEX.md`) → fixture mínima →
 teste vermelho → implementação → teste verde → aplicação na
 planta real → artifact promovido. Ver
-[`specs/sdd_and_harness_engineering.md`](specs/sdd_and_harness_engineering.md).
+[`sdd_and_harness_engineering.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/sdd_and_harness_engineering.md).
 
 ## 5. Cleanup não é progresso sem ROI de produto
 
 Hygiene precisa de trigger real (gate quebrando, ref duplicada,
 arquivo solto confundindo agente). Cleanup em loop sem trigger é
 bikeshed. Ver
-[`specs/repository_hygiene.md`](specs/repository_hygiene.md).
+[`repository_hygiene.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/repository_hygiene.md).
 
 ## 6. Slice complete IS a valid stop
 
@@ -81,7 +82,7 @@ absurdos (missing SKP, missing render, window count mismatch,
 floating door, orphan glass sem source).
 
 Spec completa em
-[`specs/skp_proof_of_progress_gate.md`](specs/skp_proof_of_progress_gate.md).
+[`skp_proof_of_progress_gate.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/skp_proof_of_progress_gate.md).
 
 ---
 

@@ -135,7 +135,7 @@ ROOT_ROLES = {
     "core": "domínio sem framework: escala, semântica espacial, schemas (`core/schemas/`), observabilidade",
     "interior": "pacote do estúdio de interiores (planners, renderers, validators, class specs) — importado por várias ferramentas",
     "tests": "suíte de regressão (marker `planta74_scale` separa a escala)",
-    "docs": "specs SDD (`docs/specs/`), mapa e guias (`docs/architecture/`), relatórios e handoffs datados, arquivo morto",
+    "docs": "índice das SPECs (`docs/specs/INDEX.md`, elas moram no `engineering-specs`) e dados JSON, mapa e guias (`docs/architecture/`), relatórios e handoffs datados, arquivo morto",
     "artifacts": "entregáveis canônicos (`artifacts/<planta>/`) e evidência (`artifacts/review/`) — protegidos por hash",
     "fixtures": "entradas canônicas e sintéticas dos testes — protegidas",
     "references": "fontes e recipes de conhecimento (aulas SketchUp, referências de design)",

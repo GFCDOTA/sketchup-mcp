@@ -23,6 +23,7 @@ import sys
 from pathlib import Path
 
 from tools.navigation.consumers import REPO
+from tools.validation import spec_index
 
 ROUTES_PATH = "docs/architecture/navigation_routes.v1.json"
 MAX_HOPS = 3
@@ -50,11 +51,21 @@ def resolve_link(md: Path, target: str) -> Path:
     return (md.parent / target).resolve()
 
 
+def _moved_spec(path: Path) -> bool:
+    """SPEC que saiu para o engineering-specs (docs/specs/INDEX.md) conta como link válido."""
+    try:
+        rel = path.relative_to(REPO.resolve()).as_posix()
+    except ValueError:
+        return False
+    return spec_index.is_moved(rel, REPO)
+
+
 def check_links(files: list[Path]) -> list[str]:
     broken = []
     for md in files:
         for target in links_of(md):
-            if not resolve_link(md, target).exists():
+            path = resolve_link(md, target)
+            if not path.exists() and not _moved_spec(path):
                 broken.append(f"{md.name}: {target}")
     return broken
 

@@ -13,7 +13,7 @@ description: >-
 
 > Nasceu do método que fechou a COZINHA da planta_74 (golden sample, PASS Felipe 2026-06-19):
 > Minecraft → marcenaria técnica → cozinha planejada moderna. A referência NÃO vira cópia —
-> vira gramática. Ver `.claude/specs/room_furnishing_method.md` (os 5 passos) e o golden
+> vira gramática. Ver [`room_furnishing_method.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/room_furnishing_method.md) (os 5 passos) e o golden
 > sample em `artifacts/planta_74/furnished/kitchen_angles/`.
 
 ## Regra máxima (inviolável)

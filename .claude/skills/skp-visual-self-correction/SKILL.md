@@ -13,7 +13,7 @@ description: >-
 
 Skill operacional pro **Visual Oracle Gate** (FP-030).
 Detalhe completo em
-[`docs/specs/FP-030_visual_oracle_gate.md`](../../../docs/specs/FP-030_visual_oracle_gate.md).
+[`FP-030_visual_oracle_gate.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/docs-specs/FP-030_visual_oracle_gate.md).
 
 ## Core rules
 

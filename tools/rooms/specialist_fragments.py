@@ -22,6 +22,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from core.schemas import schema_path
+from tools.validation import spec_index
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = "specialist_fragment.v1.schema.json"
@@ -93,7 +94,7 @@ def verify(root: Path = ROOT, fragments: list[tuple[Path, dict]] | None = None) 
                 errors["RECIPE_NOT_IN_PROFILE"].append(f"{room}/{fid}: {rid}")
         for field in PATH_FIELDS:
             for ref in frag[field]:
-                if not (root / ref).exists():
+                if not spec_index.resolves(ref, root):
                     errors["PATH_MISSING"].append(f"{room}/{fid}: {field}: {ref}")
         for skill in frag["skills"]:
             if not (root / ".claude/skills" / skill / "SKILL.md").is_file():

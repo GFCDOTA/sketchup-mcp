@@ -30,8 +30,8 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 | o estado de **cada arquivo** (ativo, legado, só documentado, histórico) | [`docs/reports/file_audit/`](docs/reports/file_audit/README.md) |
 | mexer num cômodo (exemplo completo: cozinha) | [`tools/rooms/kitchen/README.md`](tools/rooms/kitchen/README.md) |
 | saber quem usa um arquivo antes de movê-lo | `python -m tools.navigation.consumers <caminho>` |
-| ver o plano da reorganização (FP-043) e o estado dela | [relatório P8 (parcial)](docs/reports/FP-043_final_validation.md) · [spec de conclusão P3–P8](docs/specs/INDEX.md) · [FP-043 original](docs/specs/INDEX.md) · [mapa P0](docs/specs/INDEX.md) |
-| ver o plano de enxugar a raiz e as fachadas de `tools/` (FP-044) e o estado dela | [relatório final (parcial)](docs/reports/FP-044_final_validation.md) · [spec FP-044](docs/specs/INDEX.md) |
+| ver o plano da reorganização (FP-043) e o estado dela | [relatório P8 (parcial)](docs/reports/FP-043_final_validation.md) · [spec de conclusão P3–P8](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/docs-specs/FP-043_remaining_execution_P3_P8.md) · [FP-043 original](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/docs-specs/FP-043_repository_navigation_and_room_specialists.md) · [mapa P0](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/docs-specs/FP-043_P0_map.md) |
+| ver o plano de enxugar a raiz e as fachadas de `tools/` (FP-044) e o estado dela | [relatório final (parcial)](docs/reports/FP-044_final_validation.md) · [spec FP-044](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/docs-specs/FP-044_root_and_tools_consolidation.md) |
 | saber o que ainda mora em `tools/*.py` e por quê | [`tools/PUBLIC_API.md`](tools/PUBLIC_API.md) |
 | saber o que o SketchUp real já provou | [`artifacts/review/l2_fp042_20261019/README.md`](artifacts/review/l2_fp042_20261019/README.md) |
 | as regras de quem edita (humano ou agente) | [`CLAUDE.md`](CLAUDE.md) → `.claude/` |
@@ -53,7 +53,7 @@ e uma suíte de gates de fidelidade. O `.skp` é o entregável; o resto existe p
 | `artifacts/` | entregáveis canônicos (`artifacts/<planta>/`) e evidência (`artifacts/review/`) — protegidos por hash |
 | `assets/` | texturas e recursos reutilizáveis |
 | `core/` | domínio sem framework: escala, semântica espacial, schemas (`core/schemas/`), observabilidade |
-| `docs/` | specs SDD (`docs/specs/`), mapa e guias (`docs/architecture/`), relatórios e handoffs datados, arquivo morto |
+| `docs/` | índice das SPECs (`docs/specs/INDEX.md`, elas moram no `engineering-specs`) e dados JSON, mapa e guias (`docs/architecture/`), relatórios e handoffs datados, arquivo morto |
 | `fixtures/` | entradas canônicas e sintéticas dos testes — protegidas |
 | `interior/` | pacote do estúdio de interiores (planners, renderers, validators, class specs) — importado por várias ferramentas |
 | `ops/` | painel do estúdio (`ops/estudio-front/`, :8788) — o Harness App aponta para ele; mover exige repontar (D-009) |
@@ -203,4 +203,4 @@ visual é dado pelo Felipe, direto no chat.
 6. **`runs/` é scratch.** Evidência é promovida; nunca versionada a partir de `runs/`.
 7. **Nunca fechar SketchUp por nome** e nunca sobrescrever `.skp`, render ou referência aprovada: edição sai sempre em arquivo novo.
 
-Contexto operacional completo para agentes: `.claude/` (`CLAUDE.md`, `memory/`, `specs/`, `skills/`).
+Contexto operacional completo para agentes: `.claude/` (`CLAUDE.md`, `memory/`, `skills/`); SPECs em `Plan2Space/engineering-specs` (ver `docs/specs/INDEX.md`).

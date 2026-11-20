@@ -29,7 +29,7 @@ Cobertura: 4 booleans de integridade estrutural do SKP no
 - `default_material_faces_zero`
 
 Gate: todos `true`. Detalhe em
-[`specs/fidelity_gate.md`](../specs/fidelity_gate.md) § Eixo 1.
+[`fidelity_gate.md`](https://github.com/Plan2Space/engineering-specs/blob/661ea23ade081157b073a031ba4d0d4e8fa89414/sketchup-mcp/claude-specs/fidelity_gate.md) § Eixo 1.
 
 O que mede: **estrutura do SKP** (não há walls quebradas, não há
 faces sem material). Não mede se a wall está no lugar certo.
