@@ -223,7 +223,7 @@
   },
   {
    "path": "tools/correction_finding.py",
-   "owner_module": "tools.orchestration.correction.correction_finding",
+   "owner_module": "tools.sketchup.correction.correction_finding",
    "consumers": {
     "code": 2,
     "tests": 3,
@@ -235,7 +235,7 @@
   },
   {
    "path": "tools/correction_fixes.py",
-   "owner_module": "tools.orchestration.correction.correction_fixes",
+   "owner_module": "tools.sketchup.correction.correction_fixes",
    "consumers": {
     "code": 2,
     "tests": 3,
@@ -247,7 +247,7 @@
   },
   {
    "path": "tools/correction_loop.py",
-   "owner_module": "tools.orchestration.correction.correction_loop",
+   "owner_module": "tools.sketchup.correction.correction_loop",
    "consumers": {
     "code": 1,
     "tests": 2,
@@ -379,7 +379,7 @@
   },
   {
    "path": "tools/finding_router.py",
-   "owner_module": "tools.orchestration.correction.finding_router",
+   "owner_module": "tools.sketchup.correction.finding_router",
    "consumers": {
     "code": 2,
     "tests": 2,
@@ -403,7 +403,7 @@
   },
   {
    "path": "tools/furnish_apartment.py",
-   "owner_module": "tools.orchestration.furnish_apartment",
+   "owner_module": "tools.sketchup.pipeline.furnish_apartment",
    "consumers": {
     "code": 18,
     "tests": 23,
@@ -584,7 +584,7 @@
   },
   {
    "path": "tools/jsonl_io.py",
-   "owner_module": "tools.orchestration.correction.jsonl_io",
+   "owner_module": "core.observability.jsonl_io",
    "consumers": {
     "code": 8,
     "tests": 1,
@@ -908,7 +908,7 @@
   },
   {
    "path": "tools/promote_canonical.py",
-   "owner_module": "tools.orchestration.promote_canonical",
+   "owner_module": "tools.sketchup.pipeline.promote_canonical",
    "consumers": {
     "code": 3,
     "tests": 2,
@@ -1401,7 +1401,7 @@
   },
   {
    "path": "tools/variant_axes.py",
-   "owner_module": "tools.orchestration.variant_axes",
+   "owner_module": "tools.sketchup.pipeline.variant_axes",
    "consumers": {
     "code": 3,
     "tests": 2,
@@ -1413,7 +1413,7 @@
   },
   {
    "path": "tools/variant_sweep.py",
-   "owner_module": "tools.orchestration.variant_sweep",
+   "owner_module": "tools.sketchup.pipeline.variant_sweep",
    "consumers": {
     "code": 4,
     "tests": 3,
@@ -1425,7 +1425,7 @@
   },
   {
    "path": "tools/vision_queue_consumer.py",
-   "owner_module": "tools.orchestration.correction.vision_queue_consumer",
+   "owner_module": "tools.sketchup.correction.vision_queue_consumer",
    "consumers": {
     "code": 2,
     "tests": 1,

@@ -8,12 +8,12 @@ vive só no dono. Teste: `tests/test_fp044_tools_facades.py`.
 
 | Caminho estável | Dono (implementação única) | Semântica |
 |---|---|---|
-| `tools.furnish_apartment` | `tools.orchestration.furnish_apartment` | mobiliar a planta (`collect_boxes`, `CONSENSUS`, CLI) |
+| `tools.furnish_apartment` | `tools.sketchup.pipeline.furnish_apartment` | mobiliar a planta (`collect_boxes`, `CONSENSUS`, CLI) |
 | `tools.geometry_sanity` | `tools.validation.geometry_sanity` | gate de sanidade geométrica |
 | `tools.furniture_overlap_gate` | `tools.validation.furniture_overlap_gate` | gate móvel-sobre-móvel |
-| `tools.finding_router` | `tools.orchestration.correction.finding_router` | roteia finding tipado para o dono |
+| `tools.finding_router` | `tools.sketchup.correction.finding_router` | roteia finding tipado para o dono |
 | `tools.circulation_gate` | `tools.validation.circulation_gate` | gate de circulação |
-| `tools.correction_loop` | `tools.orchestration.correction.correction_loop` | loop de correção fechado |
+| `tools.correction_loop` | `tools.sketchup.correction.correction_loop` | loop de correção fechado |
 | `tools.spatial_model` | `tools.rooms.shared.spatial_model` | modelo espacial (laje/vão por cômodo) |
 | `tools.room_type` | `tools.rooms.shared.room_type` | classificação do tipo de cômodo |
 
