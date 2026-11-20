@@ -143,7 +143,7 @@ Estados: `BACKLOG`, `READY`, `IN_PROGRESS`, `IN_REVIEW`, `VERIFIED`, `DONE`, `BL
 |---|---|---|---|---|---|
 | G-01 | skills | Skill `spec-progress-keeper` e template | IN_REVIEW | — | PR #26; correção de CI em `f8d8ecf`, re-execução pendente |
 | G-02 | sketchup-mcp | Esta SPEC (FP-062) | IN_REVIEW | — | PR aberto nesta entrega |
-| G-03 | sketchup-mcp | Decidir identidade do revisor independente | BLOCKED | DEC-01 | issue #524 |
+| G-03 | sketchup-mcp | Decidir identidade do revisor independente | DONE | — | issue #524: conta separada, decidida em 2026-11-20 (DEC-01) |
 | G-04 | sketchup-mcp | Paridade do board GFCDOTA para Plan2Space (121 itens) | IN_PROGRESS | — | issue #675: cópia feita; paridade não verificada |
 | G-05 | sketchup-mcp | Gates que não passam em falso (`pipefail`, exit code) | BACKLOG | — | issue #533 (prova `UNIT_PASS`; estado do PR não verificado) |
 | G-06 | sketchup-mcp | CODEOWNERS, automação do board, reconstrução dos gates | BACKLOG | G-03, G-04 | issue #676, item 7 |
@@ -170,12 +170,12 @@ Estados: `BACKLOG`, `READY`, `IN_PROGRESS`, `IN_REVIEW`, `VERIFIED`, `DONE`, `BL
 | R-12 | agent-runtime | `EXECUTOR_SOURCE` com JSON como padrão e SQLite atrás de flag | BACKLOG | R-06, R-07, R-10 | issue #19 (restante); origem em sketchup-mcp #626 |
 | R-13 | agent-runtime | Publicar o parecer do revisor pelo outbox, sem POST direto | READY | R-04 | issue #22 |
 | R-14 | agent-runtime | Alvo GitHub do publicador com reconciliação de review | READY | R-04 | issue #24 (mesmos arquivos de R-13: sequenciar) |
-| R-15 | agent-runtime | Revisor em AppContainer comprovado; liberar APPROVE | BLOCKED | DEC-01, prova de sandbox | issue #23 |
+| R-15 | agent-runtime | Revisor em AppContainer comprovado; liberar APPROVE | BLOCKED | conta do revisor (B-02), prova de sandbox | issue #23 |
 | R-16 | agent-runtime | Validar por CI os testes que o AppContainer não executa | READY | R-11 | issues #2 e #4 |
 | R-17 | agent-runtime | Limite de uso do revisor como estado persistente | BACKLOG | — | issue #3 |
 | R-18 | agent-runtime | Derrubar árvore de processos sem `taskkill` | BACKLOG | — | issue #5 |
 | R-19 | agent-runtime | Supervisor Windows | BACKLOG | R-11 | ADR 0001, ordem 6. **Gap: sem issue** (B-05) |
-| R-20 | agent-runtime | Revisão independente verificável e reforço do Quality Guardian | BLOCKED | DEC-01 | issue #36 |
+| R-20 | agent-runtime | Revisão independente verificável e reforço do Quality Guardian | BLOCKED | conta do revisor (B-02) | issue #36 |
 | R-21 | agent-runtime | E2E real com Claude, Codex e GitHub em PR descartável | BLOCKED | R-14, R-15, R-20 | issues #8 e #47 |
 | R-22 | agent-runtime | E2E descartável com defeito semeado no ciclo padrão | BACKLOG | R-14 | issue #40. Regra: nunca mesclar |
 | R-23 | agent-runtime | Recuperação ponta a ponta no GitHub | BACKLOG | R-12 | issue #38 |
@@ -229,11 +229,11 @@ Total de microtarefas: 49.
 
 | Estado | Quantidade | IDs |
 |---|---|---|
-| DONE | 10 | R-01, R-02, R-03, R-04, R-05, R-06, R-08, R-09, R-26, A-01 |
+| DONE | 11 | G-03, R-01, R-02, R-03, R-04, R-05, R-06, R-08, R-09, R-26, A-01 |
 | IN_REVIEW | 3 | G-01, G-02, R-11 |
 | IN_PROGRESS | 7 | G-04, R-10, R-27, A-02, P-01, P-02, P-03 |
 | READY | 4 | R-07, R-13, R-14, R-16 |
-| BLOCKED | 8 | G-03, G-07, G-08, G-10, R-15, R-20, R-21, P-04 |
+| BLOCKED | 7 | G-07, G-08, G-10, R-15, R-20, R-21, P-04 |
 | BACKLOG | 15 | G-05, G-06, G-09, R-12, R-17, R-18, R-19, R-22, R-23, R-24, R-25, A-03, P-05, P-06, P-08 |
 | DEFERRED | 2 | A-04, P-07 |
 | CANCELLED | 0 | — |
@@ -285,7 +285,7 @@ Os números são contagens, não progresso ponderado. Nenhuma microtarefa aqui e
 
 | ID | Pergunta | Bloqueia | Proposta / opções |
 |---|---|---|---|
-| DEC-01 | O revisor independente usa conta ou GitHub App distinta do executor? (#524) | R-15, R-20, R-21, qualquer merge que exija revisão verificável | (1) conta ou App separada; (2) manter a identidade atual e aceitar revisão não verificável; (3) outra definida pelo proprietário |
+| DEC-01 | O revisor independente usa conta ou GitHub App distinta do executor? (#524) | — (decidida) | **DECIDIDA em 2026-11-20 pelo proprietário, no chat: alternativa 1, conta separada.** Registrada em #524 (comentário `issuecomment-7030315116`). Falta a criação da conta, que é ação do proprietário (B-02) |
 | DEC-02 | Promover `develop` para `main` (#507)? Criar o segredo `BACKLOG_PROJECT_TOKEN` (#508)? | G-07, rotina diária, relatório semanal | decisão do proprietário |
 | DEC-03 | PR #667, marcado "não mesclar", foi mesclado. Manter o histórico ou reverter? Criar guarda para que PRs descartáveis não sejam mesclados? | G-08, R-22 | registrar a decisão; a guarda é microtarefa nova se aprovada |
 | DEC-04 | Versão 0.9.0 do skills: PR #26 e issue #25 planejam a mesma versão | G-09 | proposta: #26 mantém 0.9.0 e #25 vira 0.10.0. Requer confirmação |
@@ -298,7 +298,7 @@ Os números são contagens, não progresso ponderado. Nenhuma microtarefa aqui e
 | ID | Bloqueio | Afeta | Ação necessária |
 |---|---|---|---|
 | B-01 | PR #49 com CI vermelho (`test_lock_offset_must_match_the_owner_byte`, 3.11 e 3.12) | R-10, R-12 | corrigir no mesmo branch e reexecutar o CI |
-| B-02 | Sem identidade distinta, G-REV não pode ser satisfeito com verificação | R-15, R-20, R-21 | depende de DEC-01 |
+| B-02 | Conta separada do revisor decidida, mas ainda não criada. Sem ela, G-REV não pode ser satisfeito com verificação | R-15, R-20, R-21 | o proprietário cria a conta e configura as credenciais. O agente não cria contas nem manipula credenciais |
 | B-03 | Worktree `fp062-relocation` com artefatos staged e JSON do FP-042 modificados, não commitados. Dono do trabalho não identificado nesta reconciliação | P-01, P-02 | não tocar. Confirmar o dono antes de commitar ou descartar |
 | B-04 | CI do PR #26 (skills): correção em `f8d8ecf`, re-execução pendente | G-01 | acompanhar o CI do PR |
 | B-05 | Gap de rastreabilidade: supervisor Windows (R-19) sem issue | R-19 | criar issue no agent-runtime |
@@ -315,6 +315,8 @@ Entradas só são acrescentadas. Correções são novas linhas que referenciam a
 | 2026-11-20 | — | ADR 0001 do agent-runtime aceita | `docs/adr/0001-extraction-strategy.md` em `main` |
 | 2026-11-20 | — | Achado: PR #49 do agent-runtime com CI vermelho | `test_lock_offset_must_match_the_owner_byte`, 3.11 e 3.12 |
 | 2026-11-20 | — | Achado: `EXECUTOR_SOURCE` ausente de `origin/develop` | busca em `*.py` sem ocorrências |
+| 2026-11-20 | — | Decisão DEC-01 pelo proprietário, no chat: conta separada para o revisor independente. G-03 DONE; B-02 vira ação de criação da conta | comentário em #524, `issuecomment-7030315116` |
+| 2026-11-20 | — | SPEC aberta como PR contra `develop` | `Plan2Space/sketchup-mcp` PR #677, branch `docs/fp062-execution-plan` |
 | 2026-11-20 | — | Achado: `agent_bar/` ausente e `executor_delivery.py` presente em `origin/develop`; correções a FP-060 §0 | `git ls-tree origin/develop` |
 
 ## 14. Próximas microtarefas
