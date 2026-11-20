@@ -28,7 +28,7 @@ import sys
 from pathlib import Path
 
 from tools.oracle.human_verdict import HUMAN_VERDICTS as _HUMAN_VERDICTS
-from tools.orchestration.correction.jsonl_io import read_jsonl
+from core.observability.jsonl_io import read_jsonl
 
 
 def _human_overlay(corpus_path: Path) -> dict[str, dict]:

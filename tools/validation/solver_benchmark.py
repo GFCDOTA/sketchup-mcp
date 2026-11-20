@@ -233,8 +233,8 @@ def run_case(room: str, cap: int, repeats: int, obstacles: int = 0, mode: str = 
     """Executa UM caso no processo atual (chamado no subprocesso). `obstacles` > 0 acrescenta caixas sinteticas (`mode` far|near)."""
     from core.pipeline_contracts import CapabilityLedger
     from tools.furnish_apartment import collect_boxes
-    from tools.orchestration import furnish_apartment as fa
-    from tools.orchestration import intelligent_pipeline as ip
+    from tools.sketchup.pipeline import furnish_apartment as fa
+    from tools.sketchup.pipeline import intelligent_pipeline as ip
     from tools.room_type import classify_rooms
     from tools.rooms.shared.project_paths import PLANTA_74_CONSENSUS
     from tools.validation.functional_clearance import collect_interfaces

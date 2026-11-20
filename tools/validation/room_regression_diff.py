@@ -278,7 +278,7 @@ def capture(fixture: str = "planta_74") -> dict:
     from pathlib import Path
 
     from core.scale import PT_TO_M
-    from tools.orchestration.furnish_apartment import CONSENSUS, collect_boxes
+    from tools.sketchup.pipeline.furnish_apartment import CONSENSUS, collect_boxes
     from tools.validation.fp044_baseline import CANONICAL, ROOT, _sha
 
     if fixture != "planta_74":

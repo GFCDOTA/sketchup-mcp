@@ -32,7 +32,7 @@ from pathlib import Path
 
 from tools.knowledge import rag_freshness as rf
 from tools.oracle.human_verdict import is_human_verdict, is_liked, normalize_tags
-from tools.orchestration.correction.jsonl_io import read_jsonl
+from core.observability.jsonl_io import read_jsonl
 
 ROOT = Path(__file__).resolve().parents[2]
 VERDICTS_DIR = ROOT / "references" / "felipe" / "verdicts"
