@@ -5945,6 +5945,42 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/planta_74/fp062-relocation/README.md",
+      "blob_sha": "39e16d4b6db918de7232e9f2c501c978948ee0a5",
+      "blob_size": 3186,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fp062-relocation/reproduce/run_furnish.py",
+      "blob_sha": "491fea0180caebc1cfc31b9f2b7dd622ff5030d2",
+      "blob_size": 1002,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fp062-relocation/final/regression_summary.md",
+      "blob_sha": "a551922831e9ea979e725a75859ddd26b24f5831",
+      "blob_size": 2412,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fp062-relocation/final/planta_74_after.skp",
+      "blob_sha": "bba5a74dc7d57ff241e523ec915d82c9886ee6af",
+      "blob_size": 3350720,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fp062-relocation/final/model_top_after.png",
+      "blob_sha": "d6bd66346febd06122b146336c1b371648688f37",
+      "blob_size": 87109,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fp062-relocation/final/model_iso_after.png",
+      "blob_sha": "4aaa079bc07fc38923d1b789634e3c0979f9558b",
+      "blob_size": 237676,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/scenes/living_room_modern_warm_minimal/contact_sheet.png",
       "blob_sha": "2c4c31694396fcd03997d46fa844dd6ae306d53a",
       "blob_size": 456493,

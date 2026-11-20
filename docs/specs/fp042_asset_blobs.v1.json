@@ -2958,6 +2958,24 @@
       "owner_group": "artifacts"
     },
     {
+      "path": "artifacts/review/planta_74/fp062-relocation/final/planta_74_after.skp",
+      "blob_sha": "bba5a74dc7d57ff241e523ec915d82c9886ee6af",
+      "blob_size": 3350720,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fp062-relocation/final/model_top_after.png",
+      "blob_sha": "d6bd66346febd06122b146336c1b371648688f37",
+      "blob_size": 87109,
+      "owner_group": "artifacts"
+    },
+    {
+      "path": "artifacts/review/planta_74/fp062-relocation/final/model_iso_after.png",
+      "blob_sha": "4aaa079bc07fc38923d1b789634e3c0979f9558b",
+      "blob_size": 237676,
+      "owner_group": "artifacts"
+    },
+    {
       "path": "artifacts/review/scenes/living_room_modern_warm_minimal/contact_sheet.png",
       "blob_sha": "2c4c31694396fcd03997d46fa844dd6ae306d53a",
       "blob_size": 456493,
