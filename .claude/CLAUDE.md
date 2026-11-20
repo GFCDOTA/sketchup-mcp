@@ -21,6 +21,7 @@ Estado vivo (PRs, fases, pendências): `.ai_bridge/HANDOFF.md` — ler ao retoma
 5. **Nunca autodeclarar aparência.** `visual` fica `NOT_REVIEWED`/`PENDING_HUMAN` até o Felipe decidir `APPROVED`/`CHANGES_REQUESTED` no chat.
 6. **Medida que o pedido não trouxe não vira geometria.** Toda grandeza chega como `{value, unit, origin}`; sem default inventado.
 7. **SketchUp real só em cópia sob `runs/`.** Fechar só os PIDs que você abriu; nunca `taskkill /IM`; `--mode headless` só no CI.
+8. **SPEC e skill só no repositório central.** Toda SPEC e skill do ecossistema Plan2Space é mantida exclusivamente em `Plan2Space/claude-engineering-skills`. Nenhuma SPEC nova pode ser criada fora desse repositório. Toda alteração de SPEC é feita na fonte central e referenciada aqui (`.claude/rules/spec-centralization.md`).
 
 ## Mapa do código (detalhe: `docs/architecture/repository_map.md`)
 
