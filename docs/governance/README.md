@@ -43,3 +43,11 @@ validação/prova) · `human-decision` (decisão arquitetônica, visual ou de es
 `python -m tools.validation.audit_report --out docs/reports/audit/audit_<data>.md --with-geometry`: PRs, bloqueios por causa,
 defeitos e regressões, capacidades implementadas × invocadas × consumidas, provas reais disponíveis e decisões que dependem do
 proprietário. Versionado em `docs/reports/audit/` para a revisão independente.
+
+## Pendências que saíram com Issues transferidas
+`task_readiness.json` só aceita Issue deste repositório. Quando uma Issue é transferida, a entrada sai daqui e a
+pendência é registrada na Issue de destino (vínculo, PR, merge, estado da revisão, responsável) e no Project #1.
+
+| Era | Agora | Pendência | Registro |
+|---|---|---|---|
+| `#551` | Plan2Space/agent-runtime#35 | revisão independente do PR #552 (merge `459bc305`, `issue_integrity_gate.py`), mergeado sem review; depende de #524 | [comentário de 2026-11-20](https://github.com/Plan2Space/agent-runtime/issues/35#issuecomment-7041506362); Project: `GPT Review`, aprovação humana pendente = Sim |
